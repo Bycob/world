@@ -101,9 +101,6 @@ namespace maths {
 	template <typename T> inline T mod(T n, T r) {
 		return n >= 0 ? n % r : (n % r) + r;
 	}
-
-	double WORLDAPI_EXPORT interpolate(double x1, double y1, double x2, double y2, double x);
-	double WORLDAPI_EXPORT interpolateLinear(double x1, double y1, double x2, double y2, double x);
 	
 	double WORLDAPI_EXPORT length(const arma::vec3 & vec1, const arma::vec3 & vec2);
 	double WORLDAPI_EXPORT length(const vec3d & vec1, const vec3d & vec2);

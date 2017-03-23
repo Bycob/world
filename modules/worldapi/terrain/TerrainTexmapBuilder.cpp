@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include "../maths/mathshelper.h"
+#include "../maths/interpolation.h"
 
 
 using namespace maths;

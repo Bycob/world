@@ -3,6 +3,7 @@
 #include "../Image.h"
 
 using namespace img;
+using namespace perlin;
 
 TerrainGenerator::TerrainGenerator(int size) : _size(size) {
 

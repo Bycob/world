@@ -3,6 +3,7 @@
 #include <math.h>
 
 #include <worldapi/maths/mathshelper.h>
+#include <worldapi/maths/interpolation.h>
 
 #include "terrain.h"
 #include "../interop.h"
