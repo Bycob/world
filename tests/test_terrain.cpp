@@ -12,6 +12,8 @@
 #include <worldapi/terrain/TerrainGenerator.h>
 #include <worldapi/terrain/TerrainTexmapBuilder.h>
 
+using namespace perlin;
+
 //DECLARATIONS
 void testTinyObjLoader(int argc, char** argv);
 void testPerlin(int argc, char** argv);
@@ -85,6 +87,12 @@ void testPerlin(int argc, char** argv) {
 	std::cout << "Création du dossier de tests..." << std::endl;
 	ioutil::createDirectory("tests");
 
+	// CREATION D'UN PERLIN REPETABLE
+	std::cout << "Perlin répétable" << std::endl;
+	auto repeatable = generatePerlinNoise2D(size, 0, 1, freq, persistence, true);
+	img::Image repeat(repeatable);
+	repeat.write("tests/repeat.png");
+    
 	//CREATION DU GENERATEUR
 
 	PerlinTerrainGenerator generator(size, 0, octaves, freq, persistence);

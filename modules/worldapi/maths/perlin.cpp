@@ -7,100 +7,124 @@
 #include <algorithm>
 
 #include "mathshelper.h"
+#include "interpolation.h"
 
 using namespace arma;
 using namespace maths;
 
-//TODO implémentation des modèles
-//TODO class PerlinGenerator ?
+namespace perlin {
+    //PRIVATE génère un nombre aléatoire entre 0 et 1
+    double generateRandom() {
+        return rand() / (double) RAND_MAX;
+    }
 
-//PRIVATE génère un nombre aléatoire entre 0 et 1
-double generateRandom() {
-	return rand() / (double)RAND_MAX;
-}
+    void generatePerlinOctave(Mat<double> &output,
+                              int offset,
+                              float frequency,
+                              bool repeatable,
+                              bool borders) {
 
-//PRIVATE
-Mat<double> inline defaultModel(int n_rows, int n_cols) {
-	Mat<double> model(n_rows, n_cols);
-	model.fill(-1);
-	return model;
-}
+        //Détermination de la taille de la matrice
+        int size = (int) std::min(output.n_rows, output.n_cols);
+        //marche le mieux avec des tailles de pattern de la forme 2^n + 1 et fréquence en 2^i
+        int period = max((int) ((size - 1) / frequency), 1);
 
-void generatePerlinOctave(Mat<double> &output, int offset, float frequency) {
-	generatePerlinOctave(output, offset, frequency, defaultModel(output.n_rows, output.n_cols));
-}
+        // Implémentation des bordures et de la répétabilité
+        int firstX = borders ? period : 0, firstY = firstX;
+        int lastX = (borders || repeatable) ? size - period : size, lastY = lastX;
 
-void generatePerlinOctave(Mat<double> & output, int offset, float frequency, const Mat<double> & model) {
-	//Détermination de la taille de la matrice
-	int size = std::min(output.n_rows, output.n_cols);
+        int overflowX = period * ((size - 1) / period);
+        if (repeatable) {
+            overflowX = size;
+        }
+        else if (borders) {
+            overflowX = size - 1;
+        }
+        int overflowY = overflowX;
 
-	int period = (size - 1) / frequency; //marche le mieux avec des tailles de pattern de la forme 2^n + 1 et fréquence en 2^i
-	if (period == 0) period = 1;
+        //Génération des valeurs aléatoires
+        for (int x = firstX; x < lastX; x += period) {
+            for (int y = firstY; y < lastY; y += period) {
+                output(x, y) = generateRandom();
+            }
+        }
 
-	//Génération des valeurs aléatoires
-	for (int x = 0; x < size; x += period) {
-		for (int y = 0; y < size; y += period) {
+        //Interpolation
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
 
-			output(x, y) = generateRandom();
-		}
-	}
+                if (x % period != 0 || y % period != 0) {
+                    //Calcul des bornes
+                    int borneX1, borneX2, borneY1, borneY2;
 
-	//Interpolation
-	for (int x = 0; x < size; x++) {
-		for (int y = 0; y < size; y++) {
+                    int tileX = x / period;
+                    int tileY = y / period;
 
-			if (x % period != 0 || y % period != 0) {
-				//Calcul des bornes
-				int borneX1, borneX2, borneY1, borneY2;
+                    borneX1 = tileX * period;
+                    borneY1 = tileY * period;
+                    borneX2 = borneX1 + period;
+                    borneY2 = borneY1 + period;
 
-				int tileX = x / period;
-				int tileY = y / period;
+                    if (borneX2 >= lastX) {
+                        borneX2 = overflowX;
+                    }
+                    if (borneY2 >= lastY) {
+                        borneY2 = overflowY;
+                    }
 
-				borneX1 = tileX * period;
-				borneY1 = tileY * period;
-				borneX2 = borneX1 + period;
-				borneY2 = borneY1 + period;
 
-				if (borneX2 >= size) borneX2 = borneX1;
-				if (borneY2 >= size) borneY2 = borneY1;
+                    //Interpolation
+                    double v1 = interpolate(borneX1, output(borneX1, borneY1),
+                                            borneX2, output(borneX2 % size, borneY1),
+                                            x);
 
-				//Interpolation
-				double v1 = interpolate(borneX1, output(borneX1, borneY1), borneX2, output(borneX2, borneY1), x);
-				double v2 = interpolate(borneX1, output(borneX1, borneY2), borneX2, output(borneX2, borneY2), x);
+                    double v2 = interpolate(borneX1, output(borneX1, borneY2 % size),
+                                            borneX2, output(borneX2 % size, borneY2 % size),
+                                            x);
 
-				output(x, y) = interpolate(borneY1, v1, borneY2, v2, y);
-			}
-		}
-	}
-}
+                    output(x, y) = interpolate(borneY1, v1, borneY2 % size, v2, y);
+                }
+            }
+        }
+    }
 
-void generatePerlinNoise2D(Mat<double>& output, int offset, int octaveCount, float frequency, float persistence) {
-	generatePerlinNoise2D(output, offset, octaveCount, frequency, persistence, defaultModel(output.n_rows, output.n_cols));
-}
+    void generatePerlinNoise2D(Mat<double> &output,
+                               int offset,
+                               int octaveCount,
+                               float frequency,
+                               float persistence,
+                               bool repeatable,
+                               bool borders) {
 
-void generatePerlinNoise2D(Mat<double> &output, int offset, int octaveCount, float frequency, float persistence, const Mat<double> & model) {
-	//Initialisation du random avec une seed quelconque
-	srand(time(NULL));
+        //Initialisation du random avec une seed quelconque
+        srand(time(NULL));
 
-	//Détermination de la taille de la matrice
-	int size = std::min(output.n_rows, output.n_cols);
+        //Détermination de la taille de la matrice
+        const uword size = std::min(output.n_rows, output.n_cols);
 
-	output.fill(0);
+        output.fill(0);
 
-	double persistenceSum = 0;
-	for (int i = 1; i <= octaveCount; i++) {
-		persistenceSum += pow(persistence, i);
-	}
+        double persistenceSum = 0;
+        for (int i = 1; i <= octaveCount; i++) {
+            persistenceSum += pow(persistence, i);
+        }
 
-	Mat<double> octave(size, size);
-	for (int i = 1; i <= octaveCount; i++) {
-		generatePerlinOctave(octave, offset * (i - 1), frequency * pow(2, i - 1));
-		output += octave * pow(persistence, i) / persistenceSum;
-	}
-}
+        Mat<double> octave(size, size);
+        for (int i = 1; i <= octaveCount; i++) {
+            generatePerlinOctave(octave, offset * (i - 1), frequency * (float) pow(2, i - 1), repeatable, borders);
+            output += octave * pow(persistence, i) / persistenceSum;
+        }
+    }
 
-Mat<double> generatePerlinNoise2D(int size, int offset, int octaves, float frequency, float persistence) {
-	Mat<double> result(size, size);
-	generatePerlinNoise2D(result, offset, octaves, frequency, persistence);
-	return result;
+    Mat<double> generatePerlinNoise2D(int size,
+                                      int offset,
+                                      int octaves,
+                                      float frequency,
+                                      float persistence,
+                                      bool repeatable) {
+
+        Mat<double> result(size, size);
+        generatePerlinNoise2D(result, offset, octaves, frequency, persistence, repeatable, false);
+        return result;
+    }
 }
