@@ -37,8 +37,8 @@ endif()
 
 # Dépendances
 
-include_directories(includes
-			modules)
+include_directories(includes/
+			modules/)
 
 find_package(OpenCV REQUIRED)
 

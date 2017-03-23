@@ -1,7 +1,7 @@
 #pragma once
 
 #include <armadillo/armadillo>
-#include <opencv2\opencv.hpp>
+#include <opencv2/opencv.hpp>
 
 #include "worldapidef.h"
 
