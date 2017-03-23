@@ -10,19 +10,19 @@ Dependencies :
 **PYTHON**
 
 Required : 
-	- numpy
-	- PIL
+- numpy
+- PIL
 
 **C++**
 
 Required :
-	- openCV
+- openCV
 
 WorldGUI :
-	- QT
+- QT
 
 WorldExplorer :
-	- (irrlicht) (not yet implemented)
+- (irrlicht) (not yet implemented)
 
 Build
 -------
@@ -49,6 +49,6 @@ Then ensure you have the .dll required to run the application in the qt build fo
 World - FRANCAIS
 ===========
 
-World est un projet ambitieux, visant à fournir des outils nécessaires pour générer procéduralement des éléments
-de la réalité, et également de les assembler pour pouvoir créer un écosystème complet.
+World est un projet ambitieux, visant Ã  fournir des outils nÃ©cessaires pour gÃ©nÃ©rer procÃ©duralement des Ã©lÃ©ments
+de la rÃ©alitÃ©, et Ã©galement de les assembler pour pouvoir crÃ©er un Ã©cosystÃ¨me complet.
 
