@@ -126,12 +126,15 @@ void ObjLoader::write(std::string filename) {
 		throw std::ios_base::failure("oh, shit, we didnt wrote u're file, " + filename + ".mtl... sorry for the disagreement :-*");
 	}
 
+	//Linking des deux fichiers
 	int lastSlashIndex = filename.find_last_of("/\\");
 	if (lastSlashIndex == std::string::npos) {
 		lastSlashIndex = 0;
 	}
 	std::string localName = filename.substr(lastSlashIndex + 1);
 	objfile << "mtllib " << localName << ".mtl" << std::endl;
+
+	//Création de deux string stream subsituts (pour aller plus vite)
 
 	//Ecriture
 	write(objfile, mtlfile);

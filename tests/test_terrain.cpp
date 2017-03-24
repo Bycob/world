@@ -88,10 +88,16 @@ void testPerlin(int argc, char** argv) {
 	ioutil::createDirectory("tests");
 
 	// CREATION D'UN PERLIN REPETABLE
-	std::cout << "Perlin répétable" << std::endl;
-	auto repeatable = generatePerlinNoise2D(size, 0, 1, freq, persistence, true);
+	std::cout << "Génération de bruit de perlin répétable..." << std::endl;
+	auto repeatable = generatePerlinNoise2D(size, 0, octaves, freq, persistence, true);
 	img::Image repeat(repeatable);
 	repeat.write("tests/repeat.png");
+
+	std::cout << "Génération du terrain associé..." << std::endl;
+	Terrain tr(repeatable);
+	ObjLoader repeatableobj;
+	repeatableobj.addMesh(std::shared_ptr<Mesh>(tr.convertToMesh()));
+	repeatableobj.write("tests/repeatable");
     
 	//CREATION DU GENERATEUR
 

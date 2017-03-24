@@ -31,16 +31,18 @@ class WORLDAPI_EXPORT Terrain {
 public :
 	Terrain(int size);
 
+	Terrain(const arma::Mat<double> & data);
+
 	virtual ~Terrain();
 
 	/** Permet d'obtenir l'altitude au point (x, y), avec x et y les
 	coordonnées en pourcentage des dimensions totales du terrain.
 	x et y sont compris entre 0 et 1.
 	Le résultat n'est pas interpolé.*/
-	double getZ(double x, double y, int stage = 0);
+	double getZ(double x, double y, int stage = 0) const;
 
 	/** Même chose que #getZ sauf que cette fois le résultat est interpolé*/
-	double getZInterpolated(double x, double y, int stage = 0);
+	double getZInterpolated(double x, double y, int stage = 0) const;
 
 	// ------ Gestion des subdivision
 
@@ -71,9 +73,9 @@ public :
 	@returns Le sous terrain aux coordonnées indiquées, à l'étage indiqué.
 	Si l'étage indiqué est trop grand, la méthode retourne le sous-terrain
 	à cet endroit qui a l'étage le plus grand. */
-	Terrain & getSubterrainAt(double x, double y, int stage = 1);
+	const Terrain & getSubterrainAt(double x, double y, int stage = 1) const;
 
-	Terrain & getSubterrain(double xindex, double yindex);
+	Terrain & getSubterrain(int xindex, int yindex) const;
 
 	// ------ IO
 
@@ -119,5 +121,9 @@ private :
 	friend class TerrainGenerator;
 	friend class PerlinTerrainGenerator;
 
-	void getLocalPosition(Terrain & child, double globalPosX, double globalPosY, double * const localPosX, double * const localPosY);
+	/** Avec child le terrain passé en paramètres, enfant du nième degré, et root le terrain
+	parent le plus haut dans sa hierarchie, on peut obtenir la position sur child à partir
+	de la position sur root passée en paramètres.
+	Les coordonnées s'exprime en pourcentage des dimensions des terrains.*/
+	void getLocalPosition(const Terrain & child, double globalPosX, double globalPosY, double & localPosX, double & localPosY) const;
 };

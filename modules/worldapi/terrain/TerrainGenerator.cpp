@@ -58,12 +58,15 @@ Image TerrainGenerator::generateTexture(const Terrain & terrain, const arma::Cub
 
 	for (int x = 0; x < randomArray.n_rows; x++) {
 		for (int y = 0; y < randomArray.n_cols; y++) {
-			int x1 = int(x * scaleX);
-			int y1 = int(y * scaleY);
+			double x1 = (double) x / randomArray.n_rows;
+			double y1 = (double) y / randomArray.n_cols;
 
-			result(x, y, 0) = map((int)(terrain._array(x1, y1) * (RESOLUTION - 1)), (int)(randomArray(x, y) * (RESOLUTION - 1)), 0);
-			result(x, y, 1) = map((int)(terrain._array(x1, y1) * (RESOLUTION - 1)), (int)(randomArray(x, y) * (RESOLUTION - 1)), 1);
-			result(x, y, 2) = map((int)(terrain._array(x1, y1) * (RESOLUTION - 1)), (int)(randomArray(x, y) * (RESOLUTION - 1)), 2);
+			double z = terrain.getZInterpolated(x1, y1);
+			double randParam = randomArray(x, y);
+
+			result(x, y, 0) = map((int)(z * (RESOLUTION - 1)), (int)(randParam * (RESOLUTION - 1)), 0);
+			result(x, y, 1) = map((int)(z * (RESOLUTION - 1)), (int)(randParam * (RESOLUTION - 1)), 1);
+			result(x, y, 2) = map((int)(z * (RESOLUTION - 1)), (int)(randParam * (RESOLUTION - 1)), 2);
 		}
 	}
 

@@ -18,19 +18,23 @@ Terrain::Terrain(int size) : _array(size, size) {
 
 }
 
+Terrain::Terrain(const Mat<double> & data) : _array(data) {
+	// TODO check que c'est de la bonne taille et tout et tout
+}
+
 Terrain::~Terrain() {
 
 }
 
-void Terrain::getLocalPosition(Terrain & child, double globalPosX, double globalPosY, double * const localPosX, double * const localPosY) {
+void Terrain::getLocalPosition(const Terrain & child, double globalPosX, double globalPosY, double & localPosX, double & localPosY) const {
 	double reductionFactor = 1;
 	double offsetX = 0;
 	double offsetY = 0;
-	Terrain* interTerrain = &child;
+	const Terrain* interTerrain = &child;
 
 	if (interTerrain == this) {
-		*localPosX = globalPosX;
-		*localPosY = globalPosY;
+		localPosX = globalPosX;
+		localPosY = globalPosY;
 	}
 	else {
 		while (interTerrain != this) {
@@ -41,40 +45,45 @@ void Terrain::getLocalPosition(Terrain & child, double globalPosX, double global
 			interTerrain = interTerrain->_parent;
 		}
 
-		*localPosX = (globalPosX - offsetX) / reductionFactor;
-		*localPosY = (globalPosY - offsetY) / reductionFactor;
+		localPosX = (globalPosX - offsetX) / reductionFactor;
+		localPosY = (globalPosY - offsetY) / reductionFactor;
 	}
 }
 
-double Terrain::getZ(double x, double y, int stage) {
-	Terrain & terrain = getSubterrainAt(x, y, stage);
+double Terrain::getZ(double x, double y, int stage) const {
+	const Terrain & terrain = getSubterrainAt(x, y, stage);
 
 	double posXd, posYd;
-	getLocalPosition(terrain, x, y, &posXd, &posYd);
+	getLocalPosition(terrain, x, y, posXd, posYd);
 
-	int posX = (int)floor(posXd * terrain._array.n_rows);
-	int posY = (int)floor(posYd * terrain._array.n_cols);
+	int posX = (int) (posXd * terrain._array.n_rows);
+	int posY = (int) (posYd * terrain._array.n_cols);
 
-	return terrain._array(x, y);
+	return terrain._array(posX, posY);
 }
 
-double Terrain::getZInterpolated(double x, double y, int stage) {
-	Terrain & terrain = getSubterrainAt(x, y, stage);
+double Terrain::getZInterpolated(double x, double y, int stage) const {
+	const Terrain & terrain = getSubterrainAt(x, y, stage);
 
+	int width = (int)terrain._array.n_rows;
+	int height = (int)terrain._array.n_cols;
+
+	// Positions flottantes sur le subterrain selectionné
 	double posXd, posYd;
-	getLocalPosition(terrain, x, y, &posXd, &posYd);
+	getLocalPosition(terrain, x, y, posXd, posYd);
 	
-	double posX = posXd * terrain._array.n_rows;
-	double posY = posYd * terrain._array.n_cols;
-	int posX1 = (int) floor(posX);
-	int posY1 = (int) floor(posY);
-	int posX2 = posX1 + 1; if (posX2 >= terrain._array.n_rows) posX2 = posX1;
-	int posY2 = posY1 + 1; if (posY2 >= terrain._array.n_cols) posY2 = posY1;
+	posXd *= width;
+	posYd *= height;
+	// TODO définir le comportement de manière plus exacte
+	int posX1 = min(width - 1, (int) floor(posXd));
+	int posY1 = min(height - 1, (int) floor(posYd));
+	int posX2 = posX1 + 1; if (posX2 >= width) posX2 = posX1;
+	int posY2 = posY1 + 1; if (posY2 >= height) posY2 = posY1;
 
-	double ip1 = interpolateLinear(posX1, terrain._array(posX1, posY1), posX2, terrain._array(posX2, posY1), posX);
-	double ip2 = interpolateLinear(posX1, terrain._array(posX1, posY2), posX2, terrain._array(posX2, posY2), posX);
+	double ip1 = interpolateLinear(posX1, terrain._array(posX1, posY1), posX2, terrain._array(posX2, posY1), posXd);
+	double ip2 = interpolateLinear(posX1, terrain._array(posX1, posY2), posX2, terrain._array(posX2, posY2), posXd);
 
-	return interpolateLinear(posY1, ip1, posY2, ip2, posY);
+	return interpolateLinear(posY1, ip1, posY2, ip2, posYd);
 }
 
 bool Terrain::isSubdivided() const {
@@ -103,15 +112,15 @@ void Terrain::subdivide(int subdivideFactor) {
 	}
 }
 
-Terrain & Terrain::getSubterrainAt(double x, double y, int stage) {
+const Terrain & Terrain::getSubterrainAt(double x, double y, int stage) const {
 	if (stage == 0 || !this->isSubdivided()) {
-		return *this;
+		const Terrain & result = *this;
+		return result;
 	}
 
 	int xindex = (int) floor(x * _subdivideFactor);
 	int yindex = (int) floor(y * _subdivideFactor);
 
-	std::cout << xindex << " " << yindex << " " << _subdivideFactor << std::endl;
 	Terrain & subterrain = getSubterrain(xindex, yindex);
 	double subx = x * _subdivideFactor - xindex;
 	double suby = y * _subdivideFactor - yindex;
@@ -119,7 +128,7 @@ Terrain & Terrain::getSubterrainAt(double x, double y, int stage) {
 	return subterrain.getSubterrainAt(subx, suby, stage - 1);
 }
 
-Terrain & Terrain::getSubterrain(double xindex, double yindex) {
+Terrain & Terrain::getSubterrain(int xindex, int yindex) const {
 	if (xindex >= _subdivideFactor || yindex >= _subdivideFactor || xindex < 0 || yindex < 0) {
 		throw std::runtime_error("given coordinates out of bounds");
 	}
