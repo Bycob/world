@@ -27,4 +27,21 @@ namespace perlin {
                               float frequency,
                               bool repeatable);
 
+	enum class WORLDAPI_EXPORT Direction {
+		AXIS_X, AXIS_Y,
+	};
+
+	/** Cette fonction permet de modifier les bords des deux matrices passées
+	en paramètres de sorte qu'elle s'assemble parfaitement selon la direction
+	souhaitée. La jointure est effectuée par un bruit de perlin, dont les
+	caractéristiques sont détaillées en paramètres.
+	@param direction La direction de jointure. Par exemple, direction = AXIS_X
+	signifie que lorsqu'on va vers les x croissants de mat1, on finit par
+	arriver dans mat2.*/
+	WORLDAPI_EXPORT void join(arma::Mat<double> &matDown,
+		                      arma::Mat<double> &matUp,
+		                      const Direction & direction,
+		                      int octaves,
+		                      float frequency,
+		                      float persistence);
 }

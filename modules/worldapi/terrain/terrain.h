@@ -22,7 +22,8 @@ class WORLDAPI_EXPORT TerrainGenerator;
 /** Cette classe permet de manipuler des terrains planaires avec plusieurs niveaux
 de détails. 
 Les terrains définis par cette classe sont définis par des surfaces. A chaque point
-(x, y) du plan, correspond une ou plusieurs altitude(s) z(i). 
+(x, y) du plan, correspond une ou plusieurs altitude(s) z(i), suivant si le terrain
+est simple couche ou multi couche. 
 Cette classe permet également de diviser les terrains en plusieurs morceaux avec des
 niveaux de détail plus élevés. On peut ensuite choisir le niveau de détail qu'on veut
 observer. */

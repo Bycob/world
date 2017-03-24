@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <algorithm>
+#include <functional>
 
 #include "mathshelper.h"
 #include "interpolation.h"
@@ -18,7 +19,6 @@ namespace perlin {
         return rand() / (double) RAND_MAX;
     }
 
-	// TODO LES X ET LES Y SONT INVERSES, VOIR DANS "INTEROP"
     void generatePerlinOctave(Mat<double> &output,
                               int offset,
                               float frequency,
@@ -125,4 +125,79 @@ namespace perlin {
         generatePerlinNoise2D(result, offset, octaves, frequency, persistence, repeatable);
         return result;
     }
+
+	void join(arma::Mat<double> &mat1,
+		      arma::Mat<double> &mat2,
+		      const Direction & direction,
+		      int octaves,
+		      float frequency,
+		      float persistence) {
+
+		// Vérification des dimensions de mat1 et mat2
+		int length1, length2, depth1, depth2;
+		if (direction == Direction::AXIS_Y) {
+			length1 = mat1.n_cols;
+			length2 = mat2.n_cols;
+			depth1 = mat1.n_rows;
+			depth2 = mat2.n_rows;
+		}
+		else {
+			length1 = mat1.n_rows;
+			length2 = mat2.n_rows;
+			depth1 = mat1.n_cols;
+			depth2 = mat2.n_cols;
+		}
+
+		// TODO définir le comportement lorsque length2 /= length1
+		int length = min(length1, length2);
+		int depth = min(depth1, depth2);
+
+		// Permet d'abstraire les directions.
+		// les x sont dans le sens de la longueur des deux matrices à joindre
+		// les y représentent l'éloignement à la jointure.
+		// y négatif -> mat1, y positifs -> mat2
+		std::function<double & (int, int)> at;
+
+		switch (direction) {
+		case Direction::AXIS_Y:
+			at = [&mat1, &mat2](int x, int y) -> double & {
+				if (y < 0) {
+					return mat1(x, mat1.n_cols + y);
+				}
+				else {
+					return mat2(x, y);
+				}
+			};
+			break;
+		case Direction::AXIS_X:
+			at = [&mat1, &mat2](int x, int y) -> double & {
+				if (y < 0) {
+					return mat1(mat1.n_rows + y, x);
+				}
+				else {
+					return mat2(y, x);
+				}
+			};
+			break;
+		}
+
+		// Perlin
+		int period = (int)ceil(depth / frequency);
+		int joinDepth1 = (depth1 / period - 1) * period - depth1;
+		int joinDepth2 = period;
+
+		for (int i = 0; i < octaves; i++) {
+			// Génération des points
+			for (int y = joinDepth2; y >= joinDepth1 + period; y -= period) {
+
+			}
+
+			// Interpolation entre les points
+
+			// Ajout de l'octave au joint
+
+			// Incrémentation de la période
+			period = (int) ceil(period / 2.0);
+		}
+	}
 }
