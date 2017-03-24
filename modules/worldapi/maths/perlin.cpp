@@ -18,27 +18,24 @@ namespace perlin {
         return rand() / (double) RAND_MAX;
     }
 
+	// TODO LES X ET LES Y SONT INVERSES, VOIR DANS "INTEROP"
     void generatePerlinOctave(Mat<double> &output,
                               int offset,
                               float frequency,
-                              bool repeatable,
-                              bool borders) {
+                              bool repeatable) {
 
         //Détermination de la taille de la matrice
         int size = (int) std::min(output.n_rows, output.n_cols);
         //marche le mieux avec des tailles de pattern de la forme 2^n + 1 et fréquence en 2^i
         int period = max((int) ((size - 1) / frequency), 1);
 
-        // Implémentation des bordures et de la répétabilité
-        int firstX = borders ? period : 0, firstY = firstX;
-        int lastX = (borders || repeatable) ? size - period : size, lastY = lastX;
+        // Implémentation de la répétabilité
+        int firstX = 0, firstY = firstX;
+        int lastX = repeatable ? size - period : size, lastY = lastX;
 
         int overflowX = period * ((size - 1) / period);
         if (repeatable) {
             overflowX = size;
-        }
-        else if (borders) {
-            overflowX = size - 1;
         }
         int overflowY = overflowX;
 
@@ -53,12 +50,14 @@ namespace perlin {
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
 
-                if (x % period != 0 || y % period != 0) {
+                if (x % period != 0 || x >= lastX || 
+					y % period != 0 || y >= lastY) {
+
                     //Calcul des bornes
                     int borneX1, borneX2, borneY1, borneY2;
 
-                    int tileX = x / period;
-                    int tileY = y / period;
+                    int tileX = min(x, lastX) / period;
+                    int tileY = min(y, lastY) / period;
 
                     borneX1 = tileX * period;
                     borneY1 = tileY * period;
@@ -82,7 +81,7 @@ namespace perlin {
                                             borneX2, output(borneX2 % size, borneY2 % size),
                                             x);
 
-                    output(x, y) = interpolate(borneY1, v1, borneY2 % size, v2, y);
+                    output(x, y) = interpolate(borneY1, v1, borneY2, v2, y);
                 }
             }
         }
@@ -93,8 +92,7 @@ namespace perlin {
                                int octaveCount,
                                float frequency,
                                float persistence,
-                               bool repeatable,
-                               bool borders) {
+                               bool repeatable) {
 
         //Initialisation du random avec une seed quelconque
         srand(time(NULL));
@@ -111,7 +109,7 @@ namespace perlin {
 
         Mat<double> octave(size, size);
         for (int i = 1; i <= octaveCount; i++) {
-            generatePerlinOctave(octave, offset * (i - 1), frequency * (float) pow(2, i - 1), repeatable, borders);
+            generatePerlinOctave(octave, offset * (i - 1), frequency * (float) pow(2, i - 1), repeatable);
             output += octave * pow(persistence, i) / persistenceSum;
         }
     }
@@ -124,7 +122,7 @@ namespace perlin {
                                       bool repeatable) {
 
         Mat<double> result(size, size);
-        generatePerlinNoise2D(result, offset, octaves, frequency, persistence, repeatable, false);
+        generatePerlinNoise2D(result, offset, octaves, frequency, persistence, repeatable);
         return result;
     }
 }

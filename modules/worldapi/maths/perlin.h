@@ -13,8 +13,7 @@ namespace perlin {
                                                int octaves,
                                                float frequency,
                                                float persistence,
-                                               bool repeatable = false,
-                                               bool borders = false);
+                                               bool repeatable = false);
 
     WORLDAPI_EXPORT arma::Mat<double> generatePerlinNoise2D(int size,
                                                             int offset,
@@ -26,7 +25,6 @@ namespace perlin {
     void generatePerlinOctave(arma::Mat<double> &output,
                               int offset,
                               float frequency,
-                              bool repeatable,
-                              bool borders);
+                              bool repeatable);
 
 }
