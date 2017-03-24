@@ -159,8 +159,8 @@ Mesh * Terrain::convertToMesh(float offsetX, float offsetY, float offsetZ, float
 
 			Vertex vertext(VType::TEXTURE);
 
-			vertext.add((float) y / _array.n_cols)
-				.add(1 - (float) x / _array.n_rows);
+			vertext.add((float) x / _array.n_cols)
+				.add(1 - (float) y / _array.n_rows);
 
 			mesh->addVertex(vertext);
 		}
