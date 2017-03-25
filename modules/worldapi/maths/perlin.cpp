@@ -95,7 +95,7 @@ namespace perlin {
                                bool repeatable) {
 
         //Initialisation du random avec une seed quelconque
-        srand(time(NULL));
+        srand((uint32_t) time(NULL));
 
         //Détermination de la taille de la matrice
         const uword size = std::min(output.n_rows, output.n_cols);
@@ -121,7 +121,7 @@ namespace perlin {
                                       float persistence,
                                       bool repeatable) {
 
-        Mat<double> result(size, size);
+        Mat<double> result((uword) size, (uword) size);
         generatePerlinNoise2D(result, offset, octaves, frequency, persistence, repeatable);
         return result;
     }
@@ -136,31 +136,38 @@ namespace perlin {
 		// Vérification des dimensions de mat1 et mat2
 		int length1, length2, depth1, depth2;
 		if (direction == Direction::AXIS_Y) {
-			length1 = mat1.n_cols;
-			length2 = mat2.n_cols;
-			depth1 = mat1.n_rows;
-			depth2 = mat2.n_rows;
+			length1 = (int) mat1.n_cols;
+			length2 = (int) mat2.n_cols;
+			depth1 = (int) mat1.n_rows;
+			depth2 = (int) mat2.n_rows;
 		}
 		else {
-			length1 = mat1.n_rows;
-			length2 = mat2.n_rows;
-			depth1 = mat1.n_cols;
-			depth2 = mat2.n_cols;
+			length1 = (int) mat1.n_rows;
+			length2 = (int) mat2.n_rows;
+			depth1 = (int) mat1.n_cols;
+			depth2 = (int) mat2.n_cols;
 		}
 
 		// TODO définir le comportement lorsque length2 /= length1
 		int length = min(length1, length2);
 		int depth = min(depth1, depth2);
+        int period = (int) ceil((double) (depth / frequency));
+
+        int joinDepth1 = - (depth1 % period) - period;
+        int joinDepth2 = period;
+        int joinDepth = joinDepth2 - joinDepth1 - 2;
+        int joinOffset = - 1 - joinDepth1;
 
 		// Permet d'abstraire les directions.
 		// les x sont dans le sens de la longueur des deux matrices à joindre
 		// les y représentent l'éloignement à la jointure.
-		// y négatif -> mat1, y positifs -> mat2
+		// y < joinOffset -> mat1, y > joinOffset -> mat2
 		std::function<double & (int, int)> at;
 
 		switch (direction) {
 		case Direction::AXIS_Y:
-			at = [&mat1, &mat2](int x, int y) -> double & {
+			at = [&mat1, &mat2, &joinOffset](int x, int y) -> double & {
+                y -= joinOffset;
 				if (y < 0) {
 					return mat1(x, mat1.n_cols + y);
 				}
@@ -170,7 +177,8 @@ namespace perlin {
 			};
 			break;
 		case Direction::AXIS_X:
-			at = [&mat1, &mat2](int x, int y) -> double & {
+			at = [&mat1, &mat2, &joinOffset](int x, int y) -> double & {
+                y -= joinOffset;
 				if (y < 0) {
 					return mat1(mat1.n_rows + y, x);
 				}
@@ -182,14 +190,17 @@ namespace perlin {
 		}
 
 		// Perlin
-		int period = (int)ceil(depth / frequency);
-		int joinDepth1 = (depth1 / period - 1) * period - depth1;
-		int joinDepth2 = period;
+
+        Mat<double> octave((uword) length, (uword) joinDepth);
 
 		for (int i = 0; i < octaves; i++) {
-			// Génération des points
-			for (int y = joinDepth2; y >= joinDepth1 + period; y -= period) {
+            Mat<double> join((uword) length, (uword) joinDepth);
 
+			// Génération des points
+			for (int y = joinDepth2 - period; y >= joinDepth1 + period; y -= period) {
+                for (int x = 0; x < length; x += period) {
+                    //join(x, y + 1 - joinDepth1);
+                }
 			}
 
 			// Interpolation entre les points
