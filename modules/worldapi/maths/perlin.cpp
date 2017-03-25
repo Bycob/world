@@ -19,6 +19,23 @@ namespace perlin {
         return rand() / (double) RAND_MAX;
     }
 
+    std::vector<double> getCoefs(int octaves, double persistence) {
+        std::vector<double> coefs;
+
+        double persistenceSum = 0;
+        for (int i = 1; i <= octaves; i++) {
+            double p = pow(persistence, i);
+            persistenceSum += p;
+            coefs.push_back(p);
+        }
+
+        for (int i = 0 ; i < octaves ; i++) {
+            coefs[i] /= persistenceSum;
+        }
+
+        return coefs;
+    }
+
     void generatePerlinOctave(Mat<double> &output,
                               int offset,
                               float frequency,
@@ -95,6 +112,7 @@ namespace perlin {
                                bool repeatable) {
 
         //Initialisation du random avec une seed quelconque
+        // TODO on préférera les seeds
         srand((uint32_t) time(NULL));
 
         //Détermination de la taille de la matrice
@@ -102,15 +120,12 @@ namespace perlin {
 
         output.fill(0);
 
-        double persistenceSum = 0;
-        for (int i = 1; i <= octaveCount; i++) {
-            persistenceSum += pow(persistence, i);
-        }
+        std::vector<double> coefs = getCoefs(octaveCount, persistence);
 
         Mat<double> octave(size, size);
         for (int i = 1; i <= octaveCount; i++) {
             generatePerlinOctave(octave, offset * (i - 1), frequency * (float) pow(2, i - 1), repeatable);
-            output += octave * pow(persistence, i) / persistenceSum;
+            output += octave * coefs[i];
         }
     }
 
@@ -155,8 +170,8 @@ namespace perlin {
 
         int joinDepth1 = - (depth1 % period) - period;
         int joinDepth2 = period;
-        int joinDepth = joinDepth2 - joinDepth1 - 2;
-        int joinOffset = - 1 - joinDepth1;
+        int joinDepth = joinDepth2 - joinDepth1;
+        int joinOffset = - joinDepth1;
 
 		// Permet d'abstraire les directions.
 		// les x sont dans le sens de la longueur des deux matrices à joindre
@@ -191,21 +206,70 @@ namespace perlin {
 
 		// Perlin
 
-        Mat<double> octave((uword) length, (uword) joinDepth);
+        std::vector<double> coefs = getCoefs(octaves, persistence);
+        Mat<double> join((uword) length, (uword) joinDepth);
 
 		for (int i = 0; i < octaves; i++) {
-            Mat<double> join((uword) length, (uword) joinDepth);
+            Mat<double> octave((uword) length, (uword) joinDepth);
 
 			// Génération des points
-			for (int y = joinDepth2 - period; y >= joinDepth1 + period; y -= period) {
+			for (int y = joinDepth - period; y >= period; y -= period) {
                 for (int x = 0; x < length; x += period) {
-                    //join(x, y + 1 - joinDepth1);
+                    octave(x, y) = generateRandom();
                 }
 			}
 
 			// Interpolation entre les points
+            for (int x = 0 ; x < length ; x++) {
+                for (int y = 0 ; y < joinDepth ; y++) {
+                    int minusY = joinDepth - y;
+
+                    if (y != 0 && y != joinDepth - 1 &&
+                        (x % period != 0 ||
+                        minusY % period != 0 || y < period || minusY < period)) {
+
+                        // Détermination des bornes en y
+                        int borneY1 = joinDepth - (minusY / period) * period;
+                        if (borneY1 < period) borneY1 += period;
+                        int borneY2 = borneY1 - period;
+                        if (borneY2 < period) borneY2 = 0;
+
+                        // Détermination des bornes en x
+                        int borneX1 = (x / period) * period;
+                        int borneX2 = borneX1 + period;
+                        if (borneX2 >= length) borneX2 = borneX1;
+
+                        // Interpolation en x
+                        const std::function<double (int)> interpolateX = [&](int borneY) -> double {
+                            if (borneY == 0 || borneY == joinDepth - 1) {
+                                return at(x, borneY);
+                            }
+                            else {
+                                return interpolate(borneX1, octave(borneX1, borneY), borneX2, octave(borneX2, borneY), x);
+                            }
+                        };
+
+                        double v1 = interpolateX(borneY1);
+                        double v2 = interpolateX(borneY2);
+
+                        // Interpolation en y
+                        octave(x, y) = interpolate(borneY1, v1, borneY2, v2, y);
+                    }
+                }
+            }
 
 			// Ajout de l'octave au joint
+            double coef = coefs[i];
+            for (int x = 0 ; x < length ; x++) {
+                for (int y = 1 ; y < joinDepth - 1; y++) {
+                    if (i == 0) {
+                        at(x, y) = coef * octave(x, y);
+                    }
+                    else {
+                        at(x, y) += coef * octave(x, y);
+                    }
+                }
+            }
 
 			// Incrémentation de la période
 			period = (int) ceil(period / 2.0);
