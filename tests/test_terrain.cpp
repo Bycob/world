@@ -54,6 +54,26 @@ void testTinyObjLoader(int argc, char** argv) {
 	}
 }
 
+void testRepeatable(int argc, char** argv) {
+
+    int size = 257;
+    int octaves = 4;
+    int freq = 4;
+    float persistence = 0.4;
+
+    // CREATION D'UN PERLIN REPETABLE
+    std::cout << "Génération de bruit de perlin répétable..." << std::endl;
+    auto repeatable = generatePerlinNoise2D(size, 0, octaves, freq, persistence, true);
+    img::Image repeat(repeatable);
+    repeat.write("tests/repeat.png");
+
+    std::cout << "Génération du terrain associé..." << std::endl;
+    Terrain tr(repeatable);
+    ObjLoader repeatableobj;
+    repeatableobj.addMesh(std::shared_ptr<Mesh>(tr.convertToMesh()));
+    repeatableobj.write("tests/repeatable");
+}
+
 void testPerlin(int argc, char** argv) {
 
 	//ANALYSE DES ARGUMENTS
@@ -87,17 +107,21 @@ void testPerlin(int argc, char** argv) {
 	std::cout << "Création du dossier de tests..." << std::endl;
 	ioutil::createDirectory("tests");
 
-	// CREATION D'UN PERLIN REPETABLE
-	std::cout << "Génération de bruit de perlin répétable..." << std::endl;
-	auto repeatable = generatePerlinNoise2D(size, 0, octaves, freq, persistence, true);
-	img::Image repeat(repeatable);
-	repeat.write("tests/repeat.png");
-
-	std::cout << "Génération du terrain associé..." << std::endl;
-	Terrain tr(repeatable);
-	ObjLoader repeatableobj;
-	repeatableobj.addMesh(std::shared_ptr<Mesh>(tr.convertToMesh()));
-	repeatableobj.write("tests/repeatable");
+    // CREATION DE DEUX PERLIN ET JOIN
+    try {
+        std::cout << "Génération de deux bruits de perlin..." << std::endl;
+        auto perlin1 = generatePerlinNoise2D(size, 0, octaves, freq, persistence);
+        auto perlin2 = generatePerlinNoise2D(size, 0, octaves, freq, persistence);
+        std::cout << "Join des deux bruits de perlin..." << std::endl;
+        join(perlin1, perlin2, Direction::AXIS_X, octaves, freq, persistence);
+        img::Image perlin1img(perlin1);
+        img::Image perlin2img(perlin2);
+        perlin1img.write("tests/perlin1.png");
+        perlin2img.write("tests/perlin2.png");
+    }
+    catch (std::exception &e) {
+        std::cerr << "Le test de join a levé une exception : " << e.what() << std::endl;
+    }
     
 	//CREATION DU GENERATEUR
 
