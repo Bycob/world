@@ -125,7 +125,7 @@ namespace perlin {
         Mat<double> octave(size, size);
         for (int i = 1; i <= octaveCount; i++) {
             generatePerlinOctave(octave, offset * (i - 1), frequency * (float) pow(2, i - 1), repeatable);
-            output += octave * coefs[i];
+            output += octave * coefs[i -1];
         }
     }
 
@@ -166,10 +166,10 @@ namespace perlin {
 		// TODO définir le comportement lorsque length2 /= length1
 		int length = min(length1, length2);
 		int depth = min(depth1, depth2);
-        int period = (int) ceil((double) (depth / frequency));
+        int period = maths::max(1, (int) ((depth - 1) / frequency));
 
         int joinDepth1 = - (depth1 % period) - period;
-        int joinDepth2 = period;
+        int joinDepth2 = period + 1;
         int joinDepth = joinDepth2 - joinDepth1;
         int joinOffset = - joinDepth1;
 
@@ -209,11 +209,11 @@ namespace perlin {
         std::vector<double> coefs = getCoefs(octaves, persistence);
         Mat<double> join((uword) length, (uword) joinDepth);
 
-		for (int i = 0; i < octaves; i++) {
+		for (int i = 1; i <= octaves; i++) {
             Mat<double> octave((uword) length, (uword) joinDepth);
 
 			// Génération des points
-			for (int y = joinDepth - period; y >= period; y -= period) {
+			for (int y = joinDepth - period - 1; y >= period; y -= period) {
                 for (int x = 0; x < length; x += period) {
                     octave(x, y) = generateRandom();
                 }
@@ -222,14 +222,14 @@ namespace perlin {
 			// Interpolation entre les points
             for (int x = 0 ; x < length ; x++) {
                 for (int y = 0 ; y < joinDepth ; y++) {
-                    int minusY = joinDepth - y;
+                    int minusY = joinDepth - y - 1;
 
                     if (y != 0 && y != joinDepth - 1 &&
                         (x % period != 0 ||
-                        minusY % period != 0 || y < period || minusY < period)) {
+                        minusY % period != 0 || y < period || minusY <= period)) {
 
                         // Détermination des bornes en y
-                        int borneY1 = joinDepth - (minusY / period) * period;
+                        int borneY1 = joinDepth - (minusY / period) * period - 1;
                         if (borneY1 < period) borneY1 += period;
                         int borneY2 = borneY1 - period;
                         if (borneY2 < period) borneY2 = 0;
@@ -253,16 +253,16 @@ namespace perlin {
                         double v2 = interpolateX(borneY2);
 
                         // Interpolation en y
-                        octave(x, y) = interpolate(borneY1, v1, borneY2, v2, y);
+                        octave(x, y) = interpolate(borneY2, v2, borneY1, v1, y);
                     }
                 }
             }
 
 			// Ajout de l'octave au joint
-            double coef = coefs[i];
+            double coef = coefs[i - 1];
             for (int x = 0 ; x < length ; x++) {
                 for (int y = 1 ; y < joinDepth - 1; y++) {
-                    if (i == 0) {
+                    if (i == 1) {
                         at(x, y) = coef * octave(x, y);
                     }
                     else {

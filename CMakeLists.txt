@@ -30,10 +30,10 @@ set(LIBRARY_OUTPUT_PATH bin)
 
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
    message("Compiler : GNU")
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -s -Os -Wno-attributes")
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
    
    if(${CMAKE_BUILD_TYPE} STREQUAL Release)
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -s -Os -Wno-attributes")
    endif()
 elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
    message("Compiler : MSVC")

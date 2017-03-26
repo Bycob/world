@@ -111,6 +111,7 @@ void testPerlin(int argc, char** argv) {
     try {
         std::cout << "Génération de deux bruits de perlin..." << std::endl;
         auto perlin1 = generatePerlinNoise2D(size, 0, octaves, freq, persistence);
+        sleep(1);
         auto perlin2 = generatePerlinNoise2D(size, 0, octaves, freq, persistence);
         std::cout << "Join des deux bruits de perlin..." << std::endl;
         join(perlin1, perlin2, Direction::AXIS_X, octaves, freq, persistence);
