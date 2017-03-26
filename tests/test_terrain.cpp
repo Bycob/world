@@ -61,9 +61,11 @@ void testRepeatable(int argc, char** argv) {
     int freq = 4;
     float persistence = 0.4;
 
+	Perlin perlin;
+
     // CREATION D'UN PERLIN REPETABLE
     std::cout << "Génération de bruit de perlin répétable..." << std::endl;
-    auto repeatable = generatePerlinNoise2D(size, 0, octaves, freq, persistence, true);
+    auto repeatable = perlin.generatePerlinNoise2D(size, 0, octaves, freq, persistence, true);
     img::Image repeat(repeatable);
     repeat.write("tests/repeat.png");
 
@@ -107,14 +109,15 @@ void testPerlin(int argc, char** argv) {
 	std::cout << "Création du dossier de tests..." << std::endl;
 	ioutil::createDirectory("tests");
 
+	Perlin perlin;
+
     // CREATION DE DEUX PERLIN ET JOIN
     try {
         std::cout << "Génération de deux bruits de perlin..." << std::endl;
-        auto perlin1 = generatePerlinNoise2D(size, 0, octaves, freq, persistence);
-        sleep(1);
-        auto perlin2 = generatePerlinNoise2D(size, 0, octaves, freq, persistence);
+        auto perlin1 = perlin.generatePerlinNoise2D(size, 0, octaves, freq, persistence);
+        auto perlin2 = perlin.generatePerlinNoise2D(size, 0, octaves, freq, persistence);
         std::cout << "Join des deux bruits de perlin..." << std::endl;
-        join(perlin1, perlin2, Direction::AXIS_X, octaves, freq, persistence);
+        perlin.join(perlin1, perlin2, Direction::AXIS_X, octaves, freq, persistence);
         img::Image perlin1img(perlin1);
         img::Image perlin2img(perlin2);
         perlin1img.write("tests/perlin1.png");
@@ -186,7 +189,7 @@ void testPerlin(int argc, char** argv) {
 	texmapBuilder.addSlice(230, slice3);
 	//---
 
-	arma::Mat<double> randomArray = generatePerlinNoise2D(size * 8, 0, 7, 16, 0.9);
+	arma::Mat<double> randomArray = perlin.generatePerlinNoise2D(size * 8, 0, 7, 16, 0.9);
 	img::Image texture = generator.generateTexture(*terrain, texmapBuilder, randomArray);
 
 	std::cout << "ecriture de la texture..." << std::endl;

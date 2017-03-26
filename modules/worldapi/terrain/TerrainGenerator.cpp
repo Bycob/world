@@ -75,8 +75,8 @@ Image TerrainGenerator::generateTexture(const Terrain & terrain, const arma::Cub
 
 
 
-PerlinTerrainGenerator::PerlinTerrainGenerator(int size, int offset, int octaveCount, double frequency, double persistence) : 
-	TerrainGenerator(size) , _offset(offset), _octaveCount(octaveCount), _frequency(frequency), _persistence(persistence) {
+PerlinTerrainGenerator::PerlinTerrainGenerator(int size, int offset, int octaveCount, float frequency, float persistence) :
+	TerrainGenerator(size) , _perlin(std::make_unique<Perlin>()), _offset(offset), _octaveCount(octaveCount), _frequency(frequency), _persistence(persistence) {
 
 }
 
@@ -86,7 +86,7 @@ PerlinTerrainGenerator::~PerlinTerrainGenerator() {
 
 std::unique_ptr<Terrain> PerlinTerrainGenerator::generate() const {
 	std::unique_ptr<Terrain> result = std::make_unique<Terrain>(_size);
-	generatePerlinNoise2D(result->_array, _offset, _octaveCount, _frequency, _persistence);
+	_perlin->generatePerlinNoise2D(result->_array, _offset, _octaveCount, _frequency, _persistence);
 
 	return std::move(result);
 }
@@ -94,7 +94,7 @@ std::unique_ptr<Terrain> PerlinTerrainGenerator::generate() const {
 void PerlinTerrainGenerator::generateSubdivision(Terrain & terrain, int xsub, int ysub) const {
 	//TODO Faire plusieurs tests pour voir si on obtient un meilleur résultat en changeant les paramètres.
 	Terrain & subterrain = terrain.getSubterrain(xsub, ysub);
-	generatePerlinNoise2D(subterrain._array, _offset, _octaveCount, _frequency, _persistence);
+	_perlin->generatePerlinNoise2D(subterrain._array, _offset, _octaveCount, _frequency, _persistence);
 
 	double oneTerrainLength = 1.0 / terrain._subdivideFactor;
 

@@ -1,8 +1,11 @@
 #pragma once
 
+#include <memory>
+
 #include "../worldapidef.h"
 #include "../Image.h"
 #include "../GenBase.h"
+#include "../maths/perlin.h"
 #include "TerrainTexmapBuilder.h"
 #include "terrain.h"
 
@@ -33,7 +36,7 @@ protected :
 
 class WORLDAPI_EXPORT PerlinTerrainGenerator : public TerrainGenerator {
 public :
-	PerlinTerrainGenerator(int size = DEFAULT_TERRAIN_SIZE, int offset = 0, int octaveCount = 5, double frequency = 8, double persistence = 0.5);
+	PerlinTerrainGenerator(int size = DEFAULT_TERRAIN_SIZE, int offset = 0, int octaveCount = 5, float frequency = 8, float persistence = 0.5);
 	virtual ~PerlinTerrainGenerator();
 
 	virtual std::unique_ptr<Terrain> generate() const;
@@ -41,9 +44,11 @@ public :
 protected :
 	virtual void generateSubdivision(Terrain & terrain, int x, int y) const;
 private :
+	std::unique_ptr<Perlin> _perlin;
+
 	int _offset;
-	double _octaveCount;
-	double _frequency;
-	double _persistence;
+	int _octaveCount;
+	float _frequency;
+	float _persistence;
 	double _subdivNoiseRatio = 0.05;
 };
