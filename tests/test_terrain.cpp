@@ -117,7 +117,7 @@ void testPerlin(int argc, char** argv) {
         auto perlin1 = perlin.generatePerlinNoise2D(size, 0, octaves, freq, persistence);
         auto perlin2 = perlin.generatePerlinNoise2D(size, 0, octaves, freq, persistence);
         std::cout << "Join des deux bruits de perlin..." << std::endl;
-        perlin.join(perlin1, perlin2, Direction::AXIS_X, octaves, freq, persistence, true);
+        perlin.join(perlin1, perlin2, Direction::AXIS_Y, octaves, freq, persistence, true);
         img::Image perlin1img(perlin1);
         img::Image perlin2img(perlin2);
         perlin1img.write("tests/perlin1.png");
@@ -218,6 +218,9 @@ void testPerlin(int argc, char** argv) {
 	Terrain & subterrain = terrain->getSubterrain(0, 0);
 	std::shared_ptr<Mesh> submesh = std::shared_ptr<Mesh>(subterrain.convertToSubmesh());
 	subterrainFile.addMesh(submesh);
+    subterrainFile.addMesh(std::shared_ptr<Mesh>(terrain->getSubterrain(1, 0).convertToSubmesh()));
+    subterrainFile.addMesh(std::shared_ptr<Mesh>(terrain->getSubterrain(1, 1).convertToSubmesh()));
+    subterrainFile.addMesh(std::shared_ptr<Mesh>(terrain->getSubterrain(0, 1).convertToSubmesh()));
 	subterrainFile.write("tests/subterrain");
 	std::cout << "Fichier écrit !" << std::endl;
 	

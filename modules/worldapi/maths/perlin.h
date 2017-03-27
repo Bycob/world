@@ -37,8 +37,13 @@ public :
     souhaitée. La jointure est effectuée par un bruit de perlin, dont les
     caractéristiques sont détaillées en paramètres.
     @param direction La direction de jointure. Par exemple, direction = AXIS_X
-    signifie que lorsqu'on va vers les x croissants de mat1, on finit par
-    arriver dans mat2.*/
+     signifie que lorsqu'on va vers les x croissants de mat1, on finit par
+     arriver dans mat2.
+    @param joinableSides Ce paramètre indique que la grille doit rester jointive
+     avec les grilles adjacentes dans l'autre direction. Ainsi, si on joint deux
+     couples de grilles dans une direction, et qu'on souhaite les joindre également
+     dans l'autre direction, on peut mettre ce paramètre à true pour conserver
+     la jointure. */
     void join(arma::Mat<double> &matDown,
               arma::Mat<double> &matUp,
               const perlin::Direction &direction,

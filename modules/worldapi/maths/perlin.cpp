@@ -241,16 +241,27 @@ void Perlin::join(arma::Mat<double> &mat1,
                     (x % period != 0 ||
                     minusY % period != 0 || y < period || minusY <= period)) {
 
+                    int borneX1, borneX2, borneY1, borneY2;
+
                     // Détermination des bornes en y
-                    int borneY1 = joinDepth - (minusY / period) * period - 1;
+                    borneY1 = joinDepth - (minusY / period) * period - 1;
                     if (borneY1 < period) borneY1 += period;
-                    int borneY2 = borneY1 - period;
+                    borneY2 = borneY1 - period;
                     if (borneY2 < period) borneY2 = 0;
 
                     // Détermination des bornes en x
-                    int borneX1 = (x / period) * period;
-                    int borneX2 = borneX1 + period;
-                    if (borneX2 >= length) borneX2 = borneX1;
+                    borneX1 = (x / period) * period;
+
+                    if (joinableSides && borneX1 >= length - period) {
+                        borneX1 -= period;
+                        borneX2 = length - 1;
+                    }
+                    else {
+                        borneX2 = borneX1 + period;
+                        if (borneX2 >= length) borneX2 = borneX1;
+                    }
+
+
 
                     // Interpolation en x
                     const std::function<double (int)> interpolateX = [&](int borneY) -> double {

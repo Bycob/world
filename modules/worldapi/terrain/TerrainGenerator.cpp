@@ -23,15 +23,15 @@ void TerrainGenerator::setSize(int size) {
 
 void TerrainGenerator::generateSubdivisions(Terrain & terrain, int subdivideFactor, int subdivisionsCount) {
 	terrain.subdivide(subdivideFactor);
-	
+
+    // Géneration des subdivisions à l'étage actuel
 	for (int x = 0; x < subdivideFactor; x++) {
 		for (int y = 0; y < subdivideFactor; y++) {
 			generateSubdivision(terrain, x, y);
 		}
 	}
-	//TODO harmonisation horizontale entre les différentes subdivisions.
 
-	// Subdivisions à l'étage au dessus
+	// Subdivisions d'un niveau supplémentaire (récursivité)
 	if (subdivisionsCount != 1) {
 		for (int x = 0; x < subdivideFactor; x++) {
 			for (int y = 0; y < subdivideFactor; y++) {
@@ -108,4 +108,18 @@ void PerlinTerrainGenerator::generateSubdivision(Terrain & terrain, int xsub, in
 				((double) ysub + (double) y / subterrain._array.n_rows) / terrain._subdivideFactor, 0);
 		}
 	}
+
+    // Harmonisation horizontale
+    if (xsub != 0) {
+        _perlin->join(terrain.getSubterrain(xsub - 1, ysub)._array,
+                      subterrain._array,
+                      Direction::AXIS_X,
+                      _octaveCount, _frequency, _persistence, true);
+    }
+    if (ysub != 0) {
+        _perlin->join(terrain.getSubterrain(xsub, ysub - 1)._array,
+                      subterrain._array,
+                      Direction::AXIS_Y,
+                      _octaveCount, _frequency, _persistence, true);
+    }
 }
