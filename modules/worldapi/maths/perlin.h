@@ -19,18 +19,18 @@ public :
     Perlin(long seed);
 
     void generatePerlinNoise2D(arma::Mat<double> &output,
-                                               int offset,
-                                               int octaves,
-                                               float frequency,
-                                               float persistence,
-                                               bool repeatable = false);
+                               int offset,
+                               int octaves,
+                               float frequency,
+                               float persistence,
+                               bool repeatable = false);
 
     arma::Mat<double> generatePerlinNoise2D(int size,
-                                                            int offset,
-                                                            int octaves,
-                                                            float frequency,
-                                                            float persistence,
-                                                            bool repeatable = false);
+                                            int offset,
+                                            int octaves,
+                                            float frequency,
+                                            float persistence,
+                                            bool repeatable = false);
 
     /** Cette fonction permet de modifier les bords des deux matrices passées
     en paramètres de sorte qu'elle s'assemble parfaitement selon la direction
@@ -40,11 +40,12 @@ public :
     signifie que lorsqu'on va vers les x croissants de mat1, on finit par
     arriver dans mat2.*/
     void join(arma::Mat<double> &matDown,
-                              arma::Mat<double> &matUp,
-                              const perlin::Direction &direction,
-                              int octaves,
-                              float frequency,
-                              float persistence);
+              arma::Mat<double> &matUp,
+              const perlin::Direction &direction,
+              int octaves,
+              float frequency,
+              float persistence,
+              bool joinableSides = false);
 
 private :
     std::mt19937 _rng;

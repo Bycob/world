@@ -141,11 +141,12 @@ Mat<double> Perlin::generatePerlinNoise2D(int size,
 }
 
 void Perlin::join(arma::Mat<double> &mat1,
-          arma::Mat<double> &mat2,
-          const Direction & direction,
-          int octaves,
-          float frequency,
-          float persistence) {
+                  arma::Mat<double> &mat2,
+                  const Direction & direction,
+                  int octaves,
+                  float frequency,
+                  float persistence,
+                  bool joinableSides) {
 
     // Vérification des dimensions de mat1 et mat2
     int length1, length2, depth1, depth2;
@@ -211,10 +212,23 @@ void Perlin::join(arma::Mat<double> &mat1,
     for (int i = 1; i <= octaves; i++) {
         Mat<double> octave((uword) length, (uword) joinDepth);
 
-        // Génération des points
+        // Génération des points aléatoires
         for (int y = joinDepth - period - 1; y >= period; y -= period) {
             for (int x = 0; x < length; x += period) {
-                octave(x, y) = _random(_rng);
+
+                // Permet à ce que la dernière période s'étende sur toute la place disponible
+                if (x >= length - period) {
+                    x = length - 1;
+                }
+
+                // Si le décor doit être juxtaposable sur le côté,
+                // on fait un schéma plus simple pour les bords
+                if (joinableSides && (x == length - 1 || x == 0)) {
+                    octave(x, y) = interpolate(0, at(x, 0), joinDepth - 1, at(x, joinDepth - 1), y);
+                }
+                else {
+                    octave(x, y) = _random(_rng);
+                }
             }
         }
 

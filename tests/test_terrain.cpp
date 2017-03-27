@@ -117,7 +117,7 @@ void testPerlin(int argc, char** argv) {
         auto perlin1 = perlin.generatePerlinNoise2D(size, 0, octaves, freq, persistence);
         auto perlin2 = perlin.generatePerlinNoise2D(size, 0, octaves, freq, persistence);
         std::cout << "Join des deux bruits de perlin..." << std::endl;
-        perlin.join(perlin1, perlin2, Direction::AXIS_X, octaves, freq, persistence);
+        perlin.join(perlin1, perlin2, Direction::AXIS_X, octaves, freq, persistence, true);
         img::Image perlin1img(perlin1);
         img::Image perlin2img(perlin2);
         perlin1img.write("tests/perlin1.png");
