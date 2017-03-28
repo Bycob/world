@@ -1,10 +1,10 @@
 #pragma once
 
+#include <worldapi/worldapidef.h>
+
 #include <map>
 #include <vector>
 #include <armadillo/armadillo>
-
-#include "../worldapidef.h"
 
 #define RESOLUTION 256
 

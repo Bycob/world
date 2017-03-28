@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../worldapidef.h"
+#include <worldapi/worldapidef.h>
+
 #include "../mesh.h"
 #include "../Material.h"
 #include "TreeSkeletton.h"

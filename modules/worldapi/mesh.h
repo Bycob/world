@@ -1,9 +1,9 @@
 #pragma once
 
+#include "worldapidef.h"
+
 #include <string>
 #include <vector>
-
-#include "worldapidef.h"
 
 enum class VType {
 	POSITION, NORMAL, TEXTURE, PARAM

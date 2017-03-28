@@ -2,10 +2,10 @@
 Il se base sur la bibliothèque matricielle armadillo.*/
 #pragma once
 
+#include <worldapi/worldapidef.h>
+
 #include <random>
 #include <armadillo/armadillo>
-
-#include <worldapi/worldapidef.h>
 
 namespace perlin {
     enum class WORLDAPI_EXPORT Direction {

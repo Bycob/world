@@ -1,8 +1,9 @@
 #pragma once
 
+#include <worldapi/worldapidef.h>
+
 #include "../GenBase.h"
 #include "../maths/Bezier.h"
-#include "../worldapidef.h"
 
 #include "TreeSkeletton.h"
 #include "Tree.h"

@@ -1,9 +1,9 @@
 #pragma once
 
+#include "worldapidef.h"
+
 #include <string>
 #include <armadillo/armadillo>
-
-#include "worldapidef.h"
 
 class WORLDAPI_EXPORT Material {
 public:

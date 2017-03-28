@@ -1,10 +1,10 @@
 #pragma once
 
+#include "worldapidef.h"
+
 #include <vector>
 #include <memory>
 #include <armadillo/armadillo>
-
-#include "worldapidef.h"
 
 #include "maths/mathshelper.h"
 

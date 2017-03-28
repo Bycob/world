@@ -1,9 +1,12 @@
+#define ARMA_USE_CXX11
+
 #include "TerrainGenerator.h"
 #include "../maths/perlin.h"
 #include "../Image.h"
 
 using namespace img;
 using namespace perlin;
+using namespace arma;
 
 TerrainGenerator::TerrainGenerator(int size) : _size(size) {
 
@@ -22,14 +25,7 @@ void TerrainGenerator::setSize(int size) {
 }
 
 void TerrainGenerator::generateSubdivisions(Terrain & terrain, int subdivideFactor, int subdivisionsCount) {
-	terrain.subdivide(subdivideFactor);
-
-    // Géneration des subdivisions à l'étage actuel
-	for (int x = 0; x < subdivideFactor; x++) {
-		for (int y = 0; y < subdivideFactor; y++) {
-			generateSubdivision(terrain, x, y);
-		}
-	}
+	generateSubdivisionLevel(terrain, subdivideFactor);
 
 	// Subdivisions d'un niveau supplémentaire (récursivité)
 	if (subdivisionsCount != 1) {
@@ -37,6 +33,17 @@ void TerrainGenerator::generateSubdivisions(Terrain & terrain, int subdivideFact
 			for (int y = 0; y < subdivideFactor; y++) {
 				generateSubdivisions(terrain.getSubterrain(x, y), subdivideFactor, subdivisionsCount - 1);
 			}
+		}
+	}
+}
+
+void TerrainGenerator::generateSubdivisionLevel(Terrain & terrain, int subdivideFactor) {
+	terrain.subdivide(subdivideFactor);
+
+	// Géneration des subdivisions à l'étage actuel
+	for (int x = 0; x < subdivideFactor; x++) {
+		for (int y = 0; y < subdivideFactor; y++) {
+			generateSubdivision(terrain, x, y);
 		}
 	}
 }
@@ -75,6 +82,8 @@ Image TerrainGenerator::generateTexture(const Terrain & terrain, const arma::Cub
 
 
 
+// GENERATEUR DE PERLIN
+
 PerlinTerrainGenerator::PerlinTerrainGenerator(int size, int offset, int octaveCount, float frequency, float persistence) :
 	TerrainGenerator(size) , _perlin(std::make_unique<Perlin>()), _offset(offset), _octaveCount(octaveCount), _frequency(frequency), _persistence(persistence) {
 
@@ -91,42 +100,79 @@ std::unique_ptr<Terrain> PerlinTerrainGenerator::generate() const {
 	return std::move(result);
 }
 
-void PerlinTerrainGenerator::generateSubdivision(Terrain & terrain, int xsub, int ysub) const {
-	//TODO Faire plusieurs tests pour voir si on obtient un meilleur résultat en changeant les paramètres.
-	Terrain & subterrain = terrain.getSubterrain(xsub, ysub);
-	_perlin->generatePerlinNoise2D(subterrain._array, _offset, _octaveCount, _frequency, _persistence);
+void PerlinTerrainGenerator::generateSubdivisionLevel(Terrain & terrain, int subdivideFactor) {
+	terrain.subdivide(subdivideFactor);
 
-	double oneTerrainLength = 1.0 / terrain._subdivideFactor;
+	// Pas de prébuffering
 
-	//on interpole avec les valeurs de l'étage du dessus.
-	for (int x = 0; x < subterrain._array.n_rows; x++) {
-		for (int y = 0; y < subterrain._array.n_cols; y++) {
-			subterrain._array(x, y) *= _subdivNoiseRatio;
-			subterrain._array(x, y) +=  (1 - _subdivNoiseRatio) * terrain.getZInterpolated(
-				((double) xsub + (double) x / subterrain._array.n_rows) / terrain._subdivideFactor,
-				((double) ysub + (double) y / subterrain._array.n_rows) / terrain._subdivideFactor, 0);
+	// Géneration des buffers pour le niveau de détail actuel
+	for (int x = 0; x < subdivideFactor; x++) {
+		for (int y = 0; y < subdivideFactor; y++) {
+			generateSubdivision(terrain, x, y);
 		}
 	}
+
+	// Conversion des buffers en terrain
+	for (int x = 0; x < subdivideFactor; x++) {
+		for (int y = 0; y < subdivideFactor; y++) {
+			adaptFromBuffer(terrain, x, y);
+		}
+	}
+
+	_buffer->clear();
+}
+
+void PerlinTerrainGenerator::generateSubdivision(Terrain & terrain, int xsub, int ysub) const {
+	//TODO Faire plusieurs tests pour voir si on obtient un meilleur résultat en changeant les paramètres.
+	Mat<double> mat(terrain.getSubterrain(xsub, ysub)._array);
+	_perlin->generatePerlinNoise2D(mat, _offset, _octaveCount, _frequency, _persistence);
+
+	double oneTerrainLength = 1.0 / terrain._subdivideFactor;
 
     // Harmonisation horizontale
 	// -> Le joint en y doit toujours se faire avant le joint en x pour n'importe quel terrain
 	if (ysub != 0) {
-		_perlin->join(terrain.getSubterrain(xsub, ysub - 1)._array,
-			          subterrain._array,
+		_perlin->join(getBuf(xsub, ysub - 1),
+			          mat,
 			          Direction::AXIS_Y,
 			          _octaveCount, _frequency, _persistence);
 		
 		if (xsub != 0) {
-			_perlin->join(terrain.getSubterrain(xsub - 1, ysub - 1)._array,
-						  terrain.getSubterrain(xsub, ysub - 1)._array,
+			_perlin->join(getBuf(xsub - 1, ysub - 1),
+						  getBuf(xsub, ysub - 1),
 						  Direction::AXIS_X,
 						  _octaveCount, _frequency, _persistence, true);
 		}
 	}
     if (xsub == terrain._subdivideFactor - 1) {
-        _perlin->join(terrain.getSubterrain(xsub - 1, ysub)._array,
-                      subterrain._array,
+        _perlin->join(getBuf(xsub - 1, ysub),
+                      mat,
                       Direction::AXIS_X,
                       _octaveCount, _frequency, _persistence, true);
     }
+
+	putBuf(mat, xsub, ysub);
+}
+
+void PerlinTerrainGenerator::adaptFromBuffer(Terrain & terrain, int xsub, int ysub) const {
+	Terrain & subterrain = terrain.getSubterrain(xsub, ysub);
+	Mat<double> & mat = getBuf(xsub, ysub);
+
+	for (int x = 0; x < subterrain._array.n_rows; x++) {
+		for (int y = 0; y < subterrain._array.n_cols; y++) {
+			subterrain._array(x, y) = mat(x, y) * _subdivNoiseRatio
+				+ (1 - _subdivNoiseRatio) * terrain.getZInterpolated(
+					((double)xsub + (double)x / subterrain._array.n_rows) / terrain._subdivideFactor,
+					((double)ysub + (double)y / subterrain._array.n_rows) / terrain._subdivideFactor, 0);
+		}
+	}
+}
+
+arma::Mat<double> & PerlinTerrainGenerator::getBuf(int x, int y) const {
+	return _buffer->at(std::make_pair(x, y));
+}
+
+void PerlinTerrainGenerator::putBuf(arma::Mat<double> &mat, int x, int y) const {
+	_buffer->emplace(std::make_pair(x, y), std::move(mat));
+	double a = mat(2, 4); // TODO remove : pour vérifier que la matrice est bien move dans la map (et pas copiée)
 }

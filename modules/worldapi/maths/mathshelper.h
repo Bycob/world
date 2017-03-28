@@ -1,11 +1,11 @@
 #pragma once
 
+#include <worldapi/worldapidef.h>
+
 #include <iostream>
 #include <algorithm>
 #include <limits>
 #include <armadillo/armadillo>
-
-#include <worldapi/worldapidef.h>
 
 namespace maths {
 

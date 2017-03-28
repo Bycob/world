@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../worldapidef.h"
+#include <worldapi/worldapidef.h>
 
 class WORLDAPI_EXPORT Biome {
 public:

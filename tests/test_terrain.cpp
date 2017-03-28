@@ -13,6 +13,7 @@
 #include <worldapi/terrain/TerrainTexmapBuilder.h>
 
 using namespace perlin;
+using namespace arma;
 
 //DECLARATIONS
 void testTinyObjLoader(int argc, char** argv);

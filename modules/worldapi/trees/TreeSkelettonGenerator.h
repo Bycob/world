@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../worldapidef.h"
-#include "../GenBase.h"
+#include <worldapi/worldapidef.h>
 
+#include "../GenBase.h"
 #include "TreeSkelettonParameters.h"
 #include "TreeSkeletton.h"
 

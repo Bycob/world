@@ -1,7 +1,8 @@
 #pragma once
 
+#include <worldapi/worldapidef.h>
+
 #include <memory>
-#include "worldapidef.h"
 
 template <class T> class GenBase {
 public:

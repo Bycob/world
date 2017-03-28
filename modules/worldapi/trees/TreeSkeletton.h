@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../worldapidef.h"
+#include <worldapi/worldapidef.h>
+
 #include "../WeightedSkeletton.h"
 
 /** Contient les information sur la branche débutée par ce noeud. */

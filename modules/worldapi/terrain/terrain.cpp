@@ -13,6 +13,7 @@
 
 using namespace maths;
 using namespace img;
+using namespace arma;
 
 Terrain::Terrain(int size) : _array(size, size) {
 

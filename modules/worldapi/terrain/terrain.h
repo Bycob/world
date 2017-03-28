@@ -1,15 +1,13 @@
 #pragma once
 
+#include <worldapi/worldapidef.h>
+
 #include <armadillo/armadillo>
 #include <vector>
 #include <memory>
 
-#include <worldapi/worldapidef.h>
-
 #include "../mesh.h"
 #include "../Image.h"
-
-using namespace arma;
 
 /* NB : Toutes les ressources générées par cette classe utilisent le COLUMN MAJOR ORDER,
 	c'est à dire que la première colonne de matrice armadillo correspondra à la première
@@ -102,7 +100,7 @@ public :
 
 private :
 
-	Mat<double> _array;
+	arma::Mat<double> _array;
 	std::unique_ptr<img::Image> _texture;
 
 	/// Indique l'étape de subdivision du terrain, c'est-à-dire le nombre

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../worldapidef.h"
+#include <worldapi/worldapidef.h>
 
 /** Génerer une worldmap est la première étape pour ensuite créer un monde
 entier. La worldmap définit les différents paramètres physiques qu'il existera
