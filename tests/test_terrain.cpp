@@ -122,6 +122,14 @@ void testPerlin(int argc, char** argv) {
         img::Image perlin2img(perlin2);
         perlin1img.write("tests/perlin1.png");
         perlin2img.write("tests/perlin2.png");
+
+		/*Terrain t1(perlin1);
+		Terrain t2(perlin2);
+
+		ObjLoader files;
+		files.addMesh(std::shared_ptr<Mesh>(t1.convertToMesh()));
+		files.addMesh(std::shared_ptr<Mesh>(t2.convertToMesh(0, 1, 0, 1.0, 1.0, 0.4)));
+		files.write("tests/join.obj");*/
     }
     catch (std::exception &e) {
         std::cerr << "Le test de join a levé une exception : " << e.what() << std::endl;

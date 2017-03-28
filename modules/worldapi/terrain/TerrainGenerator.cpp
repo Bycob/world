@@ -101,25 +101,32 @@ void PerlinTerrainGenerator::generateSubdivision(Terrain & terrain, int xsub, in
 	//on interpole avec les valeurs de l'étage du dessus.
 	for (int x = 0; x < subterrain._array.n_rows; x++) {
 		for (int y = 0; y < subterrain._array.n_cols; y++) {
-			subterrain._array(x, y) -= 0.5;
 			subterrain._array(x, y) *= _subdivNoiseRatio;
-			subterrain._array(x, y) += terrain.getZInterpolated(
+			subterrain._array(x, y) +=  (1 - _subdivNoiseRatio) * terrain.getZInterpolated(
 				((double) xsub + (double) x / subterrain._array.n_rows) / terrain._subdivideFactor,
 				((double) ysub + (double) y / subterrain._array.n_rows) / terrain._subdivideFactor, 0);
 		}
 	}
 
     // Harmonisation horizontale
-    if (xsub != 0) {
+	// -> Le joint en y doit toujours se faire avant le joint en x pour n'importe quel terrain
+	if (ysub != 0) {
+		_perlin->join(terrain.getSubterrain(xsub, ysub - 1)._array,
+			          subterrain._array,
+			          Direction::AXIS_Y,
+			          _octaveCount, _frequency, _persistence);
+		
+		if (xsub != 0) {
+			_perlin->join(terrain.getSubterrain(xsub - 1, ysub - 1)._array,
+						  terrain.getSubterrain(xsub, ysub - 1)._array,
+						  Direction::AXIS_X,
+						  _octaveCount, _frequency, _persistence, true);
+		}
+	}
+    if (xsub == terrain._subdivideFactor - 1) {
         _perlin->join(terrain.getSubterrain(xsub - 1, ysub)._array,
                       subterrain._array,
                       Direction::AXIS_X,
-                      _octaveCount, _frequency, _persistence, true);
-    }
-    if (ysub != 0) {
-        _perlin->join(terrain.getSubterrain(xsub, ysub - 1)._array,
-                      subterrain._array,
-                      Direction::AXIS_Y,
                       _octaveCount, _frequency, _persistence, true);
     }
 }

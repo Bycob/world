@@ -147,11 +147,13 @@ Mesh * Terrain::convertToMesh(float offsetX, float offsetY, float offsetZ, float
 	int i = 0;
 	for (int x = 0; x < _array.n_rows; x++) {
 		for (int y = 0; y < _array.n_cols; y++) {
+			float xd = (float)x / (_array.n_rows - 1);
+			float yd = (float)y / (_array.n_cols - 1);
 
 			Vertex vert(VType::POSITION);
 
-			vert.add((float) x / (_array.n_rows - 1) * sizeX + offsetX)
-				.add((float) y / (_array.n_cols - 1) * sizeY + offsetY)
+			vert.add(xd * sizeX + offsetX)
+				.add(yd * sizeY + offsetY)
 				.add(_array(x, y) * sizeZ + offsetZ);
 
 			mesh->addVertex(vert);
@@ -159,8 +161,8 @@ Mesh * Terrain::convertToMesh(float offsetX, float offsetY, float offsetZ, float
 
 			Vertex vertext(VType::TEXTURE);
 
-			vertext.add((float) x / _array.n_rows)
-				.add(1 - (float) y / _array.n_cols);
+			vertext.add(xd)
+				.add(1 - yd);
 
 			mesh->addVertex(vertext);
 		}

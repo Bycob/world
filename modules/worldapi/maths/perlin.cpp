@@ -225,6 +225,7 @@ void Perlin::join(arma::Mat<double> &mat1,
                 // on fait un schéma plus simple pour les bords
                 if (joinableSides && (x == length - 1 || x == 0)) {
                     octave(x, y) = interpolate(0, at(x, 0), joinDepth - 1, at(x, joinDepth - 1), y);
+					//if (x == length - 1) std::cout << "y=" << y << " : " << octave(x, y) << std::endl;
                 }
                 else {
                     octave(x, y) = _random(_rng);
@@ -258,10 +259,8 @@ void Perlin::join(arma::Mat<double> &mat1,
                     }
                     else {
                         borneX2 = borneX1 + period;
-                        if (borneX2 >= length) borneX2 = borneX1;
+                        if (borneX2 >= length) borneX2 = length - 1;
                     }
-
-
 
                     // Interpolation en x
                     const std::function<double (int)> interpolateX = [&](int borneY) -> double {
@@ -269,6 +268,7 @@ void Perlin::join(arma::Mat<double> &mat1,
                             return at(x, borneY);
                         }
                         else {
+							//if (joinableSides && x == length - 1) std::cout << "at " << borneX2 << " there is " << octave(borneX2, borneY) << std::endl;
                             return interpolate(borneX1, octave(borneX1, borneY), borneX2, octave(borneX2, borneY), x);
                         }
                     };
@@ -278,6 +278,8 @@ void Perlin::join(arma::Mat<double> &mat1,
 
                     // Interpolation en y
                     octave(x, y) = interpolate(borneY2, v2, borneY1, v1, y);
+
+					//if (joinableSides && x == length - 1 ) std::cout  << "with " << y << " we have " << borneX1 << " , " << borneX2 << " and " << borneY1 << " , " << borneY2 << " : " << octave(x, y) <<  std::endl;
                 }
             }
         }
