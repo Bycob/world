@@ -85,7 +85,10 @@ Image TerrainGenerator::generateTexture(const Terrain & terrain, const arma::Cub
 // GENERATEUR DE PERLIN
 
 PerlinTerrainGenerator::PerlinTerrainGenerator(int size, int offset, int octaveCount, float frequency, float persistence) :
-	TerrainGenerator(size) , _perlin(std::make_unique<Perlin>()), _offset(offset), _octaveCount(octaveCount), _frequency(frequency), _persistence(persistence) {
+	TerrainGenerator(size) ,
+    _perlin(std::make_unique<Perlin>()),
+    _buffer(std::make_unique<std::map<std::pair<int, int>, arma::Mat<double>>>()),
+    _offset(offset), _octaveCount(octaveCount), _frequency(frequency), _persistence(persistence) {
 
 }
 
@@ -124,7 +127,7 @@ void PerlinTerrainGenerator::generateSubdivisionLevel(Terrain & terrain, int sub
 
 void PerlinTerrainGenerator::generateSubdivision(Terrain & terrain, int xsub, int ysub) const {
 	//TODO Faire plusieurs tests pour voir si on obtient un meilleur résultat en changeant les paramètres.
-	Mat<double> mat(terrain.getSubterrain(xsub, ysub)._array);
+	Mat<double> mat = createInBuf(xsub, ysub, terrain.getSubterrain(xsub, ysub)._array);
 	_perlin->generatePerlinNoise2D(mat, _offset, _octaveCount, _frequency, _persistence);
 
 	double oneTerrainLength = 1.0 / terrain._subdivideFactor;
@@ -150,8 +153,6 @@ void PerlinTerrainGenerator::generateSubdivision(Terrain & terrain, int xsub, in
                       Direction::AXIS_X,
                       _octaveCount, _frequency, _persistence, true);
     }
-
-	putBuf(mat, xsub, ysub);
 }
 
 void PerlinTerrainGenerator::adaptFromBuffer(Terrain & terrain, int xsub, int ysub) const {
@@ -170,9 +171,4 @@ void PerlinTerrainGenerator::adaptFromBuffer(Terrain & terrain, int xsub, int ys
 
 arma::Mat<double> & PerlinTerrainGenerator::getBuf(int x, int y) const {
 	return _buffer->at(std::make_pair(x, y));
-}
-
-void PerlinTerrainGenerator::putBuf(arma::Mat<double> &mat, int x, int y) const {
-	_buffer->emplace(std::make_pair(x, y), std::move(mat));
-	double a = mat(2, 4); // TODO remove : pour vérifier que la matrice est bien move dans la map (et pas copiée)
 }

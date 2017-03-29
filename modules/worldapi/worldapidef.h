@@ -9,5 +9,3 @@
 #else /* defined (_WIN32) */
 #define WORLDAPI_EXPORT
 #endif
-
-#define ARMA_USE_CXX11

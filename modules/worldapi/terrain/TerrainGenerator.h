@@ -63,7 +63,12 @@ private :
 
 	// -------
 	arma::Mat<double> & getBuf(int x, int y) const;
-	// <!> déplace la matrice (std::move)
-	void putBuf(arma::Mat<double> &mat, int x, int y) const;
+
+	template <typename... Args>
+	arma::Mat<double> & createInBuf(int x, int y, Args&&... args) const {
+        _buffer->emplace(std::make_pair(x, y), arma::Mat<double>(args...));
+		return getBuf(x, y);
+    }
+
 	void adaptFromBuffer(Terrain & terrain, int xsub, int ysub) const;
 };
