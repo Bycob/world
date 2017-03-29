@@ -81,7 +81,7 @@ void testPerlin(int argc, char** argv) {
 
 	//ANALYSE DES ARGUMENTS
 
-	int size = 257;
+	int size = 129;
 	int octaves = 4;
 	int freq = 4;
 	float persistence = 0.3;
