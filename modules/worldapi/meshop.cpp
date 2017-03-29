@@ -5,14 +5,14 @@
 using namespace maths;
 
 void MeshOps::recalculateNormals(Mesh & mesh) {
-	auto vertList = mesh.getVertices(VType::POSITION);
+	auto vertList = mesh.getVertices<VType::POSITION>();
 	auto faceList = mesh.getFaces();
 
-	std::vector<vec3d> normalSum(mesh.getCount(VType::POSITION), vec3d());
-	std::vector<int> normalCount(mesh.getCount(VType::POSITION), 0);
+	std::vector<vec3d> normalSum(vertList.size(), vec3d());
+	std::vector<int> normalCount(vertList.size(), 0);
 
 	for (Face & face : faceList) {
-		auto faceVertices = face.getIDs(VType::POSITION);
+		auto faceVertices = face.getIDs<VType::POSITION>();
 		int count = face.vertexCount();
 
 		for (int j = 0; j < count; j++) {
@@ -36,12 +36,12 @@ void MeshOps::recalculateNormals(Mesh & mesh) {
 			normalCount.at(id0)++;
 
 			// Ajout de la normale à la face
-			face.setID(VType::NORMAL, j, id0);
+			face.setID<VType::NORMAL>(j, id0);
 		}
 	}
 
 	// Ajout de toutes les normales au mesh
-	mesh.clearVertices(VType::NORMAL);
+	mesh.clearVertices<VType::NORMAL>();
 
 	for (int i = 0; i < normalSum.size(); i++) {
 		int count = normalCount.at(i);
@@ -54,7 +54,7 @@ void MeshOps::recalculateNormals(Mesh & mesh) {
 			normal = vec3d(0, 0, 1);
 		}
 		
-		Vertex vn(VType::NORMAL);
+		Vertex<VType::NORMAL> vn;
 		vn.add((float) normal.x).add((float) normal.y).add((float) normal.z);
 		mesh.addVertex(vn);
 	}

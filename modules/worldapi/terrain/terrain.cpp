@@ -146,9 +146,9 @@ Mesh * Terrain::convertToMesh(float offsetX, float offsetY, float offsetZ, float
 
 	// Réservation de mémoire
 	int vertCount = _array.n_rows * _array.n_cols;
-	mesh->allocate(VType::POSITION, vertCount);
-	mesh->allocate(VType::TEXTURE, vertCount);
-	mesh->allocate(VType::NORMAL, vertCount);
+	mesh->allocateVertices<VType::POSITION>(vertCount);
+	mesh->allocateVertices<VType::TEXTURE>(vertCount);
+	mesh->allocateVertices<VType::NORMAL>(vertCount);
 
 	//Vertices
 	int i = 0;
@@ -157,7 +157,7 @@ Mesh * Terrain::convertToMesh(float offsetX, float offsetY, float offsetZ, float
 			float xd = (float)x / (_array.n_rows - 1);
 			float yd = (float)y / (_array.n_cols - 1);
 
-			Vertex vert(VType::POSITION);
+			Vertex<VType::POSITION> vert;
 
 			vert.add(xd * sizeX + offsetX)
 				.add(yd * sizeY + offsetY)
@@ -166,7 +166,7 @@ Mesh * Terrain::convertToMesh(float offsetX, float offsetY, float offsetZ, float
 			mesh->addVertex(vert);
 
 
-			Vertex vertext(VType::TEXTURE);
+			Vertex<VType::TEXTURE> vertext;
 
 			vertext.add(xd)
 				.add(1 - yd);

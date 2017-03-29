@@ -42,7 +42,7 @@ void TreeGenerator::fillBezier(Mesh &trunkMesh, const BezierCurve & curve, int d
 	double startWeight, double endWeight, int mergePos) const {
 
 	double segmentCountd = (double)_segmentCount;
-	auto v0 = trunkMesh.getVertices(VType::POSITION).at(mergePos).getValues();
+	auto v0 = trunkMesh.getVertices<VType::POSITION>().at(mergePos).getValues();
 	vec3d c0 = curve.getPointAt(0);
 	vec3d oldAx(v0[0] - c0.x, v0[1] - c0.y, v0[2] - c0.z);
 
@@ -79,7 +79,7 @@ void TreeGenerator::fillBezier(Mesh &trunkMesh, const BezierCurve & curve, int d
 
 			vec3d pt = ax * (cos(angle) * localRadius) + ay * (sin(angle) * localRadius);
 
-			Vertex vert(VType::POSITION);
+			Vertex<VType::POSITION> vert;
 			vert.add(pt.x + ptT.x).add(pt.y + ptT.y).add(pt.z + ptT.z);
 
 			// TODO C - Détermination de la coordonnée de texture
@@ -94,7 +94,7 @@ void TreeGenerator::fillBezier(Mesh &trunkMesh, const BezierCurve & curve, int d
 			int j2 = maths::mod(j1 - 1, _segmentCount);
 
 			// Les deux vertices appartenant au cercle traité actuellement.
-			const int v1 = trunkMesh.getCount(VType::POSITION) - 1;
+			const int v1 = trunkMesh.getCount<VType::POSITION>() - 1;
 			const int v2 = j == 0 ? v1 - 1 + _segmentCount : v1 - 1;
 			// Les deux vertices appartenant au cercle précédent.
 			const int v4 = i == 1 ? mergePos + j1 : v1 - j + j1 - _segmentCount;
@@ -181,7 +181,7 @@ void TreeGenerator::populateTrunkMesh(Mesh & trunkMesh, const Node<TreeInfo>* no
 			const double w2 = avgChildrenWeight + (mergeLenChild / info._size) * (node->getWeight() - avgChildrenWeight);
 			mergeWeight1 = w2;
 
-			fillBezier(trunkMesh, curve, divider, w1, w2, trunkMesh.getCount(VType::POSITION) - _segmentCount);
+			fillBezier(trunkMesh, curve, divider, w1, w2, trunkMesh.getCount<VType::POSITION>() - _segmentCount);
 		}
 		else {
 			const double localRadius = sqrt(node->getWeight()) * 0.15;
@@ -200,7 +200,7 @@ void TreeGenerator::populateTrunkMesh(Mesh & trunkMesh, const Node<TreeInfo>* no
 				const double x1 = x0 * cosPhi * cosTheta - y0 * sinTheta;
 				const double y1 = x0 * cosPhi * sinTheta + y0 * cosTheta;
 
-				Vertex vert(VType::POSITION);
+				Vertex<VType::POSITION> vert;
 				vert.add(x1 + pos.x).add(y1 + pos.y).add(z1 + pos.z);
 
 				// TODO B - Détermination de la normale
@@ -227,7 +227,7 @@ void TreeGenerator::populateTrunkMesh(Mesh & trunkMesh, const Node<TreeInfo>* no
 	// -> Cas des autres étages
 
 	// On retient la position de la dernière corolle du parent pour lier tous les enfants.
-	const int mark = trunkMesh.getCount(VType::POSITION) - _segmentCount;
+	const int mark = trunkMesh.getCount<VType::POSITION>() - _segmentCount;
 	// Origine commune côté parent
 	const vec3d parentSide = pos - (pos - parentPos) * (mergeLenChild / info._size);
 	const vec3d parentDirection = (pos - parentPos) * (0.5 * mergeLenChild / info._size);

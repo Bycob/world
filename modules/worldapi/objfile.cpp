@@ -51,7 +51,7 @@ void ObjLoader::read(bool triangulate) {
 		assert(positions.size() % 3 == 0);
 
 		for (int i = 0; i < positions.size() / 3; i++) {
-			Vertex vert(VType::POSITION);
+			Vertex<VType::POSITION> vert;
 
 			vert.add(positions.at(i * 3))
 				.add(positions.at(i * 3 + 1))
@@ -65,7 +65,7 @@ void ObjLoader::read(bool triangulate) {
 		assert(normals.size() % 3 == 0);
 
 		for (int i = 0; i < normals.size() / 3; i++) {
-			Vertex vert(VType::NORMAL);
+			Vertex<VType::NORMAL> vert;
 
 			vert.add(normals.at(i * 3))
 				.add(normals.at(i * 3 + 1))
@@ -79,7 +79,7 @@ void ObjLoader::read(bool triangulate) {
 		assert(textures.size() % 2 == 0);
 
 		for (int i = 0; i < textures.size() / 2; i++) {
-			Vertex vert(VType::TEXTURE);
+			Vertex<VType::TEXTURE> vert;
 
 			vert.add(textures.at(i * 2))
 				.add(textures.at(i * 2 + 1));
@@ -96,8 +96,8 @@ void ObjLoader::read(bool triangulate) {
 				int indice = shape.mesh.indices.at(i);
 
 				//Dans tinyObjLoader, l'indice est le même pour tout, et les vertices sont dupliquées.
-				int vt = mesh.getVertices(VType::TEXTURE).size() > indice ? indice : -1;
-				int vn = mesh.getVertices(VType::NORMAL).size() > indice ? indice : -1;
+				int vt = mesh.getVertices<VType::TEXTURE>().size() > indice ? indice : -1;
+				int vn = mesh.getVertices<VType::NORMAL>().size() > indice ? indice : -1;
 
 				face.addVertex(indice, vn, vt);
 			}
@@ -143,6 +143,16 @@ void ObjLoader::write(std::string filename) {
 	mtlfile.close();
 }
 
+// Fonctions utiles
+template <VType T> void writeValues(std::ostream & file, const Vertex<T> & vert) {
+	const std::vector<float> & values = vert.getValues();
+	for (const float & value : values) {
+		file << " " << value;
+	}
+
+	file << std::endl;
+}
+
 void ObjLoader::write(std::ostream & objstream, std::ostream & mtlstream) {
 	int meshCount = 1;
 	int verticesRead = 0;
@@ -175,41 +185,31 @@ void ObjLoader::write(std::ostream & objstream, std::ostream & mtlstream) {
 		int normalOffset = normalRead;
 		int texCoordOffset = texCoordRead;
 
-		// Lambda pour écrire les valeurs
-		auto writeValues = [&file = objstream](const Vertex & vert) {
-			const std::vector<float> & values = vert.getValues();
-			for (const float & value : values) {
-				file << " " << value;
-			}
-
-			file << std::endl;
-		};
-
 		// Ecriture des vertices
-		const std::vector<Vertex> & vertList = mesh->getVertices(VType::POSITION);
+		const std::vector<Vertex<VType::POSITION>> & vertList = mesh->getVertices<VType::POSITION>();
 
-		for (const Vertex & vert : vertList) {
+		for (const Vertex<VType::POSITION> & vert : vertList) {
 			verticesRead++;
 			objstream << "v";
-			writeValues(vert);
+			writeValues(objstream, vert);
 		}
 
 		// Ecriture des normales
-		const std::vector<Vertex> & normalList = mesh->getVertices(VType::NORMAL);
+		const std::vector<Vertex<VType::NORMAL>> & normalList = mesh->getVertices<VType::NORMAL>();
 
-		for (const Vertex & normal : normalList) {
+		for (const Vertex<VType::NORMAL> & normal : normalList) {
 			normalRead++;
 			objstream << "vn";
-			writeValues(normal);
+			writeValues(objstream, normal);
 		}
 
 		// Ecriture des coordonnées de texture
-		const std::vector<Vertex> & texCoordList = mesh->getVertices(VType::TEXTURE);
+		const std::vector<Vertex<VType::TEXTURE>> & texCoordList = mesh->getVertices<VType::TEXTURE>();
 
-		for (const Vertex & texCoord : texCoordList) {
+		for (const Vertex<VType::TEXTURE> & texCoord : texCoordList) {
 			texCoordRead++;
 			objstream << "vt";
-			writeValues(texCoord);
+			writeValues(objstream, texCoord);
 		}
 
 		// Ecriture des faces
@@ -218,9 +218,9 @@ void ObjLoader::write(std::ostream & objstream, std::ostream & mtlstream) {
 		for (const Face & face : faceList) {
 			objstream << "f";
 
-			const std::vector<int> vertIndices = face.getIDs(VType::POSITION),
-				texCoordIndices = face.getIDs(VType::TEXTURE),
-				normalIndices = face.getIDs(VType::NORMAL);
+			const std::vector<int> vertIndices = face.getIDs<VType::POSITION>(),
+				texCoordIndices = face.getIDs<VType::TEXTURE>(),
+				normalIndices = face.getIDs<VType::NORMAL>();
 
 			for (int i = 0; i < vertIndices.size(); i++) {
 				objstream << " " << vertIndices[i] + verticesOffset + 1 << "/";
