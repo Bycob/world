@@ -156,7 +156,7 @@ void testPerlin(int argc, char** argv) {
 
 	//ECRITURE DU FICHIER OBJ DU TERRAIN
 
-	std::cout << "ecriture du mesh du terrain" << std::endl;
+	std::cout << "Conversion du terrain en mesh... " << std::endl;
 	ObjLoader file;
 	std::shared_ptr<Mesh> mesh = std::shared_ptr<Mesh>(terrain->convertToMesh());
 	file.addMesh(mesh);
@@ -165,6 +165,8 @@ void testPerlin(int argc, char** argv) {
 	material->setMapKd("test2_tex.png");
 	material->setKs(0, 0, 0);
 	file.addMaterial(material);
+
+	std::cout << "Ecriture du mesh dans un fichier .obj..." << std::endl;
 
 	try {
 		file.write("tests/terrain.obj");
@@ -222,7 +224,7 @@ void testPerlin(int argc, char** argv) {
 	generator.generateSubdivisions(*terrain, 4, 1);
 	std::cout << "génération terminée !" << std::endl;
 
-	std::cout << "Ecriture du fichier obj d'un sous-terrain..." << std::endl;
+	std::cout << "Conversion en mesh de 4 sous-terrains..." << std::endl;
 	ObjLoader subterrainFile;
 	Terrain & subterrain = terrain->getSubterrain(0, 0);
 	std::shared_ptr<Mesh> submesh = std::shared_ptr<Mesh>(subterrain.convertToSubmesh());
@@ -230,6 +232,8 @@ void testPerlin(int argc, char** argv) {
     subterrainFile.addMesh(std::shared_ptr<Mesh>(terrain->getSubterrain(1, 0).convertToSubmesh()));
     subterrainFile.addMesh(std::shared_ptr<Mesh>(terrain->getSubterrain(1, 1).convertToSubmesh()));
     subterrainFile.addMesh(std::shared_ptr<Mesh>(terrain->getSubterrain(0, 1).convertToSubmesh()));
+	
+	std::cout << "Ecriture du fichier .obj..." << std::endl;
 	subterrainFile.write("tests/subterrain");
 	std::cout << "Fichier écrit !" << std::endl;
 	
