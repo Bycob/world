@@ -1,26 +1,25 @@
-// Copyright (C) 2008-2016 National ICT Australia (NICTA)
+// Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
+// Copyright 2008-2016 National ICT Australia (NICTA)
 // 
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
-// -------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
 // 
-// Written by Conrad Sanderson - http://conradsanderson.id.au
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ------------------------------------------------------------------------
 
 
 //! \addtogroup fn_sum
 //! @{
 
 
-//! \brief
-//! Delayed sum of elements of a matrix along a specified dimension (either rows or columns).
-//! The result is stored in a dense matrix that has either one column or one row.
-//! For dim = 0, find the sum of each column (traverse across rows)
-//! For dim = 1, find the sum of each row (traverse across columns)
-//! The default is dim = 0.
-//! NOTE: the dim argument is different than in Matlab/Octave.
-
 template<typename T1>
+arma_warn_unused
 arma_inline
 const Op<T1, op_sum>
 sum
@@ -41,6 +40,7 @@ sum
 
 
 template<typename T1>
+arma_warn_unused
 arma_inline
 const Op<T1, op_sum>
 sum
@@ -58,11 +58,9 @@ sum
 
 
 
-//! \brief
-//! Immediate 'sum all values' operation for expressions which resolve to a vector 
 template<typename T1>
-inline
 arma_warn_unused
+inline
 typename T1::elem_type
 sum
   (
@@ -80,13 +78,9 @@ sum
 
 
 
-//! \brief
-//! Immediate 'sum all values' operation,
-//! invoked, for example, by: sum(sum(A))
-
 template<typename T1>
-inline
 arma_warn_unused
+inline
 typename T1::elem_type
 sum(const Op<T1, op_sum>& in)
   {
@@ -99,6 +93,7 @@ sum(const Op<T1, op_sum>& in)
 
 
 template<typename T1>
+arma_warn_unused
 arma_inline
 const Op<Op<T1, op_sum>, op_sum>
 sum(const Op<T1, op_sum>& in, const uword dim)
@@ -111,8 +106,8 @@ sum(const Op<T1, op_sum>& in, const uword dim)
 
 
 template<typename T>
-arma_inline
 arma_warn_unused
+arma_inline
 const typename arma_scalar_only<T>::result &
 sum(const T& x)
   {
@@ -123,6 +118,7 @@ sum(const T& x)
 
 //! sum of cube
 template<typename T1>
+arma_warn_unused
 arma_inline
 const OpCube<T1, op_sum>
 sum
@@ -140,6 +136,7 @@ sum
 
 //! sum of sparse object
 template<typename T1>
+arma_warn_unused
 inline
 typename
 enable_if2
@@ -158,6 +155,7 @@ sum(const T1& x)
 
 
 template<typename T1>
+arma_warn_unused
 inline
 typename
 enable_if2
@@ -175,8 +173,8 @@ sum(const T1& x, const uword dim = 0)
 
 
 template<typename T1>
-inline
 arma_warn_unused
+inline
 typename T1::elem_type
 sum(const SpOp<T1, spop_sum>& in)
   {
@@ -189,6 +187,7 @@ sum(const SpOp<T1, spop_sum>& in)
 
 
 template<typename T1>
+arma_warn_unused
 arma_inline
 const SpOp<SpOp<T1, spop_sum>, spop_sum>
 sum(const SpOp<T1, spop_sum>& in, const uword dim)

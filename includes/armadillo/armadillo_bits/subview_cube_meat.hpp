@@ -1,11 +1,17 @@
-// Copyright (C) 2008-2016 National ICT Australia (NICTA)
+// Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
+// Copyright 2008-2016 National ICT Australia (NICTA)
 // 
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
-// -------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
 // 
-// Written by Conrad Sanderson - http://conradsanderson.id.au
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ------------------------------------------------------------------------
 
 
 //! \addtogroup subview_cube
@@ -579,7 +585,7 @@ subview_cube<eT>::operator= (const Base<eT,T1>& in)
     {
     if(arma_config::debug == true)
       {
-      arma_stop( arma_incompat_size_string(t, x, "copy into subcube") );
+      arma_stop_logic_error( arma_incompat_size_string(t, x, "copy into subcube") );
       }
     }
   }
@@ -682,7 +688,7 @@ subview_cube<eT>::operator+= (const Base<eT,T1>& in)
     {
     if(arma_config::debug == true)
       {
-      arma_stop( arma_incompat_size_string(t, x, "addition") );
+      arma_stop_logic_error( arma_incompat_size_string(t, x, "addition") );
       }
     }
   }
@@ -785,7 +791,7 @@ subview_cube<eT>::operator-= (const Base<eT,T1>& in)
     {
     if(arma_config::debug == true)
       {
-      arma_stop( arma_incompat_size_string(t, x, "subtraction") );
+      arma_stop_logic_error( arma_incompat_size_string(t, x, "subtraction") );
       }
     }
   }
@@ -888,7 +894,7 @@ subview_cube<eT>::operator%= (const Base<eT,T1>& in)
     {
     if(arma_config::debug == true)
       {
-      arma_stop( arma_incompat_size_string(t, x, "element-wise multiplication") );
+      arma_stop_logic_error( arma_incompat_size_string(t, x, "element-wise multiplication") );
       }
     }
   }
@@ -991,7 +997,7 @@ subview_cube<eT>::operator/= (const Base<eT,T1>& in)
     {
     if(arma_config::debug == true)
       {
-      arma_stop( arma_incompat_size_string(t, x, "element-wise division") );
+      arma_stop_logic_error( arma_incompat_size_string(t, x, "element-wise division") );
       }
     }
   }
@@ -1187,6 +1193,28 @@ subview_cube<eT>::imbue(functor F)
 template<typename eT>
 inline
 void
+subview_cube<eT>::replace(const eT old_val, const eT new_val)
+  {
+  arma_extra_debug_sigprint();
+  
+  const uword local_n_rows   = n_rows;
+  const uword local_n_cols   = n_cols;
+  const uword local_n_slices = n_slices;
+  
+  for(uword slice = 0; slice < local_n_slices; ++slice)
+    {
+    for(uword col = 0; col < local_n_cols; ++col)
+      {
+      arrayops::replace(slice_colptr(slice,col), local_n_rows, old_val, new_val);
+      }
+    }
+  }
+
+
+
+template<typename eT>
+inline
+void
 subview_cube<eT>::fill(const eT val)
   {
   arma_extra_debug_sigprint();
@@ -1355,70 +1383,6 @@ subview_cube<eT>::has_nan() const
     }
   
   return false;
-  }
-
-
-
-template<typename eT>
-inline
-arma_warn_unused
-eT
-subview_cube<eT>::min() const
-  {
-  arma_extra_debug_sigprint();
-  
-  if(n_elem == 0)
-    {
-    arma_debug_check(true, "subview_cube::min(): object has no elements");
-    
-    return Datum<eT>::nan;
-    }
-  
-  const uword local_n_rows   = n_rows;
-  const uword local_n_cols   = n_cols;
-  const uword local_n_slices = n_slices;
-  
-  eT min_val = at(0,0,0);
-  
-  for(uword si=0; si < local_n_slices; ++si)
-  for(uword ci=0; ci < local_n_cols;   ++ci)
-    {
-    min_val = (std::min)( min_val, op_min::direct_min(slice_colptr(si,ci), local_n_rows) );
-    }
-  
-  return min_val;
-  }
-
-
-
-template<typename eT>
-inline
-arma_warn_unused
-eT
-subview_cube<eT>::max() const
-  {
-  arma_extra_debug_sigprint();
-  
-  if(n_elem == 0)
-    {
-    arma_debug_check(true, "subview_cube::max(): object has no elements");
-    
-    return Datum<eT>::nan;
-    }
-  
-  const uword local_n_rows   = n_rows;
-  const uword local_n_cols   = n_cols;
-  const uword local_n_slices = n_slices;
-  
-  eT max_val = at(0,0,0);
-  
-  for(uword si=0; si < local_n_slices; ++si)
-  for(uword ci=0; ci < local_n_cols;   ++ci)
-    {
-    max_val = (std::max)( max_val, op_max::direct_max(slice_colptr(si,ci), local_n_rows) );
-    }
-  
-  return max_val;
   }
 
 
@@ -1913,7 +1877,7 @@ subview_cube<eT>::plus_inplace(Mat<eT>& out, const subview_cube<eT>& in)
         <<  in_n_rows << 'x' <<  in_n_cols << 'x' << in_n_slices << " cube interpreted as "
         <<  in_n_rows << 'x' <<  in_n_cols << " matrix";
       
-      arma_stop(tmp.str());
+      arma_stop_logic_error(tmp.str());
       }
     
     for(uword col=0; col < in_n_cols; ++col)
@@ -2014,7 +1978,7 @@ subview_cube<eT>::minus_inplace(Mat<eT>& out, const subview_cube<eT>& in)
         <<  in_n_rows << 'x' <<  in_n_cols << 'x' << in_n_slices << " cube interpreted as "
         <<  in_n_rows << 'x' <<  in_n_cols << " matrix";
       
-      arma_stop(tmp.str());
+      arma_stop_logic_error(tmp.str());
       }
     
     for(uword col=0; col < in_n_cols; ++col)
@@ -2115,7 +2079,7 @@ subview_cube<eT>::schur_inplace(Mat<eT>& out, const subview_cube<eT>& in)
         <<  in_n_rows << 'x' <<  in_n_cols << 'x' << in_n_slices << " cube interpreted as "
         <<  in_n_rows << 'x' <<  in_n_cols << " matrix";
       
-      arma_stop(tmp.str());
+      arma_stop_logic_error(tmp.str());
       }
     
     for(uword col=0; col < in_n_cols; ++col)
@@ -2216,7 +2180,7 @@ subview_cube<eT>::div_inplace(Mat<eT>& out, const subview_cube<eT>& in)
         <<  in_n_rows << 'x' <<  in_n_cols << 'x' << in_n_slices << " cube interpreted as "
         <<  in_n_rows << 'x' <<  in_n_cols << " matrix";
       
-      arma_stop(tmp.str());
+      arma_stop_logic_error(tmp.str());
       }
     
     for(uword col=0; col < in_n_cols; ++col)

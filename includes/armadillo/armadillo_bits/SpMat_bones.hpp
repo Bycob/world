@@ -1,13 +1,17 @@
-// Copyright (C) 2008-2015 National ICT Australia (NICTA)
+// Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
+// Copyright 2008-2016 National ICT Australia (NICTA)
 // 
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
-// -------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
 // 
-// Written by Conrad Sanderson - http://conradsanderson.id.au
-// Written by Ryan Curtin
-// Written by Matthew Amidon
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ------------------------------------------------------------------------
 
 
 //! \addtogroup SpMat
@@ -290,6 +294,8 @@ class SpMat : public SpBase< eT, SpMat<eT> >
   inline void  reshape(const SizeMat& s);
   inline void  reshape(const uword in_rows, const uword in_cols, const uword dim);  // this form is deprecated: don't use it
   
+  inline const SpMat& replace(const eT old_val, const eT new_val);
+  
   inline const SpMat& zeros();
   inline const SpMat& zeros(const uword in_elem);
   inline const SpMat& zeros(const uword in_rows, const uword in_cols);
@@ -414,7 +420,7 @@ class SpMat : public SpBase< eT, SpMat<eT> >
     inline iterator(SpMat& in_M, uword initial_pos = 0) : const_iterator(in_M, initial_pos) { }
     inline iterator(SpMat& in_M, uword in_row, uword in_col) : const_iterator(in_M, in_row, in_col) { }
     inline iterator(SpMat& in_M, uword in_row, uword in_col, uword in_pos) : const_iterator(in_M, in_row, in_col, in_pos) { }
-    inline iterator(const const_iterator& other) : const_iterator(other) { }
+    inline iterator(const iterator& other) : const_iterator(other) { }
     
     inline arma_hot SpValProxy<SpMat<eT> > operator*();
     

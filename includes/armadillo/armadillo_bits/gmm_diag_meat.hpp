@@ -1,11 +1,17 @@
-// Copyright (C) 2014-2016 National ICT Australia (NICTA)
+// Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
+// Copyright 2008-2016 National ICT Australia (NICTA)
 // 
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
-// -------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
 // 
-// Written by Conrad Sanderson - http://conradsanderson.id.au
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ------------------------------------------------------------------------
 
 
 //! \addtogroup gmm_diag
@@ -114,7 +120,7 @@ gmm_diag<eT>::set_params(const Base<eT,T1>& in_means_expr, const Base<eT,T2>& in
   
   arma_debug_check
     (
-    (size(in_means) != size(in_dcovs)) || (in_hefts.n_cols != in_means.n_cols) || (in_hefts.n_rows != 1),
+    (arma::size(in_means) != arma::size(in_dcovs)) || (in_hefts.n_cols != in_means.n_cols) || (in_hefts.n_rows != 1),
     "gmm_diag::set_params(): given parameters have inconsistent and/or wrong sizes"
     );
   
@@ -286,8 +292,8 @@ gmm_diag<eT>::save(const std::string name) const
     Q.slice(0).row(0) = hefts;
     Q.slice(1).row(0).zeros();  // reserved for future use
     
-    Q.slice(0).submat(1, 0, size(means)) = means;
-    Q.slice(1).submat(1, 0, size(dcovs)) = dcovs;
+    Q.slice(0).submat(1, 0, arma::size(means)) = means;
+    Q.slice(1).submat(1, 0, arma::size(dcovs)) = dcovs;
     }
   
   const bool status = Q.save(name, arma_binary);

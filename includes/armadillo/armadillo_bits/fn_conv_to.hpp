@@ -1,11 +1,17 @@
-// Copyright (C) 2008-2015 National ICT Australia (NICTA)
+// Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
+// Copyright 2008-2016 National ICT Australia (NICTA)
 // 
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
-// -------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
 // 
-// Written by Conrad Sanderson - http://conradsanderson.id.au
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ------------------------------------------------------------------------
 
 
 //! \addtogroup fn_conv_to
@@ -37,6 +43,7 @@ class conv_to
 
 template<typename out_eT>
 template<typename in_eT, typename T1>
+arma_warn_unused
 inline
 out_eT
 conv_to<out_eT>::from(const Base<in_eT, T1>& in, const typename arma_not_cx<in_eT>::result* junk)
@@ -50,13 +57,14 @@ conv_to<out_eT>::from(const Base<in_eT, T1>& in, const typename arma_not_cx<in_e
   
   arma_debug_check( (P.get_n_elem() != 1), "conv_to(): given object doesn't have exactly one element" );
   
-  return out_eT(Proxy<T1>::prefer_at_accessor ? P.at(0,0) : P[0]);
+  return out_eT(Proxy<T1>::use_at ? P.at(0,0) : P[0]);
   }
 
 
 
 template<typename out_eT>
 template<typename in_eT, typename T1>
+arma_warn_unused
 inline
 out_eT
 conv_to<out_eT>::from(const Base<in_eT, T1>& in, const typename arma_cx_only<in_eT>::result* junk)
@@ -72,7 +80,7 @@ conv_to<out_eT>::from(const Base<in_eT, T1>& in, const typename arma_cx_only<in_
   
   out_eT out;
   
-  arrayops::convert_cx_scalar(out, (Proxy<T1>::prefer_at_accessor ? P.at(0,0) : P[0]));
+  arrayops::convert_cx_scalar(out, (Proxy<T1>::use_at ? P.at(0,0) : P[0]));
   
   return out;
   }
@@ -81,6 +89,7 @@ conv_to<out_eT>::from(const Base<in_eT, T1>& in, const typename arma_cx_only<in_
 
 template<typename out_eT>
 template<typename in_eT, typename T1>
+arma_warn_unused
 inline
 out_eT
 conv_to<out_eT>::from(const BaseCube<in_eT, T1>& in, const typename arma_not_cx<in_eT>::result* junk)
@@ -94,13 +103,14 @@ conv_to<out_eT>::from(const BaseCube<in_eT, T1>& in, const typename arma_not_cx<
   
   arma_debug_check( (P.get_n_elem() != 1), "conv_to(): given object doesn't have exactly one element" );
   
-  return out_eT(ProxyCube<T1>::prefer_at_accessor ? P.at(0,0,0) : P[0]);
+  return out_eT(ProxyCube<T1>::use_at ? P.at(0,0,0) : P[0]);
   }
 
 
 
 template<typename out_eT>
 template<typename in_eT, typename T1>
+arma_warn_unused
 inline
 out_eT
 conv_to<out_eT>::from(const BaseCube<in_eT, T1>& in, const typename arma_cx_only<in_eT>::result* junk)
@@ -116,7 +126,7 @@ conv_to<out_eT>::from(const BaseCube<in_eT, T1>& in, const typename arma_cx_only
   
   out_eT out;
   
-  arrayops::convert_cx_scalar(out, (ProxyCube<T1>::prefer_at_accessor ? P.at(0,0,0) : P[0]));
+  arrayops::convert_cx_scalar(out, (ProxyCube<T1>::use_at ? P.at(0,0,0) : P[0]));
   
   return out;
   }
@@ -151,6 +161,7 @@ class conv_to< Mat<out_eT> >
 
 template<typename out_eT>
 template<typename in_eT, typename T1>
+arma_warn_unused
 inline
 Mat<out_eT>
 conv_to< Mat<out_eT> >::from(const Base<in_eT, T1>& in, const typename arma_not_cx<in_eT>::result* junk)
@@ -172,6 +183,7 @@ conv_to< Mat<out_eT> >::from(const Base<in_eT, T1>& in, const typename arma_not_
 
 template<typename out_eT>
 template<typename in_eT, typename T1>
+arma_warn_unused
 inline
 Mat<out_eT>
 conv_to< Mat<out_eT> >::from(const Base<in_eT, T1>& in, const typename arma_cx_only<in_eT>::result* junk)
@@ -193,6 +205,7 @@ conv_to< Mat<out_eT> >::from(const Base<in_eT, T1>& in, const typename arma_cx_o
 
 template<typename out_eT>
 template<typename T1>
+arma_warn_unused
 inline
 Mat<out_eT>
 conv_to< Mat<out_eT> >::from(const SpBase<out_eT, T1>& in)
@@ -206,6 +219,7 @@ conv_to< Mat<out_eT> >::from(const SpBase<out_eT, T1>& in)
 
 template<typename out_eT>
 template<typename in_eT>
+arma_warn_unused
 inline
 Mat<out_eT>
 conv_to< Mat<out_eT> >::from(const std::vector<in_eT>& in, const typename arma_not_cx<in_eT>::result* junk)
@@ -229,6 +243,7 @@ conv_to< Mat<out_eT> >::from(const std::vector<in_eT>& in, const typename arma_n
 
 template<typename out_eT>
 template<typename in_eT>
+arma_warn_unused
 inline
 Mat<out_eT>
 conv_to< Mat<out_eT> >::from(const std::vector<in_eT>& in, const typename arma_cx_only<in_eT>::result* junk)
@@ -275,6 +290,7 @@ class conv_to< Row<out_eT> >
 
 template<typename out_eT>
 template<typename in_eT, typename T1>
+arma_warn_unused
 inline
 Row<out_eT>
 conv_to< Row<out_eT> >::from(const Base<in_eT, T1>& in, const typename arma_not_cx<in_eT>::result* junk)
@@ -298,6 +314,7 @@ conv_to< Row<out_eT> >::from(const Base<in_eT, T1>& in, const typename arma_not_
 
 template<typename out_eT>
 template<typename in_eT, typename T1>
+arma_warn_unused
 inline
 Row<out_eT>
 conv_to< Row<out_eT> >::from(const Base<in_eT, T1>& in, const typename arma_cx_only<in_eT>::result* junk)
@@ -321,6 +338,7 @@ conv_to< Row<out_eT> >::from(const Base<in_eT, T1>& in, const typename arma_cx_o
 
 template<typename out_eT>
 template<typename in_eT>
+arma_warn_unused
 inline
 Row<out_eT>
 conv_to< Row<out_eT> >::from(const std::vector<in_eT>& in, const typename arma_not_cx<in_eT>::result* junk)
@@ -344,6 +362,7 @@ conv_to< Row<out_eT> >::from(const std::vector<in_eT>& in, const typename arma_n
 
 template<typename out_eT>
 template<typename in_eT>
+arma_warn_unused
 inline
 Row<out_eT>
 conv_to< Row<out_eT> >::from(const std::vector<in_eT>& in, const typename arma_cx_only<in_eT>::result* junk)
@@ -390,6 +409,7 @@ class conv_to< Col<out_eT> >
 
 template<typename out_eT>
 template<typename in_eT, typename T1>
+arma_warn_unused
 inline
 Col<out_eT>
 conv_to< Col<out_eT> >::from(const Base<in_eT, T1>& in, const typename arma_not_cx<in_eT>::result* junk)
@@ -413,6 +433,7 @@ conv_to< Col<out_eT> >::from(const Base<in_eT, T1>& in, const typename arma_not_
 
 template<typename out_eT>
 template<typename in_eT, typename T1>
+arma_warn_unused
 inline
 Col<out_eT>
 conv_to< Col<out_eT> >::from(const Base<in_eT, T1>& in, const typename arma_cx_only<in_eT>::result* junk)
@@ -436,6 +457,7 @@ conv_to< Col<out_eT> >::from(const Base<in_eT, T1>& in, const typename arma_cx_o
 
 template<typename out_eT>
 template<typename in_eT>
+arma_warn_unused
 inline
 Col<out_eT>
 conv_to< Col<out_eT> >::from(const std::vector<in_eT>& in, const typename arma_not_cx<in_eT>::result* junk)
@@ -459,6 +481,7 @@ conv_to< Col<out_eT> >::from(const std::vector<in_eT>& in, const typename arma_n
 
 template<typename out_eT>
 template<typename in_eT>
+arma_warn_unused
 inline
 Col<out_eT>
 conv_to< Col<out_eT> >::from(const std::vector<in_eT>& in, const typename arma_cx_only<in_eT>::result* junk)
@@ -493,6 +516,7 @@ class conv_to< SpMat<out_eT> >
 
 template<typename out_eT>
 template<typename T1>
+arma_warn_unused
 inline
 SpMat<out_eT>
 conv_to< SpMat<out_eT> >::from(const Base<out_eT, T1>& in)
@@ -521,6 +545,7 @@ class conv_to< Cube<out_eT> >
 
 template<typename out_eT>
 template<typename in_eT, typename T1>
+arma_warn_unused
 inline
 Cube<out_eT>
 conv_to< Cube<out_eT> >::from(const BaseCube<in_eT, T1>& in, const typename arma_not_cx<in_eT>::result* junk)
@@ -542,6 +567,7 @@ conv_to< Cube<out_eT> >::from(const BaseCube<in_eT, T1>& in, const typename arma
 
 template<typename out_eT>
 template<typename in_eT, typename T1>
+arma_warn_unused
 inline
 Cube<out_eT>
 conv_to< Cube<out_eT> >::from(const BaseCube<in_eT, T1>& in, const typename arma_cx_only<in_eT>::result* junk)
@@ -578,6 +604,7 @@ class conv_to< std::vector<out_eT> >
 
 template<typename out_eT>
 template<typename in_eT, typename T1>
+arma_warn_unused
 inline
 std::vector<out_eT>
 conv_to< std::vector<out_eT> >::from(const Base<in_eT, T1>& in, const typename arma_not_cx<in_eT>::result* junk)
@@ -606,6 +633,7 @@ conv_to< std::vector<out_eT> >::from(const Base<in_eT, T1>& in, const typename a
 
 template<typename out_eT>
 template<typename in_eT, typename T1>
+arma_warn_unused
 inline
 std::vector<out_eT>
 conv_to< std::vector<out_eT> >::from(const Base<in_eT, T1>& in, const typename arma_cx_only<in_eT>::result* junk)

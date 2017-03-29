@@ -1,19 +1,21 @@
-// This Source Code Form is a compilation of:
-// (1) source code written by Ryan Curtin and Conrad Sanderson, and
-// (2) extracts from SuperLU 4.3 source code.
-
-// This compilation is Copyright (C) 2015 National ICT Australia (NICTA)
-// and is subject to the terms of the Mozilla Public License, v. 2.0.
+// Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
+// Copyright 2008-2016 National ICT Australia (NICTA)
 // 
-// The source code that is distinct and separate from SuperLU 4.3 source code
-// is Copyright (C) 2015 National ICT Australia (NICTA)
-// and is subject to the terms of the Mozilla Public License, v. 2.0.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
 // 
-// If a copy of the MPL was not distributed with this file,
-// You can obtain one at http://mozilla.org/MPL/2.0/.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 // 
-// The original SuperLU 4.3 source code is licensed under a 3-clause BSD license,
-// as follows:
+// ------------------------------------------------------------------------
+// 
+// This file includes portions of SuperLU 5.2 software,
+// licensed under the following conditions.
 // 
 // Copyright (c) 2003, The Regents of the University of California, through
 // Lawrence Berkeley National Laboratory (subject to receipt of any required 
@@ -43,7 +45,9 @@
 // OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
 // WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 // OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-// EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+// EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+// 
+// ------------------------------------------------------------------------
 
 
 #if defined(ARMA_USE_SUPERLU)
@@ -59,16 +63,16 @@
 // and manually specify a few SuperLU structures and function prototypes.
 //
 // CAVEAT:
-// This code requires SuperLU version 4.3,
-// and assumes that newer 4.x versions will have no API changes.
+// This code requires SuperLU version 5.2,
+// and assumes that newer 5.x versions will have no API changes.
 
 namespace arma
 {
 
 namespace superlu
   {
-  // slu_*defs.h has int typedef'fed to int_t.  I'll just write it as int for
-  // simplicity, where I can, but supermatrix.h needs int_t.
+  // slu_*defs.h has int typedefed to int_t.
+  // I'll just write it as int for simplicity, where I can, but supermatrix.h needs int_t.
   typedef int int_t;
   
   // Include supermatrix.h.  This gives us SuperMatrix.
@@ -143,6 +147,44 @@ namespace superlu
     float total_needed;
     } mem_usage_t;
   
+  
+  typedef struct e_node
+    {
+    int   size;
+    void* mem;
+    } ExpHeader;
+  
+  
+  typedef struct
+    {
+    int   size;
+    int   used;
+    int   top1;
+    int   top2;
+    void* array;
+    } LU_stack_t;
+  
+  
+  typedef struct
+    {
+    int*       xsup;
+    int*       supno;   
+    int*       lsub;
+    int*       xlsub;
+    void*      lusup;
+    int*       xlusup;
+    void*      ucol;
+    int*       usub;
+    int*       xusub;
+    int        nzlmax;
+    int        nzumax;
+    int        nzlumax;
+    int        n;
+    LU_space_t MemModel;
+    int        num_expansions;
+    ExpHeader* expanders;
+    LU_stack_t stack;
+    } GlobalLU_t;
   }
 }
 
@@ -152,8 +194,8 @@ namespace superlu
 // Not using any SuperLU headers, so define all required enums and structs.
 // 
 // CAVEAT:
-// This code requires SuperLU version 4.3,
-// and assumes that newer 4.x versions will have no API changes.
+// This code requires SuperLU version 5.2,
+// and assumes that newer 5.x versions will have no API changes.
 
 namespace arma
 {
@@ -227,6 +269,7 @@ namespace superlu
                 METIS_AT_PLUS_A, PARMETIS, ZOLTAN, MY_PERMC}      colperm_t;
   typedef enum {NOTRANS, TRANS, CONJ}                             trans_t;
   typedef enum {NOREFINE, SLU_SINGLE=1, SLU_DOUBLE, SLU_EXTRA}    IterRefine_t;
+  typedef enum {SYSTEM, USER}                                     LU_space_t;
   typedef enum {ONE_NORM, TWO_NORM, INF_NORM}                     norm_t;
   typedef enum {SILU, SMILU_1, SMILU_2, SMILU_3}                  milu_t;
 
@@ -284,6 +327,44 @@ namespace superlu
     void* nzval;
     } DNformat;
   
+  
+  typedef struct e_node
+    {
+    int   size;
+    void* mem;
+    } ExpHeader;
+  
+  
+  typedef struct
+    {
+    int   size;
+    int   used;
+    int   top1;
+    int   top2;
+    void* array;
+    } LU_stack_t;
+  
+  
+  typedef struct
+    {
+    int*       xsup;
+    int*       supno;   
+    int*       lsub;
+    int*       xlsub;
+    void*      lusup;
+    int*       xlusup;
+    void*      ucol;
+    int*       usub;
+    int*       xusub;
+    int        nzlmax;
+    int        nzumax;
+    int        nzlumax;
+    int        n;
+    LU_space_t MemModel;
+    int        num_expansions;
+    ExpHeader* expanders;
+    LU_stack_t stack;
+    } GlobalLU_t;
   }
 }
 

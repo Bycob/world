@@ -1,12 +1,17 @@
-// Copyright (C) 2008-2014 National ICT Australia (NICTA)
+// Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
+// Copyright 2008-2016 National ICT Australia (NICTA)
 // 
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
-// -------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
 // 
-// Written by Conrad Sanderson - http://conradsanderson.id.au
-// Written by Ryan Curtin
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ------------------------------------------------------------------------
 
 
 //! \addtogroup fn_dot
@@ -14,8 +19,8 @@
 
 
 template<typename T1, typename T2>
-arma_inline
 arma_warn_unused
+arma_inline
 typename
 enable_if2
   <
@@ -36,8 +41,8 @@ dot
 
 
 template<typename T1, typename T2>
-inline
 arma_warn_unused
+inline
 typename
 enable_if2
   <
@@ -58,8 +63,8 @@ dot
 
 
 template<typename T1, typename T2>
-inline
 arma_warn_unused
+inline
 typename
 enable_if2
   <
@@ -85,8 +90,8 @@ norm_dot
 
 
 template<typename T1, typename T2>
-arma_inline
 arma_warn_unused
+arma_inline
 typename
 enable_if2
   <
@@ -108,8 +113,8 @@ cdot
 
 
 template<typename T1, typename T2>
-arma_inline
 arma_warn_unused
+arma_inline
 typename
 enable_if2
   <
@@ -132,8 +137,8 @@ cdot
 // convert dot(htrans(x), y) to cdot(x,y)
 
 template<typename T1, typename T2>
-arma_inline
 arma_warn_unused
+arma_inline
 typename
 enable_if2
   <
@@ -236,8 +241,8 @@ dot
   typedef typename SpProxy<T2>::stored_type pb_Q_type;
   
   if(
-         ( (SpProxy<T1>::must_use_iterator == false) && (SpProxy<T2>::must_use_iterator == false) )
-      && ( (is_SpMat<pa_Q_type>::value     == true ) && (is_SpMat<pb_Q_type>::value     == true ) )   
+         ( (SpProxy<T1>::use_iterator  == false) && (SpProxy<T2>::use_iterator  == false) )
+      && ( (is_SpMat<pa_Q_type>::value == true ) && (is_SpMat<pb_Q_type>::value == true ) )   
     )
     {
     const unwrap_spmat<pa_Q_type> tmp_a(pa.Q);
@@ -294,7 +299,7 @@ dot
   typename SpProxy<T2>::const_iterator_type it     = pb.begin();
   typename SpProxy<T2>::const_iterator_type it_end = pb.end();
   
-  // prefer_at_accessor won't save us operations
+  // use_at == false won't save us operations
   while(it != it_end)
     {
     result += (*it) * pa.at(it.row(), it.col());

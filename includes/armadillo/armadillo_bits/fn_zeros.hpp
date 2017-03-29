@@ -1,11 +1,17 @@
-// Copyright (C) 2008-2015 National ICT Australia (NICTA)
+// Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
+// Copyright 2008-2016 National ICT Australia (NICTA)
 // 
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
-// -------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
 // 
-// Written by Conrad Sanderson - http://conradsanderson.id.au
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ------------------------------------------------------------------------
 
 
 //! \addtogroup fn_zeros
@@ -13,6 +19,7 @@
 
 
 
+arma_warn_unused
 arma_inline
 const Gen<vec, gen_zeros>
 zeros(const uword n_elem)
@@ -25,6 +32,7 @@ zeros(const uword n_elem)
 
 
 template<typename obj_type>
+arma_warn_unused
 arma_inline
 const Gen<obj_type, gen_zeros>
 zeros(const uword n_elem, const arma_empty_class junk1 = arma_empty_class(), const typename arma_Mat_Col_Row_only<obj_type>::result* junk2 = 0)
@@ -45,6 +53,7 @@ zeros(const uword n_elem, const arma_empty_class junk1 = arma_empty_class(), con
 
 
 
+arma_warn_unused
 arma_inline
 const Gen<mat, gen_zeros>
 zeros(const uword n_rows, const uword n_cols)
@@ -56,6 +65,7 @@ zeros(const uword n_rows, const uword n_cols)
 
 
 
+arma_warn_unused
 arma_inline
 const Gen<mat, gen_zeros>
 zeros(const SizeMat& s)
@@ -68,6 +78,7 @@ zeros(const SizeMat& s)
 
 
 template<typename obj_type>
+arma_warn_unused
 arma_inline
 const Gen<obj_type, gen_zeros>
 zeros(const uword n_rows, const uword n_cols, const typename arma_Mat_Col_Row_only<obj_type>::result* junk = 0)
@@ -91,6 +102,7 @@ zeros(const uword n_rows, const uword n_cols, const typename arma_Mat_Col_Row_on
 
 
 template<typename obj_type>
+arma_warn_unused
 arma_inline
 const Gen<obj_type, gen_zeros>
 zeros(const SizeMat& s, const typename arma_Mat_Col_Row_only<obj_type>::result* junk = 0)
@@ -103,6 +115,7 @@ zeros(const SizeMat& s, const typename arma_Mat_Col_Row_only<obj_type>::result* 
 
 
 
+arma_warn_unused
 arma_inline
 const GenCube<cube::elem_type, gen_zeros>
 zeros(const uword n_rows, const uword n_cols, const uword n_slices)
@@ -114,6 +127,7 @@ zeros(const uword n_rows, const uword n_cols, const uword n_slices)
 
 
 
+arma_warn_unused
 arma_inline
 const GenCube<cube::elem_type, gen_zeros>
 zeros(const SizeCube& s)
@@ -126,6 +140,7 @@ zeros(const SizeCube& s)
 
 
 template<typename cube_type>
+arma_warn_unused
 arma_inline
 const GenCube<typename cube_type::elem_type, gen_zeros>
 zeros(const uword n_rows, const uword n_cols, const uword n_slices, const typename arma_Cube_only<cube_type>::result* junk = 0)
@@ -139,6 +154,7 @@ zeros(const uword n_rows, const uword n_cols, const uword n_slices, const typena
 
 
 template<typename cube_type>
+arma_warn_unused
 arma_inline
 const GenCube<typename cube_type::elem_type, gen_zeros>
 zeros(const SizeCube& s, const typename arma_Cube_only<cube_type>::result* junk = 0)
@@ -152,6 +168,7 @@ zeros(const SizeCube& s, const typename arma_Cube_only<cube_type>::result* junk 
 
 
 template<typename sp_obj_type>
+arma_warn_unused
 inline
 sp_obj_type
 zeros(const uword n_rows, const uword n_cols, const typename arma_SpMat_SpCol_SpRow_only<sp_obj_type>::result* junk = 0)
@@ -175,6 +192,7 @@ zeros(const uword n_rows, const uword n_cols, const typename arma_SpMat_SpCol_Sp
 
 
 template<typename sp_obj_type>
+arma_warn_unused
 inline
 sp_obj_type
 zeros(const SizeMat& s, const typename arma_SpMat_SpCol_SpRow_only<sp_obj_type>::result* junk = 0)

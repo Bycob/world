@@ -1,12 +1,17 @@
-// Copyright (C) 2012-2015 National ICT Australia (NICTA)
+// Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
+// Copyright 2008-2016 National ICT Australia (NICTA)
 // 
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
-// -------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
 // 
-// Written by Conrad Sanderson - http://conradsanderson.id.au
-// Written by Ryan Curtin
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ------------------------------------------------------------------------
 
 
 //! \addtogroup spop_max
@@ -136,7 +141,7 @@ spop_max::vector_max
   
   if(p.get_n_nonzero() == 0)  { return eT(0); }
   
-  if(SpProxy<T1>::must_use_iterator == false)
+  if(SpProxy<T1>::use_iterator == false)
     {
     // direct access of values
     if(p.get_n_nonzero() == p.get_n_elem())
@@ -200,7 +205,7 @@ spop_max::max(const SpBase<typename T1::elem_type, T1>& X)
   
   eT max_val = priv::most_neg<eT>();
   
-  if(SpProxy<T1>::must_use_iterator)
+  if(SpProxy<T1>::use_iterator)
     {
     // We have to iterate over the elements.
     typedef typename SpProxy<T1>::const_iterator_type it_type;
@@ -252,12 +257,14 @@ spop_max::max_with_index(const SpProxy<T1>& P, uword& index_of_max_val)
     {
     arma_debug_check(true, "max(): object has no elements");
     
+    index_of_max_val = uword(0);
+    
     return Datum<eT>::nan;
     }
   
   eT max_val = priv::most_neg<eT>();
   
-  if(SpProxy<T1>::must_use_iterator)
+  if(SpProxy<T1>::use_iterator)
     {
     // We have to iterate over the elements.
     typedef typename SpProxy<T1>::const_iterator_type it_type;
@@ -441,7 +448,7 @@ spop_max::vector_max
   
   if(p.get_n_nonzero() == 0)  { return eT(0); }
   
-  if(SpProxy<T1>::must_use_iterator == false)
+  if(SpProxy<T1>::use_iterator == false)
     {
     // direct access of values
     if(p.get_n_nonzero() == p.get_n_elem())
@@ -521,7 +528,7 @@ spop_max::max(const SpBase<typename T1::elem_type, T1>& X)
    T max_val = priv::most_neg<T>();
   eT ret_val;
   
-  if(SpProxy<T1>::must_use_iterator)
+  if(SpProxy<T1>::use_iterator)
     {
     // We have to iterate over the elements.
     typedef typename SpProxy<T1>::const_iterator_type it_type;
@@ -557,10 +564,7 @@ spop_max::max(const SpBase<typename T1::elem_type, T1>& X)
     }
   else
     {
-    if (T(0) > max_val)
-      return eT(0);
-    else
-      return ret_val;
+    return (T(0) > max_val) ? eT(0) : ret_val;
     }
   }
 
@@ -584,12 +588,14 @@ spop_max::max_with_index(const SpProxy<T1>& P, uword& index_of_max_val)
     {
     arma_debug_check(true, "max(): object has no elements");
     
+    index_of_max_val = uword(0);
+    
     return Datum<eT>::nan;
     }
   
   T max_val = priv::most_neg<T>();
   
-  if(SpProxy<T1>::must_use_iterator)
+  if(SpProxy<T1>::use_iterator)
     {
     // We have to iterate over the elements.
     typedef typename SpProxy<T1>::const_iterator_type it_type;

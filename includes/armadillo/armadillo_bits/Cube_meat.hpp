@@ -1,11 +1,17 @@
-// Copyright (C) 2008-2016 National ICT Australia (NICTA)
+// Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
+// Copyright 2008-2016 National ICT Australia (NICTA)
 // 
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
-// -------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
 // 
-// Written by Conrad Sanderson - http://conradsanderson.id.au
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ------------------------------------------------------------------------
 
 
 //! \addtogroup Cube
@@ -383,9 +389,9 @@ Cube<eT>::init
   
   eT* out_mem = (*this).memptr();
   
-  const bool prefer_at_accessor = ( ProxyCube<T1>::prefer_at_accessor || ProxyCube<T2>::prefer_at_accessor );
+  const bool use_at = ( ProxyCube<T1>::use_at || ProxyCube<T2>::use_at );
   
-  if(prefer_at_accessor == false)
+  if(use_at == false)
     {
     typedef typename ProxyCube<T1>::ea_type ea_type1;
     typedef typename ProxyCube<T2>::ea_type ea_type2;
@@ -1371,6 +1377,66 @@ Cube<eT>::tube(const span& row_span, const span& col_span) const
     );
   
   return subview_cube<eT>(*this, in_row1, in_col1, 0, subcube_n_rows, subcube_n_cols, n_slices);
+  }
+
+
+
+template<typename eT>
+inline
+subview_cube<eT>
+Cube<eT>::head_slices(const uword N)
+  {
+  arma_extra_debug_sigprint();
+  
+  arma_debug_check( (N > n_slices), "Cube::head_slices(): size out of bounds" );
+  
+  return subview_cube<eT>(*this, 0, 0, 0, n_rows, n_cols, N);
+  }
+
+
+
+template<typename eT>
+inline
+const subview_cube<eT>
+Cube<eT>::head_slices(const uword N) const
+  {
+  arma_extra_debug_sigprint();
+  
+  arma_debug_check( (N > n_slices), "Cube::head_slices(): size out of bounds" );
+  
+  return subview_cube<eT>(*this, 0, 0, 0, n_rows, n_cols, N);
+  }
+
+
+
+template<typename eT>
+inline
+subview_cube<eT>
+Cube<eT>::tail_slices(const uword N)
+  {
+  arma_extra_debug_sigprint();
+  
+  arma_debug_check( (N > n_slices), "Cube::tail_slices(): size out of bounds" );
+  
+  const uword start_slice = n_slices - N;
+  
+  return subview_cube<eT>(*this, 0, 0, start_slice, n_rows, n_cols, N);
+  }
+
+
+
+template<typename eT>
+inline
+const subview_cube<eT>
+Cube<eT>::tail_slices(const uword N) const
+  {
+  arma_extra_debug_sigprint();
+  
+  arma_debug_check( (N > n_slices), "Cube::tail_slices(): size out of bounds" );
+  
+  const uword start_slice = n_slices - N;
+  
+  return subview_cube<eT>(*this, 0, 0, start_slice, n_rows, n_cols, N);
   }
 
 
@@ -3185,6 +3251,20 @@ Cube<eT>::imbue(functor F)
 
 
 
+template<typename eT>
+inline
+const Cube<eT>&
+Cube<eT>::replace(const eT old_val, const eT new_val)
+  {
+  arma_extra_debug_sigprint();
+  
+  arrayops::replace(memptr(), n_elem, old_val, new_val);
+  
+  return *this;
+  }
+
+
+
 //! fill the cube with the specified value
 template<typename eT>
 inline
@@ -3447,6 +3527,8 @@ Cube<eT>::min(uword& index_of_min_val) const
     {
     arma_debug_check(true, "Cube::min(): object has no elements");
     
+    index_of_min_val = uword(0);
+    
     return Datum<eT>::nan;
     }
   
@@ -3466,6 +3548,8 @@ Cube<eT>::max(uword& index_of_max_val) const
     {
     arma_debug_check(true, "Cube::max(): object has no elements");
     
+    index_of_max_val = uword(0);
+    
     return Datum<eT>::nan;
     }
   
@@ -3484,6 +3568,10 @@ Cube<eT>::min(uword& row_of_min_val, uword& col_of_min_val, uword& slice_of_min_
   if(n_elem == 0)
     {
     arma_debug_check(true, "Cube::min(): object has no elements");
+    
+    row_of_min_val   = uword(0);
+    col_of_min_val   = uword(0);
+    slice_of_min_val = uword(0);
     
     return Datum<eT>::nan;
     }
@@ -3515,6 +3603,10 @@ Cube<eT>::max(uword& row_of_max_val, uword& col_of_max_val, uword& slice_of_max_
   if(n_elem == 0)
     {
     arma_debug_check(true, "Cube::max(): object has no elements");
+    
+    row_of_max_val   = uword(0);
+    col_of_max_val   = uword(0);
+    slice_of_max_val = uword(0);
     
     return Datum<eT>::nan;
     }
@@ -4609,7 +4701,7 @@ Cube_aux::set_real(Cube< std::complex<T> >& out, const BaseCube<T,T1>& X)
   
   eT* out_mem = out.memptr();
   
-  if(ProxyCube<T1>::prefer_at_accessor == false)
+  if(ProxyCube<T1>::use_at == false)
     {
     typedef typename ProxyCube<T1>::ea_type ea_type;
     
@@ -4661,7 +4753,7 @@ Cube_aux::set_imag(Cube< std::complex<T> >& out, const BaseCube<T,T1>& X)
   
   eT* out_mem = out.memptr();
   
-  if(ProxyCube<T1>::prefer_at_accessor == false)
+  if(ProxyCube<T1>::use_at == false)
     {
     typedef typename ProxyCube<T1>::ea_type ea_type;
     

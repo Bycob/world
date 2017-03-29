@@ -1,16 +1,17 @@
-// Copyright (C) 2008-2016 National ICT Australia (NICTA)
+// Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
+// Copyright 2008-2016 National ICT Australia (NICTA)
 // 
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
-// -------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
 // 
-// Written by Conrad Sanderson - http://conradsanderson.id.au
-// Written by James Sanders
-// Written by Stanislav Funiak
-// Written by Eric Jon Sundstrom
-// Written by Michael McNeil Forbes
-// Written by Keith O'Hara
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ------------------------------------------------------------------------
 
 
 //! \addtogroup auxlib
@@ -249,7 +250,7 @@ auxlib::inv_inplace_lapack(Mat<eT>& out)
     {
     arma_debug_assert_blas_size(out);
     
-    blas_int n_rows = out.n_rows;
+    blas_int n_rows = blas_int(out.n_rows);
     blas_int lwork  = (std::max)(blas_int(podarray_prealloc_n_elem::val), n_rows);
     blas_int info   = 0;
     
@@ -284,7 +285,7 @@ auxlib::inv_inplace_lapack(Mat<eT>& out)
     }
   #else
     {
-    arma_stop("inv(): use of ATLAS or LAPACK must be enabled");
+    arma_stop_logic_error("inv(): use of ATLAS or LAPACK must be enabled");
     return false;
     }
   #endif
@@ -317,6 +318,8 @@ auxlib::inv_tr(Mat<eT>& out, const Base<eT,T1>& X, const uword layout)
     arma_extra_debug_print("lapack::trtri()");
     lapack::trtri(&uplo, &diag, &n, out.memptr(), &n, &info);
     
+    if(info != 0)  { return false; }
+    
     if(layout == 0)
       {
       out = trimatu(out);  // upper triangular
@@ -326,14 +329,14 @@ auxlib::inv_tr(Mat<eT>& out, const Base<eT,T1>& X, const uword layout)
       out = trimatl(out);  // lower triangular
       }
     
-    return (info == 0);
+    return true;
     }
   #else
     {
     arma_ignore(out);
     arma_ignore(X);
     arma_ignore(layout);
-    arma_stop("inv(): use of LAPACK must be enabled");
+    arma_stop_logic_error("inv(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -377,6 +380,8 @@ auxlib::inv_sym(Mat<eT>& out, const Base<eT,T1>& X, const uword layout)
     arma_extra_debug_print("lapack::sytri()");
     lapack::sytri(&uplo, &n, out.memptr(), &n, ipiv.memptr(), work.memptr(), &info);
     
+    if(info != 0)  { return false; }
+    
     if(layout == 0)
       {
       out = symmatu(out);
@@ -386,14 +391,14 @@ auxlib::inv_sym(Mat<eT>& out, const Base<eT,T1>& X, const uword layout)
       out = symmatl(out);
       }
     
-    return (info == 0);
+    return true;
     }
   #else
     {
     arma_ignore(out);
     arma_ignore(X);
     arma_ignore(layout);
-    arma_stop("inv(): use of LAPACK must be enabled");
+    arma_stop_logic_error("inv(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -430,15 +435,17 @@ auxlib::inv_sympd(Mat<eT>& out, const Base<eT,T1>& X)
     arma_extra_debug_print("lapack::potri()");
     lapack::potri(&uplo, &n, out.memptr(), &n, &info);
     
+    if(info != 0)  { return false; }
+    
     out = symmatl(out);
-      
-    return (info == 0);
+    
+    return true;
     }
   #else
     {
     arma_ignore(out);
     arma_ignore(X);
-    arma_stop("inv_sympd(): use of LAPACK must be enabled");
+    arma_stop_logic_error("inv_sympd(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -643,7 +650,7 @@ auxlib::det_lapack(const Mat<eT>& X, const bool make_copy)
     }
   #else
     {
-    arma_stop("det(): use of ATLAS or LAPACK must be enabled");
+    arma_stop_logic_error("det(): use of ATLAS or LAPACK must be enabled");
     return eT(0);
     }
   #endif
@@ -680,6 +687,8 @@ auxlib::log_det(eT& out_val, typename get_pod_type<eT>::result& out_sign, const 
     arma_extra_debug_print("atlas::clapack_getrf()");
     const int info = atlas::clapack_getrf(atlas::CblasColMajor, tmp.n_rows, tmp.n_cols, tmp.memptr(), tmp.n_rows, ipiv.memptr());
     
+    if(info < 0)  { return false; }
+    
     // on output tmp appears to be L+U_alt, where U_alt is U with the main diagonal set to zero
     
     sword sign = (is_complex<eT>::value == false) ? ( (access::tmp_real( tmp.at(0,0) ) < T(0)) ? -1 : +1 ) : +1;
@@ -704,7 +713,7 @@ auxlib::log_det(eT& out_val, typename get_pod_type<eT>::result& out_sign, const 
     out_val  = val;
     out_sign = T(sign);
     
-    return (info == 0);
+    return true;
     }
   #elif defined(ARMA_USE_LAPACK)
     {
@@ -728,6 +737,8 @@ auxlib::log_det(eT& out_val, typename get_pod_type<eT>::result& out_sign, const 
     
     arma_extra_debug_print("lapack::getrf()");
     lapack::getrf(&n_rows, &n_cols, tmp.memptr(), &n_rows, ipiv.memptr(), &info);
+    
+    if(info < 0)  { return false; }
     
     // on output tmp appears to be L+U_alt, where U_alt is U with the main diagonal set to zero
     
@@ -753,7 +764,7 @@ auxlib::log_det(eT& out_val, typename get_pod_type<eT>::result& out_sign, const 
     out_val  = val;
     out_sign = T(sign);
     
-    return (info == 0);
+    return true;
     }
   #else
     {
@@ -762,7 +773,7 @@ auxlib::log_det(eT& out_val, typename get_pod_type<eT>::result& out_sign, const 
     out_val  = eT(0);
     out_sign =  T(0);
     
-    arma_stop("log_det(): use of ATLAS or LAPACK must be enabled");
+    arma_stop_logic_error("log_det(): use of ATLAS or LAPACK must be enabled");
     
     return false;
     }
@@ -794,8 +805,6 @@ auxlib::lu(Mat<eT>& L, Mat<eT>& U, podarray<blas_int>& ipiv, const Base<eT,T1>& 
   
   #if defined(ARMA_USE_ATLAS) || defined(ARMA_USE_LAPACK)
     {
-    bool status = false;
-    
     #if defined(ARMA_USE_ATLAS)
       {
       arma_debug_assert_atlas_size(U);
@@ -805,7 +814,7 @@ auxlib::lu(Mat<eT>& L, Mat<eT>& U, podarray<blas_int>& ipiv, const Base<eT,T1>& 
       arma_extra_debug_print("atlas::clapack_getrf()");
       int info = atlas::clapack_getrf(atlas::CblasColMajor, U_n_rows, U_n_cols, U.memptr(), U_n_rows, ipiv.memptr());
       
-      status = (info == 0);
+      if(info < 0)  { return false; }
       }
     #elif defined(ARMA_USE_LAPACK)
       {
@@ -821,10 +830,10 @@ auxlib::lu(Mat<eT>& L, Mat<eT>& U, podarray<blas_int>& ipiv, const Base<eT,T1>& 
       arma_extra_debug_print("lapack::getrf()");
       lapack::getrf(&n_rows, &n_cols, U.memptr(), &n_rows, ipiv.memptr(), &info);
       
+      if(info < 0)  { return false; }
+      
       // take into account that Fortran counts from 1
       arrayops::inplace_minus(ipiv.memptr(), blas_int(1), ipiv.n_elem);
-      
-      status = (info == 0);
       }
     #endif
     
@@ -849,12 +858,11 @@ auxlib::lu(Mat<eT>& L, Mat<eT>& U, podarray<blas_int>& ipiv, const Base<eT,T1>& 
         }
       }
     
-    return status;
+    return true;
     }
   #else
     {
-    arma_stop("lu(): use of ATLAS or LAPACK must be enabled");
-    
+    arma_stop_logic_error("lu(): use of ATLAS or LAPACK must be enabled");
     return false;
     }
   #endif
@@ -1087,7 +1095,7 @@ auxlib::eig_gen
     arma_ignore(vecs);
     arma_ignore(vecs_on);
     arma_ignore(expr);
-    arma_stop("eig_gen(): use of LAPACK must be enabled");
+    arma_stop_logic_error("eig_gen(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -1160,7 +1168,7 @@ auxlib::eig_gen
     arma_ignore(vecs);
     arma_ignore(vecs_on);
     arma_ignore(expr);
-    arma_stop("eig_gen(): use of LAPACK must be enabled");
+    arma_stop_logic_error("eig_gen(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -1303,7 +1311,7 @@ auxlib::eig_pair
     arma_ignore(vecs_on);
     arma_ignore(A_expr);
     arma_ignore(B_expr);
-    arma_stop("eig_pair(): use of LAPACK must be enabled");
+    arma_stop_logic_error("eig_pair(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -1333,7 +1341,7 @@ auxlib::eig_pair
     arma_ignore(vecs_on);
     arma_ignore(A_expr);
     arma_ignore(B_expr);
-    arma_stop("eig_pair() for complex matrices not available due to crippled LAPACK");
+    arma_stop_logic_error("eig_pair() for complex matrices not available due to crippled LAPACK");
     return false;
     }
   #elif defined(ARMA_USE_LAPACK)
@@ -1415,7 +1423,7 @@ auxlib::eig_pair
     arma_ignore(vecs_on);
     arma_ignore(A_expr);
     arma_ignore(B_expr);
-    arma_stop("eig_pair(): use of LAPACK must be enabled");
+    arma_stop_logic_error("eig_pair(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -1465,7 +1473,7 @@ auxlib::eig_sym(Col<eT>& eigval, const Base<eT,T1>& X)
     {
     arma_ignore(eigval);
     arma_ignore(X);
-    arma_stop("eig_sym(): use of LAPACK must be enabled");
+    arma_stop_logic_error("eig_sym(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -1518,7 +1526,7 @@ auxlib::eig_sym(Col<T>& eigval, const Base<std::complex<T>,T1>& X)
     {
     arma_ignore(eigval);
     arma_ignore(X);
-    arma_stop("eig_sym(): use of LAPACK must be enabled");
+    arma_stop_logic_error("eig_sym(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -1570,7 +1578,7 @@ auxlib::eig_sym(Col<eT>& eigval, Mat<eT>& eigvec, const Base<eT,T1>& X)
     arma_ignore(eigval);
     arma_ignore(eigvec);
     arma_ignore(X);
-    arma_stop("eig_sym(): use of LAPACK must be enabled");
+    arma_stop_logic_error("eig_sym(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -1625,7 +1633,7 @@ auxlib::eig_sym(Col<T>& eigval, Mat< std::complex<T> >& eigvec, const Base<std::
     arma_ignore(eigval);
     arma_ignore(eigvec);
     arma_ignore(X);
-    arma_stop("eig_sym(): use of LAPACK must be enabled");
+    arma_stop_logic_error("eig_sym(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -1679,7 +1687,7 @@ auxlib::eig_sym_dc(Col<eT>& eigval, Mat<eT>& eigvec, const Base<eT,T1>& X)
     arma_ignore(eigval);
     arma_ignore(eigvec);
     arma_ignore(X);
-    arma_stop("eig_sym(): use of LAPACK must be enabled");
+    arma_stop_logic_error("eig_sym(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -1737,7 +1745,7 @@ auxlib::eig_sym_dc(Col<T>& eigval, Mat< std::complex<T> >& eigvec, const Base<st
     arma_ignore(eigval);
     arma_ignore(eigvec);
     arma_ignore(X);
-    arma_stop("eig_sym(): use of LAPACK must be enabled");
+    arma_stop_logic_error("eig_sym(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -1762,14 +1770,16 @@ auxlib::chol(Mat<eT>& out, const Base<eT,T1>& X, const uword layout)
     
     arma_debug_assert_blas_size(out);
     
-    const uword out_n_rows = out.n_rows;
-    
     char      uplo = (layout == 0) ? 'U' : 'L';
-    blas_int  n    = out_n_rows;
+    blas_int  n    = blas_int(out.n_rows);
     blas_int  info = 0;
     
     arma_extra_debug_print("lapack::potrf()");
     lapack::potrf(&uplo, &n, out.memptr(), &n, &info);
+    
+    if(info != 0)  { return false; }
+    
+    const uword out_n_rows = out.n_rows;
     
     if(layout == 0)
       {
@@ -1790,7 +1800,7 @@ auxlib::chol(Mat<eT>& out, const Base<eT,T1>& X, const uword layout)
         }
       }
     
-    return (info == 0);
+    return true;
     }
   #else
     {
@@ -1798,7 +1808,7 @@ auxlib::chol(Mat<eT>& out, const Base<eT,T1>& X, const uword layout)
     arma_ignore(X);
     arma_ignore(layout);
     
-    arma_stop("chol(): use of LAPACK must be enabled");
+    arma_stop_logic_error("chol(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -1891,7 +1901,7 @@ auxlib::qr(Mat<eT>& Q, Mat<eT>& R, const Base<eT,T1>& X)
     arma_ignore(Q);
     arma_ignore(R);
     arma_ignore(X);
-    arma_stop("qr(): use of LAPACK must be enabled");
+    arma_stop_logic_error("qr(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -2003,7 +2013,7 @@ auxlib::qr_econ(Mat<eT>& Q, Mat<eT>& R, const Base<eT,T1>& X)
     arma_ignore(Q);
     arma_ignore(R);
     arma_ignore(X);
-    arma_stop("qr_econ(): use of LAPACK must be enabled");
+    arma_stop_logic_error("qr_econ(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -2076,7 +2086,7 @@ auxlib::svd(Col<eT>& S, const Base<eT,T1>& X, uword& X_n_rows, uword& X_n_cols)
     arma_ignore(X);
     arma_ignore(X_n_rows);
     arma_ignore(X_n_cols);
-    arma_stop("svd(): use of LAPACK must be enabled");
+    arma_stop_logic_error("svd(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -2155,7 +2165,7 @@ auxlib::svd(Col<T>& S, const Base<std::complex<T>, T1>& X, uword& X_n_rows, uwor
     arma_ignore(X_n_rows);
     arma_ignore(X_n_cols);
 
-    arma_stop("svd(): use of LAPACK must be enabled");
+    arma_stop_logic_error("svd(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -2246,9 +2256,11 @@ auxlib::svd(Mat<eT>& U, Col<eT>& S, Mat<eT>& V, const Base<eT,T1>& X)
     arma_extra_debug_print("lapack::gesvd()");
     lapack::gesvd<eT>(&jobu, &jobvt, &m, &n, A.memptr(), &lda, S.memptr(), U.memptr(), &ldu, V.memptr(), &ldvt, work.memptr(), &lwork, &info);
     
+    if(info != 0)  { return false; }
+    
     op_strans::apply_mat_inplace(V);
     
-    return (info == 0);
+    return true;
     }
   #else
     {
@@ -2256,7 +2268,7 @@ auxlib::svd(Mat<eT>& U, Col<eT>& S, Mat<eT>& V, const Base<eT,T1>& X)
     arma_ignore(S);
     arma_ignore(V);
     arma_ignore(X);
-    arma_stop("svd(): use of LAPACK must be enabled");
+    arma_stop_logic_error("svd(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -2325,9 +2337,11 @@ auxlib::svd(Mat< std::complex<T> >& U, Col<T>& S, Mat< std::complex<T> >& V, con
     arma_extra_debug_print("lapack::cx_gesvd()");
     lapack::cx_gesvd<T>(&jobu, &jobvt, &m, &n, A.memptr(), &lda, S.memptr(), U.memptr(), &ldu, V.memptr(), &ldvt, work.memptr(), &lwork, rwork.memptr(), &info);
     
+    if(info != 0)  { return false; }
+    
     op_htrans::apply_mat_inplace(V);
     
-    return (info == 0);
+    return true;
     }
   #else
     {
@@ -2335,7 +2349,7 @@ auxlib::svd(Mat< std::complex<T> >& U, Col<T>& S, Mat< std::complex<T> >& V, con
     arma_ignore(S);
     arma_ignore(V);
     arma_ignore(X);
-    arma_stop("svd(): use of LAPACK must be enabled");
+    arma_stop_logic_error("svd(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -2438,9 +2452,11 @@ auxlib::svd_econ(Mat<eT>& U, Col<eT>& S, Mat<eT>& V, const Base<eT,T1>& X, const
     arma_extra_debug_print("lapack::gesvd()");
     lapack::gesvd<eT>(&jobu, &jobvt, &m, &n, A.memptr(), &lda, S.memptr(), U.memptr(), &ldu, V.memptr(), &ldvt, work.memptr(), &lwork, &info);
     
+    if(info != 0)  { return false; }
+    
     op_strans::apply_mat_inplace(V);
     
-    return (info == 0);
+    return true;
     }
   #else
     {
@@ -2449,7 +2465,7 @@ auxlib::svd_econ(Mat<eT>& U, Col<eT>& S, Mat<eT>& V, const Base<eT,T1>& X, const
     arma_ignore(V);
     arma_ignore(X);
     arma_ignore(mode);
-    arma_stop("svd(): use of LAPACK must be enabled");
+    arma_stop_logic_error("svd(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -2554,9 +2570,11 @@ auxlib::svd_econ(Mat< std::complex<T> >& U, Col<T>& S, Mat< std::complex<T> >& V
     arma_extra_debug_print("lapack::cx_gesvd()");
     lapack::cx_gesvd<T>(&jobu, &jobvt, &m, &n, A.memptr(), &lda, S.memptr(), U.memptr(), &ldu, V.memptr(), &ldvt, work.memptr(), &lwork, rwork.memptr(), &info);
     
+    if(info != 0)  { return false; }
+    
     op_htrans::apply_mat_inplace(V);
     
-    return (info == 0);
+    return true;
     }
   #else
     {
@@ -2565,7 +2583,7 @@ auxlib::svd_econ(Mat< std::complex<T> >& U, Col<T>& S, Mat< std::complex<T> >& V
     arma_ignore(V);
     arma_ignore(X);
     arma_ignore(mode);
-    arma_stop("svd(): use of LAPACK must be enabled");
+    arma_stop_logic_error("svd(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -2625,7 +2643,7 @@ auxlib::svd_dc(Col<eT>& S, const Base<eT,T1>& X, uword& X_n_rows, uword& X_n_col
     arma_ignore(X);
     arma_ignore(X_n_rows);
     arma_ignore(X_n_cols);
-    arma_stop("svd(): use of LAPACK must be enabled");
+    arma_stop_logic_error("svd(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -2694,7 +2712,7 @@ auxlib::svd_dc(Col<T>& S, const Base<std::complex<T>, T1>& X, uword& X_n_rows, u
     arma_ignore(X);
     arma_ignore(X_n_rows);
     arma_ignore(X_n_cols);
-    arma_stop("svd(): use of LAPACK must be enabled");
+    arma_stop_logic_error("svd(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -2774,9 +2792,11 @@ auxlib::svd_dc(Mat<eT>& U, Col<eT>& S, Mat<eT>& V, const Base<eT,T1>& X)
     arma_extra_debug_print("lapack::gesdd()");
     lapack::gesdd<eT>(&jobz, &m, &n, A.memptr(), &lda, S.memptr(), U.memptr(), &ldu, V.memptr(), &ldvt, work.memptr(), &lwork, iwork.memptr(), &info);
     
+    if(info != 0)  { return false; }
+    
     op_strans::apply_mat_inplace(V);
     
-    return (info == 0);
+    return true;
     }
   #else
     {
@@ -2784,7 +2804,7 @@ auxlib::svd_dc(Mat<eT>& U, Col<eT>& S, Mat<eT>& V, const Base<eT,T1>& X)
     arma_ignore(S);
     arma_ignore(V);
     arma_ignore(X);
-    arma_stop("svd(): use of LAPACK must be enabled");
+    arma_stop_logic_error("svd(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -2848,9 +2868,11 @@ auxlib::svd_dc(Mat< std::complex<T> >& U, Col<T>& S, Mat< std::complex<T> >& V, 
     arma_extra_debug_print("lapack::cx_gesdd()");
     lapack::cx_gesdd<T>(&jobz, &m, &n, A.memptr(), &lda, S.memptr(), U.memptr(), &ldu, V.memptr(), &ldvt, work.memptr(), &lwork, rwork.memptr(), iwork.memptr(), &info);
     
+    if(info != 0)  { return false; }
+    
     op_htrans::apply_mat_inplace(V);
     
-    return (info == 0);
+    return true;
     }
   #else
     {
@@ -2858,7 +2880,7 @@ auxlib::svd_dc(Mat< std::complex<T> >& U, Col<T>& S, Mat< std::complex<T> >& V, 
     arma_ignore(S);
     arma_ignore(V);
     arma_ignore(X);
-    arma_stop("svd(): use of LAPACK must be enabled");
+    arma_stop_logic_error("svd(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -2913,9 +2935,11 @@ auxlib::svd_dc_econ(Mat<eT>& U, Col<eT>& S, Mat<eT>& V, const Base<eT,T1>& X)
     arma_extra_debug_print("lapack::gesdd()");
     lapack::gesdd<eT>(&jobz, &m, &n, A.memptr(), &lda, S.memptr(), U.memptr(), &ldu, V.memptr(), &ldvt, work.memptr(), &lwork, iwork.memptr(), &info);
     
+    if(info != 0)  { return false; }
+    
     op_strans::apply_mat_inplace(V);
     
-    return (info == 0);
+    return true;
     }
   #else
     {
@@ -2923,7 +2947,7 @@ auxlib::svd_dc_econ(Mat<eT>& U, Col<eT>& S, Mat<eT>& V, const Base<eT,T1>& X)
     arma_ignore(S);
     arma_ignore(V);
     arma_ignore(X);
-    arma_stop("svd(): use of LAPACK must be enabled");
+    arma_stop_logic_error("svd(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -2988,9 +3012,11 @@ auxlib::svd_dc_econ(Mat< std::complex<T> >& U, Col<T>& S, Mat< std::complex<T> >
     arma_extra_debug_print("lapack::cx_gesdd()");
     lapack::cx_gesdd<T>(&jobz, &m, &n, A.memptr(), &lda, S.memptr(), U.memptr(), &ldu, V.memptr(), &ldvt, work.memptr(), &lwork, rwork.memptr(), iwork.memptr(), &info);
     
+    if(info != 0)  { return false; }
+    
     op_htrans::apply_mat_inplace(V);
     
-    return (info == 0);
+    return true;
     }
   #else
     {
@@ -2998,7 +3024,7 @@ auxlib::svd_dc_econ(Mat< std::complex<T> >& U, Col<T>& S, Mat< std::complex<T> >
     arma_ignore(S);
     arma_ignore(V);
     arma_ignore(X);
-    arma_stop("svd(): use of LAPACK must be enabled");
+    arma_stop_logic_error("svd(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -3102,7 +3128,7 @@ auxlib::solve_square_fast(Mat<typename T1::elem_type>& out, Mat<typename T1::ele
     }
   #else
     {
-    arma_stop("solve(): use of ATLAS or LAPACK must be enabled");
+    arma_stop_logic_error("solve(): use of ATLAS or LAPACK must be enabled");
     return false;
     }
   #endif
@@ -3194,7 +3220,7 @@ auxlib::solve_square_refine(Mat<typename T1::pod_type>& out, typename T1::pod_ty
     arma_ignore(out_rcond);
     arma_ignore(A);
     arma_ignore(B_expr);
-    arma_stop("solve(): use of LAPACK must be enabled");
+    arma_stop_logic_error("solve(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -3296,7 +3322,7 @@ auxlib::solve_square_refine(Mat< std::complex<typename T1::pod_type> >& out, typ
     arma_ignore(out_rcond);
     arma_ignore(A);
     arma_ignore(B_expr);
-    arma_stop("solve(): use of LAPACK must be enabled");
+    arma_stop_logic_error("solve(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -3331,14 +3357,14 @@ auxlib::solve_approx_fast(Mat<typename T1::elem_type>& out, Mat<typename T1::ele
     
     Mat<eT> tmp( (std::max)(A.n_rows, A.n_cols), B.n_cols );
     
-    if(size(tmp) == size(B))
+    if(arma::size(tmp) == arma::size(B))
       {
       tmp = B;
       }
     else
       {
       tmp.zeros();
-      tmp(0,0, size(B)) = B;
+      tmp(0,0, arma::size(B)) = B;
       }
     
     char      trans = 'N';
@@ -3374,7 +3400,7 @@ auxlib::solve_approx_fast(Mat<typename T1::elem_type>& out, Mat<typename T1::ele
     arma_ignore(out);
     arma_ignore(A);
     arma_ignore(B_expr);
-    arma_stop("solve(): use of LAPACK must be enabled");
+    arma_stop_logic_error("solve(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -3408,14 +3434,14 @@ auxlib::solve_approx_svd(Mat<typename T1::pod_type>& out, Mat<typename T1::pod_t
     
     Mat<eT> tmp( (std::max)(A.n_rows, A.n_cols), B.n_cols );
     
-    if(size(tmp) == size(B))
+    if(arma::size(tmp) == arma::size(B))
       {
       tmp = B;
       }
     else
       {
       tmp.zeros();
-      tmp(0,0, size(B)) = B;
+      tmp(0,0, arma::size(B)) = B;
       }
     
     blas_int m     = blas_int(A.n_rows);
@@ -3486,7 +3512,7 @@ auxlib::solve_approx_svd(Mat<typename T1::pod_type>& out, Mat<typename T1::pod_t
     arma_ignore(out);
     arma_ignore(A);
     arma_ignore(B_expr);
-    arma_stop("solve(): use of LAPACK must be enabled");
+    arma_stop_logic_error("solve(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -3529,14 +3555,14 @@ auxlib::solve_approx_svd(Mat< std::complex<typename T1::pod_type> >& out, Mat< s
     
     Mat<eT> tmp( (std::max)(A.n_rows, A.n_cols), B.n_cols );
     
-    if(size(tmp) == size(B))
+    if(arma::size(tmp) == arma::size(B))
       {
       tmp = B;
       }
     else
       {
       tmp.zeros();
-      tmp(0,0, size(B)) = B;
+      tmp(0,0, arma::size(B)) = B;
       }
     
     blas_int m     = blas_int(A.n_rows);
@@ -3612,7 +3638,7 @@ auxlib::solve_approx_svd(Mat< std::complex<typename T1::pod_type> >& out, Mat< s
     arma_ignore(out);
     arma_ignore(A);
     arma_ignore(B_expr);
-    arma_stop("solve(): use of LAPACK must be enabled");
+    arma_stop_logic_error("solve(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -3662,7 +3688,7 @@ auxlib::solve_tri(Mat<typename T1::elem_type>& out, const Mat<typename T1::elem_
     arma_ignore(A);
     arma_ignore(B_expr);
     arma_ignore(layout);
-    arma_stop("solve(): use of LAPACK must be enabled");
+    arma_stop_logic_error("solve(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -3724,7 +3750,7 @@ auxlib::schur(Mat<eT>& U, Mat<eT>& S, const Base<eT,T1>& X, const bool calc_U)
     arma_ignore(U);
     arma_ignore(S);
     arma_ignore(X);
-    arma_stop("schur(): use of LAPACK must be enabled");
+    arma_stop_logic_error("schur(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -3760,7 +3786,7 @@ auxlib::schur(Mat<std::complex<T> >& U, Mat<std::complex<T> >& S, const bool cal
     arma_ignore(U);
     arma_ignore(S);
     arma_ignore(calc_U);
-    arma_stop("schur() for complex matrices not available due to crippled LAPACK");
+    arma_stop_logic_error("schur() for complex matrices not available due to crippled LAPACK");
     return false;
     }
   #elif defined(ARMA_USE_LAPACK)
@@ -3804,7 +3830,7 @@ auxlib::schur(Mat<std::complex<T> >& U, Mat<std::complex<T> >& S, const bool cal
     arma_ignore(U);
     arma_ignore(S);
     arma_ignore(calc_U);
-    arma_stop("schur(): use of LAPACK must be enabled");
+    arma_stop_logic_error("schur(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -3858,12 +3884,14 @@ auxlib::syl(Mat<eT>& X, const Mat<eT>& A, const Mat<eT>& B, const Mat<eT>& C)
     arma_extra_debug_print("lapack::trsyl()");
     lapack::trsyl<eT>(&trana, &tranb, &isgn, &m, &n, T1.memptr(), &m, T2.memptr(), &n, Y.memptr(), &m, &scale, &info);
     
+    if(info < 0)  { return false; }
+    
     //Y /= scale;
     Y /= (-scale);
     
     X = Z1 * Y * trans(Z2);
     
-    return (info >= 0);
+    return true;
     }
   #else
     {
@@ -3871,7 +3899,7 @@ auxlib::syl(Mat<eT>& X, const Mat<eT>& A, const Mat<eT>& B, const Mat<eT>& C)
     arma_ignore(A);
     arma_ignore(B);
     arma_ignore(C);
-    arma_stop("syl(): use of LAPACK must be enabled");
+    arma_stop_logic_error("syl(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -3885,7 +3913,7 @@ auxlib::syl(Mat<eT>& X, const Mat<eT>& A, const Mat<eT>& B, const Mat<eT>& C)
 template<typename T, typename T1, typename T2>
 inline
 bool
-auxlib::qz(Mat<T>& A, Mat<T>& B, Mat<T>& vsl, Mat<T>& vsr, const Base<T,T1>& X_expr, const Base<T,T2>& Y_expr)
+auxlib::qz(Mat<T>& A, Mat<T>& B, Mat<T>& vsl, Mat<T>& vsr, const Base<T,T1>& X_expr, const Base<T,T2>& Y_expr, const char mode)
   {
   arma_extra_debug_sigprint();
   
@@ -3921,6 +3949,11 @@ auxlib::qz(Mat<T>& A, Mat<T>& B, Mat<T>& vsl, Mat<T>& vsr, const Base<T,T1>& X_e
     blas_int lwork   = 3 * ((std::max)(blas_int(1),8*N+16));
     blas_int info    = 0;
     
+         if(mode == 'l')  { eigsort = 'S'; selctg = qz_helper::ptr_cast(&(qz_helper::select_lhp<T>)); }
+    else if(mode == 'r')  { eigsort = 'S'; selctg = qz_helper::ptr_cast(&(qz_helper::select_rhp<T>)); }
+    else if(mode == 'i')  { eigsort = 'S'; selctg = qz_helper::ptr_cast(&(qz_helper::select_iuc<T>)); }
+    else if(mode == 'o')  { eigsort = 'S'; selctg = qz_helper::ptr_cast(&(qz_helper::select_ouc<T>)); }
+    
     podarray<T> alphar(A.n_rows);
     podarray<T> alphai(A.n_rows);
     podarray<T>   beta(A.n_rows);
@@ -3940,9 +3973,11 @@ auxlib::qz(Mat<T>& A, Mat<T>& B, Mat<T>& vsl, Mat<T>& vsr, const Base<T,T1>& X_e
       &info
       );
     
+    if(info != 0)  { return false; }
+    
     op_strans::apply_mat_inplace(vsl);
     
-    return (info == 0);
+    return true;
     }
   #else
     {
@@ -3952,7 +3987,8 @@ auxlib::qz(Mat<T>& A, Mat<T>& B, Mat<T>& vsl, Mat<T>& vsr, const Base<T,T1>& X_e
     arma_ignore(vsr);
     arma_ignore(X_expr);
     arma_ignore(Y_expr);
-    arma_stop("qz(): use of LAPACK must be enabled");
+    arma_ignore(mode);
+    arma_stop_logic_error("qz(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -3966,7 +4002,7 @@ auxlib::qz(Mat<T>& A, Mat<T>& B, Mat<T>& vsl, Mat<T>& vsr, const Base<T,T1>& X_e
 template<typename T, typename T1, typename T2>
 inline
 bool
-auxlib::qz(Mat< std::complex<T> >& A, Mat< std::complex<T> >& B, Mat< std::complex<T> >& vsl, Mat< std::complex<T> >& vsr, const Base< std::complex<T>, T1 >& X_expr, const Base< std::complex<T>, T2 >& Y_expr)
+auxlib::qz(Mat< std::complex<T> >& A, Mat< std::complex<T> >& B, Mat< std::complex<T> >& vsl, Mat< std::complex<T> >& vsr, const Base< std::complex<T>, T1 >& X_expr, const Base< std::complex<T>, T2 >& Y_expr, const char mode)
   {
   arma_extra_debug_sigprint();
   
@@ -3978,7 +4014,7 @@ auxlib::qz(Mat< std::complex<T> >& A, Mat< std::complex<T> >& B, Mat< std::compl
     arma_ignore(vsr);
     arma_ignore(X_expr);
     arma_ignore(Y_expr);
-    arma_stop("qz() for complex matrices not available due to crippled LAPACK");
+    arma_stop_logic_error("qz() for complex matrices not available due to crippled LAPACK");
     return false;
     }
   #elif defined(ARMA_USE_LAPACK)
@@ -4015,6 +4051,11 @@ auxlib::qz(Mat< std::complex<T> >& A, Mat< std::complex<T> >& B, Mat< std::compl
     blas_int lwork   = 3 * ((std::max)(blas_int(1),2*N));
     blas_int info    = 0;
     
+         if(mode == 'l')  { eigsort = 'S'; selctg = qz_helper::ptr_cast(&(qz_helper::cx_select_lhp<T>)); }
+    else if(mode == 'r')  { eigsort = 'S'; selctg = qz_helper::ptr_cast(&(qz_helper::cx_select_rhp<T>)); }
+    else if(mode == 'i')  { eigsort = 'S'; selctg = qz_helper::ptr_cast(&(qz_helper::cx_select_iuc<T>)); }
+    else if(mode == 'o')  { eigsort = 'S'; selctg = qz_helper::ptr_cast(&(qz_helper::cx_select_ouc<T>)); }
+    
     podarray<eT> alpha(A.n_rows);
     podarray<eT>  beta(A.n_rows);
     
@@ -4034,9 +4075,11 @@ auxlib::qz(Mat< std::complex<T> >& A, Mat< std::complex<T> >& B, Mat< std::compl
       &info
       );
     
+    if(info != 0)  { return false; }
+    
     op_htrans::apply_mat_inplace(vsl);
     
-    return (info == 0);
+    return true;
     }
   #else
     {
@@ -4046,7 +4089,8 @@ auxlib::qz(Mat< std::complex<T> >& A, Mat< std::complex<T> >& B, Mat< std::compl
     arma_ignore(vsr);
     arma_ignore(X_expr);
     arma_ignore(Y_expr);
-    arma_stop("qz(): use of LAPACK must be enabled");
+    arma_ignore(mode);
+    arma_stop_logic_error("qz(): use of LAPACK must be enabled");
     return false;
     }
   #endif
@@ -4100,7 +4144,7 @@ auxlib::rcond(const Base<typename T1::pod_type,T1>& A_expr)
   #else
     {
     arma_ignore(A_expr);
-    arma_stop("rcond(): use of LAPACK must be enabled");
+    arma_stop_logic_error("rcond(): use of LAPACK must be enabled");
     }
   #endif
   
@@ -4157,13 +4201,257 @@ auxlib::rcond(const Base<std::complex<typename T1::pod_type>,T1>& A_expr)
   #else
     {
     arma_ignore(A_expr);
-    arma_stop("rcond(): use of LAPACK must be enabled");
+    arma_stop_logic_error("rcond(): use of LAPACK must be enabled");
     }
   #endif
   
   return T(0);
   }
 
+
+
+//
+
+
+
+namespace qz_helper
+{
+
+// sgges() and dgges() require an external function with three arguments:
+// select(alpha_real, alpha_imag, beta)
+// where the eigenvalue is defined as complex(alpha_real, alpha_imag) / beta
+
+template<typename T>
+inline
+blas_int
+select_lhp(const T* x_ptr, const T* y_ptr, const T* z_ptr)
+  {
+  arma_extra_debug_sigprint();
+  
+  // cout << "select_lhp(): (*x_ptr) = " << (*x_ptr) << endl;
+  // cout << "select_lhp(): (*y_ptr) = " << (*y_ptr) << endl;
+  // cout << "select_lhp(): (*z_ptr) = " << (*z_ptr) << endl;
+  
+  arma_ignore(y_ptr);  // ignore imaginary part
+  
+  const T x = (*x_ptr);
+  const T z = (*z_ptr);
+  
+  if(z == T(0))  { return blas_int(0); }  // consider an infinite eig value not to lie in either lhp or rhp
+  
+  return ((x/z) < T(0)) ? blas_int(1) : blas_int(0);
+  }
+
+
+
+template<typename T>
+inline
+blas_int
+select_rhp(const T* x_ptr, const T* y_ptr, const T* z_ptr)
+  {
+  arma_extra_debug_sigprint();
+  
+  // cout << "select_rhp(): (*x_ptr) = " << (*x_ptr) << endl;
+  // cout << "select_rhp(): (*y_ptr) = " << (*y_ptr) << endl;
+  // cout << "select_rhp(): (*z_ptr) = " << (*z_ptr) << endl;
+  
+  arma_ignore(y_ptr);  // ignore imaginary part
+  
+  const T x = (*x_ptr);
+  const T z = (*z_ptr);
+  
+  if(z == T(0))  { return blas_int(0); }  // consider an infinite eig value not to lie in either lhp or rhp
+  
+  return ((x/z) > T(0)) ? blas_int(1) : blas_int(0);
+  }
+
+
+
+template<typename T>
+inline
+blas_int
+select_iuc(const T* x_ptr, const T* y_ptr, const T* z_ptr)
+  {
+  arma_extra_debug_sigprint();
+  
+  // cout << "select_iuc(): (*x_ptr) = " << (*x_ptr) << endl;
+  // cout << "select_iuc(): (*y_ptr) = " << (*y_ptr) << endl;
+  // cout << "select_iuc(): (*z_ptr) = " << (*z_ptr) << endl;
+  
+  const T x = (*x_ptr);
+  const T y = (*y_ptr);
+  const T z = (*z_ptr);
+  
+  if(z == T(0))  { return blas_int(0); }  // consider an infinite eig value to be outside of the unit circle 
+  
+  //return (std::abs(std::complex<T>(x,y) / z) < T(1)) ? blas_int(1) : blas_int(0);
+  return (std::sqrt(x*x + y*y) < std::abs(z)) ? blas_int(1) : blas_int(0);
+  }
+
+
+
+template<typename T>
+inline
+blas_int
+select_ouc(const T* x_ptr, const T* y_ptr, const T* z_ptr)
+  {
+  arma_extra_debug_sigprint();
+  
+  // cout << "select_ouc(): (*x_ptr) = " << (*x_ptr) << endl;
+  // cout << "select_ouc(): (*y_ptr) = " << (*y_ptr) << endl;
+  // cout << "select_ouc(): (*z_ptr) = " << (*z_ptr) << endl;
+  
+  const T x = (*x_ptr);
+  const T y = (*y_ptr);
+  const T z = (*z_ptr);
+  
+  if(z == T(0))
+    {
+    return (x == T(0)) ? blas_int(0) : blas_int(1);  // consider an infinite eig value to be outside of the unit circle 
+    }
+  
+  //return (std::abs(std::complex<T>(x,y) / z) > T(1)) ? blas_int(1) : blas_int(0);
+  return (std::sqrt(x*x + y*y) > std::abs(z)) ? blas_int(1) : blas_int(0);
+  }
+
+
+
+// cgges() and zgges() require an external function with two arguments:
+// select(alpha, beta)
+// where the complex eigenvalue is defined as (alpha / beta)
+
+template<typename T>
+inline
+blas_int
+cx_select_lhp(const std::complex<T>* x_ptr, const std::complex<T>* y_ptr)
+  {
+  arma_extra_debug_sigprint();
+  
+  // cout << "cx_select_lhp(): (*x_ptr) = " << (*x_ptr) << endl;
+  // cout << "cx_select_lhp(): (*y_ptr) = " << (*y_ptr) << endl;
+  
+  const std::complex<T>& x = (*x_ptr);
+  const std::complex<T>& y = (*y_ptr);
+  
+  if( (y.real() == T(0)) && (y.imag() == T(0)) )  { return blas_int(0); }  // consider an infinite eig value not to lie in either lhp or rhp
+  
+  return (std::real(x / y) < T(0)) ? blas_int(1) : blas_int(0);
+  }
+
+
+
+template<typename T>
+inline
+blas_int
+cx_select_rhp(const std::complex<T>* x_ptr, const std::complex<T>* y_ptr)
+  {
+  arma_extra_debug_sigprint();
+  
+  // cout << "cx_select_rhp(): (*x_ptr) = " << (*x_ptr) << endl;
+  // cout << "cx_select_rhp(): (*y_ptr) = " << (*y_ptr) << endl;
+  
+  const std::complex<T>& x = (*x_ptr);
+  const std::complex<T>& y = (*y_ptr);
+  
+  if( (y.real() == T(0)) && (y.imag() == T(0)) )  { return blas_int(0); }  // consider an infinite eig value not to lie in either lhp or rhp
+  
+  return (std::real(x / y) > T(0)) ? blas_int(1) : blas_int(0);
+  }
+
+
+
+template<typename T>
+inline
+blas_int
+cx_select_iuc(const std::complex<T>* x_ptr, const std::complex<T>* y_ptr)
+  {
+  arma_extra_debug_sigprint();
+  
+  // cout << "cx_select_iuc(): (*x_ptr) = " << (*x_ptr) << endl;
+  // cout << "cx_select_iuc(): (*y_ptr) = " << (*y_ptr) << endl;
+  
+  const std::complex<T>& x = (*x_ptr);
+  const std::complex<T>& y = (*y_ptr);
+  
+  if( (y.real() == T(0)) && (y.imag() == T(0)) )  { return blas_int(0); }  // consider an infinite eig value to be outside of the unit circle
+  
+  return (std::abs(x / y) < T(1)) ? blas_int(1) : blas_int(0);
+  }
+
+
+
+template<typename T>
+inline
+blas_int
+cx_select_ouc(const std::complex<T>* x_ptr, const std::complex<T>* y_ptr)
+  {
+  arma_extra_debug_sigprint();
+  
+  // cout << "cx_select_ouc(): (*x_ptr) = " << (*x_ptr) << endl;
+  // cout << "cx_select_ouc(): (*y_ptr) = " << (*y_ptr) << endl;
+  
+  const std::complex<T>& x = (*x_ptr);
+  const std::complex<T>& y = (*y_ptr);
+  
+  if( (y.real() == T(0)) && (y.imag() == T(0)) )
+    {
+    return ((x.real() == T(0)) && (x.imag() == T(0))) ? blas_int(0) : blas_int(1);  // consider an infinite eig value to be outside of the unit circle
+    }
+  
+  return (std::abs(x / y) > T(1)) ? blas_int(1) : blas_int(0);
+  }
+
+
+
+// need to do shenanigans with pointers due to:
+// - we're using LAPACK ?gges() defined to expect pointer-to-function to be passed as pointer-to-object
+// - explicit casting between pointer-to-function and pointer-to-object is a non-standard extension in C
+// - the extension is essentially mandatory on POSIX systems
+// - some compilers will complain about the extension in pedantic mode
+
+template<typename T>
+inline
+void_ptr
+ptr_cast(blas_int (*function)(const T*, const T*, const T*))
+  {
+  union converter
+    {
+    blas_int (*fn)(const T*, const T*, const T*);
+    void_ptr obj;
+    };
+  
+  converter tmp;
+  
+  tmp.obj = 0;
+  tmp.fn  = function;
+  
+  return tmp.obj;
+  }
+
+
+
+template<typename T>
+inline
+void_ptr
+ptr_cast(blas_int (*function)(const std::complex<T>*, const std::complex<T>*))
+  {
+  union converter
+    {
+    blas_int (*fn)(const std::complex<T>*, const std::complex<T>*);
+    void_ptr obj;
+    };
+  
+  converter tmp;
+  
+  tmp.obj = 0;
+  tmp.fn  = function;
+  
+  return tmp.obj;
+  }
+
+
+
+}  // end of namespace qz_helper
 
 
 //! @}

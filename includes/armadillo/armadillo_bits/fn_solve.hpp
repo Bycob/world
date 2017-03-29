@@ -1,11 +1,17 @@
-// Copyright (C) 2009-2015 National ICT Australia (NICTA)
+// Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
+// Copyright 2008-2016 National ICT Australia (NICTA)
 // 
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
-// -------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
 // 
-// Written by Conrad Sanderson - http://conradsanderson.id.au
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ------------------------------------------------------------------------
 
 
 //! \addtogroup fn_solve
@@ -18,6 +24,7 @@
 
 
 template<typename T1, typename T2>
+arma_warn_unused
 inline
 typename enable_if2< is_supported_blas_type<typename T1::elem_type>::value, const Glue<T1, T2, glue_solve_gen> >::result
 solve
@@ -35,6 +42,7 @@ solve
 
 
 template<typename T1, typename T2>
+arma_deprecated
 inline
 typename enable_if2< is_supported_blas_type<typename T1::elem_type>::value, const Glue<T1, T2, glue_solve_gen> >::result
 solve
@@ -46,12 +54,15 @@ solve
   {
   arma_extra_debug_sigprint();
   
+  // arma_debug_warn("solve(A,B,bool) is deprecated and will be removed; change to solve(A,B)");
+  
   return Glue<T1, T2, glue_solve_gen>(A.get_ref(), B.get_ref(), solve_opts::flag_none);
   }
 
 
 
 template<typename T1, typename T2>
+arma_deprecated
 inline
 typename enable_if2< is_supported_blas_type<typename T1::elem_type>::value, const Glue<T1, T2, glue_solve_gen> >::result
 solve
@@ -62,6 +73,8 @@ solve
   )
   {
   arma_extra_debug_sigprint();
+  
+  // arma_debug_warn("solve(A,B,char*) is deprecated and will be removed; change to solve(A,B)");
   
   return Glue<T1, T2, glue_solve_gen>(A.get_ref(), B.get_ref(), solve_opts::flag_none);
   }
@@ -87,6 +100,7 @@ solve
 
 
 template<typename T1, typename T2>
+arma_deprecated
 inline
 typename enable_if2< is_supported_blas_type<typename T1::elem_type>::value, bool >::result
 solve
@@ -99,12 +113,15 @@ solve
   {
   arma_extra_debug_sigprint();
   
+  // arma_debug_warn("solve(X,A,B,bool) is deprecated and will be removed; change to solve(X,A,B)");
+  
   return glue_solve_gen::apply(out, A.get_ref(), B.get_ref(), solve_opts::flag_none);
   }
 
 
 
 template<typename T1, typename T2>
+arma_deprecated
 inline
 typename enable_if2< is_supported_blas_type<typename T1::elem_type>::value, bool >::result
 solve
@@ -116,6 +133,8 @@ solve
   )
   {
   arma_extra_debug_sigprint();
+  
+  // arma_debug_warn("solve(X,A,B,char*) is deprecated and will be removed; change to solve(X,A,B)");
   
   return glue_solve_gen::apply(out, A.get_ref(), B.get_ref(), solve_opts::flag_none);
   }
@@ -127,6 +146,7 @@ solve
 
 
 template<typename T1, typename T2>
+arma_warn_unused
 inline
 typename enable_if2< is_supported_blas_type<typename T1::elem_type>::value, const Glue<T1, T2, glue_solve_tri> >::result
 solve
@@ -149,6 +169,7 @@ solve
 
 
 template<typename T1, typename T2>
+arma_deprecated
 inline
 typename enable_if2< is_supported_blas_type<typename T1::elem_type>::value, const Glue<T1, T2, glue_solve_tri> >::result
 solve
@@ -159,6 +180,8 @@ solve
   )
   {
   arma_extra_debug_sigprint();
+  
+  // arma_debug_warn("solve(A,B,bool) is deprecated and will be removed; change to solve(A,B)");
   
   uword flags = solve_opts::flag_none;
   
@@ -171,6 +194,7 @@ solve
 
 
 template<typename T1, typename T2>
+arma_deprecated
 inline
 typename enable_if2< is_supported_blas_type<typename T1::elem_type>::value, const Glue<T1, T2, glue_solve_tri> >::result
 solve
@@ -181,6 +205,8 @@ solve
   )
   {
   arma_extra_debug_sigprint();
+  
+  // arma_debug_warn("solve(A,B,char*) is deprecated and will be removed; change to solve(A,B)");
   
   uword flags = solve_opts::flag_none;
   
@@ -216,6 +242,7 @@ solve
 
 
 template<typename T1, typename T2>
+arma_deprecated
 inline
 typename enable_if2< is_supported_blas_type<typename T1::elem_type>::value, bool >::result
 solve
@@ -228,6 +255,8 @@ solve
   {
   arma_extra_debug_sigprint();
   
+  // arma_debug_warn("solve(X,A,B,bool) is deprecated and will be removed; change to solve(X,A,B)");
+  
   uword flags = solve_opts::flag_none;
   
   if(A.aux_uword_a == 0)  {  flags |= solve_opts::flag_triu; }
@@ -239,6 +268,7 @@ solve
 
 
 template<typename T1, typename T2>
+arma_deprecated
 inline
 typename enable_if2< is_supported_blas_type<typename T1::elem_type>::value, bool >::result
 solve
@@ -250,6 +280,8 @@ solve
   )
   {
   arma_extra_debug_sigprint();
+  
+  // arma_debug_warn("solve(X,A,B,char*) is deprecated and will be removed; change to solve(X,A,B)");
   
   uword flags = solve_opts::flag_none;
   

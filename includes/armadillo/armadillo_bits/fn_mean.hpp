@@ -1,11 +1,17 @@
-// Copyright (C) 2009-2016 National ICT Australia (NICTA)
+// Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
+// Copyright 2008-2016 National ICT Australia (NICTA)
 // 
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
-// -------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
 // 
-// Written by Conrad Sanderson - http://conradsanderson.id.au
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ------------------------------------------------------------------------
 
 
 //! \addtogroup fn_mean
@@ -14,6 +20,7 @@
 
 
 template<typename T1>
+arma_warn_unused
 arma_inline
 const Op<T1, op_mean>
 mean
@@ -34,6 +41,7 @@ mean
 
 
 template<typename T1>
+arma_warn_unused
 arma_inline
 const Op<T1, op_mean>
 mean
@@ -52,8 +60,8 @@ mean
 
 
 template<typename T1>
-inline
 arma_warn_unused
+inline
 typename T1::elem_type
 mean
   (
@@ -71,12 +79,9 @@ mean
 
 
 
-//! \brief
-//! Immediate 'find mean value' operation,
-//! invoked, for example, by: mean(mean(A))
 template<typename T1>
-inline
 arma_warn_unused
+inline
 typename T1::elem_type
 mean(const Op<T1, op_mean>& in)
   {
@@ -89,6 +94,7 @@ mean(const Op<T1, op_mean>& in)
 
 
 template<typename T1>
+arma_warn_unused
 arma_inline
 const Op< Op<T1, op_mean>, op_mean>
 mean(const Op<T1, op_mean>& in, const uword dim)
@@ -101,8 +107,8 @@ mean(const Op<T1, op_mean>& in, const uword dim)
 
 
 template<typename T>
-arma_inline
 arma_warn_unused
+arma_inline
 const typename arma_scalar_only<T>::result &
 mean(const T& x)
   {
@@ -112,6 +118,7 @@ mean(const T& x)
 
 
 template<typename T1>
+arma_warn_unused
 arma_inline
 const OpCube<T1, op_mean>
 mean
@@ -128,8 +135,8 @@ mean
 
 
 template<typename T1>
-inline
 arma_warn_unused
+inline
 const SpOp<T1, spop_mean>
 mean
   (
@@ -150,8 +157,8 @@ mean
 
 
 template<typename T1>
-inline
 arma_warn_unused
+inline
 const SpOp<T1, spop_mean>
 mean
   (
@@ -169,8 +176,8 @@ mean
 
 
 template<typename T1>
-inline
 arma_warn_unused
+inline
 typename T1::elem_type
 mean
   (
@@ -190,8 +197,8 @@ mean
 
 
 template<typename T1>
-inline
 arma_warn_unused
+inline
 typename T1::elem_type
 mean(const SpOp<T1, spop_mean>& in)
   {

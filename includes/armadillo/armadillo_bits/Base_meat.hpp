@@ -1,11 +1,17 @@
-// Copyright (C) 2008-2015 National ICT Australia (NICTA)
+// Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
+// Copyright 2008-2016 National ICT Australia (NICTA)
 // 
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
-// -------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
 // 
-// Written by Conrad Sanderson - http://conradsanderson.id.au
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ------------------------------------------------------------------------
 
 
 //! \addtogroup Base
@@ -168,7 +174,7 @@ Base<elem_type,derived>::min(uword& row_of_min_val, uword& col_of_min_val) const
   {
   const Proxy<derived> P( (*this).get_ref() );
   
-  uword index;
+  uword index = 0;
   
   const elem_type val = op_min::min_with_index(P, index);
   
@@ -189,7 +195,7 @@ Base<elem_type,derived>::max(uword& row_of_max_val, uword& col_of_max_val) const
   {
   const Proxy<derived> P( (*this).get_ref() );
   
-  uword index;
+  uword index = 0;
   
   const elem_type val = op_max::max_with_index(P, index);
   
@@ -199,6 +205,54 @@ Base<elem_type,derived>::max(uword& row_of_max_val, uword& col_of_max_val) const
   col_of_max_val = index / local_n_rows;
   
   return val;
+  }
+
+
+
+template<typename elem_type, typename derived>
+inline
+arma_warn_unused
+uword
+Base<elem_type,derived>::index_min() const
+  {
+  const Proxy<derived> P( (*this).get_ref() );
+  
+  uword index = 0;
+  
+  if(P.get_n_elem() == 0)
+    {
+    arma_debug_check(true, "index_min(): object has no elements");
+    }
+  else
+    {
+    op_min::min_with_index(P, index);
+    }
+  
+  return index;
+  }
+
+
+
+template<typename elem_type, typename derived>
+inline
+arma_warn_unused
+uword
+Base<elem_type,derived>::index_max() const
+  {
+  const Proxy<derived> P( (*this).get_ref() );
+  
+  uword index = 0;
+  
+  if(P.get_n_elem() == 0)
+    {
+    arma_debug_check(true, "index_max(): object has no elements");
+    }
+  else
+    {
+    op_max::max_with_index(P, index);
+    }
+  
+  return index;
   }
 
 
@@ -217,20 +271,26 @@ Base_inv_yes<derived>::i() const
 
 
 template<typename derived>
-arma_inline
+arma_deprecated
+inline
 const Op<derived,op_inv>
 Base_inv_yes<derived>::i(const bool) const   // argument kept only for compatibility with old user code
   {
+  // arma_debug_warn(".i(bool) is deprecated and will be removed; change to .i()");
+  
   return Op<derived,op_inv>(static_cast<const derived&>(*this));
   }
 
 
 
 template<typename derived>
-arma_inline
+arma_deprecated
+inline
 const Op<derived,op_inv>
 Base_inv_yes<derived>::i(const char*) const   // argument kept only for compatibility with old user code
   {
+  // arma_debug_warn(".i(char*) is deprecated and will be removed; change to .i()");
+  
   return Op<derived,op_inv>(static_cast<const derived&>(*this));
   }
 

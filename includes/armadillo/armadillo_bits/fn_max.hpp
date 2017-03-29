@@ -1,25 +1,25 @@
-// Copyright (C) 2008-2016 National ICT Australia (NICTA)
+// Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
+// Copyright 2008-2016 National ICT Australia (NICTA)
 // 
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
-// -------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
 // 
-// Written by Conrad Sanderson - http://conradsanderson.id.au
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ------------------------------------------------------------------------
 
 
 //! \addtogroup fn_max
 //! @{
 
 
-//! \brief
-//! Delayed 'maximum values' operation.
-//! The dimension, along which the maxima are found, is set via 'dim'.
-//! For dim = 0, the maximum value of each column is found (i.e. searches by traversing across rows).
-//! For dim = 1, the maximum value of each row is found (i.e. searches by traversing across columns).
-//! The default is dim = 0.
-
 template<typename T1>
+arma_warn_unused
 arma_inline
 const Op<T1, op_max>
 max
@@ -40,6 +40,7 @@ max
 
 
 template<typename T1>
+arma_warn_unused
 arma_inline
 const Op<T1, op_max>
 max
@@ -58,8 +59,8 @@ max
 
 
 template<typename T1>
-inline
 arma_warn_unused
+inline
 typename T1::elem_type
 max
   (
@@ -77,12 +78,9 @@ max
 
 
 
-//! \brief
-//! Immediate 'find maximum value' operation,
-//! invoked, for example, by: max(max(A))
 template<typename T1>
-inline
 arma_warn_unused
+inline
 typename T1::elem_type
 max(const Op<T1, op_max>& in)
   {
@@ -95,6 +93,7 @@ max(const Op<T1, op_max>& in)
 
 
 template<typename T1>
+arma_warn_unused
 arma_inline
 const Op< Op<T1, op_max>, op_max>
 max(const Op<T1, op_max>& in, const uword dim)
@@ -107,8 +106,8 @@ max(const Op<T1, op_max>& in, const uword dim)
 
 
 template<typename T>
-arma_inline
 arma_warn_unused
+arma_inline
 const typename arma_scalar_only<T>::result &
 max(const T& x)
   {
@@ -119,6 +118,7 @@ max(const T& x)
 
 //! element-wise maximum
 template<typename T1, typename T2>
+arma_warn_unused
 arma_inline
 typename
 enable_if2
@@ -140,6 +140,7 @@ max
 
 
 template<typename T1>
+arma_warn_unused
 arma_inline
 const OpCube<T1, op_max>
 max
@@ -156,6 +157,7 @@ max
 
 
 template<typename T1, typename T2>
+arma_warn_unused
 arma_inline
 const GlueCube<T1, T2, glue_max>
 max
@@ -172,8 +174,8 @@ max
 
 
 template<typename T1>
-inline
 arma_warn_unused
+inline
 typename
 enable_if2
   <
@@ -190,6 +192,7 @@ max(const T1& x)
 
 
 template<typename T1>
+arma_warn_unused
 inline
 typename
 enable_if2
@@ -207,8 +210,8 @@ max(const T1& X, const uword dim = 0)
 
 
 template<typename T1>
-inline
 arma_warn_unused
+inline
 typename T1::elem_type
 max(const SpOp<T1, spop_max>& X)
   {
@@ -221,6 +224,7 @@ max(const SpOp<T1, spop_max>& X)
 
 
 template<typename T1>
+arma_warn_unused
 inline
 const SpOp< SpOp<T1, spop_max>, spop_max>
 max(const SpOp<T1, spop_max>& in, const uword dim)
@@ -232,6 +236,7 @@ max(const SpOp<T1, spop_max>& in, const uword dim)
 
 
 
+arma_warn_unused
 inline
 uword
 max(const SizeMat& s)
@@ -241,6 +246,7 @@ max(const SizeMat& s)
 
 
 
+arma_warn_unused
 inline
 uword
 max(const SizeCube& s)

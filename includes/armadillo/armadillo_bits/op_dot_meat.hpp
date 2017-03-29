@@ -1,11 +1,17 @@
-// Copyright (C) 2008-2014 National ICT Australia (NICTA)
+// Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
+// Copyright 2008-2016 National ICT Australia (NICTA)
 // 
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
-// -------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
 // 
-// Written by Conrad Sanderson - http://conradsanderson.id.au
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ------------------------------------------------------------------------
 
 
 //! \addtogroup op_dot
@@ -206,11 +212,11 @@ op_dot::apply(const T1& X, const T2& Y)
   {
   arma_extra_debug_sigprint();
   
-  const bool prefer_at_accessor = (Proxy<T1>::prefer_at_accessor) || (Proxy<T2>::prefer_at_accessor);
+  const bool use_at = (Proxy<T1>::use_at) || (Proxy<T2>::use_at);
   
   const bool have_direct_mem = ((is_Mat<T1>::value || is_subview_col<T1>::value) && (is_Mat<T2>::value || is_subview_col<T2>::value));
   
-  if(prefer_at_accessor || have_direct_mem)
+  if(use_at || have_direct_mem)
     {
     const quasi_unwrap<T1> A(X);
     const quasi_unwrap<T2> B(Y);
@@ -517,9 +523,9 @@ op_cdot::apply_proxy(const T1& X, const T2& Y)
   typedef typename Proxy<T1>::ea_type ea_type1;
   typedef typename Proxy<T2>::ea_type ea_type2;
   
-  const bool prefer_at_accessor = (Proxy<T1>::prefer_at_accessor) || (Proxy<T2>::prefer_at_accessor);
+  const bool use_at = (Proxy<T1>::use_at) || (Proxy<T2>::use_at);
   
-  if(prefer_at_accessor == false)
+  if(use_at == false)
     {
     const Proxy<T1> PA(X);
     const Proxy<T2> PB(Y);

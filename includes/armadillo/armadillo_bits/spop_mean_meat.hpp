@@ -1,12 +1,17 @@
-// Copyright (C) 2012-2015 National ICT Australia (NICTA)
-//
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
-// -------------------------------------------------------------------
+// Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
+// Copyright 2008-2016 National ICT Australia (NICTA)
 // 
-// Written by Conrad Sanderson - http://conradsanderson.id.au
-// Written by Ryan Curtin
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ------------------------------------------------------------------------
 
 
 //! \addtogroup spop_mean
@@ -74,7 +79,7 @@ spop_mean::apply_noalias_fast
     {
     Row<eT> acc(p_n_cols, fill::zeros);
     
-    if(SpProxy<T1>::must_use_iterator)
+    if(SpProxy<T1>::use_iterator)
       {
       typename SpProxy<T1>::const_iterator_type it     = p.begin();
       typename SpProxy<T1>::const_iterator_type it_end = p.end();
@@ -148,7 +153,7 @@ spop_mean::apply_noalias_slow
     for(uword col = 0; col < p_n_cols; ++col)
       {
       // Do we have to use an iterator or can we use memory directly?
-      if(SpProxy<T1>::must_use_iterator)
+      if(SpProxy<T1>::use_iterator)
         {
         typename SpProxy<T1>::const_iterator_type it  = p.begin_col(col);
         typename SpProxy<T1>::const_iterator_type end = p.begin_col(col + 1);
@@ -263,14 +268,14 @@ spop_mean::mean_all(const SpBase<typename T1::elem_type, T1>& X)
   
   SpProxy<T1> p(X.get_ref());
   
-  if(SpProxy<T1>::must_use_iterator)
+  if(SpProxy<T1>::use_iterator)
     {
     typename SpProxy<T1>::const_iterator_type it  = p.begin();
     typename SpProxy<T1>::const_iterator_type end = p.end();
 
     return spop_mean::iterator_mean(it, end, p.get_n_elem() - p.get_n_nonzero(), typename T1::elem_type(0));
     }
-  else // must_use_iterator == false; that is, we can directly access the values array
+  else // use_iterator == false; that is, we can directly access the values array
     {
     return spop_mean::direct_mean(p.get_values(), p.get_n_nonzero(), p.get_n_elem());
     }

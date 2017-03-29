@@ -1,12 +1,17 @@
-// Copyright (C) 2008-2016 National ICT Australia (NICTA)
+// Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
+// Copyright 2008-2016 National ICT Australia (NICTA)
 // 
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
-// -------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
 // 
-// Written by Conrad Sanderson - http://conradsanderson.id.au
-// Written by Ryan Curtin
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ------------------------------------------------------------------------
 
 
 
@@ -25,17 +30,23 @@
 //// Without BLAS, matrix multiplication will still work, but might be slower.
 #endif
 
+#if !defined(ARMA_USE_NEWARP)
+#define ARMA_USE_NEWARP
+//// Uncomment the above line to enable the built-in partial emulation of ARPACK.
+//// This is used for eigen decompositions of real (non-complex) sparse matrices, eg. eigs_sym(), svds() 
+#endif
+
 #if !defined(ARMA_USE_ARPACK)
 // #define ARMA_USE_ARPACK
 //// Uncomment the above line if you have ARPACK or a high-speed replacement for ARPACK.
-//// ARPACK is required for eigendecompositions of sparse matrices, eg. eigs_sym(), svds() 
+//// ARPACK is required for eigen decompositions of complex sparse matrices
 #endif
 
 #if !defined(ARMA_USE_SUPERLU)
 // #define ARMA_USE_SUPERLU
 //// Uncomment the above line if you have SuperLU.
 //// SuperLU is used for solving sparse linear systems via spsolve()
-//// Caveat: only SuperLU version 4.3 can be used!
+//// Caveat: only SuperLU version 5.2 can be used!
 #endif
 
 #if !defined(ARMA_SUPERLU_INCLUDE_DIR)
@@ -149,6 +160,10 @@
 
 #if defined(ARMA_DONT_USE_BLAS)
   #undef ARMA_USE_BLAS
+#endif
+
+#if defined(ARMA_DONT_USE_NEWARP) || !defined(ARMA_USE_LAPACK)
+  #undef ARMA_USE_NEWARP
 #endif
 
 #if defined(ARMA_DONT_USE_ARPACK)

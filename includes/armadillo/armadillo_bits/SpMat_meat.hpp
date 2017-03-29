@@ -1,13 +1,17 @@
-// Copyright (C) 2008-2015 National ICT Australia (NICTA)
+// Copyright 2008-2016 Conrad Sanderson (http://conradsanderson.id.au)
+// Copyright 2008-2016 National ICT Australia (NICTA)
 // 
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
-// -------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
 // 
-// Written by Conrad Sanderson - http://conradsanderson.id.au
-// Written by Ryan Curtin
-// Written by Matthew Amidon
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ------------------------------------------------------------------------
 
 
 //! \addtogroup SpMat
@@ -1014,7 +1018,7 @@ SpMat<eT>::operator%=(const Base<eT, T1>& x)
 
   while(it != end())
     {
-    // prefer_at_accessor == false can't save us any work here
+    // use_at == false can't save us any work here
     if(((*it) * p.at(it.row(), it.col())) != eT(0))
       {
       ++new_n_nonzero;
@@ -1029,7 +1033,7 @@ SpMat<eT>::operator%=(const Base<eT, T1>& x)
   uword cur_pos = 0;
   while(c_it != end())
     {
-    // prefer_at_accessor == false can't save us any work here
+    // use_at == false can't save us any work here
     const eT val = (*c_it) * p.at(c_it.row(), c_it.col());
     if(val != eT(0))
       {
@@ -2181,8 +2185,8 @@ SpMat<eT>::diag(const sword in_id) const
   {
   arma_extra_debug_sigprint();
   
-  const uword row_offset = (in_id < 0) ? -in_id : 0;
-  const uword col_offset = (in_id > 0) ?  in_id : 0;
+  const uword row_offset = uword( (in_id < 0) ? -in_id : 0 );
+  const uword col_offset = uword( (in_id > 0) ?  in_id : 0 );
   
   arma_debug_check
     (
@@ -3238,7 +3242,7 @@ SpMat<eT>::reshape(const uword in_rows, const uword in_cols, const uword dim)
   {
   arma_extra_debug_sigprint();
   
-  arma_debug_check( (dim > 1), "SpMat::reshape(): paramter 'dim' must be 0 or 1" );
+  arma_debug_check( (dim > 1), "SpMat::reshape(): parameter 'dim' must be 0 or 1" );
   
   if(dim == 0)
     {
@@ -3261,6 +3265,29 @@ SpMat<eT>::reshape(const uword in_rows, const uword in_cols, const uword dim)
     
     steal_mem(tmp);
     }
+  }
+
+
+
+template<typename eT>
+inline
+const SpMat<eT>&
+SpMat<eT>::replace(const eT old_val, const eT new_val)
+  {
+  arma_extra_debug_sigprint();
+  
+  if(old_val == eT(0))
+    {
+    arma_debug_warn("SpMat::replace(): replacement not done, as old_val = 0");
+    }
+  else
+    {
+    arrayops::replace(access::rwp(values), n_nonzero, old_val, new_val);
+    
+    if(new_val == eT(0))  { remove_zeros(); }
+    }
+  
+  return *this;
   }
 
 
@@ -4558,7 +4585,7 @@ SpMat<eT>::init_xform(const SpBase<eT,T1>& A, const Functor& func)
   arma_extra_debug_sigprint();
   
   // if possible, avoid doing a copy and instead apply func to the generated elements
-  if(SpProxy<T1>::Q_created_by_proxy)
+  if(SpProxy<T1>::Q_is_generated)
     {
     (*this) = A.get_ref();
     
@@ -4667,6 +4694,8 @@ inline
 typename SpMat<eT>::iterator
 SpMat<eT>::begin()
   {
+  arma_extra_debug_sigprint();
+  
   return iterator(*this);
   }
 
@@ -4677,6 +4706,8 @@ inline
 typename SpMat<eT>::const_iterator
 SpMat<eT>::begin() const
   {
+  arma_extra_debug_sigprint();
+  
   return const_iterator(*this);
   }
 
