@@ -145,6 +145,14 @@ void Mesh::clearVertices(VType type) {
 	getList(type).clear();
 }
 
+void Mesh::allocate(VType type, int count) {
+	getList(type).reserve(count);
+}
+
+void Mesh::allocateFaces(int count) {
+	_faces.reserve(count);
+}
+
 void Mesh::setMaterialName(std::string material) {
 	_materialName = material;
 }

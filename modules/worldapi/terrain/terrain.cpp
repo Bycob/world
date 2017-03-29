@@ -144,6 +144,12 @@ Mesh * Terrain::convertToMesh(float sizeX, float sizeY, float sizeZ) const {
 Mesh * Terrain::convertToMesh(float offsetX, float offsetY, float offsetZ, float sizeX, float sizeY, float sizeZ) const {
 	Mesh * mesh = new Mesh();
 
+	// Réservation de mémoire
+	int vertCount = _array.n_rows * _array.n_cols;
+	mesh->allocate(VType::POSITION, vertCount);
+	mesh->allocate(VType::TEXTURE, vertCount);
+	mesh->allocate(VType::NORMAL, vertCount);
+
 	//Vertices
 	int i = 0;
 	for (int x = 0; x < _array.n_rows; x++) {
@@ -171,6 +177,7 @@ Mesh * Terrain::convertToMesh(float offsetX, float offsetY, float offsetZ, float
 
 	//Faces
 	auto indice = [this](int x, int y)->int { return x * this->_array.n_cols + y; };
+	mesh->allocateFaces((_array.n_rows - 1) * (_array.n_cols - 1) * 2);
 
 	for (int x = 0; x < _array.n_rows - 1; x++) {
 		for (int y = 0; y < _array.n_cols - 1; y++) {

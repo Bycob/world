@@ -76,6 +76,8 @@ public :
 	int getCount(const VType & type) const;
 
 	void clearVertices(VType type);
+	void allocate(VType type, int capacity);
+	void allocateFaces(int capacity);
 
 	void setMaterialName(std::string material);
 	std::string getMaterialName() const {
