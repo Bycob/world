@@ -6,6 +6,7 @@
 
 
 using namespace maths;
+using namespace arma;
 
 //CLASS TERRAIN_TEXMAP_BUILDER
 
@@ -26,11 +27,12 @@ void TerrainTexmapBuilder::addSlice(int height, std::vector<ColorPart> colorPart
 	this->_slices[height] = colorParts;
 }
 
-arma::Cube<double> TerrainTexmapBuilder::convertToMap() const {
+Cube<double> TerrainTexmapBuilder::convertToMap() const {
 	if (_slices.begin() == _slices.end()) 
 		throw std::runtime_error("Ajouter des couleurs avant de convertir en carte");
 
-	arma::Cube<double> result(RESOLUTION, RESOLUTION, 3); //result[altitude, point (aléatoire), r|g|b]
+	//result[altitude, point (aléatoire), r|g|b]
+	Cube<double> result((uword) RESOLUTION, (uword) RESOLUTION, (uword) 3);
 
 	auto sliceIt = _slices.begin();
 
@@ -80,13 +82,13 @@ arma::Cube<double> TerrainTexmapBuilder::convertToMap() const {
 
 			//Interpolation entre les bornes
 			//TODO fonctions pour simplifier ça
-			result(h, p, 0) = interpolate(
+			result((uword)h, (uword)p, (uword)0) = interpolate(
 				lowerSlice->first, interpolate(lowerRatioSum - lowerfirstPoint->ratio / 2.0, lowerfirstPoint->r, lowerRatioSum + lowersecondPoint->ratio / 2.0, lowersecondPoint->r, x),
 				higherSlice->first, interpolate(higherRatioSum - higherfirstPoint->ratio / 2.0, higherfirstPoint->r, higherRatioSum + highersecondPoint->ratio / 2.0, highersecondPoint->r, x), altitude);
-			result(h, p, 1) = interpolate(
+			result((uword)h, (uword)p, (uword)1) = interpolate(
 				lowerSlice->first, interpolate(lowerRatioSum - lowerfirstPoint->ratio / 2.0, lowerfirstPoint->g, lowerRatioSum + lowersecondPoint->ratio / 2.0, lowersecondPoint->g, x),
 				higherSlice->first, interpolate(higherRatioSum - higherfirstPoint->ratio / 2.0, higherfirstPoint->g, higherRatioSum + highersecondPoint->ratio / 2.0, highersecondPoint->g, x), altitude);
-			result(h, p, 2) = interpolate(
+			result((uword)h, (uword)p, (uword)2) = interpolate(
 				lowerSlice->first, interpolate(lowerRatioSum - lowerfirstPoint->ratio / 2.0, lowerfirstPoint->b, lowerRatioSum + lowersecondPoint->ratio / 2.0, lowersecondPoint->b, x),
 				higherSlice->first, interpolate(higherRatioSum - higherfirstPoint->ratio / 2.0, higherfirstPoint->b, higherRatioSum + highersecondPoint->ratio / 2.0, highersecondPoint->b, x), altitude);
 		}

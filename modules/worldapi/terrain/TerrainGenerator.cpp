@@ -1,4 +1,3 @@
-#define ARMA_USE_CXX11
 
 #include "TerrainGenerator.h"
 #include "../maths/perlin.h"
