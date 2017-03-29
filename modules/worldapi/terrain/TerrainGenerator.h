@@ -59,15 +59,16 @@ private :
 	int _octaveCount;
 	float _frequency;
 	float _persistence;
-	double _subdivNoiseRatio = 0.05;
+	double _subdivNoiseRatio = 0.1;
 
 	// -------
-	arma::Mat<double> & getBuf(int x, int y) const;
+	arma::mat & getBuf(int x, int y) const;
 
 	template <typename... Args>
 	arma::Mat<double> & createInBuf(int x, int y, Args&&... args) const {
-        _buffer->emplace(std::make_pair(x, y), arma::Mat<double>(args...));
-		return getBuf(x, y);
+		std::pair<int, int> index = std::make_pair(x, y);
+		(*_buffer)[index] = arma::Mat<double>(args...);
+		return (*_buffer)[index];
     }
 
 	void adaptFromBuffer(Terrain & terrain, int xsub, int ysub) const;

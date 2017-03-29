@@ -126,7 +126,7 @@ void PerlinTerrainGenerator::generateSubdivisionLevel(Terrain & terrain, int sub
 
 void PerlinTerrainGenerator::generateSubdivision(Terrain & terrain, int xsub, int ysub) const {
 	//TODO Faire plusieurs tests pour voir si on obtient un meilleur résultat en changeant les paramètres.
-	Mat<double> mat = createInBuf(xsub, ysub, terrain.getSubterrain(xsub, ysub)._array);
+	Mat<double> & mat = createInBuf(xsub, ysub, terrain.getSubterrain(xsub, ysub)._array);
 	_perlin->generatePerlinNoise2D(mat, _offset, _octaveCount, _frequency, _persistence);
 
 	double oneTerrainLength = 1.0 / terrain._subdivideFactor;
@@ -163,7 +163,7 @@ void PerlinTerrainGenerator::adaptFromBuffer(Terrain & terrain, int xsub, int ys
 			subterrain._array(x, y) = mat(x, y) * _subdivNoiseRatio
 				+ (1 - _subdivNoiseRatio) * terrain.getZInterpolated(
 					((double)xsub + (double)x / subterrain._array.n_rows) / terrain._subdivideFactor,
-					((double)ysub + (double)y / subterrain._array.n_rows) / terrain._subdivideFactor, 0);
+					((double)ysub + (double)y / subterrain._array.n_cols) / terrain._subdivideFactor, 0);
 		}
 	}
 }
