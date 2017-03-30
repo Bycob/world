@@ -4,25 +4,6 @@
 #include <stdexcept>
 
 
-
-//----- VERTEX
-
-template <VType T> Vertex<T>::Vertex() {
-	_values.reserve(3);
-}
-
-template <VType T> Vertex<T>::~Vertex() {}
-
-template <VType T> Vertex<T> & Vertex<T>::add(float value) {
-	_values.push_back(value);
-	return *this;
-}
-
-template <VType T> void Vertex<T>::setID(int id) {
-	_vID = id;
-}
-
-
 //----- FACE
 
 Face::Face() : _vcount(0) {

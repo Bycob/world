@@ -13,13 +13,22 @@ enum class VType {
 template<VType type>
 class Vertex {
 public :
-	Vertex();
-	virtual ~Vertex();
+	Vertex() {
+		_values.reserve(3);
+	}
 
-	Vertex<type> & add(float value);
+	~Vertex() {}
+
+	Vertex<type> & add(float value) {
+		_values.push_back(value);
+		return *this;
+	}
+
 	const std::vector<float> & getValues() const { return _values; }
 
-	void setID(int id);
+	void setID(int id) {
+		_vID = id;
+	}
 	int getID() const { return _vID; };
 
 private :
