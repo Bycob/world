@@ -7,7 +7,7 @@
 #include "Material.h"
 #include "stringops.h"
 
-#include "objfile.h"
+#include "ObjLoader.h"
 
 ObjLoader::ObjLoader() {
 	_defaultMaterial = std::make_shared<Material>(DEFAULT_MATERIAL_NAME);

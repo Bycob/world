@@ -1,7 +1,7 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <worldapi/objfile.h>
+#include <worldapi/ObjLoader.h>
 #include <worldapi/mesh.h>
 #include <worldapi/ioutil.h>
 #include <worldapi/trees/TreeSkelettonGenerator.h>

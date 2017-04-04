@@ -5,7 +5,7 @@
 #include <worldapi/terrain/TerrainGenerator.h>
 #include <worldapi/terrain/terrain.h>
 #include <worldapi/mesh.h>
-#include <worldapi/objfile.h>
+#include <worldapi/ObjLoader.h>
 
 #include "panelterrain.h"
 #include "ui_panelterrain.h"

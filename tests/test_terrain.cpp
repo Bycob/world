@@ -3,7 +3,7 @@
 
 #include <armadillo/armadillo>
 
-#include <worldapi/objfile.h>
+#include <worldapi/ObjLoader.h>
 #include <worldapi/Material.h>
 #include <worldapi/interop.h>
 #include <worldapi/ioutil.h>
