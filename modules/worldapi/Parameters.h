@@ -12,15 +12,15 @@ long default_seed() {
 //FONCTIONS-PARAMETRES
 
 template <typename I, typename T>
-class ParameterFunc {
+class Parameter {
 public:
 	virtual T operator()(const I & in) = 0;
 };
 
 template <typename I, typename T>
-class ConstantParameterFunc : public ParameterFunc<I, T> {
+class ConstantParameter : public Parameter<I, T> {
 public :
-	ConstantParameterFunc(T value) : _value(value) {}
+	ConstantParameter(T value) : _value(value) {}
 
 	virtual T operator()(const I &in) {
 		return _value;
@@ -30,17 +30,17 @@ private :
 };
 
 template <typename I, typename T>
-class RandomParameterFunc : public ParameterFunc<I, T> {
+class RandomParameter : public Parameter<I, T> {
 public :
-	RandomParameterFunc() : _rng(default_seed()) {}
+	RandomParameter() : _rng(default_seed()) {}
 protected :
 	std::mt19937 _rng;
 };
 
 template <typename I>
-class GaussianParameterFunc : public RandomParameterFunc<I, double> {
+class GaussianParameter : public RandomParameter<I, double> {
 public :
-	GaussianParameterFunc(double median, double deviation) : _random(median, deviation) {}
+	GaussianParameter(double median, double deviation) : _random(median, deviation) {}
 
 	virtual double operator()(const I & in) {
 		return this->_random(this->_rng);
@@ -50,9 +50,9 @@ private :
 };
 
 template <typename I>
-class UniformIntegerParameterFunc : public RandomParameterFunc<I, int> {
+class UniformRandomIntegerParameter : public RandomParameter<I, int> {
 public :
-	UniformIntegerParameterFunc(int low, int high) : _random(low, high) {}
+	UniformRandomIntegerParameter(int low, int high) : _random(low, high) {}
 
 	virtual int operator()(const I & in) {
 		return this->_random(this->_rng);
@@ -62,9 +62,9 @@ private :
 };
 
 template <typename I>
-class UniformDoubleParameterFunc : public RandomParameterFunc<I, double> {
+class UniformRandomDoubleParameter : public RandomParameter<I, double> {
 public:
-	UniformDoubleParameterFunc(double low, double high) : _random(low, high) {}
+	UniformRandomDoubleParameter(double low, double high) : _random(low, high) {}
 
 	virtual double operator()(const I & in) {
 		return this->_random(this->_rng);

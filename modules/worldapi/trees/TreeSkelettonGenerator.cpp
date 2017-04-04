@@ -20,7 +20,7 @@ TreeSkelettonGenerator::TreeSkelettonGenerator() :
 	_sizeFactor(std::make_unique<wrapper_d>(const_d(3.0 / 5.0))),
 	_offsetTheta(std::make_unique<wrapper_d>(const_d(0))),
 
-	_weight(std::make_unique<DefaultWeightFunc>()),
+	_weight(std::make_unique<DefaultWeightParameter>()),
 	_count(std::make_unique<const_i>(4)),
 	_maxLevel(std::make_unique<const_i>(4)) {
 

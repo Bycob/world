@@ -36,12 +36,12 @@ using namespace treegen;
 void testTree(int argc, char ** argv) {
 	TreeSkelettonGenerator generator;
 
-	generator.setInclination(SideBranchPhiFunc(wrapper_d(gaussian(0.9, 0.2))));
-	generator.setRotationOffset(SideBranchOffsetTheta(wrapper_d(gaussian(0, 0.5))));
+	generator.setInclination(SideBranchPhiParameter(wrapper_d(gaussian(0.9, 0.2))));
+	generator.setRotationOffset(SideBranchOffsetThetaParameter(wrapper_d(gaussian(0, 0.5))));
 	generator.setForkingCount(treegen::uniform_i(4, 6));
-	generator.setSizeFactor(SideBranchSizeFunc(wrapper_d(gaussian(4.0 / 5.0, 0.1))));
-	generator.setMaxForkingLevel(MaxLevelByWeightFunc(0.02));
-	generator.setWeight(SideBranchWeightFunc(DefaultWeightFunc()));
+	generator.setSizeFactor(SideBranchSizeParameter(wrapper_d(gaussian(4.0 / 5.0, 0.1))));
+	generator.setMaxForkingLevel(MaxLevelByWeightParameter(0.02));
+	generator.setWeight(SideBranchWeightParameter(DefaultWeightParameter()));
 
 	for (int i = 1; i < argc; i++) {
 		std::string arg(argv[i]);
