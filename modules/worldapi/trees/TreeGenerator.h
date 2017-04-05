@@ -20,7 +20,6 @@ public:
 	TreeGenerator();
 	~TreeGenerator();
 
-	virtual std::unique_ptr<Tree> generate() const;
 	std::unique_ptr<Tree> generate(const TreeSkeletton & skeletton) const;
 
 private :
@@ -28,8 +27,6 @@ private :
 		double startWeight, double endWeight, int mergePos) const;
 	void populateTrunkMesh(Mesh & trunkMesh, const Node<TreeInfo>* node,
 		double mergeLen, double mergeWeight) const;
-
-	std::shared_ptr<TreeSkeletton> _skeletton;
 
 	int _segmentCount = DEFAULT_SEGMENT_COUNT;
 	float _faceSize = DEFAULT_FACE_SIZE;

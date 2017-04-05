@@ -9,8 +9,6 @@ public:
 	GenBase();
 	virtual ~GenBase();
 
-	virtual std::unique_ptr<T> generate() const = 0;
-
 protected :
 };
 

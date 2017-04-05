@@ -59,6 +59,10 @@ namespace img {
 		Image(const arma::Cube<double> & data);
 		Image(const arma::Mat<double> & data);
 		Image(const std::string & filename);
+		// move constructor
+		Image(Image && img);
+		// copy constructor
+		Image(const Image & img);
 		~Image();
 
 		// access

@@ -18,13 +18,6 @@ TreeGenerator::~TreeGenerator() {
 
 }
 
-std::unique_ptr<Tree> TreeGenerator::generate() const {
-	if (_skeletton == nullptr) {
-		throw std::runtime_error("TreeGenerator : no default skeletton defined");
-	}
-	return std::move(generate(*_skeletton));
-}
-
 std::unique_ptr<Tree> TreeGenerator::generate(const TreeSkeletton & skeletton) const {
 	std::unique_ptr<Tree> tree = std::make_unique<Tree>();
 

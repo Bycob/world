@@ -163,8 +163,18 @@ namespace img {
 		_type = getImageType(_image->type());
 	}
 
+	Image::Image(Image && image) : _image(image._image), _type(image._type) {
+		image._image = nullptr;
+	}
+
+	Image::Image(const Image & image) {
+		_image = new cv::Mat(*image._image);
+		_type = image._type;
+	}
+
 	Image::~Image() {
-		delete _image;
+		if (_image != nullptr) // moved
+			delete _image;
 	}
 
 	Pixel Image::at(int x, int y) {
