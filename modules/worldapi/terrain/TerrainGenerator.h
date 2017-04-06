@@ -52,8 +52,8 @@ public :
 protected :
 	virtual void generateSubdivision(Terrain & terrain, int x, int y) const;
 private :
-	std::unique_ptr<Perlin> _perlin;
-	std::unique_ptr<std::map<std::pair<int, int>, arma::Mat<double>>> _buffer;
+	mutable Perlin _perlin;
+	mutable std::map<std::pair<int, int>, arma::Mat<double>> _buffer;
 
 	int _offset;
 	int _octaveCount;
@@ -67,8 +67,8 @@ private :
 	template <typename... Args>
 	arma::Mat<double> & createInBuf(int x, int y, Args&&... args) const {
 		std::pair<int, int> index = std::make_pair(x, y);
-		(*_buffer)[index] = arma::Mat<double>(args...);
-		return (*_buffer)[index];
+		_buffer[index] = arma::Mat<double>(args...);
+		return _buffer[index];
     }
 
 	void adaptFromBuffer(Terrain & terrain, int xsub, int ysub) const;

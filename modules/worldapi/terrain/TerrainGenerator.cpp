@@ -85,8 +85,7 @@ Image TerrainGenerator::generateTexture(const Terrain & terrain, const arma::Cub
 
 PerlinTerrainGenerator::PerlinTerrainGenerator(int size, int offset, int octaveCount, float frequency, float persistence) :
 	TerrainGenerator(size) ,
-    _perlin(std::make_unique<Perlin>()),
-    _buffer(std::make_unique<std::map<std::pair<int, int>, arma::Mat<double>>>()),
+    _buffer(std::map<std::pair<int, int>, arma::Mat<double>>()),
     _offset(offset), _octaveCount(octaveCount), _frequency(frequency), _persistence(persistence) {
 
 }
@@ -97,7 +96,7 @@ PerlinTerrainGenerator::~PerlinTerrainGenerator() {
 
 std::unique_ptr<Terrain> PerlinTerrainGenerator::generate() const {
 	std::unique_ptr<Terrain> result = std::make_unique<Terrain>(_size);
-	_perlin->generatePerlinNoise2D(result->_array, _offset, _octaveCount, _frequency, _persistence);
+	_perlin.generatePerlinNoise2D(result->_array, _offset, _octaveCount, _frequency, _persistence);
 
 	return std::move(result);
 }
@@ -121,33 +120,33 @@ void PerlinTerrainGenerator::generateSubdivisionLevel(Terrain & terrain, int sub
 		}
 	}
 
-	_buffer->clear();
+	_buffer.clear();
 }
 
 void PerlinTerrainGenerator::generateSubdivision(Terrain & terrain, int xsub, int ysub) const {
 	//TODO Faire plusieurs tests pour voir si on obtient un meilleur résultat en changeant les paramètres.
 	Mat<double> & mat = createInBuf(xsub, ysub, terrain.getSubterrain(xsub, ysub)._array);
-	_perlin->generatePerlinNoise2D(mat, _offset, _octaveCount, _frequency, _persistence);
+	_perlin.generatePerlinNoise2D(mat, _offset, _octaveCount, _frequency, _persistence);
 
 	double oneTerrainLength = 1.0 / terrain._subdivideFactor;
 
     // Harmonisation horizontale
 	// -> Le joint en y doit toujours se faire avant le joint en x pour n'importe quel terrain
 	if (ysub != 0) {
-		_perlin->join(getBuf(xsub, ysub - 1),
+		_perlin.join(getBuf(xsub, ysub - 1),
 			          mat,
 			          Direction::AXIS_Y,
 			          _octaveCount, _frequency, _persistence);
 		
 		if (xsub != 0) {
-			_perlin->join(getBuf(xsub - 1, ysub - 1),
+			_perlin.join(getBuf(xsub - 1, ysub - 1),
 						  getBuf(xsub, ysub - 1),
 						  Direction::AXIS_X,
 						  _octaveCount, _frequency, _persistence, true);
 		}
 	}
     if (xsub == terrain._subdivideFactor - 1) {
-        _perlin->join(getBuf(xsub - 1, ysub),
+        _perlin.join(getBuf(xsub - 1, ysub),
                       mat,
                       Direction::AXIS_X,
                       _octaveCount, _frequency, _persistence, true);
@@ -169,5 +168,5 @@ void PerlinTerrainGenerator::adaptFromBuffer(Terrain & terrain, int xsub, int ys
 }
 
 arma::Mat<double> & PerlinTerrainGenerator::getBuf(int x, int y) const {
-	return _buffer->at(std::make_pair(x, y));
+	return _buffer.at(std::make_pair(x, y));
 }
