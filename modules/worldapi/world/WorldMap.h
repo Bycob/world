@@ -19,12 +19,15 @@ public:
 	const arma::cube & getReliefMap();
 	img::Image getReliefMapAsImage();
 private:
-	uint32_t sizeX, sizeY;
+	uint32_t _sizeX, _sizeY;
 
 	/** La carte des reliefs permet de caractériser d'une part l'altitude
 	moyenne et d'autre part l'étendue du relief, ce en chaque endroit.
 	Par conséquent c'est la carte des reliefs qui définit les zones de
 	montagnes, les plateaux, les plaines... */
 	arma::cube _reliefMap;
+
+	friend class WorldMapGenerator;
+	friend class WorldMapGeneratorModule;
 };
 

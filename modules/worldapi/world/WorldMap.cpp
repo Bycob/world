@@ -6,6 +6,7 @@ using namespace arma;
 using namespace img;
 
 WorldMap::WorldMap(uint32_t sizeX, uint32_t sizeY) : 
+	_sizeX(sizeX), _sizeY(sizeY),
 	_reliefMap(sizeX, sizeY, 2) {
 	
 }
