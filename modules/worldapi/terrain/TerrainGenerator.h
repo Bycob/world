@@ -19,6 +19,8 @@ public:
 	TerrainGenerator(int size = DEFAULT_TERRAIN_SIZE);
 	virtual ~TerrainGenerator();
 
+	virtual std::unique_ptr<Terrain> generate() = 0;
+
 	// ACCESSEURS
 	void setSubdivisionsCount(int subdivisionCount);
 	void setSize(int size);
@@ -38,7 +40,7 @@ protected :
 
 	// ------
 
-	virtual void generateSubdivision(Terrain & terrain, int x, int y) const = 0;
+	virtual void generateSubdivision(Terrain & terrain, int x, int y) = 0;
 };
 
 class WORLDAPI_EXPORT PerlinTerrainGenerator : public TerrainGenerator {
@@ -46,13 +48,13 @@ public :
 	PerlinTerrainGenerator(int size = DEFAULT_TERRAIN_SIZE, int offset = 0, int octaveCount = 5, float frequency = 8, float persistence = 0.5);
 	virtual ~PerlinTerrainGenerator();
 
-	virtual std::unique_ptr<Terrain> generate() const;
+	virtual std::unique_ptr<Terrain> generate();
 
 	virtual void generateSubdivisionLevel(Terrain & terrain, int subdivideFactor);
 protected :
-	virtual void generateSubdivision(Terrain & terrain, int x, int y) const;
+	virtual void generateSubdivision(Terrain & terrain, int x, int y);
 private :
-	mutable Perlin _perlin;
+	Perlin _perlin;
 	mutable std::map<std::pair<int, int>, arma::Mat<double>> _buffer;
 
 	int _offset;

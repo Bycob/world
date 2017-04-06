@@ -51,9 +51,9 @@ public:
 		_weight = std::make_unique<F>(weight);
 	}
 
-	virtual std::unique_ptr<TreeSkeletton> generate() const;
+	virtual std::unique_ptr<TreeSkeletton> generate();
 private :
-	void forkNode(Node<TreeInfo> * node) const;
+	void forkNode(Node<TreeInfo> * node);
 
 	// Génération de nombres alétoires uniforme entre 0 et 1. 
 	std::unique_ptr<treegen::param_d> _rng;

@@ -94,7 +94,7 @@ PerlinTerrainGenerator::~PerlinTerrainGenerator() {
 	
 }
 
-std::unique_ptr<Terrain> PerlinTerrainGenerator::generate() const {
+std::unique_ptr<Terrain> PerlinTerrainGenerator::generate() {
 	std::unique_ptr<Terrain> result = std::make_unique<Terrain>(_size);
 	_perlin.generatePerlinNoise2D(result->_array, _offset, _octaveCount, _frequency, _persistence);
 
@@ -123,7 +123,7 @@ void PerlinTerrainGenerator::generateSubdivisionLevel(Terrain & terrain, int sub
 	_buffer.clear();
 }
 
-void PerlinTerrainGenerator::generateSubdivision(Terrain & terrain, int xsub, int ysub) const {
+void PerlinTerrainGenerator::generateSubdivision(Terrain & terrain, int xsub, int ysub) {
 	//TODO Faire plusieurs tests pour voir si on obtient un meilleur résultat en changeant les paramètres.
 	Mat<double> & mat = createInBuf(xsub, ysub, terrain.getSubterrain(xsub, ysub)._array);
 	_perlin.generatePerlinNoise2D(mat, _offset, _octaveCount, _frequency, _persistence);
