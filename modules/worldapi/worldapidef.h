@@ -11,3 +11,8 @@
 #endif
 
 //#define ARMA_NO_DEBUG
+
+// Warnings MSVC
+#ifdef _MSC_VER
+#pragma warning(disable:4251)
+#endif
