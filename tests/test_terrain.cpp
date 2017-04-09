@@ -101,7 +101,7 @@ void testPerlin(int argc, char** argv) {
 				freq = argval;
 			}
 		}
-		catch (std::exception & e) {
+		catch (std::exception &) {
 			std::cout << "erreur dans la ligne de commande, utilisation des paramètres par défaut..." << std::endl;
 		}
 	}
@@ -200,7 +200,7 @@ void testPerlin(int argc, char** argv) {
 	texmapBuilder.addSlice(230, slice3);
 	//---
 
-	arma::Mat<double> randomArray = perlin.generatePerlinNoise2D(size * 8, 0, 7, 16, 0.9);
+	arma::Mat<double> randomArray = perlin.generatePerlinNoise2D(size * 8, 0, 7, 16, (float)0.9);
 	img::Image texture = generator.generateTexture(*terrain, texmapBuilder, randomArray);
 
 	std::cout << "ecriture de la texture..." << std::endl;
