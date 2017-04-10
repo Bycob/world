@@ -5,6 +5,7 @@
 #include <tuple>
 
 #include "../maths/mathshelper.h"
+#include "../maths/interpolation.h"
 
 using namespace arma;
 using namespace maths;
@@ -62,7 +63,7 @@ void CustomWorldRMGenerator::generate(WorldMap & map) const {
 	float caseSize = (float)relief.n_cols / (float)caseCount;
 
 	// Préparation de la grille
-	typedef std::tuple<float, float, float, float> point; // pour plus de lisibilité
+	typedef std::pair<vec2d, vec2d> point; // pour plus de lisibilité
 	std::vector<std::vector<point>> pointsMap; pointsMap.reserve(sliceCount);
 	std::vector<std::pair<uint32_t, uint32_t>> grid; grid.reserve(size);
 
@@ -74,7 +75,7 @@ void CustomWorldRMGenerator::generate(WorldMap & map) const {
 
 		for (int y = 0; y < caseCount; y++) {
 			grid.emplace_back(x, y);
-			slice.emplace_back(-1, -1, 0, 0);
+			slice.emplace_back(vec2d(1, 1), vec2d(0, 0));
 		}
 	}
 	
@@ -99,29 +100,29 @@ void CustomWorldRMGenerator::generate(WorldMap & map) const {
 		if (x > 0) {
 			auto negXCase = pointsMap[x - 1][y];
 
-			if (std::get<0>(negXCase) > 0) {
-				limNegX = std::get<0>(negXCase);
+			if (negXCase.first.x >= 0) {
+				limNegX = negXCase.first.x;
 			}
 		}
 		if (x < sliceCount - 1) {
 			auto posXCase = pointsMap[x + 1][y];
 
-			if (std::get<0>(posXCase) > 0) {
-				limPosX = std::get<0>(posXCase);
+			if (posXCase.first.x >= 0) {
+				limPosX = posXCase.first.x;
 			}
 		}
 		if (y > 0) {
 			auto negYCase = pointsMap[x][y - 1];
 
-			if (std::get<1>(negYCase) > 0) {
-				limNegY = std::get<1>(negYCase);
+			if (negYCase.first.y >= 0) {
+				limNegY = negYCase.first.y;
 			}
 		}
 		if (y < caseCount - 1) {
 			auto posYCase = pointsMap[x][y + 1];
 
-			if (std::get<1>(posYCase) > 0) {
-				limPosY = std::get<1>(posYCase);
+			if (posYCase.first.y >= 0) {
+				limPosY = posYCase.first.y;
 			}
 		}
 
@@ -129,23 +130,41 @@ void CustomWorldRMGenerator::generate(WorldMap & map) const {
 		double randX = rand(rng());
 		double randY = rand(rng());
 
+		// TODO ces deux paramètres sont random.
 		float elevation = 0;
 		float diff = 0;
 
-		pointsMap[x][y] = std::tuple<float, float, float, float>(
-			(float)(randX * (limPosX - limNegX) + limNegX + x * sliceSize),
-			(float)(randY * (limPosY - limNegY) + limNegY + y * caseSize),
-			elevation, diff);
-
-		// ET VOILA !
-		// Maintenant est-ce qu'on trouve les valeurs ici, ou est-ce qu'on attend ?
-		// Est-ce qu'on sépare cet algorithme du reste ?
-		// Tant de question sans réponse...
+		pointsMap[x][y] = std::make_pair<vec2d, vec2d>(
+			vec2d(
+				(float)(randX * (limPosX - limNegX) + limNegX + x * sliceSize),
+				(float)(randY * (limPosY - limNegY) + limNegY + y * caseSize)),
+			vec2d(elevation, diff));
 	}
 
 
 	// -> Interpolation des valeurs des points pour reconstituer une map
-	// https://en.wikipedia.org/wiki/Inverse_distance_weighting
+	
+	// Création des interpolateur
+	IDWInterpolator<vec2d, vec2d> interpolator(6, 30);
+
+	// On prépare les données à interpoler.
+	for (auto & slice : pointsMap) {
+		for (auto & pt : slice) {
+			if (pt.first.x >= 0) {
+				interpolator.addData(pt.first, pt.second);
+			}
+		}
+	}
+
+	// On remplit la grille à l'aide de l'interpolateur. And enjoy.
+	for (uint32_t x = 0; x < relief.n_rows; x++) {
+		for (uint32_t y = 0; y < relief.n_cols; y++) {
+			vec2d pt((double)x + 0.5, (double)y + 0.5);
+			vec2d result = interpolator.getData(pt);
+			relief.at(x, y, 0) = result.x;
+			relief.at(x, y, 1) = result.y;
+		}
+	}
 }
 
 

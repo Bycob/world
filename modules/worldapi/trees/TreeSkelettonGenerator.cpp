@@ -106,7 +106,7 @@ void TreeSkelettonGenerator::forkNode(Node<TreeInfo>* node) {
 		// Mise à jour des variables
 		TreeInfo & newInfo = addedNode->getInfo();
 		newInfo._level = info._level + 1;
-		newInfo._size = length(node->getPosition(), addedNode->getPosition());
+		newInfo._size = vec3d::length(node->getPosition(), addedNode->getPosition());
 
 		// On fork ensuite tous les nodes créés.
 		const int maxLevel = (*_maxLevel)(info);

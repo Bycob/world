@@ -82,15 +82,15 @@ Cube<double> TerrainTexmapBuilder::convertToMap() const {
 
 			//Interpolation entre les bornes
 			//TODO fonctions pour simplifier ça
-			result((uword)h, (uword)p, (uword)0) = interpolate(
-				lowerSlice->first, interpolate(lowerRatioSum - lowerfirstPoint->ratio / 2.0, lowerfirstPoint->r, lowerRatioSum + lowersecondPoint->ratio / 2.0, lowersecondPoint->r, x),
-				higherSlice->first, interpolate(higherRatioSum - higherfirstPoint->ratio / 2.0, higherfirstPoint->r, higherRatioSum + highersecondPoint->ratio / 2.0, highersecondPoint->r, x), altitude);
-			result((uword)h, (uword)p, (uword)1) = interpolate(
-				lowerSlice->first, interpolate(lowerRatioSum - lowerfirstPoint->ratio / 2.0, lowerfirstPoint->g, lowerRatioSum + lowersecondPoint->ratio / 2.0, lowersecondPoint->g, x),
-				higherSlice->first, interpolate(higherRatioSum - higherfirstPoint->ratio / 2.0, higherfirstPoint->g, higherRatioSum + highersecondPoint->ratio / 2.0, highersecondPoint->g, x), altitude);
-			result((uword)h, (uword)p, (uword)2) = interpolate(
-				lowerSlice->first, interpolate(lowerRatioSum - lowerfirstPoint->ratio / 2.0, lowerfirstPoint->b, lowerRatioSum + lowersecondPoint->ratio / 2.0, lowersecondPoint->b, x),
-				higherSlice->first, interpolate(higherRatioSum - higherfirstPoint->ratio / 2.0, higherfirstPoint->b, higherRatioSum + highersecondPoint->ratio / 2.0, highersecondPoint->b, x), altitude);
+			result((uword)h, (uword)p, (uword)0) = interpolateCosine(
+				lowerSlice->first, interpolateCosine(lowerRatioSum - lowerfirstPoint->ratio / 2.0, lowerfirstPoint->r, lowerRatioSum + lowersecondPoint->ratio / 2.0, lowersecondPoint->r, x),
+				higherSlice->first, interpolateCosine(higherRatioSum - higherfirstPoint->ratio / 2.0, higherfirstPoint->r, higherRatioSum + highersecondPoint->ratio / 2.0, highersecondPoint->r, x), altitude);
+			result((uword)h, (uword)p, (uword)1) = interpolateCosine(
+				lowerSlice->first, interpolateCosine(lowerRatioSum - lowerfirstPoint->ratio / 2.0, lowerfirstPoint->g, lowerRatioSum + lowersecondPoint->ratio / 2.0, lowersecondPoint->g, x),
+				higherSlice->first, interpolateCosine(higherRatioSum - higherfirstPoint->ratio / 2.0, higherfirstPoint->g, higherRatioSum + highersecondPoint->ratio / 2.0, highersecondPoint->g, x), altitude);
+			result((uword)h, (uword)p, (uword)2) = interpolateCosine(
+				lowerSlice->first, interpolateCosine(lowerRatioSum - lowerfirstPoint->ratio / 2.0, lowerfirstPoint->b, lowerRatioSum + lowersecondPoint->ratio / 2.0, lowersecondPoint->b, x),
+				higherSlice->first, interpolateCosine(higherRatioSum - higherfirstPoint->ratio / 2.0, higherfirstPoint->b, higherRatioSum + highersecondPoint->ratio / 2.0, highersecondPoint->b, x), altitude);
 		}
 	}
 
