@@ -10,6 +10,7 @@
 #define WORLDAPI_EXPORT
 #endif
 
+#define _USE_MATH_DEFINES
 //#define ARMA_NO_DEBUG
 
 // Warnings MSVC
