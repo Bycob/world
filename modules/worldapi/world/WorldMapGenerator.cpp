@@ -35,19 +35,20 @@ ReliefMapGenerator::ReliefMapGenerator(WorldMapGenerator * parent) :
 
 
 // -----
-const float CustomWorldRMGenerator::PIXEL_UNIT = 100;
+const float CustomWorldRMGenerator::PIXEL_UNIT = 10;
 
-CustomWorldRMGenerator::CustomWorldRMGenerator(WorldMapGenerator * parent) : 
-	ReliefMapGenerator(parent) {
+CustomWorldRMGenerator::CustomWorldRMGenerator(WorldMapGenerator * parent, float biomeDensity) : 
+	ReliefMapGenerator(parent),
+	_biomeDensity(biomeDensity) {
 	
 }
 
 void CustomWorldRMGenerator::generate(WorldMap & map) const {
-	cube relief = reliefMap(map);
+	cube & relief = reliefMap(map);
 
 	// Nombre de biomes à générer.
 	uint32_t size = relief.n_rows * relief.n_cols;
-	uint32_t biomeCount = (uint32_t)(_biomeDensity * (float) size / PIXEL_UNIT);
+	uint32_t biomeCount = (uint32_t)(_biomeDensity * (float) size / (PIXEL_UNIT * PIXEL_UNIT));
 
 
 	// -> Création de la grille pour le placement des points de manière aléatoire,
@@ -56,33 +57,33 @@ void CustomWorldRMGenerator::generate(WorldMap & map) const {
 	// Calcul des dimensions de la grille
 	float minDistance = PIXEL_UNIT / 2.0 * sqrt(_biomeDensity);
 	
-	uint32_t sliceCount = (uint32_t)((float)relief.n_rows / minDistance);
+	uint32_t sliceCount = maths::max<uint32_t>((uint32_t)((float)relief.n_rows / minDistance), 1);
 	float sliceSize = (float)relief.n_rows / (float)sliceCount;
 
-	uint32_t caseCount = (uint32_t)((float)relief.n_cols / minDistance);
+	uint32_t caseCount = maths::max<uint32_t>((uint32_t)((float)relief.n_cols / minDistance), 1);
 	float caseSize = (float)relief.n_cols / (float)caseCount;
 
 	// Préparation de la grille
 	typedef std::pair<vec2d, vec2d> point; // pour plus de lisibilité
 	std::vector<std::vector<point>> pointsMap; pointsMap.reserve(sliceCount);
-	std::vector<std::pair<uint32_t, uint32_t>> grid; grid.reserve(size);
+	std::vector<std::pair<uint32_t, uint32_t>> grid; grid.reserve(sliceCount * caseCount);
 
 	for (int x = 0; x < sliceCount; x++) {
 		pointsMap.emplace_back();
 
-		auto slice = pointsMap[x];
+		std::vector<point> & slice = pointsMap[x];
 		slice.reserve(caseCount);
 
 		for (int y = 0; y < caseCount; y++) {
 			grid.emplace_back(x, y);
-			slice.emplace_back(vec2d(1, 1), vec2d(0, 0));
+			slice.emplace_back(vec2d(-1, -1), vec2d(0, 0));
 		}
 	}
 	
 	// Génération des points
 	std::uniform_real_distribution<double> rand(0.0, 1.0);
 
-	for (int i = 0; i < biomeCount; i++) {
+	for (int i = 0; i < biomeCount; i++) { // TODO dans les cas limites la grille peut se vider totalement
 		// Génération des coordonnées des points
 		uint32_t randIndex = (uint32_t)(rand(rng()) * grid.size());
 		std::pair<uint32_t, uint32_t> randPoint = grid.at(randIndex);
@@ -131,8 +132,8 @@ void CustomWorldRMGenerator::generate(WorldMap & map) const {
 		double randY = rand(rng());
 
 		// TODO ces deux paramètres sont random.
-		float elevation = 0;
-		float diff = 0;
+		float elevation = rand(rng());
+		float diff = rand(rng()) * elevation;
 
 		pointsMap[x][y] = std::make_pair<vec2d, vec2d>(
 			vec2d(
@@ -145,7 +146,7 @@ void CustomWorldRMGenerator::generate(WorldMap & map) const {
 	// -> Interpolation des valeurs des points pour reconstituer une map
 	
 	// Création des interpolateur
-	IDWInterpolator<vec2d, vec2d> interpolator(6, 30);
+	IDWInterpolator<vec2d, vec2d> interpolator(6);
 
 	// On prépare les données à interpoler.
 	for (auto & slice : pointsMap) {
@@ -170,7 +171,8 @@ void CustomWorldRMGenerator::generate(WorldMap & map) const {
 
 // WorldMapGenerator
 
-WorldMapGenerator::WorldMapGenerator(uint32_t sizeX, uint32_t sizeY) : 
+WorldMapGenerator::WorldMapGenerator(uint32_t sizeX, uint32_t sizeY) :
+	_rng(time(NULL)),
 	_sizeX(sizeX), _sizeY(sizeY),
 	_reliefMap(nullptr) {
 

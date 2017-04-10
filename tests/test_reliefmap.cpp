@@ -21,7 +21,7 @@ void testReliefMap(int argc, char** argv) {
 	std::cout << "Creation du generateur" << std::endl;
 
 	WorldMapGenerator generator(100, 150);
-	generator.emplaceReliefMapGenerator<CustomWorldRMGenerator>();
+	generator.emplaceReliefMapGenerator<CustomWorldRMGenerator>(0.12);
 
 	std::cout << "Generation de la ReliefMap" << std::endl;
 

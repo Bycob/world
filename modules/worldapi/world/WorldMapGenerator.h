@@ -35,7 +35,7 @@ public:
 
 class WORLDAPI_EXPORT CustomWorldRMGenerator : public ReliefMapGenerator {
 public:
-	CustomWorldRMGenerator(WorldMapGenerator * parent);
+	CustomWorldRMGenerator(WorldMapGenerator * parent, float biomeDensity = 1);
 
 	virtual void generate(WorldMap & map) const;
 private:

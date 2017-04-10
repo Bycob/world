@@ -45,8 +45,10 @@ namespace img {
 		switch (_ref->_type) {
 		case ImageType::RGB :
 			_ref->_image->at<cv::Vec3b>(_x, _y) = cv::Vec3b(b, g, r);
+			break;
 		case ImageType::RGBA :
 			_ref->_image->at<cv::Vec4b>(_x, _y) = cv::Vec4b(b, g, r, a);
+			break;
 		default :
 			_ref->_image->at<uint8_t>(_x, _y) = r;
 		}

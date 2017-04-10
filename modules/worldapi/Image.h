@@ -14,8 +14,7 @@ namespace img {
 	enum class WORLDAPI_EXPORT ImageType {
 		RGB = 0,
 		RGBA = 1,
-		GREYSCALE = 2,
-		COUNT = 3
+		GREYSCALE = 2
 	};
 
 	class WORLDAPI_EXPORT Pixel {

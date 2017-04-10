@@ -20,5 +20,15 @@ const cube & WorldMap::getReliefMap() {
 }
 
 Image WorldMap::getReliefMapAsImage() {
-	throw std::runtime_error("Not yet implemented");
+	Image img(_reliefMap.n_rows, _reliefMap.n_cols, ImageType::RGB);
+
+	for (uint32_t x = 0; x < _reliefMap.n_rows; x++) {
+		for (uint32_t y = 0; y < _reliefMap.n_cols; y++) {
+			img.at(x, y).set(
+				(uint8_t) (_reliefMap(x, y, 0) * 255),
+				(uint8_t) ((1 - _reliefMap(x, y, 1)) * 255)
+			);
+		}
+	}
+	return img;
 }
