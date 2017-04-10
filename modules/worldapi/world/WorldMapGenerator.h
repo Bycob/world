@@ -35,13 +35,18 @@ public:
 
 class WORLDAPI_EXPORT CustomWorldRMGenerator : public ReliefMapGenerator {
 public:
-	CustomWorldRMGenerator(WorldMapGenerator * parent, float biomeDensity = 1);
+	CustomWorldRMGenerator(WorldMapGenerator * parent, float biomeDensity = 1, uint32_t limitBrightness = 4);
+
+	void setLimitBrightness(uint32_t);
 
 	virtual void generate(WorldMap & map) const;
 private:
 	static const float PIXEL_UNIT;
 	/** Le nombre moyen de biomes par bloc de 100 pixels de WorldMap.*/
 	float _biomeDensity;
+	/** La netteté des limites entre les biomes. En pratique c'est
+	le "p" dans l'algo de l'interpolation. */
+	uint32_t _limitBrightness;
 };
 
 

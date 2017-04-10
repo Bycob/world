@@ -37,10 +37,15 @@ ReliefMapGenerator::ReliefMapGenerator(WorldMapGenerator * parent) :
 // -----
 const float CustomWorldRMGenerator::PIXEL_UNIT = 10;
 
-CustomWorldRMGenerator::CustomWorldRMGenerator(WorldMapGenerator * parent, float biomeDensity) : 
+CustomWorldRMGenerator::CustomWorldRMGenerator(WorldMapGenerator * parent, float biomeDensity, uint32_t limitBrightness) :
 	ReliefMapGenerator(parent),
-	_biomeDensity(biomeDensity) {
+	_biomeDensity(biomeDensity),
+	_limitBrightness(limitBrightness) {
 	
+}
+
+void CustomWorldRMGenerator::setLimitBrightness(uint32_t p) {
+	_limitBrightness = p;
 }
 
 void CustomWorldRMGenerator::generate(WorldMap & map) const {
@@ -146,7 +151,7 @@ void CustomWorldRMGenerator::generate(WorldMap & map) const {
 	// -> Interpolation des valeurs des points pour reconstituer une map
 	
 	// Création des interpolateur
-	IDWInterpolator<vec2d, vec2d> interpolator(6);
+	IDWInterpolator<vec2d, vec2d> interpolator(_limitBrightness);
 
 	// On prépare les données à interpoler.
 	for (auto & slice : pointsMap) {
