@@ -129,10 +129,13 @@ void CustomWorldRMGenerator::generate(WorldMap & map) const {
 		double randX = rand(rng());
 		double randY = rand(rng());
 
-		pointsMap[x][y] = std::make_tuple<float, float, float, float>(
-			randX * (limPosX - limNegX) + limNegX + x * sliceSize,
-			randY * (limPosY - limNegY) + limNegY + y * caseSize,
-			0, 0);
+		float elevation = 0;
+		float diff = 0;
+
+		pointsMap[x][y] = std::tuple<float, float, float, float>(
+			(float)(randX * (limPosX - limNegX) + limNegX + x * sliceSize),
+			(float)(randY * (limPosY - limNegY) + limNegY + y * caseSize),
+			elevation, diff);
 
 		// ET VOILA !
 		// Maintenant est-ce qu'on trouve les valeurs ici, ou est-ce qu'on attend ?
@@ -142,7 +145,7 @@ void CustomWorldRMGenerator::generate(WorldMap & map) const {
 
 
 	// -> Interpolation des valeurs des points pour reconstituer une map
-
+	// https://en.wikipedia.org/wiki/Inverse_distance_weighting
 }
 
 
