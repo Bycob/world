@@ -5,16 +5,13 @@
 
 #include "worldapidef.h"
 
-long default_seed() {
-	return (long) time(NULL);
-}
-
 //FONCTIONS-PARAMETRES
 
 template <typename I, typename T>
 class Parameter {
 public:
 	virtual T operator()(const I & in) = 0;
+	virtual Parameter<I, T> * clone() const = 0;
 };
 
 template <typename I, typename T>
@@ -25,6 +22,10 @@ public :
 	virtual T operator()(const I &in) {
 		return _value;
 	}
+
+	virtual ConstantParameter<I, T> * clone() const {
+		return new ConstantParameter<I, T>(*this);
+	}
 private :
 	T _value;
 };
@@ -32,7 +33,7 @@ private :
 template <typename I, typename T>
 class RandomParameter : public Parameter<I, T> {
 public :
-	RandomParameter() : _rng(default_seed()) {}
+	RandomParameter() : _rng(time(NULL)) {}
 protected :
 	std::mt19937 _rng;
 };
@@ -44,6 +45,10 @@ public :
 
 	virtual double operator()(const I & in) {
 		return this->_random(this->_rng);
+	}
+
+	virtual GaussianParameter<I> * clone() const {
+		return new GaussianParameter<I>(*this);
 	}
 private :
 	std::normal_distribution<double> _random;
@@ -57,6 +62,10 @@ public :
 	virtual int operator()(const I & in) {
 		return this->_random(this->_rng);
 	}
+
+	virtual UniformRandomIntegerParameter<I> * clone() const {
+		return new UniformRandomIntegerParameter<I>(*this);
+	}
 private :
 	std::uniform_int_distribution<int> _random;
 };
@@ -68,6 +77,10 @@ public:
 
 	virtual double operator()(const I & in) {
 		return this->_random(this->_rng);
+	}
+
+	virtual UniformRandomDoubleParameter<I> * clone() const {
+		return new UniformRandomDoubleParameter<I>(*this);
 	}
 private:
 	std::uniform_real_distribution<double> _random;

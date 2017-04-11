@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "WorldMap.h"
+#include "WorldParameters.h"
 #include "../GenBase.h"
 
 // MODULES (à déplacer ?)
@@ -17,6 +18,7 @@ class WorldMapGenerator;
 class WORLDAPI_EXPORT WorldMapGeneratorModule {
 public:
 	WorldMapGeneratorModule(WorldMapGenerator * parent);
+	virtual ~WorldMapGeneratorModule() = default;
 
 	virtual void generate(WorldMap & map) const = 0;
 protected:
@@ -47,6 +49,8 @@ private:
 	/** La netteté des limites entre les biomes. En pratique c'est
 	le "p" dans l'algo de l'interpolation. */
 	uint32_t _limitBrightness;
+
+	std::unique_ptr<relief::diff_param> _diffParam;
 };
 
 

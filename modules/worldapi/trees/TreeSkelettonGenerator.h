@@ -21,9 +21,6 @@ public:
 	}
 
 	void setConstantInclination(double phi);
-	template <class F> void setInclination_wrapped(const F & phiFunc) {
-		_phi = std::make_unique<treegen::wrapper_d>(phiFunc);
-	}
 	template <class F> void setInclination(const F & phiFunc) {
 		_phi = std::make_unique<F>(phiFunc);
 	}

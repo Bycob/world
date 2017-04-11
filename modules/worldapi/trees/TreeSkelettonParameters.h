@@ -21,6 +21,8 @@ namespace treegen {
 	public :
 		virtual T operator()(const TreeInfo & info,
 			int divisionCount = 1, double theta = 0, double phi = 0, double weight = 0, double size = 0) = 0;
+
+		virtual TreeParameter<T> * clone() const = 0;
 	};
 
 	template <typename T>
@@ -33,6 +35,10 @@ namespace treegen {
 			int divisionCount, double theta, double phi, double weight, double size) {
 
 			return (*_wrapped)(info);
+		}
+
+		virtual TreeParameterWrapper<T> * clone() const {
+			return new TreeParameterWrapper<T>(*this);
 		}
 	private :
 		TreeParameterWrapper() : _wrapped(nullptr) {}
@@ -50,6 +56,10 @@ namespace treegen {
 			int divisionCount, double theta, double phi, double weight, double size) {
 
 			return (*_chained)(info, divisionCount, theta, phi, weight, size);
+		}
+
+		virtual TreeParameterChain<T> * clone() const {
+			return new TreeParameterChain<T>(*this);
 		}
 	private:
 		std::shared_ptr<TreeParameter<T>> _chained;
@@ -69,6 +79,10 @@ namespace treegen {
 			int divisionCount, double theta, double phi, double weight, double size) {
 			return info.getWeight() / divisionCount;
 		}
+
+		virtual DefaultWeightParameter * clone() const {
+			return new DefaultWeightParameter(*this);
+		}
 	};
 
 	class SpecialWeightParameter1 : public TreeParameter<double> {
@@ -81,6 +95,10 @@ namespace treegen {
 				w /= 10.0;
 			}
 			return w / divisionCount;
+		}
+
+		virtual SpecialWeightParameter1 * clone() const {
+			return new SpecialWeightParameter1(*this);
 		}
 	};
 
@@ -97,6 +115,10 @@ namespace treegen {
 				superResult /= 2.0;
 			}
 			return superResult;
+		}
+
+		virtual SpecialSizeParameter1 * clone() const {
+			return new SpecialSizeParameter1(*this);
 		}
 	};
 
@@ -116,6 +138,9 @@ namespace treegen {
 			}
 		}
 
+		virtual MaxLevelByWeightParameter * clone() const {
+			return new MaxLevelByWeightParameter(*this);
+		}
 	private :
 		double _weightThreshold;
 	};
@@ -138,6 +163,10 @@ namespace treegen {
 			}
 			return result;
 		}
+
+		virtual SideBranchPhiParameter * clone() const {
+			return new SideBranchPhiParameter(*this);
+		}
 	private :
 	};
 
@@ -158,6 +187,10 @@ namespace treegen {
 
 			return result;
 		}
+
+		virtual SideBranchOffsetThetaParameter * clone() const {
+			return new SideBranchOffsetThetaParameter(*this);
+		}
 	};
 
 	class SideBranchSizeParameter : public chain_d {
@@ -172,6 +205,10 @@ namespace treegen {
 			result *= pow(weight / info.getWeight(), 0.3) * 1.4;
 
 			return result;
+		}
+
+		virtual SideBranchSizeParameter * clone() const {
+			return new SideBranchSizeParameter(*this);
 		}
 	};
 	
@@ -192,6 +229,10 @@ namespace treegen {
 				result *= 0.6;
 			}
 			return result;
+		}
+
+		virtual SideBranchSizeParameter * clone() const {
+			return new SideBranchSizeParameter(*this);
 		}
 	};
 }
