@@ -165,6 +165,8 @@ void PerlinTerrainGenerator::adaptFromBuffer(Terrain & terrain, int xsub, int ys
 					((double)ysub + (double)y / subterrain._array.n_cols) / terrain._subdivideFactor, 0);
 		}
 	}
+
+	subterrain._noisePart = _subdivNoiseRatio;
 }
 
 arma::Mat<double> & PerlinTerrainGenerator::getBuf(int x, int y) const {

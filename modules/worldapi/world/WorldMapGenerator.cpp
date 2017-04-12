@@ -41,12 +41,20 @@ CustomWorldRMGenerator::CustomWorldRMGenerator(WorldMapGenerator * parent, float
 	ReliefMapGenerator(parent),
 	_biomeDensity(biomeDensity),
 	_limitBrightness(limitBrightness),
-	_diffParam(std::make_unique<relief::CustomWorldDifferential>()) {
+	_diffLaw(std::make_unique<relief::CustomWorldDifferential>()) {
 	
+}
+
+void CustomWorldRMGenerator::setBiomeDensity(float biomeDensity) {
+	_biomeDensity = biomeDensity;
 }
 
 void CustomWorldRMGenerator::setLimitBrightness(uint32_t p) {
 	_limitBrightness = p;
+}
+
+void CustomWorldRMGenerator::setDifferentialLaw(const relief::diff_law & law) {
+	_diffLaw = std::unique_ptr<relief::diff_law>(law.clone());
 }
 
 void CustomWorldRMGenerator::generate(WorldMap & map) const {
@@ -139,7 +147,7 @@ void CustomWorldRMGenerator::generate(WorldMap & map) const {
 
 		// TODO ces deux paramètres sont random.
 		float elevation = rand(rng());
-		float diff = (*_diffParam)(std::pair<double, double>(elevation, rand(rng())));
+		float diff = (*_diffLaw)(std::pair<double, double>(elevation, rand(rng())));
 
 		pointsMap[x][y] = std::make_pair<vec2d, vec2d>(
 			vec2d(

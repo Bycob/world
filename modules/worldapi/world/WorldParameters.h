@@ -7,9 +7,9 @@
 #include "../Parameters.h"
 
 namespace relief {
-	typedef Parameter<std::pair<double, double>, double> diff_param;
+	typedef Parameter<std::pair<double, double>, double> diff_law;
 
-	class CustomWorldDifferential : public diff_param {
+	class CustomWorldDifferential : public diff_law {
 	public:
 		CustomWorldDifferential(double range = 4) : _range(range) {}
 

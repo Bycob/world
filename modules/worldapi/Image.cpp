@@ -98,23 +98,23 @@ namespace img {
 		setComponent(0, fromFloat(l));
 	}
 
-	uint8_t Pixel::getAlpha() {
+	uint8_t Pixel::getAlpha() const {
 		return getComponent(3);
 	}
 
-	uint8_t Pixel::getRed() {
+	uint8_t Pixel::getRed() const {
 		return getComponent(2);
 	}
 
-	uint8_t Pixel::getGreen() {
+	uint8_t Pixel::getGreen() const {
 		return getComponent(1);
 	}
 
-	uint8_t Pixel::getBlue() {
+	uint8_t Pixel::getBlue() const {
 		return getComponent(0);
 	}
 
-	uint8_t Pixel::getComponent(int id) {
+	uint8_t Pixel::getComponent(int id) const {
 		switch (_ref->_type) {
 		case ImageType::RGBA:
 			return _ref->_image->at<uint8_t>(_x, _y, id);
@@ -179,8 +179,24 @@ namespace img {
 			delete _image;
 	}
 
+	ImageType Image::type() const {
+		return _type;
+	}
+
+	uint32_t Image::width() const {
+		return _image->cols;
+	}
+
+	uint32_t Image::height() const {
+		return _image->rows;
+	}
+
 	Pixel Image::at(int x, int y) {
 		return Pixel(x, y, this);
+	}
+
+	const Pixel Image::at(int x, int y) const {
+		return Pixel(x, y, const_cast<Image *>(this)); // TODO c'est absolument pas const ça !
 	}
 
 	void Image::write(const std::string &file) {

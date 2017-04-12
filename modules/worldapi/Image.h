@@ -35,17 +35,17 @@ namespace img {
 		void setLevel(uint8_t l);
 		void setLevelf(float l);
 
-		uint8_t getAlpha();
-		uint8_t getRed();
-		uint8_t getGreen();
-		uint8_t getBlue();
+		uint8_t getAlpha() const;
+		uint8_t getRed() const;
+		uint8_t getGreen() const;
+		uint8_t getBlue() const;
 
 	private:
 		friend class Image;
 
 		Pixel(int width, int height, Image *ref);
 
-		uint8_t getComponent(int id);
+		uint8_t getComponent(int id) const;
 		void setComponent(int id, uint8_t type);
 
 		int _x; int _y;
@@ -64,8 +64,14 @@ namespace img {
 		Image(const Image & img);
 		~Image();
 
+		// infos
+		ImageType type() const;
+		uint32_t width() const;
+		uint32_t height() const;
+
 		// access
 		Pixel at(int x, int y);
+		const Pixel at(int x, int y) const;
 
 		// IO
 		void write(const std::string &file);

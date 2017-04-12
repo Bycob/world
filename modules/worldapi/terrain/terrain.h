@@ -103,16 +103,25 @@ private :
 	arma::Mat<double> _array;
 	std::unique_ptr<img::Image> _texture;
 
-	/// Indique l'étape de subdivision du terrain, c'est-à-dire le nombre
-	/// de subdivisions dont il a été issu.
+	/** Indique l'étape de subdivision du terrain, c'est-à-dire le nombre
+	de subdivisions dont il a été issu.*/
 	int _subdivisionStage = 0;
+	/** Chaque sous-terrain est composé d'une part de bruit, le reste étant
+	une copie interpolée des valeurs du terrain à l'étage en dessus. Ce
+	champ indique quelle est la part de bruit dans le terrain et permet ainsi
+	d'extraire ce bruit au besoin. */
+	float _noisePart = 0;
+	/** Si ce terrain est une subdivision, indique la position de cette
+	subdivision au sein du terrain parent. */
 	int _x, _y;
 	Terrain *_parent = nullptr;
 
-	int _subdivideFactor;
-	/// Vector contenant tous les sous-terrains. Les terrains sont
-	/// ordonnées en column-major order, c'est à dire que le sous-terrain
-	/// d'indice (x, y) est stocké à la case x * _subdivideFactor + y
+	/** Indique le nombre de subdivision que possède ce terrain en largeur
+	et en hauteur. */
+	int _subdivideFactor = 0;
+	/** Vector contenant tous les sous-terrains. Les terrains sont
+	ordonnées en column-major order, c'est à dire que le sous-terrain
+	d'indice (x, y) est stocké à la case x * _subdivideFactor + y */
 	std::vector<std::unique_ptr<Terrain>> _subterrain;
 
 	// ------
