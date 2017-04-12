@@ -32,17 +32,22 @@ INCLUDEPATH += "$${WORLDAPI_SOURCES}/modules" \
 LIBS    += -L$${WORLDAPI_LIBDIR} -lworldapi
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
+    mainwindow.cpp \
     panelterrain.cpp \
     generatepanel.cpp \
     scene.cpp \
-    qtworld.cpp
+    qtworld.cpp \
+    previewpanel3d.cpp
 
 HEADERS  += mainwindow.h \
     panelterrain.h \
     generatepanel.h \
     scene.h \
-    qtworld.h
+    qtworld.h \
+    previewpanel3d.h
 
 FORMS    += mainwindow.ui \
     panelterrain.ui
+
+RESOURCES += \
+    icons.qrc

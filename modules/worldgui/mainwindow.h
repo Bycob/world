@@ -5,6 +5,7 @@
 #include <Qt3DCore/QEntity>
 
 #include "generatepanel.h"
+#include "previewpanel3d.h"
 
 namespace Ui {
 class MainWindow;
@@ -19,12 +20,15 @@ public:
     ~MainWindow();
 
 public slots:
+    void generate();
+
     void setScene(const Scene *objects);
+    void setImage(const QImage *image);
 
 private:
     Ui::MainWindow *ui;
     GeneratePanel *generatePanel = nullptr;
-    Qt3DCore::QEntity *rootEntity;
+    PreviewPanel3D _3DPanel;
 
     void swapGeneratePanel(GeneratePanel * newPanel);
 };

@@ -2,14 +2,18 @@
 #define QTWORLD_H
 
 #include <Qt3DCore/QEntity>
-#include <worldapi/files/mesh.h>
+#include <qimage.h>
+
+#include <worldapi/mesh.h>
+#include <worldapi/Image.h>
 
 class QtWorld
 {
 public:
     QtWorld() = delete;
 
-    static Qt3DCore::QEntity * toQt(const Mesh & mesh, Qt3DCore::QEntity * parent);
+    static Qt3DCore::QEntity * getQMesh(const Mesh & mesh, Qt3DCore::QEntity * parent);
+    static QImage * getQImage(const img::Image & image);
 };
 
 #endif // QTWORLD_H

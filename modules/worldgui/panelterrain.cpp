@@ -9,6 +9,10 @@
 
 #include "panelterrain.h"
 #include "ui_panelterrain.h"
+#include "qtworld.h"
+
+#define MAX_MESH_SIZE 350
+ // max ~10000 vertices
 
 PanelTerrain::PanelTerrain(QWidget *parent) :
     GeneratePanel(parent),
@@ -33,18 +37,24 @@ void PanelTerrain::generate()
     generated = std::shared_ptr<Terrain>(generator.generate().release());
 
     // Ecriture du mesh (temporaire)
-    ObjLoader file;
+    /*ObjLoader file;
     std::shared_ptr<Mesh> mesh = std::shared_ptr<Mesh>(generated->convertToMesh());
     file.addMesh(mesh);
 
     std::cout << "Ecriture du mesh" << std::endl;
     file.write("mesh");
-    std::cout << "Mesh ecrit" << std::endl;
+    std::cout << "Mesh ecrit" << std::endl;*/
 
     // Setup de ma scène
     this->myScene = std::make_unique<Scene>();
-    this->myScene->addMesh(std::shared_ptr<Mesh>(generated->convertToMesh()));
+
+    if (size < MAX_MESH_SIZE) {
+        this->myScene->addMesh(std::shared_ptr<Mesh>(generated->convertToMesh()));
+    }
 
     // On indique qu'elle a changé
     emit meshesChanged(this->myScene.get());
+
+    // Image
+    emit imageChanged(QtWorld::getQImage(generated->convertToImage()));
 }

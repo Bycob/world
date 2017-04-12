@@ -17,6 +17,7 @@ public:
     virtual const Scene * getMeshes();
 signals:
     void meshesChanged(const Scene * objects);
+    void imageChanged(const QImage * image);
 
 public slots:
     virtual void generate() = 0;
