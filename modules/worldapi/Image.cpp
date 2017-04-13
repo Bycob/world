@@ -42,15 +42,16 @@ namespace img {
 	}
 
 	void Pixel::set(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+		// TODO améliorer les performances
 		switch (_ref->_type) {
 		case ImageType::RGB :
-			_ref->_image->at<cv::Vec3b>(_x, _y) = cv::Vec3b(b, g, r);
+			_ref->_image->at<cv::Vec3b>(_y, _x) = cv::Vec3b(b, g, r);
 			break;
 		case ImageType::RGBA :
-			_ref->_image->at<cv::Vec4b>(_x, _y) = cv::Vec4b(b, g, r, a);
+			_ref->_image->at<cv::Vec4b>(_y, _x) = cv::Vec4b(b, g, r, a);
 			break;
 		default :
-			_ref->_image->at<uint8_t>(_x, _y) = r;
+			_ref->_image->at<uint8_t>(_y, _x) = r;
 		}
 	}
 
@@ -117,13 +118,13 @@ namespace img {
 	uint8_t Pixel::getComponent(int id) const {
 		switch (_ref->_type) {
 		case ImageType::RGBA:
-			return _ref->_image->at<uint8_t>(_x, _y, id);
+			return _ref->_image->data[4 * (_ref->_image->cols * _y + _x) + id];
 		case ImageType::RGB:
 			if (id == 3) return 255;
-			return _ref->_image->at<uint8_t>(_x, _y, id);
+			return _ref->_image->data[3 * (_ref->_image->cols * _y + _x) + id];
 		default:
 			if (id == 3) return 255;
-			return _ref->_image->at<uint8_t>(_x, _y);
+			return _ref->_image->data[_ref->_image->cols * _y + _x];
 		}
 	}
 
@@ -131,12 +132,14 @@ namespace img {
 		switch (_ref->_type) {
 		case ImageType::RGB:
 			if (id == 3) return;
+			_ref->_image->data[3 * (_ref->_image->cols * _y + _x) + id] = value;
+			break;
 		case ImageType::RGBA:
-			_ref->_image->at<uint8_t>(_x, _y, id) = value;
+			_ref->_image->data[4 * (_ref->_image->cols * _y + _x) + id] = value;
 			break;
 		default:
 			if (id == 3) return;
-			_ref->_image->at<uint8_t>(_x, _y) = value;
+			_ref->_image->data[_ref->_image->cols * _y + _x] = value;
 		}
 	}
 
@@ -145,7 +148,7 @@ namespace img {
 	// Implémentation de Image
 
 	Image::Image(int width, int height, const ImageType &type)
-		: _image(new cv::Mat(width, height, getCVType(type))),
+		: _image(new cv::Mat(height, width, getCVType(type))),
 		_type(type) {
 
 	}
