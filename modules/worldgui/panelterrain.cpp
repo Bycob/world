@@ -32,9 +32,40 @@ void PanelTerrain::generate()
     int octaves = this->ui->octaves_field->value();
     int frequency = this->ui->frequency_field->value();
     double persistence = this->ui->persistence_field->value();
+    bool texture = ui->textureCheckBox->isChecked();
 
     PerlinTerrainGenerator generator(size, 0, octaves, frequency, persistence);
     generated = std::shared_ptr<Terrain>(generator.generate().release());
+
+    if (texture) {
+        Perlin perlin;
+
+        //---
+        TerrainTexmapBuilder texmapBuilder(0, 255);
+
+        std::vector<ColorPart> slice1;
+        slice1.push_back(ColorPart(47.0 / 255, 128.0 / 255, 43.0 / 255, 0.75));
+        slice1.push_back(ColorPart(65.0 / 255, 53.0 / 255, 22.0 / 255, 0.25));
+
+        std::vector<ColorPart> slice2;
+        slice2.push_back(ColorPart(47.0 / 255, 128.0 / 255, 43.0 / 255, 0.15));
+        slice2.push_back(ColorPart(65.0 / 255, 53.0 / 255, 22.0 / 255, 0.25));
+        slice2.push_back(ColorPart(0.25, 0.25, 0.25, 0.6));
+
+        std::vector<ColorPart> slice3;
+        slice3.push_back(ColorPart(1, 1, 1, 0.7));
+        slice3.push_back(ColorPart(0.25, 0.25, 0.25, 0.3));
+
+        texmapBuilder.addSlice(1, slice1);
+        texmapBuilder.addSlice(180, slice2);
+        texmapBuilder.addSlice(230, slice3);
+        //---
+
+        arma::Mat<double> randomArray = perlin.generatePerlinNoise2D(size * 8, 0, 7, 16, (float)0.9);
+        img::Image texture = generator.generateTexture(*generated, texmapBuilder, randomArray);
+
+        emit imageChanged(QtWorld::getQImage(texture));
+    }
 
     // Ecriture du mesh (temporaire)
     /*ObjLoader file;
@@ -56,5 +87,7 @@ void PanelTerrain::generate()
     emit meshesChanged(this->myScene.get());
 
     // Image
-    emit imageChanged(QtWorld::getQImage(generated->convertToImage()));
+    if (!texture) {
+        emit imageChanged(QtWorld::getQImage(generated->convertToImage()));
+    }
 }

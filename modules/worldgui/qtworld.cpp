@@ -36,7 +36,7 @@ QImage * QtWorld::getQImage(const Image & image)
 
     for (int x = 0 ; x < width ; x++) {
         for (int y = 0 ; y < height ; y++) {
-            const Pixel & pix = image.at(x, y);
+            const ConstPixel & pix = image.at(x, y);
             QRgb value = qRgba(pix.getRed(), pix.getGreen(), pix.getBlue(), pix.getAlpha());
             qimage->setPixel(x, y, value);
         }
