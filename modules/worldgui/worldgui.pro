@@ -37,17 +37,20 @@ SOURCES += main.cpp\
     generatepanel.cpp \
     scene.cpp \
     qtworld.cpp \
-    previewpanel3d.cpp
+    previewpanel3d.cpp \
+    panelworldmap.cpp
 
 HEADERS  += mainwindow.h \
     panelterrain.h \
     generatepanel.h \
     scene.h \
     qtworld.h \
-    previewpanel3d.h
+    previewpanel3d.h \
+    panelworldmap.h
 
 FORMS    += mainwindow.ui \
-    panelterrain.ui
+    panelterrain.ui \
+    panelworldmap.ui
 
 RESOURCES += \
     icons.qrc

@@ -20,11 +20,12 @@ public:
     ~MainWindow();
 
 public slots:
+    void changeGeneratePanel();
+
     void generate();
 
     void setScene(const Scene *objects);
     void setImage(const QImage *image);
-
 private:
     Ui::MainWindow *ui;
     GeneratePanel *generatePanel = nullptr;

@@ -12,14 +12,20 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "panelterrain.h"
+#include "panelworldmap.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    swapGeneratePanel(new PanelTerrain());
+    swapGeneratePanel(new PanelWorldMap());
     ui->_3DTab->layout()->replaceWidget(ui->_3DPanel, _3DPanel.getWidget());
+
+    QObject::connect(ui->terrainButton, SIGNAL(clicked(bool)), this, SLOT(changeGeneratePanel()));
+    QObject::connect(ui->mapButton, SIGNAL(clicked(bool)), this, SLOT(changeGeneratePanel()));
+    // Géneration d'objets
+    QObject::connect(ui->generateButton, SIGNAL(clicked(bool)), this, SLOT(generate()));
 }
 
 MainWindow::~MainWindow()
@@ -49,30 +55,40 @@ void MainWindow::generate()
     generatePanel->generate();
 }
 
+void MainWindow::changeGeneratePanel()
+{
+    auto sender = QObject::sender();
+
+    if (sender == this->ui->terrainButton) {
+        swapGeneratePanel(new PanelTerrain());
+    }
+    else if (sender == this->ui->mapButton) {
+        swapGeneratePanel(new PanelWorldMap());
+    }
+}
+
 void MainWindow::swapGeneratePanel(GeneratePanel *newPanel)
 {
     // Remplacement
-    if (newPanel != nullptr) {
-        if (generatePanel != nullptr) {
+    if (generatePanel != nullptr) {
+        if (newPanel != nullptr) {
             ui->generateTab->layout()->replaceWidget(generatePanel, newPanel);
-            delete generatePanel;
         }
         else {
-            ui->generateTab->layout()->replaceWidget(ui->generatePanel, newPanel);
-        }
-    }
-    else {
-        if (generatePanel != nullptr) {
             ui->generateTab->layout()->replaceWidget(generatePanel, ui->generatePanel);
-            delete generatePanel;
         }
+
+        generatePanel->disconnect();
+        delete generatePanel;
     }
+    else if (newPanel != nullptr) {
+        ui->generateTab->layout()->replaceWidget(ui->generatePanel, newPanel);
+    }
+
     generatePanel = newPanel;
 
     if (newPanel != nullptr) {
         // Connexion signal / slot
-        // Géneration d'objets
-        QObject::connect(ui->generateButton, SIGNAL(clicked(bool)), this, SLOT(generate()));
         // Changement d'objets 3D
         QObject::connect(newPanel, SIGNAL(meshesChanged(const Scene*)), this, SLOT(setScene(const Scene*)));
         // Changement d'image

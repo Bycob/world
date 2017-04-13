@@ -38,7 +38,7 @@ PreviewPanel3D::PreviewPanel3D(QWidget * parent) :
 
 void PreviewPanel3D::setScene(const Scene * objects) {
     for (Qt3DCore::QNode * child : _rootEntity->childNodes()) {
-        child->deleteLater();
+        //child->deleteLater();
     }
 
     for (std::shared_ptr<Mesh> mesh : objects->getMeshes()) {

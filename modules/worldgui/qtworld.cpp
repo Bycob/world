@@ -41,5 +41,6 @@ QImage * QtWorld::getQImage(const Image & image)
             qimage->setPixel(x, y, value);
         }
     }
+
     return qimage;
 }
