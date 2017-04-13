@@ -36,8 +36,12 @@ namespace img {
 
 	// Implémentation de Pixel
 
-	Pixel::Pixel(int x, int y, Image * ref)
+	ConstPixel::ConstPixel(int x, int y, Image * ref)
 		: _x(x), _y(y), _ref(ref) {
+
+	}
+
+	Pixel::Pixel(int x, int y, Image * ref) : ConstPixel(x, y, ref) {
 
 	}
 
@@ -99,23 +103,23 @@ namespace img {
 		setComponent(0, fromFloat(l));
 	}
 
-	uint8_t Pixel::getAlpha() const {
+	uint8_t ConstPixel::getAlpha() const {
 		return getComponent(3);
 	}
 
-	uint8_t Pixel::getRed() const {
+	uint8_t ConstPixel::getRed() const {
 		return getComponent(2);
 	}
 
-	uint8_t Pixel::getGreen() const {
+	uint8_t ConstPixel::getGreen() const {
 		return getComponent(1);
 	}
 
-	uint8_t Pixel::getBlue() const {
+	uint8_t ConstPixel::getBlue() const {
 		return getComponent(0);
 	}
 
-	uint8_t Pixel::getComponent(int id) const {
+	uint8_t ConstPixel::getComponent(int id) const {
 		switch (_ref->_type) {
 		case ImageType::RGBA:
 			return _ref->_image->data[4 * (_ref->_image->cols * _y + _x) + id];
@@ -198,8 +202,8 @@ namespace img {
 		return Pixel(x, y, this);
 	}
 
-	const Pixel Image::at(int x, int y) const {
-		return Pixel(x, y, const_cast<Image *>(this)); // TODO c'est absolument pas const ça !
+	const ConstPixel Image::at(int x, int y) const {
+		return ConstPixel(x, y, const_cast<Image *>(this));
 	}
 
 	void Image::write(const std::string &file) {

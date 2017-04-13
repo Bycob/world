@@ -17,7 +17,25 @@ namespace img {
 		GREYSCALE = 2
 	};
 
-	class WORLDAPI_EXPORT Pixel {
+	class WORLDAPI_EXPORT ConstPixel {
+	public:
+		uint8_t getAlpha() const;
+		uint8_t getRed() const;
+		uint8_t getGreen() const;
+		uint8_t getBlue() const;
+
+	protected:
+		friend class Image;
+
+		ConstPixel(int width, int height, Image *ref);
+
+		uint8_t getComponent(int id) const;
+
+		int _x; int _y;
+		Image * _ref;
+	};
+
+	class WORLDAPI_EXPORT Pixel : public ConstPixel {
 	public:
 		void set(uint8_t r, uint8_t g = 0, uint8_t b = 0, uint8_t a = 255);
 		void setf(float r, float g = 0, float b = 0, float a = 1);
@@ -35,21 +53,12 @@ namespace img {
 		void setLevel(uint8_t l);
 		void setLevelf(float l);
 
-		uint8_t getAlpha() const;
-		uint8_t getRed() const;
-		uint8_t getGreen() const;
-		uint8_t getBlue() const;
-
 	private:
 		friend class Image;
 
 		Pixel(int width, int height, Image *ref);
 
-		uint8_t getComponent(int id) const;
 		void setComponent(int id, uint8_t type);
-
-		int _x; int _y;
-		Image * _ref;
 	};
 
 	class WORLDAPI_EXPORT Image {
@@ -71,7 +80,7 @@ namespace img {
 
 		// access
 		Pixel at(int x, int y);
-		const Pixel at(int x, int y) const;
+		const ConstPixel at(int x, int y) const;
 
 		// IO
 		void write(const std::string &file);
@@ -82,6 +91,7 @@ namespace img {
 		cv::Mat *_image;
 		
 		friend class Pixel;
+		friend class ConstPixel;
 	};
 }
 

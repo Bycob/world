@@ -15,11 +15,15 @@ using namespace maths;
 using namespace img;
 using namespace arma;
 
-Terrain::Terrain(int size) : _array(size, size), _texture(nullptr) {
+Terrain::Terrain(int size) : 
+	_array(size, size),
+	_texture(std::make_unique<Image>(1, 1, ImageType::RGB)) {
 
 }
 
-Terrain::Terrain(const Mat<double> & data) : _array(data), _texture(nullptr) {
+Terrain::Terrain(const Mat<double> & data) :
+	_array(data), 
+	_texture(nullptr) {
 	// TODO check que c'est de la bonne taille et tout et tout
 }
 
