@@ -19,12 +19,18 @@ class PanelTerrain : public GeneratePanel
 public:
     explicit PanelTerrain(QWidget *parent = 0);
     ~PanelTerrain();
+
+    virtual std::vector<std::unique_ptr<Resource>> getResources();
 signals:
 
 public slots:
     virtual void generate();
 private:
-    std::shared_ptr<Terrain> generated;
+    std::shared_ptr<Terrain> _generated;
+
+    // Ressources
+    std::unique_ptr<img::Image> _terrainImage;
+    std::unique_ptr<img::Image> _texture;
 
     Ui::PanelTerrain *ui;
 };

@@ -12,7 +12,7 @@
 #include "qtworld.h"
 
 #define MAX_MESH_SIZE 350
- // max ~10000 vertices
+ // max ~100000 vertices
 
 PanelTerrain::PanelTerrain(QWidget *parent) :
     GeneratePanel(parent),
@@ -26,6 +26,15 @@ PanelTerrain::~PanelTerrain()
     delete ui;
 }
 
+std::vector<std::unique_ptr<Resource>> PanelTerrain::getResources() {
+    auto result = GeneratePanel::getResources();
+
+    result.emplace_back(new ImageResource("carte de reliefs", _terrainImage.get()));
+    result.emplace_back(new ImageResource("texture du terrain", _texture.get()));
+
+    return result;
+}
+
 void PanelTerrain::generate()
 {
     int size = this->ui->size_field->value();
@@ -35,7 +44,7 @@ void PanelTerrain::generate()
     bool texture = ui->textureCheckBox->isChecked();
 
     PerlinTerrainGenerator generator(size, 0, octaves, frequency, persistence);
-    generated = std::shared_ptr<Terrain>(generator.generate().release());
+    _generated = std::shared_ptr<Terrain>(generator.generate().release());
 
     if (texture) {
         Perlin perlin;
@@ -62,7 +71,7 @@ void PanelTerrain::generate()
         //---
 
         arma::Mat<double> randomArray = perlin.generatePerlinNoise2D(size * 8, 0, 7, 16, (float)0.9);
-        img::Image texture = generator.generateTexture(*generated, texmapBuilder, randomArray);
+        img::Image texture = generator.generateTexture(*_generated, texmapBuilder, randomArray);
 
         emit imageChanged(QtWorld::getQImage(texture));
     }
@@ -77,17 +86,17 @@ void PanelTerrain::generate()
     std::cout << "Mesh ecrit" << std::endl;*/
 
     // Setup de ma scène
-    this->myScene = std::make_unique<Scene>();
+    this->_myScene = std::make_unique<Scene>();
 
     if (size < MAX_MESH_SIZE) {
-        this->myScene->addMesh(std::shared_ptr<Mesh>(generated->convertToMesh()));
+        this->_myScene->addMesh(std::shared_ptr<Mesh>(_generated->convertToMesh()));
     }
 
     // On indique qu'elle a changé
-    emit meshesChanged(this->myScene.get());
+    emit meshesChanged(this->_myScene.get());
 
     // Image
     if (!texture) {
-        emit imageChanged(QtWorld::getQImage(generated->convertToImage()));
+        emit imageChanged(QtWorld::getQImage(_generated->convertToImage()));
     }
 }

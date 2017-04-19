@@ -38,7 +38,10 @@ SOURCES += main.cpp\
     scene.cpp \
     qtworld.cpp \
     previewpanel3d.cpp \
-    panelworldmap.cpp
+    panelworldmap.cpp \
+    resource.cpp \
+    dialogsavenode.cpp \
+    resourcemodel.cpp
 
 HEADERS  += mainwindow.h \
     panelterrain.h \
@@ -46,11 +49,15 @@ HEADERS  += mainwindow.h \
     scene.h \
     qtworld.h \
     previewpanel3d.h \
-    panelworldmap.h
+    panelworldmap.h \
+    resource.h \
+    dialogsavenode.h \
+    resourcemodel.h
 
 FORMS    += mainwindow.ui \
     panelterrain.ui \
-    panelworldmap.ui
+    panelworldmap.ui \
+    dialogsavenode.ui
 
 RESOURCES += \
     icons.qrc

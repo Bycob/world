@@ -43,8 +43,8 @@ void PreviewPanel3D::setScene(const Scene * objects) {
 
     for (std::shared_ptr<Mesh> mesh : objects->getMeshes()) {
         Qt3DRender::QMesh *qmesh = new Qt3DRender::QMesh(_rootEntity);
-        qmesh->setSource(QUrl::fromLocalFile(QStringLiteral("mesh.obj")));
-        qDebug() << qmesh;
+        qmesh->setSource(QUrl::fromLocalFile(QStringLiteral("d:/Utilisateurs/Louis/Documents/Louis JEAN/programmation/Python/world/build/build_worldgui/mesh.obj")));
+        //std::cout << qmesh->geometry()->attributes().size();
 
         Qt3DExtras::QPhongMaterial *material = new Qt3DExtras::QPhongMaterial();
         material->setDiffuse(QColor(QRgb(0xff0000)));
@@ -53,7 +53,7 @@ void PreviewPanel3D::setScene(const Scene * objects) {
         entity->addComponent(qmesh);
         entity->addComponent(material);
 
-        Qt3DCore::QEntity *entity2 = new Qt3DCore::QEntity(_rootEntity);
+        /*Qt3DCore::QEntity *entity2 = new Qt3DCore::QEntity(_rootEntity);
         Qt3DExtras::QConeMesh * cone = new Qt3DExtras::QConeMesh();
         cone->setTopRadius(0.5);
         cone->setBottomRadius(1);
@@ -61,7 +61,7 @@ void PreviewPanel3D::setScene(const Scene * objects) {
         cone->setRings(50);
         cone->setSlices(20);
         entity2->addComponent(cone);
-        entity2->addComponent(material);
+        entity2->addComponent(material);*/
     }
 }
 

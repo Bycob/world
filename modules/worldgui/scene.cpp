@@ -1,5 +1,7 @@
 #include "scene.h"
 
+#include <worldapi/ObjLoader.h>
+
 Scene::Scene()
 {
 
@@ -23,4 +25,18 @@ const std::vector<std::shared_ptr<Mesh> > &Scene::getMeshes() const
 const std::vector<std::shared_ptr<Material> > &Scene::getMaterials() const
 {
     return materials;
+}
+
+void Scene::save(QString path) const {
+    ObjLoader file;
+
+    for (auto & mesh : meshes) {
+        file.addMesh(mesh);
+    }
+
+    for (auto & material : materials) {
+        file.addMaterial(material);
+    }
+
+    file.write(path.toStdString());
 }

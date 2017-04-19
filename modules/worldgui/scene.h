@@ -2,6 +2,9 @@
 #define RENDERABLE3DOBJECTS_H
 
 #include <memory>
+
+#include <QString>
+
 #include <worldapi/mesh.h>
 #include <worldapi/Material.h>
 
@@ -15,6 +18,8 @@ public:
 
     const std::vector<std::shared_ptr<Mesh>> & getMeshes() const;
     const std::vector<std::shared_ptr<Material>> & getMaterials() const;
+
+    void save(QString path) const;
 private:
     std::vector<std::shared_ptr<Mesh>> meshes;
     std::vector<std::shared_ptr<Material>> materials;
