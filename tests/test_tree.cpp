@@ -31,14 +31,14 @@ void testCircularSkeletton(int argc, char** argv) {
 	delete skeletton;
 }
 
-using namespace treegen;
+using namespace tree;
 
 void testTree(int argc, char ** argv) {
 	TreeSkelettonGenerator generator;
 
 	generator.setInclination(SideBranchPhiParameter(wrapper_d(gaussian(0.9, 0.2))));
 	generator.setRotationOffset(SideBranchOffsetThetaParameter(wrapper_d(gaussian(0, 0.5))));
-	generator.setForkingCount(treegen::uniform_i(4, 6));
+	generator.setForkingCount(tree::uniform_i(4, 6));
 	generator.setSizeFactor(SideBranchSizeParameter(wrapper_d(gaussian(4.0 / 5.0, 0.1))));
 	generator.setMaxForkingLevel(MaxLevelByWeightParameter(0.02));
 	generator.setWeight(SideBranchWeightParameter(DefaultWeightParameter()));

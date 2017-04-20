@@ -7,7 +7,7 @@
 #include "TreeSkeletton.h"
 #include "worldapi/Parameters.h"
 
-namespace treegen {
+namespace tree {
 	typedef Parameter<TreeInfo, double> param_d;
 	typedef Parameter<TreeInfo, int> param_i;
 	typedef ConstantParameter<TreeInfo, double> const_d;

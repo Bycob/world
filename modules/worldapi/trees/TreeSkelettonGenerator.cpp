@@ -7,7 +7,7 @@
 
 #include "TreeSkelettonGenerator.h"
 
-using namespace treegen;
+using namespace tree;
 using namespace maths;
 
 TreeSkelettonGenerator::TreeSkelettonGenerator() :

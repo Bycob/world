@@ -53,22 +53,22 @@ private :
 	void forkNode(Node<TreeInfo> * node);
 
 	// Génération de nombres alétoires uniforme entre 0 et 1. 
-	std::unique_ptr<treegen::param_d> _rng;
+	std::unique_ptr<tree::param_d> _rng;
 
 	// Localisation du point de départ de l'arbre
-	std::unique_ptr<treegen::param_d> _seedLocation;
+	std::unique_ptr<tree::param_d> _seedLocation;
 	// Poids de départ de l'arbre
-	std::unique_ptr<treegen::param_d> _rootWeight;
+	std::unique_ptr<tree::param_d> _rootWeight;
 
-	std::unique_ptr<treegen::tree_param_d> _phi;
-	std::unique_ptr<treegen::tree_param_d> _offsetTheta;
-	std::unique_ptr<treegen::tree_param_d> _sizeFactor;
+	std::unique_ptr<tree::tree_param_d> _phi;
+	std::unique_ptr<tree::tree_param_d> _offsetTheta;
+	std::unique_ptr<tree::tree_param_d> _sizeFactor;
 
-	std::unique_ptr<treegen::tree_param_d> _weight;
+	std::unique_ptr<tree::tree_param_d> _weight;
 	// Nombre de branches à chaque division
-	std::unique_ptr<treegen::param_i> _count;
+	std::unique_ptr<tree::param_i> _count;
 	// Nombre maximum de divisions.
-	std::unique_ptr<treegen::param_i> _maxLevel;
+	std::unique_ptr<tree::param_i> _maxLevel;
 };
 
 // Fonctions spécifiques pour les arbres
