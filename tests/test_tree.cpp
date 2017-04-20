@@ -4,10 +4,10 @@
 #include <worldapi/ObjLoader.h>
 #include <worldapi/mesh.h>
 #include <worldapi/ioutil.h>
-#include <worldapi/trees/TreeSkelettonGenerator.h>
-#include <worldapi/trees/TreeGenerator.h>
-#include <worldapi/trees/TreeSkeletton.h>
-#include <worldapi/trees/Tree.h>
+#include <worldapi/tree/TreeSkelettonGenerator.h>
+#include <worldapi/tree/TreeGenerator.h>
+#include <worldapi/tree/TreeSkeletton.h>
+#include <worldapi/tree/Tree.h>
 
 void testCircularSkeletton(int argc, char** argv);
 void testTree(int argc, char **argv);
