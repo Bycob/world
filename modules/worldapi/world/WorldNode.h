@@ -10,9 +10,11 @@
 #include <string>
 #include <set>
 
-#define INIT_TYPE(NAME, ...) WorldNodeType NAME = WorldNodeType::create(__VA_ARGS__);
+#define DECL_TYPE static WorldNodeType type;
+#define INIT_TYPE(CLASSNAME, ...) WorldNodeType CLASSNAME::type = WorldNodeType::create(__VA_ARGS__);
+#define TYPE(CLASSNAME) CLASSNAME::type
 
-class WorldNodeType {
+class WORLDAPI_EXPORT WorldNodeType {
 public:
     static const WorldNodeType & create(const std::string & name, bool unique = false);
 
@@ -30,13 +32,17 @@ private:
     bool _unique;
 };
 
-class WorldNode {
+class World;
+
+class WORLDAPI_EXPORT WorldNode {
 public:
-    WorldNode(const WorldNodeType & type);
+    WorldNode(const World * world, const WorldNodeType & type);
     virtual ~WorldNode();
 
+    const WorldNodeType & type() const;
 private:
     const WorldNodeType _nodeType;
+    const World * _world;
 };
 
 

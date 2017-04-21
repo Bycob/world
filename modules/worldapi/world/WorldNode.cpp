@@ -7,6 +7,8 @@
 #include <stdexcept>
 #include <iostream>
 
+#include "World.h"
+
 const WorldNodeType& WorldNodeType::create(const std::string &name, bool unique) {
     static std::set<WorldNodeType> _types;
     auto created = _types.insert(WorldNodeType(name, unique));
@@ -44,10 +46,15 @@ bool WorldNodeType::operator<(const WorldNodeType &type) const {
 }
 
 
-WorldNode::WorldNode(const WorldNodeType &type) : _nodeType(type) {
+WorldNode::WorldNode(const World * world, const WorldNodeType &type)
+        : _nodeType(type), _world(world) {
 
 }
 
 WorldNode::~WorldNode() {
 
+}
+
+const WorldNodeType& WorldNode::type() const {
+    return _nodeType;
 }

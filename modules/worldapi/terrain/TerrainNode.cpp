@@ -4,8 +4,9 @@
 
 #include "TerrainNode.h"
 
-INIT_TYPE(TerrainNode::type, "terrain")
+INIT_TYPE(TerrainNode, "terrain")
 
-TerrainNode::TerrainNode() : WorldNode(TerrainNode::type) {
+TerrainNode::TerrainNode(const World * world)
+        : WorldNode(world, TYPE(TerrainNode)) {
 
 }

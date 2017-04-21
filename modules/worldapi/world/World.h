@@ -13,7 +13,16 @@ public:
 	World();
 	virtual ~World();
 
-
+	template <typename T> T & createNode() {
+		if (checkNodeTypeInternal(T::type)) {
+			T * newNode = new T(*this);
+			_nodes.emplace_back(newNode);
+			return *newNode;
+		}
+		else {
+			throw std::runtime_error("The node can't be created");
+		}
+	};
 
 	// getAssets(zone, level detail)
 
@@ -24,5 +33,7 @@ private:
     std::vector<std::unique_ptr<WorldNode>> _nodes;
 
     friend class WorldGenerator;
+
+	bool checkNodeTypeInternal(const WorldNodeType & type) const;
 };
 

@@ -12,9 +12,9 @@
 
 class TerrainNode : public WorldNode {
 public:
-    static WorldNodeType type;
+    DECL_TYPE
 
-    TerrainNode();
+    TerrainNode(const World * world);
 private:
 
 };
