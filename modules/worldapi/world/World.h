@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "WorldGenerator.h"
-#include "../WorldNode.h"
+#include "WorldNode.h"
 
 class WORLDAPI_EXPORT World {
 public:
@@ -21,6 +21,8 @@ public:
 private:
 	std::unique_ptr<WorldGenerator> _gen;
 
-    std::vector<WorldNode> _nodes;
+    std::vector<std::unique_ptr<WorldNode>> _nodes;
+
+    friend class WorldGenerator;
 };
 

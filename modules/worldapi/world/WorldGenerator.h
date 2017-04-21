@@ -5,6 +5,8 @@
 #ifndef WORLD_WORLDGENERATOR_H
 #define WORLD_WORLDGENERATOR_H
 
+#include <worldapi/worldapidef.h>
+
 class WorldGenerator {
 public:
     WorldGenerator();
