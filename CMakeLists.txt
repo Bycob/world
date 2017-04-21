@@ -6,6 +6,7 @@ include(CMakeInclude.cmake)
 
 # Options de l'utilisateur
 option(WORLD_STATIC_BUILD "Build le projet sous formes de librairies statiques" OFF)
+option(WORLD_BUILD_TESTS "Build les target de tests" ON)
 
 
 # Setup de certaines variables
@@ -42,3 +43,5 @@ include_directories(includes/
 add_subdirectory(modules/worldapi/)
 # Ajout du répertoire de tests
 add_subdirectory(tests/)
+
+message("=====")

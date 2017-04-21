@@ -4,6 +4,8 @@
 #include <worldapi/world/WorldMapGenerator.h>
 #include <worldapi/ioutil.h>
 
+#include "testutil.h"
+
 using namespace img;
 
 void testReliefMap(int, char**);
@@ -13,14 +15,14 @@ int main(int argc, char** argv) {
 }
 
 void testReliefMap(int argc, char** argv) {
-	uint32_t limitBrightness = 4;
+	int limitBrightness = 4;
 	double biomeDensity = 0.02;
 
 	std::cout << "Indiquez la densité des biomes : ";
-	std::cin >> biomeDensity;
+	parseDouble(std::cin, biomeDensity);
 
 	std::cout << "Indiquez la netteté des limites : ";
-	std::cin >> limitBrightness;
+	parseInt(std::cin, limitBrightness);
 	
 	std::cout << "Generation du dossier world/relief" << std::endl;
 
@@ -30,7 +32,7 @@ void testReliefMap(int argc, char** argv) {
 	std::cout << "Creation du generateur" << std::endl;
 
 	WorldMapGenerator generator(800, 500);
-	generator.emplaceReliefMapGenerator<CustomWorldRMGenerator>(biomeDensity, limitBrightness);
+	generator.emplaceReliefMapGenerator<CustomWorldRMGenerator>(biomeDensity, (uint32_t) limitBrightness);
 	
 	std::cout << "Generation de la ReliefMap" << std::endl;
 
