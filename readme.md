@@ -1,4 +1,4 @@
-# World - ENGLISH
+﻿# World - ENGLISH
 
 # Setup development environment
 
@@ -27,9 +27,11 @@ To use the python part of the project, you will need these two packages :
 You can install pip with the command : `python -m pip install --upgrade pip`
 
 ### WorldGUI
+
 - QT
 
 ### World3D
+
 - irrlicht
 
 All the other third parties are included in the repository.
