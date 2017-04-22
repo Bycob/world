@@ -1,6 +1,4 @@
 
-find_package(OpenCV REQUIRED)
-
 # Récuperation des sources
 file(GLOB_RECURSE
 	WORLD_API_SOURCES
