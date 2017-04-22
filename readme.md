@@ -30,7 +30,7 @@ You can install pip with the command : `python -m pip install --upgrade pip`
 
 - QT
 
-### World3D
+### World3D
 
 - irrlicht
 
