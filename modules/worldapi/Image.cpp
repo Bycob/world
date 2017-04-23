@@ -34,6 +34,13 @@ namespace img {
 		return f >= 1.0 ? 255 : (f <= 0.0 ? 0 : (uint8_t) (f * 256.0));
 	}
 
+	class PrivateImage {
+	public:
+		PrivateImage(cv::Mat && image) : _image(image) {}
+
+		cv::Mat _image;
+	};
+
 	// Implémentation de Pixel
 
 	ConstPixel::ConstPixel(int x, int y, Image * ref)
@@ -49,13 +56,13 @@ namespace img {
 		// TODO améliorer les performances
 		switch (_ref->_type) {
 		case ImageType::RGB :
-			_ref->_image->at<cv::Vec3b>(_y, _x) = cv::Vec3b(b, g, r);
+			_ref->_private->_image.at<cv::Vec3b>(_y, _x) = cv::Vec3b(b, g, r);
 			break;
 		case ImageType::RGBA :
-			_ref->_image->at<cv::Vec4b>(_y, _x) = cv::Vec4b(b, g, r, a);
+			_ref->_private->_image.at<cv::Vec4b>(_y, _x) = cv::Vec4b(b, g, r, a);
 			break;
 		default :
-			_ref->_image->at<uint8_t>(_y, _x) = r;
+			_ref->_private->_image.at<uint8_t>(_y, _x) = r;
 		}
 	}
 
@@ -122,13 +129,13 @@ namespace img {
 	uint8_t ConstPixel::getComponent(int id) const {
 		switch (_ref->_type) {
 		case ImageType::RGBA:
-			return _ref->_image->data[4 * (_ref->_image->cols * _y + _x) + id];
+			return _ref->_private->_image.data[4 * (_ref->_private->_image.cols * _y + _x) + id];
 		case ImageType::RGB:
 			if (id == 3) return 255;
-			return _ref->_image->data[3 * (_ref->_image->cols * _y + _x) + id];
+			return _ref->_private->_image.data[3 * (_ref->_private->_image.cols * _y + _x) + id];
 		default:
 			if (id == 3) return 255;
-			return _ref->_image->data[_ref->_image->cols * _y + _x];
+			return _ref->_private->_image.data[_ref->_private->_image.cols * _y + _x];
 		}
 	}
 
@@ -136,14 +143,14 @@ namespace img {
 		switch (_ref->_type) {
 		case ImageType::RGB:
 			if (id == 3) return;
-			_ref->_image->data[3 * (_ref->_image->cols * _y + _x) + id] = value;
+			_ref->_private->_image.data[3 * (_ref->_private->_image.cols * _y + _x) + id] = value;
 			break;
 		case ImageType::RGBA:
-			_ref->_image->data[4 * (_ref->_image->cols * _y + _x) + id] = value;
+			_ref->_private->_image.data[4 * (_ref->_private->_image.cols * _y + _x) + id] = value;
 			break;
 		default:
 			if (id == 3) return;
-			_ref->_image->data[_ref->_image->cols * _y + _x] = value;
+			_ref->_private->_image.data[_ref->_private->_image.cols * _y + _x] = value;
 		}
 	}
 
@@ -152,38 +159,38 @@ namespace img {
 	// Implémentation de Image
 
 	Image::Image(int width, int height, const ImageType &type)
-		: _image(new cv::Mat(height, width, getCVType(type))),
+		: _private(new PrivateImage(cv::Mat(height, width, getCVType(type)))),
 		_type(type) {
 
 	}
 
 	Image::Image(const arma::Cube<double> & data) {
-		_image = new cv::Mat(armaToCV(data));
-		_type = getImageType(_image->type());
+		_private = new PrivateImage(cv::Mat(armaToCV(data)));
+		_type = getImageType(_private->_image.type());
 	}
 
 	Image::Image(const arma::Mat<double> & data) {
-		_image = new cv::Mat(armaToCV(data));
-		_type = getImageType(_image->type());
+		_private = new PrivateImage(cv::Mat(armaToCV(data)));
+		_type = getImageType(_private->_image.type());
 	}
 
 	Image::Image(const std::string & filename) {
-		_image = new cv::Mat(cv::imread(filename));
-		_type = getImageType(_image->type());
+		_private = new PrivateImage(cv::Mat(cv::imread(filename)));
+		_type = getImageType(_private->_image.type());
 	}
 
-	Image::Image(Image && image) : _image(image._image), _type(image._type) {
-		image._image = nullptr;
+	Image::Image(Image && image) : _private(image._private), _type(image._type) {
+		image._private = nullptr;
 	}
 
 	Image::Image(const Image & image) {
-		_image = new cv::Mat(*image._image);
+		_private = new PrivateImage(cv::Mat(image._private->_image));
 		_type = image._type;
 	}
 
 	Image::~Image() {
-		if (_image != nullptr) // moved
-			delete _image;
+		if (_private != nullptr) // moved
+			delete _private;
 	}
 
 	ImageType Image::type() const {
@@ -191,11 +198,11 @@ namespace img {
 	}
 
 	uint32_t Image::width() const {
-		return _image->cols;
+		return _private->_image.cols;
 	}
 
 	uint32_t Image::height() const {
-		return _image->rows;
+		return _private->_image.rows;
 	}
 
 	Pixel Image::at(int x, int y) {
@@ -207,6 +214,6 @@ namespace img {
 	}
 
 	void Image::write(const std::string &file) {
-		cv::imwrite(file, *_image);
+		cv::imwrite(file, _private->_image);
 	}
 }

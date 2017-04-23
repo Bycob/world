@@ -4,11 +4,8 @@
 #include <armadillo/armadillo>
 #include <stdint.h>
 
-namespace cv {
-	class Mat;
-}
-
 namespace img {
+	class PrivateImage;
 	class Image;
 
 	enum class WORLDAPI_EXPORT ImageType {
@@ -88,7 +85,7 @@ namespace img {
 		ImageType _type;
 
 		// pointeur sur l'image, pour éviter d'avoir à inclure opencv dans le .h
-		cv::Mat *_image;
+		PrivateImage *_private;
 		
 		friend class Pixel;
 		friend class ConstPixel;
