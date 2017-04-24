@@ -10,8 +10,11 @@ include(cmake/WorldUtils.cmake)
 
 # Options de l'utilisateur
 option(WORLD_STATIC_BUILD "Build le projet sous formes de librairies statiques" OFF)
+
 option(WORLD_BUILD_TESTS "Build les target de tests" ON)
 option(WORLD_BUILD_WORLD3D "Build la visualisation en 3D" OFF)
+
+option(WORLD_USE_OPENCV "Compile les modules utilisant opencv" ON)
 
 
 # Setup de certaines variables
