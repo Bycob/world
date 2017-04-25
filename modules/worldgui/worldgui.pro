@@ -25,9 +25,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 INCLUDEPATH += "$${WORLDAPI_SOURCES}/modules" \
-                "$${WORLDAPI_SOURCES}/includes" \
-                "$${WORLDAPI_SOURCES}/includes/armadillo" \
-                "$${WORLDAPI_SOURCES}/includes/opencv"
+                "$${WORLDAPI_SOURCES}/3rdparty"
 
 LIBS    += -L$${WORLDAPI_LIBDIR} -lworldapi
 

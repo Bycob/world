@@ -1,6 +1,6 @@
 #include "Image.h"
 
-#ifndef USE_OPENCV
+#ifdef USE_OPENCV
 #include "interop.h"
 
 #include <stdexcept>
