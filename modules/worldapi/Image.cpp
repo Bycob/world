@@ -1,4 +1,6 @@
 #include "Image.h"
+
+#ifndef USE_OPENCV
 #include "interop.h"
 
 #include <stdexcept>
@@ -217,3 +219,18 @@ namespace img {
 		cv::imwrite(file, _private->_image);
 	}
 }
+
+#else // USE_OPENCV
+
+#include <libpng/png.h>
+
+namespace img {
+	class PrivateImage {
+	public:
+		PrivateImage(png_structp img) : _image(img) {}
+
+		png_structp _image;
+	};
+}
+
+#endif // USE_OPENCV

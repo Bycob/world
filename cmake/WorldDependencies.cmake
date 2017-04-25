@@ -2,7 +2,11 @@
 if (${WORLD_USE_OPENCV})
     message("-- Use OpenCV")
     find_package(OpenCV REQUIRED)
-    include_directories(${OpenCV_INCLUDE_DIRS})
+
+    if(${OpenCV_FOUND})
+        include_directories(${OpenCV_INCLUDE_DIRS})
+        add_definitions(-DUSE_OPENCV)
+    endif()
 endif()
 
 if (${WORLD_BUILD_WORLD3D})
