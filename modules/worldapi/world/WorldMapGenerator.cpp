@@ -196,8 +196,8 @@ WorldMapGenerator::~WorldMapGenerator() {
 
 }
 
-std::unique_ptr<WorldMap> WorldMapGenerator::generate() {
-	std::unique_ptr<WorldMap> map = std::make_unique<WorldMap>(_sizeX, _sizeY);
+WorldMap * WorldMapGenerator::generate() {
+	WorldMap * map = new WorldMap(_sizeX, _sizeY);
 
 	if (_reliefMap != nullptr) _reliefMap->generate(*map);
 

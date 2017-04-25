@@ -20,7 +20,7 @@ public:
 	TreeGenerator();
 	~TreeGenerator();
 
-	std::unique_ptr<Tree> generate(const TreeSkeletton & skeletton) const;
+	Tree * generate(const TreeSkeletton & skeletton) const;
 
 private :
 	void fillBezier(Mesh &trunkMesh, const BezierCurve & bezier, int divisionCount,

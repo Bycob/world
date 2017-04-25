@@ -18,8 +18,8 @@ TreeGenerator::~TreeGenerator() {
 
 }
 
-std::unique_ptr<Tree> TreeGenerator::generate(const TreeSkeletton & skeletton) const {
-	std::unique_ptr<Tree> tree = std::make_unique<Tree>();
+Tree * TreeGenerator::generate(const TreeSkeletton & skeletton) const {
+	Tree * tree = new Tree();
 
 	//Création du mesh
 	Mesh & trunkMesh = tree->_trunkMesh;
@@ -28,7 +28,7 @@ std::unique_ptr<Tree> TreeGenerator::generate(const TreeSkeletton & skeletton) c
 
 	MeshOps::recalculateNormals(trunkMesh);
 
-	return std::move(tree);
+	return tree;
 }
 
 void TreeGenerator::fillBezier(Mesh &trunkMesh, const BezierCurve & curve, int divCount,

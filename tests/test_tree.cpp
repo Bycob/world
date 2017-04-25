@@ -55,7 +55,7 @@ void testTree(int argc, char ** argv) {
 	ioutil::createDirectory("trees");
 
 	std::cout << "Génération d'un squelette d'arbre" << std::endl;
-	std::unique_ptr<TreeSkeletton> treeSkeletton = generator.generate();
+	std::unique_ptr<TreeSkeletton> treeSkeletton(generator.generate());
 
 	std::cout << "Généré ! Conversion en modèle..." << std::endl;
 	std::shared_ptr<Mesh> mesh(treeSkeletton->convertToMesh());
@@ -67,7 +67,7 @@ void testTree(int argc, char ** argv) {
 
 	std::cout << "Génération du tronc de l'arbre" << std::endl;
 	TreeGenerator generator2;
-	std::unique_ptr<Tree> tree = generator2.generate(*treeSkeletton);
+	std::unique_ptr<Tree> tree(generator2.generate(*treeSkeletton));
 
 	std::cout << "Généré ! Ecriture du modèle" << std::endl;
 	const Mesh & trunkMesh = tree->getTrunkMesh();

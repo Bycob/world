@@ -94,11 +94,11 @@ PerlinTerrainGenerator::~PerlinTerrainGenerator() {
 	
 }
 
-std::unique_ptr<Terrain> PerlinTerrainGenerator::generate() {
-	std::unique_ptr<Terrain> result = std::make_unique<Terrain>(_size);
+Terrain * PerlinTerrainGenerator::generate() {
+	Terrain * result = new Terrain(_size);
 	_perlin.generatePerlinNoise2D(result->_array, _offset, _octaveCount, _frequency, _persistence);
 
-	return std::move(result);
+	return result;
 }
 
 void PerlinTerrainGenerator::generateSubdivisionLevel(Terrain & terrain, int subdivideFactor) {
