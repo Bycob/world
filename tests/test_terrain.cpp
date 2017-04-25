@@ -143,7 +143,7 @@ void testPerlin(int argc, char** argv) {
 	//GENERATION DE L'IMAGE DU TERRAIN
 
 	std::cout << "Génération du terrain..." << std::endl;
-	std::unique_ptr<Terrain> terrain = generator.generate();
+	std::unique_ptr<Terrain> terrain(generator.generate());
 
 	std::cout << "ecriture de l'image du terrain..." <<std::endl;
 	img::Image image = terrain->convertToImage();

@@ -19,7 +19,7 @@ public:
 	TerrainGenerator(int size = DEFAULT_TERRAIN_SIZE);
 	virtual ~TerrainGenerator();
 
-	virtual std::unique_ptr<Terrain> generate() = 0;
+	virtual Terrain * generate() = 0;
 
 	// ACCESSEURS
 	void setSubdivisionsCount(int subdivisionCount);
@@ -48,7 +48,7 @@ public :
 	PerlinTerrainGenerator(int size = DEFAULT_TERRAIN_SIZE, int offset = 0, int octaveCount = 5, float frequency = 8, float persistence = 0.5);
 	virtual ~PerlinTerrainGenerator();
 
-	virtual std::unique_ptr<Terrain> generate();
+	virtual Terrain * generate();
 
 	virtual void generateSubdivisionLevel(Terrain & terrain, int subdivideFactor);
 protected :

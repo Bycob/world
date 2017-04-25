@@ -32,6 +32,10 @@ public :
 
 	Terrain(const arma::Mat<double> & data);
 
+	Terrain(const Terrain & terrain);
+
+	Terrain(Terrain && terrain);
+
 	virtual ~Terrain();
 
 	/** Permet d'obtenir l'altitude au point (x, y), avec x et y les

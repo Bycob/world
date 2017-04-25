@@ -25,7 +25,7 @@ void PanelWorldMap::generate() {
 
     generator.emplaceReliefMapGenerator<CustomWorldRMGenerator>(biomeDensity, limitBrightness);
 
-    std::unique_ptr<WorldMap> generated = generator.generate();
+    std::unique_ptr<WorldMap> generated(generator.generate());
     img::Image img = generated->getReliefMapAsImage();
 
     emit imageChanged(QtWorld::getQImage(img));

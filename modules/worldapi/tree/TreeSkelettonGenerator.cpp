@@ -46,8 +46,8 @@ void TreeSkelettonGenerator::setConstantMaxForkingLevel(int level) {
 	_maxLevel = std::make_unique<const_i>(level);
 }
 
-std::unique_ptr<TreeSkeletton> TreeSkelettonGenerator::generate() {
-	std::unique_ptr<TreeSkeletton> result = std::make_unique<TreeSkeletton>();
+TreeSkeletton * TreeSkelettonGenerator::generate() {
+	TreeSkeletton * result = new TreeSkeletton();
 
 	Node<TreeInfo> * primaryNode = result->getPrimaryNode();
 	primaryNode->setPosition(0, 0, (*_seedLocation)(primaryNode->getInfo()));
@@ -56,7 +56,7 @@ std::unique_ptr<TreeSkeletton> TreeSkelettonGenerator::generate() {
 
 	forkNode(primaryNode);
 
-	return std::move(result);
+	return result;
 }
 
 void TreeSkelettonGenerator::forkNode(Node<TreeInfo>* node) {

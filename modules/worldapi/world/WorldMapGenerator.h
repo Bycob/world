@@ -67,7 +67,7 @@ public:
 	WorldMapGenerator(uint32_t sizeX, uint32_t sizeY);
 	~WorldMapGenerator();
 
-	std::unique_ptr<WorldMap> generate();
+	WorldMap * generate();
 
 	template <class T, typename... Args>
 	void emplaceReliefMapGenerator(Args&&... args) {

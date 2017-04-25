@@ -43,7 +43,7 @@ All the other third parties are included in the repository.
 In a terminal, get into your personnal *build* directory, then type
 
 ```
-cmake [path_to_source] -G[your_favorite_compiler] -DCMAKE_PREFIX_PATH=[path to openCV]
+cmake -G[your_favorite_compiler] -DCMAKE_PREFIX_PATH=[path to openCV] [path_to_sources]
 ```
 
 then build and compile with *your_favorite_compiler*

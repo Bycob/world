@@ -27,6 +27,42 @@ Terrain::Terrain(const Mat<double> & data) :
 	// TODO check que c'est de la bonne taille et tout et tout
 }
 
+Terrain::Terrain(const Terrain &terrain)
+		: _array(terrain._array),
+		  _texture(std::make_unique<Image>(*terrain._texture)),
+		  _subdivisionStage(terrain._subdivisionStage),
+		  _noisePart(terrain._noisePart),
+		  _x(terrain._x),
+		  _y(terrain._y),
+		  _parent(nullptr),
+		  _subdivideFactor(terrain._subdivideFactor) {
+
+	for (auto & ptr : terrain._subterrain) {
+		_subterrain.emplace_back(new Terrain(*ptr));
+	}
+	for (auto & ptr : _subterrain) {
+		ptr->_parent = this;
+	}
+}
+
+Terrain::Terrain(Terrain &&terrain)
+		: _array(std::move(terrain._array)),
+		  _texture(std::move(terrain._texture)),
+		  _subdivisionStage(terrain._subdivisionStage),
+		  _noisePart(terrain._noisePart),
+		  _x(terrain._x),
+		  _y(terrain._y),
+		  _parent(nullptr),
+		  _subdivideFactor(terrain._subdivideFactor) {
+
+	for (auto & ptr : terrain._subterrain) {
+		_subterrain.push_back(std::move(ptr));
+	}
+	for (auto & ptr : _subterrain) {
+		ptr->_parent = this;
+	}
+}
+
 Terrain::~Terrain() {
 
 }

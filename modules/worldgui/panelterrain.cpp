@@ -44,7 +44,7 @@ void PanelTerrain::generate()
     bool texture = ui->textureCheckBox->isChecked();
 
     PerlinTerrainGenerator generator(size, 0, octaves, frequency, persistence);
-    _generated = std::shared_ptr<Terrain>(generator.generate().release());
+    _generated = std::shared_ptr<Terrain>(generator.generate());
 
     if (texture) {
         Perlin perlin;

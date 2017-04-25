@@ -48,7 +48,7 @@ public:
 		_weight = std::make_unique<F>(weight);
 	}
 
-	virtual std::unique_ptr<TreeSkeletton> generate();
+	virtual TreeSkeletton * generate();
 private :
 	void forkNode(Node<TreeInfo> * node);
 
