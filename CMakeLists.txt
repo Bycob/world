@@ -43,7 +43,7 @@ endif()
 # Dépendances
 include(cmake/WorldDependencies.cmake)
 
-include_directories(includes/
+include_directories(3rdparty/
 			modules/)
 
 

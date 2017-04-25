@@ -1,8 +1,14 @@
 
 # Recupération des sources
-file(GLOB_RECURSE
-        WORLD3D_SOURCES
-        ./*)
+set(WORLD3D_SOURCES
+        Application.cpp
+        Application.h
+        IniFile.cpp
+        IniFile.h
+        main.cpp
+        MainView.cpp
+        MainView.h
+        util.h)
 
 # Ajout de la target
 if(${WORLD_BUILD_WORLD3D})

@@ -2,12 +2,14 @@
 
 #include "util.h"
 
-Application::Application(int argc, char **argv)
+Application::Application()
         : _running(false), _mainView(std::make_unique<MainView>(*this)) {
 
 }
 
-void Application::run() {
+void Application::run(int argc, char **argv) {
+    loadWorld(argc, argv);
+
     _running = true;
     _mainView->show();
 
@@ -20,4 +22,8 @@ void Application::run() {
 
 void Application::requestStop() {
     _running = false;
+}
+
+void Application::loadWorld(int argc, char **argv) {
+
 }

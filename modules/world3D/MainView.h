@@ -33,7 +33,10 @@ private:
     irr::IrrlichtDevice *_device ;
     irr::scene::ISceneManager *_scenemanager ;
 
+    irr::scene::ICameraSceneNode *_camera;
+
     void runInternal();
+    void updateScene();
 };
 
 
