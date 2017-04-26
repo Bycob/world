@@ -4,6 +4,7 @@
 
 #include "IniFile.h"
 
+#include <iostream>
 #include <regex>
 
 #include <worldapi/stringops.h>
@@ -20,8 +21,12 @@ IniFile::IniFile(const std::string & content) {
     parse(content);
 }
 
-bool IniFile::hasKey(const std::string &key) {
+bool IniFile::hasKey(const std::string &key) const {
     return _values.find(key) != _values.end();
+}
+
+int IniFile::getKeyCount() const {
+    return (int) _values.size();
 }
 
 std::string IniFile::getValue(const std::string &key) const {
@@ -45,8 +50,8 @@ void IniFile::parse(const std::string &content) {
     std::string currentSection("");
     auto lines = split(content, '\n', true);
 
+    std::regex sectionrgx("^\\[(.*)\\]$");
     std::regex keyvalrgx("^([^=\\s]*)\\s*=\\s*([^=]*)$");
-    std::regex sectionrgx("^\\[(*)\\]$");
 
     for (std::string & line : lines) {
         std::smatch res;
