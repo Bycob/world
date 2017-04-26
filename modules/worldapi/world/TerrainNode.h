@@ -8,7 +8,7 @@
 #include <worldapi/worldapidef.h>
 
 #include "../world/WorldNode.h"
-#include "terrain.h"
+#include "../terrain/terrain.h"
 
 class TerrainNode : public WorldNode {
 public:
