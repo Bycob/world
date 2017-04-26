@@ -26,7 +26,6 @@ private:
     Application & _app;
 
     std::atomic_bool _running;
-    std::mutex _lock;
     std::unique_ptr<std::thread> _graphicThread;
 
     irr::video::IVideoDriver *_driver ;

@@ -61,7 +61,7 @@ void MainView::runInternal() {
         updateScene();
 
         _driver->beginScene(true, true,
-                            irr::video::SColor(255, 255, 0, 0));
+                            irr::video::SColor(255, 5, 15, 0));
         auto screenSize = _driver->getScreenSize();
         _camera->setAspectRatio((float) screenSize.Width / screenSize.Height);
 
@@ -77,7 +77,5 @@ void MainView::runInternal() {
 }
 
 void MainView::updateScene() {
-    _lock.lock();
 
-    _lock.unlock();
 }

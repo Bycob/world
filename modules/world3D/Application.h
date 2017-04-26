@@ -8,9 +8,8 @@
 #include <atomic>
 #include <memory>
 
-#include <worldapi/world/World.h>
-
 #include "MainView.h"
+#include "SynchronizedWorld.h"
 
 class Application {
 public:
@@ -18,11 +17,14 @@ public:
 
     void run(int argc, char** argv);
     void requestStop();
+
+    const SynchronizedWorld & getWorld() const;
 private:
     std::atomic_bool _running;
 
     std::unique_ptr<MainView> _mainView;
-    std::unique_ptr<World> _world;
+
+    std::unique_ptr<SynchronizedWorld> _world;
 
     void loadWorld(int argc, char** argv);
 };

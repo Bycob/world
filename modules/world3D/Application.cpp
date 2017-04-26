@@ -24,6 +24,17 @@ void Application::requestStop() {
     _running = false;
 }
 
+const SynchronizedWorld & Application::getWorld() const {
+    if (_world == nullptr) throw std::runtime_error("getWorld() called while not running.");
+    return *_world;
+}
+
 void Application::loadWorld(int argc, char **argv) {
-    _world = std::make_unique<World>();
+    _world = std::make_unique<SynchronizedWorld>();
+
+    _world->lock();
+    World & world = _world->get();
+    // Do some initialization stuff
+
+    _world->unlock();
 }
