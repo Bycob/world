@@ -52,9 +52,9 @@ void MainView::runInternal() {
     cube->getMaterial(0).AmbientColor.set(255, 30, 30, 30);
     cube->getMaterial(0).DiffuseColor.set(255, 255, 0, 0);
     cube->getMaterial(0).SpecularColor.set(255, 255, 255, 255);
-    auto light = _scenemanager->addLightSceneNode(cube, vector3df(0, 2, 0), video::SColorf(1.0f,1.0f,1.0f), 745.0f, 1);
+    auto light = _scenemanager->addLightSceneNode(cube, vector3df(0, 8, 0), video::SColorf(1.0f,1.0f,1.0f), 745.0f, 1);
     light->getLightData().Type = ELT_POINT;
-    light->getLightData().Attenuation.set(1, 0.1, 0.001);
+    light->getLightData().Attenuation.set(1, 0, 0);
     //_scenemanager->setAmbientLight(SColorf(1.0f, 1.0f, 1.0f));
 
     while(_device->run()) {

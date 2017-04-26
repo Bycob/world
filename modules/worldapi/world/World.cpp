@@ -1,7 +1,7 @@
 #include "World.h"
 
 
-World::World() {
+World::World() : _gen(std::make_unique<WorldGenerator>()) {
 
 }
 

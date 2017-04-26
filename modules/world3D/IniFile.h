@@ -15,6 +15,7 @@ public:
     IniFile();
     IniFile(const std::string & content);
 
+    bool hasKey(const std::string & key);
     std::string getValue(const std::string & key) const;
     std::string getOrSetValue(const std::string & key, const std::string & defaultValue);
 

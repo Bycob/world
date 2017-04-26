@@ -25,5 +25,5 @@ void Application::requestStop() {
 }
 
 void Application::loadWorld(int argc, char **argv) {
-
+    _world = std::make_unique<World>();
 }

@@ -20,7 +20,7 @@ public:
 			return *newNode;
 		}
 		else {
-			throw std::runtime_error("The node can't be created");
+			throw std::runtime_error("The node can not be created");
 		}
 	};
 

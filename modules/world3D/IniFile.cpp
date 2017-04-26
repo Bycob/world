@@ -20,6 +20,10 @@ IniFile::IniFile(const std::string & content) {
     parse(content);
 }
 
+bool IniFile::hasKey(const std::string &key) {
+    return _values.find(key) != _values.end();
+}
+
 std::string IniFile::getValue(const std::string &key) const {
     return _values.at(key);
 }
