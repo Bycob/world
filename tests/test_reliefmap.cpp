@@ -1,7 +1,7 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <worldapi/world/WorldMapGenerator.h>
+#include <worldapi/world/MapGenerator.h>
 #include <worldapi/ioutil.h>
 
 #include "testutil.h"
@@ -31,7 +31,7 @@ void testReliefMap(int argc, char** argv) {
 
 	std::cout << "Creation du generateur" << std::endl;
 
-	WorldMapGenerator generator(800, 500);
+	MapGenerator generator(800, 500);
 	generator.emplaceReliefMapGenerator<CustomWorldRMGenerator>(biomeDensity, (uint32_t) limitBrightness);
 	
 	std::cout << "Generation de la ReliefMap" << std::endl;

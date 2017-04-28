@@ -7,14 +7,13 @@
 #include <utility>
 
 #include "../Image.h"
-#include "../GenBase.h"
 #include "../maths/perlin.h"
 #include "TerrainTexmapBuilder.h"
 #include "terrain.h"
 
 #define DEFAULT_TERRAIN_SIZE 257
 
-class WORLDAPI_EXPORT TerrainGenerator : public GenBase<Terrain> {
+class WORLDAPI_EXPORT TerrainGenerator {
 public:
 	TerrainGenerator(int size = DEFAULT_TERRAIN_SIZE);
 	virtual ~TerrainGenerator();

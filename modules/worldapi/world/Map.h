@@ -13,10 +13,10 @@
 entier. La worldmap définit les différents paramètres physiques qu'il existera
 dans le monde, comme les zones de montagnes, le climat, le type d'écosystème,
 et ce en chaque endroit du monde.*/
-class WORLDAPI_EXPORT WorldMap {
+class WORLDAPI_EXPORT Map {
 public:
-	WorldMap(uint32_t sizeX, uint32_t sizeY);
-	~WorldMap();
+	Map(uint32_t sizeX, uint32_t sizeY);
+	~Map();
 
 	const arma::cube & getReliefMap();
 	img::Image getReliefMapAsImage();
@@ -30,17 +30,17 @@ private:
 	Première tranche : altitude moyenne. Deuxième tranche : étendue.*/
 	arma::cube _reliefMap;
 
-	friend class WorldMapGenerator;
-	friend class WorldMapGeneratorModule;
+	friend class MapGenerator;
+	friend class MapGeneratorModule;
 };
 
-class WorldMapNode : public WorldNode {
+class MapNode : public WorldNode {
 public:
 	DECL_TYPE
 
-	WorldMapNode(const World * world);
+	MapNode(const World * world);
 private:
-	std::unique_ptr<WorldMap> _map;
+	std::unique_ptr<Map> _map;
 };
 
 

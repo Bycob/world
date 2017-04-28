@@ -1,4 +1,4 @@
-#include "WorldMapGenerator.h"
+#include "MapGenerator.h"
 
 #include <utility>
 #include <list>
@@ -13,23 +13,23 @@ using namespace img;
 
 // MODULES (à déplacer ?)
 
-WorldMapGeneratorModule::WorldMapGeneratorModule(WorldMapGenerator * parent) : 
+MapGeneratorModule::MapGeneratorModule(MapGenerator * parent) :
 	_parent(parent) {
 
 }
 
-cube & WorldMapGeneratorModule::reliefMap(WorldMap & map) const {
+cube & MapGeneratorModule::reliefMap(Map & map) const {
 	return map._reliefMap;
 }
 
-std::mt19937 & WorldMapGeneratorModule::rng() const {
+std::mt19937 & MapGeneratorModule::rng() const {
 	return _parent->_rng;
 }
 
 
 // -----
-ReliefMapGenerator::ReliefMapGenerator(WorldMapGenerator * parent) : 
-	WorldMapGeneratorModule(parent) {
+ReliefMapGenerator::ReliefMapGenerator(MapGenerator * parent) :
+	MapGeneratorModule(parent) {
 
 }
 
@@ -37,7 +37,7 @@ ReliefMapGenerator::ReliefMapGenerator(WorldMapGenerator * parent) :
 // -----
 const float CustomWorldRMGenerator::PIXEL_UNIT = 10;
 
-CustomWorldRMGenerator::CustomWorldRMGenerator(WorldMapGenerator * parent, float biomeDensity, uint32_t limitBrightness) :
+CustomWorldRMGenerator::CustomWorldRMGenerator(MapGenerator * parent, float biomeDensity, uint32_t limitBrightness) :
 	ReliefMapGenerator(parent),
 	_biomeDensity(biomeDensity),
 	_limitBrightness(limitBrightness),
@@ -57,7 +57,7 @@ void CustomWorldRMGenerator::setDifferentialLaw(const relief::diff_law & law) {
 	_diffLaw = std::unique_ptr<relief::diff_law>(law.clone());
 }
 
-void CustomWorldRMGenerator::generate(WorldMap & map) const {
+void CustomWorldRMGenerator::generate(Map & map) const {
 	cube & relief = reliefMap(map);
 
 	// Nombre de biomes à générer.
@@ -183,21 +183,21 @@ void CustomWorldRMGenerator::generate(WorldMap & map) const {
 }
 
 
-// WorldMapGenerator
+// MapGenerator
 
-WorldMapGenerator::WorldMapGenerator(uint32_t sizeX, uint32_t sizeY) :
+MapGenerator::MapGenerator(uint32_t sizeX, uint32_t sizeY) :
 	_rng(time(NULL)),
 	_sizeX(sizeX), _sizeY(sizeY),
 	_reliefMap(nullptr) {
 
 }
 
-WorldMapGenerator::~WorldMapGenerator() {
+MapGenerator::~MapGenerator() {
 
 }
 
-WorldMap * WorldMapGenerator::generate() {
-	WorldMap * map = new WorldMap(_sizeX, _sizeY);
+Map * MapGenerator::generate() {
+	Map * map = new Map(_sizeX, _sizeY);
 
 	if (_reliefMap != nullptr) _reliefMap->generate(*map);
 

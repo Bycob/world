@@ -1,25 +1,25 @@
-#include "WorldMap.h"
+#include "Map.h"
 
 #include <stdexcept>
 
 using namespace arma;
 using namespace img;
 
-WorldMap::WorldMap(uint32_t sizeX, uint32_t sizeY) : 
+Map::Map(uint32_t sizeX, uint32_t sizeY) :
 	_sizeX(sizeX), _sizeY(sizeY),
 	_reliefMap(sizeX, sizeY, 2) {
 	
 }
 
-WorldMap::~WorldMap() {
+Map::~Map() {
 
 }
 
-const cube & WorldMap::getReliefMap() {
+const cube & Map::getReliefMap() {
 	return _reliefMap;
 }
 
-Image WorldMap::getReliefMapAsImage() {
+Image Map::getReliefMapAsImage() {
 	Image img(_reliefMap.n_rows, _reliefMap.n_cols, ImageType::RGB);
 
 	for (uint32_t x = 0; x < _reliefMap.n_rows; x++) {

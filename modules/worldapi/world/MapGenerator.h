@@ -6,45 +6,44 @@
 #include <random>
 #include <memory>
 
-#include "WorldMap.h"
+#include "Map.h"
 #include "WorldParameters.h"
-#include "../GenBase.h"
 
 // MODULES (à déplacer ?)
 
-class WorldMapGenerator;
+class MapGenerator;
 
 /** Classe de base des modules du générateur de cartes. */
-class WORLDAPI_EXPORT WorldMapGeneratorModule {
+class WORLDAPI_EXPORT MapGeneratorModule {
 public:
-	WorldMapGeneratorModule(WorldMapGenerator * parent);
-	virtual ~WorldMapGeneratorModule() = default;
+	MapGeneratorModule(MapGenerator * parent);
+	virtual ~MapGeneratorModule() = default;
 
-	virtual void generate(WorldMap & map) const = 0;
+	virtual void generate(Map & map) const = 0;
 protected:
-	WorldMapGenerator * _parent;
+	MapGenerator * _parent;
 
 	std::mt19937 & rng() const;
-	arma::cube & reliefMap(WorldMap & map) const;
+	arma::cube & reliefMap(Map & map) const;
 };
 
 /** Classe de base des modules du générateur de cartes servant
 à générer la carte de relief. */
-class WORLDAPI_EXPORT ReliefMapGenerator : public WorldMapGeneratorModule {
+class WORLDAPI_EXPORT ReliefMapGenerator : public MapGeneratorModule {
 public:
-	ReliefMapGenerator(WorldMapGenerator * parent);
+	ReliefMapGenerator(MapGenerator * parent);
 };
 
 class WORLDAPI_EXPORT CustomWorldRMGenerator : public ReliefMapGenerator {
 public:
-	CustomWorldRMGenerator(WorldMapGenerator * parent, float biomeDensity = 1, uint32_t limitBrightness = 4);
+	CustomWorldRMGenerator(MapGenerator * parent, float biomeDensity = 1, uint32_t limitBrightness = 4);
 
 	void setBiomeDensity(float biomeDensity);
 	void setLimitBrightness(uint32_t);
 
 	void setDifferentialLaw(const relief::diff_law & law);
 
-	virtual void generate(WorldMap & map) const;
+	virtual void generate(Map & map) const;
 private:
 	static const float PIXEL_UNIT;
 	/** Le nombre moyen de biomes par bloc de 100 pixels de WorldMap.*/
@@ -59,15 +58,15 @@ private:
 };
 
 
-// WorldMapGenerator
+// MapGenerator
 
 /** */
-class WORLDAPI_EXPORT WorldMapGenerator : public GenBase<WorldMap> {
+class WORLDAPI_EXPORT MapGenerator {
 public:
-	WorldMapGenerator(uint32_t sizeX, uint32_t sizeY);
-	~WorldMapGenerator();
+	MapGenerator(uint32_t sizeX, uint32_t sizeY);
+	~MapGenerator();
 
-	WorldMap * generate();
+	Map * generate();
 
 	template <class T, typename... Args>
 	void emplaceReliefMapGenerator(Args&&... args) {
@@ -81,5 +80,5 @@ private:
 	std::unique_ptr<ReliefMapGenerator> _reliefMap;
 
 
-	friend class WorldMapGeneratorModule;
+	friend class MapGeneratorModule;
 };

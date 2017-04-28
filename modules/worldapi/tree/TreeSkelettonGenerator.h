@@ -2,12 +2,11 @@
 
 #include <worldapi/worldapidef.h>
 
-#include "../GenBase.h"
 #include "TreeSkelettonParameters.h"
 #include "TreeSkeletton.h"
 
 
-class WORLDAPI_EXPORT TreeSkelettonGenerator : public GenBase<TreeSkeletton> {
+class WORLDAPI_EXPORT TreeSkelettonGenerator {
 public:
 	TreeSkelettonGenerator();
 	virtual ~TreeSkelettonGenerator();

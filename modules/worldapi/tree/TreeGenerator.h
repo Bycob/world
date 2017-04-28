@@ -2,7 +2,6 @@
 
 #include <worldapi/worldapidef.h>
 
-#include "../GenBase.h"
 #include "../maths/Bezier.h"
 
 #include "TreeSkeletton.h"
@@ -15,7 +14,7 @@
 
 using maths::BezierCurve;
 
-class WORLDAPI_EXPORT TreeGenerator : public GenBase<Tree> {
+class WORLDAPI_EXPORT TreeGenerator {
 public:
 	TreeGenerator();
 	~TreeGenerator();
