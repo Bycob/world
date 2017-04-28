@@ -2,10 +2,12 @@
 
 #include <worldapi/worldapidef.h>
 
+#include <memory>
 #include <stdint.h>
 #include <armadillo/armadillo>
 
 #include "../Image.h"
+#include "World.h"
 
 /** Génerer une worldmap est la première étape pour ensuite créer un monde
 entier. La worldmap définit les différents paramètres physiques qu'il existera
@@ -31,4 +33,14 @@ private:
 	friend class WorldMapGenerator;
 	friend class WorldMapGeneratorModule;
 };
+
+class WorldMapNode : public WorldNode {
+public:
+	DECL_TYPE
+
+	WorldMapNode(const World * world);
+private:
+	std::unique_ptr<WorldMap> _map;
+};
+
 

@@ -2,12 +2,10 @@
 // Created by louis on 20/04/17.
 //
 
-#include "WorldNode.h"
+#include "World.h"
 
 #include <stdexcept>
 #include <iostream>
-
-#include "World.h"
 
 const WorldNodeType& WorldNodeType::create(const std::string &name, bool unique) {
     static std::set<WorldNodeType> _types;

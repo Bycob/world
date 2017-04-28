@@ -2,7 +2,7 @@
 // Created by louis on 21/04/17.
 //
 
-#include "WorldMapNode.h"
+#include "WorldMap.h"
 
 INIT_TYPE(WorldMapNode, "worldmap")
 
