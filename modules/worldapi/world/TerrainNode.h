@@ -8,6 +8,7 @@
 #include <worldapi/worldapidef.h>
 
 #include "World.h"
+#include "WorldGenerator.h"
 #include "../terrain/terrain.h"
 
 class TerrainNode : public WorldNode {
@@ -17,6 +18,13 @@ public:
     TerrainNode(const World * world);
 private:
 
+};
+
+class TerrainGenNode : public WorldGenNode {
+public:
+    TerrainGenNode(WorldGenerator & parent);
+
+    virtual void addRequiredNodes(World & world) const;
 };
 
 

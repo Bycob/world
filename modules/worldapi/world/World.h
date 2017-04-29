@@ -51,16 +51,9 @@ public:
 	World(const WorldGenerator & generator);
 	virtual ~World();
 
-	template <typename T> T & createNode() {
-		if (checkNodeTypeInternal(T::type)) {
-			T * newNode = new T(*this);
-			_nodes.emplace_back(newNode);
-			return *newNode;
-		}
-		else {
-			throw std::runtime_error("The node can not be created");
-		}
-	};
+	// TODO renforcer l'architecture en templates pour que ça plante à la compilation et pas à l'execution
+	template <typename T> T & createNode();
+	template <typename T> T & getUniqueNode();
 
 	WorldGenerator & getGenerator();
 
@@ -77,3 +70,4 @@ private:
 	bool checkNodeTypeInternal(const WorldNodeType & type) const;
 };
 
+#include "World.inl"

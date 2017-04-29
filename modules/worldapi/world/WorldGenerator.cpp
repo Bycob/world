@@ -23,10 +23,14 @@ WorldGenerator::~WorldGenerator() {
 
 }
 
-World* WorldGenerator::createWorld() {
+World* WorldGenerator::generate() {
     return new World(*this);
 }
 
 void WorldGenerator::init(World &world) {
 
+    // Ajout des noeuds requis pour le monde.
+    for (std::unique_ptr<WorldGenNode> & node : _nodes) {
+        node->addRequiredNodes(world);
+    }
 }
