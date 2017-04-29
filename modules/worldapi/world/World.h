@@ -42,13 +42,14 @@ private:
 	const World * _world;
 };
 
-class InternalWorldGenerator;
+class PrivateWorld;
 class WorldGenerator;
 
 class WORLDAPI_EXPORT World {
 public:
 	World();
 	World(const WorldGenerator & generator);
+	World(const World & world) = delete;
 	virtual ~World();
 
 	// TODO renforcer l'architecture en templates pour que ça plante à la compilation et pas à l'execution
@@ -61,12 +62,12 @@ public:
 
 	// getAssets(vec3d from, level detail scale)
 private:
-	InternalWorldGenerator * _internal;
-
-    std::vector<std::unique_ptr<WorldNode>> _nodes;
+	PrivateWorld * _internal;
 
     friend class WorldGenerator;
 
+	// Retourne une référence vers le champ _internal->_nodes
+	std::vector<std::unique_ptr<WorldNode>> & _nodes();
 	bool checkNodeTypeInternal(const WorldNodeType & type) const;
 };
 

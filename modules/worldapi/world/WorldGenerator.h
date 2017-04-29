@@ -34,6 +34,8 @@ protected:
     }
 };
 
+class PrivateWorldGenerator;
+
 class WORLDAPI_EXPORT WorldGenerator {
 public:
     /** Crée un générateur fonctionnel permettant de créer un monde
@@ -51,7 +53,7 @@ public:
 
 private:
 
-    std::vector<std::unique_ptr<WorldGenNode>> _nodes;
+	PrivateWorldGenerator * _internal;
 
     void init(World & world);
 

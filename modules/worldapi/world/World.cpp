@@ -2,22 +2,23 @@
 
 #include "WorldGenerator.h"
 
-class InternalWorldGenerator {
+class PrivateWorld {
 public:
     template <typename... Args>
-    InternalWorldGenerator(Args... args)
+    PrivateWorld(Args... args)
             : _gen(std::make_unique<WorldGenerator>(args...)) {}
 
     std::unique_ptr<WorldGenerator> _gen;
+	std::vector<std::unique_ptr<WorldNode>> _nodes;
 };
 
 
-World::World() : _internal(new InternalWorldGenerator()) {
+World::World() : _internal(new PrivateWorld()) {
     getGenerator().init(*this);
 }
 
 World::World(const WorldGenerator &generator)
-        : _internal(new InternalWorldGenerator(generator)) {
+	: _internal(new PrivateWorld(generator)) {
     getGenerator().init(*this);
 }
 
@@ -29,9 +30,13 @@ WorldGenerator& World::getGenerator() {
     return *_internal->_gen;
 }
 
+std::vector<std::unique_ptr<WorldNode>> & World::_nodes() {
+	return _internal->_nodes;
+}
+
 bool World::checkNodeTypeInternal(const WorldNodeType &type) const {
     if (type.unique()) {
-        for (const std::unique_ptr<WorldNode> & node : _nodes) {
+        for (const std::unique_ptr<WorldNode> & node : _internal->_nodes) {
             if (node->type() == type) {
                 return false;
             }
