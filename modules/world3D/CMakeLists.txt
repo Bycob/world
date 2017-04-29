@@ -9,6 +9,6 @@ if(${WORLD_BUILD_WORLD3D})
     message("-- Build World3D")
     add_executable(world3D ${WORLD3D_SOURCES})
     target_link_libraries(world3D ${IRRLICHT_LIBRARIES} worldapi)
-
-    add_subdirectory(tests)
 endif()
+
+add_subdirectory(tests)
