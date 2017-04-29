@@ -1,5 +1,7 @@
 #include "interop.h"
 
+#ifdef USE_OPENCV
+
 cv::Mat armaToCV(const arma::Mat<double>& mat) {
 	cv::Mat output(mat.n_cols, mat.n_rows, CV_8UC1);
 
@@ -28,3 +30,5 @@ cv::Mat armaToCV(const arma::Cube<double> & cube) {
 
 	return output;
 }
+
+#endif
