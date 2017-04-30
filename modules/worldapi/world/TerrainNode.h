@@ -22,7 +22,7 @@ private:
 
 class TerrainGenNode : public WorldGenNode {
 public:
-    TerrainGenNode(WorldGenerator & parent);
+    TerrainGenNode(WorldGenerator * parent);
 
     virtual void addRequiredNodes(World & world) const;
 };

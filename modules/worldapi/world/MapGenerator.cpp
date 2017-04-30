@@ -203,3 +203,14 @@ Map * MapGenerator::generate() {
 
 	return map;
 }
+
+// MapGeneratorNode
+
+MapGeneratorNode::MapGeneratorNode(WorldGenerator * parent) 
+	: WorldGenNode(parent) {
+
+}
+
+void MapGeneratorNode::addRequiredNodes(World & world) const {
+	requireUnique<MapNode>(world);
+}

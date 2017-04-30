@@ -13,12 +13,14 @@ TerrainNode::TerrainNode(const World * world)
 
 }
 
-TerrainGenNode::TerrainGenNode(WorldGenerator &parent)
+
+
+TerrainGenNode::TerrainGenNode(WorldGenerator * parent)
         : WorldGenNode(parent) {
 
 }
 
 void TerrainGenNode::addRequiredNodes(World &world) const {
+	requireUnique<MapNode>(world);
     requireUnique<TerrainNode>(world);
-    requireUnique<MapNode>(world);
 }

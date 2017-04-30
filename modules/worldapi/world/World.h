@@ -59,7 +59,6 @@ public:
 	WorldGenerator & getGenerator();
 
 	// getAssets(zone, level detail)
-
 	// getAssets(vec3d from, level detail scale)
 private:
 	PrivateWorld * _internal;

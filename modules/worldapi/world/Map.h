@@ -34,7 +34,7 @@ private:
 	friend class MapGeneratorModule;
 };
 
-class MapNode : public WorldNode {
+class WORLDAPI_EXPORT MapNode : public WorldNode {
 public:
 	DECL_TYPE
 

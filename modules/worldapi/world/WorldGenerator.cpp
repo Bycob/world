@@ -4,6 +4,9 @@
 
 #include "WorldGenerator.h"
 
+#include "MapGenerator.h"
+#include "TerrainNode.h"
+
 class PrivateWorldGenerator {
 public:
 	std::vector<std::unique_ptr<WorldGenNode>> _nodes;
@@ -12,6 +15,9 @@ public:
 
 WorldGenerator* WorldGenerator::defaultGenerator() {
     WorldGenerator * result = new WorldGenerator();
+
+	result->_nodes().emplace_back(new MapGeneratorNode(result));
+	result->_nodes().emplace_back(new TerrainGenNode(result));
 
     return result;
 }
@@ -30,6 +36,10 @@ WorldGenerator::~WorldGenerator() {
 
 World* WorldGenerator::generate() {
     return new World(*this);
+}
+
+std::vector<std::unique_ptr<WorldGenNode>> & WorldGenerator::_nodes() {
+	return _internal->_nodes;
 }
 
 void WorldGenerator::init(World &world) {

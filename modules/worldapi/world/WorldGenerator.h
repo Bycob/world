@@ -13,12 +13,12 @@ class WorldGenerator;
 
 class WORLDAPI_EXPORT WorldGenNode {
 public:
-    WorldGenNode(WorldGenerator & generator);
+    WorldGenNode(WorldGenerator * generator);
     virtual ~WorldGenNode() = default;
 
     virtual void addRequiredNodes(World & world) const;
 protected:
-    const WorldGenerator * _parent;
+    WorldGenerator * _parent;
 
     /** Ajout un noeud unique du type passé en template au World
      * passé en paramètres, seulement si le World ne contient aucune
@@ -55,6 +55,7 @@ private:
 
 	PrivateWorldGenerator * _internal;
 
+	std::vector<std::unique_ptr<WorldGenNode>> & _nodes();
     void init(World & world);
 
     friend class World;

@@ -1,7 +1,9 @@
 #ifndef RESOURCEMODEL_H
 #define RESOURCEMODEL_H
 
-class ResourceModel
+#include <QAbstractItemModel>
+
+class ResourceModel : QAbstractItemModel
 {
 public:
     ResourceModel();

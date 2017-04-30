@@ -1,10 +1,9 @@
 #include <iostream>
+#include <regex>
 
 #include "../../../tests/testutil.h"
 
 #include "../IniFile.h"
-
-#include <regex>
 
 int main(int argc, char** argv) {
     test([] {

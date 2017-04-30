@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "Map.h"
+#include "WorldGenerator.h"
 #include "WorldParameters.h"
 
 // MODULES (à déplacer ?)
@@ -81,4 +82,13 @@ private:
 
 
 	friend class MapGeneratorModule;
+};
+
+class WORLDAPI_EXPORT MapGeneratorNode : public WorldGenNode {
+public:
+	MapGeneratorNode(WorldGenerator * generator);
+
+	virtual void addRequiredNodes(World & world) const;
+private:
+
 };
