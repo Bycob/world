@@ -55,6 +55,7 @@ public:
 	// TODO renforcer l'architecture en templates pour que ça plante à la compilation et pas à l'execution
 	template <typename T> T & createNode();
 	template <typename T> T & getUniqueNode();
+	template <typename T> const T & getUniqueNode() const;
 
 	WorldGenerator & getGenerator();
 

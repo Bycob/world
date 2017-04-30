@@ -1,6 +1,6 @@
 
 template <typename T> T & World::getUniqueNode()  {
-    if (!T::type.isUnique()) throw std::runtime_error("getUniqueNode() : non-unique type");
+    if (!T::type.unique()) throw std::runtime_error("getUniqueNode() : non-unique type");
 
     for (auto & node : _nodes()) {
         if (node->type() == T::type) {
@@ -9,6 +9,10 @@ template <typename T> T & World::getUniqueNode()  {
     }
 
     throw std::runtime_error("Node type not found");
+}
+
+template <typename T> const T & World::getUniqueNode() const {
+    return const_cast<const T &>(const_cast<World *>(this)->getUniqueNode<T>());
 }
 
 template <typename T> T & World::createNode()  {

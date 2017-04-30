@@ -41,7 +41,7 @@ void MainView::runInternal() {
             true,
             true,
             0);
-    _scenemanager = _device->getSceneManager () ;
+    _scenemanager = _device->getSceneManager();
     _driver = _device->getVideoDriver();
 
     _camera = _scenemanager->addCameraSceneNodeMaya();
