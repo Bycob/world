@@ -62,9 +62,9 @@ private:
 // MapGenerator
 
 /** */
-class WORLDAPI_EXPORT MapGenerator {
+class WORLDAPI_EXPORT MapGenerator : public WorldGenNode {
 public:
-	MapGenerator(uint32_t sizeX, uint32_t sizeY);
+	MapGenerator(uint32_t sizeX, uint32_t sizeY, WorldGenerator * parent = nullptr);
 	~MapGenerator();
 
 	Map * generate();
@@ -73,6 +73,8 @@ public:
 	void emplaceReliefMapGenerator(Args&&... args) {
 		_reliefMap = std::make_unique<T>(this, args...);
 	}
+
+	virtual void addRequiredNodes(World & world) const;
 private:
 	mutable std::mt19937 _rng;
 
@@ -84,11 +86,3 @@ private:
 	friend class MapGeneratorModule;
 };
 
-class WORLDAPI_EXPORT MapGeneratorNode : public WorldGenNode {
-public:
-	MapGeneratorNode(WorldGenerator * generator);
-
-	virtual void addRequiredNodes(World & world) const;
-private:
-
-};

@@ -5,7 +5,7 @@
 #include "WorldGenerator.h"
 
 #include "MapGenerator.h"
-#include "TerrainNode.h"
+#include "Ground.h"
 
 class PrivateWorldGenerator {
 public:
@@ -16,8 +16,8 @@ public:
 WorldGenerator* WorldGenerator::defaultGenerator() {
     WorldGenerator * result = new WorldGenerator();
 
-	result->_nodes().emplace_back(new MapGeneratorNode(result));
-	result->_nodes().emplace_back(new TerrainGenNode(result));
+	result->_nodes().emplace_back(new MapGenerator(100, 100, result));
+	result->_nodes().emplace_back(new GroundGenerator(result));
 
     return result;
 }

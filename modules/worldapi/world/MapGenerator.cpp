@@ -185,7 +185,8 @@ void CustomWorldRMGenerator::generate(Map & map) const {
 
 // MapGenerator
 
-MapGenerator::MapGenerator(uint32_t sizeX, uint32_t sizeY) :
+MapGenerator::MapGenerator(uint32_t sizeX, uint32_t sizeY, WorldGenerator * parent) :
+	WorldGenNode(parent),
 	_rng(time(NULL)),
 	_sizeX(sizeX), _sizeY(sizeY),
 	_reliefMap(nullptr) {
@@ -197,20 +198,13 @@ MapGenerator::~MapGenerator() {
 }
 
 Map * MapGenerator::generate() {
-	Map * map = new Map(_sizeX, _sizeY);
+	Map * map = new Map(nullptr, _sizeX, _sizeY);
 
 	if (_reliefMap != nullptr) _reliefMap->generate(*map);
 
 	return map;
 }
 
-// MapGeneratorNode
-
-MapGeneratorNode::MapGeneratorNode(WorldGenerator * parent) 
-	: WorldGenNode(parent) {
-
-}
-
-void MapGeneratorNode::addRequiredNodes(World & world) const {
-	requireUnique<MapNode>(world);
+void MapGenerator::addRequiredNodes(World & world) const {
+	requireUnique<Map>(world);
 }

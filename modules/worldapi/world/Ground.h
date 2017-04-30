@@ -11,18 +11,19 @@
 #include "WorldGenerator.h"
 #include "../terrain/terrain.h"
 
-class TerrainNode : public WorldNode {
+/** Cette classe gère le sol du monde. */
+class Ground : public WorldNode {
 public:
     DECL_TYPE
 
-    TerrainNode(const World * world);
+    Ground(const World * world);
 private:
 
 };
 
-class TerrainGenNode : public WorldGenNode {
+class GroundGenerator : public WorldGenNode {
 public:
-    TerrainGenNode(WorldGenerator * parent);
+    GroundGenerator(WorldGenerator * parent);
 
     virtual void addRequiredNodes(World & world) const;
 };
