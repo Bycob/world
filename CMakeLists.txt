@@ -22,14 +22,26 @@ if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-# ParamËtres du projet
+# Param√®tres du projet
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-# Parametre du compilateur
+# Detection de la platforme
+if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(WORLD_64_BITS ON)
+    set(WORLD_BITS 64)
+else()
+    set(WORLD_32_BITS ON)
+    set(WORLD_BITS 32)
+endif()
+
+message("-- Detected ${WORLD_BITS} bits platform")
+
+# Detection et param√®tres du compilateur
 if(CMAKE_CXX_COMPILER_ID MATCHES "^GNU$")
     message("-- Compiler : GNU")
+    set(WORLD_COMPILER_IS_GNU on)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -pthread")
 
     if(CMAKE_BUILD_TYPE MATCHES "^Release$")
@@ -37,10 +49,11 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "^GNU$")
     endif()
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "^MSVC$")
     message("-- Compiler : MSVC")
+    set(WORLD_COMPILER_IS_MSVC on)
 endif()
 
 
-# DÈpendances
+# D√©pendances
 include(cmake/WorldDependencies.cmake)
 
 include_directories(3rdparty/
@@ -53,7 +66,7 @@ add_subdirectory(3rdparty/)
 add_subdirectory(modules/worldapi/)
 # Ajout de World 3D
 add_subdirectory(modules/world3D)
-# Ajout du rÈpertoire de tests
+# Ajout du r√©pertoire de tests
 add_subdirectory(tests/)
 
 message("=====")

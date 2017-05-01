@@ -18,6 +18,7 @@ if (IRRLICHT_LIBRARIES AND IRRLICHT_INCLUDE_DIRS)
   # in cache already
   set(IRRLICHT_FOUND TRUE)
 else (IRRLICHT_LIBRARIES AND IRRLICHT_INCLUDE_DIRS)
+  # declare variables for different platforms
   if (WIN32)
     set(IRRLICHT_PATHS
       ${PROJECT_SOURCE_DIR}/../irrlicht/include
@@ -25,9 +26,18 @@ else (IRRLICHT_LIBRARIES AND IRRLICHT_INCLUDE_DIRS)
 
     set(IRRLICHT_LIBRARY_PATHS
       ${PROJECT_SOURCE_DIR}/../irrlicht/lib
-      ${PROJECT_SOURCE_DIR}/../irrlicht/lib/Win64-visualstudio
-      ${PROJECT_SOURCE_DIR}/../irrlicht/lib/Win64-visualstudio
     )
+
+    if (${WORLD_COMPILER_IS_MSVC})
+      set(IRRLICHT_LIBRARY_PATHS ${IRRLICHT_LIBRARY_PATHS}
+        ${PROJECT_SOURCE_DIR}/../irrlicht/lib/Win64-visualstudio
+      )
+    elseif(${WORLD_COMPILER_IS_GNU})
+      set(IRRLICHT_LIBRARY_PATHS ${IRRLICHT_LIBRARY_PATHS}
+        ${PROJECT_SOURCE_DIR}/../irrlicht/lib/gnu-gcc # TODO à revérifier
+      )
+    endif()
+
   else (WIN32)
     set(IRRLICHT_PATHS
       /usr/include
@@ -46,6 +56,7 @@ else (IRRLICHT_LIBRARIES AND IRRLICHT_INCLUDE_DIRS)
     )
   endif (WIN32)
 
+  # find Irrlicht
   find_path(IRRLICHT_INCLUDE_DIR
     NAMES
       irrlicht.h
