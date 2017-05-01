@@ -18,27 +18,46 @@ if (IRRLICHT_LIBRARIES AND IRRLICHT_INCLUDE_DIRS)
   # in cache already
   set(IRRLICHT_FOUND TRUE)
 else (IRRLICHT_LIBRARIES AND IRRLICHT_INCLUDE_DIRS)
+  if (WIN32)
+    set(IRRLICHT_PATHS
+      ${PROJECT_SOURCE_DIR}/../irrlicht/include
+    )
 
-  find_path(IRRLICHT_INCLUDE_DIR
-    NAMES
-      irrlicht.h
-    PATHS
+    set(IRRLICHT_LIBRARY_PATHS
+      ${PROJECT_SOURCE_DIR}/../irrlicht/lib
+      ${PROJECT_SOURCE_DIR}/../irrlicht/lib/Win64-visualstudio
+      ${PROJECT_SOURCE_DIR}/../irrlicht/lib/Win64-visualstudio
+    )
+  else (WIN32)
+    set(IRRLICHT_PATHS
       /usr/include
       /usr/include/irrlicht
       /usr/local/include
       /usr/local/include/irrlicht
       /opt/local/include
       /sw/include
+    )
+
+    set(IRRLICHT_LIBRARY_PATHS
+      /usr/lib
+      /usr/local/lib
+      /opt/local/lib
+      /sw/lib
+    )
+  endif (WIN32)
+
+  find_path(IRRLICHT_INCLUDE_DIR
+    NAMES
+      irrlicht.h
+    PATHS
+      ${IRRLICHT_PATHS}
   )
 
   find_library(IRRLICHT_LIBRARY
     NAMES
         Irrlicht
     PATHS
-      /usr/lib
-      /usr/local/lib
-      /opt/local/lib
-      /sw/lib
+      ${IRRLICHT_LIBRARY_PATHS}
   )
 
   if (IRRLICHT_LIBRARY)
@@ -74,4 +93,3 @@ else (IRRLICHT_LIBRARIES AND IRRLICHT_INCLUDE_DIRS)
   mark_as_advanced(IRRLICHT_INCLUDE_DIRS IRRLICHT_LIBRARIES)
 
 endif (IRRLICHT_LIBRARIES AND IRRLICHT_INCLUDE_DIRS)
-
