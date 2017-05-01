@@ -10,7 +10,9 @@
 #include <mutex>
 #include <thread>
 
-#include <irrlicht/irrlicht.h>
+#include <irrlicht.h>
+
+#include "GroundSceneNode.h"
 
 class Application;
 
@@ -21,6 +23,7 @@ public:
 
     void show();
 
+    bool running();
     void waitClose();
 private:
     Application & _app;
@@ -32,7 +35,9 @@ private:
     irr::IrrlichtDevice *_device ;
     irr::scene::ISceneManager *_scenemanager ;
 
+    std::atomic_bool _resetScene;
     irr::scene::ICameraSceneNode *_camera;
+    std::unique_ptr<GroundSceneNode> _ground;
 
     void runInternal();
     void updateScene();

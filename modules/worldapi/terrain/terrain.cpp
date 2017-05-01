@@ -10,6 +10,7 @@
 #include "../Image.h"
 #include "../mesh.h"
 #include "../meshop.h"
+#include "../stream.h"
 
 using namespace maths;
 using namespace img;
@@ -24,7 +25,10 @@ Terrain::Terrain(int size) :
 Terrain::Terrain(const Mat<double> & data) :
 	_array(data), 
 	_texture(nullptr) {
-	// TODO check que c'est de la bonne taille et tout et tout
+
+	if (data.n_rows != data.n_cols) {
+		throw std::runtime_error("Terrain must be squared !");
+	}
 }
 
 Terrain::Terrain(const Terrain &terrain)
@@ -268,14 +272,30 @@ Mesh * Terrain::convertToSubmesh(float rootSizeX, float rootSizeY, float rootSiz
 	return convertToMesh(offsetX - rootSizeX / 2, offsetY - rootSizeY / 2, offsetZ, sizeX, sizeY, sizeZ);
 }
 
-Image Terrain::convertToImage() {
+Image Terrain::convertToImage() const {
 	return Image(this->_array);
 }
 
-Image Terrain::getTexture() {
+void Terrain::writeRawData(std::ostream &stream) const {
+	bin_ostream binstream(stream);
+
+	for (int x = 0 ; x < _array.n_rows ; x++) {
+		for (int y = 0 ; y < _array.n_cols ; y++) {
+			binstream << _array(x, y);
+		}
+	}
+}
+
+int Terrain::getRawDataSize() const {
+	return (int) (_array.n_rows * _array.n_cols) * sizeof(double);
+}
+
+Image Terrain::getTexture() const {
+	if (_texture == nullptr) throw std::runtime_error("No texture");
 	return *_texture;
 }
 
-const Image & Terrain::texture() {
-	return (*_texture);
+const Image & Terrain::texture() const {
+	if (_texture == nullptr) throw std::runtime_error("No texture");
+	return *_texture;
 }

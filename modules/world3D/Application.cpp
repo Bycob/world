@@ -1,5 +1,7 @@
 #include "Application.h"
 
+#include <worldapi/world/WorldGenerator.h>
+
 #include "util.h"
 
 Application::Application()
@@ -14,7 +16,11 @@ void Application::run(int argc, char **argv) {
     _mainView->show();
 
     while(_running) {
-        sleep(20);
+        if (!_mainView->running()) {
+            _running = false;
+        }
+
+        sleep(20.0f);
     }
 
     _mainView->waitClose();
@@ -24,13 +30,13 @@ void Application::requestStop() {
     _running = false;
 }
 
-const SynchronizedWorld & Application::getWorld() const {
+SynchronizedWorld & Application::getWorld() {
     if (_world == nullptr) throw std::runtime_error("getWorld() called while not running.");
     return *_world;
 }
 
 void Application::loadWorld(int argc, char **argv) {
-    _world = std::make_unique<SynchronizedWorld>();
+    _world = std::make_unique<SynchronizedWorld>(*WorldGenerator::defaultGenerator());
 
     _world->lock();
     World & world = _world->get();

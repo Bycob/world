@@ -45,6 +45,14 @@ CustomWorldRMGenerator::CustomWorldRMGenerator(MapGenerator * parent, float biom
 	
 }
 
+CustomWorldRMGenerator::CustomWorldRMGenerator(const CustomWorldRMGenerator &other, MapGenerator * newParent)
+	: ReliefMapGenerator(newParent),
+	  _biomeDensity(other._biomeDensity),
+	  _limitBrightness(other._limitBrightness),
+	  _diffLaw(other._diffLaw->clone()){
+
+}
+
 void CustomWorldRMGenerator::setBiomeDensity(float biomeDensity) {
 	_biomeDensity = biomeDensity;
 }
@@ -182,6 +190,10 @@ void CustomWorldRMGenerator::generate(Map & map) const {
 	}
 }
 
+CustomWorldRMGenerator* CustomWorldRMGenerator::clone(MapGenerator * newParent) {
+	return new CustomWorldRMGenerator(*this, newParent);
+}
+
 
 // MapGenerator
 
@@ -191,6 +203,16 @@ MapGenerator::MapGenerator(uint32_t sizeX, uint32_t sizeY, WorldGenerator * pare
 	_sizeX(sizeX), _sizeY(sizeY),
 	_reliefMap(nullptr) {
 
+}
+
+MapGenerator::MapGenerator(const MapGenerator &other, WorldGenerator * newParent):
+	WorldGenNode(newParent),
+	_rng(time(NULL)),
+	_sizeX(other._sizeX), _sizeY(other._sizeY),
+	_reliefMap(nullptr) {
+
+	if (other._reliefMap != nullptr)
+		_reliefMap = std::unique_ptr<ReliefMapGenerator>(other._reliefMap->clone(this));
 }
 
 MapGenerator::~MapGenerator() {
@@ -207,4 +229,8 @@ Map * MapGenerator::generate() {
 
 void MapGenerator::addRequiredNodes(World & world) const {
 	requireUnique<Map>(world);
+}
+
+MapGenerator* MapGenerator::clone(WorldGenerator * newParent) {
+	return new MapGenerator(*this, newParent);
 }

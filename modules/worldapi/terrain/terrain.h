@@ -33,7 +33,6 @@ public :
 	Terrain(const arma::Mat<double> & data);
 
 	Terrain(const Terrain & terrain);
-
 	Terrain(Terrain && terrain);
 
 	virtual ~Terrain();
@@ -96,11 +95,14 @@ public :
 	Mesh * convertToSubmesh(float rootSizeX = 1, float rootSizeY = 1, float rootSizeZ = 0.4) const;
 
 	//Méthodes pour la conversion du terrain en image.
-	img::Image convertToImage();
+	img::Image convertToImage() const;
+	/** Ecrit en brut les données du terrain. */
+	void writeRawData(std::ostream & stream) const;
+	int getRawDataSize() const;
 
-	img::Image getTexture();
+	img::Image getTexture() const;
 
-	const img::Image & texture();
+	const img::Image & texture() const;
 
 private :
 

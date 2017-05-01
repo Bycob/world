@@ -4,11 +4,6 @@
 
 #include "stream.h"
 
-buf_ostream::buf_ostream(char *buf, int size) : _buf(buf), _size(size) {
-
-}
-
-
 bin_ostream::bin_ostream(std::ostream &stream) : _stream(stream) {
 
 }

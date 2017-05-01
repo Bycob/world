@@ -13,7 +13,8 @@
 
 class SynchronizedWorld {
 public:
-    SynchronizedWorld();
+    template <typename... Args>
+    SynchronizedWorld(Args... args);
 
     World & get();
     void lock();
@@ -25,5 +26,10 @@ private:
     std::unique_ptr<World> _world;
 };
 
+template <typename... Args>
+SynchronizedWorld::SynchronizedWorld(Args... args)
+        : _world(std::make_unique<World>(args...)), _locked(false) {
+
+}
 
 #endif //WORLD_SYNCHRONIZEDWORLD_H

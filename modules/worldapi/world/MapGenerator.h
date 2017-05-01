@@ -21,6 +21,8 @@ public:
 	virtual ~MapGeneratorModule() = default;
 
 	virtual void generate(Map & map) const = 0;
+
+	virtual MapGeneratorModule * clone(MapGenerator * newParent) = 0;
 protected:
 	MapGenerator * _parent;
 
@@ -33,18 +35,22 @@ protected:
 class WORLDAPI_EXPORT ReliefMapGenerator : public MapGeneratorModule {
 public:
 	ReliefMapGenerator(MapGenerator * parent);
+
+	virtual ReliefMapGenerator * clone(MapGenerator * newParent) override = 0;
 };
 
 class WORLDAPI_EXPORT CustomWorldRMGenerator : public ReliefMapGenerator {
 public:
 	CustomWorldRMGenerator(MapGenerator * parent, float biomeDensity = 1, uint32_t limitBrightness = 4);
+	CustomWorldRMGenerator(const CustomWorldRMGenerator & other, MapGenerator * newParent);
 
 	void setBiomeDensity(float biomeDensity);
 	void setLimitBrightness(uint32_t);
 
 	void setDifferentialLaw(const relief::diff_law & law);
 
-	virtual void generate(Map & map) const;
+	void generate(Map & map) const override;
+	CustomWorldRMGenerator * clone(MapGenerator * newParent) override;
 private:
 	static const float PIXEL_UNIT;
 	/** Le nombre moyen de biomes par bloc de 100 pixels de WorldMap.*/
@@ -65,6 +71,7 @@ private:
 class WORLDAPI_EXPORT MapGenerator : public WorldGenNode {
 public:
 	MapGenerator(uint32_t sizeX, uint32_t sizeY, WorldGenerator * parent = nullptr);
+	MapGenerator(const MapGenerator& other, WorldGenerator * newParent);
 	~MapGenerator();
 
 	Map * generate();
@@ -74,14 +81,14 @@ public:
 		_reliefMap = std::make_unique<T>(this, args...);
 	}
 
-	virtual void addRequiredNodes(World & world) const;
+	void addRequiredNodes(World & world) const override;
+	MapGenerator * clone(WorldGenerator * newParent) override;
 private:
 	mutable std::mt19937 _rng;
 
 	uint32_t _sizeX, _sizeY;
 
 	std::unique_ptr<ReliefMapGenerator> _reliefMap;
-
 
 	friend class MapGeneratorModule;
 };

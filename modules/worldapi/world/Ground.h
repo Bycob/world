@@ -25,7 +25,8 @@ class GroundGenerator : public WorldGenNode {
 public:
     GroundGenerator(WorldGenerator * parent);
 
-    virtual void addRequiredNodes(World & world) const;
+    void addRequiredNodes(World & world) const override;
+    GroundGenerator * clone(WorldGenerator * newParent) override;
 };
 
 

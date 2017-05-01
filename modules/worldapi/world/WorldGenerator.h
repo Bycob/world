@@ -17,6 +17,8 @@ public:
     virtual ~WorldGenNode() = default;
 
     virtual void addRequiredNodes(World & world) const;
+
+    virtual WorldGenNode * clone(WorldGenerator * newParent) = 0;
 protected:
     WorldGenerator * _parent;
 
@@ -25,13 +27,15 @@ protected:
      * autre occurence du même noeud. */
     template <typename T>
     void requireUnique(World & world) const {
-        if (!T::type.unique())
+        if (!T::type().unique())
             throw std::runtime_error("Can't require non-unique node type");
         try {
             world.createNode<T>();
         }
         catch (std::exception & e) {}
     }
+
+    friend class WorldGenerator;
 };
 
 class PrivateWorldGenerator;

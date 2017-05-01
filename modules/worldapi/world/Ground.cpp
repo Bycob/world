@@ -6,7 +6,7 @@
 
 #include "Map.h"
 
-INIT_TYPE(Ground, "ground")
+INIT_TYPE(Ground, "ground", true)
 
 Ground::Ground(const World * world)
         : WorldNode(world, TYPE(Ground)) {
@@ -23,4 +23,10 @@ GroundGenerator::GroundGenerator(WorldGenerator * parent)
 void GroundGenerator::addRequiredNodes(World &world) const {
 	requireUnique<Map>(world);
     requireUnique<Ground>(world);
+}
+
+GroundGenerator* GroundGenerator::clone(WorldGenerator * newParent) {
+    GroundGenerator * result = new GroundGenerator(*this);
+    result->_parent = newParent;
+    return result;
 }

@@ -7,14 +7,6 @@
 
 #include <iostream>
 
-class buf_ostream {
-public:
-    buf_ostream(char* buf, int size);
-private:
-    char* _buf;
-    int _size;
-};
-
 class bin_ostream {
 public:
     bin_ostream(std::ostream & stream);

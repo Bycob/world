@@ -18,7 +18,7 @@ public:
     void run(int argc, char** argv);
     void requestStop();
 
-    const SynchronizedWorld & getWorld() const;
+    SynchronizedWorld & getWorld();
 private:
     std::atomic_bool _running;
 

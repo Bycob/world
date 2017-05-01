@@ -22,12 +22,17 @@ WorldGenerator* WorldGenerator::defaultGenerator() {
     return result;
 }
 
-WorldGenerator::WorldGenerator() {
+WorldGenerator::WorldGenerator()
+        : _internal(new PrivateWorldGenerator()) {
 
 }
 
-WorldGenerator::WorldGenerator(const WorldGenerator &other) {
+WorldGenerator::WorldGenerator(const WorldGenerator &other)
+        : _internal(new PrivateWorldGenerator()) {
 
+    for (auto & node : other._internal->_nodes) {
+        _internal->_nodes.emplace_back(node->clone(this));
+    }
 }
 
 WorldGenerator::~WorldGenerator() {

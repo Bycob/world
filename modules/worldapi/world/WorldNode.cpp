@@ -23,7 +23,8 @@ WorldNodeType::WorldNodeType(const std::string &name, bool unique)
 
 }
 
-WorldNodeType::WorldNodeType(const WorldNodeType &other) : _name(other._name) {
+WorldNodeType::WorldNodeType(const WorldNodeType &other)
+        : _name(other._name), _unique(other._unique) {
 
 }
 

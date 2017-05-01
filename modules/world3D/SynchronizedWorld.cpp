@@ -4,11 +4,6 @@
 
 #include "SynchronizedWorld.h"
 
-SynchronizedWorld::SynchronizedWorld()
-        : _world(std::make_unique<World>()), _locked(false) {
-
-}
-
 World& SynchronizedWorld::get() {
     if (!_locked) {
         throw std::runtime_error("You may lock the world before getting it.");

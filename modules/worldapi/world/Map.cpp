@@ -5,7 +5,7 @@
 using namespace arma;
 using namespace img;
 
-INIT_TYPE(Map, "map")
+INIT_TYPE(Map, "map", true)
 
 Map::Map(const World * parent, uint32_t sizeX, uint32_t sizeY) :
 	WorldNode(parent, TYPE(Map)),

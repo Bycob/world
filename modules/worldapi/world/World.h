@@ -7,9 +7,14 @@
 #include <string>
 #include <set>
 
-#define DECL_TYPE static WorldNodeType type;
-#define INIT_TYPE(CLASSNAME, ...) WorldNodeType CLASSNAME::type = WorldNodeType::create(__VA_ARGS__);
-#define TYPE(CLASSNAME) CLASSNAME::type
+#define DECL_TYPE static const WorldNodeType & type();
+#define INIT_TYPE(CLASSNAME, ...) \
+const WorldNodeType & CLASSNAME::type() { \
+	static WorldNodeType type = WorldNodeType::create(__VA_ARGS__); \
+	return type; \
+}
+
+#define TYPE(CLASSNAME) CLASSNAME::type()
 
 class WORLDAPI_EXPORT WorldNodeType {
 public:

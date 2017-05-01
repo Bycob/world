@@ -23,3 +23,15 @@ void GroundSceneNode::initialize(const World &world) {
 
     //IReadFile * rawFile = _fileSystem->createMemoryReadFile();
 }
+
+ITerrainSceneNode* GroundSceneNode::getNode(const Terrain &terrain) {
+    std::stringstream stream;
+    terrain.writeRawData(stream);
+    // TODO faire un vrai buffer pour éviter une copie inutile
+    const std::string & str = stream.str();
+    const char* data = str.c_str();
+    IReadFile * memoryFile = _fileSystem->createMemoryReadFile((void*)data, str.size(), "", false);
+
+    ITerrainSceneNode * result = _sceneManager->addTerrainSceneNode(memoryFile);
+    return result;
+}
