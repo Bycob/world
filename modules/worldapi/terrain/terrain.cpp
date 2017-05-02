@@ -281,13 +281,13 @@ void Terrain::writeRawData(std::ostream &stream) const {
 
 	for (int x = 0 ; x < _array.n_rows ; x++) {
 		for (int y = 0 ; y < _array.n_cols ; y++) {
-			binstream << _array(x, y);
+			binstream << (float) _array(x, y);
 		}
 	}
 }
 
 int Terrain::getRawDataSize() const {
-	return (int) (_array.n_rows * _array.n_cols) * sizeof(double);
+	return (int) (_array.n_rows * _array.n_cols) * sizeof(float);
 }
 
 Image Terrain::getTexture() const {
