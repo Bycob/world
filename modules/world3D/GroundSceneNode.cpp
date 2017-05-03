@@ -23,36 +23,40 @@ void GroundSceneNode::initialize(const World &world) {
     const Ground & ground = world.getUniqueNode<Ground>();
 
     // Test
-    PerlinTerrainGenerator generator;
+    PerlinTerrainGenerator generator(513, 0, 5, 2, 0.4);
     std::unique_ptr<Terrain> terrain(generator.generate());
     getNode(*terrain);
     //*/
 }
 
 ITerrainSceneNode* GroundSceneNode::getNode(const Terrain &terrain) {
-    std::stringstream stream;
-    terrain.writeRawData(stream);
-    // TODO faire un vrai buffer pour éviter une copie inutile
-    const std::string & str = stream.str();
-    const char* data = str.c_str();
-    IReadFile * memoryFile = _fileSystem->createMemoryReadFile((void*)data, terrain.getRawDataSize(), "", false);
+    // Creation du terrain
+    int dataSize;
+    const char* data = terrain.getRawData(dataSize, 1000);
+    IReadFile * memoryFile = _fileSystem->createMemoryReadFile((void*)data, dataSize, "", true);
 
     ITerrainSceneNode * result =
-            _sceneManager->addTerrainSceneNode("tests/perlin1.png", 0, -1,
+            _sceneManager->addTerrainSceneNode(nullptr, 0, -1,
                                                vector3df(0.0f, 0.0f, 0.0f),
                                                vector3df(0.0f, 0.0f, 0.0f),
-                                               vector3df(1.0f, 0.5f, 1.0f),
+                                               vector3df(1.0f, 1.0f, 1.0f),
                                                SColor(255, 255, 255, 255),
                                                5, ETPS_17, 4, true);
-    //result->loadHeightMapRAW(memoryFile, 32, true, true, 0, SColor(255,255,255,255), 4);
+    result->loadHeightMapRAW(memoryFile, 32, true, true, 0, SColor(255,255,255,255), 4);
+
+    memoryFile->drop();
+
+    // Paramètres d'affichage
     result->setMaterialFlag(video::EMF_LIGHTING, true);
+    result->setMaterialFlag(video::EMF_NORMALIZE_NORMALS, true);
 
     result->setMaterialType(EMT_SOLID);
     auto &material = result->getMaterial(0);
     material.BackfaceCulling = false;
-    material.AmbientColor = SColor(255, 50, 50, 50);
-    material.SpecularColor = SColor(255, 255, 255, 0);
-    material.DiffuseColor = SColor(255, 255, 240, 123);
+    material.ColorMaterial = ECM_NONE;
+    material.AmbientColor.set(255, 0, 0, 0);
+    material.SpecularColor.set(255, 255, 255, 255);
+    material.DiffuseColor.set(255, 123, 85, 12);
 
 
     // Collision pour la camera
@@ -61,9 +65,9 @@ ITerrainSceneNode* GroundSceneNode::getNode(const Terrain &terrain) {
     result->setTriangleSelector(selector);
 
     // create collision response animator and attach it to the camera
-    scene::ISceneNodeAnimator* anim = _sceneManager->createCollisionResponseAnimator(
-            selector, _sceneManager->getActiveCamera(), core::vector3df(0.5,1,0.6),
-            core::vector3df(0,-1,0),
+    scene::ISceneNodeAnimatorCollisionResponse* anim = _sceneManager->createCollisionResponseAnimator(
+            selector, _sceneManager->getActiveCamera(), core::vector3df(1,2,1),
+            core::vector3df(0,-0,0),
             core::vector3df(0,0.5,0));
     selector->drop();
     _sceneManager->getActiveCamera()->addAnimator(anim);

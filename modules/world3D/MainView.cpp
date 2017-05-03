@@ -50,19 +50,19 @@ void MainView::runInternal() {
 
     // Initialisation des différents modules de rendu
     _camera = _scenemanager->addCameraSceneNodeFPS(0, 100.0f, 0.05f);
-    _camera->setPosition(vector3df(20, 500, 20));
+    _camera->setPosition(vector3df(20, 200, 20));
     //_camera = _scenemanager->addCameraSceneNode(0, vector3df(200 + 64, 200 + 119, 200 + 64), vector3df(64, 119, 64));
 
-    /*// ----- Tests (temporaire)
+    /*/ ----- Tests (temporaire)
     auto cube = _scenemanager->addSphereSceneNode();
     cube->setMaterialFlag(EMF_LIGHTING, true);
     cube->getMaterial(0).AmbientColor.set(255, 30, 30, 30);
     cube->getMaterial(0).DiffuseColor.set(255, 255, 0, 0);
-    cube->getMaterial(0).SpecularColor.set(255, 255, 255, 255);*/
-    auto light = _scenemanager->addLightSceneNode(0, vector3df(200, 200, 200), video::SColorf(1.0f,1.0f,1.0f), 745.0f);
-    light->getLightData().Type = ELT_POINT;
-    light->getLightData().Attenuation = vector3df(1, 0.001, 0);
-    //_scenemanager->setAmbientLight(SColorf(1.0f, 1.0f, 1.0f));
+    cube->getMaterial(0).SpecularColor.set(255, 255, 255, 255);
+    cube->getMaterial(0).ColorMaterial = ECM_NONE;//*/
+    auto light = _scenemanager->addLightSceneNode(0, vector3df(0, 200, 0), video::SColorf(1.0f,1.0f,1.0f), 745.0f);
+    light->setRotation(vector3df(45, 0, 0));
+    light->getLightData().Type = ELT_DIRECTIONAL;
 
     while(_device->run()) {
         updateScene();

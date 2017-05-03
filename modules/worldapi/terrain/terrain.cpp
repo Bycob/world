@@ -276,18 +276,32 @@ Image Terrain::convertToImage() const {
 	return Image(this->_array);
 }
 
-void Terrain::writeRawData(std::ostream &stream) const {
+void Terrain::writeRawData(std::ostream &stream, float height, float offset) const {
 	bin_ostream binstream(stream);
 
 	for (int x = 0 ; x < _array.n_rows ; x++) {
 		for (int y = 0 ; y < _array.n_cols ; y++) {
-			binstream << (float) _array(x, y);
+			binstream << (float) _array(x, y) * height + offset;
 		}
 	}
 }
 
+char * Terrain::getRawData(int &rawDataSize, float height, float offset) const {
+	float * result = new float[_array.n_rows * _array.n_cols];
+
+	for (int x = 0 ; x < _array.n_rows ; x++) {
+		for (int y = 0 ; y < _array.n_cols ; y++) {
+			result[x * _array.n_cols + y] = (float) _array(x, y) * height + offset;
+		}
+	}
+
+	rawDataSize = getRawDataSize();
+
+	return (char*) result;
+}
+
 int Terrain::getRawDataSize() const {
-	return (int) (_array.n_rows * _array.n_cols) * sizeof(float);
+	return (int) (_array.n_rows * _array.n_cols) * sizeof(float) / sizeof(char);
 }
 
 Image Terrain::getTexture() const {

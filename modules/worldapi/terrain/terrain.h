@@ -97,7 +97,9 @@ public :
 	//Méthodes pour la conversion du terrain en image.
 	img::Image convertToImage() const;
 	/** Ecrit en brut les données du terrain. */
-	void writeRawData(std::ostream & stream) const;
+	void writeRawData(std::ostream & stream, float height = 1, float offset = 0) const;
+	/** Donne un tableau d'octets contenant la carte d'altitude brute de ce terrain. */
+	char * getRawData(int & rawDataSize, float height = 1, float offset = 0) const;
 	int getRawDataSize() const;
 
 	img::Image getTexture() const;
