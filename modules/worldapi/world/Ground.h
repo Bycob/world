@@ -12,7 +12,7 @@
 #include "../terrain/terrain.h"
 
 /** Cette classe gère le sol du monde. */
-class Ground : public WorldNode {
+class WORLDAPI_EXPORT Ground : public WorldNode {
 public:
     DECL_TYPE
 
@@ -21,7 +21,7 @@ private:
 
 };
 
-class GroundGenerator : public WorldGenNode {
+class WORLDAPI_EXPORT GroundGenerator : public WorldGenNode {
 public:
     GroundGenerator(WorldGenerator * parent);
 

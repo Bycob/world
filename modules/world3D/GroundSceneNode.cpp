@@ -33,7 +33,7 @@ ITerrainSceneNode* GroundSceneNode::getNode(const Terrain &terrain) {
     // Creation du terrain
     int dataSize;
     const char* data = terrain.getRawData(dataSize, 1000);
-    IReadFile * memoryFile = _fileSystem->createMemoryReadFile((void*)data, dataSize, "", true);
+    IReadFile * memoryFile = _fileSystem->createMemoryReadFile((void*)data, dataSize, "", false);
 
     ITerrainSceneNode * result =
             _sceneManager->addTerrainSceneNode(nullptr, 0, -1,
@@ -44,7 +44,8 @@ ITerrainSceneNode* GroundSceneNode::getNode(const Terrain &terrain) {
                                                5, ETPS_17, 4, true);
     result->loadHeightMapRAW(memoryFile, 32, true, true, 0, SColor(255,255,255,255), 4);
 
-    memoryFile->drop();
+	memoryFile->drop();
+	delete[] data;
 
     // Paramètres d'affichage
     result->setMaterialFlag(video::EMF_LIGHTING, true);

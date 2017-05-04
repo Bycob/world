@@ -45,11 +45,13 @@ void MainView::runInternal() {
             true,
             true,
             0);
+	_device->setResizable(true);
     _scenemanager = _device->getSceneManager();
     _driver = _device->getVideoDriver();
 
     // Initialisation des différents modules de rendu
     _camera = _scenemanager->addCameraSceneNodeFPS(0, 100.0f, 0.05f);
+	_camera->setFOV(1.57);
     _camera->setPosition(vector3df(20, 200, 20));
     //_camera = _scenemanager->addCameraSceneNode(0, vector3df(200 + 64, 200 + 119, 200 + 64), vector3df(64, 119, 64));
 
