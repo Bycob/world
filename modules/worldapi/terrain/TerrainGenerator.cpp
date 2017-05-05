@@ -169,6 +169,10 @@ void PerlinTerrainGenerator::adaptFromBuffer(Terrain & terrain, int xsub, int ys
 	subterrain._noisePart = _subdivNoiseRatio;
 }
 
+TerrainGenerator * PerlinTerrainGenerator::clone() const {
+	return new PerlinTerrainGenerator(_size, _offset, _octaveCount, _frequency, _persistence);
+}
+
 arma::Mat<double> & PerlinTerrainGenerator::getBuf(int x, int y) const {
 	return _buffer.at(std::make_pair(x, y));
 }

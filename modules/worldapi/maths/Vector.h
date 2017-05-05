@@ -188,7 +188,9 @@ namespace maths {
 	template struct WORLDAPI_EXPORT vec3<float>;
 	template struct WORLDAPI_EXPORT vec2<double>;
 	template struct WORLDAPI_EXPORT vec2<float>;
+	template struct WORLDAPI_EXPORT vec2<int>;
 
 	typedef vec3<double> vec3d;
 	typedef vec2<double> vec2d;
+	typedef vec2<int> vec2i;
 }

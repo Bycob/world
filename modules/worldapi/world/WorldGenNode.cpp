@@ -5,6 +5,10 @@ WorldGenNode::WorldGenNode(WorldGenerator * generator)
 
 }
 
-void WorldGenNode::addRequiredNodes(World &world) const {
+void WorldGenNode::expand(World & world, const maths::vec3d & location) {
+	// Default implementation
+}
 
+void WorldGenNode::addRequiredNodes(World &world) const {
+	// Default implementation
 }

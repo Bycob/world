@@ -6,6 +6,9 @@
 
 #include "MapGenerator.h"
 #include "Ground.h"
+#include "../maths/mathshelper.h"
+
+using namespace maths;
 
 class PrivateWorldGenerator {
 public:
@@ -53,4 +56,10 @@ void WorldGenerator::init(World &world) {
     for (std::unique_ptr<WorldGenNode> & node : _internal->_nodes) {
         node->addRequiredNodes(world);
     }
+}
+
+void WorldGenerator::expand(World & world, const vec3d &location) {
+	for (std::unique_ptr<WorldGenNode> & node : _internal->_nodes) {
+		node->expand(world, location);
+	}
 }

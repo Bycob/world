@@ -17,13 +17,17 @@ class WORLDAPI_EXPORT Map : public WorldNode {
 public:
 	DECL_TYPE
 
-	Map(const World * parent = nullptr, uint32_t sizeX = 100, uint32_t sizeY = 100);
+	Map(const World * parent = nullptr, uint32_t sizeX = 100, uint32_t sizeY = 100, float unitsPerPixel = 500);
 	~Map();
+
+	float getUnitsPerPixel() const;
 
 	const arma::cube & getReliefMap();
 	img::Image getReliefMapAsImage();
 private:
 	uint32_t _sizeX, _sizeY;
+	/** Indique combien d'unité du monde pour un terrain */
+	float _unitsPerPixel;
 
 	/** La carte des reliefs permet de caractériser d'une part l'altitude
 	moyenne et d'autre part l'étendue du relief, ce en chaque endroit.

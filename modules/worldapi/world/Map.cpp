@@ -7,15 +7,20 @@ using namespace img;
 
 INIT_TYPE(Map, "map", true)
 
-Map::Map(const World * parent, uint32_t sizeX, uint32_t sizeY) :
+Map::Map(const World * parent, uint32_t sizeX, uint32_t sizeY, float unitsPerPixel) :
 	WorldNode(parent, TYPE(Map)),
 	_sizeX(sizeX), _sizeY(sizeY),
+	_unitsPerPixel(unitsPerPixel),
 	_reliefMap(sizeX, sizeY, 2) {
 	
 }
 
 Map::~Map() {
 
+}
+
+float Map::getUnitsPerPixel() const {
+	return _unitsPerPixel;
 }
 
 const cube & Map::getReliefMap() {

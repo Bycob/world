@@ -13,12 +13,12 @@ public:
 };
 
 
-World::World() : _internal(new PrivateWorld()) {
+World::World() : _internal(new PrivateWorld()), _directory() {
     getGenerator().init(*this);
 }
 
 World::World(const WorldGenerator &generator)
-	: _internal(new PrivateWorld(generator)) {
+	: _internal(new PrivateWorld(generator)), _directory() {
     getGenerator().init(*this);
 }
 

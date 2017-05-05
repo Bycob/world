@@ -8,6 +8,7 @@
 #include <worldapi/worldapidef.h>
 
 #include "World.h"
+#include "../maths/Vector.h"
 
 class WorldGenerator;
 
@@ -16,8 +17,9 @@ public:
     WorldGenNode(WorldGenerator * generator);
     virtual ~WorldGenNode() = default;
 
-    virtual void addRequiredNodes(World & world) const;
+	virtual void expand(World & world, const maths::vec3d &location);
 
+    virtual void addRequiredNodes(World & world) const;
     virtual WorldGenNode * clone(WorldGenerator * newParent) = 0;
 protected:
     WorldGenerator * _parent;
@@ -54,6 +56,10 @@ public:
     ~WorldGenerator();
 
     World * generate();
+
+	/** Etend le monde à la position indiquée, générant du nouveau contenu
+	et/ou des niveaux de détails supplémentaires. */
+	void expand(World & world, const maths::vec3d &location);
 
 private:
 

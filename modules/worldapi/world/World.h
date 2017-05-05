@@ -7,6 +7,8 @@
 #include <string>
 #include <set>
 
+#include "../WorldFolder.h"
+
 #define DECL_TYPE static const WorldNodeType & type();
 #define INIT_TYPE(CLASSNAME, ...) \
 const WorldNodeType & CLASSNAME::type() { \
@@ -42,9 +44,14 @@ public:
 	virtual ~WorldNode();
 
 	const WorldNodeType & type() const;
-private:
+
+	void setDirectory(const std::string & directory);
+	const WorldFolder & getDirectory() const;
+protected:
 	const WorldNodeType _nodeType;
 	const World * _world;
+
+	WorldFolder _directory;
 };
 
 class PrivateWorld;
@@ -68,6 +75,8 @@ public:
 	// getAssets(vec3d from, level detail scale)
 private:
 	PrivateWorld * _internal;
+
+	WorldFolder _directory;
 
     friend class WorldGenerator;
 

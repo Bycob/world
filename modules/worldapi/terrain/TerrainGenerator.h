@@ -29,6 +29,8 @@ public:
 
 	void generateSubdivisions(Terrain & terrain, int subdivideFactor, int subdivisionsCount);
 	virtual void generateSubdivisionLevel(Terrain & terrain, int subdivideFactor);
+
+	virtual TerrainGenerator * clone() const = 0;
 protected :
 	/// Indique la taille du terrain à générer
 	int _size;
@@ -50,6 +52,8 @@ public :
 	virtual Terrain * generate();
 
 	virtual void generateSubdivisionLevel(Terrain & terrain, int subdivideFactor);
+
+	TerrainGenerator * clone() const override;
 protected :
 	virtual void generateSubdivision(Terrain & terrain, int x, int y);
 private :

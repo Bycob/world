@@ -57,3 +57,11 @@ WorldNode::~WorldNode() {
 const WorldNodeType& WorldNode::type() const {
     return _nodeType;
 }
+
+void WorldNode::setDirectory(const std::string & directory) {
+	_directory.setPath(directory);
+}
+
+const WorldFolder & WorldNode::getDirectory() const {
+	return _directory;
+}
