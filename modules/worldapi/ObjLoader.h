@@ -2,7 +2,6 @@
 
 #include "worldapidef.h"
 
-#include <tiny_obj_loader.h>
 #include <vector>
 #include <memory>
 

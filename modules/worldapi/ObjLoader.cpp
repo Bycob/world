@@ -3,6 +3,8 @@
 #include <fstream>
 #include <string>
 
+#include <tiny_obj_loader/tiny_obj_loader.h>
+
 #include "mesh.h"
 #include "Material.h"
 #include "stringops.h"
