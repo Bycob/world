@@ -26,12 +26,14 @@ WorldGenerator* WorldGenerator::defaultGenerator() {
 }
 
 WorldGenerator::WorldGenerator()
-        : _internal(new PrivateWorldGenerator()) {
+        : _internal(new PrivateWorldGenerator()),
+	      _expandRadius(3000) {
 
 }
 
 WorldGenerator::WorldGenerator(const WorldGenerator &other)
-        : _internal(new PrivateWorldGenerator()) {
+		: _internal(new PrivateWorldGenerator()),
+		  _expandRadius(other._expandRadius) {
 
     for (auto & node : other._internal->_nodes) {
         _internal->_nodes.emplace_back(node->clone(this));

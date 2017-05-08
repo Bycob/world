@@ -9,14 +9,14 @@
 
 #include "../WorldFolder.h"
 
-#define DECL_TYPE static const WorldNodeType & type();
-#define INIT_TYPE(CLASSNAME, ...) \
+#define DECL_WORLD_NODE_TYPE static const WorldNodeType & type();
+#define INIT_WORLD_NODE_TYPE(CLASSNAME, ...) \
 const WorldNodeType & CLASSNAME::type() { \
 	static WorldNodeType type = WorldNodeType::create(__VA_ARGS__); \
 	return type; \
 }
 
-#define TYPE(CLASSNAME) CLASSNAME::type()
+#define WORLD_NODE_TYPE(CLASSNAME) CLASSNAME::type()
 
 class WORLDAPI_EXPORT WorldNodeType {
 public:

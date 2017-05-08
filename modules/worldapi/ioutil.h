@@ -1,17 +1,11 @@
 #pragma once
-#include <iostream>
-#include <sys/stat.h>
 
-#ifdef _WIN32
-#include <direct.h>
-#endif
+#include <worldapi/worldapidef.h>
+
+#include <string>
+#include <vector>
 
 namespace ioutil {
-	inline void createDirectory(std::string directory) {
-#ifdef _WIN32
-		_mkdir(directory.c_str());
-#else
-		mkdir(directory.c_str(), 0700);
-#endif
-	}
+	void WORLDAPI_EXPORT createDirectory(const std::string &directory);
+	std::vector<std::string> WORLDAPI_EXPORT getFileList(const std::string &directory);
 }

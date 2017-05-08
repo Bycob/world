@@ -8,12 +8,14 @@
 #include <worldapi/worldapidef.h>
 
 #include <map>
+#include <utility>
 
 #include "World.h"
 #include "WorldGenerator.h"
 #include "../terrain/terrain.h"
 #include "../terrain/TerrainGenerator.h"
-#include "../maths/Vector.h"
+
+class GroundCache;
 
 /** Cette classe gère le sol du monde. Le sol est composé de plusieurs
 terrains carrés accolés les uns aux autres. Les caractéristiques de ces
@@ -25,12 +27,13 @@ considéré comme non généré s'il n'est ni dans le cache, ni dans le dossier
 référencé. */
 class WORLDAPI_EXPORT Ground : public WorldNode {
 public:
-    DECL_TYPE
+    DECL_WORLD_NODE_TYPE
 
     Ground(const World * world);
+	virtual ~Ground();
 
-	void setHeight(float height);
-	void setSeaLevel(float seaLevel);
+	void setMaxAltitude(float max) { _maxAltitude = max; };
+	void setMinAltitude(float min) { _minAltitude = min; }
 	
 	/** Indique si le terrain à l'indice (x, y) existe déjà ou au
 	contraire doit être généré par le générateur de terrain.
@@ -38,20 +41,24 @@ public:
 	bool isTerrainGenerated(int x, int y, int lvl = 0) const;
 	/** Donne le terrain d'indice (x, y). */
 	const Terrain & getTerrain(int x, int y) const;
+
+	std::string getTerrainDataId(int x, int y, int lvl) const;
 private:
 	// Paramètres
-	/** La hauteur maximum du décor. */
-	float _height;
-	/** Le niveau de la mer, dans la même unité que _height. */
-	float _seaLevel;
+	/** L'altitude maximum du monde. Le niveau de la mer est fixé à 0. */
+	float _maxAltitude;
+	/** L'altitude minimum du monde. Le niveau de la mer est fixé à 0. */
+	float _minAltitude;
 	/** La taille d'un terrain de niveau 0 utilisé pour paver la Map. Normalement,
 	cette taille est la même que celle d'un pixel de la Map. */
 	float _unitSize;
 
 	// Données
-	mutable std::map<maths::vec2i, Terrain> _terrains;
+	int _cacheSize;
+	mutable GroundCache * _cache;
 
-	Terrain & getTerrain(int x, int y);
+	std::map<std::pair<int, int>, std::unique_ptr<Terrain>> & terrains() const;
+	Terrain & terrainAt(int x, int y);
 
 	friend class GroundGenerator;
 };
@@ -72,6 +79,8 @@ private:
 	/** nombre de subdivisions effectuées pour les différents niveaux
 	de détails du terrain. */
 	uint32_t _subdivisions;
+
+	void applyMap(Terrain & terrain, bool unapply = false);
 };
 
 

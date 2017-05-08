@@ -21,7 +21,6 @@ public:
 	virtual Terrain * generate() = 0;
 
 	// ACCESSEURS
-	void setSubdivisionsCount(int subdivisionCount);
 	void setSize(int size);
 
 	img::Image generateTexture(const Terrain & terrain, const TerrainTexmapBuilder & builder, const arma::Mat<double> & randomArray) const;
@@ -36,8 +35,6 @@ protected :
 	int _size;
 	/// Indique si la texture doit être générée automatiquement avec le terrain
 	bool _generateTexture;
-	/// 
-	int _subdivisionCount = 0;
 
 	// ------
 

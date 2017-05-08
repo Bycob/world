@@ -5,10 +5,10 @@
 using namespace arma;
 using namespace img;
 
-INIT_TYPE(Map, "map", true)
+INIT_WORLD_NODE_TYPE(Map, "map", true)
 
 Map::Map(const World * parent, uint32_t sizeX, uint32_t sizeY, float unitsPerPixel) :
-	WorldNode(parent, TYPE(Map)),
+	WorldNode(parent, WORLD_NODE_TYPE(Map)),
 	_sizeX(sizeX), _sizeY(sizeY),
 	_unitsPerPixel(unitsPerPixel),
 	_reliefMap(sizeX, sizeY, 2) {

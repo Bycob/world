@@ -15,10 +15,6 @@ TerrainGenerator::~TerrainGenerator() {
 
 }
 
-void TerrainGenerator::setSubdivisionsCount(int subdivisionCount) {
-	_subdivisionCount = subdivisionCount;
-}
-
 void TerrainGenerator::setSize(int size) {
 	_size = size;
 }

@@ -28,13 +28,15 @@ protected:
      * passé en paramètres, seulement si le World ne contient aucune
      * autre occurence du même noeud. */
     template <typename T>
-    void requireUnique(World & world) const {
+    T & requireUnique(World & world) const {
         if (!T::type().unique())
             throw std::runtime_error("Can't require non-unique node type");
         try {
-            world.createNode<T>();
+            return world.createNode<T>();
         }
-        catch (std::exception & e) {}
+        catch (std::exception & e) {
+			return world.getUniqueNode<T>();
+		}
     }
 
     friend class WorldGenerator;
@@ -55,6 +57,9 @@ public:
 
     ~WorldGenerator();
 
+	float getExpandRadius() const { return _expandRadius; }
+	void setExpandRadius(float radius) { _expandRadius = radius; };
+
     World * generate();
 
 	/** Etend le monde à la position indiquée, générant du nouveau contenu
@@ -64,6 +69,8 @@ public:
 private:
 
 	PrivateWorldGenerator * _internal;
+
+	float _expandRadius;
 
 	std::vector<std::unique_ptr<WorldGenNode>> & _nodes();
     void init(World & world);
