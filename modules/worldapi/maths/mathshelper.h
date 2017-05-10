@@ -17,11 +17,11 @@ namespace maths {
 		virtual T operator() (T x) const = 0;
 	};
 
-	template <typename T> inline T max(T v1, T v2) {
+	template <typename T1, typename T2> inline auto max(T1 v1, T2 v2) -> decltype(v1 + v2) {
 		return v1 > v2 ? v1 : v2;
 	}
 
-	template <typename T> inline T min(T v1, T v2) {
+	template <typename T1, typename T2> inline auto min(T1 v1, T2 v2) -> decltype(v1 + v2) {
 		return v1 < v2 ? v1 : v2;
 	}
 

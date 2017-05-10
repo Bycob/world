@@ -313,3 +313,10 @@ const Image & Terrain::texture() const {
 	if (_texture == nullptr) throw std::runtime_error("No texture");
 	return *_texture;
 }
+
+vec2i Terrain::getPixelPos(double x, double y) const {
+	return {
+		(int) maths::min(x * _array.n_rows, _array.n_rows - 1),
+		(int) maths::min(y * _array.n_cols, _array.n_cols - 1)
+	};
+}

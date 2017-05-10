@@ -2,6 +2,7 @@
 
 #include <worldapi/worldapidef.h>
 
+#include <utility>
 #include <memory>
 #include <stdint.h>
 #include <armadillo/armadillo>
@@ -23,6 +24,7 @@ public:
 	float getUnitsPerPixel() const;
 
 	const arma::cube & getReliefMap();
+	std::pair<double, double> & getReliefAt(double x, double y) const;
 	img::Image getReliefMapAsImage();
 private:
 	uint32_t _sizeX, _sizeY;

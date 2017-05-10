@@ -122,5 +122,5 @@ GroundGenerator* GroundGenerator::clone(WorldGenerator * newParent) {
 }
 
 void GroundGenerator::applyMap(Terrain & terrain, bool unapply) {
-	// TODO
+	
 }

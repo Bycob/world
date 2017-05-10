@@ -27,6 +27,14 @@ const cube & Map::getReliefMap() {
 	return _reliefMap;
 }
 
+std::pair<double, double>& Map::getReliefAt(double x, double y) const {
+	double offset;
+	double diff;
+	// TODO, TODO, TODO...
+
+	return std::pair<double, double>(offset, diff);
+}
+
 Image Map::getReliefMapAsImage() {
 	Image img(_reliefMap.n_rows, _reliefMap.n_cols, ImageType::RGB);
 

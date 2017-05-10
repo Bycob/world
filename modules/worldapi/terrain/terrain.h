@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 
+#include "../maths/mathshelper.h"
 #include "../mesh.h"
 #include "../Image.h"
 
@@ -136,10 +137,13 @@ private :
 
 	friend class TerrainGenerator;
 	friend class PerlinTerrainGenerator;
+	friend class TerrainManipulator;
 
 	/** Avec child le terrain passé en paramètres, enfant du nième degré, et root le terrain
 	parent le plus haut dans sa hierarchie, on peut obtenir la position sur child à partir
 	de la position sur root passée en paramètres.
 	Les coordonnées s'exprime en pourcentage des dimensions des terrains.*/
 	void getLocalPosition(const Terrain & child, double globalPosX, double globalPosY, double & localPosX, double & localPosY) const;
+
+	maths::vec2i getPixelPos(double x, double y) const;
 };
