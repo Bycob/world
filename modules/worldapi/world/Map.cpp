@@ -27,7 +27,7 @@ const cube & Map::getReliefMap() {
 	return _reliefMap;
 }
 
-std::pair<double, double>& Map::getReliefAt(double x, double y) const {
+std::pair<double, double> Map::getReliefAt(double x, double y) const {
 	double offset;
 	double diff;
 	// TODO, TODO, TODO...
