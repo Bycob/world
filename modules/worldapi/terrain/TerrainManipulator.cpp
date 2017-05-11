@@ -38,7 +38,7 @@ void TerrainManipulator::multiply(Terrain & terrain, const arma::mat & factor, b
 		throw std::runtime_error("TerrainManipulator::multiply : bad matrix dimensions");
 	}
 
-	terrain._array *= factor;
+	terrain._array %= factor;
 
 	if (applyToChildren && terrain.isSubdivided()) {
 
