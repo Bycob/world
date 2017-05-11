@@ -38,6 +38,10 @@ public :
 
 	virtual ~Terrain();
 
+    uint32_t getSize() const {
+        return _array.n_rows;
+    }
+
 	/** Permet d'obtenir l'altitude au point (x, y), avec x et y les
 	coordonnées en pourcentage des dimensions totales du terrain.
 	x et y sont compris entre 0 et 1.

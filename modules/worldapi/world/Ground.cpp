@@ -5,6 +5,7 @@
 #include "Ground.h"
 
 #include <memory>
+#include <worldapi/terrain/TerrainManipulator.h>
 
 #include "Map.h"
 #include "../terrain/TerrainGenerator.h"
@@ -76,6 +77,7 @@ GroundGenerator::GroundGenerator(WorldGenerator * parent, const GroundGenerator 
 
 void GroundGenerator::expand(World & world, const maths::vec3d & location) {
 	Ground & ground = world.getUniqueNode<Ground>();
+    Map & map = world.getUniqueNode<Map>();
 
 	float unit = ground._unitSize;
 	float distance = _parent->getExpandRadius();
@@ -104,7 +106,7 @@ void GroundGenerator::expand(World & world, const maths::vec3d & location) {
 	}
 
 	for (auto & pair : generated) {
-		applyMap(*pair.second);
+		applyMap(*pair.second, map);
 		ground.terrains()[pair.first] = std::unique_ptr<Terrain>(pair.second.release());
 	}
 }
@@ -121,6 +123,41 @@ GroundGenerator* GroundGenerator::clone(WorldGenerator * newParent) {
     return result;
 }
 
-void GroundGenerator::applyMap(Terrain & terrain, bool unapply) {
-	
+void GroundGenerator::applyMap(Terrain & terrain, const Map & map, bool unapply) {
+	std::unique_ptr<ITerrainManipulator> manipulator(ITerrainManipulator::createManipulator());
+
+    int mapOx = map.getSizeX() / 2;
+    int mapOy = map.getSizeY() / 2;
+    int tX;// TODO récuperer les coordonnées du terrain
+    int tY;
+
+	uint32_t size = terrain.getSize();
+	arma::mat bufferOffset(size, size);
+	arma::mat bufferDiff(size, size);
+
+	for (uint32_t x = 0 ; x < size ; x++) {
+		for (uint32_t y = 0 ; y < size ; y++) {
+            double mapX = tX + (double) x / size;
+            double mapY = tY + (double) y / size;
+			auto data = map.getReliefAt(mapX, mapY);
+
+            if (unapply) {
+                bufferOffset(x, y) = - data.first;
+                bufferDiff(x, y) = 1 / data.second;
+            }
+            else {
+                bufferOffset(x, y) = data.first;
+                bufferDiff(x, y) = data.second;
+            }
+		}
+	}
+
+	if (unapply) {
+		manipulator->applyOffset(terrain, bufferOffset, true);
+		manipulator->multiply(terrain, bufferDiff);
+	}
+	else {
+		manipulator->multiply(terrain, bufferDiff, true);
+		manipulator->applyOffset(terrain, bufferOffset, true);
+	}
 }

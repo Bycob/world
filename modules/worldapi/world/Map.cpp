@@ -2,8 +2,12 @@
 
 #include <stdexcept>
 
+#include "../maths/mathshelper.h"
+#include "../maths/interpolation.h"
+
 using namespace arma;
 using namespace img;
+using namespace maths;
 
 INIT_WORLD_NODE_TYPE(Map, "map", true)
 
@@ -19,18 +23,27 @@ Map::~Map() {
 
 }
 
-float Map::getUnitsPerPixel() const {
-	return _unitsPerPixel;
-}
-
-const cube & Map::getReliefMap() {
+const cube & Map::getReliefMap() const {
 	return _reliefMap;
 }
 
 std::pair<double, double> Map::getReliefAt(double x, double y) const {
-	double offset;
-	double diff;
-	// TODO, TODO, TODO...
+	// Vérification des paramètres
+	x = clamp(x, 0, _sizeX - 1 - std::numeric_limits<double>::epsilon());
+	y = clamp(y, 0, _sizeY - 1 - std::numeric_limits<double>::epsilon());
+
+	int xi = (int) floor(x);
+	int yi = (int) floor(y);
+	double xd = x - xi;
+	double yd = y - yi;
+
+	double offset1 = interpolateLinear(0, _reliefMap(xi, yi, 0), 1, _reliefMap(xi + 1, yi, 0), xd);
+	double offset2 = interpolateLinear(0, _reliefMap(xi, yi + 1, 0), 1, _reliefMap(xi + 1, yi + 1, 0), xd);
+	double offset = interpolateLinear(0, offset1, 1, offset2, yd);
+
+	double diff1 = interpolateLinear(0, _reliefMap(xi, yi, 1), 1, _reliefMap(xi + 1, yi, 1), xd);
+	double diff2 = interpolateLinear(0, _reliefMap(xi, yi + 1, 1), 1, _reliefMap(xi + 1, yi + 1, 1), xd);
+	double diff = interpolateLinear(0, offset1, 1, offset2, yd);
 
 	return std::pair<double, double>(offset, diff);
 }

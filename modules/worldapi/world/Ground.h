@@ -12,6 +12,7 @@
 
 #include "World.h"
 #include "WorldGenerator.h"
+#include "Map.h"
 #include "../terrain/terrain.h"
 #include "../terrain/TerrainGenerator.h"
 
@@ -80,7 +81,7 @@ private:
 	de détails du terrain. */
 	uint32_t _subdivisions;
 
-	void applyMap(Terrain & terrain, bool unapply = false);
+	void applyMap(Terrain & terrain, const Map & map, bool unapply = false);
 };
 
 

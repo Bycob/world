@@ -25,6 +25,11 @@ namespace maths {
 		return v1 < v2 ? v1 : v2;
 	}
 
+	template <typename T1, typename T2, typename T3>
+	inline auto clamp(T1 value, T2 min, T3 max) -> decltype(value + min + max) {
+		return value < min ? min : (value > max ? max : value);
+	};
+
 	// Renvoie n modulo r
 	template <typename T> inline T mod(T n, T r) {
 		return n >= 0 ? n % r : (n % r) + r;

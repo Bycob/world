@@ -21,10 +21,33 @@ public:
 	Map(const World * parent = nullptr, uint32_t sizeX = 100, uint32_t sizeY = 100, float unitsPerPixel = 500);
 	~Map();
 
-	float getUnitsPerPixel() const;
+	int getSizeX() const {
+		return _sizeX;
+	}
+	int getSizeY() const {
+		return _sizeY;
+	}
+	float getUnitsPerPixel() const {
+		return _unitsPerPixel;
+	}
 
-	const arma::cube & getReliefMap();
+	const arma::cube & getReliefMap() const;
+
+	/** Donne les caractéristiques du relief à un endroit donné.
+	 * Les coordonnées sont exprimées en pixel, le point (0, 0)
+	 * correspondant à un coin de la carte.
+	 * @param x L'abscisse du point étudié.
+	 * @param y L'ordonnée du point étudié.
+	 * @returns une paire contenant deux informations sur le relief
+	 * au point (x, y) : l'altitude et l'étendue de d'altitude.
+	 * @see _reliefMap*/
 	std::pair<double, double> getReliefAt(double x, double y) const;
+
+	/** Construit une image RGB qui représente la carte des reliefs. Le
+	 * relief est composé d'une composante d'altitude et d'une composante
+	 * d'étendue d'altitude. Pour le représenter, deux canaux de l'image
+	 * sont utilisés.
+	 * @see _reliefMap */
 	img::Image getReliefMapAsImage();
 private:
 	uint32_t _sizeX, _sizeY;
