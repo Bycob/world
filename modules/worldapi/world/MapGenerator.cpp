@@ -227,6 +227,10 @@ Map * MapGenerator::generate() {
 	return map;
 }
 
+void MapGenerator::expand(World & world, const IPointOfView & from) {
+	// Rien
+}
+
 void MapGenerator::addRequiredNodes(World & world) const {
 	requireUnique<Map>(world);
 }

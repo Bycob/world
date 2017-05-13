@@ -26,14 +26,12 @@ WorldGenerator* WorldGenerator::defaultGenerator() {
 }
 
 WorldGenerator::WorldGenerator()
-        : _internal(new PrivateWorldGenerator()),
-	      _expandRadius(3000) {
+        : _internal(new PrivateWorldGenerator()) {
 
 }
 
 WorldGenerator::WorldGenerator(const WorldGenerator &other)
-		: _internal(new PrivateWorldGenerator()),
-		  _expandRadius(other._expandRadius) {
+		: _internal(new PrivateWorldGenerator()) {
 
     for (auto & node : other._internal->_nodes) {
         _internal->_nodes.emplace_back(node->clone(this));
@@ -60,7 +58,7 @@ void WorldGenerator::init(World &world) {
     }
 }
 
-void WorldGenerator::expand(World & world, const vec3d &location) {
+void WorldGenerator::expand(World & world, const IPointOfView &location) {
 	for (std::unique_ptr<WorldGenNode> & node : _internal->_nodes) {
 		node->expand(world, location);
 	}

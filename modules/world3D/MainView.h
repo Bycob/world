@@ -25,6 +25,8 @@ public:
 
     bool running();
     void waitClose();
+
+	void resetScene();
 private:
     Application & _app;
 

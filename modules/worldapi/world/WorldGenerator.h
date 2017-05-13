@@ -8,6 +8,7 @@
 #include <worldapi/worldapidef.h>
 
 #include "World.h"
+#include "IPointOfView.h"
 #include "../maths/Vector.h"
 
 class WorldGenerator;
@@ -17,9 +18,9 @@ public:
     WorldGenNode(WorldGenerator * generator);
     virtual ~WorldGenNode() = default;
 
-	virtual void expand(World & world, const maths::vec3d &location);
+	virtual void expand(World & world, const IPointOfView &location) = 0;
 
-    virtual void addRequiredNodes(World & world) const;
+    virtual void addRequiredNodes(World & world) const = 0;
     virtual WorldGenNode * clone(WorldGenerator * newParent) = 0;
 protected:
     WorldGenerator * _parent;
@@ -57,20 +58,15 @@ public:
 
     ~WorldGenerator();
 
-	float getExpandRadius() const { return _expandRadius; }
-	void setExpandRadius(float radius) { _expandRadius = radius; };
-
     World * generate();
 
 	/** Etend le monde à la position indiquée, générant du nouveau contenu
 	et/ou des niveaux de détails supplémentaires. */
-	void expand(World & world, const maths::vec3d &location);
+	void expand(World & world, const IPointOfView &location);
 
 private:
 
 	PrivateWorldGenerator * _internal;
-
-	float _expandRadius;
 
 	std::vector<std::unique_ptr<WorldGenNode>> & _nodes();
     void init(World & world);

@@ -36,6 +36,13 @@ void MainView::waitClose() {
     _graphicThread->join();
 }
 
+void MainView::resetScene() {
+	_resetScene = true;
+}
+
+
+// Private implémentation
+
 void MainView::runInternal() {
     _device = irr::createDevice (
             irr::video::EDT_OPENGL,
@@ -50,9 +57,9 @@ void MainView::runInternal() {
     _driver = _device->getVideoDriver();
 
     // Initialisation des différents modules de rendu
-    _camera = _scenemanager->addCameraSceneNodeFPS(0, 100.0f, 0.05f);
+    _camera = _scenemanager->addCameraSceneNodeFPS(0, 100.0f, 0.1f);
 	_camera->setFOV(1.57);
-    _camera->setPosition(vector3df(20, 200, 20));
+    _camera->setPosition(vector3df(500, 1200, 500));
     //_camera = _scenemanager->addCameraSceneNode(0, vector3df(200 + 64, 200 + 119, 200 + 64), vector3df(64, 119, 64));
 
     /*/ ----- Tests (temporaire)
@@ -86,17 +93,22 @@ void MainView::runInternal() {
 }
 
 void MainView::updateScene() {
+	SynchronizedWorld & syncWorld = _app.getWorld();
+
+	auto camPos = _camera->getPosition();
+	_app.setUserPosition(maths::vec3d(camPos.X, camPos.Z, camPos.Y));
+
     if (_resetScene) {
-        SynchronizedWorld & syncWorld = _app.getWorld();
-        syncWorld.lock();
-        World & world = syncWorld.get();
+
+		syncWorld.lock();
+		World & world = syncWorld.get();
 
         _ground = std::make_unique<GroundSceneNode>(_device);
         _ground->initialize(world);
 
-        syncWorld.unlock();
-
         _resetScene = false;
+
+		syncWorld.unlock();
     }
     else {
 

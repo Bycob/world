@@ -81,6 +81,8 @@ public:
 		_reliefMap = std::make_unique<T>(this, args...);
 	}
 
+	void expand(World & world, const IPointOfView & from);
+
 	void addRequiredNodes(World & world) const override;
 	MapGenerator * clone(WorldGenerator * newParent) override;
 private:

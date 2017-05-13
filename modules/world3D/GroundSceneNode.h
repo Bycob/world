@@ -5,9 +5,12 @@
 #ifndef WORLD_TERRAINSCENENODE_H
 #define WORLD_TERRAINSCENENODE_H
 
+#include <vector>
+
 #include <irrlicht.h>
 
 #include <worldapi/terrain/terrain.h>
+#include <worldapi/world/Ground.h>
 #include <worldapi/world/World.h>
 
 class GroundSceneNode {
@@ -19,7 +22,9 @@ private:
     irr::scene::ISceneManager * _sceneManager;
     irr::io::IFileSystem * _fileSystem;
 
-    irr::scene::ITerrainSceneNode * getNode(const Terrain & terrain);
+	std::vector<irr::scene::ITerrainSceneNode*> _terrainNodes;
+
+    void addNode(const TerrainTile & tile, const Ground & groundModule);
 };
 
 

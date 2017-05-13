@@ -4,8 +4,13 @@
 
 #include "util.h"
 
+using namespace maths;
+
 Application::Application()
-        : _running(false), _mainView(std::make_unique<MainView>(*this)) {
+        : _running(false),
+	      _mainView(std::make_unique<MainView>(*this)), 
+	      _userPos(vec3d(0, 0, 0), 3000),
+		  _lastUpdatePos(0, 0, 0) {
 
 }
 
@@ -19,6 +24,23 @@ void Application::run(int argc, char **argv) {
         if (!_mainView->running()) {
             _running = false;
         }
+		else {
+			// On prend les paramètres en local.
+			_paramLock.lock();
+			PointOfView userPos = _userPos;
+			_paramLock.unlock();
+
+			if ((userPos._pos - _lastUpdatePos).norm() > 1000) {
+				_world->lock();
+				World & world = _world->get();
+				world.getGenerator().expand(world, userPos);
+
+				_world->unlock();
+
+				_mainView->resetScene();
+				_lastUpdatePos = userPos._pos;
+			}
+		}
 
         sleep(20.0f);
     }
@@ -33,6 +55,12 @@ void Application::requestStop() {
 SynchronizedWorld & Application::getWorld() {
     if (_world == nullptr) throw std::runtime_error("getWorld() called while not running.");
     return *_world;
+}
+
+void Application::setUserPosition(maths::vec3d pos) {
+	_paramLock.lock();
+	_userPos._pos = pos;
+	_paramLock.unlock();
 }
 
 void Application::loadWorld(int argc, char **argv) {

@@ -18,6 +18,12 @@
 
 class GroundCache;
 
+struct TerrainTile {
+	Terrain & _terrain;
+	int _x;
+	int _y;
+};
+
 /** Cette classe gère le sol du monde. Le sol est composé de plusieurs
 terrains carrés accolés les uns aux autres. Les caractéristiques de ces
 terrains dépendent notament d'une Map générée en amont.
@@ -33,8 +39,15 @@ public:
     Ground(const World * world);
 	virtual ~Ground();
 
-	void setMaxAltitude(float max) { _maxAltitude = max; };
+	// TODO constraints
+	void setMaxAltitude(float max) { _maxAltitude = max; }
 	void setMinAltitude(float min) { _minAltitude = min; }
+	void setUnitSize(float unitSize) { _unitSize = unitSize; }
+
+	float getMaxAltitude() const { return _maxAltitude; }
+	float getMinAltitude() const { return _minAltitude; }
+	float getAltitudeRange() const { return _maxAltitude - _minAltitude; }
+	float getUnitSize() const { return _unitSize; }
 	
 	/** Indique si le terrain à l'indice (x, y) existe déjà ou au
 	contraire doit être généré par le générateur de terrain.
@@ -44,6 +57,10 @@ public:
 	const Terrain & getTerrain(int x, int y) const;
 
 	std::string getTerrainDataId(int x, int y, int lvl) const;
+
+	const Terrain & getTerrainAt(double x, double y, int lvl = 0) const;
+
+	const std::vector<TerrainTile> getTerrainsFrom(const IPointOfView & pointOfView) const;
 private:
 	// Paramètres
 	/** L'altitude maximum du monde. Le niveau de la mer est fixé à 0. */
@@ -59,7 +76,7 @@ private:
 	mutable GroundCache * _cache;
 
 	std::map<std::pair<int, int>, std::unique_ptr<Terrain>> & terrains() const;
-	Terrain & terrainAt(int x, int y);
+	Terrain & terrain(int x, int y);
 
 	friend class GroundGenerator;
 };
@@ -69,7 +86,7 @@ public:
     GroundGenerator(WorldGenerator * parent);
 	GroundGenerator(WorldGenerator * newParent, const GroundGenerator & other);
 
-	void expand(World & world, const maths::vec3d &location) override;
+	void expand(World & world, const IPointOfView &from) override;
 
     void addRequiredNodes(World & world) const override;
     GroundGenerator * clone(WorldGenerator * newParent) override;
@@ -81,7 +98,7 @@ private:
 	de détails du terrain. */
 	uint32_t _subdivisions;
 
-	void applyMap(Terrain & terrain, const Map & map, bool unapply = false);
+	void applyMap(TerrainTile & tile, const Map & map, bool unapply = false);
 };
 
 

@@ -6,7 +6,10 @@
 #define WORLD_APPLICATION_H
 
 #include <atomic>
+#include <mutex>
 #include <memory>
+
+#include <worldapi/world/IPointOfView.h>
 
 #include "MainView.h"
 #include "SynchronizedWorld.h"
@@ -19,12 +22,18 @@ public:
     void requestStop();
 
     SynchronizedWorld & getWorld();
+
+	void setUserPosition(maths::vec3d pos);
 private:
     std::atomic_bool _running;
+	std::mutex _paramLock;
 
     std::unique_ptr<MainView> _mainView;
 
     std::unique_ptr<SynchronizedWorld> _world;
+	PointOfView _userPos;
+
+	maths::vec3d _lastUpdatePos;
 
     void loadWorld(int argc, char** argv);
 };
