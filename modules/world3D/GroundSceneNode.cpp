@@ -4,7 +4,10 @@
 
 #include "GroundSceneNode.h"
 
+#include <worldapi/world/IPointOfView.h>
 #include <worldapi/terrain/TerrainGenerator.h>
+
+#include "Application.h"
 
 using namespace irr;
 using namespace core;
@@ -12,34 +15,56 @@ using namespace scene;
 using namespace io;
 using namespace video;
 
-GroundSceneNode::GroundSceneNode(IrrlichtDevice *device)
-        : _sceneManager(device->getSceneManager()),
-          _fileSystem(device->getFileSystem()){
+GroundSceneNode::GroundSceneNode(Application & application, IrrlichtDevice *device)
+        : _app(application),
+          _sceneManager(device->getSceneManager()),
+          _fileSystem(device->getFileSystem()) {
+
+}
+
+GroundSceneNode::~GroundSceneNode() {
 
 }
 
 void GroundSceneNode::initialize(const World &world) {
+    clearAllNodes();
+
     const Ground & ground = world.getUniqueNode<Ground>();
 
-    // Test
+    /*/ Test
     PerlinTerrainGenerator generator(129, 0, 5, 1, 0.4);
     std::unique_ptr<Terrain> terrain(generator.generate());
 	addNode({ *terrain, 0, 0 }, ground);
     //*/
+
+    // TODO checker pourquoi on a pas forcément le const sur le TerrainTile
+    auto terrains = ground.getTerrainsFrom(_app.getUserPointOfView());
+
+    for (TerrainTile & terrain : terrains) {
+        addNode(terrain, ground);
+    }
+}
+
+void GroundSceneNode::clearAllNodes() {
+    for (ITerrainSceneNode * node : _terrainNodes) {
+        _sceneManager->addToDeletionQueue(node);
+    }
+
+    _terrainNodes.clear();
 }
 
 void GroundSceneNode::addNode(const TerrainTile &tile, const Ground & groundModule) {
 	const Terrain & terrain = tile._terrain;
 
 	// Données concernant la position et les dimensions du terrain
-	int terrainRes = terrain.getSize();
-	double tileSize = groundModule.getUnitSize();
-	double scaling = tileSize / terrainRes;
-	double terrainX = tile._x * tileSize;
-	double terrainY = tile._y * tileSize;
+	int terrainRes = (terrain.getSize() - 1);
+	float tileSize = groundModule.getUnitSize();
+	float scaling = tileSize / terrainRes;
+	float terrainX = tile._x * tileSize;
+	float terrainY = tile._y * tileSize;
 
-	double heightScaling = groundModule.getAltitudeRange();
-	double heightPos = groundModule.getMinAltitude();
+	float heightScaling = groundModule.getAltitudeRange();
+	float heightPos = groundModule.getMinAltitude();
 
 	// Construction du noeud irrlicht
     int dataSize;

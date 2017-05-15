@@ -18,7 +18,7 @@ class WORLDAPI_EXPORT Map : public WorldNode {
 public:
 	DECL_WORLD_NODE_TYPE
 
-	Map(const World * parent = nullptr, uint32_t sizeX = 100, uint32_t sizeY = 100, float unitsPerPixel = 500);
+	Map(const World * parent = nullptr, uint32_t sizeX = 100, uint32_t sizeY = 100, float unitsPerPixel = 2000);
 	~Map();
 
 	int getSizeX() const {

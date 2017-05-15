@@ -52,13 +52,18 @@ void MainView::runInternal() {
             true,
             true,
             0);
+
 	_device->setResizable(true);
+    _device->getLogger()->setLogLevel(ELOG_LEVEL::ELL_WARNING);
+    _device->getCursorControl()->setVisible(false);
+
     _scenemanager = _device->getSceneManager();
     _driver = _device->getVideoDriver();
 
     // Initialisation des différents modules de rendu
     _camera = _scenemanager->addCameraSceneNodeFPS(0, 100.0f, 0.1f);
 	_camera->setFOV(1.57);
+    _camera->setFarValue(10000);
     _camera->setPosition(vector3df(500, 1200, 500));
     //_camera = _scenemanager->addCameraSceneNode(0, vector3df(200 + 64, 200 + 119, 200 + 64), vector3df(64, 119, 64));
 
@@ -103,7 +108,7 @@ void MainView::updateScene() {
 		syncWorld.lock();
 		World & world = syncWorld.get();
 
-        _ground = std::make_unique<GroundSceneNode>(_device);
+        _ground = std::make_unique<GroundSceneNode>(_app, _device);
         _ground->initialize(world);
 
         _resetScene = false;

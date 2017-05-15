@@ -46,6 +46,8 @@ public :
 	PerlinTerrainGenerator(int size = DEFAULT_TERRAIN_SIZE, int offset = 0, int octaveCount = 5, float frequency = 8, float persistence = 0.5);
 	virtual ~PerlinTerrainGenerator();
 
+	void setFrequency(float frequency) {_frequency = frequency;}
+
 	virtual Terrain * generate();
 
 	virtual void generateSubdivisionLevel(Terrain & terrain, int subdivideFactor);

@@ -16,7 +16,9 @@ Map::Map(const World * parent, uint32_t sizeX, uint32_t sizeY, float unitsPerPix
 	_sizeX(sizeX), _sizeY(sizeY),
 	_unitsPerPixel(unitsPerPixel),
 	_reliefMap(sizeX, sizeY, 2) {
-	
+
+	_reliefMap.slice(0).fill(0);
+	_reliefMap.slice(1).fill(1);
 }
 
 Map::~Map() {
@@ -43,7 +45,7 @@ std::pair<double, double> Map::getReliefAt(double x, double y) const {
 
 	double diff1 = interpolateLinear(0, _reliefMap(xi, yi, 1), 1, _reliefMap(xi + 1, yi, 1), xd);
 	double diff2 = interpolateLinear(0, _reliefMap(xi, yi + 1, 1), 1, _reliefMap(xi + 1, yi + 1, 1), xd);
-	double diff = interpolateLinear(0, offset1, 1, offset2, yd);
+	double diff = interpolateLinear(0, diff1, 1, diff2, yd);
 
 	return std::pair<double, double>(offset, diff);
 }

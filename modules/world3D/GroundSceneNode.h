@@ -13,17 +13,23 @@
 #include <worldapi/world/Ground.h>
 #include <worldapi/world/World.h>
 
+class Application;
+
 class GroundSceneNode {
 public:
-    GroundSceneNode(irr::IrrlichtDevice * device);
+    GroundSceneNode(Application & app, irr::IrrlichtDevice * device);
+	virtual ~GroundSceneNode();
 
     void initialize(const World &world);
 private:
+	Application & _app;
+
     irr::scene::ISceneManager * _sceneManager;
     irr::io::IFileSystem * _fileSystem;
 
 	std::vector<irr::scene::ITerrainSceneNode*> _terrainNodes;
 
+	void clearAllNodes();
     void addNode(const TerrainTile & tile, const Ground & groundModule);
 };
 

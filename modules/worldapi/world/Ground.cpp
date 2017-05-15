@@ -114,6 +114,9 @@ const std::vector<TerrainTile> Ground::getTerrainsFrom(const IPointOfView & from
 GroundGenerator::GroundGenerator(WorldGenerator * parent)
         : WorldGenNode(parent), _generator(std::make_unique<PerlinTerrainGenerator>()) {
 	// TODO changer PerlinTerrainGenerator en un truc générique
+	PerlinTerrainGenerator * generator = static_cast<PerlinTerrainGenerator*>(_generator.get());
+	generator->setSize(129);
+	generator->setFrequency(2);
 }
 
 GroundGenerator::GroundGenerator(WorldGenerator * parent, const GroundGenerator & other)
@@ -144,7 +147,7 @@ void GroundGenerator::expand(World & world, const IPointOfView & from) {
 	std::map<std::pair<int, int>, std::unique_ptr<Terrain>> generated;
 	
 	for (int x = tx1; x <= tx2; x++) {
-		for (int y = ty1; y <= ty1; y++) {
+		for (int y = ty1; y <= ty2; y++) {
 			int dx = x - centerX;
 			int dy = y - centerY;
 

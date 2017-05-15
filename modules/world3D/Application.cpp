@@ -63,6 +63,14 @@ void Application::setUserPosition(maths::vec3d pos) {
 	_paramLock.unlock();
 }
 
+PointOfView Application::getUserPointOfView() const {
+	_paramLock.lock();
+	auto result = _userPos;
+	_paramLock.unlock();
+
+	return result;
+}
+
 void Application::loadWorld(int argc, char **argv) {
     _world = std::make_unique<SynchronizedWorld>(*WorldGenerator::defaultGenerator());
 

@@ -24,9 +24,10 @@ public:
     SynchronizedWorld & getWorld();
 
 	void setUserPosition(maths::vec3d pos);
+	PointOfView getUserPointOfView() const;
 private:
     std::atomic_bool _running;
-	std::mutex _paramLock;
+	mutable std::mutex _paramLock;
 
     std::unique_ptr<MainView> _mainView;
 
