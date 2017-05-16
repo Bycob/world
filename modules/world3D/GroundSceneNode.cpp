@@ -23,11 +23,16 @@ GroundSceneNode::GroundSceneNode(Application & application, IrrlichtDevice *devi
 }
 
 GroundSceneNode::~GroundSceneNode() {
-
+    clearAllNodes();
 }
 
 void GroundSceneNode::initialize(const World &world) {
     clearAllNodes();
+
+    update(world);
+}
+
+void GroundSceneNode::update(const World &world) {
 
     const Ground & ground = world.getUniqueNode<Ground>();
 
@@ -41,20 +46,21 @@ void GroundSceneNode::initialize(const World &world) {
     auto terrains = ground.getTerrainsFrom(_app.getUserPointOfView());
 
     for (TerrainTile & terrain : terrains) {
+        // TODO gestion des terrains visibles
         addNode(terrain, ground);
     }
 }
 
 void GroundSceneNode::clearAllNodes() {
     for (ITerrainSceneNode * node : _terrainNodes) {
-        _sceneManager->addToDeletionQueue(node);
+        node->remove();
     }
 
     _terrainNodes.clear();
 }
 
 void GroundSceneNode::addNode(const TerrainTile &tile, const Ground & groundModule) {
-	const Terrain & terrain = tile._terrain;
+	const Terrain & terrain = *tile._terrain;
 
 	// Données concernant la position et les dimensions du terrain
 	int terrainRes = (terrain.getSize() - 1);

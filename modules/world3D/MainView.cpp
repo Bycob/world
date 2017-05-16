@@ -14,7 +14,7 @@ using namespace irr::scene;
 using namespace irr::video;
 
 MainView::MainView(Application & app)
-        : _app(app), _running(false), _resetScene(true) {
+        : _app(app), _running(false), _resetScene(true), _worldChanged(false) {
 
 }
 
@@ -40,6 +40,10 @@ void MainView::resetScene() {
 	_resetScene = true;
 }
 
+void MainView::onWorldChange() {
+    _worldChanged = true;
+}
+
 
 // Private implémentation
 
@@ -61,7 +65,7 @@ void MainView::runInternal() {
     _driver = _device->getVideoDriver();
 
     // Initialisation des différents modules de rendu
-    _camera = _scenemanager->addCameraSceneNodeFPS(0, 100.0f, 0.1f);
+    _camera = _scenemanager->addCameraSceneNodeFPS(0, 100.0f, 0.5f);
 	_camera->setFOV(1.57);
     _camera->setFarValue(10000);
     _camera->setPosition(vector3df(500, 1200, 500));
@@ -112,10 +116,18 @@ void MainView::updateScene() {
         _ground->initialize(world);
 
         _resetScene = false;
+        _worldChanged = false;
 
 		syncWorld.unlock();
     }
-    else {
+    else if (_worldChanged) {
+        syncWorld.lock();
+        World & world = syncWorld.get();
 
+        _ground->update(world);
+
+        _worldChanged = true;
+
+        syncWorld.unlock();
     }
 }

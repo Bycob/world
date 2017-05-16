@@ -19,7 +19,7 @@
 class GroundCache;
 
 struct TerrainTile {
-	Terrain & _terrain;
+	Terrain * _terrain;
 	int _x;
 	int _y;
 };

@@ -21,6 +21,7 @@ public:
 	virtual ~GroundSceneNode();
 
     void initialize(const World &world);
+	void update(const World &world);
 private:
 	Application & _app;
 

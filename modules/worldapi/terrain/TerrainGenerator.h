@@ -18,16 +18,18 @@ public:
 	TerrainGenerator(int size = DEFAULT_TERRAIN_SIZE);
 	virtual ~TerrainGenerator();
 
-	virtual Terrain * generate() = 0;
-
 	// ACCESSEURS
 	void setSize(int size);
 
-	img::Image generateTexture(const Terrain & terrain, const TerrainTexmapBuilder & builder, const arma::Mat<double> & randomArray) const;
-	img::Image generateTexture(const Terrain & terrain, const arma::Cube<double> & map, const arma::Mat<double> & randomArray) const;
+	virtual Terrain * generate() = 0;
+
+	virtual void join(Terrain & terrain1, Terrain & terrain2, bool axisX, bool joinableSides = false) = 0;
 
 	void generateSubdivisions(Terrain & terrain, int subdivideFactor, int subdivisionsCount);
 	virtual void generateSubdivisionLevel(Terrain & terrain, int subdivideFactor);
+
+	img::Image generateTexture(const Terrain & terrain, const TerrainTexmapBuilder & builder, const arma::Mat<double> & randomArray) const;
+	img::Image generateTexture(const Terrain & terrain, const arma::Cube<double> & map, const arma::Mat<double> & randomArray) const;
 
 	virtual TerrainGenerator * clone() const = 0;
 protected :
@@ -48,9 +50,11 @@ public :
 
 	void setFrequency(float frequency) {_frequency = frequency;}
 
-	virtual Terrain * generate();
+	Terrain * generate() override;
 
-	virtual void generateSubdivisionLevel(Terrain & terrain, int subdivideFactor);
+	void join(Terrain & terrain1, Terrain & terrain2, bool axisX, bool joinableSides) override;
+
+	void generateSubdivisionLevel(Terrain & terrain, int subdivideFactor) override;
 
 	TerrainGenerator * clone() const override;
 protected :

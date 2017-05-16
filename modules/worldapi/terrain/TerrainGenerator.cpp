@@ -97,6 +97,13 @@ Terrain * PerlinTerrainGenerator::generate() {
 	return result;
 }
 
+void PerlinTerrainGenerator::join(Terrain &terrain1, Terrain &terrain2, bool axisX, bool joinableSides) {
+	_perlin.join(terrain1._array, terrain2._array,
+				 axisX ? Direction::AXIS_X : Direction::AXIS_Y,
+				 _octaveCount, _frequency, _persistence,
+				 joinableSides);
+}
+
 void PerlinTerrainGenerator::generateSubdivisionLevel(Terrain & terrain, int subdivideFactor) {
 	terrain.subdivide(subdivideFactor);
 

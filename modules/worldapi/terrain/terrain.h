@@ -123,7 +123,7 @@ private :
 	une copie interpolée des valeurs du terrain à l'étage en dessus. Ce
 	champ indique quelle est la part de bruit dans le terrain et permet ainsi
 	d'extraire ce bruit au besoin. */
-	float _noisePart = 0;
+	double _noisePart = 0;
 	/** Si ce terrain est une subdivision, indique la position de cette
 	subdivision au sein du terrain parent. */
 	int _x, _y;

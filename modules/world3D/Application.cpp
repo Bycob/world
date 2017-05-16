@@ -9,7 +9,7 @@ using namespace maths;
 Application::Application()
         : _running(false),
 	      _mainView(std::make_unique<MainView>(*this)), 
-	      _userPos(vec3d(0, 0, 0), 3000),
+	      _userPos(vec3d(0, 0, 0), 5000),
 		  _lastUpdatePos(0, 0, 0) {
 
 }
@@ -30,7 +30,7 @@ void Application::run(int argc, char **argv) {
 			PointOfView userPos = _userPos;
 			_paramLock.unlock();
 
-			if ((userPos._pos - _lastUpdatePos).norm() > 1000) {
+			if ((userPos._pos - _lastUpdatePos).norm() > 500) {
 				_world->lock();
 				World & world = _world->get();
 				world.getGenerator().expand(world, userPos);

@@ -101,7 +101,7 @@ const std::vector<TerrainTile> Ground::getTerrainsFrom(const IPointOfView & from
 			int dy = y - centerY;
 
 			if (dx * dx + dy * dy <= tdist2 && isTerrainGenerated(x, y)) {
-				result.push_back({ const_cast<Ground*>(this)->terrain(x, y), x, y });
+				result.push_back({ &const_cast<Ground*>(this)->terrain(x, y), x, y });
 			}
 		}
 	}
@@ -116,7 +116,7 @@ GroundGenerator::GroundGenerator(WorldGenerator * parent)
 	// TODO changer PerlinTerrainGenerator en un truc générique
 	PerlinTerrainGenerator * generator = static_cast<PerlinTerrainGenerator*>(_generator.get());
 	generator->setSize(129);
-	generator->setFrequency(2);
+	generator->setFrequency(3ù);
 }
 
 GroundGenerator::GroundGenerator(WorldGenerator * parent, const GroundGenerator & other)
@@ -158,13 +158,96 @@ void GroundGenerator::expand(World & world, const IPointOfView & from) {
 	}
 
 	// Fusionnement
+	std::map<std::pair<int, int>, TerrainTile> joinedY;
+
+	// Le joint y doit se faire avant le joint x
+	// TODO simplifier l'algorithme suivant ?
+	// join y
 	for (auto & pair : generated) {
-		// Le joint y doit se faire avant le joint x
+		int x = pair.first.first;
+		int y = pair.first.second;
+		Terrain& terrain = *pair.second;
+
+		// Détermination du deuxième terrain à joindre
+		// Fusion en dessus
+		std::pair<int, int> key1(x, y + 1);
+		auto terrain2 = generated.find(key1);
+
+		if (terrain2 != generated.end()) {
+			_generator->join(terrain, *(*terrain2).second, false, false);
+		}
+		else if ((terrain2 = ground.terrains().find(key1))
+				 != ground.terrains().end()) {
+
+			TerrainTile t2tile = {(*terrain2).second.get(), x, y + 1};
+			applyMap(t2tile, map, true);
+			_generator->join(terrain, *t2tile._terrain, false, false);
+			joinedY[key1] = t2tile;
+		}
+
+		// Fusion en dessous si aucun terrain généré n'est présent
+		std::pair<int, int> key2(x, y - 1);
+
+		if (generated.find(key2) == generated.end() &&
+				(terrain2 = ground.terrains().find(key2)) != ground.terrains().end()) {
+
+			TerrainTile t2tile = {(*terrain2).second.get(), x, y - 1};
+			applyMap(t2tile, map, true);
+			_generator->join(*t2tile._terrain, terrain, false, false);
+			joinedY[key2] = t2tile;
+		}
+
+		joinedY[{x, y}] = {&terrain, x, y};
 	}
 
-	// Application de la carte et ajout
+	// join x
+	std::map<std::pair<int, int>, TerrainTile> joinedX;
+
+	for (auto & pair : joinedY) {
+		TerrainTile & tile = pair.second;
+		Terrain & terrain = *tile._terrain;
+		int x = tile._x;
+		int y = tile._y;
+
+		// Fusion x croissants
+		std::pair<int, int> key1(x + 1, y);
+		auto terrain2 = joinedY.find(key1);
+		auto terrain2bis = ground.terrains().find(key1);
+
+		if (terrain2 != joinedY.end()) {
+			_generator->join(terrain, *(*terrain2).second._terrain, true, true);
+		}
+		else if (terrain2bis != ground.terrains().end()) {
+
+			TerrainTile t2tile = {(*terrain2bis).second.get(), x + 1, y};
+			applyMap(t2tile, map, true);
+			_generator->join(terrain, *t2tile._terrain, true, true);
+			joinedX[key1] = t2tile;
+		}
+
+		// Fusion x décroissants si aucun terrain généré n'est présent
+		std::pair<int, int> key2(x - 1, y);
+
+		if (joinedY.find(key2) == joinedY.end() &&
+			(terrain2bis = ground.terrains().find(key2)) != ground.terrains().end()) {
+
+			TerrainTile t2tile = {(*terrain2bis).second.get(), x - 1, y};
+			applyMap(t2tile, map, true);
+			_generator->join(*t2tile._terrain, terrain, true, true);
+			joinedX[key2] = t2tile;
+		}
+
+		joinedX[{tile._x, tile._y}] = tile;
+	}
+
+	// Application de la carte
+	for (auto & pair : joinedX) {
+		applyMap(pair.second, map);
+	}
+
+	// Ajout
 	for (auto & pair : generated) {
-		TerrainTile tile = { *pair.second, pair.first.first, pair.first.second };
+		TerrainTile tile = { pair.second.get(), pair.first.first, pair.first.second };
 		applyMap(tile, map);
 		ground.terrains()[pair.first] = std::unique_ptr<Terrain>(pair.second.release());
 	}
@@ -183,7 +266,7 @@ GroundGenerator* GroundGenerator::clone(WorldGenerator * newParent) {
 }
 
 void GroundGenerator::applyMap(TerrainTile & tile, const Map & map, bool unapply) {
-	Terrain & terrain = tile._terrain;
+	Terrain & terrain = *tile._terrain;
 	int tX = tile._x;
 	int tY = tile._y;
 

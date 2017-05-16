@@ -27,6 +27,7 @@ public:
     void waitClose();
 
 	void resetScene();
+	void onWorldChange();
 private:
     Application & _app;
 
@@ -38,6 +39,7 @@ private:
     irr::scene::ISceneManager *_scenemanager ;
 
     std::atomic_bool _resetScene;
+	std::atomic_bool _worldChanged;
     irr::scene::ICameraSceneNode *_camera;
     std::unique_ptr<GroundSceneNode> _ground;
 
