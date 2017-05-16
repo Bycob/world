@@ -116,7 +116,7 @@ GroundGenerator::GroundGenerator(WorldGenerator * parent)
 	// TODO changer PerlinTerrainGenerator en un truc générique
 	PerlinTerrainGenerator * generator = static_cast<PerlinTerrainGenerator*>(_generator.get());
 	generator->setSize(129);
-	generator->setFrequency(3ù);
+	generator->setFrequency(3);
 }
 
 GroundGenerator::GroundGenerator(WorldGenerator * parent, const GroundGenerator & other)
@@ -298,7 +298,7 @@ void GroundGenerator::applyMap(TerrainTile & tile, const Map & map, bool unapply
 
 	if (unapply) {
 		manipulator->applyOffset(terrain, bufferOffset, true);
-		manipulator->multiply(terrain, bufferDiff);
+		manipulator->multiply(terrain, bufferDiff, true);
 	}
 	else {
 		manipulator->multiply(terrain, bufferDiff, true);
