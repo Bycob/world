@@ -37,7 +37,7 @@ void Application::run(int argc, char **argv) {
 
 				_world->unlock();
 
-				_mainView->resetScene();
+				_mainView->onWorldChange();
 				_lastUpdatePos = userPos._pos;
 			}
 		}

@@ -41,19 +41,40 @@ void GroundSceneNode::update(const World &world) {
     std::unique_ptr<Terrain> terrain(generator.generate());
 	addNode({ *terrain, 0, 0 }, ground);
     //*/
+	auto userLoc = _app.getUserPointOfView();
+	auto distMax = userLoc.getHorizonDistance();
 
-    // TODO checker pourquoi on a pas forcément le const sur le TerrainTile
-    auto terrains = ground.getTerrainsFrom(_app.getUserPointOfView());
+	// Remove des terrains trop loin
+	auto it = _terrainNodes.begin();
+
+	while (it != _terrainNodes.end()) {
+		auto & pair = *it;
+
+		float x = pair.first.first * ground.getUnitSize() - userLoc._pos.x;
+		float y = pair.first.second * ground.getUnitSize() - userLoc._pos.y;
+
+		if (x * x + y * y > distMax * distMax) {
+			it = _terrainNodes.erase(it);
+		}
+		else {
+			++it;
+		}
+	}
+
+	// TODO checker pourquoi on a pas forcément le const sur le TerrainTile
+	auto terrains = ground.getTerrainsFrom(userLoc);
 
     for (TerrainTile & terrain : terrains) {
-        // TODO gestion des terrains visibles
-        addNode(terrain, ground);
+		// TODO gestion des terrains qui on changé entre temps
+		if (_terrainNodes.find(std::pair<int, int>(terrain._x, terrain._y)) == _terrainNodes.end()) {
+			addNode(terrain, ground);
+		}
     }
 }
 
 void GroundSceneNode::clearAllNodes() {
-    for (ITerrainSceneNode * node : _terrainNodes) {
-        node->remove();
+    for (auto & pair : _terrainNodes) {
+        pair.second->remove();
     }
 
     _terrainNodes.clear();
@@ -83,7 +104,7 @@ void GroundSceneNode::addNode(const TerrainTile &tile, const Ground & groundModu
                                                vector3df(0.0f, 0.0f, 0.0f),
                                                vector3df(scaling, scaling, scaling),
                                                SColor(255, 255, 255, 255),
-                                               5, ETPS_17, 4, true);
+                                               2, ETPS_17, 4, true);
     result->loadHeightMapRAW(memoryFile, 32, true, true, 0, SColor(255,255,255,255), 4);
 
 	memoryFile->drop();
@@ -119,5 +140,5 @@ void GroundSceneNode::addNode(const TerrainTile &tile, const Ground & groundModu
     anim->drop();
 	//*/
 
-	_terrainNodes.push_back(result);
+	_terrainNodes[std::pair<int, int>(tile._x, tile._y)] = result;
 }

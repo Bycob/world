@@ -6,6 +6,8 @@
 #define WORLD_TERRAINSCENENODE_H
 
 #include <vector>
+#include <map>
+#include <utility>
 
 #include <irrlicht.h>
 
@@ -28,7 +30,7 @@ private:
     irr::scene::ISceneManager * _sceneManager;
     irr::io::IFileSystem * _fileSystem;
 
-	std::vector<irr::scene::ITerrainSceneNode*> _terrainNodes;
+	std::map<std::pair<int, int>, irr::scene::ITerrainSceneNode*> _terrainNodes;
 
 	void clearAllNodes();
     void addNode(const TerrainTile & tile, const Ground & groundModule);

@@ -58,7 +58,7 @@ void MainView::runInternal() {
             0);
 
 	_device->setResizable(true);
-    _device->getLogger()->setLogLevel(ELOG_LEVEL::ELL_WARNING);
+    //_device->getLogger()->setLogLevel(ELOG_LEVEL::ELL_WARNING);
     _device->getCursorControl()->setVisible(false);
 
     _scenemanager = _device->getSceneManager();
@@ -126,7 +126,7 @@ void MainView::updateScene() {
 
         _ground->update(world);
 
-        _worldChanged = true;
+        _worldChanged = false;
 
         syncWorld.unlock();
     }
