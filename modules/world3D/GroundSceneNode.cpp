@@ -53,7 +53,8 @@ void GroundSceneNode::update(const World &world) {
 		float x = pair.first.first * ground.getUnitSize() - userLoc._pos.x;
 		float y = pair.first.second * ground.getUnitSize() - userLoc._pos.y;
 
-		if (x * x + y * y > distMax * distMax) {
+		if (x * x + y * y > distMax * distMax || true) {
+			pair.second->remove();
 			it = _terrainNodes.erase(it);
 		}
 		else {
@@ -66,7 +67,7 @@ void GroundSceneNode::update(const World &world) {
 
     for (TerrainTile & terrain : terrains) {
 		// TODO gestion des terrains qui on changé entre temps
-		if (_terrainNodes.find(std::pair<int, int>(terrain._x, terrain._y)) == _terrainNodes.end()) {
+		if (_terrainNodes.find(std::pair<int, int>(terrain._x, terrain._y)) == _terrainNodes.end() || true) {
 			addNode(terrain, ground);
 		}
     }

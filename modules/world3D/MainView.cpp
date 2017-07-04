@@ -68,7 +68,7 @@ void MainView::runInternal() {
     _camera = _scenemanager->addCameraSceneNodeFPS(0, 100.0f, 0.5f);
 	_camera->setFOV(1.57);
     _camera->setFarValue(10000);
-    _camera->setPosition(vector3df(500, 1200, 500));
+    _camera->setPosition(vector3df(0, 1200, 500));
     //_camera = _scenemanager->addCameraSceneNode(0, vector3df(200 + 64, 200 + 119, 200 + 64), vector3df(64, 119, 64));
 
     /*/ ----- Tests (temporaire)

@@ -40,7 +40,7 @@ Terrain::Terrain(const Terrain &terrain)
 		  _y(terrain._y),
 		  _parent(nullptr),
 		  _subdivideFactor(terrain._subdivideFactor) {
-
+	
 	for (auto & ptr : terrain._subterrain) {
 		_subterrain.emplace_back(new Terrain(*ptr));
 	}

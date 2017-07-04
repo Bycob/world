@@ -116,7 +116,7 @@ GroundGenerator::GroundGenerator(WorldGenerator * parent)
 	// TODO changer PerlinTerrainGenerator en un truc générique
 	PerlinTerrainGenerator * generator = static_cast<PerlinTerrainGenerator*>(_generator.get());
 	generator->setSize(129);
-	generator->setFrequency(3);
+	generator->setFrequency(4);
 }
 
 GroundGenerator::GroundGenerator(WorldGenerator * parent, const GroundGenerator & other)
@@ -248,7 +248,6 @@ void GroundGenerator::expand(World & world, const IPointOfView & from) {
 	// Ajout
 	for (auto & pair : generated) {
 		TerrainTile tile = { pair.second.get(), pair.first.first, pair.first.second };
-		applyMap(tile, map);
 		ground.terrains()[pair.first] = std::unique_ptr<Terrain>(pair.second.release());
 	}
 }
@@ -266,6 +265,9 @@ GroundGenerator* GroundGenerator::clone(WorldGenerator * newParent) {
 }
 
 void GroundGenerator::applyMap(TerrainTile & tile, const Map & map, bool unapply) {
+	const double offsetCoef = 0.5;
+	const double diffCoef = 1 - offsetCoef;
+
 	Terrain & terrain = *tile._terrain;
 	int tX = tile._x;
 	int tY = tile._y;
@@ -286,12 +288,12 @@ void GroundGenerator::applyMap(TerrainTile & tile, const Map & map, bool unapply
 			auto data = map.getReliefAt(mapX, mapY);
 			
             if (unapply) {
-                bufferOffset(x, y) = - 0.5 * data.first;
-                bufferDiff(x, y) = 1 / (data.second * 0.5);
+				bufferOffset(x, y) = - offsetCoef * data.first;
+				bufferDiff(x, y) = 1 / (data.second * diffCoef);
             }
             else {
-                bufferOffset(x, y) = 0.5 * data.first;
-                bufferDiff(x, y) = 0.5 * data.second;
+				bufferOffset(x, y) = offsetCoef * data.first;
+				bufferDiff(x, y) = diffCoef * data.second;
             }
 		}
 	}
