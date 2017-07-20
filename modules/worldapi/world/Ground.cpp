@@ -299,11 +299,11 @@ void GroundGenerator::applyMap(TerrainTile & tile, const Map & map, bool unapply
 	}
 
 	if (unapply) {
-		manipulator->applyOffset(terrain, bufferOffset, true);
-		manipulator->multiply(terrain, bufferDiff, true);
+		manipulator->applyOffset(terrain, bufferOffset);
+		manipulator->multiply(terrain, bufferDiff);
 	}
 	else {
-		manipulator->multiply(terrain, bufferDiff, true);
-		manipulator->applyOffset(terrain, bufferOffset, true);
+		manipulator->multiply(terrain, bufferDiff);
+		manipulator->applyOffset(terrain, bufferOffset);
 	}
 }

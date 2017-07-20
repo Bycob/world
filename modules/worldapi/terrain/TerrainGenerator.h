@@ -10,6 +10,7 @@
 #include "../maths/perlin.h"
 #include "TerrainTexmapBuilder.h"
 #include "terrain.h"
+#include "TerrainSubdivisionTree.h"
 
 #define DEFAULT_TERRAIN_SIZE 257
 
@@ -25,8 +26,9 @@ public:
 
 	virtual void join(Terrain & terrain1, Terrain & terrain2, bool axisX, bool joinableSides = false) = 0;
 
-	void generateSubdivisions(Terrain & terrain, int subdivideFactor, int subdivisionsCount);
-	virtual void generateSubdivisionLevel(Terrain & terrain, int subdivideFactor);
+	TerrainSubdivisionTree * generateSubdivisions(Terrain & terrain, int subdivideFactor, int subdivisionsCount);
+	void generateSubdivisionLevels(TerrainSubdivisionTree & tree, int subdivideFactor, int subdivisionsCount);
+	virtual void generateSubdivisionLevel(TerrainSubdivisionTree & tree, int subdivideFactor);
 
 	img::Image generateTexture(const Terrain & terrain, const TerrainTexmapBuilder & builder, const arma::Mat<double> & randomArray) const;
 	img::Image generateTexture(const Terrain & terrain, const arma::Cube<double> & map, const arma::Mat<double> & randomArray) const;
@@ -40,7 +42,7 @@ protected :
 
 	// ------
 
-	virtual void generateSubdivision(Terrain & terrain, int x, int y) = 0;
+	virtual void generateSubdivision(TerrainSubdivisionTree & terrain, int x, int y) = 0;
 };
 
 class WORLDAPI_EXPORT PerlinTerrainGenerator : public TerrainGenerator {
@@ -54,11 +56,11 @@ public :
 
 	void join(Terrain & terrain1, Terrain & terrain2, bool axisX, bool joinableSides) override;
 
-	void generateSubdivisionLevel(Terrain & terrain, int subdivideFactor) override;
+	void generateSubdivisionLevel(TerrainSubdivisionTree & tree, int subdivideFactor) override;
 
 	TerrainGenerator * clone() const override;
 protected :
-	virtual void generateSubdivision(Terrain & terrain, int x, int y);
+	virtual void generateSubdivision(TerrainSubdivisionTree & tree, int x, int y);
 private :
 	Perlin _perlin;
 	mutable std::map<std::pair<int, int>, arma::Mat<double>> _buffer;
@@ -79,5 +81,5 @@ private :
 		return _buffer[index];
     }
 
-	void adaptFromBuffer(Terrain & terrain, int xsub, int ysub) const;
+	void adaptFromBuffer(TerrainSubdivisionTree & terrain, int xsub, int ysub) const;
 };

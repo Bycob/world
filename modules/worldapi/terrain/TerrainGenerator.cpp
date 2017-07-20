@@ -19,26 +19,33 @@ void TerrainGenerator::setSize(int size) {
 	_size = size;
 }
 
-void TerrainGenerator::generateSubdivisions(Terrain & terrain, int subdivideFactor, int subdivisionsCount) {
-	generateSubdivisionLevel(terrain, subdivideFactor);
+TerrainSubdivisionTree * TerrainGenerator::generateSubdivisions(Terrain & terrain, int subdivideFactor, int subdivisionsCount) {
+	TerrainSubdivisionTree * result = new TerrainSubdivisionTree(terrain);
+	generateSubdivisionLevels(*result, subdivideFactor, subdivisionsCount);
+	return result;
+}
+
+void TerrainGenerator::generateSubdivisionLevels(TerrainSubdivisionTree & tree, int subdivideFactor, int subdivisionsCount) {
+	generateSubdivisionLevel(tree, subdivideFactor);
 
 	// Subdivisions d'un niveau supplémentaire (récursivité)
-	if (subdivisionsCount != 1) {
+	if (subdivisionsCount > 1) {
 		for (int x = 0; x < subdivideFactor; x++) {
 			for (int y = 0; y < subdivideFactor; y++) {
-				generateSubdivisions(terrain.getSubterrain(x, y), subdivideFactor, subdivisionsCount - 1);
+				TerrainSubdivisionTree & subtree = tree.getSubtree(x, y);
+				generateSubdivisionLevels(subtree, subdivideFactor, subdivisionsCount - 1);
 			}
 		}
 	}
 }
 
-void TerrainGenerator::generateSubdivisionLevel(Terrain & terrain, int subdivideFactor) {
-	terrain.subdivide(subdivideFactor);
+void TerrainGenerator::generateSubdivisionLevel(TerrainSubdivisionTree & tree, int subdivideFactor) {
+	tree.subdivide(subdivideFactor);
 
 	// Géneration des subdivisions à l'étage actuel
 	for (int x = 0; x < subdivideFactor; x++) {
 		for (int y = 0; y < subdivideFactor; y++) {
-			generateSubdivision(terrain, x, y);
+			generateSubdivision(tree, x, y);
 		}
 	}
 }
@@ -104,7 +111,7 @@ void PerlinTerrainGenerator::join(Terrain &terrain1, Terrain &terrain2, bool axi
 				 joinableSides);
 }
 
-void PerlinTerrainGenerator::generateSubdivisionLevel(Terrain & terrain, int subdivideFactor) {
+void PerlinTerrainGenerator::generateSubdivisionLevel(TerrainSubdivisionTree & terrain, int subdivideFactor) {
 	terrain.subdivide(subdivideFactor);
 
 	// Pas de prébuffering
@@ -126,9 +133,9 @@ void PerlinTerrainGenerator::generateSubdivisionLevel(Terrain & terrain, int sub
 	_buffer.clear();
 }
 
-void PerlinTerrainGenerator::generateSubdivision(Terrain & terrain, int xsub, int ysub) {
-	//TODO Faire plusieurs tests pour voir si on obtient un meilleur résultat en changeant les paramètres.
-	Mat<double> & mat = createInBuf(xsub, ysub, terrain.getSubterrain(xsub, ysub)._array);
+void PerlinTerrainGenerator::generateSubdivision(TerrainSubdivisionTree & terrain, int xsub, int ysub) {
+	//TODO Faire plusieurs tests pour voir si on obtient un meilleur résultat en changeant les paramètres de l'algo de perlin.
+	Mat<double> & mat = createInBuf(xsub, ysub, terrain.getSubtree(xsub, ysub)._terrain->_array);
 	_perlin.generatePerlinNoise2D(mat, _offset, _octaveCount, _frequency, _persistence);
 
 	double oneTerrainLength = 1.0 / terrain._subdivideFactor;
@@ -156,20 +163,25 @@ void PerlinTerrainGenerator::generateSubdivision(Terrain & terrain, int xsub, in
     }
 }
 
-void PerlinTerrainGenerator::adaptFromBuffer(Terrain & terrain, int xsub, int ysub) const {
-	Terrain & subterrain = terrain.getSubterrain(xsub, ysub);
+void PerlinTerrainGenerator::adaptFromBuffer(TerrainSubdivisionTree & tree, int xsub, int ysub) const {
+	TerrainSubdivisionTree & subtree = tree.getSubtree(xsub, ysub);
+	Terrain & subterrain = *subtree._terrain;
 	Mat<double> & mat = getBuf(xsub, ysub);
 
-	for (int x = 0; x < subterrain._array.n_rows; x++) {
-		for (int y = 0; y < subterrain._array.n_cols; y++) {
+	int rows = subterrain._array.n_rows;
+	int cols = subterrain._array.n_cols;
+	int sf = tree._subdivideFactor;
+
+	for (int x = 0; x < rows; x++) {
+		for (int y = 0; y < cols; y++) {
 			subterrain._array(x, y) = mat(x, y) * _subdivNoiseRatio
-				+ (1 - _subdivNoiseRatio) * terrain.getZInterpolated(
-					((double)xsub + (double)x / subterrain._array.n_rows) / terrain._subdivideFactor,
-					((double)ysub + (double)y / subterrain._array.n_cols) / terrain._subdivideFactor, 0);
+				+ (1 - _subdivNoiseRatio) * tree.getZInterpolated(
+					((double)xsub + (double)x / rows) / sf,
+					((double)ysub + (double)y / cols) / sf);
 		}
 	}
 
-	subterrain._noisePart = _subdivNoiseRatio;
+	subtree._noisePart = _subdivNoiseRatio;
 }
 
 TerrainGenerator * PerlinTerrainGenerator::clone() const {

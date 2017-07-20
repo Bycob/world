@@ -221,24 +221,24 @@ void testPerlin(int argc, char** argv) {
 
 	// CREATION DES SUBDIVISIONS DU TERRAIN
 	std::cout << "génération des subdivisions" << std::endl;
-	generator.generateSubdivisions(*terrain, 4, 1);
+	TerrainSubdivisionTree * terrainTree = generator.generateSubdivisions(*terrain, 4, 1);
 	std::cout << "génération terminée !" << std::endl;
 
 	std::cout << "Conversion en mesh de 4 sous-terrains..." << std::endl;
 	ObjLoader subterrainFile;
-	Terrain & subterrain = terrain->getSubterrain(0, 0);
-	std::shared_ptr<Mesh> submesh = std::shared_ptr<Mesh>(subterrain.convertToSubmesh());
+	TerrainSubdivisionTree & subtree = terrainTree->getSubtree(0, 0);
+	std::shared_ptr<Mesh> submesh = std::shared_ptr<Mesh>(subtree.convertToSubmesh());
 	subterrainFile.addMesh(submesh);
-    subterrainFile.addMesh(std::shared_ptr<Mesh>(terrain->getSubterrain(1, 0).convertToSubmesh()));
-    subterrainFile.addMesh(std::shared_ptr<Mesh>(terrain->getSubterrain(1, 1).convertToSubmesh()));
-    subterrainFile.addMesh(std::shared_ptr<Mesh>(terrain->getSubterrain(0, 1).convertToSubmesh()));
+    subterrainFile.addMesh(std::shared_ptr<Mesh>(terrainTree->getSubtree(1, 0).convertToSubmesh()));
+    subterrainFile.addMesh(std::shared_ptr<Mesh>(terrainTree->getSubtree(1, 1).convertToSubmesh()));
+    subterrainFile.addMesh(std::shared_ptr<Mesh>(terrainTree->getSubtree(0, 1).convertToSubmesh()));
 	
 	std::cout << "Ecriture du fichier .obj..." << std::endl;
 	subterrainFile.write("tests/subterrain");
 	std::cout << "Fichier écrit !" << std::endl;
 	
 	std::cout << "Ecriture de l'image associée..." << std::endl;
-	img::Image image2 = subterrain.convertToImage();
+	img::Image image2 = subtree.terrain().convertToImage();
 	image2.write("tests/subterrain.png");
 	std::cout << "Image écrite !" << std::endl;
 }

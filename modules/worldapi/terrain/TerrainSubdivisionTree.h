@@ -1,14 +1,27 @@
 #pragma once
 
+#include <worldapi/worldapidef.h>
+
 #include "terrain.h"
 
-class TerrainSubdivisionTree {
+// TODO mettre à jour la doc
+
+/** Cette classe permet de diviser des terrains en plusieurs morceaux avec des
+niveaux de détail plus élevés. On peut ensuite choisir le niveau de détail qu'on veut
+observer.*/
+class WORLDAPI_EXPORT TerrainSubdivisionTree {
 public:
 	TerrainSubdivisionTree(const Terrain & terrain);
 	TerrainSubdivisionTree(Terrain && terrain);
+	TerrainSubdivisionTree(const TerrainSubdivisionTree & other);
+	TerrainSubdivisionTree(TerrainSubdivisionTree && other);
 	~TerrainSubdivisionTree();
 
 	Terrain & terrain() {
+		return *_terrain;
+	}
+
+	const Terrain & terrain() const {
 		return *_terrain;
 	}
 
@@ -50,6 +63,15 @@ public:
 	const TerrainSubdivisionTree & getSubtreeAt(double x, double y, int stage = 1) const;
 
 	TerrainSubdivisionTree & getSubtree(int xindex, int yindex) const;
+
+	/** Convertit ce terrain en submesh, en indiquant la taille du terrain parent
+	au niveau de détail le plus bas, c'est à dire le parent le plus éloigné de ce
+	terrain. Le mesh issu de la conversion représentera donc une fraction de ce
+	parent éloigné.
+	Si le niveau de subdivision de ce terrain est 0, alors cette méthode produit le
+	même résultat que la méthode #convertToMesh(float, float, float). */
+	Mesh * convertToSubmesh(float rootSizeX = 1, float rootSizeY = 1, float rootSizeZ = 0.4) const;
+
 private:
 	TerrainSubdivisionTree(Terrain * terrain) 
 		: _terrain(std::unique_ptr<Terrain>(terrain)) { }
@@ -76,7 +98,7 @@ private:
 	/** Vector contenant tous les sous-terrains. Les terrains sont
 	ordonnées en column-major order, c'est à dire que le sous-terrain
 	d'indice (x, y) est stocké à la case x * _subdivideFactor + y */
-	std::vector<std::unique_ptr<TerrainSubdivisionTree>> _subterrain;
+	std::vector<std::unique_ptr<TerrainSubdivisionTree>> _subtrees;
 
 	// ------
 	friend class TerrainGenerator;
