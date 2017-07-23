@@ -17,6 +17,7 @@ using namespace video;
 
 GroundSceneNode::GroundSceneNode(Application & application, IrrlichtDevice *device)
         : _app(application),
+		  _driver(device->getVideoDriver()),
           _sceneManager(device->getSceneManager()),
           _fileSystem(device->getFileSystem()) {
 
@@ -53,7 +54,7 @@ void GroundSceneNode::update(const World &world) {
 		float x = pair.first.first * ground.getUnitSize() - userLoc._pos.x;
 		float y = pair.first.second * ground.getUnitSize() - userLoc._pos.y;
 
-		if (x * x + y * y > distMax * distMax || true) {
+		if (x * x + y * y > distMax * distMax) {
 			pair.second->remove();
 			it = _terrainNodes.erase(it);
 		}
@@ -62,12 +63,14 @@ void GroundSceneNode::update(const World &world) {
 		}
 	}
 
+	_driver->removeAllHardwareBuffers();
+
 	// TODO checker pourquoi on a pas forcément le const sur le TerrainTile
 	auto terrains = ground.getTerrainsFrom(userLoc);
 
     for (TerrainTile & terrain : terrains) {
 		// TODO gestion des terrains qui on changé entre temps
-		if (_terrainNodes.find(std::pair<int, int>(terrain._x, terrain._y)) == _terrainNodes.end() || true) {
+		if (_terrainNodes.find(std::pair<int, int>(terrain._x, terrain._y)) == _terrainNodes.end()) {
 			addNode(terrain, ground);
 		}
     }
@@ -123,7 +126,7 @@ void GroundSceneNode::addNode(const TerrainTile &tile, const Ground & groundModu
 	// Couleurs du terrain
     material.AmbientColor.set(255, 0, 0, 0);
     material.SpecularColor.set(255, 255, 255, 255);
-    material.DiffuseColor.set(255, 123, 85, 12);
+    material.DiffuseColor.set(255, 200, 178, 126);
 
 
     /*/ Collision pour la camera

@@ -28,6 +28,7 @@ private:
 	Application & _app;
 
     irr::scene::ISceneManager * _sceneManager;
+	irr::video::IVideoDriver *_driver;
     irr::io::IFileSystem * _fileSystem;
 
 	std::map<std::pair<int, int>, irr::scene::ITerrainSceneNode*> _terrainNodes;
