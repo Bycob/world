@@ -131,7 +131,7 @@ void GroundGenerator::expand(World & world, const IPointOfView & from) {
     Map & map = world.getUniqueNode<Map>();
 
 	float unit = ground._unitSize;
-	float distance = from.getHorizonDistance();
+	float distance = from.getHorizonDistance() + 2 * ground.getUnitSize();
 
 	float tdist = distance / unit;
 	float tdist2 = tdist * tdist;
