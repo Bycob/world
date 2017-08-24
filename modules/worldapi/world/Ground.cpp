@@ -52,8 +52,8 @@ const Terrain & Ground::getTerrain(int x, int y) const {
 
 std::string Ground::getTerrainDataId(int x, int y, int lvl) const {
 	uint64_t id = (uint64_t)(x & 0x0FFFFFFF) 
-		+ (uint64_t)(y & 0x0FFFFFFF) << 24 
-		+ (uint64_t)(lvl & 0xFF) << 48;
+		+ (uint64_t)((y & 0x0FFFFFFF) << 24) 
+		+ (uint64_t)((lvl & 0xFF) << 48);
 	return std::to_string(id);
 }
 
@@ -239,7 +239,7 @@ void GroundGenerator::expand(World & world, const IPointOfView & from) {
 
 		joinedX[{tile._x, tile._y}] = tile;
 	}
-
+	
 	// Application de la carte
 	for (auto & pair : joinedX) {
 		applyMap(pair.second, map);
@@ -271,6 +271,7 @@ void GroundGenerator::applyMap(TerrainTile & tile, const Map & map, bool unapply
 	Terrain & terrain = *tile._terrain;
 	int tX = tile._x;
 	int tY = tile._y;
+	//std::cout << (unapply ? "unapply " : "apply ") << "to" << tX << ", " << tY << std::endl;
 
 	std::unique_ptr<ITerrainManipulator> manipulator(ITerrainManipulator::createManipulator());
 

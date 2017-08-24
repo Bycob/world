@@ -52,6 +52,7 @@ public:
 	void generate(Map & map) const override;
 	CustomWorldRMGenerator * clone(MapGenerator * newParent) override;
 private:
+	// la largeur d'un carré unité.
 	static const float PIXEL_UNIT;
 	/** Le nombre moyen de biomes par bloc de 100 pixels de WorldMap.*/
 	float _biomeDensity;

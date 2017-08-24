@@ -228,7 +228,10 @@ Map * MapGenerator::generate() {
 }
 
 void MapGenerator::expand(World & world, const IPointOfView & from) {
-	// Rien
+	Map & map = world.getUniqueNode<Map>();
+
+	if (_reliefMap != nullptr) _reliefMap->generate(map);
+
 }
 
 void MapGenerator::addRequiredNodes(World & world) const {

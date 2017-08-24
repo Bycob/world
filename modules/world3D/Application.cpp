@@ -20,6 +20,8 @@ void Application::run(int argc, char **argv) {
     _running = true;
     _mainView->show();
 
+	bool firstExpand = true;
+
     while(_running) {
         if (!_mainView->running()) {
             _running = false;
@@ -31,14 +33,23 @@ void Application::run(int argc, char **argv) {
 			_paramLock.unlock();
 
 			if ((userPos._pos - _lastUpdatePos).norm() > 500) {
+				// Mise à jour du monde
 				_world->lock();
 				World & world = _world->get();
 				world.getGenerator().expand(world, userPos);
 
+				// Debug
+				if (firstExpand) {
+					world.getUniqueNode<Map>().getReliefMapAsImage().write("world3D_map.png");
+				}
+
 				_world->unlock();
 
+				// Mise à jour de la vue
 				_mainView->onWorldChange();
 				_lastUpdatePos = userPos._pos;
+
+				firstExpand = false;
 			}
 		}
 

@@ -19,7 +19,10 @@ public:
 WorldGenerator* WorldGenerator::defaultGenerator() {
     WorldGenerator * result = new WorldGenerator();
 
-	result->_nodes().emplace_back(new MapGenerator(100, 100, result));
+	MapGenerator * map = new MapGenerator(100, 100, result);
+	map->emplaceReliefMapGenerator<CustomWorldRMGenerator>(map);
+	result->_nodes().emplace_back(map);
+
 	result->_nodes().emplace_back(new GroundGenerator(result));
 
     return result;
