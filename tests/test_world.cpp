@@ -12,7 +12,7 @@ int main(int argc, char** argv) {
 
 void generate_test_world(int argc, char** argv) {
     std::cout << "Configuration du générateur..." << std::endl;
-    std::unique_ptr<WorldGenerator> generator(WorldGenerator::defaultGenerator());
+    std::unique_ptr<WorldGenerator> generator(WorldGenerator::createDefaultGenerator());
 
     std::cout << "Géneration du monde..." << std::endl;
     std::unique_ptr<World> world(generator->generate());

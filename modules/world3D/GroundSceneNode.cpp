@@ -4,6 +4,7 @@
 
 #include "GroundSceneNode.h"
 
+#include <worldapi/world/FlatWorld.h>
 #include <worldapi/world/IPointOfView.h>
 #include <worldapi/terrain/TerrainGenerator.h>
 
@@ -35,7 +36,7 @@ void GroundSceneNode::initialize(const World &world) {
 
 void GroundSceneNode::update(const World &world) {
 
-    const Ground & ground = world.getUniqueNode<Ground>();
+    const Ground & ground = dynamic_cast<const FlatWorld&>(world).getEnvironment().getGround();
 
     /*/ Test
     PerlinTerrainGenerator generator(129, 0, 5, 1, 0.4);

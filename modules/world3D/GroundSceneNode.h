@@ -12,7 +12,7 @@
 #include <irrlicht.h>
 
 #include <worldapi/terrain/terrain.h>
-#include <worldapi/world/Ground.h>
+#include <worldapi/terrain/Ground.h>
 #include <worldapi/world/World.h>
 
 class Application;

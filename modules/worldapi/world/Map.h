@@ -14,11 +14,10 @@
 entier. La worldmap définit les différents paramètres physiques qu'il existera
 dans le monde, comme les zones de montagnes, le climat, le type d'écosystème,
 et ce en chaque endroit du monde.*/
-class WORLDAPI_EXPORT Map : public WorldNode {
+class WORLDAPI_EXPORT Map {
 public:
-	DECL_WORLD_NODE_TYPE
 
-	Map(const World * parent = nullptr, uint32_t sizeX = 100, uint32_t sizeY = 100, float unitsPerPixel = 2000);
+	Map(uint32_t sizeX = 100, uint32_t sizeY = 100, float unitsPerPixel = 2000);
 	~Map();
 
 	int getSizeX() const {
@@ -51,7 +50,7 @@ public:
 	img::Image getReliefMapAsImage();
 private:
 	uint32_t _sizeX, _sizeY;
-	/** Indique combien d'unité du monde pour un terrain */
+	/** Indique combien d'unité du monde pour un pixel de la map */
 	float _unitsPerPixel;
 
 	/** La carte des reliefs permet de caractériser d'une part l'altitude

@@ -13,6 +13,8 @@
 
 class SynchronizedWorld {
 public:
+	static SynchronizedWorld * createFromWorld(World * world);
+
     template <typename... Args>
     SynchronizedWorld(Args... args);
 
@@ -21,6 +23,8 @@ public:
     void unlock();
 
 private:
+	SynchronizedWorld();
+
     std::mutex _mutex;
     std::atomic_bool _locked;
     std::unique_ptr<World> _world;

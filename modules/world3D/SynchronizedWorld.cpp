@@ -4,6 +4,17 @@
 
 #include "SynchronizedWorld.h"
 
+SynchronizedWorld * SynchronizedWorld::createFromWorld(World * world) {
+	SynchronizedWorld * syncWorld = new SynchronizedWorld();
+	syncWorld->_world = std::unique_ptr<World>(world);
+	return syncWorld;
+}
+
+//private 
+SynchronizedWorld::SynchronizedWorld() {
+
+}
+
 World& SynchronizedWorld::get() {
     if (!_locked) {
         throw std::runtime_error("You may lock the world before getting it.");

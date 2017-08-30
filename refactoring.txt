@@ -1,0 +1,38 @@
+Refactoring du code :
+- organisation des fichiers de worldapi
+- organiser et harmoniser les includes
+
+1. include worldapidef.h OU include header
+2. std
+3. 3rd party
+4. worldapi (en chemin <absolu>)
+5. autres...
+
+- harmoniser l'utilisation de PIMPL : que lorsque c'est nécessaire (avec les fields de type vector<unique_ptr> par exemple ?)
+- introduction d'interfaces (IType) pour faciliter la testabilité et la modularité du code
+- essayer d'éliminer le plus de "friend class"
+- appliquer les règles de gestion de la mémoire de manière stricte / harmoniser la définition des paramètres pour les différents générateurs
+
+class Something {
+
+
+	* Objets passés en pointeurs avec le préfixe "add", "set" -> la classe appelée devient propriétaire de la ressource passée en paramètres
+	addNode(WorldGenNode * node) {
+
+	}
+	-> Something devient de fait le propriétaire de la ressource.
+
+	* Objets retournés par les méthodes : si la méthode retourne un pointeur, c'est que l'objet doit être géré par l'utilisateur
+	* Si la méthode retourne une référence, l'objet est géré par la librairie :)
+
+	World * generate() {
+
+	}
+	-> L'objet World est géré par l'utilisateur
+
+	SocksSimulator & getSocksSimulator() {
+	
+	}
+	-> L'objet SocksSimulator est géré par la librairie
+}
+

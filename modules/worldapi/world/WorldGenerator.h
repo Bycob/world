@@ -15,32 +15,14 @@ class WorldGenerator;
 
 class WORLDAPI_EXPORT WorldGenNode {
 public:
-    WorldGenNode(WorldGenerator * generator);
-    virtual ~WorldGenNode() = default;
+	void startGeneration(World & world);
+	virtual void generate(World & world) = 0;
 
-	virtual void expand(World & world, const IPointOfView &location) = 0;
+	void addNode(WorldGenNode * child);
+private:
+	void generateChildren(World & world);
 
-    virtual void addRequiredNodes(World & world) const = 0;
-    virtual WorldGenNode * clone(WorldGenerator * newParent) = 0;
-protected:
-    WorldGenerator * _parent;
-
-    /** Ajout un noeud unique du type passé en template au World
-     * passé en paramètres, seulement si le World ne contient aucune
-     * autre occurence du même noeud. */
-    template <typename T>
-    T & requireUnique(World & world) const {
-        if (!T::type().unique())
-            throw std::runtime_error("Can't require non-unique node type");
-        try {
-            return world.createNode<T>();
-        }
-        catch (std::exception & e) {
-			return world.getUniqueNode<T>();
-		}
-    }
-
-    friend class WorldGenerator;
+	std::vector<WorldGenNode*> _childrens;
 };
 
 class PrivateWorldGenerator;
@@ -51,28 +33,25 @@ public:
      * relativement complet sans configuration supplémentaire.
      * Le générateur est lui-même généré aléatoirement (Cette fonctionnalité
      * n'est pas encore implémentée)*/
-    static WorldGenerator * defaultGenerator();
+    static WorldGenerator * createDefaultGenerator();
 
     WorldGenerator();
-    WorldGenerator(const WorldGenerator & other);
+    virtual ~WorldGenerator();
 
-    ~WorldGenerator();
+	/** Génère un monde en utilisant les paramètres passés préalablement */
+    virtual World * generate();
 
-    World * generate();
+	void addPrimaryNode(WorldGenNode * node);
 
-	/** Etend le monde à la position indiquée, générant du nouveau contenu
-	et/ou des niveaux de détails supplémentaires. */
-	void expand(World & world, const IPointOfView &location);
+protected :
+	void processGeneration(World & world);
 
 private:
-
 	PrivateWorldGenerator * _internal;
 
 	std::vector<std::unique_ptr<WorldGenNode>> & _nodes();
-    void init(World & world);
 
-    friend class World;
-    friend class WorldGenModule;
+    friend class WorldGenNode;
 };
 
 #endif //WORLD_WORLDGENERATOR_H

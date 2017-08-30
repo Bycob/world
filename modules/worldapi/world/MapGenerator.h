@@ -69,10 +69,10 @@ private:
 // MapGenerator
 
 /** */
-class WORLDAPI_EXPORT MapGenerator : public WorldGenNode {
+class WORLDAPI_EXPORT MapGenerator {
 public:
-	MapGenerator(uint32_t sizeX, uint32_t sizeY, WorldGenerator * parent = nullptr);
-	MapGenerator(const MapGenerator& other, WorldGenerator * newParent);
+	MapGenerator(uint32_t sizeX, uint32_t sizeY);
+	MapGenerator(const MapGenerator& other);
 	~MapGenerator();
 
 	Map * generate();
@@ -82,10 +82,7 @@ public:
 		_reliefMap = std::make_unique<T>(this, args...);
 	}
 
-	void expand(World & world, const IPointOfView & from);
-
-	void addRequiredNodes(World & world) const override;
-	MapGenerator * clone(WorldGenerator * newParent) override;
+	MapGenerator * clone() const;
 private:
 	mutable std::mt19937 _rng;
 

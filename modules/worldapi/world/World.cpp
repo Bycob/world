@@ -1,47 +1,38 @@
 #include "World.h"
 
+#include <map>
+
 #include "WorldGenerator.h"
+#include "Chunk.h"
+#include "IWorldExpander.h"
 
 class PrivateWorld {
 public:
-    template <typename... Args>
-    PrivateWorld(Args... args)
-            : _gen(std::make_unique<WorldGenerator>(args...)) {}
+    PrivateWorld() {}
 
-    std::unique_ptr<WorldGenerator> _gen;
-	std::vector<std::unique_ptr<WorldNode>> _nodes;
+	std::map<ChunkPosition, std::unique_ptr<Chunk>> _chunks;
+	std::vector<std::unique_ptr<IWorldExpander>> _expanders;
 };
 
 
 World::World() : _internal(new PrivateWorld()), _directory() {
-    getGenerator().init(*this);
-}
 
-World::World(const WorldGenerator &generator)
-	: _internal(new PrivateWorld(generator)), _directory() {
-    getGenerator().init(*this);
 }
 
 World::~World() {
     delete _internal;
 }
 
-WorldGenerator& World::getGenerator() {
-    return *_internal->_gen;
+void World::addExpander(IWorldExpander * expander) {
+	_internal->_expanders.emplace_back(expander);
 }
 
-std::vector<std::unique_ptr<WorldNode>> & World::_nodes() {
-	return _internal->_nodes;
+Chunk & World::getChunk(const ChunkPosition & position) {
+	return *_internal->_chunks[position];
 }
 
-bool World::checkNodeTypeInternal(const WorldNodeType &type) const {
-    if (type.unique()) {
-        for (const std::unique_ptr<WorldNode> & node : _internal->_nodes) {
-            if (node->type() == type) {
-                return false;
-            }
-        }
-    }
-
-    return true;
+void World::expand(const IPointOfView & from) {
+	for (auto & expander : _internal->_expanders) {
+		expander->expand(*this, from);
+	}
 }

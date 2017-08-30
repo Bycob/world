@@ -1,6 +1,7 @@
 #include "Application.h"
 
 #include <worldapi/world/WorldGenerator.h>
+#include <worldapi/world/FlatWorld.h>
 
 #include "util.h"
 
@@ -9,7 +10,7 @@ using namespace maths;
 Application::Application()
         : _running(false),
 	      _mainView(std::make_unique<MainView>(*this)), 
-	      _userPos(vec3d(0, 0, 0), 5000),
+	      _userPos(vec3d(0, 0, 0), 20000),
 		  _lastUpdatePos(0, 0, 0) {
 
 }
@@ -36,11 +37,15 @@ void Application::run(int argc, char **argv) {
 				// Mise à jour du monde
 				_world->lock();
 				World & world = _world->get();
-				world.getGenerator().expand(world, userPos);
+				world.expand(userPos);
 
 				// Debug
 				if (firstExpand) {
-					world.getUniqueNode<Map>().getReliefMapAsImage().write("world3D_map.png");
+					dynamic_cast<FlatWorld &>(world)
+						.getEnvironment()
+						.getMap()
+						.getReliefMapAsImage()
+						.write("world3D_map.png");
 				}
 
 				_world->unlock();
@@ -83,11 +88,8 @@ PointOfView Application::getUserPointOfView() const {
 }
 
 void Application::loadWorld(int argc, char **argv) {
-    _world = std::make_unique<SynchronizedWorld>(*WorldGenerator::defaultGenerator());
+	std::unique_ptr<WorldGenerator> generator(WorldGenerator::createDefaultGenerator());
 
-    _world->lock();
-    World & world = _world->get();
-    // Do some initialization stuff
-
-    _world->unlock();
+    _world = std::unique_ptr<SynchronizedWorld>(
+		SynchronizedWorld::createFromWorld(generator->generate()));
 }

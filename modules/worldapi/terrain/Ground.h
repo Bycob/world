@@ -10,11 +10,9 @@
 #include <map>
 #include <utility>
 
-#include "World.h"
-#include "WorldGenerator.h"
-#include "Map.h"
-#include "../terrain/terrain.h"
-#include "../terrain/TerrainGenerator.h"
+#include "../world/WorldObject.h"
+#include "../world/IPointOfView.h"
+#include "terrain.h"
 
 class GroundCache;
 
@@ -32,11 +30,9 @@ déjà générés. Dans ce cas, les terrains sont chargés dynamiquement par
 la classe Ground lorsque l'utilisateur le demande. Un terrain donné est
 considéré comme non généré s'il n'est ni dans le cache, ni dans le dossier
 référencé. */
-class WORLDAPI_EXPORT Ground : public WorldNode {
+class WORLDAPI_EXPORT Ground : public WorldObject {
 public:
-    DECL_WORLD_NODE_TYPE
-
-    Ground(const World * world);
+    Ground();
 	virtual ~Ground();
 
 	// TODO constraints
@@ -78,27 +74,7 @@ private:
 	std::map<std::pair<int, int>, std::unique_ptr<Terrain>> & terrains() const;
 	Terrain & terrain(int x, int y);
 
-	friend class GroundGenerator;
-};
-
-class WORLDAPI_EXPORT GroundGenerator : public WorldGenNode {
-public:
-    GroundGenerator(WorldGenerator * parent);
-	GroundGenerator(WorldGenerator * newParent, const GroundGenerator & other);
-
-	void expand(World & world, const IPointOfView &from) override;
-
-    void addRequiredNodes(World & world) const override;
-    GroundGenerator * clone(WorldGenerator * newParent) override;
-
-private:
-	std::unique_ptr<TerrainGenerator> _generator;
-
-	/** nombre de subdivisions effectuées pour les différents niveaux
-	de détails du terrain. */
-	uint32_t _subdivisions;
-
-	void applyMap(TerrainTile & tile, const Map & map, bool unapply = false);
+	friend class Environment2DGenerator; // TODO temporaire, trouver une solution plus propre
 };
 
 

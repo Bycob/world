@@ -197,16 +197,14 @@ CustomWorldRMGenerator* CustomWorldRMGenerator::clone(MapGenerator * newParent) 
 
 // MapGenerator
 
-MapGenerator::MapGenerator(uint32_t sizeX, uint32_t sizeY, WorldGenerator * parent) :
-	WorldGenNode(parent),
+MapGenerator::MapGenerator(uint32_t sizeX, uint32_t sizeY) :
 	_rng(time(NULL)),
 	_sizeX(sizeX), _sizeY(sizeY),
 	_reliefMap(nullptr) {
 
 }
 
-MapGenerator::MapGenerator(const MapGenerator &other, WorldGenerator * newParent):
-	WorldGenNode(newParent),
+MapGenerator::MapGenerator(const MapGenerator &other):
 	_rng(time(NULL)),
 	_sizeX(other._sizeX), _sizeY(other._sizeY),
 	_reliefMap(nullptr) {
@@ -219,25 +217,14 @@ MapGenerator::~MapGenerator() {
 
 }
 
+MapGenerator * MapGenerator::clone() const {
+	return new MapGenerator(*this);
+}
+
 Map * MapGenerator::generate() {
-	Map * map = new Map(nullptr, _sizeX, _sizeY);
+	Map * map = new Map(_sizeX, _sizeY);
 
 	if (_reliefMap != nullptr) _reliefMap->generate(*map);
 
 	return map;
-}
-
-void MapGenerator::expand(World & world, const IPointOfView & from) {
-	Map & map = world.getUniqueNode<Map>();
-
-	if (_reliefMap != nullptr) _reliefMap->generate(map);
-
-}
-
-void MapGenerator::addRequiredNodes(World & world) const {
-	requireUnique<Map>(world);
-}
-
-MapGenerator* MapGenerator::clone(WorldGenerator * newParent) {
-	return new MapGenerator(*this, newParent);
 }
