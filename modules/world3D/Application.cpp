@@ -33,7 +33,7 @@ void Application::run(int argc, char **argv) {
 			PointOfView userPos = _userPos;
 			_paramLock.unlock();
 
-			if ((userPos._pos - _lastUpdatePos).norm() > 500) {
+			if ((userPos._pos - _lastUpdatePos).norm() > 2000 || firstExpand) {
 				// Mise à jour du monde
 				_world->lock();
 				World & world = _world->get();

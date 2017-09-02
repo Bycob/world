@@ -14,7 +14,7 @@ using namespace irr::scene;
 using namespace irr::video;
 
 MainView::MainView(Application & app)
-        : _app(app), _running(false), _resetScene(true), _worldChanged(false) {
+        : _app(app), _running(false), _resetScene(true), _worldChanged(false), _fpsModeActive(true) {
 
 }
 
@@ -44,8 +44,19 @@ void MainView::onWorldChange() {
     _worldChanged = true;
 }
 
+bool MainView::OnEvent(const SEvent& event) {
+	if (event.EventType == EET_KEY_INPUT_EVENT) {
+		if (event.KeyInput.Key == KEY_ESCAPE && event.KeyInput.PressedDown) {
+			_fpsModeActive = !_fpsModeActive;
+			_camera->setInputReceiverEnabled(_fpsModeActive);
+			_device->getCursorControl()->setVisible(!_fpsModeActive);
+		}
+	}
+	return false;
+}
 
-// Private implémentation
+
+// Private implementation
 
 void MainView::runInternal() {
     _device = irr::createDevice (
@@ -55,7 +66,7 @@ void MainView::runInternal() {
             false,
             true,
             true,
-            0);
+            this);
 
 	_device->setResizable(true);
     _device->getLogger()->setLogLevel(ELOG_LEVEL::ELL_WARNING);
@@ -65,12 +76,12 @@ void MainView::runInternal() {
     _driver = _device->getVideoDriver();
 
     // Initialisation des différents modules de rendu
-    _camera = _scenemanager->addCameraSceneNodeFPS(0, 100.0f, 0.5f);
+    _camera = _scenemanager->addCameraSceneNodeFPS(0, 100.0f, 5.0f);
 	_camera->setFOV(1.57);
-    _camera->setFarValue(10000);
+    _camera->setFarValue(40000);
     _camera->setPosition(vector3df(0, 1200, 500));
     //_camera = _scenemanager->addCameraSceneNode(0, vector3df(200 + 64, 200 + 119, 200 + 64), vector3df(64, 119, 64));
-
+	
     /*/ ----- Tests (temporaire)
     auto cube = _scenemanager->addSphereSceneNode();
     cube->setMaterialFlag(EMF_LIGHTING, true);
@@ -82,8 +93,12 @@ void MainView::runInternal() {
     light->setRotation(vector3df(45, 0, 0));
     light->getLightData().Type = ELT_DIRECTIONAL;
 
+	// Affichage de debug
+	_debug = new DebugScreenNode(_app, _device, _scenemanager->getRootSceneNode(), -1);
+
     while(_device->run()) {
         updateScene();
+		_debug->updateInfos();
 
         _driver->beginScene(true, true,
                             irr::video::SColor(255, 190, 199, 220));
@@ -112,7 +127,7 @@ void MainView::updateScene() {
 		syncWorld.lock();
 		World & world = syncWorld.get();
 
-        _ground = std::make_unique<GroundSceneNode>(_app, _device);
+        _ground = std::make_unique<GroundManager>(_app, _device);
         _ground->initialize(world);
 
         _resetScene = false;

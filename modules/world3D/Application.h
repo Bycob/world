@@ -32,8 +32,8 @@ private:
     std::unique_ptr<MainView> _mainView;
 
     std::unique_ptr<SynchronizedWorld> _world;
-	PointOfView _userPos;
 
+	PointOfView _userPos;
 	maths::vec3d _lastUpdatePos;
 
     void loadWorld(int argc, char** argv);

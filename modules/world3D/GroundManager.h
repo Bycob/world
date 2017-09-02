@@ -17,10 +17,10 @@
 
 class Application;
 
-class GroundSceneNode {
+class GroundManager {
 public:
-    GroundSceneNode(Application & app, irr::IrrlichtDevice * device);
-	virtual ~GroundSceneNode();
+    GroundManager(Application & app, irr::IrrlichtDevice * device);
+	virtual ~GroundManager();
 
     void initialize(const World &world);
 	void update(const World &world);

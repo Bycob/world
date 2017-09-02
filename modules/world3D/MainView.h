@@ -12,11 +12,12 @@
 
 #include <irrlicht.h>
 
-#include "GroundSceneNode.h"
+#include "GroundManager.h"
+#include "DebugScreenNode.h"
 
 class Application;
 
-class MainView {
+class MainView : public irr::IEventReceiver {
 public:
     MainView(Application & app);
     ~MainView();
@@ -28,6 +29,8 @@ public:
 
 	void resetScene();
 	void onWorldChange();
+
+	virtual bool OnEvent(const irr::SEvent& event);
 private:
     Application & _app;
 
@@ -40,8 +43,14 @@ private:
 
     std::atomic_bool _resetScene;
 	std::atomic_bool _worldChanged;
+
+	// Irrlicht nodes
     irr::scene::ICameraSceneNode *_camera;
-    std::unique_ptr<GroundSceneNode> _ground;
+	DebugScreenNode * _debug;
+
+    std::unique_ptr<GroundManager> _ground;
+
+	bool _fpsModeActive = true;
 
     void runInternal();
     void updateScene();

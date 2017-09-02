@@ -2,7 +2,7 @@
 // Created by louis on 30/04/17.
 //
 
-#include "GroundSceneNode.h"
+#include "GroundManager.h"
 
 #include <worldapi/world/FlatWorld.h>
 #include <worldapi/world/IPointOfView.h>
@@ -16,7 +16,7 @@ using namespace scene;
 using namespace io;
 using namespace video;
 
-GroundSceneNode::GroundSceneNode(Application & application, IrrlichtDevice *device)
+GroundManager::GroundManager(Application & application, IrrlichtDevice *device)
         : _app(application),
 		  _driver(device->getVideoDriver()),
           _sceneManager(device->getSceneManager()),
@@ -24,17 +24,17 @@ GroundSceneNode::GroundSceneNode(Application & application, IrrlichtDevice *devi
 
 }
 
-GroundSceneNode::~GroundSceneNode() {
+GroundManager::~GroundManager() {
     clearAllNodes();
 }
 
-void GroundSceneNode::initialize(const World &world) {
+void GroundManager::initialize(const World &world) {
     clearAllNodes();
 
     update(world);
 }
 
-void GroundSceneNode::update(const World &world) {
+void GroundManager::update(const World &world) {
 
     const Ground & ground = dynamic_cast<const FlatWorld&>(world).getEnvironment().getGround();
 
@@ -77,7 +77,7 @@ void GroundSceneNode::update(const World &world) {
     }
 }
 
-void GroundSceneNode::clearAllNodes() {
+void GroundManager::clearAllNodes() {
     for (auto & pair : _terrainNodes) {
         pair.second->remove();
     }
@@ -85,7 +85,7 @@ void GroundSceneNode::clearAllNodes() {
     _terrainNodes.clear();
 }
 
-void GroundSceneNode::addNode(const TerrainTile &tile, const Ground & groundModule) {
+void GroundManager::addNode(const TerrainTile &tile, const Ground & groundModule) {
 	const Terrain & terrain = *tile._terrain;
 
 	// Données concernant la position et les dimensions du terrain
