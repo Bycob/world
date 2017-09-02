@@ -26,6 +26,9 @@ public:
 	int getSizeY() const {
 		return _sizeY;
 	}
+
+	void setUnitsPerPixel(float units);
+
 	float getUnitsPerPixel() const {
 		return _unitsPerPixel;
 	}
@@ -47,7 +50,7 @@ public:
 	 * d'étendue d'altitude. Pour le représenter, deux canaux de l'image
 	 * sont utilisés.
 	 * @see _reliefMap */
-	img::Image getReliefMapAsImage();
+	img::Image getReliefMapAsImage() const;
 private:
 	uint32_t _sizeX, _sizeY;
 	/** Indique combien d'unité du monde pour un pixel de la map */

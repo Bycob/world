@@ -22,20 +22,24 @@ Map::~Map() {
 
 }
 
+void Map::setUnitsPerPixel(float units) {
+	_unitsPerPixel = units;
+}
+
 const cube & Map::getReliefMap() const {
 	return _reliefMap;
 }
 
 std::pair<double, double> Map::getReliefAt(double x, double y) const {
 	// Vérification des paramètres
-	x = clamp(x, 0, _sizeX - 1 - std::numeric_limits<double>::epsilon());
-	y = clamp(y, 0, _sizeY - 1 - std::numeric_limits<double>::epsilon());
+	x = clamp(x, 0, _sizeX - 2 - std::numeric_limits<double>::epsilon());
+	y = clamp(y, 0, _sizeY - 2 - std::numeric_limits<double>::epsilon());
 
 	int xi = (int) floor(x);
 	int yi = (int) floor(y);
 	double xd = x - xi;
 	double yd = y - yi;
-
+	
 	double offset1 = interpolateLinear(0, _reliefMap(xi, yi, 0), 1, _reliefMap(xi + 1, yi, 0), xd);
 	double offset2 = interpolateLinear(0, _reliefMap(xi, yi + 1, 0), 1, _reliefMap(xi + 1, yi + 1, 0), xd);
 	double offset = interpolateLinear(0, offset1, 1, offset2, yd);
@@ -47,7 +51,7 @@ std::pair<double, double> Map::getReliefAt(double x, double y) const {
 	return std::pair<double, double>(offset, diff);
 }
 
-Image Map::getReliefMapAsImage() {
+Image Map::getReliefMapAsImage() const {
 	Image img(_reliefMap.n_rows, _reliefMap.n_cols, ImageType::RGB);
 
 	for (uint32_t x = 0; x < _reliefMap.n_rows; x++) {

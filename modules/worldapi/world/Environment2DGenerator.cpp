@@ -4,18 +4,24 @@
 
 using namespace maths;
 
-Environment2DGenerator::Environment2DGenerator() 
-	: _terrainGenerator(new PerlinTerrainGenerator(129, 0, 5, 4)), _mapGenerator(new MapGenerator(100, 100)) {
+const Environment2DMetadata Environment2DGenerator::DEFAULT_METADATA = { 1500, 4000 };
 
+Environment2DGenerator::Environment2DGenerator() 
+	: _metadata(DEFAULT_METADATA) {
+
+	_terrainGenerator = std::make_unique<PerlinTerrainGenerator>(129, 0, 5, 4);
+
+	_mapGenerator = std::make_unique<MapGenerator>(100, 100);
+	_mapGenerator->emplaceReliefMapGenerator<CustomWorldRMGenerator>(_mapGenerator.get());
 }
 
 Environment2DGenerator::Environment2DGenerator(TerrainGenerator * terrainGenerator, MapGenerator * mapGenerator) 
-	: _terrainGenerator(terrainGenerator), _mapGenerator(mapGenerator) {
+	: _metadata(DEFAULT_METADATA), _terrainGenerator(terrainGenerator), _mapGenerator(mapGenerator) {
 
 }
 
 Environment2DGenerator::Environment2DGenerator(const Environment2DGenerator & generator)
-	: _terrainGenerator(generator._terrainGenerator->clone()), _mapGenerator(generator._mapGenerator->clone()) {
+	: _metadata(generator._metadata), _terrainGenerator(generator._terrainGenerator->clone()), _mapGenerator(generator._mapGenerator->clone()) {
 
 }
 
@@ -33,6 +39,7 @@ void Environment2DGenerator::setMapGenerator(MapGenerator * generator) {
 
 void Environment2DGenerator::generate(FlatWorld & world) {
 	Environment2D & env = world.getEnvironment();
+	env._metadata = _metadata;
 
 	if (_mapGenerator != nullptr) {
 		env.setMap(_mapGenerator->generate());
@@ -48,8 +55,8 @@ void Environment2DGenerator::expand(FlatWorld & world, const IPointOfView  & fro
 
 	vec3d location = from.getPosition();
 
-	Map & map = env.getMap();
-	Ground & ground = env.getGround();
+	Map & map = env.map();
+	Ground & ground = env.ground();
 
 	if (_terrainGenerator != nullptr) {
 
@@ -160,9 +167,6 @@ void Environment2DGenerator::expand(FlatWorld & world, const IPointOfView  & fro
 				TerrainTile t2tile = { (*terrain2bis).second.get(), x - 1, y };
 				if (joinedX.find(key2) == joinedX.end())
 					applyMap(t2tile, map, true);
-				else {
-					std::cout << "JE T'AI TROUVE SALE BUG" << std::endl;
-				}
 				_terrainGenerator->join(*t2tile._terrain, terrain, true, true);
 				joinedX[key2] = t2tile;
 			}
@@ -188,6 +192,8 @@ void Environment2DGenerator::applyMap(TerrainTile & tile, const Map & map, bool 
 	const double offsetCoef = 0.5;
 	const double diffCoef = 1 - offsetCoef;
 
+	const double ratio = _metadata.unitsPerTerrain / _metadata.unitsPerMapPixel;
+
 	Terrain & terrain = *tile._terrain;
 	int tX = tile._x;
 	int tY = tile._y;
@@ -204,17 +210,20 @@ void Environment2DGenerator::applyMap(TerrainTile & tile, const Map & map, bool 
 
 	for (uint32_t x = 0; x < size; x++) {
 		for (uint32_t y = 0; y < size; y++) {
-			double mapX = tX + mapOx + (double)x / size;
-			double mapY = tY + mapOy + (double)y / size;
+			double mapX = mapOx + (tX + (double)x / size) * ratio;
+			double mapY = mapOy + (tY + (double)y / size) * ratio;
 			auto data = map.getReliefAt(mapX, mapY);
 
+			double offset = offsetCoef * data.first;
+			double diff = data.second * diffCoef;
+
 			if (unapply) {
-				bufferOffset(x, y) = -offsetCoef * data.first;
-				bufferDiff(x, y) = 1 / (data.second * diffCoef);
+				bufferOffset(x, y) = -offset;
+				bufferDiff(x, y) = diff > std::numeric_limits<double>::epsilon() ? 1 / diff : 0;
 			}
 			else {
-				bufferOffset(x, y) = offsetCoef * data.first;
-				bufferDiff(x, y) = diffCoef * data.second;
+				bufferOffset(x, y) = offset;
+				bufferDiff(x, y) = diff;
 			}
 		}
 	}

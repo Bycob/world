@@ -14,12 +14,16 @@ public:
 	Environment2DGenerator(const Environment2DGenerator & other);
 	virtual ~Environment2DGenerator();
 
-	virtual void generate(FlatWorld & world);
-	virtual void expand(FlatWorld & world, const IPointOfView & from);
-
 	void setTerrainGenerator(TerrainGenerator * generator);
 	void setMapGenerator(MapGenerator * generator);
+
+	virtual void generate(FlatWorld & world);
+	virtual void expand(FlatWorld & world, const IPointOfView & from);
 private:
+	static const Environment2DMetadata DEFAULT_METADATA;
+
+	Environment2DMetadata _metadata;
+
 	std::unique_ptr<TerrainGenerator> _terrainGenerator;
 	std::unique_ptr<MapGenerator> _mapGenerator;
 

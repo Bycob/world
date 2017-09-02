@@ -9,21 +9,33 @@
 
 class PrivateEnvironment2D;
 
+struct Environment2DMetadata {
+	float unitsPerMapPixel;
+	float unitsPerTerrain;
+};
+
 class Environment2D {
 public:
 	Environment2D();
 	virtual ~Environment2D();
 
-	Map & getMap() { return *_map; }
+	Map & map() { return *_map; }
 	const Map & getMap() const { return *_map; }
 	void setMap(Map * map);
 
-	Ground & getGround() { return *_ground; }
+	Ground & ground() { return *_ground; }
 	const Ground & getGround() const { return *_ground; }
 	void setGround(Ground * ground);
 
+	Environment2DMetadata & metadata() { return _metadata; }
+	const Environment2DMetadata & getMetadata() const { return _metadata; }
+	void setMetadata(const Environment2DMetadata & metadata);
 private:
+	Environment2DMetadata _metadata;
+
 	std::unique_ptr<Ground> _ground;
 	std::unique_ptr<Map> _map;
+
+	friend class Environment2DGenerator;
 };
 

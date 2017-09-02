@@ -19,13 +19,8 @@ public:
 
 WorldGenerator* WorldGenerator::createDefaultGenerator() {
 	FlatWorldGenerator * result = new FlatWorldGenerator();
-	
-	PerlinTerrainGenerator * terrain = new PerlinTerrainGenerator(129, 0, 5, 4);
 
-	MapGenerator * map = new MapGenerator(100, 100);
-	map->emplaceReliefMapGenerator<CustomWorldRMGenerator>(map);
-
-	result->addPrimaryNode(new Environment2DGenerator(terrain, map));
+	result->addPrimaryNode(new Environment2DGenerator());
 
     return result;
 }

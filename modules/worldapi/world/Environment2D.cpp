@@ -15,3 +15,7 @@ void Environment2D::setMap(Map * map) {
 void Environment2D::setGround(Ground * ground) {
 	_ground = std::unique_ptr<Ground>(ground);
 }
+
+void Environment2D::setMetadata(const Environment2DMetadata & metadata) {
+	_metadata = metadata;
+}
