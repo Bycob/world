@@ -2,7 +2,7 @@
 
 #include "worldapidef.h"
 
-#include "mesh.h"
+#include "Mesh.h"
 
 class WORLDAPI_EXPORT MeshOps {
 public :

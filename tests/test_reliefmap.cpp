@@ -32,7 +32,7 @@ void testReliefMap(int argc, char** argv) {
 	std::cout << "Creation du generateur" << std::endl;
 
 	MapGenerator generator(800, 500);
-	generator.emplaceReliefMapGenerator<CustomWorldRMGenerator>(biomeDensity, (uint32_t) limitBrightness);
+	generator.createReliefMapGenerator<CustomWorldRMGenerator>(biomeDensity, (uint32_t) limitBrightness);
 	
 	std::cout << "Generation de la ReliefMap" << std::endl;
 

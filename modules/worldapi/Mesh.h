@@ -6,6 +6,8 @@
 #include <vector>
 #include <stdexcept>
 
+#include "maths/MathsHelper.h"
+
 enum class VType {
 	POSITION, NORMAL, TEXTURE, PARAM
 };
@@ -31,6 +33,8 @@ public :
 	}
 	int getID() const { return _vID; };
 
+	maths::vec3d toVec3() const;
+	maths::vec2d toVec2() const;
 private :
 	int _vID;
 	std::vector<float> _values;
@@ -94,9 +98,9 @@ public :
 
 	void allocateFaces(int capacity);
 
-	void setMaterialName(std::string material);
+	void setMaterialName(const std::string & material);
 	
-	std::string getMaterialName() const {
+	const std::string & getMaterialName() const {
 		return _materialName;
 	}
 
@@ -114,4 +118,4 @@ private:
 	template <VType type> std::vector<Vertex<type>> & getList();
 };
 
-#include "mesh.inl"
+#include "Mesh.inl"

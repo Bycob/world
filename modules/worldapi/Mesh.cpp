@@ -1,4 +1,4 @@
-#include "mesh.h"
+#include "Mesh.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -52,8 +52,8 @@ void Mesh::allocateFaces(int count) {
 	_faces.reserve(count);
 }
 
-void Mesh::setMaterialName(std::string material) {
-	_materialName = material;
+void Mesh::setMaterialName(const std::string & name) {
+	_materialName = name;
 }
 
 void Mesh::optimize() {

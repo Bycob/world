@@ -4,7 +4,13 @@
 #include "World.h"
 #include "WorldGenerator.h"
 #include "Environment2D.h"
-#include "IFlatWorldExpander.h"
+#include "IExpander.h"
+#include "IChunkDecorator.h"
+
+class FlatWorld;
+
+typedef IExpander<FlatWorld> IFlatWorldExpander;
+typedef IChunkDecorator<FlatWorld> IFlatWorldChunkDecorator;
 
 class PrivateFlatWorld;
 
@@ -14,11 +20,16 @@ public:
 	virtual ~FlatWorld();
 
 	void addFlatWorldExpander(IFlatWorldExpander * expander);
+	void addFlatWorldChunkDecorator(IFlatWorldChunkDecorator * decorator);
 
 	virtual void expand(const IPointOfView & from);
 
-	Environment2D & getEnvironment() { return _environment; }
+	Environment2D & environment() { return _environment; }
 	const Environment2D & getEnvironment() const { return _environment; }
+
+protected:
+	virtual void generateChunk(Chunk & chunk);
+
 private:
 	PrivateFlatWorld * _internal;
 

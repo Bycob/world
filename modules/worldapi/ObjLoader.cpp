@@ -5,48 +5,38 @@
 
 #include <tiny_obj_loader/tiny_obj_loader.h>
 
-#include "mesh.h"
-#include "Material.h"
-#include "stringops.h"
-
 #include "ObjLoader.h"
 
-ObjLoader::ObjLoader() {
-	_defaultMaterial = std::make_shared<Material>(DEFAULT_MATERIAL_NAME);
-}
+#include "Mesh.h"
+#include "Scene.h"
+#include "StringOps.h"
 
-ObjLoader::ObjLoader(std::string pathname, bool triangulate) : ObjLoader() {
-	_filename = pathname;
-	read(triangulate);
+ObjLoader::ObjLoader(bool triangulate) : _triangulate(triangulate) {
+	_defaultMaterial = std::make_shared<Material>(DEFAULT_MATERIAL_NAME);
 }
 
 ObjLoader::~ObjLoader() {
 
 }
 
-void ObjLoader::printDebug() {
-	std::cout << "Ce fichier objet contient :" << std::endl;
-
-	//TODO afficher la description du fichier
-}
-
-void ObjLoader::read(bool triangulate) {
+Scene * ObjLoader::read(const std::string & filename) const {
 	//Lecture via tinyobj
 	std::string errstr = "";
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;
 	
-	bool success = tinyobj::LoadObj(shapes, materials, errstr, _filename.c_str(), NULL, triangulate);
+	bool success = tinyobj::LoadObj(shapes, materials, errstr, filename.c_str(), NULL, _triangulate);
 
 	if (!success) {
 		throw std::ios_base::failure(errstr);
 	}
 
-	//Conversion en meshes
-	for (auto shape : shapes) {
-		_meshes.push_back(std::make_shared<Mesh>());
+	//Conversion en objet 3D
+	Scene * result = new Scene();
 
-		Mesh & mesh = **_meshes.end();
+	for (auto shape : shapes) {
+		std::shared_ptr<Mesh> shared_mesh(std::make_shared<Mesh>());
+		Mesh & mesh = *shared_mesh;
 
 		//positions
 		std::vector<float> & positions = shape.mesh.positions;
@@ -107,10 +97,12 @@ void ObjLoader::read(bool triangulate) {
 			offset += ngon;
 			mesh.addFace(face);
 		}
+
+		result->createObject(shared_mesh);
 	}
 }
 
-void ObjLoader::write(std::string filename) {
+void ObjLoader::write(const Scene & object3D, std::string filename) const {
 	//On enlève l'extension si elle est passée en paramètres.
 	if (endsWith(filename, ".obj")) {
 		filename = filename.substr(0, filename.size() - 4);
@@ -139,7 +131,7 @@ void ObjLoader::write(std::string filename) {
 	//Création de deux string stream subsituts (pour aller plus vite)
 
 	//Ecriture
-	write(objfile, mtlfile);
+	write(object3D, objfile, mtlfile);
 
 	objfile.close();
 	mtlfile.close();
@@ -155,22 +147,30 @@ template <VType T> void writeValues(std::ostream & file, const Vertex<T> & vert)
 	file << std::endl;
 }
 
-void ObjLoader::write(std::ostream & objstream, std::ostream & mtlstream) {
+void ObjLoader::write(const Scene & scene, std::ostream & objstream, std::ostream & mtlstream) const {
+	std::vector<std::shared_ptr<Material>> materials;
+	scene.getMaterials(materials);
+	std::vector<Object3D *> objects;
+	scene.getObjects(objects);
+	
 	int meshCount = 1;
 	int verticesRead = 0;
 	int normalRead = 0;
 	int texCoordRead = 0;
 
-	std::string defaultMaterialName = _materials.size() == 0 ? _defaultMaterial->getName() : _materials[0]->getName();
-	bool includeDefaultMaterial = _materials.size() == 0;
+	std::string defaultMaterialName = materials.size() == 0 ? _defaultMaterial->getName() : materials[0]->getName();
+	bool includeDefaultMaterial = materials.size() == 0;
 
-	for (std::shared_ptr<Mesh> & mesh : _meshes) {
+	for (Object3D * object : objects) {
+		const Mesh & mesh = object->getMesh();
+
+		// Nom
 		std::string name = std::string("mesh") + std::to_string(meshCount);
 		objstream << "o " << name << std::endl;
 
 		//Materiau
 		objstream << "usemtl ";
-		std::string materialName = mesh->getMaterialName();
+		std::string materialName = mesh.getMaterialName();
 
 		if (materialName == "") {
 			objstream << defaultMaterialName;
@@ -188,7 +188,7 @@ void ObjLoader::write(std::ostream & objstream, std::ostream & mtlstream) {
 		int texCoordOffset = texCoordRead;
 
 		// Ecriture des vertices
-		const std::vector<Vertex<VType::POSITION>> & vertList = mesh->getVertices<VType::POSITION>();
+		const std::vector<Vertex<VType::POSITION>> & vertList = mesh.getVertices<VType::POSITION>();
 
 		for (const Vertex<VType::POSITION> & vert : vertList) {
 			verticesRead++;
@@ -197,7 +197,7 @@ void ObjLoader::write(std::ostream & objstream, std::ostream & mtlstream) {
 		}
 
 		// Ecriture des normales
-		const std::vector<Vertex<VType::NORMAL>> & normalList = mesh->getVertices<VType::NORMAL>();
+		const std::vector<Vertex<VType::NORMAL>> & normalList = mesh.getVertices<VType::NORMAL>();
 
 		for (const Vertex<VType::NORMAL> & normal : normalList) {
 			normalRead++;
@@ -206,7 +206,7 @@ void ObjLoader::write(std::ostream & objstream, std::ostream & mtlstream) {
 		}
 
 		// Ecriture des coordonnées de texture
-		const std::vector<Vertex<VType::TEXTURE>> & texCoordList = mesh->getVertices<VType::TEXTURE>();
+		const std::vector<Vertex<VType::TEXTURE>> & texCoordList = mesh.getVertices<VType::TEXTURE>();
 
 		for (const Vertex<VType::TEXTURE> & texCoord : texCoordList) {
 			texCoordRead++;
@@ -215,7 +215,7 @@ void ObjLoader::write(std::ostream & objstream, std::ostream & mtlstream) {
 		}
 
 		// Ecriture des faces
-		const std::vector<Face> & faceList = mesh->getFaces();
+		const std::vector<Face> & faceList = mesh.getFaces();
 
 		for (const Face & face : faceList) {
 			objstream << "f";
@@ -244,7 +244,7 @@ void ObjLoader::write(std::ostream & objstream, std::ostream & mtlstream) {
 	// Ajout des matériaux
 	// On vérifie que le nom du "default material" n'est pas déjà pris
 	if (includeDefaultMaterial) {
-		for (std::shared_ptr<Material> & material : _materials) {
+		for (std::shared_ptr<Material> & material : materials) {
 			if (material->getName() == _defaultMaterial->getName()) {
 				includeDefaultMaterial = false;
 				break;
@@ -253,12 +253,12 @@ void ObjLoader::write(std::ostream & objstream, std::ostream & mtlstream) {
 	}
 
 	if (includeDefaultMaterial) {
-		_materials.push_back(_defaultMaterial);
+		materials.push_back(_defaultMaterial);
 	}
 
 	int materialID = 1;
 
-	for (std::shared_ptr<Material> material : _materials) {
+	for (std::shared_ptr<Material> material : materials) {
 		//Déclaration du materiau
 		mtlstream << std::endl << "newmtl ";
 		std::string materialName = trimSpaces(material->getName());
@@ -291,7 +291,7 @@ void ObjLoader::write(std::ostream & objstream, std::ostream & mtlstream) {
 	}
 
 	if (includeDefaultMaterial) {
-		_materials.pop_back();
+		materials.pop_back();
 	}
 }
 
@@ -304,29 +304,4 @@ T & extAt(std::vector<T> & vector, int index) {
 	}
 
 	return vector.at(index);
-}
-
-
-void ObjLoader::addMesh(std::shared_ptr<Mesh> mesh) {
-	_meshes.push_back(mesh);
-}
-
-void ObjLoader::addMesh(const Mesh & mesh) {
-	_meshes.push_back(std::make_shared<Mesh>(mesh));
-}
-
-void ObjLoader::addMaterial(std::shared_ptr<Material> material) {
-	_materials.push_back(material);
-}
-
-void ObjLoader::getMeshes(std::vector<std::shared_ptr<Mesh>> &output) {
-	for (auto mesh : _meshes) {
-		output.push_back(mesh);
-	}
-}
-
-void ObjLoader::getMaterials(std::vector<std::shared_ptr<Material>> &output) {
-	for (auto mesh : _materials) {
-		output.push_back(mesh);
-	}
 }

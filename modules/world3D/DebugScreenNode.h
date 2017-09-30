@@ -2,7 +2,7 @@
 
 #include <irrlicht.h>
 
-#include <worldapi/maths/mathshelper.h>
+#include <worldapi/maths/MathsHelper.h>
 
 class Application;
 

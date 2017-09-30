@@ -1,6 +1,6 @@
 
 #include "TerrainGenerator.h"
-#include "../maths/perlin.h"
+#include "../maths/Perlin.h"
 #include "../Image.h"
 
 using namespace img;

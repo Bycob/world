@@ -78,8 +78,10 @@ public:
 	Map * generate();
 
 	template <class T, typename... Args>
-	void emplaceReliefMapGenerator(Args&&... args) {
-		_reliefMap = std::make_unique<T>(this, args...);
+	T & createReliefMapGenerator(Args&&... args) {
+		T * reliefMap = new T(this, args...);
+		_reliefMap = std::unique_ptr<T>(reliefMap);
+		return *reliefMap;
 	}
 
 	MapGenerator * clone() const;

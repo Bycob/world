@@ -1,6 +1,6 @@
 #include <math.h>
 
-#include "mathshelper.h"
+#include "MathsHelper.h"
 
 namespace maths {
 	double length(const arma::vec3 & vec1, const arma::vec3 & vec2) {

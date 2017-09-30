@@ -1,9 +1,9 @@
 #define _USE_MATH_DEFINES
 
 #include "TreeGenerator.h"
-#include "../mesh.h"
-#include "../meshop.h"
-#include "../maths/mathshelper.h"
+#include "../Mesh.h"
+#include "../MeshOps.h"
+#include "../maths/MathsHelper.h"
 
 #include <math.h>
 #include <stdexcept>

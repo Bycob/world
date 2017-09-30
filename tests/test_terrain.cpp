@@ -4,11 +4,12 @@
 #include <armadillo/armadillo>
 
 #include <worldapi/ObjLoader.h>
+#include <worldapi/Scene.h>
 #include <worldapi/Material.h>
-#include <worldapi/interop.h>
-#include <worldapi/ioutil.h>
-#include <worldapi/maths/perlin.h>
-#include <worldapi/terrain/terrain.h>
+#include <worldapi/Interop.h>
+#include <worldapi/IOUtil.h>
+#include <worldapi/maths/Perlin.h>
+#include <worldapi/terrain/Terrain.h>
 #include <worldapi/terrain/TerrainGenerator.h>
 #include <worldapi/terrain/TerrainTexmapBuilder.h>
 
@@ -31,20 +32,18 @@ int main(int argc, char** argv) {
 void testTinyObjLoader(int argc, char** argv) {
 	if (argc >= 2) {
 		try {
-			ObjLoader obj(argv[1]);
+			ObjLoader obj;
 			std::cout << "Lecture du mesh" << std::endl;
-			obj.printDebug();
 
-			std::vector<std::shared_ptr<Mesh>> output;
-			obj.getMeshes(output);
+			std::unique_ptr<Scene> scene(obj.read(argv[1]));
 			std::cout << "Mesh lu !" << std::endl;
-			std::shared_ptr<Mesh> mesh2 = output.at(0);
+
+			std::vector<Object3D*> output;
+			scene->getObjects(output);
+			std::shared_ptr<Mesh> mesh2 = output.at(0)->getMeshPtr();
 
 			std::cout << "Reecriture du fichier sous un autre nom" << std::endl;
-			ObjLoader obj2;
-			obj2.addMesh(mesh2);
-
-			obj2.write("tests/result.obj");
+			obj.write(*scene, "tests/result.obj");
 		}
 		catch (std::exception & e) {
 			std::cout << e.what() << std::endl;
@@ -72,9 +71,11 @@ void testRepeatable(int argc, char** argv) {
 
     std::cout << "Génération du terrain associé..." << std::endl;
     Terrain tr(repeatable);
-    ObjLoader repeatableobj;
-    repeatableobj.addMesh(std::shared_ptr<Mesh>(tr.convertToMesh()));
-    repeatableobj.write("tests/repeatable");
+    Scene repeatableobj;
+	repeatableobj.createObject(std::shared_ptr<Mesh>(tr.convertToMesh()));
+
+	ObjLoader loader;
+    loader.write(repeatableobj, "tests/repeatable");
 }
 
 void testPerlin(int argc, char** argv) {
@@ -156,20 +157,22 @@ void testPerlin(int argc, char** argv) {
 
 	//ECRITURE DU FICHIER OBJ DU TERRAIN
 
+	ObjLoader meshIO;
+
 	std::cout << "Conversion du terrain en mesh... " << std::endl;
-	ObjLoader file;
+	Scene scene1;
 	std::shared_ptr<Mesh> mesh = std::shared_ptr<Mesh>(terrain->convertToMesh());
-	file.addMesh(mesh);
+	scene1.createObject(mesh);
 	
 	std::shared_ptr<Material> material = std::make_shared<Material>("material01");
 	material->setMapKd("test2_tex.png");
 	material->setKs(0, 0, 0);
-	file.addMaterial(material);
+	scene1.addMaterial(material);
 
 	std::cout << "Ecriture du mesh dans un fichier .obj..." << std::endl;
 
 	try {
-		file.write("tests/terrain.obj");
+		meshIO.write(scene1, "tests/terrain.obj");
 	}
 	catch (std::exception & e) {
 		std::cout << "erreur : " << e.what() << std::endl;
@@ -225,16 +228,16 @@ void testPerlin(int argc, char** argv) {
 	std::cout << "génération terminée !" << std::endl;
 
 	std::cout << "Conversion en mesh de 4 sous-terrains..." << std::endl;
-	ObjLoader subterrainFile;
+	Scene subterrainScene;
 	TerrainSubdivisionTree & subtree = terrainTree->getSubtree(0, 0);
 	std::shared_ptr<Mesh> submesh = std::shared_ptr<Mesh>(subtree.convertToSubmesh());
-	subterrainFile.addMesh(submesh);
-    subterrainFile.addMesh(std::shared_ptr<Mesh>(terrainTree->getSubtree(1, 0).convertToSubmesh()));
-    subterrainFile.addMesh(std::shared_ptr<Mesh>(terrainTree->getSubtree(1, 1).convertToSubmesh()));
-    subterrainFile.addMesh(std::shared_ptr<Mesh>(terrainTree->getSubtree(0, 1).convertToSubmesh()));
+	subterrainScene.createObject(submesh);
+	subterrainScene.createObject(std::shared_ptr<Mesh>(terrainTree->getSubtree(1, 0).convertToSubmesh()));
+	subterrainScene.createObject(std::shared_ptr<Mesh>(terrainTree->getSubtree(1, 1).convertToSubmesh()));
+	subterrainScene.createObject(std::shared_ptr<Mesh>(terrainTree->getSubtree(0, 1).convertToSubmesh()));
 	
 	std::cout << "Ecriture du fichier .obj..." << std::endl;
-	subterrainFile.write("tests/subterrain");
+	meshIO.write(subterrainScene, "tests/subterrain");
 	std::cout << "Fichier écrit !" << std::endl;
 	
 	std::cout << "Ecriture de l'image associée..." << std::endl;

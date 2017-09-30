@@ -4,7 +4,6 @@
 
 #include "MapGenerator.h"
 #include "FlatWorldGenerator.h"
-#include "IFlatWorldExpander.h"
 #include "../terrain/TerrainGenerator.h"
 
 class WORLDAPI_EXPORT Environment2DGenerator : public FlatWorldGenNode, IFlatWorldExpander {

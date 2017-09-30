@@ -14,7 +14,7 @@ using namespace irr::scene;
 using namespace irr::video;
 
 MainView::MainView(Application & app)
-        : _app(app), _running(false), _resetScene(true), _worldChanged(false), _fpsModeActive(true) {
+	: _app(app), _running(false), _resetScene(true), _worldChanged(false), _fpsModeActive(true) {
 
 }
 
@@ -23,17 +23,17 @@ MainView::~MainView() {
 }
 
 void MainView::show() {
-    _running = true;
+	_running = true;
 
-    _graphicThread = std::make_unique<std::thread>(&MainView::runInternal, this);
+	_graphicThread = std::make_unique<std::thread>(&MainView::runInternal, this);
 }
 
 bool MainView::running() {
-    return _running;
+	return _running;
 }
 
 void MainView::waitClose() {
-    _graphicThread->join();
+	_graphicThread->join();
 }
 
 void MainView::resetScene() {
@@ -41,15 +41,20 @@ void MainView::resetScene() {
 }
 
 void MainView::onWorldChange() {
-    _worldChanged = true;
+	_worldChanged = true;
 }
 
 bool MainView::OnEvent(const SEvent& event) {
 	if (event.EventType == EET_KEY_INPUT_EVENT) {
-		if (event.KeyInput.Key == KEY_ESCAPE && event.KeyInput.PressedDown) {
-			_fpsModeActive = !_fpsModeActive;
-			_camera->setInputReceiverEnabled(_fpsModeActive);
-			_device->getCursorControl()->setVisible(!_fpsModeActive);
+		if (event.KeyInput.PressedDown) {
+			if (event.KeyInput.Key == KEY_ESCAPE) {
+				_fpsModeActive = !_fpsModeActive;
+				_camera->setInputReceiverEnabled(_fpsModeActive);
+				_device->getCursorControl()->setVisible(!_fpsModeActive);
+			}
+			else if (event.KeyInput.Key == KEY_KEY_Q) {
+				_device->closeDevice();
+			}
 		}
 	}
 	return false;

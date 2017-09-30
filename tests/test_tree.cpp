@@ -2,6 +2,7 @@
 #include <stdexcept>
 
 #include <worldapi/ObjLoader.h>
+#include <worldapi/Scene.h>
 #include <worldapi/mesh.h>
 #include <worldapi/ioutil.h>
 #include <worldapi/tree/TreeSkelettonGenerator.h>
@@ -62,8 +63,9 @@ void testTree(int argc, char ** argv) {
 
 	std::cout << "Modèle converti ! Ecriture du modèle..." << std::endl;
 	ObjLoader file;
-	file.addMesh(mesh);
-	file.write("trees/skeletton");
+	Scene scene;
+	scene.createObject(mesh);
+	file.write(scene, "trees/skeletton");
 
 	std::cout << "Génération du tronc de l'arbre" << std::endl;
 	TreeGenerator generator2;
@@ -71,7 +73,7 @@ void testTree(int argc, char ** argv) {
 
 	std::cout << "Généré ! Ecriture du modèle" << std::endl;
 	const Mesh & trunkMesh = tree->getTrunkMesh();
-	ObjLoader file2;
-	file2.addMesh(trunkMesh);
-	file2.write("trees/trunk");
+	Scene scene2;
+	scene2.createObject(trunkMesh);
+	file.write(scene2, "trees/trunk");
 }

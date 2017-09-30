@@ -6,7 +6,7 @@
 #include <memory>
 #include <armadillo/armadillo>
 
-#include "maths/mathshelper.h"
+#include "maths/MathsHelper.h"
 
 #define DEFAULT_WEIGHT 1
 

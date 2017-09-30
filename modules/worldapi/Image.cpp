@@ -1,7 +1,7 @@
 #include "Image.h"
 
 #ifdef USE_OPENCV
-#include "interop.h"
+#include "Interop.h"
 
 #include <stdexcept>
 #include <opencv/cv.h>

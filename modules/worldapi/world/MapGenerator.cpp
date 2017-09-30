@@ -4,8 +4,8 @@
 #include <list>
 #include <tuple>
 
-#include "../maths/mathshelper.h"
-#include "../maths/interpolation.h"
+#include "../maths/MathsHelper.h"
+#include "../maths/Interpolation.h"
 
 using namespace arma;
 using namespace maths;

@@ -1,4 +1,4 @@
-#include "perlin.h"
+#include "Perlin.h"
 
 #include <armadillo/armadillo>
 #include <math.h>
@@ -7,8 +7,8 @@
 #include <algorithm>
 #include <functional>
 
-#include "mathshelper.h"
-#include "interpolation.h"
+#include "MathsHelper.h"
+#include "Interpolation.h"
 
 using namespace arma;
 using namespace maths;

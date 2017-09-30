@@ -10,13 +10,11 @@
 
 using namespace maths;
 
-typedef std::pair<int, int> id;
-
 class GroundCache {
 public:
 	GroundCache() : _terrains() {}
 
-	std::map<id, std::unique_ptr<Terrain>> _terrains;
+	std::map<vec2i, std::unique_ptr<Terrain>> _terrains;
 };
 
 Ground::Ground() :
@@ -30,7 +28,7 @@ Ground::~Ground() {
 }
 
 bool Ground::isTerrainGenerated(int x, int y, int lvl) const {
-	if (terrains().find(std::make_pair(x, y)) != terrains().end()) {
+	if (terrains().find({ x, y }) != terrains().end()) {
 		return true;
 	}
 
@@ -43,17 +41,17 @@ const Terrain & Ground::getTerrain(int x, int y) const {
 
 std::string Ground::getTerrainDataId(int x, int y, int lvl) const {
 	uint64_t id = (uint64_t)(x & 0x0FFFFFFF) 
-		+ (uint64_t)((y & 0x0FFFFFFF) << 24) 
-		+ (uint64_t)((lvl & 0xFF) << 48);
+		+ ((uint64_t) (y & 0x0FFFFFFF) << 24)
+		+ ((uint64_t) (lvl & 0xFF) << 48);
 	return std::to_string(id);
 }
 
-std::map<std::pair<int, int>, std::unique_ptr<Terrain>>& Ground::terrains() const {
+std::map<vec2i, std::unique_ptr<Terrain>>& Ground::terrains() const {
 	return _cache->_terrains;
 }
 
 Terrain & Ground::terrain(int x, int y) {
-	auto terrain = _cache->_terrains.find(std::make_pair(x, y));
+	auto terrain = _cache->_terrains.find({ x, y });
 	
 	if (terrain != _cache->_terrains.end()) {
 		return *(*terrain).second;
@@ -69,13 +67,30 @@ const Terrain & Ground::getTerrainAt(double x, double y, int lvl) const {
 	return const_cast<Ground*>(this)->terrain(xi, yi);
 }
 
+double Ground::getAltitudeAt(double x, double y, int lvl) const {
+	uint32_t xi = (uint32_t)floor(x / _unitSize);
+	uint32_t yi = (uint32_t)floor(y / _unitSize);
+
+	const Terrain & terrain = const_cast<Ground*>(this)->terrain(xi, yi);
+	return _minAltitude + (_maxAltitude - _minAltitude) * terrain.getZInterpolated(x - xi, y - yi);
+}
+
 const std::vector<TerrainTile> Ground::getTerrainsFrom(const IPointOfView & from) const {
 	std::vector<TerrainTile> result;
 
-	// TODO duplication de code avec Environment2DGenerator::expand(...)
+	iterateTerrainPos(from, [&] (int x, int y) {
+		if (isTerrainGenerated(x, y)) {
+			result.push_back({ &const_cast<Ground*>(this)->terrain(x, y), x, y });
+		}
+	});
+
+	return result;
+}
+
+void Ground::iterateTerrainPos(const IPointOfView & from, const std::function<void(int, int)>& action) const {
 	vec3d location = from.getPosition();
 	float distance = from.getHorizonDistance();
-	
+
 	float tdist = distance / _unitSize;
 	float tdist2 = tdist * tdist;
 	int centerX = (int)round(location.x / _unitSize);
@@ -91,11 +106,10 @@ const std::vector<TerrainTile> Ground::getTerrainsFrom(const IPointOfView & from
 			int dx = x - centerX;
 			int dy = y - centerY;
 
-			if (dx * dx + dy * dy <= tdist2 && isTerrainGenerated(x, y)) {
-				result.push_back({ &const_cast<Ground*>(this)->terrain(x, y), x, y });
+			if (dx * dx + dy * dy <= tdist2) {
+				action(x, y);
 			}
 		}
 	}
 
-	return result;
 }

@@ -1,7 +1,7 @@
 #include "TerrainSubdivisionTree.h"
 
-#include <worldapi/maths/mathshelper.h>
-#include <worldapi/maths/interpolation.h>
+#include <worldapi/maths/MathsHelper.h>
+#include <worldapi/maths/Interpolation.h>
 
 using namespace maths;
 

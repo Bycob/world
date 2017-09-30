@@ -1,6 +1,6 @@
-#include "meshop.h"
+#include "MeshOps.h"
 
-#include "maths/mathshelper.h"
+#include "maths/MathsHelper.h"
 
 using namespace maths;
 

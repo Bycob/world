@@ -17,10 +17,17 @@ namespace maths {
 		vec3() : x(0), y(0), z(0) {}
 		vec3(T x, T y, T z) : x(x), y(y), z(z) {}
 
-		vec3<T> operator+(const vec3<T> & rhs) const;
-		vec3<T> operator-(const vec3<T> & rhs) const;
-		vec3<T> operator*(T rhs) const;
-		vec3<T> operator/(T rhs) const;
+		template <typename R> operator vec3<R>() const;
+
+		template<typename R> auto operator*(R rhs) const -> vec3<decltype(x * rhs)>;
+		template<typename R> auto operator/(R rhs) const -> vec3<decltype(x / rhs)>;
+		
+		template <typename R> auto operator+(const vec3<R> & rhs) const -> vec3<decltype(x + rhs.x)>;
+		template <typename R> auto operator-(const vec3<R> & rhs) const -> vec3<decltype(x - rhs.x)>;
+		template<typename R> auto operator*(const vec3<R> & rhs) const -> vec3<decltype(x * rhs.x)>;
+		template<typename R> auto operator/(const vec3<R> & rhs) const -> vec3<decltype(x / rhs.x)>;
+
+		template<typename R> bool operator<(const vec3<R> & rhs) const;
 
 		vec3<T> normalize() const;
 		T norm() const;
@@ -42,10 +49,13 @@ namespace maths {
 		vec2() : x(0), y(0) {}
 		vec2(T x, T y) : x(x), y(y) {}
 
-		vec2<T> operator+(const vec2<T> & rhs) const;
-		vec2<T> operator-(const vec2<T> & rhs) const;
 		vec2<T> operator*(T rhs) const;
 		vec2<T> operator/(T rhs) const;
+
+		vec2<T> operator+(const vec2<T> & rhs) const;
+		vec2<T> operator-(const vec2<T> & rhs) const;
+
+		template <typename R> bool operator<(const vec2<R> & rhs) const;
 
 		vec2<T> normalize() const;
 		T norm() const;
@@ -61,20 +71,54 @@ namespace maths {
 
 	// vec3
 
-	template<typename T> inline vec3<T> vec3<T>::operator+(const vec3<T> & rhs) const {
-		return vec3(this->x + rhs.x, this->y + rhs.y, this->z + rhs.z);
+	template<typename T>
+	template<typename R>
+	inline vec3<T>::operator vec3<R>() const {
+		return vec3<R>((R) this->x, (R) this->y, (R) this->z);
 	}
 
-	template<typename T> inline vec3<T> vec3<T>::operator-(const vec3<T> & rhs) const {
-		return vec3(this->x - rhs.x, this->y - rhs.y, this->z - rhs.z);
-	}
-
-	template<typename T> inline vec3<T> vec3<T>::operator*(T rhs) const {
+	template<typename T>
+	template<typename R>
+	inline auto vec3<T>::operator*(R rhs) const -> vec3<decltype(x * rhs)> {
 		return vec3(this->x * rhs, this->y * rhs, this->z * rhs);
 	}
 
-	template<typename T> inline vec3<T> vec3<T>::operator/(T rhs) const {
+	template<typename T>
+	template<typename R>
+	inline auto vec3<T>::operator/(R rhs) const -> vec3<decltype(x / rhs)> {
 		return vec3(this->x / rhs, this->y / rhs, this->z / rhs);
+	}
+
+	template<typename T>
+	template<typename R>
+	inline auto vec3<T>::operator+(const vec3<R> & rhs) const -> vec3<decltype(x + rhs.x)> {
+		return vec3(this->x + rhs.x, this->y + rhs.y, this->z + rhs.z);
+	}
+
+	template<typename T>
+	template<typename R>
+	inline auto vec3<T>::operator-(const vec3<R> & rhs) const -> vec3<decltype(x - rhs.x)> {
+		return vec3(this->x - rhs.x, this->y - rhs.y, this->z - rhs.z);
+	}
+
+	template<typename T>
+	template<typename R>
+	inline auto vec3<T>::operator*(const vec3<R> & rhs) const -> vec3<decltype(x * rhs.x)> {
+		return vec3(this->x * rhs.x, this->y * rhs.y, this->z * rhs.z);
+	}
+
+	template<typename T>
+	template<typename R>
+	inline auto vec3<T>::operator/(const vec3<R> & rhs) const -> vec3<decltype(x / rhs.x)> {
+		return vec3(this->x / rhs.x, this->y / rhs.y, this->z / rhs.z);
+	}
+
+	template<typename T>
+	template<typename R>
+	inline bool vec3<T>::operator<(const vec3<R> & rhs) const {
+		return x < rhs.x ? true :
+			(x == rhs.x && y < rhs.y ? true :
+				x == rhs.x && y == rhs.y && z < rhs.z);
 	}
 
 	template<typename T> inline T vec3<T>::norm() const {
@@ -146,6 +190,12 @@ namespace maths {
 
 	template<typename T> inline vec2<T> vec2<T>::operator/(T rhs) const {
 		return vec2(this->x / rhs, this->y / rhs);
+	}
+
+	template<typename T>
+	template<typename R> 
+	inline bool vec2<T>::operator<(const vec2<R> & rhs) const {
+		return x < rhs.x ? true : x == rhs.x && y < rhs.y;
 	}
 
 	template<typename T> inline T vec2<T>::norm() const {

@@ -7,9 +7,9 @@
 #include <utility>
 
 #include "../Image.h"
-#include "../maths/perlin.h"
+#include "../maths/Perlin.h"
 #include "TerrainTexmapBuilder.h"
-#include "terrain.h"
+#include "Terrain.h"
 #include "TerrainSubdivisionTree.h"
 
 #define DEFAULT_TERRAIN_SIZE 257

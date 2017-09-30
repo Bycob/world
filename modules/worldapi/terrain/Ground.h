@@ -9,8 +9,8 @@
 
 #include <map>
 #include <utility>
+#include <functional>
 
-#include "../world/WorldObject.h"
 #include "../world/IPointOfView.h"
 #include "terrain.h"
 
@@ -30,7 +30,7 @@ déjà générés. Dans ce cas, les terrains sont chargés dynamiquement par
 la classe Ground lorsque l'utilisateur le demande. Un terrain donné est
 considéré comme non généré s'il n'est ni dans le cache, ni dans le dossier
 référencé. */
-class WORLDAPI_EXPORT Ground : public WorldObject {
+class WORLDAPI_EXPORT Ground {
 public:
     Ground();
 	virtual ~Ground();
@@ -55,8 +55,11 @@ public:
 	std::string getTerrainDataId(int x, int y, int lvl) const;
 
 	const Terrain & getTerrainAt(double x, double y, int lvl = 0) const;
+	double getAltitudeAt(double x, double y, int lvl = 0) const;
 
 	const std::vector<TerrainTile> getTerrainsFrom(const IPointOfView & pointOfView) const;
+
+	void iterateTerrainPos(const IPointOfView & from, const std::function<void(int, int)> & action) const;
 private:
 	// Paramètres
 	/** L'altitude maximum du monde. Le niveau de la mer est fixé à 0. */
@@ -71,7 +74,7 @@ private:
 	int _cacheSize;
 	mutable GroundCache * _cache;
 
-	std::map<std::pair<int, int>, std::unique_ptr<Terrain>> & terrains() const;
+	std::map<maths::vec2i, std::unique_ptr<Terrain>> & terrains() const;
 	Terrain & terrain(int x, int y);
 
 	friend class Environment2DGenerator; // TODO temporaire, trouver une solution plus propre

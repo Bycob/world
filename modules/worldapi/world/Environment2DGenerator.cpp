@@ -12,7 +12,7 @@ Environment2DGenerator::Environment2DGenerator()
 	_terrainGenerator = std::make_unique<PerlinTerrainGenerator>(129, 0, 5, 4);
 
 	_mapGenerator = std::make_unique<MapGenerator>(100, 100);
-	_mapGenerator->emplaceReliefMapGenerator<CustomWorldRMGenerator>(_mapGenerator.get());
+	_mapGenerator->createReliefMapGenerator<CustomWorldRMGenerator>();
 }
 
 Environment2DGenerator::Environment2DGenerator(TerrainGenerator * terrainGenerator, MapGenerator * mapGenerator) 
@@ -38,7 +38,7 @@ void Environment2DGenerator::setMapGenerator(MapGenerator * generator) {
 }
 
 void Environment2DGenerator::generate(FlatWorld & world) {
-	Environment2D & env = world.getEnvironment();
+	Environment2D & env = world.environment();
 	env._metadata = _metadata;
 
 	if (_mapGenerator != nullptr) {
@@ -51,7 +51,7 @@ void Environment2DGenerator::generate(FlatWorld & world) {
 }
 
 void Environment2DGenerator::expand(FlatWorld & world, const IPointOfView  & from) {
-	Environment2D & env = world.getEnvironment();
+	Environment2D & env = world.environment();
 
 	vec3d location = from.getPosition();
 
@@ -74,7 +74,7 @@ void Environment2DGenerator::expand(FlatWorld & world, const IPointOfView  & fro
 		int ty2 = (int)round((location.y + distance) / unit);
 
 		// Creation des terrains
-		std::map<std::pair<int, int>, std::unique_ptr<Terrain>> generated;
+		std::map<vec2i, std::unique_ptr<Terrain>> generated;
 
 		for (int x = tx1; x <= tx2; x++) {
 			for (int y = ty1; y <= ty2; y++) {
@@ -82,25 +82,25 @@ void Environment2DGenerator::expand(FlatWorld & world, const IPointOfView  & fro
 				int dy = y - centerY;
 
 				if (dx * dx + dy * dy <= tdist2 && !ground.isTerrainGenerated(x, y)) {
-					generated[std::pair<int, int>(x, y)] = std::unique_ptr<Terrain>(_terrainGenerator->generate());
+					generated[{x, y}] = std::unique_ptr<Terrain>(_terrainGenerator->generate());
 				}
 			}
 		}
 
 		// Fusionnement
-		std::map<std::pair<int, int>, TerrainTile> joinedY;
+		std::map<vec2i, TerrainTile> joinedY;
 
 		// Le joint y doit se faire avant le joint x
 		// TODO simplifier l'algorithme suivant ?
 		// join y
 		for (auto & pair : generated) {
-			int x = pair.first.first;
-			int y = pair.first.second;
+			int x = pair.first.x;
+			int y = pair.first.y;
 			Terrain& terrain = *pair.second;
 
 			// Détermination du deuxième terrain à joindre
 			// Fusion en dessus
-			std::pair<int, int> key1(x, y + 1);
+			vec2i key1(x, y + 1);
 			auto terrain2 = generated.find(key1);
 
 			if (terrain2 != generated.end()) {
@@ -117,7 +117,7 @@ void Environment2DGenerator::expand(FlatWorld & world, const IPointOfView  & fro
 			}
 
 			// Fusion en dessous si aucun terrain généré n'est présent
-			std::pair<int, int> key2(x, y - 1);
+			vec2i key2(x, y - 1);
 
 			if (generated.find(key2) == generated.end() &&
 				(terrain2 = ground.terrains().find(key2)) != ground.terrains().end()) {
@@ -133,7 +133,7 @@ void Environment2DGenerator::expand(FlatWorld & world, const IPointOfView  & fro
 		}
 
 		// join x
-		std::map<std::pair<int, int>, TerrainTile> joinedX;
+		std::map<vec2i, TerrainTile> joinedX;
 
 		for (auto & pair : joinedY) {
 			TerrainTile & tile = pair.second;
@@ -142,7 +142,7 @@ void Environment2DGenerator::expand(FlatWorld & world, const IPointOfView  & fro
 			int y = tile._y;
 
 			// Fusion x croissants
-			std::pair<int, int> key1(x + 1, y);
+			vec2i key1(x + 1, y);
 			auto terrain2 = joinedY.find(key1);
 			auto terrain2bis = ground.terrains().find(key1);
 
@@ -159,7 +159,7 @@ void Environment2DGenerator::expand(FlatWorld & world, const IPointOfView  & fro
 			}
 
 			// Fusion x décroissants si aucun terrain généré n'est présent
-			std::pair<int, int> key2(x - 1, y);
+			vec2i key2(x - 1, y);
 
 			if (joinedY.find(key2) == joinedY.end() &&
 				(terrain2bis = ground.terrains().find(key2)) != ground.terrains().end()) {
@@ -181,7 +181,7 @@ void Environment2DGenerator::expand(FlatWorld & world, const IPointOfView  & fro
 
 		// Ajout
 		for (auto & pair : generated) {
-			TerrainTile tile = { pair.second.get(), pair.first.first, pair.first.second };
+			TerrainTile tile = { pair.second.get(), pair.first.x, pair.first.y };
 			ground.terrains()[pair.first] = std::unique_ptr<Terrain>(pair.second.release());
 		}
 	}

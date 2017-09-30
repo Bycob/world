@@ -1,16 +1,17 @@
+#include "Terrain.h"
+
 #include <algorithm>
 #include <iostream>
 #include <math.h>
 
-#include <worldapi/maths/mathshelper.h>
+#include <worldapi/maths/MathsHelper.h>
 #include <worldapi/maths/interpolation.h>
 
-#include "terrain.h"
-#include "../interop.h"
+#include "../Interop.h"
 #include "../Image.h"
-#include "../mesh.h"
-#include "../meshop.h"
-#include "../stream.h"
+#include "../Mesh.h"
+#include "../MeshOps.h"
+#include "../Stream.h"
 
 using namespace maths;
 using namespace img;

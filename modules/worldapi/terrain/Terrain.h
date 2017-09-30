@@ -6,7 +6,7 @@
 #include <vector>
 #include <memory>
 
-#include "../maths/mathshelper.h"
+#include "../maths/MathsHelper.h"
 #include "../mesh.h"
 #include "../Image.h"
 

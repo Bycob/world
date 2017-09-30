@@ -6,7 +6,7 @@
 
 #include <utility>
 
-#include "mathshelper.h"
+#include "MathsHelper.h"
 
 namespace maths {
 	class WORLDAPI_EXPORT CosineInterpolation : public Function<double> {

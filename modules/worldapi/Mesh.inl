@@ -1,4 +1,28 @@
 
+// VERTEX
+
+template<VType type> inline maths::vec3d Vertex<type>::toVec3() const {
+	switch (_values.size()) {
+	case 2:
+		return maths::vec3d(_values[0], _values[1], 0);
+	case 3:
+		return maths::vec3d(_values[0], _values[1], _values[2]);
+	default:
+		throw std::runtime_error("No conversion possible to vec3");
+	}
+}
+
+template<VType type> inline maths::vec2d Vertex<type>::toVec2() const {
+	switch (_values.size()) {
+	case 2:
+	case 3:
+		return maths::vec2d(_values[0], _values[1]);
+	default:
+		throw std::runtime_error("No conversion possible to vec2");
+	}
+}
+
+
 // FACE
 
 template<> inline std::vector<int> & Face::getIDsInternal<VType::POSITION>() {

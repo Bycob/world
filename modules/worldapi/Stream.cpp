@@ -2,7 +2,7 @@
 // Created by louis on 30/04/17.
 //
 
-#include "stream.h"
+#include "Stream.h"
 
 bin_ostream::bin_ostream(std::ostream &stream) : _stream(stream) {
 

@@ -7,7 +7,7 @@
 #include "FlatWorldGenerator.h"
 #include "Environment2DGenerator.h"
 #include "MapGenerator.h"
-#include "../maths/mathshelper.h"
+#include "../maths/MathsHelper.h"
 
 using namespace maths;
 

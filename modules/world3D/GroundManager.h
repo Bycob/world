@@ -15,22 +15,16 @@
 #include <worldapi/terrain/Ground.h>
 #include <worldapi/world/World.h>
 
-class Application;
+#include "RenderingModule.h"
 
-class GroundManager {
+class GroundManager : public RenderingModule {
 public:
     GroundManager(Application & app, irr::IrrlichtDevice * device);
 	virtual ~GroundManager();
 
-    void initialize(const World &world);
-	void update(const World &world);
+    void initialize(const World &world) override;
+	void update(const World &world) override;
 private:
-	Application & _app;
-
-    irr::scene::ISceneManager * _sceneManager;
-	irr::video::IVideoDriver *_driver;
-    irr::io::IFileSystem * _fileSystem;
-
 	std::map<std::pair<int, int>, irr::scene::ITerrainSceneNode*> _terrainNodes;
 
 	void clearAllNodes();

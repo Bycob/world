@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-#include "../maths/mathshelper.h"
+#include "../maths/MathsHelper.h"
 #include "../maths/interpolation.h"
 
 using namespace arma;

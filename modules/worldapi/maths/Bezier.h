@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mathshelper.h"
+#include "MathsHelper.h"
 
 namespace maths {
 	

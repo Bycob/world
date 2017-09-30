@@ -2,20 +2,23 @@
 
 #include <worldapi/worldapidef.h>
 
-#include "../mesh.h"
+#include "../world/WorldObject.h"
+#include "../Mesh.h"
 #include "../Material.h"
 #include "TreeSkeletton.h"
 
 #include <memory>
 
-class WORLDAPI_EXPORT Tree {
+class WORLDAPI_EXPORT Tree : public WorldObject {
 public:
 	Tree();
-	~Tree();
+	virtual ~Tree();
 
 	const Mesh & getTrunkMesh() {
 		return _trunkMesh;
 	}
+
+	void fillScene(Scene & scene) const override;
 private :
 	friend class TreeGenerator;
 

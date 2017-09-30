@@ -1,4 +1,4 @@
-#include "interop.h"
+#include "Interop.h"
 
 #ifdef USE_OPENCV
 

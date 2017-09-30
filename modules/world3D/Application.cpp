@@ -42,7 +42,7 @@ void Application::run(int argc, char **argv) {
 				// Debug
 				if (firstExpand) {
 					dynamic_cast<FlatWorld &>(world)
-						.getEnvironment()
+						.environment()
 						.getMap()
 						.getReliefMapAsImage()
 						.write("world3D_map.png");

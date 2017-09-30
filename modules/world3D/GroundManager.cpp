@@ -17,10 +17,7 @@ using namespace io;
 using namespace video;
 
 GroundManager::GroundManager(Application & application, IrrlichtDevice *device)
-        : _app(application),
-		  _driver(device->getVideoDriver()),
-          _sceneManager(device->getSceneManager()),
-          _fileSystem(device->getFileSystem()) {
+        : RenderingModule(application, device) {
 
 }
 
