@@ -12,7 +12,7 @@
 #include <functional>
 
 #include "../world/IPointOfView.h"
-#include "terrain.h"
+#include "Terrain.h"
 
 class GroundCache;
 

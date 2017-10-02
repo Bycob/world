@@ -3,8 +3,8 @@
 
 #include <worldapi/ObjLoader.h>
 #include <worldapi/Scene.h>
-#include <worldapi/mesh.h>
-#include <worldapi/ioutil.h>
+#include <worldapi/Mesh.h>
+#include <worldapi/IOUtil.h>
 #include <worldapi/tree/TreeSkelettonGenerator.h>
 #include <worldapi/tree/TreeGenerator.h>
 #include <worldapi/tree/TreeSkeletton.h>

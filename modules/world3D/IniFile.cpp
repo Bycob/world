@@ -7,7 +7,7 @@
 #include <iostream>
 #include <regex>
 
-#include <worldapi/stringops.h>
+#include <worldapi/StringOps.h>
 
 IniFile IniFile::read(const std::string &filename) {
     return IniFile("");

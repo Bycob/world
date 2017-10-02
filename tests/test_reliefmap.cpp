@@ -2,7 +2,7 @@
 #include <stdexcept>
 
 #include <worldapi/world/MapGenerator.h>
-#include <worldapi/ioutil.h>
+#include <worldapi/IOUtil.h>
 
 #include "testutil.h"
 

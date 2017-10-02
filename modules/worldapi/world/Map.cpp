@@ -3,7 +3,7 @@
 #include <stdexcept>
 
 #include "../maths/MathsHelper.h"
-#include "../maths/interpolation.h"
+#include "../maths/Interpolation.h"
 
 using namespace arma;
 using namespace img;

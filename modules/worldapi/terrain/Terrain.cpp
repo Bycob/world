@@ -5,7 +5,7 @@
 #include <math.h>
 
 #include <worldapi/maths/MathsHelper.h>
-#include <worldapi/maths/interpolation.h>
+#include <worldapi/maths/Interpolation.h>
 
 #include "../Interop.h"
 #include "../Image.h"

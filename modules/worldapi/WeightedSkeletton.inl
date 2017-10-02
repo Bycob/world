@@ -1,7 +1,7 @@
 #include <iostream>
 #include <list>
 
-#include "mesh.h"
+#include "Mesh.h"
 #include "WeightedSkeletton.h"
 
 template <class T> Node<T>::Node(double weight, double x, double y, double z) : 

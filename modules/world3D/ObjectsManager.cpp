@@ -79,7 +79,7 @@ void ObjectsManager::update(const World & world) {
 	// Pour l'instant on ne crée qu'un chunk node unique.
 	// TODO hierarchiser les objets par chunk
 	ChunkNodeHandler & coreNode = getOrCreateNode({ 0, 0 });
-	IPointOfView & userView = _app.getUserPointOfView();
+	const IPointOfView & userView = _app.getUserPointOfView();
 
 	std::unique_ptr<Scene> scene(world.createSceneFrom(userView));
 

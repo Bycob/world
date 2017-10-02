@@ -2,7 +2,7 @@
 
 #include <worldapi/worldapidef.h>
 
-#include "terrain.h"
+#include "Terrain.h"
 
 class WORLDAPI_EXPORT ITerrainManipulator {
 public:

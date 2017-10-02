@@ -4,7 +4,7 @@
 
 #include <tinydir/tinydir.h>
 
-#include "ioutil.h"
+#include "IOUtil.h"
 
 WorldFolder::WorldFolder(const std::string & path) 
 	: _path(path), _filelist() {

@@ -15,6 +15,7 @@ class ChunkNodeHandler;
 
 class ObjectNodeHandler {
 public:
+	ObjectNodeHandler() {};
 	ObjectNodeHandler(ChunkNodeHandler * parent, const Object3D & object);
 	virtual ~ObjectNodeHandler();
 
@@ -26,6 +27,7 @@ private:
 
 class ChunkNodeHandler {
 public:
+	ChunkNodeHandler() {};
 	ChunkNodeHandler(ObjectsManager * manager);
 	virtual ~ChunkNodeHandler();
 

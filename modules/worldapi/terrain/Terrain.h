@@ -7,7 +7,7 @@
 #include <memory>
 
 #include "../maths/MathsHelper.h"
-#include "../mesh.h"
+#include "../Mesh.h"
 #include "../Image.h"
 
 /* NB : Toutes les ressources générées par cette classe utilisent le COLUMN MAJOR ORDER,
