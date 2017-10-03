@@ -24,8 +24,8 @@ void FlatWorld::addFlatWorldChunkDecorator(IFlatWorldChunkDecorator * decorator)
 	_internal->_chunkDecorators.emplace_back(decorator);
 }
 
-void FlatWorld::expand(const IPointOfView & from) {
-	World::expand(from);
+void FlatWorld::callExpanders(const IPointOfView &from) {
+	World::callExpanders(from);
 
 	for (auto & expander : _internal->_expanders) {
 		expander->expand(*this, from);

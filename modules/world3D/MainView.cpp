@@ -7,6 +7,8 @@
 #include <iostream>
 
 #include "Application.h"
+#include "GroundManager.h"
+#include "ObjectsManager.h"
 
 using namespace irr;
 using namespace irr::core;
@@ -121,6 +123,13 @@ void MainView::runInternal() {
     _resetScene = true;
 }
 
+void MainView::recreateModules() {
+    _modules.clear();
+
+    _modules.push_back(std::move(std::make_unique<GroundManager>(_app, _device)));
+    _modules.push_back(std::move(std::make_unique<ObjectsManager>(_app, _device)));
+}
+
 void MainView::updateScene() {
 	SynchronizedWorld & syncWorld = _app.getWorld();
 
@@ -132,8 +141,11 @@ void MainView::updateScene() {
 		syncWorld.lock();
 		World & world = syncWorld.get();
 
-        _ground = std::make_unique<GroundManager>(_app, _device);
-        _ground->initialize(world);
+        recreateModules();
+
+        for (auto & module : _modules) {
+            module->initialize(world);
+        }
 
         _resetScene = false;
         _worldChanged = false;
@@ -144,7 +156,9 @@ void MainView::updateScene() {
         syncWorld.lock();
         World & world = syncWorld.get();
 
-        _ground->update(world);
+        for (auto & module : _modules) {
+            module->update(world);
+        }
 
         _worldChanged = false;
 

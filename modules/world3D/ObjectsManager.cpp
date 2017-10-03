@@ -13,22 +13,30 @@ using namespace video;
 //----- ObjectNodeHandler
 
 ObjectNodeHandler::ObjectNodeHandler(ChunkNodeHandler * parent, const Object3D & object) 
-	: _parent(parent), _meshNode(nullptr) {
-	
-	_meshNode = parent->sceneManager()->addMeshSceneNode(nullptr, 0, -1);
+	: _parent(parent), _meshNode(NULL) {
+
 	updateObject3D(object);
 }
 
 ObjectNodeHandler::~ObjectNodeHandler() {
-	_meshNode->remove();
+	// TODO produit une segfault si le scenemanager est déjà supprimé (fermeture de l'application)
+	// ==> RESOUDRE
 }
 
 void ObjectNodeHandler::updateObject3D(const Object3D & object) {
 	SMesh * irrMesh = ObjectsManager::convertToIrrlichtMesh(object.getMesh(), _parent->_objectsManager->_driver);
 
-	_meshNode->setMesh(irrMesh);
+	if (_meshNode == NULL) {
+		_meshNode = _parent->sceneManager()->addMeshSceneNode(irrMesh, 0, -1);
+	}
+	else {
+		_meshNode->setMesh(irrMesh);
+	}
+
 	_meshNode->setPosition(toIrrlicht(object.getPosition()));
 	_meshNode->setScale(toIrrlicht(object.getScale()));
+
+	_meshNode->setMaterialFlag(video::EMF_BACK_FACE_CULLING, false);
 
 	irrMesh->drop();
 }
@@ -83,6 +91,8 @@ void ObjectsManager::update(const World & world) {
 
 	std::unique_ptr<Scene> scene(world.createSceneFrom(userView));
 
+	coreNode.clearObjects();
+
 	for (Object3D * object : scene->getObjects()) {
 		coreNode.updateObject(*object);
 	}
@@ -136,6 +146,9 @@ SMesh * ObjectsManager::convertToIrrlichtMesh(const Mesh & mesh, IVideoDriver * 
 				irrMesh->addMeshBuffer(buffer);
 				buffer->drop();
 			}
+
+			buffer->Vertices.set_used(faces.size() * 3);
+			buffer->Indices.set_used(faces.size() * 3);
 		}
 
 		// Add face data
@@ -145,7 +158,7 @@ SMesh * ObjectsManager::convertToIrrlichtMesh(const Mesh & mesh, IVideoDriver * 
 			int normID = face.getID<VType::NORMAL>(i);
 
 			S3DVertex& v = buffer->Vertices[primitiveCount];
-			v.Pos = toIrrlicht(positions[posID].toVec3()); // TODO check if posID == -1;
+			v.Pos = toIrrlicht(positions[posID].toVec3() * 100); // TODO check if posID == -1;
 			
 			if (texID != -1)
 				v.TCoords = toIrrlicht(positions[texID].toVec2());
@@ -153,11 +166,16 @@ SMesh * ObjectsManager::convertToIrrlichtMesh(const Mesh & mesh, IVideoDriver * 
 			if (normID != -1)
 				v.Normal = toIrrlicht(positions[normID].toVec3());
 
+			v.Color = SColor(255, 255, 255, 255);
+
 			buffer->Indices[primitiveCount] = primitiveCount;
 
 			primitiveCount++;
 		}
 	}
+
+	irrMesh->setDirty();
+	irrMesh->recalculateBoundingBox();
 
 	return irrMesh;
 }

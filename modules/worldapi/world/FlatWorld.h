@@ -22,12 +22,12 @@ public:
 	void addFlatWorldExpander(IFlatWorldExpander * expander);
 	void addFlatWorldChunkDecorator(IFlatWorldChunkDecorator * decorator);
 
-	virtual void expand(const IPointOfView & from);
-
 	Environment2D & environment() { return _environment; }
 	const Environment2D & getEnvironment() const { return _environment; }
 
 protected:
+	virtual void callExpanders(const IPointOfView & from);
+
 	virtual void generateChunk(Chunk & chunk);
 
 private:

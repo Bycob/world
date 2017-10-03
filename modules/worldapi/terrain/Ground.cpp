@@ -61,18 +61,22 @@ Terrain & Ground::terrain(int x, int y) {
 }
 
 const Terrain & Ground::getTerrainAt(double x, double y, int lvl) const {
-	uint32_t xi = (uint32_t) floor(x / _unitSize);
-	uint32_t yi = (uint32_t) floor(y / _unitSize);
+	int xi = (int) floor(x / _unitSize);
+	int yi = (int) floor(y / _unitSize);
 
 	return const_cast<Ground*>(this)->terrain(xi, yi);
 }
 
 double Ground::getAltitudeAt(double x, double y, int lvl) const {
-	uint32_t xi = (uint32_t)floor(x / _unitSize);
-	uint32_t yi = (uint32_t)floor(y / _unitSize);
+	int xi = (int)floor(x / _unitSize);
+	int yi = (int)floor(y / _unitSize);
+
+	if (!isTerrainGenerated(xi, yi)) {
+		return 0;
+	}
 
 	const Terrain & terrain = const_cast<Ground*>(this)->terrain(xi, yi);
-	return _minAltitude + (_maxAltitude - _minAltitude) * terrain.getZInterpolated(x - xi, y - yi);
+	return _minAltitude + (_maxAltitude - _minAltitude) * terrain.getZInterpolated(x / _unitSize - xi, y / _unitSize - yi);
 }
 
 const std::vector<TerrainTile> Ground::getTerrainsFrom(const IPointOfView & from) const {

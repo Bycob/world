@@ -7,7 +7,18 @@
 using namespace maths;
 
 SimpleTreeDecorator::SimpleTreeDecorator(int maxTreesPerChunk) 
-	: _rng(time(NULL)), _maxTreesPerChunk(maxTreesPerChunk) {
+	: _rng(time(NULL)), _maxTreesPerChunk(maxTreesPerChunk),
+	  _skelettonGenerator(std::make_unique<TreeSkelettonGenerator>()),
+	  _treeGenerator(std::make_unique<TreeGenerator>()) {
+
+	_skelettonGenerator->setConstantMaxForkingLevel(2);
+	_skelettonGenerator->setConstantForkingCount(3);
+}
+
+SimpleTreeDecorator::SimpleTreeDecorator(const SimpleTreeDecorator &other)
+	: _rng(other._rng), _maxTreesPerChunk(other._maxTreesPerChunk),
+	  _skelettonGenerator(other._skelettonGenerator->clone()),
+	  _treeGenerator(other._treeGenerator->clone()) {
 
 }
 
@@ -23,12 +34,18 @@ void SimpleTreeDecorator::setTreeGenerator(TreeGenerator * generator) {
 	_treeGenerator = std::unique_ptr<TreeGenerator>(generator);
 }
 
+void SimpleTreeDecorator::generate(FlatWorld &world) {
+	world.addFlatWorldChunkDecorator(new SimpleTreeDecorator(*this));
+}
+
 void SimpleTreeDecorator::decorate(FlatWorld & world, Chunk & chunk) {
 	if (chunk.getChunkPosition().getPosition3D().z != 0) return;
 
+	vec3d chunkSize = chunk.getSize();
+
 	std::vector<vec2d> positions;
-	std::uniform_real_distribution<double> distribX(0, 2);
-	std::uniform_real_distribution<double> distribY(0, 3);
+	std::uniform_real_distribution<double> distribX(0, chunkSize.x);
+	std::uniform_real_distribution<double> distribY(0, chunkSize.y);
 	
 	Ground & ground = world.environment().ground();
 
@@ -60,5 +77,6 @@ void SimpleTreeDecorator::decorate(FlatWorld & world, Chunk & chunk) {
 		
 		tree->setPosition3D(absolutePosition);
 		chunk.addObject(tree);
+		std::cout << absolutePosition << std::endl;
 	}
 }

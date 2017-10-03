@@ -6,6 +6,8 @@
 
 class WORLDAPI_EXPORT FlatWorldGenNode : public WorldGenNode {
 public:
+	virtual ~FlatWorldGenNode() = default;
+
 	void startGeneration(FlatWorld & world);
 	
 	virtual void generate(FlatWorld & world) = 0;

@@ -10,8 +10,8 @@
 using namespace tree;
 using namespace maths;
 
-TreeSkelettonGenerator::TreeSkelettonGenerator() :
-	_rng(std::make_unique<uniform_d>(0, 1)),
+TreeSkelettonGenerator::TreeSkelettonGenerator()
+	: _rng(std::make_unique<uniform_d>(0, 1)),
 
 	_seedLocation(std::make_unique<const_d>(0)),
 	_rootWeight(std::make_unique<const_d>(1)),
@@ -26,8 +26,28 @@ TreeSkelettonGenerator::TreeSkelettonGenerator() :
 
 }
 
+TreeSkelettonGenerator::TreeSkelettonGenerator(const TreeSkelettonGenerator &other)
+	: _rng(other._rng->clone()),
+
+	  _seedLocation(other._seedLocation->clone()),
+	  _rootWeight(other._rootWeight->clone()),
+
+	  _phi(other._phi->clone()),
+	  _sizeFactor(other._sizeFactor->clone()),
+	  _offsetTheta(other._offsetTheta->clone()),
+
+	  _weight(other._weight->clone()),
+	  _count(other._count->clone()),
+	  _maxLevel(other._maxLevel->clone()) {
+
+}
+
 TreeSkelettonGenerator::~TreeSkelettonGenerator() {
 
+}
+
+TreeSkelettonGenerator* TreeSkelettonGenerator::clone() const {
+	return new TreeSkelettonGenerator(*this);
 }
 
 void TreeSkelettonGenerator::setConstantInclination(double phi) {

@@ -12,10 +12,10 @@
 
 #include <irrlicht.h>
 
-#include "GroundManager.h"
 #include "DebugScreenNode.h"
 
 class Application;
+class RenderingModule;
 
 class MainView : public irr::IEventReceiver {
 public:
@@ -48,11 +48,12 @@ private:
     irr::scene::ICameraSceneNode *_camera;
 	DebugScreenNode * _debug;
 
-    std::unique_ptr<GroundManager> _ground;
+	std::vector<std::unique_ptr<RenderingModule>> _modules;
 
 	bool _fpsModeActive = true;
 
     void runInternal();
+	void recreateModules();
     void updateScene();
 };
 

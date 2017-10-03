@@ -1,14 +1,16 @@
 #pragma once
 
+#include "worldapidef.h"
+
 #include <random>
 #include <time.h>
 
-#include "worldapidef.h"
+#include "ICloneable.h"
 
 //FONCTIONS-PARAMETRES
 
 template <typename I, typename T>
-class Parameter {
+class Parameter : public ICloneable<Parameter<I, T>> {
 public:
 	virtual T operator()(const I & in) = 0;
 	virtual Parameter<I, T> * clone() const = 0;

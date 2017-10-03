@@ -2,25 +2,26 @@
 
 #include <worldapi/worldapidef.h>
 
+#include "../ICloneable.h"
 #include "../maths/Bezier.h"
-
 #include "TreeSkeletton.h"
 #include "Tree.h"
 
-#define DEFAULT_SEGMENT_COUNT 48
+#define DEFAULT_SEGMENT_COUNT 12
 #define DEFAULT_MERGE_SIZE 0.04
 #define DEFAULT_FACE_SIZE 0.1
-#define DEFAULT_MERGE_RES 8
+#define DEFAULT_MERGE_RES 6
 
 using maths::BezierCurve;
 
-class WORLDAPI_EXPORT TreeGenerator {
+class WORLDAPI_EXPORT TreeGenerator : public ICloneable<TreeGenerator> {
 public:
 	TreeGenerator();
 	~TreeGenerator();
 
-	Tree * generate(const TreeSkeletton & skeletton) const;
+	TreeGenerator * clone() const override;
 
+	Tree * generate(const TreeSkeletton & skeletton) const;
 private :
 	void fillBezier(Mesh &trunkMesh, const BezierCurve & bezier, int divisionCount,
 		double startWeight, double endWeight, int mergePos) const;

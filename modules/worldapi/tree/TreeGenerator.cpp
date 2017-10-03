@@ -18,6 +18,10 @@ TreeGenerator::~TreeGenerator() {
 
 }
 
+TreeGenerator* TreeGenerator::clone() const {
+	return new TreeGenerator(*this);
+}
+
 Tree * TreeGenerator::generate(const TreeSkeletton & skeletton) const {
 	Tree * tree = new Tree();
 

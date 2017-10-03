@@ -2,14 +2,17 @@
 
 #include <worldapi/worldapidef.h>
 
+#include "../ICloneable.h"
 #include "TreeSkelettonParameters.h"
 #include "TreeSkeletton.h"
 
-
-class WORLDAPI_EXPORT TreeSkelettonGenerator {
+class WORLDAPI_EXPORT TreeSkelettonGenerator : public ICloneable<TreeSkelettonGenerator> {
 public:
 	TreeSkelettonGenerator();
+	TreeSkelettonGenerator(const TreeSkelettonGenerator & other);
 	virtual ~TreeSkelettonGenerator();
+
+	TreeSkelettonGenerator* clone() const override;
 
 	template <class F> void setSeedLocation(const F & seedLocFunc) {
 		_seedLocation = std::make_unique<F>(seedLocFunc);

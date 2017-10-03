@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from __future__ import absolute_import
 
 WORLD_LOCATION = "d:\\Utilisateurs\\Louis\\Documents\\Louis JEAN\\programmation\\Python\\world"

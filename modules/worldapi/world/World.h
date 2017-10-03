@@ -22,10 +22,6 @@ typedef IChunkDecorator<World> IWorldChunkDecorator;
 
 class PrivateWorld;
 
-enum AccessFlag {
-	MissingChunk
-};
-
 class WORLDAPI_EXPORT World {
 public:
 	World();
@@ -57,6 +53,7 @@ protected:
 
 	void iterateChunkPosInSight(const IPointOfView & from, const LODData & data, const std::function<void(const ChunkPosition&)> & action) const;
 
+	virtual void callExpanders(const IPointOfView & from);
 	virtual void generateChunk(Chunk & chunk);
 
 private:

@@ -74,10 +74,14 @@ ChunkPosition World::getChunkPosition(const ObjectPosition & position) {
 		position.getMaxLOD());
 }
 
-void World::expand(const IPointOfView & from) {
+void World::callExpanders(const IPointOfView & from) {
 	for (auto & expander : _internal->_expanders) {
 		expander->expand(*this, from);
 	}
+}
+
+void World::expand(const IPointOfView & from) {
+	callExpanders(from);
 
 	LODData & lodData = getOrCreateLODData(1);
 
@@ -119,7 +123,7 @@ LODData & World::getOrCreateLODData(int lod) {
 	auto lodData = _internal->_lodData.find(lod);
 
 	if (lodData == _internal->_lodData.end()) {
-		return *(_internal->_lodData[lod] = std::make_unique<LODData>(vec3d(1000, 1000, 1000)));
+		return *(_internal->_lodData[lod] = std::make_unique<LODData>(vec3d(4000, 4000, 1000)));
 	}
 	else {
 		return *(*lodData).second;
