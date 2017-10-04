@@ -15,7 +15,6 @@ class ChunkNodeHandler;
 
 class ObjectNodeHandler {
 public:
-	ObjectNodeHandler() {};
 	ObjectNodeHandler(ChunkNodeHandler * parent, const Object3D & object);
 	virtual ~ObjectNodeHandler();
 
@@ -27,7 +26,6 @@ private:
 
 class ChunkNodeHandler {
 public:
-	ChunkNodeHandler() {};
 	ChunkNodeHandler(ObjectsManager * manager);
 	virtual ~ChunkNodeHandler();
 
@@ -38,7 +36,7 @@ public:
 
 	ObjectsManager * _objectsManager;
 private:
-	std::map<irr::s64, ObjectNodeHandler> _objects;
+	std::map<irr::s64, std::unique_ptr<ObjectNodeHandler>> _objects;
 };
 
 class ObjectsManager : public RenderingModule {
@@ -51,7 +49,7 @@ public:
 
 	static irr::scene::SMesh * convertToIrrlichtMesh(const Mesh & mesh, irr::video::IVideoDriver * driver);
 private:
-	std::map<maths::vec2i, ChunkNodeHandler> _chunks;
+	std::map<maths::vec2i, std::unique_ptr<ChunkNodeHandler>> _chunks;
 
 	ChunkNodeHandler & getOrCreateNode(const maths::vec2i & pos);
 };

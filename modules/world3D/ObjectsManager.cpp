@@ -21,7 +21,7 @@ ObjectNodeHandler::ObjectNodeHandler(ChunkNodeHandler * parent, const Object3D &
 ObjectNodeHandler::~ObjectNodeHandler() {
 	// TODO produit une segfault si le scenemanager est déjà supprimé (fermeture de l'application)
 	// ==> RESOUDRE
-	//_parent->sceneManager()->addToDeletionQueue(_meshNode);
+	_meshNode->remove();
 }
 
 void ObjectNodeHandler::updateObject3D(const Object3D & object) {
@@ -66,7 +66,7 @@ ChunkNodeHandler::~ChunkNodeHandler() {
 }
 
 void ChunkNodeHandler::updateObject(const Object3D & object) {
-	_objects[_objects.size()] = ObjectNodeHandler(this, object);
+	_objects[_objects.size()] = std::move(std::make_unique<ObjectNodeHandler>(this, object));
 }
 
 void ChunkNodeHandler::clearObjects() {
@@ -114,10 +114,10 @@ ChunkNodeHandler & ObjectsManager::getOrCreateNode(const maths::vec2i & pos) {
 	auto occ = _chunks.find(pos);
 
 	if (occ != _chunks.end()) {
-		return occ->second;
+		return *occ->second;
 	}
 	else {
-		return _chunks[pos] = ChunkNodeHandler(this);
+		return *(_chunks[pos] = std::move(std::make_unique<ChunkNodeHandler>(this)));
 	}
 }
 
