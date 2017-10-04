@@ -9,7 +9,7 @@
 #include "../tree/TreeGenerator.h"
 #include "../tree/TreeSkelettonGenerator.h"
 
-class WORLDAPI_EXPORT SimpleTreeDecorator : public IFlatWorldChunkDecorator, public FlatWorldGenNode {
+class WORLDAPI_EXPORT SimpleTreeDecorator : public IFlatWorldChunkDecorator {
 public:
 	SimpleTreeDecorator(int maxTreesPerChunk = 1);
 	SimpleTreeDecorator(const SimpleTreeDecorator & other);
@@ -18,7 +18,6 @@ public:
 	void setTreeSkelettonGenerator(TreeSkelettonGenerator * generator);
 	void setTreeGenerator(TreeGenerator * generator);
 
-	void generate(FlatWorld & world) override;
 	virtual void decorate(FlatWorld & world, Chunk & chunk);
 
 private:

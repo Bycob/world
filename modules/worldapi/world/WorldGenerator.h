@@ -29,11 +29,6 @@ class PrivateWorldGenerator;
 
 class WORLDAPI_EXPORT WorldGenerator {
 public:
-    /** Crée un générateur fonctionnel permettant de créer un monde
-     * relativement complet sans configuration supplémentaire.
-     * Le générateur est lui-même généré aléatoirement (Cette fonctionnalité
-     * n'est pas encore implémentée)*/
-    static WorldGenerator * createDefaultGenerator();
 
     WorldGenerator();
     virtual ~WorldGenerator();

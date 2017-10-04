@@ -24,6 +24,10 @@ class PrivateWorld;
 
 class WORLDAPI_EXPORT World {
 public:
+	/** Crée un monde complet qui peut être utilisé pour appréhender les capacité
+	de la bibliothèque 'World'. */
+	static World * createDemoWorld();
+
 	World();
 	World(const World & world) = delete;
 	virtual ~World();

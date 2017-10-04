@@ -17,6 +17,7 @@ FlatWorld::~FlatWorld() {
 }
 
 void FlatWorld::addFlatWorldExpander(IFlatWorldExpander * expander) {
+	expander->onAddExpander(*this);
 	_internal->_expanders.emplace_back(expander);
 }
 

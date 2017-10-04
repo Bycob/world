@@ -9,6 +9,7 @@ class IExpander {
 public:
 	virtual ~IExpander() = default;
 
+	virtual void onAddExpander(T & object) {}
 	virtual void expand(T & object, const IPointOfView & from) = 0;
 };
 

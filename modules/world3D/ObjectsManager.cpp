@@ -21,6 +21,7 @@ ObjectNodeHandler::ObjectNodeHandler(ChunkNodeHandler * parent, const Object3D &
 ObjectNodeHandler::~ObjectNodeHandler() {
 	// TODO produit une segfault si le scenemanager est déjà supprimé (fermeture de l'application)
 	// ==> RESOUDRE
+	//_parent->sceneManager()->addToDeletionQueue(_meshNode);
 }
 
 void ObjectNodeHandler::updateObject3D(const Object3D & object) {
@@ -36,7 +37,18 @@ void ObjectNodeHandler::updateObject3D(const Object3D & object) {
 	_meshNode->setPosition(toIrrlicht(object.getPosition()));
 	_meshNode->setScale(toIrrlicht(object.getScale()));
 
-	_meshNode->setMaterialFlag(video::EMF_BACK_FACE_CULLING, false);
+	// Materiau
+	_meshNode->setMaterialFlag(EMF_LIGHTING, true);
+	
+	SMaterial & material = _meshNode->getMaterial(0);
+	material.Lighting = true;
+	material.NormalizeNormals = true;
+	material.BackfaceCulling = false;
+	material.ColorMaterial = ECM_NONE;
+
+	material.AmbientColor.set(255, 0, 0, 0);
+	material.SpecularColor.set(255, 255, 255, 255);
+	material.DiffuseColor.set(255, 200, 178, 126);
 
 	irrMesh->drop();
 }

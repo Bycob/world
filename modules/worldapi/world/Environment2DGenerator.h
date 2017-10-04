@@ -6,7 +6,7 @@
 #include "FlatWorldGenerator.h"
 #include "../terrain/TerrainGenerator.h"
 
-class WORLDAPI_EXPORT Environment2DGenerator : public FlatWorldGenNode, IFlatWorldExpander {
+class WORLDAPI_EXPORT Environment2DGenerator : public FlatWorldGenNode, public IFlatWorldExpander {
 public:
 	Environment2DGenerator();
 	Environment2DGenerator(TerrainGenerator * terrainGenerator, MapGenerator * mapGenerator);
@@ -17,6 +17,7 @@ public:
 	void setMapGenerator(MapGenerator * generator);
 
 	virtual void generate(FlatWorld & world);
+	virtual void onAddExpander(FlatWorld & world);
 	virtual void expand(FlatWorld & world, const IPointOfView & from);
 private:
 	static const Environment2DMetadata DEFAULT_METADATA;

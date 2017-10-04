@@ -38,6 +38,10 @@ void Environment2DGenerator::setMapGenerator(MapGenerator * generator) {
 }
 
 void Environment2DGenerator::generate(FlatWorld & world) {
+	world.addFlatWorldExpander(new Environment2DGenerator(*this));
+}
+
+void Environment2DGenerator::onAddExpander(FlatWorld & world) {
 	Environment2D & env = world.environment();
 	env._metadata = _metadata;
 
@@ -46,8 +50,6 @@ void Environment2DGenerator::generate(FlatWorld & world) {
 	}
 
 	env.setGround(new Ground());
-
-	world.addFlatWorldExpander(new Environment2DGenerator(*this));
 }
 
 void Environment2DGenerator::expand(FlatWorld & world, const IPointOfView  & from) {

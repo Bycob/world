@@ -2,7 +2,10 @@
 
 #include <map>
 
+#include "FlatWorld.h"
 #include "WorldGenerator.h"
+#include "SimpleTreeDecorator.h"
+#include "Environment2DGenerator.h"
 #include "Chunk.h"
 #include "LODData.h"
 
@@ -18,6 +21,17 @@ public:
 	std::vector<std::unique_ptr<IWorldExpander>> _expanders;
 	std::vector<std::unique_ptr<IWorldChunkDecorator>> _chunkDecorators;
 };
+
+
+
+World * World::createDemoWorld() {
+	FlatWorld * world = new FlatWorld();
+
+	world->addFlatWorldExpander(new Environment2DGenerator());
+	world->addFlatWorldChunkDecorator(new SimpleTreeDecorator());
+
+	return world;
+}
 
 
 World::World() : _internal(new PrivateWorld()), _directory() {
@@ -46,6 +60,7 @@ void World::addObject(WorldObject * object) {
 }
 
 void World::addExpander(IWorldExpander * expander) {
+	expander->onAddExpander(*this);
 	_internal->_expanders.emplace_back(expander);
 }
 

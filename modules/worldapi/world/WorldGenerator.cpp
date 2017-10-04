@@ -5,8 +5,6 @@
 #include "WorldGenerator.h"
 
 #include "FlatWorldGenerator.h"
-#include "SimpleTreeDecorator.h"
-#include "Environment2DGenerator.h"
 #include "MapGenerator.h"
 #include "../maths/MathsHelper.h"
 
@@ -17,15 +15,6 @@ public:
 	std::vector<std::unique_ptr<WorldGenNode>> _nodes;
 };
 
-
-WorldGenerator* WorldGenerator::createDefaultGenerator() {
-	FlatWorldGenerator * result = new FlatWorldGenerator();
-
-	result->addPrimaryNode(new Environment2DGenerator());
-	result->addPrimaryNode(new SimpleTreeDecorator());
-
-    return result;
-}
 
 WorldGenerator::WorldGenerator()
         : _internal(new PrivateWorldGenerator()) {

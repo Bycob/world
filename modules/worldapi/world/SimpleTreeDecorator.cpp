@@ -34,10 +34,6 @@ void SimpleTreeDecorator::setTreeGenerator(TreeGenerator * generator) {
 	_treeGenerator = std::unique_ptr<TreeGenerator>(generator);
 }
 
-void SimpleTreeDecorator::generate(FlatWorld &world) {
-	world.addFlatWorldChunkDecorator(new SimpleTreeDecorator(*this));
-}
-
 void SimpleTreeDecorator::decorate(FlatWorld & world, Chunk & chunk) {
 	if (chunk.getChunkPosition().getPosition3D().z != 0) return;
 

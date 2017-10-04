@@ -88,8 +88,6 @@ PointOfView Application::getUserPointOfView() const {
 }
 
 void Application::loadWorld(int argc, char **argv) {
-	std::unique_ptr<WorldGenerator> generator(WorldGenerator::createDefaultGenerator());
-
     _world = std::unique_ptr<SynchronizedWorld>(
-		SynchronizedWorld::createFromWorld(generator->generate()));
+		SynchronizedWorld::createFromWorld(World::createDemoWorld()));
 }
