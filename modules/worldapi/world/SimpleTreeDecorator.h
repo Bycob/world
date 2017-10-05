@@ -11,7 +11,7 @@
 
 class WORLDAPI_EXPORT SimpleTreeDecorator : public IFlatWorldChunkDecorator {
 public:
-	SimpleTreeDecorator(int maxTreesPerChunk = 1);
+	SimpleTreeDecorator(int maxTreesPerChunk = 3);
 	SimpleTreeDecorator(const SimpleTreeDecorator & other);
 	virtual ~SimpleTreeDecorator();
 

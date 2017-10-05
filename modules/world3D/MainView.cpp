@@ -83,7 +83,7 @@ void MainView::runInternal() {
     _driver = _device->getVideoDriver();
 
     // Initialisation des différents modules de rendu
-    _camera = _scenemanager->addCameraSceneNodeFPS(0, 100.0f, 5.0f);
+    _camera = _scenemanager->addCameraSceneNodeFPS(0, 100.0f, .1f);
 	_camera->setFOV(1.57);
     _camera->setFarValue(40000);
     _camera->setPosition(vector3df(0, 1200, 500));

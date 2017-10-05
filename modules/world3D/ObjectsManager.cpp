@@ -19,8 +19,6 @@ ObjectNodeHandler::ObjectNodeHandler(ChunkNodeHandler * parent, const Object3D &
 }
 
 ObjectNodeHandler::~ObjectNodeHandler() {
-	// TODO produit une segfault si le scenemanager est déjà supprimé (fermeture de l'application)
-	// ==> RESOUDRE
 	_meshNode->remove();
 }
 
@@ -170,7 +168,7 @@ SMesh * ObjectsManager::convertToIrrlichtMesh(const Mesh & mesh, IVideoDriver * 
 			int normID = face.getID<VType::NORMAL>(i);
 
 			S3DVertex& v = buffer->Vertices[primitiveCount];
-			v.Pos = toIrrlicht(positions[posID].toVec3() * 100); // TODO check if posID == -1;
+			v.Pos = toIrrlicht(positions[posID].toVec3() * 2); // TODO check if posID == -1;
 			
 			if (texID != -1)
 				v.TCoords = toIrrlicht(positions[texID].toVec2());

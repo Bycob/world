@@ -24,8 +24,8 @@ class PrivateWorld;
 
 class WORLDAPI_EXPORT World {
 public:
-	/** Crée un monde complet qui peut être utilisé pour appréhender les capacité
-	de la bibliothèque 'World'. */
+	/** Crée un monde complet qui peut être utilisé pour appréhender 
+	les capacité de la bibliothèque 'World'. */
 	static World * createDemoWorld();
 
 	World();
@@ -37,7 +37,9 @@ public:
 
 	void addObject(WorldObject * object);
 
-	bool isChunkGenerated(const ChunkPosition & position);
+	bool isChunkGenerated(const ChunkPosition & position) const;
+	int getChunkCount() const;
+	int getChunkCount(int lod) const;
 	Chunk & getChunk(const ChunkPosition & position) const;
 	ChunkPosition getChunkPosition(const ObjectPosition & position);
 

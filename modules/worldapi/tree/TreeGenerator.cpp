@@ -10,7 +10,8 @@
 
 using maths::vec3d;
 
-TreeGenerator::TreeGenerator() {
+TreeGenerator::TreeGenerator(int segmentCount, float faceSize, float mergeSize, int mergeRes) :
+	_segmentCount(segmentCount), _faceSize(faceSize), _mergeSize(mergeSize), _mergeRes(mergeRes) {
 
 }
 

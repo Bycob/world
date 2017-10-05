@@ -43,10 +43,6 @@ World::~World() {
 }
 
 void World::setLODData(int lod, const LODData & data) {
-	if (_internal->_lodData.find(lod) != _internal->_lodData.end()) {
-		throw std::runtime_error("this lod data already exists and can not be modified");
-	}
-
 	_internal->_lodData[lod] = std::make_unique<LODData>(data);
 }
 
@@ -68,9 +64,17 @@ void World::addChunkDecorator(IWorldChunkDecorator * decorator) {
 	_internal->_chunkDecorators.emplace_back(decorator);
 }
 
-bool World::isChunkGenerated(const ChunkPosition & position) {
+bool World::isChunkGenerated(const ChunkPosition & position) const {
 	auto & chunks = _internal->_chunks;
 	return chunks.find(position) != chunks.end();
+}
+
+int World::getChunkCount() const {
+	return _internal->_chunks.size();
+}
+
+int World::getChunkCount(int lod) const {
+	return getChunkCount(); // TODO modifier
 }
 
 Chunk & World::getChunk(const ChunkPosition & position) const {

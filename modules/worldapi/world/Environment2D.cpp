@@ -1,6 +1,8 @@
 #include "Environment2D.h"
 
-Environment2D::Environment2D() {
+Environment2D::Environment2D() :
+	_ground(std::make_unique<Ground>()),
+	_map(std::make_unique<Map>()) {
 
 }
 

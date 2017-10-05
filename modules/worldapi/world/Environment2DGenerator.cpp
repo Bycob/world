@@ -42,6 +42,14 @@ void Environment2DGenerator::generate(FlatWorld & world) {
 }
 
 void Environment2DGenerator::onAddExpander(FlatWorld & world) {
+	if (world.getChunkCount(1) == 0)
+		world.setLODData(1, LODData({
+			_metadata.unitsPerTerrain,
+			_metadata.unitsPerTerrain,
+			_metadata.unitsPerTerrain
+		}));
+
+	// Setup environment
 	Environment2D & env = world.environment();
 	env._metadata = _metadata;
 

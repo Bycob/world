@@ -9,7 +9,7 @@ using namespace maths;
 SimpleTreeDecorator::SimpleTreeDecorator(int maxTreesPerChunk) 
 	: _rng(time(NULL)), _maxTreesPerChunk(maxTreesPerChunk),
 	  _skelettonGenerator(std::make_unique<TreeSkelettonGenerator>()),
-	  _treeGenerator(std::make_unique<TreeGenerator>()) {
+	  _treeGenerator(std::make_unique<TreeGenerator>(12, 0.25, 0.2, 4)) {
 
 	_skelettonGenerator->setConstantMaxForkingLevel(2);
 	_skelettonGenerator->setConstantForkingCount(3);

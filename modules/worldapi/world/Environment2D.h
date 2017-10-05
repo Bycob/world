@@ -9,12 +9,12 @@
 
 class PrivateEnvironment2D;
 
-struct Environment2DMetadata {
+struct WORLDAPI_EXPORT Environment2DMetadata {
 	float unitsPerMapPixel;
 	float unitsPerTerrain;
 };
 
-class Environment2D {
+class WORLDAPI_EXPORT Environment2D {
 public:
 	Environment2D();
 	virtual ~Environment2D();
