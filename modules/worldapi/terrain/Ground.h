@@ -11,16 +11,12 @@
 #include <utility>
 #include <functional>
 
-#include "../world/IPointOfView.h"
 #include "Terrain.h"
+#include "../world/Chunk.h"
+#include "../world/MapGenerator.h"
 
+class FlatWorld;
 class GroundCache;
-
-struct TerrainTile {
-	Terrain * _terrain;
-	int _x;
-	int _y;
-};
 
 /** Cette classe gère le sol du monde. Le sol est composé de plusieurs
 terrains carrés accolés les uns aux autres. Les caractéristiques de ces
@@ -50,34 +46,39 @@ public:
 	@returns true si le terrain existe, false s'il doit être généré.*/
 	bool isTerrainGenerated(int x, int y, int lvl = 0) const;
 	/** Donne le terrain d'indice (x, y). */
-	const Terrain & getTerrain(int x, int y) const;
+	const Terrain & getTerrain(int x, int y, int lvl = 0) const;
 
 	std::string getTerrainDataId(int x, int y, int lvl) const;
 
 	const Terrain & getTerrainAt(double x, double y, int lvl = 0) const;
 	double getAltitudeAt(double x, double y, int lvl = 0) const;
 
-	const std::vector<TerrainTile> getTerrainsFrom(const IPointOfView & pointOfView) const;
-
-	void iterateTerrainPos(const IPointOfView & from, const std::function<void(int, int)> & action) const;
 private:
 	// Paramètres
 	/** L'altitude maximum du monde. Le niveau de la mer est fixé à 0. */
-	float _maxAltitude;
+	double _maxAltitude;
 	/** L'altitude minimum du monde. Le niveau de la mer est fixé à 0. */
-	float _minAltitude;
+	double _minAltitude;
 	/** La taille d'un terrain de niveau 0 utilisé pour paver la Map. Normalement,
 	cette taille est la même que celle d'un pixel de la Map. */
-	float _unitSize;
+	double _unitSize;
+    int _factor = 4;
+
+    // Generator
+    std::unique_ptr<ReliefMapGenerator> _mapGenerator;
+    std::unique_ptr<TerrainGenerator> _terrainGenerator;
 
 	// Données
 	int _cacheSize;
 	mutable GroundCache * _cache;
 
-	std::map<maths::vec2i, std::unique_ptr<Terrain>> & terrains() const;
-	Terrain & terrain(int x, int y);
+	std::map<maths::vec3i, std::unique_ptr<Terrain>> & terrains() const;
+	Terrain & terrain(int x, int y, int lvl = 0);
 
-	friend class Environment2DGenerator; // TODO temporaire, trouver une solution plus propre
+    double getTerrainSize(int level) const;
+    void generateChunk(FlatWorld &world, Chunk &chunk);
+    void generateTerrain(int x, int y, int lvl);
+    void applyMap(int x, int y, int lvl, bool unapply);
 };
 
 

@@ -6,20 +6,20 @@
 #include <memory>
 
 #include <worldapi/maths/MathsHelper.h>
-#include "WorldObject.h"
-#include "../Scene.h"
 
-class WORLDAPI_EXPORT ChunkPosition {
+class WorldObject;
+
+class WORLDAPI_EXPORT ChunkID {
 public:
-	ChunkPosition(int x = 0, int y = 0, int z = 0, int lod = 0);
-	ChunkPosition(const maths::vec3i & pos, int lod = 0);
-	ChunkPosition(const ChunkPosition & other);
-	~ChunkPosition();
+	ChunkID(int x = 0, int y = 0, int z = 0, int lod = 0);
+	ChunkID(const maths::vec3i & pos, int lod = 0);
+	ChunkID(const ChunkID & other);
+	~ChunkID();
 
 	const maths::vec3i & getPosition3D() const;
 	int getLOD() const { return _lod; }
 
-	bool operator<(const ChunkPosition & other) const;
+	bool operator<(const ChunkID & other) const;
 private:
 	maths::vec3i _pos;
 	int _lod;
@@ -29,11 +29,12 @@ class PrivateChunk;
 
 class WORLDAPI_EXPORT Chunk {
 public:
-	Chunk(const ChunkPosition & position, const maths::vec3d & size);
+	Chunk(const ChunkID & position, const maths::vec3d & size);
 	virtual ~Chunk();
 
-	const ChunkPosition & getChunkPosition() const { return _position; };
+	const ChunkID & getChunkPosition() const { return _position; }
 	const maths::vec3d & getSize() const { return _size; }
+    const maths::vec3d & getOffset() const { return _offset; }
 	
 	maths::vec3d toAbsolutePosition(const maths::vec3d & relative) const;
 	maths::vec3d toRelativePosition(const maths::vec3d & absolute) const;
@@ -45,10 +46,9 @@ public:
 		addObjectInternal(new T(args...));
 	}
 
-	void fillScene(Scene & scene);
-
 private:
-	ChunkPosition _position;
+	ChunkID _position;
+	maths::vec3d _offset;
 	maths::vec3d _size;
 
 	PrivateChunk * _internal;

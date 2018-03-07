@@ -6,6 +6,7 @@
 
 #include <memory>
 
+#include "TerrainManipulator.h"
 #include "TerrainGenerator.h"
 
 using namespace maths;
@@ -14,7 +15,9 @@ class GroundCache {
 public:
 	GroundCache() : _terrains() {}
 
-	std::map<vec2i, std::unique_ptr<Terrain>> _terrains;
+	std::map<vec2i, std::unique_ptr<Terrain>> _heightMap;
+	std::map<vec2i, std::unique_ptr<Terrain>> _heightDiffMap;
+	std::map<vec3i, std::unique_ptr<Terrain>> _terrains;
 };
 
 Ground::Ground() :
@@ -28,15 +31,18 @@ Ground::~Ground() {
 }
 
 bool Ground::isTerrainGenerated(int x, int y, int lvl) const {
-	if (terrains().find({ x, y }) != terrains().end()) {
-		return true;
-	}
-
-	return false;
+	return terrains().find({ x, y, lvl}) != terrains().end();
 }
 
-const Terrain & Ground::getTerrain(int x, int y) const {
+const Terrain & Ground::getTerrain(int x, int y, int lvl) const {
 	return const_cast<Ground*>(this)->terrain(x, y);
+}
+
+const Terrain & Ground::getTerrainAt(double x, double y, int lvl) const {
+    int xi = (int) floor(x / _unitSize);
+    int yi = (int) floor(y / _unitSize);
+
+    return const_cast<Ground*>(this)->terrain(xi, yi);
 }
 
 std::string Ground::getTerrainDataId(int x, int y, int lvl) const {
@@ -46,25 +52,18 @@ std::string Ground::getTerrainDataId(int x, int y, int lvl) const {
 	return std::to_string(id);
 }
 
-std::map<vec2i, std::unique_ptr<Terrain>>& Ground::terrains() const {
+std::map<vec3i, std::unique_ptr<Terrain>>& Ground::terrains() const {
 	return _cache->_terrains;
 }
 
-Terrain & Ground::terrain(int x, int y) {
-	auto terrain = _cache->_terrains.find({ x, y });
+Terrain & Ground::terrain(int x, int y, int lvl) {
+	auto terrain = _cache->_terrains.find({ x, y, lvl});
 	
 	if (terrain != _cache->_terrains.end()) {
 		return *(*terrain).second;
 	}
 
 	throw std::runtime_error("Le terrain à l'emplacement (" + std::to_string(x) + ", " + std::to_string(y) + ") n'est pas généré.");
-}
-
-const Terrain & Ground::getTerrainAt(double x, double y, int lvl) const {
-	int xi = (int) floor(x / _unitSize);
-	int yi = (int) floor(y / _unitSize);
-
-	return const_cast<Ground*>(this)->terrain(xi, yi);
 }
 
 double Ground::getAltitudeAt(double x, double y, int lvl) const {
@@ -79,41 +78,85 @@ double Ground::getAltitudeAt(double x, double y, int lvl) const {
 	return _minAltitude + (_maxAltitude - _minAltitude) * terrain.getZInterpolated(x / _unitSize - xi, y / _unitSize - yi);
 }
 
-const std::vector<TerrainTile> Ground::getTerrainsFrom(const IPointOfView & from) const {
-	std::vector<TerrainTile> result;
-
-	iterateTerrainPos(from, [&] (int x, int y) {
-		if (isTerrainGenerated(x, y)) {
-			result.push_back({ &const_cast<Ground*>(this)->terrain(x, y), x, y });
-		}
-	});
-
-	return result;
+double Ground::getTerrainSize(int lvl) const {
+    return _unitSize * pow(2, - lvl); // TODO utiliser exponentiation rapide
 }
 
-void Ground::iterateTerrainPos(const IPointOfView & from, const std::function<void(int, int)>& action) const {
-	vec3d location = from.getPosition();
-	float distance = from.getHorizonDistance();
+void Ground::generateChunk(FlatWorld &world, Chunk &chunk) {
+    // Calculate lvl for the given chunk
+    int lvl = 0;
 
-	float tdist = distance / _unitSize;
-	float tdist2 = tdist * tdist;
-	int centerX = (int)round(location.x / _unitSize);
-	int centerY = (int)round(location.y / _unitSize);
+    // Find terrains to generate
+    double terrainSize = getTerrainSize(lvl);
+    vec3d lower = chunk.getOffset() / terrainSize;
+    vec3d upper = lower + chunk.getSize() / terrainSize;
 
-	int tx1 = (int)round((location.x - distance) / _unitSize);
-	int ty1 = (int)round((location.y - distance) / _unitSize);
-	int tx2 = (int)round((location.x + distance) / _unitSize);
-	int ty2 = (int)round((location.y + distance) / _unitSize);
+    for (int x = (int) floor(lower.x) ; x < ceil(upper.x) ; x++) {
+        for (int y = (int) floor(lower.y) ; y < ceil(upper.y) ; y++) {
+            if (!isTerrainGenerated(x, y, lvl)) {
+                generateTerrain(x, y, lvl);
+            }
+        }
+    }
+}
 
-	for (int x = tx1; x <= tx2; x++) {
-		for (int y = ty1; y <= ty2; y++) {
-			int dx = x - centerX;
-			int dy = y - centerY;
+void Ground::generateTerrain(int x, int y, int lvl) {
+    // Terrain creation
+    _cache->_terrains[{x, y, lvl}] = std::unique_ptr<Terrain>(_terrainGenerator->generate());
 
-			if (dx * dx + dy * dy <= tdist2) {
-				action(x, y);
-			}
-		}
-	}
+    // Join
+    // TODO
 
+    // Generation of the height and heightDiff (TODO move to generator metadata)
+
+}
+
+void Ground::applyMap(int x, int y, int lvl, bool unapply) {
+    /*const double offsetCoef = 0.5;
+    const double diffCoef = 1 - offsetCoef;
+
+    const double ratio = _metadata.unitsPerTerrain / _metadata.unitsPerMapPixel;
+
+    Terrain & terrain = *tile._terrain;
+    int tX = tile._x;
+    int tY = tile._y;
+    //std::cout << (unapply ? "unapply " : "apply ") << "to" << tX << ", " << tY << std::endl;
+
+    std::unique_ptr<ITerrainManipulator> manipulator(ITerrainManipulator::createManipulator());
+
+    int mapOx = map.getSizeX() / 2;
+    int mapOy = map.getSizeY() / 2;
+
+    uint32_t size = terrain.getSize();
+    arma::mat bufferOffset(size, size);
+    arma::mat bufferDiff(size, size);
+
+    for (uint32_t x = 0; x < size; x++) {
+        for (uint32_t y = 0; y < size; y++) {
+            double mapX = mapOx + (tX + (double)x / size) * ratio;
+            double mapY = mapOy + (tY + (double)y / size) * ratio;
+            auto data = map.getReliefAt(mapX, mapY);
+
+            double offset = offsetCoef * data.first;
+            double diff = data.second * diffCoef;
+
+            if (unapply) {
+                bufferOffset(x, y) = -offset;
+                bufferDiff(x, y) = diff > std::numeric_limits<double>::epsilon() ? 1 / diff : 0;
+            }
+            else {
+                bufferOffset(x, y) = offset;
+                bufferDiff(x, y) = diff;
+            }
+        }
+    }
+
+    if (unapply) {
+        manipulator->applyOffset(terrain, bufferOffset);
+        manipulator->multiply(terrain, bufferDiff);
+    }
+    else {
+        manipulator->multiply(terrain, bufferDiff);
+        manipulator->applyOffset(terrain, bufferOffset);
+    }*/
 }

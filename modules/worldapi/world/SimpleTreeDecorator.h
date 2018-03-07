@@ -5,13 +5,12 @@
 #include <random>
 
 #include "FlatWorld.h"
-#include "FlatWorldGenerator.h"
 #include "../tree/TreeGenerator.h"
 #include "../tree/TreeSkelettonGenerator.h"
 
-class WORLDAPI_EXPORT SimpleTreeDecorator : public IFlatWorldChunkDecorator {
+class WORLDAPI_EXPORT SimpleTreeDecorator : public IFlatWorldDecorator {
 public:
-	SimpleTreeDecorator(int maxTreesPerChunk = 3);
+	SimpleTreeDecorator(int maxTreesPerChunk = 1);
 	SimpleTreeDecorator(const SimpleTreeDecorator & other);
 	virtual ~SimpleTreeDecorator();
 

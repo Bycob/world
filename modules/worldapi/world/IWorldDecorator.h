@@ -5,9 +5,9 @@
 class Chunk;
 
 template <typename T> 
-class IChunkDecorator {
+class IWorldDecorator {
 public:
-	virtual ~IChunkDecorator() = default;
+	virtual ~IWorldDecorator() = default;
 
 	virtual void decorate(T & world, Chunk & chunk) = 0;
 };

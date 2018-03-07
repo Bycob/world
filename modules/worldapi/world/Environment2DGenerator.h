@@ -3,10 +3,10 @@
 #include <worldapi/worldapidef.h>
 
 #include "MapGenerator.h"
-#include "FlatWorldGenerator.h"
+#include "FlatWorld.h"
 #include "../terrain/TerrainGenerator.h"
 
-class WORLDAPI_EXPORT Environment2DGenerator : public FlatWorldGenNode, public IFlatWorldExpander {
+class WORLDAPI_EXPORT Environment2DGenerator : public IFlatWorldExpander {
 public:
 	Environment2DGenerator();
 	Environment2DGenerator(TerrainGenerator * terrainGenerator, MapGenerator * mapGenerator);
@@ -16,7 +16,6 @@ public:
 	void setTerrainGenerator(TerrainGenerator * generator);
 	void setMapGenerator(MapGenerator * generator);
 
-	virtual void generate(FlatWorld & world);
 	virtual void onAddExpander(FlatWorld & world);
 	virtual void expand(FlatWorld & world, const IPointOfView & from);
 private:
@@ -29,4 +28,3 @@ private:
 
 	void applyMap(TerrainTile & tile, const Map & map, bool unapply = false);
 };
-

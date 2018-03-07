@@ -6,6 +6,7 @@
 
 class WORLDAPI_EXPORT LODData {
 public:
+	LODData();
 	LODData(const maths::vec3d & chunkSize);
 	LODData(const LODData & other);
 	virtual ~LODData();

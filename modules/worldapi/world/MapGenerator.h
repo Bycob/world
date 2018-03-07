@@ -6,51 +6,32 @@
 #include <random>
 #include <memory>
 
-#include "Map.h"
-#include "WorldGenerator.h"
+#include "../terrain/Terrain.h"
 #include "WorldParameters.h"
 
-// MODULES (à déplacer ?)
-
-class MapGenerator;
-
-/** Classe de base des modules du générateur de cartes. */
-class WORLDAPI_EXPORT MapGeneratorModule {
-public:
-	MapGeneratorModule(MapGenerator * parent);
-	virtual ~MapGeneratorModule() = default;
-
-	virtual void generate(Map & map) const = 0;
-
-	virtual MapGeneratorModule * clone(MapGenerator * newParent) = 0;
-protected:
-	MapGenerator * _parent;
-
-	std::mt19937 & rng() const;
-	arma::cube & reliefMap(Map & map) const;
-};
 
 /** Classe de base des modules du générateur de cartes servant
 à générer la carte de relief. */
-class WORLDAPI_EXPORT ReliefMapGenerator : public MapGeneratorModule {
+class WORLDAPI_EXPORT ReliefMapGenerator {
 public:
-	ReliefMapGenerator(MapGenerator * parent);
+	ReliefMapGenerator();
 
-	virtual ReliefMapGenerator * clone(MapGenerator * newParent) override = 0;
+	virtual void generate(Terrain& height, Terrain& heightDiff) const = 0;
+protected:
+	mutable std::mt19937 _rng;
 };
 
 class WORLDAPI_EXPORT CustomWorldRMGenerator : public ReliefMapGenerator {
 public:
-	CustomWorldRMGenerator(MapGenerator * parent, float biomeDensity = 1, uint32_t limitBrightness = 4);
-	CustomWorldRMGenerator(const CustomWorldRMGenerator & other, MapGenerator * newParent);
+	CustomWorldRMGenerator(float biomeDensity = 1, uint32_t limitBrightness = 4);
+	CustomWorldRMGenerator(const CustomWorldRMGenerator & other);
 
 	void setBiomeDensity(float biomeDensity);
 	void setLimitBrightness(uint32_t);
 
 	void setDifferentialLaw(const relief::diff_law & law);
 
-	void generate(Map & map) const override;
-	CustomWorldRMGenerator * clone(MapGenerator * newParent) override;
+	void generate(Terrain& height, Terrain& heightDiff) const override;
 private:
 	// la largeur d'un carré unité.
 	static const float PIXEL_UNIT;
@@ -64,34 +45,3 @@ private:
 	de l'altitude. */
 	std::unique_ptr<relief::diff_law> _diffLaw;
 };
-
-
-// MapGenerator
-
-/** */
-class WORLDAPI_EXPORT MapGenerator {
-public:
-	MapGenerator(uint32_t sizeX, uint32_t sizeY);
-	MapGenerator(const MapGenerator& other);
-	~MapGenerator();
-
-	Map * generate();
-
-	template <class T, typename... Args>
-	T & createReliefMapGenerator(Args&&... args) {
-		T * reliefMap = new T(this, args...);
-		_reliefMap = std::unique_ptr<T>(reliefMap);
-		return *reliefMap;
-	}
-
-	MapGenerator * clone() const;
-private:
-	mutable std::mt19937 _rng;
-
-	uint32_t _sizeX, _sizeY;
-
-	std::unique_ptr<ReliefMapGenerator> _reliefMap;
-
-	friend class MapGeneratorModule;
-};
-

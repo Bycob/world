@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "../maths/MathsHelper.h"
+#include "../maths/BoundingBox.h"
 #include "../Mesh.h"
 #include "../Image.h"
 
@@ -39,6 +40,10 @@ public :
         return _array.n_rows;
     }
 
+	double& operator()(int x, int y) {
+		return _array(x, y);
+	}
+
 	/** Permet d'obtenir l'altitude au point (x, y), avec x et y les
 	coordonnées en pourcentage des dimensions totales du terrain.
 	x et y sont compris entre 0 et 1.
@@ -51,17 +56,12 @@ public :
 	// ------ IO
 
 	//Interfaçage avec les fichiers .obj
-	Mesh * convertToMesh(float sizeX = 1, float sizeY = 1, float sizeZ = 0.4) const;
-
-	Mesh * convertToMesh(float offsetX, float offsetY, float offsetZ, float sizeX, float sizeY, float sizeZ) const;
+    Mesh * convertToMesh();
+	Mesh * convertToMesh(double sizeX, double sizeY, double sizeZ) const;
+	Mesh * convertToMesh(double offsetX, double offsetY, double offsetZ, double sizeX, double sizeY, double sizeZ) const;
 	
 	//Méthodes pour la conversion du terrain en image.
 	img::Image convertToImage() const;
-	/** Ecrit en brut les données du terrain. */
-	void writeRawData(std::ostream & stream, float height = 1, float offset = 0) const;
-	/** Donne un tableau d'octets contenant la carte d'altitude brute de ce terrain. */
-	char * getRawData(int & rawDataSize, float height = 1, float offset = 0) const;
-	int getRawDataSize() const;
 
 	img::Image getTexture() const;
 
@@ -69,6 +69,7 @@ public :
 
 private :
 
+    maths::BoundingBox _bbox;
 	arma::Mat<double> _array;
 	std::unique_ptr<img::Image> _texture;
 

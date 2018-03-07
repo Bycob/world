@@ -19,13 +19,15 @@ using namespace arma;
 
 Terrain::Terrain(int size) : 
 	_array(size, size),
-	_texture(std::make_unique<Image>(1, 1, ImageType::RGB)) {
+	_texture(std::make_unique<Image>(1, 1, ImageType::RGB)),
+	_bbox({-0.5, -0.5, -0.0}, {0.5, 0.5, 0.4}) {
 
 }
 
 Terrain::Terrain(const Mat<double> & data) :
 	_array(data), 
-	_texture(nullptr) {
+	_texture(nullptr),
+	_bbox({-0.5, -0.5, -0.0}, {0.5, 0.5, 0.4}) {
 
 	if (data.n_rows != data.n_cols) {
 		throw std::runtime_error("Terrain must be squared !");
@@ -34,13 +36,15 @@ Terrain::Terrain(const Mat<double> & data) :
 
 Terrain::Terrain(const Terrain &terrain)
 		: _array(terrain._array),
-		  _texture(std::make_unique<Image>(*terrain._texture)) {
+		  _texture(std::make_unique<Image>(*terrain._texture)),
+		  _bbox(terrain._bbox){
 	
 }
 
 Terrain::Terrain(Terrain &&terrain)
 		: _array(std::move(terrain._array)),
-		  _texture(std::move(terrain._texture)) {
+		  _texture(std::move(terrain._texture)),
+		  _bbox(terrain._bbox){
 
 }
 
@@ -73,11 +77,17 @@ double Terrain::getZInterpolated(double x, double y) const {
 	return interpolateLinear(posY1, ip1, posY2, ip2, y);
 }
 
-Mesh * Terrain::convertToMesh(float sizeX, float sizeY, float sizeZ) const {
+Mesh * Terrain::convertToMesh() {
+	auto lower = _bbox.getLowerBound();
+	auto size = _bbox.getUpperBound() - lower;
+	return convertToMesh(lower.x, lower.y, lower.z, size.x, size.y, size.z);
+}
+
+Mesh * Terrain::convertToMesh(double sizeX, double sizeY, double sizeZ) const {
 	return convertToMesh(-sizeX / 2, -sizeY / 2, 0, sizeX, sizeY, sizeZ);
 }
 
-Mesh * Terrain::convertToMesh(float offsetX, float offsetY, float offsetZ, float sizeX, float sizeY, float sizeZ) const {
+Mesh * Terrain::convertToMesh(double offsetX, double offsetY, double offsetZ, double sizeX, double sizeY, double sizeZ) const {
 	Mesh * mesh = new Mesh();
 
 	// Réservation de mémoire
@@ -139,34 +149,6 @@ Mesh * Terrain::convertToMesh(float offsetX, float offsetY, float offsetZ, float
 
 Image Terrain::convertToImage() const {
 	return Image(this->_array);
-}
-
-void Terrain::writeRawData(std::ostream &stream, float height, float offset) const {
-	bin_ostream binstream(stream);
-
-	for (int x = 0 ; x < _array.n_rows ; x++) {
-		for (int y = 0 ; y < _array.n_cols ; y++) {
-			binstream << (float) _array(x, y) * height + offset;
-		}
-	}
-}
-
-char * Terrain::getRawData(int &rawDataSize, float height, float offset) const {
-	float * result = new float[_array.n_rows * _array.n_cols];
-
-	for (int x = 0 ; x < _array.n_rows ; x++) {
-		for (int y = 0 ; y < _array.n_cols ; y++) {
-			result[x * _array.n_cols + y] = (float) _array(x, y) * height + offset;
-		}
-	}
-
-	rawDataSize = getRawDataSize();
-
-	return (char*) result;
-}
-
-int Terrain::getRawDataSize() const {
-	return (int) (_array.n_rows * _array.n_cols) * sizeof(float) / sizeof(char);
 }
 
 Image Terrain::getTexture() const {

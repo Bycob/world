@@ -1,4 +1,4 @@
-#include "Environment2DGenerator.h"
+/*#include "Environment2DGenerator.h"
 
 #include "../terrain/TerrainManipulator.h"
 
@@ -35,29 +35,6 @@ void Environment2DGenerator::setTerrainGenerator(TerrainGenerator * generator) {
 
 void Environment2DGenerator::setMapGenerator(MapGenerator * generator) {
 	_mapGenerator = std::unique_ptr<MapGenerator>(generator);
-}
-
-void Environment2DGenerator::generate(FlatWorld & world) {
-	world.addFlatWorldExpander(new Environment2DGenerator(*this));
-}
-
-void Environment2DGenerator::onAddExpander(FlatWorld & world) {
-	if (world.getChunkCount(1) == 0)
-		world.setLODData(1, LODData({
-			_metadata.unitsPerTerrain,
-			_metadata.unitsPerTerrain,
-			_metadata.unitsPerTerrain
-		}));
-
-	// Setup environment
-	Environment2D & env = world.environment();
-	env._metadata = _metadata;
-
-	if (_mapGenerator != nullptr) {
-		env.setMap(_mapGenerator->generate());
-	}
-
-	env.setGround(new Ground());
 }
 
 void Environment2DGenerator::expand(FlatWorld & world, const IPointOfView  & from) {
@@ -247,3 +224,4 @@ void Environment2DGenerator::applyMap(TerrainTile & tile, const Map & map, bool 
 		manipulator->applyOffset(terrain, bufferOffset);
 	}
 }
+*/

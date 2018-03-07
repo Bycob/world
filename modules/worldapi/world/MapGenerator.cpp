@@ -4,6 +4,7 @@
 #include <list>
 #include <tuple>
 
+#include "../Image.h"
 #include "../maths/MathsHelper.h"
 #include "../maths/Interpolation.h"
 
@@ -11,25 +12,9 @@ using namespace arma;
 using namespace maths;
 using namespace img;
 
-// MODULES (à déplacer ?)
-
-MapGeneratorModule::MapGeneratorModule(MapGenerator * parent) :
-	_parent(parent) {
-
-}
-
-cube & MapGeneratorModule::reliefMap(Map & map) const {
-	return map._reliefMap;
-}
-
-std::mt19937 & MapGeneratorModule::rng() const {
-	return _parent->_rng;
-}
-
 
 // -----
-ReliefMapGenerator::ReliefMapGenerator(MapGenerator * parent) :
-	MapGeneratorModule(parent) {
+ReliefMapGenerator::ReliefMapGenerator() {
 
 }
 
@@ -37,17 +22,15 @@ ReliefMapGenerator::ReliefMapGenerator(MapGenerator * parent) :
 // -----
 const float CustomWorldRMGenerator::PIXEL_UNIT = 10;
 
-CustomWorldRMGenerator::CustomWorldRMGenerator(MapGenerator * parent, float biomeDensity, uint32_t limitBrightness) :
-	ReliefMapGenerator(parent),
+CustomWorldRMGenerator::CustomWorldRMGenerator(float biomeDensity, uint32_t limitBrightness) :
 	_biomeDensity(biomeDensity),
 	_limitBrightness(limitBrightness),
 	_diffLaw(std::make_unique<relief::CustomWorldDifferential>()) {
 	
 }
 
-CustomWorldRMGenerator::CustomWorldRMGenerator(const CustomWorldRMGenerator &other, MapGenerator * newParent)
-	: ReliefMapGenerator(newParent),
-	  _biomeDensity(other._biomeDensity),
+CustomWorldRMGenerator::CustomWorldRMGenerator(const CustomWorldRMGenerator &other)
+	: _biomeDensity(other._biomeDensity),
 	  _limitBrightness(other._limitBrightness),
 	  _diffLaw(other._diffLaw->clone()){
 
@@ -65,25 +48,24 @@ void CustomWorldRMGenerator::setDifferentialLaw(const relief::diff_law & law) {
 	_diffLaw = std::unique_ptr<relief::diff_law>(law.clone());
 }
 
-void CustomWorldRMGenerator::generate(Map & map) const {
-	cube & relief = reliefMap(map);
-
+void CustomWorldRMGenerator::generate(Terrain &height, Terrain &heightDiff) const {
 	// Nombre de biomes à générer.
-	uint32_t size = relief.n_rows * relief.n_cols;
-	uint32_t biomeCount = (uint32_t)(_biomeDensity * (float) size / (PIXEL_UNIT * PIXEL_UNIT));
+	uint32_t size = (uint32_t) (height.getSize() * height.getSize());
+	uint32_t biomeCount = (uint32_t)(_biomeDensity * (double) size / (PIXEL_UNIT * PIXEL_UNIT));
 
 
 	// -> Création de la grille pour le placement des points de manière aléatoire,
 	// mais avec une distance minimum.
 
 	// Calcul des dimensions de la grille
-	float minDistance = PIXEL_UNIT / 2.0 * sqrt(_biomeDensity);
-	
-	uint32_t sliceCount = maths::max<uint32_t>((uint32_t)((float)relief.n_rows / minDistance), 1);
-	float sliceSize = (float)relief.n_rows / (float)sliceCount;
+	double minDistance = PIXEL_UNIT / 2.0 * sqrt(_biomeDensity);
 
-	uint32_t caseCount = maths::max<uint32_t>((uint32_t)((float)relief.n_cols / minDistance), 1);
-	float caseSize = (float)relief.n_cols / (float)caseCount;
+	// TODO unifier
+	uint32_t sliceCount = maths::max<uint32_t>((uint32_t)((float)height.getSize() / minDistance), 1);
+	float sliceSize = (float)height.getSize() / (float)sliceCount;
+
+	uint32_t caseCount = maths::max<uint32_t>((uint32_t)((float)height.getSize() / minDistance), 1);
+	float caseSize = (float)height.getSize() / (float)caseCount;
 
 	// Préparation de la grille
 	typedef std::pair<vec2d, vec2d> point; // pour plus de lisibilité
@@ -107,7 +89,7 @@ void CustomWorldRMGenerator::generate(Map & map) const {
 
 	for (int i = 0; i < biomeCount; i++) { // TODO dans les cas limites la grille peut se vider totalement
 		// Génération des coordonnées des points
-		uint32_t randIndex = (uint32_t)(rand(rng()) * grid.size());
+		uint32_t randIndex = (uint32_t)(rand(_rng) * grid.size());
 		std::pair<uint32_t, uint32_t> randPoint = grid.at(randIndex);
 		grid.erase(grid.begin() + randIndex);
 
@@ -150,12 +132,12 @@ void CustomWorldRMGenerator::generate(Map & map) const {
 		}
 
 		// à partir des limites on peut déterminer la position random du point
-		double randX = rand(rng());
-		double randY = rand(rng());
+		double randX = rand(_rng);
+		double randY = rand(_rng);
 
-		// TODO ces deux paramètres sont random.
-		float elevation = rand(rng());
-		float diff = (*_diffLaw)(std::pair<double, double>(elevation, rand(rng())));
+		// TODO L'utilisateur n'a aucun contrôle sur le premier paramètre.
+		float elevation = rand(_rng);
+		float diff = (*_diffLaw)(std::pair<double, double>(elevation, rand(_rng)));
 
 		pointsMap[x][y] = std::make_pair<vec2d, vec2d>(
 			vec2d(
@@ -180,51 +162,12 @@ void CustomWorldRMGenerator::generate(Map & map) const {
 	}
 
 	// On remplit la grille à l'aide de l'interpolateur. And enjoy.
-	for (uint32_t x = 0; x < relief.n_rows; x++) {
-		for (uint32_t y = 0; y < relief.n_cols; y++) {
+	for (uint32_t x = 0; x < height.getSize(); x++) {
+		for (uint32_t y = 0; y < height.getSize(); y++) {
 			vec2d pt((double)x + 0.5, (double)y + 0.5);
 			vec2d result = interpolator.getData(pt);
-			relief.at(x, y, 0) = result.x;
-			relief.at(x, y, 1) = result.y;
+			height(x, y) = result.x;
+			heightDiff(x, y) = result.y;
 		}
 	}
-}
-
-CustomWorldRMGenerator* CustomWorldRMGenerator::clone(MapGenerator * newParent) {
-	return new CustomWorldRMGenerator(*this, newParent);
-}
-
-
-// MapGenerator
-
-MapGenerator::MapGenerator(uint32_t sizeX, uint32_t sizeY) :
-	_rng(time(NULL)),
-	_sizeX(sizeX), _sizeY(sizeY),
-	_reliefMap(nullptr) {
-
-}
-
-MapGenerator::MapGenerator(const MapGenerator &other):
-	_rng(time(NULL)),
-	_sizeX(other._sizeX), _sizeY(other._sizeY),
-	_reliefMap(nullptr) {
-
-	if (other._reliefMap != nullptr)
-		_reliefMap = std::unique_ptr<ReliefMapGenerator>(other._reliefMap->clone(this));
-}
-
-MapGenerator::~MapGenerator() {
-
-}
-
-MapGenerator * MapGenerator::clone() const {
-	return new MapGenerator(*this);
-}
-
-Map * MapGenerator::generate() {
-	Map * map = new Map(_sizeX, _sizeY);
-
-	if (_reliefMap != nullptr) _reliefMap->generate(*map);
-
-	return map;
 }

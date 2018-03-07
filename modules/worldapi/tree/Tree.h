@@ -1,13 +1,13 @@
 #pragma once
 
+#include <memory>
+
 #include <worldapi/worldapidef.h>
 
 #include "../world/WorldObject.h"
 #include "../Mesh.h"
 #include "../Material.h"
 #include "TreeSkeletton.h"
-
-#include <memory>
 
 class WORLDAPI_EXPORT Tree : public WorldObject {
 public:
@@ -17,8 +17,6 @@ public:
 	const Mesh & getTrunkMesh() {
 		return _trunkMesh;
 	}
-
-	void fillScene(Scene & scene) const override;
 private :
 	friend class TreeGenerator;
 

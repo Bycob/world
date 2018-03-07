@@ -9,16 +9,14 @@
 #include <functional>
 
 #include "../WorldFolder.h"
-#include "../Scene.h"
 #include "Chunk.h"
-#include "IExpander.h"
-#include "IChunkDecorator.h"
+#include "WorldObject.h"
 #include "LODData.h"
+#include "IWorldDecorator.h"
 
 class World;
 
-typedef IExpander<World> IWorldExpander;
-typedef IChunkDecorator<World> IWorldChunkDecorator;
+typedef IWorldDecorator<World> IWorldChunkDecorator;
 
 class PrivateWorld;
 
@@ -37,29 +35,18 @@ public:
 
 	void addObject(WorldObject * object);
 
-	bool isChunkGenerated(const ChunkPosition & position) const;
-	int getChunkCount() const;
-	int getChunkCount(int lod) const;
-	Chunk & getChunk(const ChunkPosition & position) const;
-	ChunkPosition getChunkPosition(const ObjectPosition & position);
+	Chunk & getChunk(const ChunkID & position);
+	ChunkID getChunkPosition(const ObjectPosition & position);
 
-	void addExpander(IWorldExpander * expander);
 	void addChunkDecorator(IWorldChunkDecorator * decorator);
-
-	virtual void expand(const IPointOfView & from);
-	virtual void generateChunk(const ChunkPosition & position);
-	
-	virtual Scene * createSceneFrom(const IPointOfView & from) const;
 
 	// getAssets(zone, level detail)
 	// getAssets(vec3d from, level detail scale)
 protected:
 	LODData & getOrCreateLODData(int lod);
-	Chunk & getOrCreateChunk(const ChunkPosition & position);
+	Chunk & getOrCreateChunk(const ChunkID & position);
 
-	void iterateChunkPosInSight(const IPointOfView & from, const LODData & data, const std::function<void(const ChunkPosition&)> & action) const;
-
-	virtual void callExpanders(const IPointOfView & from);
+	bool isChunkGenerated(const ChunkID & position) const;
 	virtual void generateChunk(Chunk & chunk);
 
 private:

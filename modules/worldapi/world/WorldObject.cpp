@@ -9,8 +9,8 @@
 
 using namespace maths;
 
-ObjectPosition::ObjectPosition(const vec3d & pos, int lodMax)
-	: _pos(pos), _lodMax(lodMax) {
+ObjectPosition::ObjectPosition(const vec3d & offset)
+	: _pos(offset) {
 
 }
 
@@ -32,13 +32,9 @@ WorldObject::~WorldObject() {
 }
 
 void WorldObject::setPosition3D(const maths::vec3d & pos) {
-	_position = ObjectPosition(pos, _position.getMaxLOD());
+	_position = ObjectPosition(pos);
 }
 
 const ObjectPosition & WorldObject::getPosition() const {
 	return _position;
-}
-
-void WorldObject::fillScene(Scene & scene) const {
-
 }

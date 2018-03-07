@@ -4,8 +4,7 @@ class PrivateFlatWorld {
 public:
 	PrivateFlatWorld() {}
 
-	std::vector<std::unique_ptr<IFlatWorldExpander>> _expanders;
-	std::vector<std::unique_ptr<IFlatWorldChunkDecorator>> _chunkDecorators;
+	std::vector<std::unique_ptr<IFlatWorldDecorator>> _chunkDecorators;
 };
 
 FlatWorld::FlatWorld() : _internal(new PrivateFlatWorld()) {
@@ -16,21 +15,12 @@ FlatWorld::~FlatWorld() {
 	delete _internal;
 }
 
-void FlatWorld::addFlatWorldExpander(IFlatWorldExpander * expander) {
-	expander->onAddExpander(*this);
-	_internal->_expanders.emplace_back(expander);
-}
-
-void FlatWorld::addFlatWorldChunkDecorator(IFlatWorldChunkDecorator * decorator) {
+void FlatWorld::addFlatWorldDecorator(IFlatWorldDecorator *decorator) {
 	_internal->_chunkDecorators.emplace_back(decorator);
 }
 
-void FlatWorld::callExpanders(const IPointOfView &from) {
-	World::callExpanders(from);
-
-	for (auto & expander : _internal->_expanders) {
-		expander->expand(*this, from);
-	}
+Ground& FlatWorld::ground() {
+	return _ground;
 }
 
 void FlatWorld::generateChunk(Chunk & chunk) {

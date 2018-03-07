@@ -43,7 +43,7 @@ void SimpleTreeDecorator::decorate(FlatWorld & world, Chunk & chunk) {
 	std::uniform_real_distribution<double> distribX(0, chunkSize.x);
 	std::uniform_real_distribution<double> distribY(0, chunkSize.y);
 	
-	Ground & ground = world.environment().ground();
+	Ground & ground = world.ground();
 
 	for (int i = 0; i < _maxTreesPerChunk; i++) {
 		// On génère une position pour l'arbre

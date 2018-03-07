@@ -1,31 +1,33 @@
 #include "Chunk.h"
 
+#include "WorldObject.h"
+
 using namespace maths;
 
-ChunkPosition::ChunkPosition(int x, int y, int z, int lod)
+ChunkID::ChunkID(int x, int y, int z, int lod)
 	: _pos(x, y, z), _lod(lod) {
 
 }
 
-ChunkPosition::ChunkPosition(const maths::vec3i & pos, int lod) 
+ChunkID::ChunkID(const maths::vec3i & pos, int lod)
 	: _pos(pos), _lod(lod) {
 
 }
 
-ChunkPosition::ChunkPosition(const ChunkPosition & other)
+ChunkID::ChunkID(const ChunkID & other)
 	: _pos(other._pos), _lod(other._lod) {
 
 }
 
-ChunkPosition::~ChunkPosition() {
+ChunkID::~ChunkID() {
 
 }
 
-const vec3i & ChunkPosition::getPosition3D() const {
+const vec3i & ChunkID::getPosition3D() const {
 	return _pos;
 }
 
-bool ChunkPosition::operator<(const ChunkPosition & other) const {
+bool ChunkID::operator<(const ChunkID & other) const {
 	return _lod < other._lod ? true : (
 		_pos.x < other._pos.x ? true : (
 			_pos.y < other._pos.y ? true : (
@@ -39,8 +41,10 @@ public:
 	std::vector<std::unique_ptr<WorldObject>> _objects;
 };
 
-Chunk::Chunk(const ChunkPosition & position, const vec3d & size) 
-	: _internal(new PrivateChunk()), _position(position), _size(size) {
+Chunk::Chunk(const ChunkID & position, const vec3d & size)
+	: _internal(new PrivateChunk()), _position(position),
+	  _offset(_position.getPosition3D() * size),
+	  _size(size) {
 
 }
 
@@ -49,21 +53,15 @@ Chunk::~Chunk() {
 }
 
 vec3d Chunk::toAbsolutePosition(const vec3d & relative) const {
-	return _size * _position.getPosition3D() + relative;
+	return _size * _offset;
 }
 
 vec3d Chunk::toRelativePosition(const vec3d & absolute) const {
-	return absolute - _size * _position.getPosition3D();
+	return absolute - _offset;
 }
 
 void Chunk::addObject(WorldObject * object) {
 	_internal->_objects.emplace_back(object);
-}
-
-void Chunk::fillScene(Scene & scene) {
-	for (auto & object : _internal->_objects) {
-		object->fillScene(scene);
-	}
 }
 
 void Chunk::addObjectInternal(WorldObject * object) {

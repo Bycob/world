@@ -2,6 +2,11 @@
 
 using namespace maths;
 
+LODData::LODData()
+	: _chunkSize({0, 0, 0}){
+
+}
+
 LODData::LODData(const vec3d & chunkSize) 
 	: _chunkSize(chunkSize) {
 
