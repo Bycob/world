@@ -23,7 +23,7 @@ DebugScreenNode::~DebugScreenNode() {
 }
 
 void DebugScreenNode::updateInfos() {
-	_userPos = _app.getUserPointOfView().getPosition();
+	_userPos = _app.getUserPosition();
 }
 
 void DebugScreenNode::OnRegisterSceneNode() {

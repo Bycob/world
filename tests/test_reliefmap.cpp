@@ -31,15 +31,16 @@ void testReliefMap(int argc, char** argv) {
 
 	std::cout << "Creation du generateur" << std::endl;
 
-	MapGenerator generator(800, 500);
-	generator.createReliefMapGenerator<CustomWorldRMGenerator>(biomeDensity, (uint32_t) limitBrightness);
+	CustomWorldRMGenerator generator(biomeDensity, (uint32_t) limitBrightness);
 	
 	std::cout << "Generation de la ReliefMap" << std::endl;
+	Terrain height(513);
+	Terrain heightDiff(513);
 
-	auto generated = generator.generate();
+	generator.generate(height, heightDiff);
 
 	std::cout << "Conversion en image et ecriture" << std::endl;
 
-	Image img = generated->getReliefMapAsImage();
-	img.write("world/relief/reliefmap.png");
+	height.convertToImage().write("world/relief/height.png");
+	heightDiff.convertToImage().write("world/relief/heightDiff.png");
 }

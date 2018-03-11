@@ -8,31 +8,17 @@
 #include <worldapi/maths/MathsHelper.h>
 
 class WorldObject;
-
-class WORLDAPI_EXPORT ChunkID {
-public:
-	ChunkID(int x = 0, int y = 0, int z = 0, int lod = 0);
-	ChunkID(const maths::vec3i & pos, int lod = 0);
-	ChunkID(const ChunkID & other);
-	~ChunkID();
-
-	const maths::vec3i & getPosition3D() const;
-	int getLOD() const { return _lod; }
-
-	bool operator<(const ChunkID & other) const;
-private:
-	maths::vec3i _pos;
-	int _lod;
-};
-
 class PrivateChunk;
 
 class WORLDAPI_EXPORT Chunk {
 public:
-	Chunk(const ChunkID & position, const maths::vec3d & size);
+	Chunk(const maths::vec3d& offset, const maths::vec3d & size);
 	virtual ~Chunk();
 
-	const ChunkID & getChunkPosition() const { return _position; }
+	void setDetailSizeBounds(double min, double max);
+	double getMinDetailSize() const { return _minDetailSize; }
+	double getMaxDetailSize() const { return _maxDetailSize; }
+
 	const maths::vec3d & getSize() const { return _size; }
     const maths::vec3d & getOffset() const { return _offset; }
 	
@@ -47,7 +33,8 @@ public:
 	}
 
 private:
-	ChunkID _position;
+	double _minDetailSize = 0;
+	double _maxDetailSize = 1e100;
 	maths::vec3d _offset;
 	maths::vec3d _size;
 

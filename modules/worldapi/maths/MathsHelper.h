@@ -30,7 +30,7 @@ namespace maths {
 		return value < min ? min : (value > max ? max : value);
 	};
 
-	// Renvoie n modulo r
+	/** @returns n modulo r, compris entre 0 et r - 1 */
 	template <typename T> inline T mod(T n, T r) {
 		return n >= 0 ? n % r : (n % r) + r;
 	}

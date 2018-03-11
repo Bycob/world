@@ -20,7 +20,7 @@ public:
 
 	Ground& ground();
 protected:
-	virtual void generateChunk(Chunk & chunk);
+	void onFirstExploration(ChunkNode &chunk) override;
 
 private:
 	PrivateFlatWorld * _internal;

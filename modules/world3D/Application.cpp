@@ -1,6 +1,5 @@
 #include "Application.h"
 
-#include <worldapi/world/WorldGenerator.h>
 #include <worldapi/world/FlatWorld.h>
 
 #include "util.h"
@@ -9,10 +8,12 @@ using namespace maths;
 
 Application::Application()
         : _running(false),
-	      _mainView(std::make_unique<MainView>(*this)), 
-	      _userPos(vec3d(0, 0, 0), 20000),
-		  _lastUpdatePos(0, 0, 0) {
+	      _mainView(std::make_unique<MainView>(*this)),
+		  _lastUpdatePos(0, 0, 0),
+		  _explorer(std::make_unique<FirstPersonWorldExplorer>()),
+		  _collector(std::make_unique<SynchronizedCollector>()){
 
+	_explorer->setOrigin({0, 0, 0});
 }
 
 void Application::run(int argc, char **argv) {
@@ -30,29 +31,21 @@ void Application::run(int argc, char **argv) {
 		else {
 			// On prend les paramètres en local.
 			_paramLock.lock();
-			PointOfView userPos = _userPos;
+			vec3d newUpdatePos = _newUpdatePos;
 			_paramLock.unlock();
 
-			if ((userPos._pos - _lastUpdatePos).norm() > 2000 || firstExpand) {
+			if ((newUpdatePos - _lastUpdatePos).norm() > 2000 || firstExpand) {
 				// Mise à jour du monde
-				_world->lock();
-				World & world = _world->get();
-				world.expand(userPos);
+				_collector->lock();
+				FlatWorldCollector &collector = _collector->get();
 
-				// Debug
-				if (firstExpand) {
-					dynamic_cast<FlatWorld &>(world)
-						.environment()
-						.getMap()
-						.getReliefMapAsImage()
-						.write("world3D_map.png");
-				}
+				_explorer->explore(*_world, collector);
 
-				_world->unlock();
+				_collector->unlock();
 
 				// Mise à jour de la vue
 				_mainView->onWorldChange();
-				_lastUpdatePos = userPos._pos;
+				_lastUpdatePos = newUpdatePos;
 
 				firstExpand = false;
 			}
@@ -68,26 +61,24 @@ void Application::requestStop() {
     _running = false;
 }
 
-SynchronizedWorld & Application::getWorld() {
-    if (_world == nullptr) throw std::runtime_error("getWorld() called while not running.");
-    return *_world;
-}
-
 void Application::setUserPosition(maths::vec3d pos) {
 	_paramLock.lock();
-	_userPos._pos = pos;
+	_newUpdatePos = pos;
 	_paramLock.unlock();
 }
 
-PointOfView Application::getUserPointOfView() const {
+maths::vec3d Application::getUserPosition() const {
 	_paramLock.lock();
-	auto result = _userPos;
+	auto pos = _newUpdatePos;
 	_paramLock.unlock();
+	return pos;
+}
 
-	return result;
+SynchronizedCollector& Application::getCollector() {
+	return *_collector;
 }
 
 void Application::loadWorld(int argc, char **argv) {
-    _world = std::unique_ptr<SynchronizedWorld>(
-		SynchronizedWorld::createFromWorld(World::createDemoWorld()));
+	// TODO changer quand ce sera plus forcément un flatworld
+    _world = std::unique_ptr<FlatWorld>((FlatWorld*) World::createDemoWorld());
 }

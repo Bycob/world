@@ -12,8 +12,9 @@ public:
 	virtual ~LODData();
 
 	const maths::vec3d & getChunkSize() const { return _chunkSize; }
-
+	double getMinDetailSize() const { return _minDetailSize; }
 private:
 	maths::vec3d _chunkSize;
+	double _minDetailSize;
 };
 

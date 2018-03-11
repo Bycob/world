@@ -65,7 +65,7 @@ void testRepeatable(int argc, char** argv) {
 
     // CREATION D'UN PERLIN REPETABLE
     std::cout << "Génération de bruit de perlin répétable..." << std::endl;
-    auto repeatable = perlin.generatePerlinNoise2D(size, 0, octaves, freq, persistence, true);
+    Mat<double> repeatable = perlin.generatePerlinNoise2D(size, 0, octaves, freq, persistence, true);
     img::Image repeat(repeatable);
     repeat.write("tests/repeat.png");
 
@@ -139,15 +139,16 @@ void testPerlin(int argc, char** argv) {
     
 	//CREATION DU GENERATEUR
 
-	PerlinTerrainGenerator generator(size, 0, octaves, freq, persistence);
+	PerlinTerrainGenerator generator(0, octaves, freq, persistence);
 
 	//GENERATION DE L'IMAGE DU TERRAIN
 
 	std::cout << "Génération du terrain..." << std::endl;
-	std::unique_ptr<Terrain> terrain(generator.generate());
+    Terrain terrain(size);
+    generator.process(terrain);
 
 	std::cout << "ecriture de l'image du terrain..." <<std::endl;
-	img::Image image = terrain->convertToImage();
+	img::Image image = terrain.convertToImage();
 	try {
 		image.write("tests/terrain.png");
 	}
@@ -161,7 +162,7 @@ void testPerlin(int argc, char** argv) {
 
 	std::cout << "Conversion du terrain en mesh... " << std::endl;
 	Scene scene1;
-	std::shared_ptr<Mesh> mesh = std::shared_ptr<Mesh>(terrain->convertToMesh());
+	std::shared_ptr<Mesh> mesh = std::shared_ptr<Mesh>(terrain.convertToMesh());
 	scene1.createObject(mesh);
 	
 	std::shared_ptr<Material> material = std::make_shared<Material>("material01");
@@ -186,17 +187,17 @@ void testPerlin(int argc, char** argv) {
 	TerrainTexmapBuilder texmapBuilder(0, 255);
 
 	std::vector<ColorPart> slice1;
-	slice1.push_back(ColorPart(47.0 / 255, 128.0 / 255, 43.0 / 255, 0.75));
-	slice1.push_back(ColorPart(65.0 / 255, 53.0 / 255, 22.0 / 255, 0.25));
+	slice1.emplace_back(47.0 / 255, 128.0 / 255, 43.0 / 255, 0.75);
+	slice1.emplace_back(65.0 / 255, 53.0 / 255, 22.0 / 255, 0.25);
 
 	std::vector<ColorPart> slice2;
-	slice2.push_back(ColorPart(47.0 / 255, 128.0 / 255, 43.0 / 255, 0.15));
-	slice2.push_back(ColorPart(65.0 / 255, 53.0 / 255, 22.0 / 255, 0.25));
-	slice2.push_back(ColorPart(0.25, 0.25, 0.25, 0.6));
+	slice2.emplace_back(47.0 / 255, 128.0 / 255, 43.0 / 255, 0.15);
+	slice2.emplace_back(65.0 / 255, 53.0 / 255, 22.0 / 255, 0.25);
+	slice2.emplace_back(0.25, 0.25, 0.25, 0.6);
 
 	std::vector<ColorPart> slice3;
-	slice3.push_back(ColorPart(1, 1, 1, 0.7));
-	slice3.push_back(ColorPart(0.25, 0.25, 0.25, 0.3));
+	slice3.emplace_back(1, 1, 1, 0.7);
+	slice3.emplace_back(0.25, 0.25, 0.25, 0.3);
 	
 	texmapBuilder.addSlice(1, slice1);
 	texmapBuilder.addSlice(180, slice2);
@@ -204,7 +205,7 @@ void testPerlin(int argc, char** argv) {
 	//---
 
 	arma::Mat<double> randomArray = perlin.generatePerlinNoise2D(size * 8, 0, 7, 16, (float)0.9);
-	img::Image texture = generator.generateTexture(*terrain, texmapBuilder, randomArray);
+	img::Image texture = generator.generateTexture(terrain, texmapBuilder, randomArray);
 
 	std::cout << "ecriture de la texture..." << std::endl;
 	try {
@@ -224,7 +225,7 @@ void testPerlin(int argc, char** argv) {
 
 	// CREATION DES SUBDIVISIONS DU TERRAIN
 	std::cout << "génération des subdivisions" << std::endl;
-	TerrainSubdivisionTree * terrainTree = generator.generateSubdivisions(*terrain, 4, 1);
+	TerrainSubdivisionTree * terrainTree = generator.generateSubdivisions(terrain, 4, 1);
 	std::cout << "génération terminée !" << std::endl;
 
 	std::cout << "Conversion en mesh de 4 sous-terrains..." << std::endl;

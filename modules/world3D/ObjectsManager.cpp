@@ -9,11 +9,12 @@ using namespace irr;
 using namespace scene;
 using namespace video;
 
+using ObjectKey = WorldCollector::ObjectKey;
 
 //----- ObjectNodeHandler
 
-ObjectNodeHandler::ObjectNodeHandler(ChunkNodeHandler * parent, const Object3D & object) 
-	: _parent(parent), _meshNode(NULL) {
+ObjectNodeHandler::ObjectNodeHandler(ObjectsManager &objectsManager, const Object3D & object)
+	: _objManager(objectsManager), _meshNode(NULL) {
 
 	updateObject3D(object);
 }
@@ -23,23 +24,23 @@ ObjectNodeHandler::~ObjectNodeHandler() {
 }
 
 void ObjectNodeHandler::updateObject3D(const Object3D & object) {
-	SMesh * irrMesh = ObjectsManager::convertToIrrlichtMesh(object.getMesh(), _parent->_objectsManager->_driver);
+	SMesh * irrMesh = ObjectsManager::convertToIrrlichtMesh(object.getMesh(), _objManager._driver);
 
 	if (_meshNode == NULL) {
-		_meshNode = _parent->sceneManager()->addMeshSceneNode(irrMesh, 0, -1);
+		_meshNode = _objManager._sceneManager->addMeshSceneNode(irrMesh, 0, -1);
 	}
 	else {
 		_meshNode->setMesh(irrMesh);
 	}
 
 	_meshNode->setPosition(toIrrlicht(object.getPosition()));
+    std::cout << "graph : " << object.getPosition() << std::endl;
 	_meshNode->setScale(toIrrlicht(object.getScale()));
 
 	// Materiau
 	_meshNode->setMaterialFlag(EMF_LIGHTING, true);
 	
 	SMaterial & material = _meshNode->getMaterial(0);
-	material.Lighting = true;
 	material.NormalizeNormals = true;
 	material.BackfaceCulling = false;
 	material.ColorMaterial = ECM_NONE;
@@ -49,30 +50,6 @@ void ObjectNodeHandler::updateObject3D(const Object3D & object) {
 	material.DiffuseColor.set(255, 200, 178, 126);
 
 	irrMesh->drop();
-}
-
-
-//----- ChunkNodeHandler
-
-ChunkNodeHandler::ChunkNodeHandler(ObjectsManager * manager) 
-	: _objectsManager(manager) {
-
-}
-
-ChunkNodeHandler::~ChunkNodeHandler() {
-
-}
-
-void ChunkNodeHandler::updateObject(const Object3D & object) {
-	_objects[_objects.size()] = std::move(std::make_unique<ObjectNodeHandler>(this, object));
-}
-
-void ChunkNodeHandler::clearObjects() {
-	_objects.clear();
-}
-
-ISceneManager * ChunkNodeHandler::sceneManager() const {
-	return _objectsManager->_sceneManager;
 }
 
 
@@ -87,37 +64,26 @@ ObjectsManager::~ObjectsManager() {
 
 }
 
-void ObjectsManager::initialize(const World & world) {
-	_chunks.clear();
+void ObjectsManager::initialize(const FlatWorldCollector &collector) {
+	_objects.clear();
 
-	update(world);
+	update(collector);
 }
 
-void ObjectsManager::update(const World & world) {
-	// Pour l'instant on ne crée qu'un chunk node unique.
-	// TODO hierarchiser les objets par chunk
-	ChunkNodeHandler & coreNode = getOrCreateNode({ 0, 0 });
-	const IPointOfView & userView = _app.getUserPointOfView();
+void ObjectsManager::update(const FlatWorldCollector &collector) {
+	/*auto it = collector.objectsIterator();
 
-	std::unique_ptr<Scene> scene(world.createSceneFrom(userView));
+	for (; it.hasNext(); it++) {
+		auto pair = *it;
 
-	coreNode.clearObjects();
-
-	for (Object3D * object : scene->getObjects()) {
-		coreNode.updateObject(*object);
-	}
+		if (!_objects.find(pair.first)) {
+			auto & mainPart = pair.second.getPart(0);
+			_objects[pair.first] =
+					std::make_unique<ObjectNodeHandler>(*this, mainPart.getObject3D());
+		}
+	}*/
 }
 
-ChunkNodeHandler & ObjectsManager::getOrCreateNode(const maths::vec2i & pos) {
-	auto occ = _chunks.find(pos);
-
-	if (occ != _chunks.end()) {
-		return *occ->second;
-	}
-	else {
-		return *(_chunks[pos] = std::move(std::make_unique<ChunkNodeHandler>(this)));
-	}
-}
 
 
 SMesh * ObjectsManager::convertToIrrlichtMesh(const Mesh & mesh, IVideoDriver * driver) {
@@ -168,7 +134,7 @@ SMesh * ObjectsManager::convertToIrrlichtMesh(const Mesh & mesh, IVideoDriver * 
 			int normID = face.getID<VType::NORMAL>(i);
 
 			S3DVertex& v = buffer->Vertices[primitiveCount];
-			v.Pos = toIrrlicht(positions[posID].toVec3() * 2); // TODO check if posID == -1;
+			v.Pos = toIrrlicht(positions[posID].toVec3() * 100); // TODO check if posID == -1;
 			
 			if (texID != -1)
 				v.TCoords = toIrrlicht(positions[texID].toVec2());

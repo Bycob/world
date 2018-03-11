@@ -7,20 +7,21 @@ using namespace img;
 using namespace perlin;
 using namespace arma;
 
-TerrainGenerator::TerrainGenerator(int size) : _size(size) {
+TerrainGenerator::TerrainGenerator() {
 
 }
 
-TerrainGenerator::~TerrainGenerator() {
+TerrainGenerator::~TerrainGenerator() = default;
 
-}
+Terrain* TerrainGenerator::createTerrain(int size) {
+	auto* result = new Terrain(size);
+	process(*result);
 
-void TerrainGenerator::setSize(int size) {
-	_size = size;
+	return result;
 }
 
 TerrainSubdivisionTree * TerrainGenerator::generateSubdivisions(Terrain & terrain, int subdivideFactor, int subdivisionsCount) {
-	TerrainSubdivisionTree * result = new TerrainSubdivisionTree(terrain);
+	auto* result = new TerrainSubdivisionTree(terrain);
 	generateSubdivisionLevels(*result, subdivideFactor, subdivisionsCount);
 	return result;
 }
@@ -86,8 +87,7 @@ Image TerrainGenerator::generateTexture(const Terrain & terrain, const arma::Cub
 
 // GENERATEUR DE PERLIN
 
-PerlinTerrainGenerator::PerlinTerrainGenerator(int size, int offset, int octaveCount, float frequency, float persistence) :
-	TerrainGenerator(size) ,
+PerlinTerrainGenerator::PerlinTerrainGenerator(int offset, int octaveCount, float frequency, float persistence) :
     _buffer(std::map<std::pair<int, int>, arma::Mat<double>>()),
     _offset(offset), _octaveCount(octaveCount), _frequency(frequency), _persistence(persistence) {
 
@@ -97,11 +97,8 @@ PerlinTerrainGenerator::~PerlinTerrainGenerator() {
 	
 }
 
-Terrain * PerlinTerrainGenerator::generate() {
-	Terrain * result = new Terrain(_size);
-	_perlin.generatePerlinNoise2D(result->_array, _offset, _octaveCount, _frequency, _persistence);
-
-	return result;
+void PerlinTerrainGenerator::process(Terrain &terrain) {
+	_perlin.generatePerlinNoise2D(terrain._array, _offset, _octaveCount, _frequency, _persistence);
 }
 
 void PerlinTerrainGenerator::join(Terrain &terrain1, Terrain &terrain2, bool axisX, bool joinableSides) {
@@ -185,7 +182,7 @@ void PerlinTerrainGenerator::adaptFromBuffer(TerrainSubdivisionTree & tree, int 
 }
 
 TerrainGenerator * PerlinTerrainGenerator::clone() const {
-	return new PerlinTerrainGenerator(_size, _offset, _octaveCount, _frequency, _persistence);
+	return new PerlinTerrainGenerator(_offset, _octaveCount, _frequency, _persistence);
 }
 
 arma::Mat<double> & PerlinTerrainGenerator::getBuf(int x, int y) const {

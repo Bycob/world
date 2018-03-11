@@ -9,20 +9,6 @@
 
 using namespace maths;
 
-ObjectPosition::ObjectPosition(const vec3d & offset)
-	: _pos(offset) {
-
-}
-
-ObjectPosition::~ObjectPosition() {
-
-}
-
-const maths::vec3d & ObjectPosition::getPosition3D() const {
-	return _pos;
-}
-
-
 WorldObject::WorldObject() {
 
 }
@@ -32,9 +18,5 @@ WorldObject::~WorldObject() {
 }
 
 void WorldObject::setPosition3D(const maths::vec3d & pos) {
-	_position = ObjectPosition(pos);
-}
-
-const ObjectPosition & WorldObject::getPosition() const {
-	return _position;
+	_position = pos;
 }

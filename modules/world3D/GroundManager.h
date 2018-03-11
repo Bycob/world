@@ -1,7 +1,3 @@
-//
-// Created by louis on 30/04/17.
-//
-
 #ifndef WORLD_TERRAINSCENENODE_H
 #define WORLD_TERRAINSCENENODE_H
 
@@ -22,13 +18,13 @@ public:
     GroundManager(Application & app, irr::IrrlichtDevice * device);
 	virtual ~GroundManager();
 
-    void initialize(const World &world) override;
-	void update(const World &world) override;
+    void initialize(const FlatWorldCollector &collector) override;
+	void update(const FlatWorldCollector &collector) override;
 private:
-	std::map<std::pair<int, int>, irr::scene::ITerrainSceneNode*> _terrainNodes;
+	std::map<long, irr::scene::ITerrainSceneNode*> _terrainNodes;
 
 	void clearAllNodes();
-    void addNode(const TerrainTile & tile, const Ground & groundModule);
+    irr::scene::ITerrainSceneNode* createNode(const Terrain& terrain);
 };
 
 

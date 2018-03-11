@@ -27,22 +27,23 @@ est simple couche ou multi couche. */
 class WORLDAPI_EXPORT Terrain {
 
 public :
-	Terrain(int size);
+	explicit Terrain(int size);
 
-	Terrain(const arma::Mat<double> & data);
+	explicit Terrain(const arma::Mat<double> & data);
 
 	Terrain(const Terrain & terrain);
 	Terrain(Terrain && terrain);
 
 	virtual ~Terrain();
 
+	void setBounds(double xmin, double ymin, double zmin, double xmax, double ymax, double zmax);
+	const maths::BoundingBox & getBoundingBox() const;
+
     uint32_t getSize() const {
-        return _array.n_rows;
+        return (uint32_t) _array.n_rows;
     }
 
-	double& operator()(int x, int y) {
-		return _array(x, y);
-	}
+	double& operator()(int x, int y);
 
 	/** Permet d'obtenir l'altitude au point (x, y), avec x et y les
 	coordonnées en pourcentage des dimensions totales du terrain.
@@ -62,6 +63,10 @@ public :
 	
 	//Méthodes pour la conversion du terrain en image.
 	img::Image convertToImage() const;
+
+	//Raw map TODO raw data stream ?
+	char * getRawData(int & rawDataSize, float height = 1, float offset = 0) const;
+	int getRawDataSize() const;
 
 	img::Image getTexture() const;
 

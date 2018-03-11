@@ -86,7 +86,7 @@ void MainView::runInternal() {
     _camera = _scenemanager->addCameraSceneNodeFPS(0, 100.0f, .1f);
 	_camera->setFOV(1.57);
     _camera->setFarValue(40000);
-    _camera->setPosition(vector3df(0, 1200, 500));
+    _camera->setPosition(vector3df(0, 1200, 0));
     //_camera = _scenemanager->addCameraSceneNode(0, vector3df(200 + 64, 200 + 119, 200 + 64), vector3df(64, 119, 64));
 	
     /*/ ----- Tests (temporaire)
@@ -96,8 +96,8 @@ void MainView::runInternal() {
     cube->getMaterial(0).DiffuseColor.set(255, 255, 0, 0);
     cube->getMaterial(0).SpecularColor.set(255, 255, 255, 255);
     cube->getMaterial(0).ColorMaterial = ECM_NONE;//*/
-    auto light = _scenemanager->addLightSceneNode(0, vector3df(0, 200, 0), video::SColorf(1.0f,1.0f,1.0f), 745.0f);
-    light->setRotation(vector3df(45, 0, 0));
+    auto light = _scenemanager->addLightSceneNode(0, vector3df(0, 0, 1), video::SColorf(1.0f,1.0f,1.0f), 100.0f);
+    light->setRotation(vector3df(60, 0, 0));
     light->getLightData().Type = ELT_DIRECTIONAL;
 
 	// Affichage de debug
@@ -131,37 +131,37 @@ void MainView::recreateModules() {
 }
 
 void MainView::updateScene() {
-	SynchronizedWorld & syncWorld = _app.getWorld();
+	SynchronizedCollector & syncCollector = _app.getCollector();
 
 	auto camPos = _camera->getPosition();
 	_app.setUserPosition(maths::vec3d(camPos.X, camPos.Z, camPos.Y));
 
     if (_resetScene) {
 
-		syncWorld.lock();
-		World & world = syncWorld.get();
+		syncCollector.lock();
+		FlatWorldCollector & collector = syncCollector.get();
 
         recreateModules();
 
         for (auto & module : _modules) {
-            module->initialize(world);
+            module->initialize(collector);
         }
 
         _resetScene = false;
         _worldChanged = false;
 
-		syncWorld.unlock();
+		syncCollector.unlock();
     }
     else if (_worldChanged) {
-        syncWorld.lock();
-        World & world = syncWorld.get();
+        syncCollector.lock();
+        FlatWorldCollector & collector = syncCollector.get();
 
         for (auto & module : _modules) {
-            module->update(world);
+            module->update(collector);
         }
 
         _worldChanged = false;
 
-        syncWorld.unlock();
+        syncCollector.unlock();
     }
 }

@@ -1,7 +1,3 @@
-//
-// Created by louis on 22/04/17.
-//
-
 #ifndef WORLD_UTIL_H_H
 #define WORLD_UTIL_H_H
 

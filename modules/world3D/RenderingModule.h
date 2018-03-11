@@ -1,17 +1,17 @@
 #pragma once
 
 #include <irrlicht.h>
+#include <worldapi/world/FlatWorldCollector.h>
 
 class Application;
-class World;
 
 class RenderingModule {
 public:
 	RenderingModule(Application & app, irr::IrrlichtDevice * device);
 	virtual ~RenderingModule();
 
-	virtual void initialize(const World & world) = 0;
-	virtual void update(const World & world) = 0;
+	virtual void initialize(const FlatWorldCollector & collector) = 0;
+	virtual void update(const FlatWorldCollector & collector) = 0;
 
 	Application & _app;
 

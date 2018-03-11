@@ -10,10 +10,13 @@ LODData::LODData()
 LODData::LODData(const vec3d & chunkSize) 
 	: _chunkSize(chunkSize) {
 
+	const double l = _chunkSize.norm();
+	_minDetailSize = l / 100;
 }
 
 LODData::LODData(const LODData & other) 
-	: _chunkSize(other._chunkSize) {
+	: _chunkSize(other._chunkSize),
+	  _minDetailSize(other._minDetailSize) {
 
 }
 

@@ -17,7 +17,7 @@ public:
 	void setTreeSkelettonGenerator(TreeSkelettonGenerator * generator);
 	void setTreeGenerator(TreeGenerator * generator);
 
-	virtual void decorate(FlatWorld & world, Chunk & chunk);
+	void decorate(FlatWorld & world, ChunkNode & chunk) override;
 
 private:
 	int _maxTreesPerChunk;

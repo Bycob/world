@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include <memory>
 
-#include <worldapi/world/WorldGenerator.h>
+#include <worldapi/world/World.h>
 
 void generate_test_world(int argc, char** argv);
 

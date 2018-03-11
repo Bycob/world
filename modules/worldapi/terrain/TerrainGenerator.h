@@ -16,13 +16,11 @@
 
 class WORLDAPI_EXPORT TerrainGenerator {
 public:
-	TerrainGenerator(int size = DEFAULT_TERRAIN_SIZE);
+	TerrainGenerator();
 	virtual ~TerrainGenerator();
 
-	// ACCESSEURS
-	void setSize(int size);
-
-	virtual Terrain * generate() = 0;
+	Terrain * createTerrain(int size);
+	virtual void process(Terrain &terrain) = 0;
 
 	virtual void join(Terrain & terrain1, Terrain & terrain2, bool axisX, bool joinableSides = false) = 0;
 
@@ -35,8 +33,6 @@ public:
 
 	virtual TerrainGenerator * clone() const = 0;
 protected :
-	/// Indique la taille du terrain à générer
-	int _size;
 	/// Indique si la texture doit être générée automatiquement avec le terrain
 	bool _generateTexture;
 
@@ -47,12 +43,12 @@ protected :
 
 class WORLDAPI_EXPORT PerlinTerrainGenerator : public TerrainGenerator {
 public :
-	PerlinTerrainGenerator(int size = DEFAULT_TERRAIN_SIZE, int offset = 0, int octaveCount = 5, float frequency = 8, float persistence = 0.5);
-	virtual ~PerlinTerrainGenerator();
+	PerlinTerrainGenerator(int offset = 0, int octaveCount = 5, float frequency = 8, float persistence = 0.5);
+	~PerlinTerrainGenerator() override;
 
 	void setFrequency(float frequency) {_frequency = frequency;}
 
-	Terrain * generate() override;
+	void process(Terrain &terrain) override;
 
 	void join(Terrain & terrain1, Terrain & terrain2, bool axisX, bool joinableSides) override;
 
@@ -60,7 +56,7 @@ public :
 
 	TerrainGenerator * clone() const override;
 protected :
-	virtual void generateSubdivision(TerrainSubdivisionTree & tree, int x, int y);
+	void generateSubdivision(TerrainSubdivisionTree & tree, int x, int y) override;
 private :
 	Perlin _perlin;
 	mutable std::map<std::pair<int, int>, arma::Mat<double>> _buffer;

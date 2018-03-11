@@ -9,10 +9,12 @@
 #include <mutex>
 #include <memory>
 
-#include <worldapi/world/IPointOfView.h>
+#include <worldapi/world/FlatWorld.h>
+#include <worldapi/world/FirstPersonWorldExplorer.h>
+#include <worldapi/world/FlatWorldCollector.h>
 
 #include "MainView.h"
-#include "SynchronizedWorld.h"
+#include "SynchronizedCollector.h"
 
 class Application {
 public:
@@ -21,20 +23,22 @@ public:
     void run(int argc, char** argv);
     void requestStop();
 
-    SynchronizedWorld & getWorld();
-
 	void setUserPosition(maths::vec3d pos);
-	PointOfView getUserPointOfView() const;
+	maths::vec3d getUserPosition() const;
+
+	SynchronizedCollector & getCollector();
 private:
     std::atomic_bool _running;
 	mutable std::mutex _paramLock;
 
-    std::unique_ptr<MainView> _mainView;
+	std::unique_ptr<FlatWorld> _world;
+	std::unique_ptr<FirstPersonWorldExplorer> _explorer;
+	std::unique_ptr<SynchronizedCollector> _collector;
 
-    std::unique_ptr<SynchronizedWorld> _world;
-
-	PointOfView _userPos;
+	maths::vec3d _newUpdatePos;
 	maths::vec3d _lastUpdatePos;
+
+    std::unique_ptr<MainView> _mainView;
 
     void loadWorld(int argc, char** argv);
 };

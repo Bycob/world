@@ -5,7 +5,6 @@
 #include "GroundManager.h"
 
 #include <worldapi/world/FlatWorld.h>
-#include <worldapi/world/IPointOfView.h>
 #include <worldapi/terrain/TerrainGenerator.h>
 
 #include "Application.h"
@@ -25,53 +24,32 @@ GroundManager::~GroundManager() {
     clearAllNodes();
 }
 
-void GroundManager::initialize(const World &world) {
+void GroundManager::initialize(const FlatWorldCollector &collector) {
     clearAllNodes();
 
-    update(world);
+    update(collector);
 }
 
-void GroundManager::update(const World &world) {
-
-    const Ground & ground = dynamic_cast<const FlatWorld&>(world).getEnvironment().getGround();
+void GroundManager::update(const FlatWorldCollector &collector) {
 
     /*/ Test
     PerlinTerrainGenerator generator(129, 0, 5, 1, 0.4);
     std::unique_ptr<Terrain> terrain(generator.generate());
 	addNode({ *terrain, 0, 0 }, ground);
     //*/
-	auto userLoc = _app.getUserPointOfView();
-	auto distMax = userLoc.getHorizonDistance();
 
-	// Remove des terrains trop loin
-	auto it = _terrainNodes.begin();
-
-	while (it != _terrainNodes.end()) {
-		auto & pair = *it;
-
-		float x = pair.first.first * ground.getUnitSize() - userLoc._pos.x;
-		float y = pair.first.second * ground.getUnitSize() - userLoc._pos.y;
-
-		if (x * x + y * y > distMax * distMax) {
-			pair.second->remove();
-			it = _terrainNodes.erase(it);
-		}
-		else {
-			++it;
-		}
-	}
+	// TODO Remove des terrains trop loin
 
 	_driver->removeAllHardwareBuffers();
 
-	// TODO checker pourquoi on a pas forcément le const sur le TerrainTile
-	auto terrains = ground.getTerrainsFrom(userLoc);
+    // Add terrains if they're not already here
+    /*auto terrainIt = collector.iterateTerrains();
 
-    for (TerrainTile & terrain : terrains) {
-		// TODO gestion des terrains qui on changé entre temps
-		if (_terrainNodes.find(std::pair<int, int>(terrain._x, terrain._y)) == _terrainNodes.end()) {
-			addNode(terrain, ground);
-		}
-    }
+    for (; terrainIt.hasNext(); terrainIt++) {
+        auto pair = *terrainIt;
+        if (_terrainNodes.find(pair.first) == _terrainNodes.end())
+            _terrainNodes[pair.first] = createNode(pair.second);
+    }*/
 }
 
 void GroundManager::clearAllNodes() {
@@ -82,29 +60,24 @@ void GroundManager::clearAllNodes() {
     _terrainNodes.clear();
 }
 
-void GroundManager::addNode(const TerrainTile &tile, const Ground & groundModule) {
-	const Terrain & terrain = *tile._terrain;
+ITerrainSceneNode* GroundManager::createNode(const Terrain &terrain) {
 
 	// Données concernant la position et les dimensions du terrain
 	int terrainRes = (terrain.getSize() - 1);
-	float tileSize = groundModule.getUnitSize();
-	float scaling = tileSize / terrainRes;
-	float terrainX = tile._x * tileSize;
-	float terrainY = tile._y * tileSize;
-
-	float heightScaling = groundModule.getAltitudeRange();
-	float heightPos = groundModule.getMinAltitude();
+	maths::vec3d offset = terrain.getBoundingBox().getLowerBound();
+	maths::vec3d size = terrain.getBoundingBox().getUpperBound() - offset;
+	double factor = size.x / size.z;
 
 	// Construction du noeud irrlicht
     int dataSize;
-    const char* data = terrain.getRawData(dataSize, heightScaling / scaling);
+    const char* data = terrain.getRawData(dataSize, factor);
     IReadFile * memoryFile = _fileSystem->createMemoryReadFile((void*)data, dataSize, "", false);
 
     ITerrainSceneNode * result =
             _sceneManager->addTerrainSceneNode(nullptr, 0, -1,
-                                               vector3df(terrainX, heightPos, terrainY),
+                                               vector3df((float) offset.x, (float) offset.z, (float) offset.y),
                                                vector3df(0.0f, 0.0f, 0.0f),
-                                               vector3df(scaling, scaling, scaling),
+                                               vector3df((float) size.x, (float) (size.z / factor), (float) (size.y)),
                                                SColor(255, 255, 255, 255),
                                                2, ETPS_17, 4, true);
     result->loadHeightMapRAW(memoryFile, 32, true, true, 0, SColor(255,255,255,255), 4);
@@ -142,5 +115,5 @@ void GroundManager::addNode(const TerrainTile &tile, const Ground & groundModule
     anim->drop();
 	//*/
 
-	_terrainNodes[std::pair<int, int>(tile._x, tile._y)] = result;
+	return result;
 }

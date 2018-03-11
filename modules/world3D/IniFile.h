@@ -1,7 +1,3 @@
-//
-// Created by louis on 23/04/17.
-//
-
 #ifndef WORLD_INITFILE_H
 #define WORLD_INITFILE_H
 

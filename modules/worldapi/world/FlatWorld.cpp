@@ -23,8 +23,8 @@ Ground& FlatWorld::ground() {
 	return _ground;
 }
 
-void FlatWorld::generateChunk(Chunk & chunk) {
-	World::generateChunk(chunk);
+void FlatWorld::onFirstExploration(ChunkNode &chunk) {
+    World::onFirstExploration(chunk);
 
 	for (auto & decorator : _internal->_chunkDecorators) {
 		decorator->decorate(*this, chunk);

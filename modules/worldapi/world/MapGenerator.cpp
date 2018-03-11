@@ -20,9 +20,9 @@ ReliefMapGenerator::ReliefMapGenerator() {
 
 
 // -----
-const float CustomWorldRMGenerator::PIXEL_UNIT = 10;
+const double CustomWorldRMGenerator::PIXEL_UNIT = 10;
 
-CustomWorldRMGenerator::CustomWorldRMGenerator(float biomeDensity, uint32_t limitBrightness) :
+CustomWorldRMGenerator::CustomWorldRMGenerator(double biomeDensity, uint32_t limitBrightness) :
 	_biomeDensity(biomeDensity),
 	_limitBrightness(limitBrightness),
 	_diffLaw(std::make_unique<relief::CustomWorldDifferential>()) {

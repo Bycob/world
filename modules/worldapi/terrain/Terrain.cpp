@@ -48,8 +48,18 @@ Terrain::Terrain(Terrain &&terrain)
 
 }
 
-Terrain::~Terrain() {
+Terrain::~Terrain() = default;
 
+void Terrain::setBounds(double xmin, double ymin, double zmin, double xmax, double ymax, double zmax) {
+	_bbox.reset({xmin, ymin, zmin}, {xmax, ymax, zmax});
+}
+
+const maths::BoundingBox& Terrain::getBoundingBox() const {
+	return _bbox;
+}
+
+double& Terrain::operator()(int x, int y) {
+	return _array(x, y);
 }
 
 double Terrain::getZ(double x, double y) const {
@@ -149,6 +159,24 @@ Mesh * Terrain::convertToMesh(double offsetX, double offsetY, double offsetZ, do
 
 Image Terrain::convertToImage() const {
 	return Image(this->_array);
+}
+
+char * Terrain::getRawData(int &rawDataSize, float height, float offset) const {
+	float * result = new float[_array.n_rows * _array.n_cols];
+
+	for (int x = 0 ; x < _array.n_rows ; x++) {
+		for (int y = 0 ; y < _array.n_cols ; y++) {
+			result[x * _array.n_cols + y] = (float) _array(x, y) * height + offset;
+		}
+	}
+
+	rawDataSize = getRawDataSize();
+
+	return (char*) result;
+}
+
+int Terrain::getRawDataSize() const {
+	return (int) (_array.n_rows * _array.n_cols) * sizeof(float) / sizeof(char);
 }
 
 Image Terrain::getTexture() const {

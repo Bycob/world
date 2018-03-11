@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
 
 void testCircularSkeletton(int argc, char** argv) {
 	std::cout << "Test des WeightedSkeletton avec des références circulaires" << std::endl;
-	WeightedSkeletton<TreeInfo> *skeletton = new WeightedSkeletton<TreeInfo>();
+	auto *skeletton = new WeightedSkeletton<TreeInfo>();
 
 	Node<TreeInfo> * primaryNode = skeletton->getPrimaryNode();
 	primaryNode->setWeight(1);

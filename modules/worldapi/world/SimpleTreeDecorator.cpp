@@ -34,8 +34,11 @@ void SimpleTreeDecorator::setTreeGenerator(TreeGenerator * generator) {
 	_treeGenerator = std::unique_ptr<TreeGenerator>(generator);
 }
 
-void SimpleTreeDecorator::decorate(FlatWorld & world, Chunk & chunk) {
-	if (chunk.getChunkPosition().getPosition3D().z != 0) return;
+void SimpleTreeDecorator::decorate(FlatWorld & world, ChunkNode & chunkNode) {
+	Chunk &chunk = chunkNode._chunk;
+
+	if (chunk.getMinDetailSize() > 0.5 || chunk.getMaxDetailSize() <= 0.5)
+		return;
 
 	vec3d chunkSize = chunk.getSize();
 
@@ -68,11 +71,12 @@ void SimpleTreeDecorator::decorate(FlatWorld & world, Chunk & chunk) {
 		Tree * tree = _treeGenerator->generate(*skeletton);
 		
 		// Détermination de l'altitude de l'arbre
-		vec3d absolutePosition = chunk.toAbsolutePosition(vec3d(position.x, position.y, 0));
-		absolutePosition.z += ground.getAltitudeAt(absolutePosition.x, absolutePosition.y);
-		
-		tree->setPosition3D(absolutePosition);
+		// FIXME Attention, ne fonctionne plus si on active le lod
+		vec3d pos3D(position.x, position.y,
+					ground.observeAltitudeAt(position.x, position.y) - chunk.getOffset().z);
+
+		tree->setPosition3D(pos3D);
 		chunk.addObject(tree);
-		std::cout << absolutePosition << std::endl;
+		std::cout << pos3D << std::endl;
 	}
 }
