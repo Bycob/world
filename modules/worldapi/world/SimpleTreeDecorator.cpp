@@ -71,6 +71,7 @@ void SimpleTreeDecorator::decorate(FlatWorld & world, ChunkNode & chunkNode) {
 		Tree * tree = _treeGenerator->generate(*skeletton);
 		
 		// Détermination de l'altitude de l'arbre
+		// FIXME Actuellement des arbres pop dans tous les chunks verticalement :/
 		// FIXME Attention, ne fonctionne plus si on active le lod
 		vec3d pos3D(position.x, position.y,
 					ground.observeAltitudeAt(position.x, position.y) - chunk.getOffset().z);

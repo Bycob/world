@@ -29,8 +29,8 @@ public:
 	ObjectsManager(Application & app, irr::IrrlichtDevice * device);
 	virtual ~ObjectsManager();
 
-	void initialize(const FlatWorldCollector &collector) override;
-	void update(const FlatWorldCollector &collector) override;
+	void initialize(FlatWorldCollector &collector) override;
+	void update(FlatWorldCollector &collector) override;
 
 	static irr::scene::SMesh * convertToIrrlichtMesh(const Mesh & mesh, irr::video::IVideoDriver * driver);
 private:

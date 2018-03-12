@@ -16,6 +16,7 @@
 #include "../world/MapGenerator.h"
 
 class FlatWorld;
+class FlatWorldCollector;
 class GroundCache;
 
 /** Cette classe gère le sol du monde. Le sol est composé de plusieurs
@@ -44,6 +45,7 @@ public:
 
 	// EXPLORATION
 	double observeAltitudeAt(double x, double y, int lvl = 0);
+	void collectChunk(FlatWorldCollector &collector, FlatWorld &world, ChunkNode &chunkNode);
 private:
 	// Paramètres
 	/** L'altitude maximum du monde. Le niveau de la mer est fixé à 0. */
@@ -79,7 +81,7 @@ private:
 	// DATA
 	/** Donne un identifiant unique pour la section de terrain à
 	 * l'emplacement donné. */
-	std::string getTerrainDataId(int x, int y, int lvl) const;
+	long getTerrainDataId(int x, int y, int lvl) const;
     double getTerrainSize(int level) const;
 
 	// GENERATION
@@ -89,7 +91,7 @@ private:
 	 * - the terrains with higher level at the same place are already
 	 * generated.*/
     void generateTerrain(int x, int y, int lvl);
-    void applyMap(int x, int y, int lvl, bool unapply);
+    void applyMap(int x, int y, int lvl, bool unapply = false);
 };
 
 

@@ -36,9 +36,11 @@ Terrain::Terrain(const Mat<double> & data) :
 
 Terrain::Terrain(const Terrain &terrain)
 		: _array(terrain._array),
-		  _texture(std::make_unique<Image>(*terrain._texture)),
-		  _bbox(terrain._bbox){
-	
+		  _bbox(terrain._bbox) {
+
+	if (terrain._texture != nullptr) {
+		_texture = std::make_unique<Image>(*terrain._texture);
+	}
 }
 
 Terrain::Terrain(Terrain &&terrain)
@@ -49,6 +51,15 @@ Terrain::Terrain(Terrain &&terrain)
 }
 
 Terrain::~Terrain() = default;
+
+Terrain& Terrain::operator=(const Terrain &terrain) {
+	_array = terrain._array;
+	_bbox = terrain._bbox;
+
+	if (terrain._texture != nullptr) {
+		_texture = std::make_unique<Image>(*terrain._texture);
+	}
+}
 
 void Terrain::setBounds(double xmin, double ymin, double zmin, double xmax, double ymax, double zmax) {
 	_bbox.reset({xmin, ymin, zmin}, {xmax, ymax, zmax});

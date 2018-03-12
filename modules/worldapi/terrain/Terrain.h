@@ -36,6 +36,8 @@ public :
 
 	virtual ~Terrain();
 
+	Terrain& operator=(const Terrain& terrain);
+
 	void setBounds(double xmin, double ymin, double zmin, double xmax, double ymax, double zmax);
 	const maths::BoundingBox & getBoundingBox() const;
 

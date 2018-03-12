@@ -26,6 +26,7 @@ double FirstPersonWorldExplorer::getDetailSizeAt(const vec3d &pos) {
     return _angularResolution * length;
 }
 
+// TODO cette méthode en template ! (Avec IWorldCollector<T>)
 void FirstPersonWorldExplorer::explore(World &world, WorldCollector &collector) {
     std::set<ChunkNode> explored;
     std::set<ChunkNode> toExplore;
@@ -37,7 +38,7 @@ void FirstPersonWorldExplorer::explore(World &world, WorldCollector &collector) 
         ChunkNode currentChunk = *it;
 
         // Retrieve content
-
+        collector.collect(world, currentChunk);
 
         // Vertical exploration : we explore the inside
 

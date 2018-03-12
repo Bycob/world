@@ -3,13 +3,47 @@
 
 #include <worldapi/worldapidef.h>
 
-#include "WorldCollector.h"
+#include <map>
 
-class FlatWorldCollector : public WorldCollector{
+#include "WorldCollector.h"
+#include "FlatWorld.h"
+#include "../terrain/Terrain.h"
+
+class FlatWorldCollector;
+
+class PrivateTerrainIterator;
+
+class WORLDAPI_EXPORT TerrainIterator
+        : public std::iterator<std::forward_iterator_tag, std::pair<long, Terrain*>> {
+public:
+    TerrainIterator(FlatWorldCollector &collector);
+    ~TerrainIterator();
+
+    void operator++();
+    std::pair<long, Terrain*> operator*();
+    bool hasNext() const;
+private:
+    PrivateTerrainIterator* _internal;
+
+    FlatWorldCollector &_collector;
+};
+
+class WORLDAPI_EXPORT FlatWorldCollector : public WorldCollector{
 public:
     FlatWorldCollector();
     ~FlatWorldCollector() override;
 
+    void reset() override;
+    void collect(World & world, ChunkNode & chunk) override;
+    void collect(FlatWorld &world, ChunkNode & chunk);
+
+    // TODO TerrainStream
+    void addTerrain(long key, const Terrain &terrain);
+    TerrainIterator iterateTerrains();
+private:
+    friend class TerrainIterator;
+
+    std::map<long, Terrain> _terrains;
 };
 
 

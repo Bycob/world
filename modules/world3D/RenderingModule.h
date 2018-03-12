@@ -10,8 +10,8 @@ public:
 	RenderingModule(Application & app, irr::IrrlichtDevice * device);
 	virtual ~RenderingModule();
 
-	virtual void initialize(const FlatWorldCollector & collector) = 0;
-	virtual void update(const FlatWorldCollector & collector) = 0;
+	virtual void initialize(FlatWorldCollector &collector) = 0;
+	virtual void update(FlatWorldCollector &collector) = 0;
 
 	Application & _app;
 

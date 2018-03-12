@@ -24,32 +24,38 @@ GroundManager::~GroundManager() {
     clearAllNodes();
 }
 
-void GroundManager::initialize(const FlatWorldCollector &collector) {
+void GroundManager::initialize(FlatWorldCollector &collector) {
     clearAllNodes();
 
     update(collector);
 }
 
-void GroundManager::update(const FlatWorldCollector &collector) {
+void GroundManager::update(FlatWorldCollector &collector) {
 
     /*/ Test
-    PerlinTerrainGenerator generator(129, 0, 5, 1, 0.4);
+    PerlinTerrainGenerator generator(0, 5, 1, 0.4);
     std::unique_ptr<Terrain> terrain(generator.generate());
 	addNode({ *terrain, 0, 0 }, ground);
     //*/
 
 	// TODO Remove des terrains trop loin
+    for (auto &pair : _terrainNodes) {
+        pair.second->remove();
+    }
+    _terrainNodes.clear();
 
 	_driver->removeAllHardwareBuffers();
 
     // Add terrains if they're not already here
-    /*auto terrainIt = collector.iterateTerrains();
+    auto terrainIt = collector.iterateTerrains();
 
-    for (; terrainIt.hasNext(); terrainIt++) {
+    for (; terrainIt.hasNext(); ++terrainIt) {
         auto pair = *terrainIt;
-        if (_terrainNodes.find(pair.first) == _terrainNodes.end())
-            _terrainNodes[pair.first] = createNode(pair.second);
-    }*/
+
+        if (_terrainNodes.find(pair.first) == _terrainNodes.end()) {
+            _terrainNodes[pair.first] = createNode(*pair.second);
+        }
+    }
 }
 
 void GroundManager::clearAllNodes() {
@@ -66,15 +72,16 @@ ITerrainSceneNode* GroundManager::createNode(const Terrain &terrain) {
 	int terrainRes = (terrain.getSize() - 1);
 	maths::vec3d offset = terrain.getBoundingBox().getLowerBound();
 	maths::vec3d size = terrain.getBoundingBox().getUpperBound() - offset;
+    size = size / terrainRes;
 	double factor = size.x / size.z;
 
 	// Construction du noeud irrlicht
     int dataSize;
-    const char* data = terrain.getRawData(dataSize, factor);
+    const char* data = terrain.getRawData(dataSize, factor * terrainRes);
     IReadFile * memoryFile = _fileSystem->createMemoryReadFile((void*)data, dataSize, "", false);
 
     ITerrainSceneNode * result =
-            _sceneManager->addTerrainSceneNode(nullptr, 0, -1,
+            _sceneManager->addTerrainSceneNode(nullptr, nullptr, -1,
                                                vector3df((float) offset.x, (float) offset.z, (float) offset.y),
                                                vector3df(0.0f, 0.0f, 0.0f),
                                                vector3df((float) size.x, (float) (size.z / factor), (float) (size.y)),

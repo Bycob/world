@@ -8,6 +8,7 @@
 
 #include "TerrainManipulator.h"
 #include "TerrainGenerator.h"
+#include "../world/FlatWorldCollector.h"
 
 using namespace maths;
 
@@ -25,7 +26,7 @@ public:
 Ground::Ground() :
 		  _cache(new GroundCache()),
 		  _unitSize(4000), _maxAltitude(4000), _minAltitude(-2000) {
-    _terrainGenerator = std::make_unique<PerlinTerrainGenerator>(129, 0, 5, 4);
+    _terrainGenerator = std::make_unique<PerlinTerrainGenerator>(0, 5, 4);
     _mapGenerator = std::make_unique<CustomWorldRMGenerator>();
 }
 
@@ -34,26 +35,45 @@ Ground::~Ground() {
 }
 
 double Ground::observeAltitudeAt(double x, double y, int lvl) {
-    int xi = (int)floor(x / _unitSize);
-    int yi = (int)floor(y / _unitSize);
+    double size = getTerrainSize(lvl);
+    int xi = (int)floor(x / size);
+    int yi = (int)floor(y / size);
 
     if (!terrainExists(xi, yi)) {
         generateTerrain(xi, yi, lvl);
     }
 
     const Terrain & terrain = const_cast<Ground*>(this)->terrain(xi, yi);
-    return _minAltitude + (_maxAltitude - _minAltitude) * terrain.getZInterpolated(x / _unitSize - xi, y / _unitSize - yi);
+    return _minAltitude + (_maxAltitude - _minAltitude) * terrain.getZInterpolated(x / size - xi, y / size - yi);
 }
 
 bool Ground::terrainExists(int x, int y, int lvl) const {
 	return terrains().find({ x, y, lvl}) != terrains().end();
 }
 
-std::string Ground::getTerrainDataId(int x, int y, int lvl) const {
+void Ground::collectChunk(FlatWorldCollector &collector, FlatWorld &world, ChunkNode &chunkNode) {
+    generateChunk(world, chunkNode);
+    Chunk& chunk = chunkNode._chunk;
+
+    int lvl = 0;
+
+    // Find terrains to generate
+    double terrainSize = getTerrainSize(lvl);
+    vec3d lower = chunk.getOffset() / terrainSize;
+    vec3d upper = lower + chunk.getSize() / terrainSize;
+
+    for (int x = (int) floor(lower.x) ; x < ceil(upper.x) ; x++) {
+        for (int y = (int) floor(lower.y) ; y < ceil(upper.y) ; y++) {
+            collector.addTerrain(getTerrainDataId(x, y, lvl), terrain(x, y, lvl));
+        }
+    }
+}
+
+long Ground::getTerrainDataId(int x, int y, int lvl) const {
 	uint64_t id = (uint64_t)(x & 0x0FFFFFFF) 
 		+ ((uint64_t) (y & 0x0FFFFFFF) << 24)
 		+ ((uint64_t) (lvl & 0xFF) << 48);
-	return std::to_string(id);
+	return id;
 }
 
 std::map<vec3i, std::unique_ptr<Terrain>>& Ground::terrains() const {
@@ -104,13 +124,21 @@ void Ground::generateChunk(FlatWorld &world, ChunkNode &chunkNode) {
 
 void Ground::generateTerrain(int x, int y, int lvl) {
     // Terrain creation
-    Terrain& created = *(_cache->_terrains[{x, y, lvl}] = std::make_unique<Terrain>(129));
-    _terrainGenerator->process(created);
+    std::unique_ptr<Terrain> created = std::make_unique<Terrain>(129);
+    _terrainGenerator->process(*created);
+
+    // Bounds
+    double terrainSize = getTerrainSize(lvl);
+    // TODO min altitude and max altitude also depends on lvl
+    created->setBounds(terrainSize * x, terrainSize * y, _minAltitude,
+                      terrainSize * (x + 1), terrainSize * (y + 1), _maxAltitude);
 
     // Join
     // TODO
 
-	applyMap(x, y, lvl, true);
+    _cache->_terrains[{x, y, lvl}] = std::move(created);
+
+	applyMap(x, y, lvl);
 }
 
 void Ground::applyMap(int tX, int tY, int lvl, bool unapply) {

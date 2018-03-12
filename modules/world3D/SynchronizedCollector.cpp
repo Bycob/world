@@ -5,7 +5,8 @@
 #include "SynchronizedCollector.h"
 
 //private 
-SynchronizedCollector::SynchronizedCollector() {
+SynchronizedCollector::SynchronizedCollector()
+        : _collector(std::make_unique<FlatWorldCollector>()) {
 
 }
 

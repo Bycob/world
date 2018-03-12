@@ -64,13 +64,13 @@ ObjectsManager::~ObjectsManager() {
 
 }
 
-void ObjectsManager::initialize(const FlatWorldCollector &collector) {
+void ObjectsManager::initialize(FlatWorldCollector &collector) {
 	_objects.clear();
 
 	update(collector);
 }
 
-void ObjectsManager::update(const FlatWorldCollector &collector) {
+void ObjectsManager::update(FlatWorldCollector &collector) {
 	/*auto it = collector.objectsIterator();
 
 	for (; it.hasNext(); it++) {

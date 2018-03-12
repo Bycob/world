@@ -153,7 +153,6 @@ std::pair<ChunkNode, bool> ChunkSystem::getOrCreateNeighbourID(const ChunkNode &
     ChunkID nid = ChunkID(id.getPosition3D() + direction, id.getLOD());
 
     bool created = createChunk(nid);
-    printf("%p\n", getChunk(nid));
     return {getChunkNode(nid), created};
 }
 
