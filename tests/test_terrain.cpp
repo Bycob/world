@@ -113,6 +113,7 @@ void testPerlin(int argc, char** argv) {
 
 	Perlin perlin;
 
+	// @Deprecated
     // CREATION DE DEUX PERLIN ET JOIN
     try {
         std::cout << "Génération de deux bruits de perlin..." << std::endl;

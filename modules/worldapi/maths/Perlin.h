@@ -32,6 +32,7 @@ public :
                                             float persistence,
                                             bool repeatable = false);
 
+
     /** Cette fonction permet de modifier les bords des deux matrices passées
     en paramètres de sorte qu'elle s'assemble parfaitement selon la direction
     souhaitée. La jointure est effectuée par un bruit de perlin, dont les
@@ -43,7 +44,8 @@ public :
      avec les grilles adjacentes dans l'autre direction. Ainsi, si on joint deux
      couples de grilles dans une direction, et qu'on souhaite les joindre également
      dans l'autre direction, on peut mettre ce paramètre à true pour conserver
-     la jointure. */
+     la jointure.
+    @deprecated parce qu'extremement moche*/
     void join(arma::Mat<double> &matDown,
               arma::Mat<double> &matUp,
               const perlin::Direction &direction,
@@ -56,6 +58,10 @@ private :
     std::mt19937 _rng;
     std::uniform_real_distribution<double> _random;
 
+    // Buffer for perlin points
+    arma::mat _buffer;
+
+    void growBuffer(arma::uword size);
     void generatePerlinOctave(arma::Mat<double> &output,
                               int offset,
                               float frequency,

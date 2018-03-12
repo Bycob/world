@@ -39,70 +39,59 @@ Perlin::Perlin(long seed) : _rng(seed), _random(0.0, 1.0) {
 
 }
 
+void Perlin::growBuffer(arma::uword size) {
+    if (_buffer.n_rows < size) {
+        _buffer = arma::mat(size, size);
+    }
+}
+
 void Perlin::generatePerlinOctave(Mat<double> &output,
                           int offset,
                           float frequency,
                           bool repeatable) {
 
-    //Détermination de la taille de la matrice
-    int size = (int) std::min(output.n_rows, output.n_cols);
-    //marche le mieux avec des tailles de pattern de la forme 2^n + 1 et fréquence en 2^i
-    int period = max((int) ((size - 1) / frequency), 1);
+    uword fi = (uword) ceil(frequency) + 1;
+    growBuffer(fi);
 
-    // Implémentation de la répétabilité
-    int firstX = 0, firstY = firstX;
-    int lastX = repeatable ? size - period : size, lastY = lastX;
+    // Fill buffer
+    for (int x = 0 ; x < fi ; x++) {
+        for (int y = 0 ; y < fi ; y++) {
+            _buffer(x, y) = _random(_rng);
 
-    int overflowX = period * ((size - 1) / period);
-    if (repeatable) {
-        overflowX = size;
-    }
-    int overflowY = overflowX;
-
-    //Génération des valeurs aléatoires
-    for (int x = firstX; x < lastX; x += period) {
-        for (int y = firstY; y < lastY; y += period) {
-            output(x, y) = _random(_rng);
+            if (repeatable) {
+                if (x == fi - 1) {
+                    _buffer(x, y) = _buffer(0, y);
+                }
+                else if (y == fi - 1) {
+                    _buffer(x, y) = _buffer(x, 0);
+                }
+            }
         }
     }
 
-    //Interpolation
-    for (int x = 0; x < size; x++) {
-        for (int y = 0; y < size; y++) {
+    // Build octave
+    for (int x = 0; x < output.n_rows; x++) {
+        for (int y = 0; y < output.n_cols; y++) {
+            double xd = (double) x / output.n_rows;
+            double yd = (double) y / output.n_cols;
 
-            if (x % period != 0 || x >= lastX ||
-                y % period != 0 || y >= lastY) {
+            // Bounds
+            double f1 = frequency + 1;
+            int borneX1 = (int) (xd * f1);
+            int borneY1 = (int) (yd * f1);
+            int borneX2 = maths::min(borneX1 + 1, (int)(fi - 1));
+            int borneY2 = maths::min(borneY1 + 1, (int)(fi - 1));
 
-                //Calcul des bornes
-                int borneX1, borneX2, borneY1, borneY2;
+            // Interpolation
+            double v1 = interpolateCosine(borneX1 / f1, _buffer(borneX1, borneY1),
+                                          borneX2 / f1, _buffer(borneX2, borneY1),
+                                          xd);
 
-                int tileX = min(x, lastX) / period;
-                int tileY = min(y, lastY) / period;
+            double v2 = interpolateCosine(borneX1 / f1, _buffer(borneX1, borneY2),
+                                          borneX2 / f1, _buffer(borneX2, borneY2),
+                                          xd);
 
-                borneX1 = tileX * period;
-                borneY1 = tileY * period;
-                borneX2 = borneX1 + period;
-                borneY2 = borneY1 + period;
-
-                if (borneX2 >= lastX) {
-                    borneX2 = overflowX;
-                }
-                if (borneY2 >= lastY) {
-                    borneY2 = overflowY;
-                }
-
-
-                //Interpolation
-                double v1 = interpolateCosine(borneX1, output(borneX1, borneY1),
-                                        borneX2, output(borneX2 % size, borneY1),
-                                        x);
-
-                double v2 = interpolateCosine(borneX1, output(borneX1, borneY2 % size),
-                                        borneX2, output(borneX2 % size, borneY2 % size),
-                                        x);
-
-                output(x, y) = interpolateCosine(borneY1, v1, borneY2, v2, y);
-            }
+            output(x, y) = interpolateCosine(borneY1 / f1, v1, borneY2 / f1, v2, yd);
         }
     }
 }
@@ -123,7 +112,7 @@ void Perlin::generatePerlinNoise2D(Mat<double> &output,
 
     Mat<double> octave(size, size);
     for (int i = 1; i <= octaveCount; i++) {
-        generatePerlinOctave(octave, offset * (i - 1), frequency * (float) pow(2, i - 1), repeatable);
+        generatePerlinOctave(octave, offset * i, frequency * (float) pow(2, i - 1), repeatable);
         output += octave * coefs[i -1];
     }
 }
@@ -139,6 +128,10 @@ Mat<double> Perlin::generatePerlinNoise2D(int size,
     generatePerlinNoise2D(result, offset, octaves, frequency, persistence, repeatable);
     return result;
 }
+
+
+// ICI LE MUSEE
+// HERE IS THE MUSEUM
 
 void Perlin::join(arma::Mat<double> &mat1,
                   arma::Mat<double> &mat2,
