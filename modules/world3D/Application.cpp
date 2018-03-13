@@ -42,7 +42,7 @@ void Application::run(int argc, char **argv) {
 				FlatWorldCollector &collector = _collector->get();
 				collector.reset();
 
-				_explorer->explore(*_world, collector);
+				_explorer->explore<FlatWorld>(*_world, collector);
 
 				_collector->unlock();
 

@@ -10,6 +10,12 @@
 #include "../Object3D.h"
 #include "../Material.h"
 
+template <typename T>
+class WORLDAPI_EXPORT IWorldCollector {
+public:
+    virtual void collect(T &world, ChunkNode &chunkNode) = 0;
+};
+
 class WorldCollector;
 
 class PrivateWorldCollectorIterator;
@@ -25,7 +31,7 @@ private:
 
 class PrivateWorldCollector;
 
-class WORLDAPI_EXPORT WorldCollector {
+class WORLDAPI_EXPORT WorldCollector : public IWorldCollector<World> {
 public:
     typedef long ObjectKey;
     typedef long PartKey;

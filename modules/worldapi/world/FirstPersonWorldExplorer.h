@@ -14,7 +14,8 @@ public:
     void setMinAngle(double minAngle);
     void setPunctumProximum(double punctumProximum);
 
-    void explore(World & world, WorldCollector & collector);
+    template <typename T>
+    void explore(T & world, IWorldCollector<T> & collector);
 
     double getDetailSizeAt(const maths::vec3d &pos);
 private:
@@ -23,5 +24,6 @@ private:
     maths::vec3d _origin;
 };
 
+#include "FirstPersonWorldExplorer.inl"
 
 #endif //WORLD_FIRSTPERSONWORLDEXPLORER_H

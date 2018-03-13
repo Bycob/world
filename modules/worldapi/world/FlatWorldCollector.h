@@ -28,14 +28,13 @@ private:
     FlatWorldCollector &_collector;
 };
 
-class WORLDAPI_EXPORT FlatWorldCollector : public WorldCollector{
+class WORLDAPI_EXPORT FlatWorldCollector : public WorldCollector, public IWorldCollector<FlatWorld> {
 public:
     FlatWorldCollector();
     ~FlatWorldCollector() override;
 
     void reset() override;
-    void collect(World & world, ChunkNode & chunk) override;
-    void collect(FlatWorld &world, ChunkNode & chunk);
+    void collect(FlatWorld &world, ChunkNode & chunk) override;
 
     // TODO TerrainStream
     void addTerrain(long key, const Terrain &terrain);

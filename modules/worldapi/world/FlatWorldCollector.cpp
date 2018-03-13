@@ -39,18 +39,6 @@ void FlatWorldCollector::reset() {
     _terrains.clear();
 }
 
-void FlatWorldCollector::collect(World &world, ChunkNode &chunk) {
-    // TODO meme comportement, mais avec des templates -> Tellement plus propre !
-    FlatWorld* flatWorld = dynamic_cast<FlatWorld*>(&world);
-
-    if (flatWorld) {
-        collect(*flatWorld, chunk);
-    }
-    else {
-        WorldCollector::collect(world, chunk);
-    }
-}
-
 void FlatWorldCollector::collect(FlatWorld &world, ChunkNode &chunk) {
     WorldCollector::collect(world, chunk);
 
