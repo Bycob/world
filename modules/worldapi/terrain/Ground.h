@@ -92,6 +92,8 @@ private:
 	 * generated.*/
     void generateTerrain(int x, int y, int lvl);
     void applyMap(int x, int y, int lvl, bool unapply = false);
+
+	friend class GroundContext;
 };
 
 

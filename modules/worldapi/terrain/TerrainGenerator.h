@@ -12,7 +12,11 @@
 #include "Terrain.h"
 #include "TerrainSubdivisionTree.h"
 
-#define DEFAULT_TERRAIN_SIZE 257
+class WORLDAPI_EXPORT ITerrainGeneratorContext {
+public:
+    virtual bool neighbourExists(int x, int y) const = 0;
+    virtual const Terrain& getNeighbour(int x, int y) const = 0;
+};
 
 class WORLDAPI_EXPORT TerrainGenerator {
 public:
@@ -21,6 +25,7 @@ public:
 
 	Terrain * createTerrain(int size);
 	virtual void process(Terrain &terrain) = 0;
+    virtual void process(Terrain &terrain, const ITerrainGeneratorContext &context);
 
 	virtual void join(Terrain & terrain1, Terrain & terrain2, bool axisX, bool joinableSides = false) = 0;
 
@@ -49,6 +54,7 @@ public :
 	void setFrequency(float frequency) {_frequency = frequency;}
 
 	void process(Terrain &terrain) override;
+    void process(Terrain &terrain, const ITerrainGeneratorContext &context) override;
 
 	void join(Terrain & terrain1, Terrain & terrain2, bool axisX, bool joinableSides) override;
 

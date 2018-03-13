@@ -18,12 +18,13 @@ using namespace arma;
 
 //DECLARATIONS
 void testTinyObjLoader(int argc, char** argv);
+void testRepeatable(int argc, char** argv);
 void testPerlin(int argc, char** argv);
 
 
 //MAIN
 int main(int argc, char** argv) {
-	testPerlin(argc, argv);
+	testRepeatable(argc, argv);
 }
 
 

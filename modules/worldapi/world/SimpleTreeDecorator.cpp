@@ -78,6 +78,6 @@ void SimpleTreeDecorator::decorate(FlatWorld & world, ChunkNode & chunkNode) {
 
 		tree->setPosition3D(pos3D);
 		chunk.addObject(tree);
-		std::cout << pos3D << std::endl;
+		// std::cout << pos3D << std::endl;
 	}
 }

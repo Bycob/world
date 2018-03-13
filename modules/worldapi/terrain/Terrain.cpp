@@ -74,23 +74,23 @@ double& Terrain::operator()(int x, int y) {
 }
 
 double Terrain::getZ(double x, double y) const {
-	int posX = (int) (x * _array.n_rows);
-	int posY = (int) (y * _array.n_cols);
+	// TODO gerer depassement de bornes
+	int posX = (int) (x * (_array.n_rows - 1));
+	int posY = (int) (y * (_array.n_cols - 1));
 
 	return _array(posX, posY);
 }
 
 double Terrain::getZInterpolated(double x, double y) const {
-	int width = (int)_array.n_rows;
-	int height = (int)_array.n_cols;
+	int width = (int) (_array.n_rows - 1);
+	int height = (int) (_array.n_cols - 1);
 
 	x *= width;
 	y *= height;
-	// TODO définir le comportement de manière plus exacte
-	int posX1 = min(width - 1, (int) floor(x));
-	int posY1 = min(height - 1, (int) floor(y));
-	int posX2 = posX1 + 1; if (posX2 >= width) posX2 = posX1;
-	int posY2 = posY1 + 1; if (posY2 >= height) posY2 = posY1;
+	int posX1 = clamp((int) floor(x), 0, width);
+	int posY1 = clamp((int) floor(y), 0, height);
+	int posX2 = min(posX1 + 1, width);
+	int posY2 = min(posY1 + 1, height);
 
 	double ip1 = interpolateLinear(posX1, _array(posX1, posY1), posX2, _array(posX2, posY1), x);
 	double ip2 = interpolateLinear(posX1, _array(posX1, posY2), posX2, _array(posX2, posY2), x);

@@ -14,6 +14,10 @@ using namespace arma;
 using namespace maths;
 using namespace perlin;
 
+Perlin::modifier Perlin::DEFAULT_MODIFIER = [&] (double, double, double val){
+    return val;
+};
+
 std::vector<double> getCoefs(int octaves, double persistence) {
     std::vector<double> coefs;
 
@@ -46,26 +50,29 @@ void Perlin::growBuffer(arma::uword size) {
 }
 
 void Perlin::generatePerlinOctave(Mat<double> &output,
-                          int offset,
-                          float frequency,
-                          bool repeatable) {
+                                  int offset,
+                                  float frequency,
+                                  bool repeatable,
+                                  const modifier &sourceModifier) {
 
-    uword fi = (uword) ceil(frequency) + 1;
-    growBuffer(fi);
+    uword fi = (uword) ceil(frequency);
+    growBuffer(fi + 1);
 
     // Fill buffer
-    for (int x = 0 ; x < fi ; x++) {
-        for (int y = 0 ; y < fi ; y++) {
-            _buffer(x, y) = _random(_rng);
+    for (int x = 0 ; x <= fi ; x++) {
+        for (int y = 0 ; y <= fi ; y++) {
+            double val = _random(_rng);
 
             if (repeatable) {
-                if (x == fi - 1) {
-                    _buffer(x, y) = _buffer(0, y);
+                if (x == fi) {
+                    val = _buffer(0, y);
                 }
-                else if (y == fi - 1) {
-                    _buffer(x, y) = _buffer(x, 0);
+                else if (y == fi) {
+                    val = _buffer(x, 0);
                 }
             }
+
+            _buffer(x, y) = sourceModifier((double) x / fi, (double) y / fi, val);
         }
     }
 
@@ -76,11 +83,11 @@ void Perlin::generatePerlinOctave(Mat<double> &output,
             double yd = (double) y / output.n_cols;
 
             // Bounds
-            double f1 = frequency + 1;
+            double f1 = frequency;
             int borneX1 = (int) (xd * f1);
             int borneY1 = (int) (yd * f1);
-            int borneX2 = maths::min(borneX1 + 1, (int)(fi - 1));
-            int borneY2 = maths::min(borneY1 + 1, (int)(fi - 1));
+            int borneX2 = maths::min(borneX1 + 1, (int)fi);
+            int borneY2 = maths::min(borneY1 + 1, (int)fi);
 
             // Interpolation
             double v1 = interpolateCosine(borneX1 / f1, _buffer(borneX1, borneY1),
@@ -96,12 +103,18 @@ void Perlin::generatePerlinOctave(Mat<double> &output,
     }
 }
 
+void Perlin::generatePerlinNoise2D(arma::Mat<double> &output, int offset, int octaves, float frequency,
+                                   float persistence, bool repeatable) {
+    generatePerlinNoise2D(output, offset, octaves, frequency, persistence, repeatable, DEFAULT_MODIFIER);
+}
+
 void Perlin::generatePerlinNoise2D(Mat<double> &output,
-                           int offset,
-                           int octaveCount,
-                           float frequency,
-                           float persistence,
-                           bool repeatable) {
+                                   int offset,
+                                   int octaveCount,
+                                   float frequency,
+                                   float persistence,
+                                   bool repeatable,
+                                   const modifier &sourceModifier) {
 
     //Détermination de la taille de la matrice
     const uword size = std::min(output.n_rows, output.n_cols);
@@ -112,17 +125,17 @@ void Perlin::generatePerlinNoise2D(Mat<double> &output,
 
     Mat<double> octave(size, size);
     for (int i = 1; i <= octaveCount; i++) {
-        generatePerlinOctave(octave, offset * i, frequency * (float) pow(2, i - 1), repeatable);
+        generatePerlinOctave(octave, offset * i, frequency * (float) pow(2, i - 1), repeatable, sourceModifier);
         output += octave * coefs[i -1];
     }
 }
 
 Mat<double> Perlin::generatePerlinNoise2D(int size,
-                                  int offset,
-                                  int octaves,
-                                  float frequency,
-                                  float persistence,
-                                  bool repeatable) {
+                                          int offset,
+                                          int octaves,
+                                          float frequency,
+                                          float persistence,
+                                          bool repeatable) {
 
     Mat<double> result((uword) size, (uword) size);
     generatePerlinNoise2D(result, offset, octaves, frequency, persistence, repeatable);

@@ -20,6 +20,10 @@ Terrain* TerrainGenerator::createTerrain(int size) {
 	return result;
 }
 
+void TerrainGenerator::process(Terrain &terrain, const ITerrainGeneratorContext &context) {
+    process(terrain);
+}
+
 TerrainSubdivisionTree * TerrainGenerator::generateSubdivisions(Terrain & terrain, int subdivideFactor, int subdivisionsCount) {
 	auto* result = new TerrainSubdivisionTree(terrain);
 	generateSubdivisionLevels(*result, subdivideFactor, subdivisionsCount);
@@ -99,6 +103,36 @@ PerlinTerrainGenerator::~PerlinTerrainGenerator() {
 
 void PerlinTerrainGenerator::process(Terrain &terrain) {
 	_perlin.generatePerlinNoise2D(terrain._array, _offset, _octaveCount, _frequency, _persistence);
+}
+
+void PerlinTerrainGenerator::process(Terrain &terrain, const ITerrainGeneratorContext &context) {
+    // TODO implement with optionnal types
+    const Terrain* top = context.neighbourExists(0, 1) ? &context.getNeighbour(0, 1) : nullptr;
+    const Terrain* bottom = context.neighbourExists(0, -1) ? &context.getNeighbour(0, -1) : nullptr;
+    const Terrain* left = context.neighbourExists(-1, 0) ? &context.getNeighbour(-1, 0) : nullptr;
+    const Terrain* right = context.neighbourExists(1, 0) ? &context.getNeighbour(1, 0) : nullptr;
+    const double eps = std::numeric_limits<double>::epsilon();
+
+    Perlin::modifier modifier = [&] (double x, double y, double val){
+        // TODO optimisation : getZ
+        if (x < eps && left) {
+            return left->getZInterpolated(1, y);
+        }
+        else if (1 - x < eps && right) {
+            return right->getZInterpolated(0, y);
+        }
+        else if (y < eps && bottom) {
+            return bottom->getZInterpolated(x, 1);
+        }
+        else if (1 - y < eps && top) {
+            return top->getZInterpolated(x, 0);
+        }
+        else {
+            return val;
+        }
+    };
+
+    _perlin.generatePerlinNoise2D(terrain._array, _offset, _octaveCount, _frequency, _persistence, false, modifier);
 }
 
 void PerlinTerrainGenerator::join(Terrain &terrain1, Terrain &terrain2, bool axisX, bool joinableSides) {

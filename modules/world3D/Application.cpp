@@ -35,9 +35,12 @@ void Application::run(int argc, char **argv) {
 			_paramLock.unlock();
 
 			if ((newUpdatePos - _lastUpdatePos).norm() > 2000 || firstExpand) {
+				_explorer->setOrigin(newUpdatePos);
+
 				// Mise à jour du monde
 				_collector->lock();
 				FlatWorldCollector &collector = _collector->get();
+				collector.reset();
 
 				_explorer->explore(*_world, collector);
 

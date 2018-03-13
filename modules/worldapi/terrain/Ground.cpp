@@ -12,6 +12,23 @@
 
 using namespace maths;
 
+// Utility class
+class GroundContext : public ITerrainGeneratorContext {
+public:
+    GroundContext(Ground& ground, int x, int y, int lvl) : _x(x), _y(y), _lvl(lvl), _ground(ground) {}
+
+    bool neighbourExists(int x, int y) const override {
+        return _ground.terrainExists(x + _x, y + _y, _lvl);
+    }
+
+    const Terrain& getNeighbour(int x, int y) const override {
+        return _ground.terrain(x + _x, y + _y, _lvl);
+    }
+private:
+    int _x, _y, _lvl;
+    Ground &_ground;
+};
+
 class GroundCache {
 public:
 	GroundCache() : _terrains(), _mapUnitPerTerrain(2) {}
@@ -26,7 +43,7 @@ public:
 Ground::Ground() :
 		  _cache(new GroundCache()),
 		  _unitSize(4000), _maxAltitude(4000), _minAltitude(-2000) {
-    _terrainGenerator = std::make_unique<PerlinTerrainGenerator>(0, 5, 4);
+    _terrainGenerator = std::make_unique<PerlinTerrainGenerator>(0, 1, 4);
     _mapGenerator = std::make_unique<CustomWorldRMGenerator>();
 }
 
@@ -123,9 +140,21 @@ void Ground::generateChunk(FlatWorld &world, ChunkNode &chunkNode) {
 }
 
 void Ground::generateTerrain(int x, int y, int lvl) {
+    // Map turned off
+    std::vector<vec3i> unmapped;
+    unmapped.emplace_back(x - 1, y, lvl);
+    unmapped.emplace_back(x + 1, y, lvl);
+    unmapped.emplace_back(x, y - 1, lvl);
+    unmapped.emplace_back(x, y + 1, lvl);
+
+    for (auto & pos : unmapped) {
+        if (terrainExists(pos.x, pos.y, pos.z))
+            applyMap(pos.x, pos.y, pos.z, true);
+    }
+
     // Terrain creation
     std::unique_ptr<Terrain> created = std::make_unique<Terrain>(129);
-    _terrainGenerator->process(*created);
+    _terrainGenerator->process(*created, GroundContext(*this, x, y, lvl));
 
     // Bounds
     double terrainSize = getTerrainSize(lvl);
@@ -133,37 +162,41 @@ void Ground::generateTerrain(int x, int y, int lvl) {
     created->setBounds(terrainSize * x, terrainSize * y, _minAltitude,
                       terrainSize * (x + 1), terrainSize * (y + 1), _maxAltitude);
 
-    // Join
-    // TODO
-
     _cache->_terrains[{x, y, lvl}] = std::move(created);
 
-	applyMap(x, y, lvl);
+    // Map turned on
+    unmapped.emplace_back(x, y, lvl);
+
+    for (auto& pos : unmapped) {
+        if (terrainExists(pos.x, pos.y, pos.z))
+            applyMap(pos.x, pos.y, pos.z, false);
+    }
 }
 
 void Ground::applyMap(int tX, int tY, int lvl, bool unapply) {
+
 	// Terrain
 	Terrain& terrain = *_cache->_terrains[{tX, tY, lvl}];
 	uint32_t size = terrain.getSize();
 
-	// Map
-	const double ratio = _cache->_mapUnitPerTerrain;
+    // Map
+    vec2i mapLoc(0, 0);
 
     // (TODO optimize)
 
 	// We generate the map if it's not done
-    if (_cache->_heightMap.find({0, 0}) == _cache->_heightMap.end()) {
-        _cache->_heightMap[{0, 0}] = std::make_unique<Terrain>(100);
-        _cache->_heightDiffMap[{0, 0}] = std::make_unique<Terrain>(100);
-        _mapGenerator->generate(*_cache->_heightMap[{0, 0}], *_cache->_heightDiffMap[{0, 0}]);
+    if (_cache->_heightMap.find(mapLoc) == _cache->_heightMap.end()) {
+        _cache->_heightMap[mapLoc] = std::make_unique<Terrain>(100);
+        _cache->_heightDiffMap[mapLoc] = std::make_unique<Terrain>(100);
+        _mapGenerator->generate(*_cache->_heightMap[mapLoc], *_cache->_heightDiffMap[mapLoc]);
     }
 
     // Setup variables
 	Terrain& heightMap = *_cache->_heightMap[{0, 0}];
 	Terrain& diffMap = *_cache->_heightDiffMap[{0, 0}];
-	const double inv_mapSize =  1 / heightMap.getSize();
-	const double mapOx = 0.5 + tX * ratio  * inv_mapSize;
-	const double mapOy = 0.5 + tY * ratio * inv_mapSize;
+    const double ratio = _cache->_mapUnitPerTerrain / heightMap.getSize();
+    const double mapOx = 0.5 + tX * ratio;
+	const double mapOy = 0.5 + tY * ratio;
 
     const double offsetCoef = 0.5;
     const double diffCoef = 1 - offsetCoef;
@@ -177,8 +210,8 @@ void Ground::applyMap(int tX, int tY, int lvl, bool unapply) {
 
     for (uint32_t x = 0; x < size; x++) {
         for (uint32_t y = 0; y < size; y++) {
-            double mapX = mapOx + ((double)x / size) * ratio * inv_mapSize;
-            double mapY = mapOy + ((double)x / size) * ratio * inv_mapSize;
+            double mapX = mapOx + ((double)x / (size - 1)) * ratio;
+            double mapY = mapOy + ((double)y / (size - 1)) * ratio;
 
             double offset = offsetCoef * heightMap.getZInterpolated(mapX, mapY);
             double diff = diffMap.getZInterpolated(mapX, mapY) * diffCoef;

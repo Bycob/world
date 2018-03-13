@@ -15,6 +15,10 @@ namespace perlin {
 
 class WORLDAPI_EXPORT Perlin {
 public :
+    typedef std::function<double(double, double, double)> modifier;
+
+    static modifier DEFAULT_MODIFIER;
+
     Perlin();
     Perlin(long seed);
 
@@ -24,6 +28,14 @@ public :
                                float frequency,
                                float persistence,
                                bool repeatable = false);
+
+    void generatePerlinNoise2D(arma::Mat<double> &output,
+                               int offset,
+                               int octaves,
+                               float frequency,
+                               float persistence,
+                               bool repeatable,
+                               const modifier &sourceModifier);
 
     arma::Mat<double> generatePerlinNoise2D(int size,
                                             int offset,
@@ -65,5 +77,6 @@ private :
     void generatePerlinOctave(arma::Mat<double> &output,
                               int offset,
                               float frequency,
-                              bool repeatable);
+                              bool repeatable,
+                              const modifier &sourceModifier);
 };
