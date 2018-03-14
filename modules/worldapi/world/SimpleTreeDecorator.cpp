@@ -34,13 +34,20 @@ void SimpleTreeDecorator::setTreeGenerator(TreeGenerator * generator) {
 	_treeGenerator = std::unique_ptr<TreeGenerator>(generator);
 }
 
-void SimpleTreeDecorator::decorate(FlatWorld & world, ChunkNode & chunkNode) {
-	Chunk &chunk = chunkNode._chunk;
+void SimpleTreeDecorator::decorate(FlatWorld & world, WorldZone & zone) {
+	Chunk &chunk = zone.chunk();
 
-	if (chunk.getMinDetailSize() > 0.5 || chunk.getMaxDetailSize() <= 0.5)
+    const double avgTreeDetailSize = 0.5;
+	if (!(chunk.getMinDetailSize() < avgTreeDetailSize && avgTreeDetailSize <= chunk.getMaxDetailSize()))
 		return;
 
 	vec3d chunkSize = chunk.getSize();
+    // FIXME changer la condition pour limiter la forêt en hauteur
+    vec3d offset = zone.getAbsoluteOffset();
+
+    if (offset.z < -1000 || offset.z > 1000) {
+        return;
+    }
 
 	std::vector<vec2d> positions;
 	std::uniform_real_distribution<double> distribX(0, chunkSize.x);
@@ -64,20 +71,19 @@ void SimpleTreeDecorator::decorate(FlatWorld & world, ChunkNode & chunkNode) {
 		}
 
 		if (!addTree) continue;
-
-		// Génération de l'arbre
-		positions.push_back(position);
-		std::unique_ptr<TreeSkeletton> skeletton(_skelettonGenerator->generate());
-		Tree * tree = _treeGenerator->generate(*skeletton);
 		
 		// Détermination de l'altitude de l'arbre
-		// FIXME Actuellement des arbres pop dans tous les chunks verticalement :/
-		// FIXME Attention, ne fonctionne plus si on active le lod
-		vec3d pos3D(position.x, position.y,
-					ground.observeAltitudeAt(position.x, position.y) - chunk.getOffset().z);
-
-		tree->setPosition3D(pos3D);
-		chunk.addObject(tree);
+		double altitude = ground.observeAltitudeAt(position.x + offset.x, position.y + offset.y);
+		vec3d pos3D(position.x, position.y, altitude - offset.z);
 		// std::cout << pos3D << std::endl;
+
+		// Création de l'arbre
+		std::unique_ptr<TreeSkeletton> skeletton(_skelettonGenerator->generate());
+		Tree * tree = _treeGenerator->generate(*skeletton);
+		tree->setPosition3D(pos3D);
+
+		// Ajout au chunk
+		chunk.addObject(tree);
+		positions.push_back(position);
 	}
 }

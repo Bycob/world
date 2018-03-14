@@ -17,6 +17,8 @@ public:
 	const Mesh & getTrunkMesh() {
 		return _trunkMesh;
 	}
+
+	void collectWholeObject(WorldZone &zone, CollectorObject &collector) override;
 private :
 	friend class TreeGenerator;
 

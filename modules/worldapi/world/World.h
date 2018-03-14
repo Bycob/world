@@ -33,10 +33,10 @@ public:
     void addChunkDecorator(IWorldChunkDecorator * decorator);
 
 	// NAVIGATION
-	ChunkNode exploreNeighbour(const ChunkNode &chunk, const maths::vec3d &direction);
-	ChunkNode exploreLocation(const maths::vec3d &location);
+	WorldZone exploreNeighbour(const WorldZone &zone, const maths::vec3d &direction);
+	WorldZone exploreLocation(const maths::vec3d &location);
 protected:
-	virtual void onFirstExploration(ChunkNode &chunk);
+	virtual void onFirstExploration(WorldZone &chunk);
 
 private:
 	PrivateWorld * _internal;

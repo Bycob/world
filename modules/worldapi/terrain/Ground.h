@@ -45,7 +45,7 @@ public:
 
 	// EXPLORATION
 	double observeAltitudeAt(double x, double y, int lvl = 0);
-	void collectChunk(FlatWorldCollector &collector, FlatWorld &world, ChunkNode &chunkNode);
+	void collectChunk(FlatWorldCollector &collector, FlatWorld &world, WorldZone &chunkNode);
 private:
 	// Paramètres
 	/** L'altitude maximum du monde. Le niveau de la mer est fixé à 0. */
@@ -85,7 +85,7 @@ private:
     double getTerrainSize(int level) const;
 
 	// GENERATION
-    void generateChunk(FlatWorld &world, ChunkNode &chunk);
+    void generateZone(FlatWorld &world, WorldZone &zone);
 	/** Generate the terrain with given coordinates. Assume that:
 	 * - the terrain wasn't generated yet,
 	 * - the terrains with higher level at the same place are already

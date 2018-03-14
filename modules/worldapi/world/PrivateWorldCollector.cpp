@@ -1,12 +1,12 @@
 #include "PrivateWorldCollector.h"
 
 
-CollectorChunk::CollectorChunk(ChunkNode &chunkNode)
-        : _chunkNode(chunkNode) {
+PrivateCollectorChunk::PrivateCollectorChunk(WorldZone &chunkNode)
+        : _chunkNode(chunkNode), _nextKey(0) {
 
 }
 
-CollectorObject::CollectorObject(CollectorChunk &parent, WorldObject &object)
-        : _parent(parent), _object(object) {
+PrivateCollectorObject::PrivateCollectorObject(const WorldZone &zone, WorldObject &object)
+        : _zone(zone), _object(object) {
 
 }

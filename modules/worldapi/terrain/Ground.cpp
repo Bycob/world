@@ -61,16 +61,16 @@ double Ground::observeAltitudeAt(double x, double y, int lvl) {
     }
 
     const Terrain & terrain = const_cast<Ground*>(this)->terrain(xi, yi);
-    return _minAltitude + (_maxAltitude - _minAltitude) * terrain.getZInterpolated(x / size - xi, y / size - yi);
+    return _minAltitude + getAltitudeRange() * terrain.getZInterpolated(x / size - xi, y / size - yi);
 }
 
 bool Ground::terrainExists(int x, int y, int lvl) const {
 	return terrains().find({ x, y, lvl}) != terrains().end();
 }
 
-void Ground::collectChunk(FlatWorldCollector &collector, FlatWorld &world, ChunkNode &chunkNode) {
-    generateChunk(world, chunkNode);
-    Chunk& chunk = chunkNode._chunk;
+void Ground::collectChunk(FlatWorldCollector &collector, FlatWorld &world, WorldZone &chunkNode) {
+    generateZone(world, chunkNode);
+    Chunk& chunk = chunkNode.chunk();
 
     int lvl = 0;
 
@@ -118,8 +118,8 @@ double Ground::getTerrainSize(int lvl) const {
     return _unitSize * pow(2, - lvl); // TODO utiliser exponentiation rapide
 }
 
-void Ground::generateChunk(FlatWorld &world, ChunkNode &chunkNode) {
-    Chunk& chunk = chunkNode._chunk;
+void Ground::generateZone(FlatWorld &world, WorldZone &zone) {
+    Chunk& chunk = zone.chunk();
 
     // Calculate lvl for the given chunk
     int lvl = 0;
@@ -158,7 +158,7 @@ void Ground::generateTerrain(int x, int y, int lvl) {
 
     // Bounds
     double terrainSize = getTerrainSize(lvl);
-    // TODO min altitude and max altitude also depends on lvl
+    // TODO min altitude and max altitude also depend on lvl
     created->setBounds(terrainSize * x, terrainSize * y, _minAltitude,
                       terrainSize * (x + 1), terrainSize * (y + 1), _maxAltitude);
 

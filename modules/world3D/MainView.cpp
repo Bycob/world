@@ -85,6 +85,7 @@ void MainView::runInternal() {
     // Initialisation des différents modules de rendu
     _camera = _scenemanager->addCameraSceneNodeFPS(0, 100.0f, 1.f);
 	_camera->setFOV(1.57);
+    _camera->setNearValue(0.1f);
     _camera->setFarValue(40000);
     _camera->setPosition(vector3df(0, 1200, 0));
     //_camera = _scenemanager->addCameraSceneNode(0, vector3df(200 + 64, 200 + 119, 200 + 64), vector3df(64, 119, 64));

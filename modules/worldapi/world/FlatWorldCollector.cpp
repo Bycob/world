@@ -39,11 +39,11 @@ void FlatWorldCollector::reset() {
     _terrains.clear();
 }
 
-void FlatWorldCollector::collect(FlatWorld &world, ChunkNode &chunk) {
-    WorldCollector::collect(world, chunk);
+void FlatWorldCollector::collect(FlatWorld &world, WorldZone &zone) {
+    WorldCollector::collect(world, zone);
 
     Ground &ground = world.ground();
-    ground.collectChunk(*this, world, chunk);
+    ground.collectChunk(*this, world, zone);
 }
 
 void FlatWorldCollector::addTerrain(long key, const Terrain &terrain) {

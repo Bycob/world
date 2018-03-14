@@ -25,18 +25,16 @@ void Chunk::setDetailSizeBounds(double min, double max) {
 	_maxDetailSize = max;
 }
 
-vec3d Chunk::toAbsolutePosition(const vec3d & relative) const {
-	return _size * _offset;
-}
-
-vec3d Chunk::toRelativePosition(const vec3d & absolute) const {
-	return absolute - _offset;
-}
-
 void Chunk::addObject(WorldObject * object) {
 	_internal->_objects.emplace_back(object);
 }
 
 void Chunk::addObjectInternal(WorldObject * object) {
 	_internal->_objects.emplace_back(object);
+}
+
+void Chunk::forEachObject(const std::function<void(WorldObject &)> &action) {
+	for (auto & object : _internal->_objects) {
+		action(*object);
+	}
 }

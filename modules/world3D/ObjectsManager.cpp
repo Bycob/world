@@ -47,9 +47,11 @@ void ObjectNodeHandler::updateObject3D(const Object3D & object) {
 
 	material.AmbientColor.set(255, 0, 0, 0);
 	material.SpecularColor.set(255, 255, 255, 255);
-	material.DiffuseColor.set(255, 200, 178, 126);
+	material.DiffuseColor.set(255, 200, 0, 0);
 
 	irrMesh->drop();
+
+    //_objManager._sceneManager->getActiveCamera()->setTarget(_meshNode->getPosition());
 }
 
 
@@ -71,17 +73,17 @@ void ObjectsManager::initialize(FlatWorldCollector &collector) {
 }
 
 void ObjectsManager::update(FlatWorldCollector &collector) {
-	/*auto it = collector.objectsIterator();
+	auto it = collector.iterateObjects();
 
-	for (; it.hasNext(); it++) {
+	for (; it.hasNext(); ++it) {
 		auto pair = *it;
 
-		if (!_objects.find(pair.first)) {
-			auto & mainPart = pair.second.getPart(0);
+		if (_objects.find(pair.first) == _objects.end()) {
+			auto & mainPart = pair.second->getPart(0);
 			_objects[pair.first] =
 					std::make_unique<ObjectNodeHandler>(*this, mainPart.getObject3D());
 		}
-	}*/
+	}
 }
 
 
@@ -134,7 +136,7 @@ SMesh * ObjectsManager::convertToIrrlichtMesh(const Mesh & mesh, IVideoDriver * 
 			int normID = face.getID<VType::NORMAL>(i);
 
 			S3DVertex& v = buffer->Vertices[primitiveCount];
-			v.Pos = toIrrlicht(positions[posID].toVec3() * 100); // TODO check if posID == -1;
+			v.Pos = toIrrlicht(positions[posID].toVec3() * 10.0); // TODO check if posID == -1;
 			
 			if (texID != -1)
 				v.TCoords = toIrrlicht(positions[texID].toVec2());

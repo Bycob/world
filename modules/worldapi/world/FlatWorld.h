@@ -20,7 +20,7 @@ public:
 
 	Ground& ground();
 protected:
-	void onFirstExploration(ChunkNode &chunk) override;
+	void onFirstExploration(WorldZone &chunk) override;
 
 private:
 	PrivateFlatWorld * _internal;

@@ -9,34 +9,43 @@ using ObjectKey = WorldCollector::ObjectKey;
 using PartKey = WorldCollector::PartKey;
 
 // Private classes : no WORLDAPI_EXPORT
-class CollectorChunk;
-class CollectorObject;
+class PrivateCollectorChunk;
 
-class CollectorObjectPart {
+class PrivateCollectorObjectPart {
 public:
+    PrivateCollectorObjectPart(const Object3D &object3D) : _object3D(object3D) {}
 
+    Object3D _object3D;
 };
 
-class CollectorObject {
+class PrivateCollectorObject {
 public:
-    CollectorChunk& _parent;
+    WorldZone _zone;
     WorldObject& _object;
-    std::map<PartKey, CollectorObjectPart> _keys;
+    std::map<PartKey, std::unique_ptr<CollectorObjectPart>> _parts;
 
-    CollectorObject(CollectorChunk& parent, WorldObject& object);
+    PrivateCollectorObject(const WorldZone&, WorldObject& object);
 };
 
-class CollectorChunk {
+class PrivateCollectorChunk {
 public:
-    ChunkNode &_chunkNode;
+    WorldZone &_chunkNode;
     std::map<ObjectKey, std::unique_ptr<CollectorObject>> _objects;
+    long _nextKey;
 
-    CollectorChunk(ChunkNode& chunkNode);
+    PrivateCollectorChunk(WorldZone& chunkNode);
 };
 
 class PrivateWorldCollector {
 public:
-    std::map<ChunkID, std::unique_ptr<CollectorChunk>> _chunks;
+    std::map<ChunkID, std::unique_ptr<PrivateCollectorChunk>> _chunks;
+};
+
+class PrivateCollectorIterator {
+public:
+    std::map<ChunkID, std::unique_ptr<PrivateCollectorChunk>>::iterator _chunkIt;
+    std::map<ObjectKey, std::unique_ptr<CollectorObject>>::iterator _objectIt;
+
 };
 
 

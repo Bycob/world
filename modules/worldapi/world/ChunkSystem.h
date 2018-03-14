@@ -8,7 +8,9 @@
 
 class WORLDAPI_EXPORT ChunkID {
 public:
-    ChunkID(int x = 0, int y = 0, int z = 0, int lod = 0);
+    static ChunkID NONE;
+
+    ChunkID(int x, int y, int z, int lod = 0);
     ChunkID(const maths::vec3i & pos, int lod = 0);
     ChunkID(const ChunkID & other);
     ~ChunkID();
@@ -23,24 +25,7 @@ private:
     int _lod;
 };
 
-class ChunkSystem;
-
-// TODO rename ?
-/** Contains a reference to a chunk, and metadata from the
- * chunk system */
-class WORLDAPI_EXPORT ChunkNode {
-public:
-    ChunkID _id;
-    Chunk& _chunk;
-    ChunkSystem& _system;
-
-    ChunkNode(ChunkSystem& system, const ChunkID &id, Chunk& chunk);
-    ChunkNode(const ChunkNode &other);
-
-    bool operator<(const ChunkNode &other) const;
-    bool operator==(const ChunkNode &other) const;
-};
-
+class WorldZone;
 
 class PrivateChunkSystem;
 
@@ -69,18 +54,45 @@ public:
     virtual int getLODForDetailSize(double detailSize) const;
 
     // NAVIGATION
-    virtual std::pair<ChunkNode, bool> getOrCreateChunkID(const maths::vec3d& position, int lod = 0);
-    virtual std::pair<ChunkNode, bool> getOrCreateNeighbourID(const ChunkNode &chunk, const maths::vec3i &direction);
+    virtual std::pair<WorldZone, bool> getOrCreateZone(const maths::vec3d &position, int lod = 0);
+    std::pair<WorldZone, bool> getOrCreateNeighbourZone(const WorldZone &chunk, const maths::vec3i &direction);
 private:
     PrivateChunkSystem* _internal;
 
     int _maxLOD;
 
+    friend class WorldZone;
+
     LODData& getOrCreateLODData(int lod);
     Chunk & getChunk(const ChunkID &id);
-    ChunkNode getChunkNode(const ChunkID &id);
+    WorldZone getZone(const ChunkID &id);
     /** @returns true if the chunk wasn't created yet */
     bool createChunk(ChunkID id);
 };
+
+/** Contains a reference to a chunk, and metadata from the
+ * chunk system */
+class WORLDAPI_EXPORT WorldZone {
+public:
+    WorldZone(ChunkSystem& system, const ChunkID &id, Chunk& chunk);
+    WorldZone(const WorldZone &other);
+
+    Chunk& chunk();
+    // TODO est-ce que ceci doit etre accessible ?
+    const ChunkID &getID() const;
+
+    bool operator<(const WorldZone &other) const;
+    bool operator==(const WorldZone &other) const;
+
+    bool hasParent();
+    WorldZone getParent() const;
+    maths::vec3d getRelativeOffset(const WorldZone &other);
+    maths::vec3d getAbsoluteOffset();
+private:
+    const ChunkID _id;
+    Chunk& _chunk;
+    ChunkSystem& _system;
+};
+
 
 #endif //WORLD_CHUNKSYSTEM_H

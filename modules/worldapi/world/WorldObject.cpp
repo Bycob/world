@@ -1,11 +1,10 @@
-//
-// Created by louis on 20/04/17.
-//
-
 #include "WorldObject.h"
 
 #include <stdexcept>
 #include <iostream>
+
+#include "ChunkSystem.h"
+#include "WorldCollector.h"
 
 using namespace maths;
 
@@ -19,4 +18,8 @@ WorldObject::~WorldObject() {
 
 void WorldObject::setPosition3D(const maths::vec3d & pos) {
 	_position = pos;
+}
+
+void WorldObject::collectWholeObject(WorldZone &zone, CollectorObject &collector) {
+
 }

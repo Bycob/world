@@ -23,7 +23,7 @@ Ground& FlatWorld::ground() {
 	return _ground;
 }
 
-void FlatWorld::onFirstExploration(ChunkNode &chunk) {
+void FlatWorld::onFirstExploration(WorldZone &chunk) {
     World::onFirstExploration(chunk);
 
 	for (auto & decorator : _internal->_chunkDecorators) {

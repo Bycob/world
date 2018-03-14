@@ -34,7 +34,7 @@ public:
     ~FlatWorldCollector() override;
 
     void reset() override;
-    void collect(FlatWorld &world, ChunkNode & chunk) override;
+    void collect(FlatWorld &world, WorldZone & zone) override;
 
     // TODO TerrainStream
     void addTerrain(long key, const Terrain &terrain);

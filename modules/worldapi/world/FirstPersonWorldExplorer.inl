@@ -1,14 +1,14 @@
 
 template <typename T>
 void FirstPersonWorldExplorer::explore(T &world, IWorldCollector<T> &collector) {
-    std::set<ChunkNode> explored;
-    std::set<ChunkNode> toExplore;
+    std::set<WorldZone> explored;
+    std::set<WorldZone> toExplore;
     toExplore.insert(world.exploreLocation(_origin));
 
     while (!toExplore.empty()) {
         auto it = toExplore.begin();
 
-        ChunkNode currentChunk = *it;
+        WorldZone currentChunk = *it;
 
         // Retrieve content
         collector.collect(world, currentChunk);
@@ -27,8 +27,8 @@ void FirstPersonWorldExplorer::explore(T &world, IWorldCollector<T> &collector) 
         };
 
         for (maths::vec3i direction : directions) {
-            ChunkNode neighbour = world.exploreNeighbour(*it, direction);
-            auto offset = neighbour._chunk.getOffset();
+            WorldZone neighbour = world.exploreNeighbour(*it, direction);
+            auto offset = neighbour.chunk().getOffset();
             double detailSize = getDetailSizeAt(offset);
 
             // TODO Precise exit condition

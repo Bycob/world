@@ -4,10 +4,14 @@
 
 #include <tuple>
 #include <memory>
+#include <iterator>
 
 #include <worldapi/maths/MathsHelper.h>
 
 class WorldObject;
+
+class ChunkIterator;
+
 class PrivateChunk;
 
 class WORLDAPI_EXPORT Chunk {
@@ -21,9 +25,6 @@ public:
 
 	const maths::vec3d & getSize() const { return _size; }
     const maths::vec3d & getOffset() const { return _offset; }
-	
-	maths::vec3d toAbsolutePosition(const maths::vec3d & relative) const;
-	maths::vec3d toRelativePosition(const maths::vec3d & absolute) const;
 
 	void addObject(WorldObject * object);
 	
@@ -32,6 +33,7 @@ public:
 		addObjectInternal(new T(args...));
 	}
 
+	void forEachObject(const std::function<void(WorldObject&)> & action);
 private:
 	double _minDetailSize = 0;
 	double _maxDetailSize = 1e100;
@@ -42,4 +44,3 @@ private:
 
 	void addObjectInternal(WorldObject * object);
 };
-
