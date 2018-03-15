@@ -35,6 +35,7 @@ public:
 	// NAVIGATION
 	WorldZone exploreNeighbour(const WorldZone &zone, const maths::vec3d &direction);
 	WorldZone exploreLocation(const maths::vec3d &location);
+	std::vector<WorldZone> exploreInside(const WorldZone &zone);
 protected:
 	virtual void onFirstExploration(WorldZone &chunk);
 

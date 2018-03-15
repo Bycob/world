@@ -18,6 +18,8 @@ public:
 	virtual ~ObjectNodeHandler();
 
 	void updateObject3D(const Object3D & object);
+
+	bool removeTag = false;
 private:
 	ObjectsManager& _objManager;
 

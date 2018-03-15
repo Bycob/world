@@ -33,3 +33,7 @@ void TerrainManipulator::multiply(Terrain & terrain, const arma::mat & factor) c
 	terrain._array %= factor;
 }
 
+void TerrainManipulator::multiply(Terrain &terrain, double factor) const {
+	terrain._array *= factor;
+}
+

@@ -34,14 +34,16 @@ public:
     ~FlatWorldCollector() override;
 
     void reset() override;
-    void collect(FlatWorld &world, WorldZone & zone) override;
+    void collect(FlatWorld &world, WorldZone &zone) override;
 
     // TODO TerrainStream
     void addTerrain(long key, const Terrain &terrain);
+    void disableTerrain(long key);
     TerrainIterator iterateTerrains();
 private:
     friend class TerrainIterator;
 
+    std::set<long> _disabledTerrains;
     std::map<long, Terrain> _terrains;
 };
 

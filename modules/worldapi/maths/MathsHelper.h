@@ -32,7 +32,26 @@ namespace maths {
 
 	/** @returns n modulo r, compris entre 0 et r - 1 */
 	template <typename T> inline T mod(T n, T r) {
-		return n >= 0 ? n % r : (n % r) + r;
+		T m = n % r;
+		return m < 0 ? m + r : m;
+	}
+
+	template <typename T>
+	inline T powi(T b, int e) {
+		const int m = e % 2;
+		if (e == 0) {
+			return 1;
+		}
+		else if (m == 1) {
+			return b * powi(b, e - 1);
+		}
+		else if (m == -1) {
+			return powi(b, e + 1) / b;
+		}
+		else {
+			const T t = powi(b, e / 2);
+			return t * t;
+		}
 	}
 	
 	double WORLDAPI_EXPORT length(const arma::vec3 & vec1, const arma::vec3 & vec2);

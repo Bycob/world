@@ -37,17 +37,31 @@ void FlatWorldCollector::reset() {
     WorldCollector::reset();
 
     _terrains.clear();
+    _disabledTerrains.clear();
 }
 
 void FlatWorldCollector::collect(FlatWorld &world, WorldZone &zone) {
     WorldCollector::collect(world, zone);
 
     Ground &ground = world.ground();
-    ground.collectChunk(*this, world, zone);
+    ground.collectZone(*this, world, zone);
 }
 
 void FlatWorldCollector::addTerrain(long key, const Terrain &terrain) {
-    _terrains.emplace(key, terrain);
+    if (_disabledTerrains.find(key) != _disabledTerrains.end()) {
+        return;
+    }
+
+    auto it = _terrains.find(key);
+
+    if (it == _terrains.end()) {
+        _terrains.emplace_hint(it, key, terrain);
+    }
+}
+
+void FlatWorldCollector::disableTerrain(long key) {
+    _terrains.erase(key);
+    _disabledTerrains.insert(key);
 }
 
 TerrainIterator FlatWorldCollector::iterateTerrains() {

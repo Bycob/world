@@ -17,6 +17,7 @@ class PrivateChunk;
 class WORLDAPI_EXPORT Chunk {
 public:
 	Chunk(const maths::vec3d& offset, const maths::vec3d & size);
+	Chunk(const Chunk &chunk) = delete;
 	virtual ~Chunk();
 
 	void setDetailSizeBounds(double min, double max);

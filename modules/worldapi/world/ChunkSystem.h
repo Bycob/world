@@ -5,27 +5,11 @@
 
 #include "LODData.h"
 #include "Chunk.h"
+#include "WorldZone.h"
+#include "ChunkID.h"
 
-class WORLDAPI_EXPORT ChunkID {
-public:
-    static ChunkID NONE;
 
-    ChunkID(int x, int y, int z, int lod = 0);
-    ChunkID(const maths::vec3i & pos, int lod = 0);
-    ChunkID(const ChunkID & other);
-    ~ChunkID();
-
-    const maths::vec3i & getPosition3D() const;
-    int getLOD() const { return _lod; }
-
-    bool operator<(const ChunkID & other) const;
-    bool operator==(const ChunkID & other) const;
-private:
-    maths::vec3i _pos;
-    int _lod;
-};
-
-class WorldZone;
+class ChunkHandler;
 
 class PrivateChunkSystem;
 
@@ -55,13 +39,14 @@ public:
 
     // NAVIGATION
     virtual std::pair<WorldZone, bool> getOrCreateZone(const maths::vec3d &position, int lod = 0);
-    std::pair<WorldZone, bool> getOrCreateNeighbourZone(const WorldZone &chunk, const maths::vec3i &direction);
+    std::pair<WorldZone, bool> getOrCreateNeighbourZone(const ChunkHandler &chunk, const maths::vec3i &direction);
+    std::vector<std::pair<WorldZone, bool>> getOrCreateChildren(const ChunkHandler &zone);
 private:
     PrivateChunkSystem* _internal;
 
-    int _maxLOD;
+    int _maxLOD = 4;
 
-    friend class WorldZone;
+    friend class ChunkHandler;
 
     LODData& getOrCreateLODData(int lod);
     Chunk & getChunk(const ChunkID &id);
@@ -72,26 +57,34 @@ private:
 
 /** Contains a reference to a chunk, and metadata from the
  * chunk system */
-class WORLDAPI_EXPORT WorldZone {
+class WORLDAPI_EXPORT ChunkHandler : public IWorldZoneHandler {
 public:
-    WorldZone(ChunkSystem& system, const ChunkID &id, Chunk& chunk);
-    WorldZone(const WorldZone &other);
+    ChunkHandler(ChunkSystem& system, const ChunkID &id, Chunk& chunk);
+    ChunkHandler(const ChunkHandler &other);
 
-    Chunk& chunk();
-    // TODO est-ce que ceci doit etre accessible ?
-    const ChunkID &getID() const;
+    IWorldZoneHandler* clone();
 
-    bool operator<(const WorldZone &other) const;
-    bool operator==(const WorldZone &other) const;
+    Chunk& chunk() override;
+    const Chunk& getChunk() const override;
+    const ChunkID &getID() const override;
 
-    bool hasParent();
-    WorldZone getParent() const;
-    maths::vec3d getRelativeOffset(const WorldZone &other);
+    bool operator<(const ChunkHandler &other) const;
+    bool operator==(const ChunkHandler &other) const;
+
+    bool hasParent() override;
+    WorldZone getParent() const override;
+
+    virtual std::pair<WorldZone, bool> getOrCreateNeighbourZone(const maths::vec3i &direction) override;
+    virtual std::vector<std::pair<WorldZone, bool>> getOrCreateChildren() override;
+
+    maths::vec3d getRelativeOffset(const ChunkHandler &other);
     maths::vec3d getAbsoluteOffset();
 private:
     const ChunkID _id;
     Chunk& _chunk;
     ChunkSystem& _system;
+
+    friend class ChunkSystem;
 };
 
 

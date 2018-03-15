@@ -34,7 +34,7 @@ void ObjectNodeHandler::updateObject3D(const Object3D & object) {
 	}
 
 	_meshNode->setPosition(toIrrlicht(object.getPosition()));
-    std::cout << "graph : " << object.getPosition() << std::endl;
+    //std::cout << "graph : " << object.getPosition() << std::endl;
 	_meshNode->setScale(toIrrlicht(object.getScale()));
 
 	// Materiau
@@ -73,6 +73,12 @@ void ObjectsManager::initialize(FlatWorldCollector &collector) {
 }
 
 void ObjectsManager::update(FlatWorldCollector &collector) {
+	// Set remove tag to true
+	for (auto & pair : _objects) {
+		pair.second->removeTag = true;
+	}
+
+	// Add new objects
 	auto it = collector.iterateObjects();
 
 	for (; it.hasNext(); ++it) {
@@ -82,6 +88,21 @@ void ObjectsManager::update(FlatWorldCollector &collector) {
 			auto & mainPart = pair.second->getPart(0);
 			_objects[pair.first] =
 					std::make_unique<ObjectNodeHandler>(*this, mainPart.getObject3D());
+		}
+		else {
+			_objects[pair.first]->removeTag = false;
+		}
+	}
+
+	// Remove all objects that have the remove tag
+	auto iter = _objects.begin();
+
+	for (; iter != _objects.end();) {
+		if (iter->second->removeTag) {
+			iter = _objects.erase(iter);
+		}
+		else {
+			++iter;
 		}
 	}
 }

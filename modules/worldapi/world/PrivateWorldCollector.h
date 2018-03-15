@@ -24,16 +24,16 @@ public:
     WorldObject& _object;
     std::map<PartKey, std::unique_ptr<CollectorObjectPart>> _parts;
 
-    PrivateCollectorObject(const WorldZone&, WorldObject& object);
+    PrivateCollectorObject(const WorldZone &, WorldObject &object);
 };
 
 class PrivateCollectorChunk {
 public:
-    WorldZone &_chunkNode;
+    WorldZone _chunkNode;
     std::map<ObjectKey, std::unique_ptr<CollectorObject>> _objects;
     long _nextKey;
 
-    PrivateCollectorChunk(WorldZone& chunkNode);
+    PrivateCollectorChunk(const WorldZone& chunkNode);
 };
 
 class PrivateWorldCollector {

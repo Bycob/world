@@ -14,7 +14,7 @@
 template <typename T>
 class WORLDAPI_EXPORT IWorldCollector {
 public:
-    virtual void collect(T &world, WorldZone &chunkNode) = 0;
+    virtual void collect(T &world, WorldZone &zone) = 0;
 };
 
 
@@ -44,7 +44,7 @@ public:
      * If the collector has already collected the zone, it won't collect
      * it again. Call the resetZone() method to make a zone collectable
      * again (or even the reset() method)*/
-    virtual void collect(World & world, WorldZone & zone);
+    virtual void collect(World &world, WorldZone &zone);
 
     CollectorObject &getCollectedObject(const ObjectKey & key);
     CollectorIterator iterateObjects();

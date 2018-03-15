@@ -1,5 +1,7 @@
 #include "LODData.h"
 
+#include "../maths/MathsHelper.h"
+
 using namespace maths;
 
 LODData::LODData()
@@ -10,8 +12,8 @@ LODData::LODData()
 LODData::LODData(const vec3d & chunkSize) 
 	: _chunkSize(chunkSize) {
 
-	const double l = _chunkSize.norm();
-	_minDetailSize = l / 100;
+	const double l = min(chunkSize.x, min(chunkSize.y, chunkSize.z));
+	_minDetailSize = l / 128;
 }
 
 LODData::LODData(const LODData & other) 

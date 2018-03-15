@@ -17,21 +17,21 @@ void WorldCollector::reset() {
 
 void WorldCollector::collect(World &world, WorldZone &zone) {
     // We don't collect the same chunk twice
-    if (_internal->_chunks.find(zone.getID()) != _internal->_chunks.end()) {
+    if (_internal->_chunks.find(zone->getID()) != _internal->_chunks.end()) {
         return;
     }
 
     auto chunk = std::make_unique<PrivateCollectorChunk>(zone);
 
-    zone.chunk().forEachObject([&] (WorldObject & object) {
+    zone->chunk().forEachObject([&] (WorldObject & object) {
         auto collObj = std::make_unique<CollectorObject>(zone, object);
-        ObjectKey newKey = std::make_pair(zone.getID(), chunk->_nextKey);
+        ObjectKey newKey = std::make_pair(zone->getID(), chunk->_nextKey);
         chunk->_nextKey++;
         object.collectWholeObject(zone, *collObj);
         chunk->_objects.emplace(newKey, std::move(collObj));
     });
 
-    _internal->_chunks.emplace(zone.getID(), std::move(chunk));
+    _internal->_chunks.emplace(zone->getID(), std::move(chunk));
 }
 
 CollectorObject& WorldCollector::getCollectedObject(const ObjectKey &key) {
@@ -61,7 +61,7 @@ void CollectorObject::putPart(const WorldCollector::PartKey &key, const Object3D
     auto part = std::make_unique<CollectorObjectPart>(object);
     Object3D &obj = part->getObject3D();
     // TODO changer en getRelativeOffset(reference)
-    obj.setPosition(obj.getPosition() + here.getAbsoluteOffset() + _internal->_object.getPosition3D());
+    obj.setPosition(obj.getPosition() + here->getAbsoluteOffset() + _internal->_object.getPosition3D());
 
     _internal->_parts.emplace(key, std::move(part));
 

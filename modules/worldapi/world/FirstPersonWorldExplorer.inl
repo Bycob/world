@@ -8,13 +8,14 @@ void FirstPersonWorldExplorer::explore(T &world, IWorldCollector<T> &collector) 
     while (!toExplore.empty()) {
         auto it = toExplore.begin();
 
-        WorldZone currentChunk = *it;
+        WorldZone currentZone = *it;
+        const Chunk &currentChunk = (*it)->getChunk();
 
         // Retrieve content
-        collector.collect(world, currentChunk);
+        collector.collect(world, currentZone);
 
         // Vertical exploration : we explore the inside
-
+        exploreVertical(world, *it, collector);
 
         // Horizontal exploration : we explore the neighbourhood
         maths::vec3i directions[] = {
@@ -28,16 +29,33 @@ void FirstPersonWorldExplorer::explore(T &world, IWorldCollector<T> &collector) 
 
         for (maths::vec3i direction : directions) {
             WorldZone neighbour = world.exploreNeighbour(*it, direction);
-            auto offset = neighbour.chunk().getOffset();
-            double detailSize = getDetailSizeAt(offset);
+            auto offset = getChunkNearestPoint(neighbour);
 
-            // TODO Precise exit condition
-            if (explored.find(neighbour) == explored.end() && detailSize < 200) {
+            if (explored.find(neighbour) == explored.end()
+                && _origin.squaredLength(offset) < _maxDistance * _maxDistance) {
+
                 toExplore.insert(neighbour);
             }
         }
 
         explored.insert(*it);
         toExplore.erase(it);
+    }
+}
+
+template <typename T>
+void FirstPersonWorldExplorer::exploreVertical(T &world, const WorldZone &zone, IWorldCollector<T> & collector) {
+    const Chunk &currentChunk = zone->getChunk();
+    const double detailSize = getDetailSizeAt(getChunkNearestPoint(zone));
+    //std::cout << detailSize << std::endl;
+
+    if (currentChunk.getMinDetailSize() > detailSize) {
+        auto smallerZones = world.exploreInside(zone);
+
+        for (WorldZone &smallerZone : smallerZones) {
+            collector.collect(world, smallerZone);
+
+            exploreVertical(world, smallerZone, collector);
+        }
     }
 }

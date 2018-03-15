@@ -37,25 +37,36 @@ void GroundManager::update(FlatWorldCollector &collector) {
     std::unique_ptr<Terrain> terrain(generator.generate());
 	addNode({ *terrain, 0, 0 }, ground);
     //*/
-
-	// TODO Remove des terrains trop loin
-    for (auto &pair : _terrainNodes) {
-        pair.second->remove();
-    }
-    _terrainNodes.clear();
-
-	_driver->removeAllHardwareBuffers();
+    std::map<long, bool> toKeep;
 
     // Add terrains if they're not already here
     auto terrainIt = collector.iterateTerrains();
 
+    int c = 0;
     for (; terrainIt.hasNext(); ++terrainIt) {
         auto pair = *terrainIt;
 
         if (_terrainNodes.find(pair.first) == _terrainNodes.end()) {
             _terrainNodes[pair.first] = createNode(*pair.second);
+            c++;
+        }
+        toKeep[pair.first] = true;
+    }
+
+    // Remove terrains that should be removed
+    auto iter = _terrainNodes.begin();
+
+    for (; iter != _terrainNodes.end();) {
+        if (toKeep.find(iter->first) == toKeep.end()) {
+            iter->second->remove();
+            iter = _terrainNodes.erase(iter);
+        }
+        else {
+            ++iter;
         }
     }
+
+    _driver->removeAllHardwareBuffers();
 }
 
 void GroundManager::clearAllNodes() {
@@ -73,18 +84,17 @@ ITerrainSceneNode* GroundManager::createNode(const Terrain &terrain) {
 	maths::vec3d offset = terrain.getBoundingBox().getLowerBound();
 	maths::vec3d size = terrain.getBoundingBox().getUpperBound() - offset;
     size = size / terrainRes;
-	double factor = size.x / size.z;
 
 	// Construction du noeud irrlicht
     int dataSize;
-    const char* data = terrain.getRawData(dataSize, factor * terrainRes);
+    const char* data = terrain.getRawData(dataSize, (float) terrainRes);
     IReadFile * memoryFile = _fileSystem->createMemoryReadFile((void*)data, dataSize, "", false);
 
     ITerrainSceneNode * result =
             _sceneManager->addTerrainSceneNode(nullptr, nullptr, -1,
                                                vector3df((float) offset.x, (float) offset.z, (float) offset.y),
                                                vector3df(0.0f, 0.0f, 0.0f),
-                                               vector3df((float) size.x, (float) (size.z / factor), (float) (size.y)),
+                                               vector3df((float) size.x, (float) size.z, (float) (size.y)),
                                                SColor(255, 255, 255, 255),
                                                2, ETPS_17, 4, true);
     result->loadHeightMapRAW(memoryFile, 32, true, true, 0, SColor(255,255,255,255), 4);
@@ -104,7 +114,10 @@ ITerrainSceneNode* GroundManager::createNode(const Terrain &terrain) {
 	// Couleurs du terrain
     material.AmbientColor.set(255, 0, 0, 0);
     material.SpecularColor.set(255, 255, 255, 255);
-    material.DiffuseColor.set(255, 200, 178, 126);
+
+    u32 lin_ts = (u32)(log(size.x / 250) / log(2) * 50);
+    material.DiffuseColor.set(255, 255 - lin_ts, 178, lin_ts);
+    //material.DiffuseColor.set(255, 200, 178, 126);
 
 
     /*/ Collision pour la camera

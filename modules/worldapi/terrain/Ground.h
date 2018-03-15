@@ -45,7 +45,8 @@ public:
 
 	// EXPLORATION
 	double observeAltitudeAt(double x, double y, int lvl = 0);
-	void collectChunk(FlatWorldCollector &collector, FlatWorld &world, WorldZone &chunkNode);
+	double observeAltitudeAt(WorldZone zone, double x, double y);
+	void collectZone(FlatWorldCollector &collector, FlatWorld &world, WorldZone &zone);
 private:
 	// Paramètres
 	/** L'altitude maximum du monde. Le niveau de la mer est fixé à 0. */
@@ -58,7 +59,9 @@ private:
 	/** Le facteur de subdivision pour les différents niveaux de détails.
 	 * La taille d'un terrain en fonction de son niveau de détail est
 	 * calculée ainsi : _unitSize * _factor ^ lod */
-    int _factor = 4;
+    int _factor = 2;
+	int _terrainRes = 129;
+    int _maxLOD = 4;
 
     // Generator
     std::unique_ptr<ReliefMapGenerator> _mapGenerator;
@@ -78,11 +81,16 @@ private:
 	@returns true si le terrain existe, false s'il doit être généré.*/
 	bool terrainExists(int x, int y, int lvl = 0) const;
 
+	/** Replace a parent terrain by its children in the collector */
+	void replaceTerrain(int x, int y, int lvl, FlatWorldCollector & collector);
+
 	// DATA
 	/** Donne un identifiant unique pour la section de terrain à
 	 * l'emplacement donné. */
 	long getTerrainDataId(int x, int y, int lvl) const;
     double getTerrainSize(int level) const;
+	int getLevelForChunk(const WorldZone &zone) const;
+	maths::vec3i getParentId(const maths::vec3i &childId) const;
 
 	// GENERATION
     void generateZone(FlatWorld &world, WorldZone &zone);
@@ -91,7 +99,9 @@ private:
 	 * - the terrains with higher level at the same place are already
 	 * generated.*/
     void generateTerrain(int x, int y, int lvl);
+    void applyPreviousLayer(int x, int y, int lvl, bool unapply = false);
     void applyMap(int x, int y, int lvl, bool unapply = false);
+	void applyParent(int tX, int tY, int lvl, bool unapply = false);
 
 	friend class GroundContext;
 };

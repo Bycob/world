@@ -1,7 +1,7 @@
 #include "PrivateWorldCollector.h"
 
 
-PrivateCollectorChunk::PrivateCollectorChunk(WorldZone &chunkNode)
+PrivateCollectorChunk::PrivateCollectorChunk(const WorldZone &chunkNode)
         : _chunkNode(chunkNode), _nextKey(0) {
 
 }

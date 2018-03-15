@@ -1,6 +1,7 @@
 #include "ChunkSystem.h"
 
 #include <map>
+#include <vector>
 
 
 using namespace maths;
@@ -60,6 +61,14 @@ public:
 
 ChunkSystem::ChunkSystem() : _internal(new PrivateChunkSystem()) {
     _internal->_lodData.emplace(0, LODData({4000, 4000, 4000}));
+
+    for (int i = 1 ; i <= _maxLOD ; i++) {
+        getOrCreateLODData(i);
+    }
+
+    for (int i = 0 ; i <= _maxLOD ; i++) {
+        std::cout << i << " : " << getMinDetailSize(i) << " " << getMaxDetailSize(i) << std::endl;
+    }
 }
 
 ChunkSystem::~ChunkSystem() {
@@ -114,7 +123,7 @@ LODData & ChunkSystem::getOrCreateLODData(int lod) {
     auto lodData = _internal->_lodData.find(lod);
 
     if (lodData == _internal->_lodData.end()) {
-        auto dimensions = _internal->_lodData[0].getChunkSize() * pow(2, -lod);
+        auto dimensions = _internal->_lodData[0].getChunkSize() * powi(2., -lod);
         return _internal->_lodData[lod] = LODData(dimensions);
     }
     else {
@@ -135,7 +144,7 @@ std::pair<WorldZone, bool> ChunkSystem::getOrCreateZone(const vec3d &position, i
     return {getZone(id), created};
 }
 
-std::pair<WorldZone, bool> ChunkSystem::getOrCreateNeighbourZone(const WorldZone &chunk, const maths::vec3i &direction) {
+std::pair<WorldZone, bool> ChunkSystem::getOrCreateNeighbourZone(const ChunkHandler &chunk, const maths::vec3i &direction) {
     ChunkID id = chunk.getID();
     ChunkID nid = ChunkID(id.getPosition3D() + direction, id.getLOD());
 
@@ -143,12 +152,49 @@ std::pair<WorldZone, bool> ChunkSystem::getOrCreateNeighbourZone(const WorldZone
     return {getZone(nid), created};
 }
 
+std::vector<std::pair<WorldZone, bool>> ChunkSystem::getOrCreateChildren(const ChunkHandler &zone) {
+    std::vector<std::pair<WorldZone, bool>> vector;
+
+    ChunkEntry &entry = *_internal->_chunks[zone._id];
+    bool created = false;
+
+    // Create children
+    if (entry._children.empty() && zone._id.getLOD() < _maxLOD) {
+        int lod = zone._id.getLOD() + 1;
+
+        // Actuellement, a chaque fois qu'on monte d'un lod, on divise la taille du chunk par 2
+        int factor = 2;
+        vec3i origin = zone._id.getPosition3D() * factor;
+
+        for (int x = 0 ; x < factor ; x++) {
+            for (int y = 0 ; y < factor ; y++) {
+                for (int z = 0 ; z < factor ; z++) {
+                    ChunkID nid(origin.x + x, origin.y + y, origin.z + z, lod);
+                    createChunk(nid);
+                    entry._children.push_back(nid);
+                }
+            }
+        }
+
+        created = true;
+    }
+
+    std::transform(entry._children.begin(),
+                   entry._children.end(),
+                   std::inserter(vector, vector.end()), [&] (const ChunkID &id) {
+
+                return std::make_pair(getZone(id), created);
+    });
+
+    return vector;
+}
+
 Chunk& ChunkSystem::getChunk(const ChunkID &id) {
     return _internal->_chunks[id]->_chunk;
 }
 
 WorldZone ChunkSystem::getZone(const ChunkID &id) {
-    return WorldZone(*this, id, getChunk(id));
+    return WorldZone(new ChunkHandler(*this, id, getChunk(id)));
 }
 
 bool ChunkSystem::createChunk(ChunkID id) {
@@ -172,39 +218,55 @@ bool ChunkSystem::createChunk(ChunkID id) {
 
 
 
-WorldZone::WorldZone(ChunkSystem & system, const ChunkID &id, Chunk &chunk)
+ChunkHandler::ChunkHandler(ChunkSystem & system, const ChunkID &id, Chunk &chunk)
         : _system(system), _id(id), _chunk(chunk) {}
 
-WorldZone::WorldZone(const WorldZone &other)
+ChunkHandler::ChunkHandler(const ChunkHandler &other)
         : _system(other._system), _id(other._id), _chunk(other._chunk) {}
 
-Chunk& WorldZone::chunk() {
+IWorldZoneHandler* ChunkHandler::clone() {
+    return new ChunkHandler(*this);
+}
+
+Chunk& ChunkHandler::chunk() {
     return _chunk;
 }
 
-const ChunkID& WorldZone::getID() const {
+const Chunk& ChunkHandler::getChunk() const {
+    return _chunk;
+}
+
+const ChunkID& ChunkHandler::getID() const {
     return _id;
 }
 
-bool WorldZone::operator<(const WorldZone &other) const {
+bool ChunkHandler::operator<(const ChunkHandler &other) const {
     return _id < other._id;
 }
 
-bool WorldZone::operator==(const WorldZone &other) const {
+bool ChunkHandler::operator==(const ChunkHandler &other) const {
     return _id == other._id;
 }
 
-bool WorldZone::hasParent() {
+bool ChunkHandler::hasParent() {
     auto &entry = _system._internal->_chunks[_id];
     return !(entry->_parentID == ChunkID::NONE);
 }
 
-WorldZone WorldZone::getParent() const {
+WorldZone ChunkHandler::getParent() const {
     auto &entry = _system._internal->_chunks[_id];
     return _system.getZone(entry->_parentID);
 }
 
-maths::vec3d WorldZone::getRelativeOffset(const WorldZone &other) {
+std::pair<WorldZone, bool> ChunkHandler::getOrCreateNeighbourZone(const maths::vec3i &direction) {
+    return _system.getOrCreateNeighbourZone(*this, direction);
+}
+
+std::vector<std::pair<WorldZone, bool>> ChunkHandler::getOrCreateChildren() {
+    return _system.getOrCreateChildren(*this);
+}
+
+maths::vec3d ChunkHandler::getRelativeOffset(const ChunkHandler &other) {
     // TODO
 
     // We look for the nearest common ancestor between the two
@@ -240,13 +302,13 @@ maths::vec3d WorldZone::getRelativeOffset(const WorldZone &other) {
     }*/
 }
 
-maths::vec3d WorldZone::getAbsoluteOffset() {
-    std::unique_ptr<WorldZone> parent = std::make_unique<WorldZone>(*this);
-    vec3d offset = parent->_chunk.getOffset();
+maths::vec3d ChunkHandler::getAbsoluteOffset() {
+    WorldZone parent(new ChunkHandler(*this));
+    vec3d offset = parent->getChunk().getOffset();
 
     while (parent->hasParent()) {
-        parent = std::make_unique<WorldZone>(parent->getParent());
-        offset = offset + parent->_chunk.getOffset();
+        parent = parent->getParent();
+        offset = offset + parent->getChunk().getOffset();
     }
 
     return offset;
