@@ -21,7 +21,7 @@ public:
     void initialize(FlatWorldCollector &collector) override;
 	void update(FlatWorldCollector &collector) override;
 private:
-	std::map<long, irr::scene::ITerrainSceneNode*> _terrainNodes;
+	std::map<FlatWorldCollector::TerrainKey, irr::scene::ITerrainSceneNode*> _terrainNodes;
 
 	void clearAllNodes();
     irr::scene::ITerrainSceneNode* createNode(const Terrain& terrain);

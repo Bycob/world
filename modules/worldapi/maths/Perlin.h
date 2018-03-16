@@ -4,6 +4,7 @@ Il se base sur la bibliothèque matricielle armadillo.*/
 
 #include <worldapi/worldapidef.h>
 
+#include <functional>
 #include <random>
 #include <armadillo/armadillo>
 

@@ -5,6 +5,7 @@
 #include <tuple>
 #include <memory>
 #include <iterator>
+#include <functional>
 
 #include <worldapi/maths/MathsHelper.h>
 

@@ -74,7 +74,6 @@ double Ground::observeAltitudeAt(double x, double y, int lvl) {
 
 double Ground::observeAltitudeAt(WorldZone zone, double x, double y) {
     int lvl = getLevelForChunk(zone);
-    std::cout << lvl << " " << zone->getID().getLOD() << std::endl;
     vec3d offset = zone->getAbsoluteOffset();
     return observeAltitudeAt(offset.x + x, offset.y + y, lvl);
 }
@@ -140,7 +139,7 @@ void Ground::replaceTerrain(int xp, int yp, int lvl, FlatWorldCollector &collect
     }
 }
 
-long Ground::getTerrainDataId(int x, int y, int lvl) const {
+uint64_t Ground::getTerrainDataId(int x, int y, int lvl) const {
     uint64_t id = (uint64_t)(x & 0x0FFFFFFF)
                   + ((uint64_t) (y & 0x0FFFFFFF) << 24)
                   + ((uint64_t) (lvl & 0xFF) << 48);

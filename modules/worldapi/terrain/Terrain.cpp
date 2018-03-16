@@ -59,6 +59,8 @@ Terrain& Terrain::operator=(const Terrain &terrain) {
 	if (terrain._texture != nullptr) {
 		_texture = std::make_unique<Image>(*terrain._texture);
 	}
+
+	return *this;
 }
 
 void Terrain::setBounds(double xmin, double ymin, double zmin, double xmax, double ymax, double zmax) {

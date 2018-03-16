@@ -65,10 +65,6 @@ ChunkSystem::ChunkSystem() : _internal(new PrivateChunkSystem()) {
     for (int i = 1 ; i <= _maxLOD ; i++) {
         getOrCreateLODData(i);
     }
-
-    for (int i = 0 ; i <= _maxLOD ; i++) {
-        std::cout << i << " : " << getMinDetailSize(i) << " " << getMaxDetailSize(i) << std::endl;
-    }
 }
 
 ChunkSystem::~ChunkSystem() {
@@ -300,6 +296,7 @@ maths::vec3d ChunkHandler::getRelativeOffset(const ChunkHandler &other) {
             }
         }
     }*/
+	return {};
 }
 
 maths::vec3d ChunkHandler::getAbsoluteOffset() {

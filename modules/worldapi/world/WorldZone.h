@@ -39,6 +39,7 @@ public:
 
     WorldZone& operator=(const WorldZone &other) {
         _handler.reset(other._handler->clone());
+		return *this;
     }
 
     bool operator<(const WorldZone &other) const { return _handler->getID() < other._handler->getID(); }

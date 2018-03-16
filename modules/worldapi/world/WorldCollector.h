@@ -49,7 +49,7 @@ public:
     CollectorObject &getCollectedObject(const ObjectKey & key);
     CollectorIterator iterateObjects();
 protected:
-    std::unique_ptr<PrivateWorldCollector> _internal;
+    PrivateWorldCollector* _internal;
 
     ChunkKey getChunkKey(ObjectKey key);
 
@@ -61,13 +61,14 @@ class PrivateCollectorObject;
 class WORLDAPI_EXPORT CollectorObject {
 public:
     CollectorObject(WorldZone &zone, WorldObject &object);
+	~CollectorObject();
 
     void putPart(const WorldCollector::PartKey &key, const Object3D &object);
 
     CollectorObjectPart &getPart(const WorldCollector::PartKey &key);
     const Object3D &getPartAsObject3D(const WorldCollector::PartKey &key) const;
 private:
-    std::unique_ptr<PrivateCollectorObject> _internal;
+    PrivateCollectorObject* _internal;
 
     friend class WorldCollector;
 };
@@ -77,11 +78,12 @@ class PrivateCollectorObjectPart;
 class WORLDAPI_EXPORT CollectorObjectPart {
 public:
     CollectorObjectPart(const Object3D &object3D);
+	~CollectorObjectPart();
 
     const Object3D &getObject3D() const;
     Object3D &getObject3D();
 private:
-    std::unique_ptr<PrivateCollectorObjectPart> _internal;
+    PrivateCollectorObjectPart* _internal;
 
     friend class WorldCollector;
 };
@@ -100,7 +102,7 @@ public:
 
     bool hasNext() const;
 private:
-    std::unique_ptr<PrivateCollectorIterator> _internal;
+    PrivateCollectorIterator* _internal;
 
     WorldCollector &_collector;
 

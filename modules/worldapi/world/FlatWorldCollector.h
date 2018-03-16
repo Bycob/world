@@ -20,7 +20,7 @@ public:
     ~TerrainIterator();
 
     void operator++();
-    std::pair<long, Terrain*> operator*();
+    std::pair<uint64_t, Terrain*> operator*();
     bool hasNext() const;
 private:
     PrivateTerrainIterator* _internal;
@@ -30,6 +30,8 @@ private:
 
 class WORLDAPI_EXPORT FlatWorldCollector : public WorldCollector, public IWorldCollector<FlatWorld> {
 public:
+	typedef uint64_t TerrainKey;
+	
     FlatWorldCollector();
     ~FlatWorldCollector() override;
 
@@ -37,14 +39,14 @@ public:
     void collect(FlatWorld &world, WorldZone &zone) override;
 
     // TODO TerrainStream
-    void addTerrain(long key, const Terrain &terrain);
-    void disableTerrain(long key);
+    void addTerrain(TerrainKey key, const Terrain &terrain);
+    void disableTerrain(TerrainKey key);
     TerrainIterator iterateTerrains();
 private:
     friend class TerrainIterator;
 
-    std::set<long> _disabledTerrains;
-    std::map<long, Terrain> _terrains;
+    std::set<TerrainKey> _disabledTerrains;
+    std::map<TerrainKey, Terrain> _terrains;
 };
 
 

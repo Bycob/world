@@ -1,8 +1,11 @@
 #include "FlatWorldCollector.h"
 
+
+using TerrainKey = FlatWorldCollector::TerrainKey;
+
 class PrivateTerrainIterator {
 public:
-    std::map<long, Terrain>::iterator _it;
+    std::map<TerrainKey, Terrain>::iterator _it;
 };
 
 TerrainIterator::TerrainIterator(FlatWorldCollector &collector)
@@ -20,7 +23,7 @@ void TerrainIterator::operator++() {
     _internal->_it++;
 }
 
-std::pair<long, Terrain*> TerrainIterator::operator*() {
+std::pair<TerrainKey, Terrain*> TerrainIterator::operator*() {
     auto &p = *_internal->_it;
     return std::make_pair(p.first, &p.second);
 }
@@ -47,7 +50,7 @@ void FlatWorldCollector::collect(FlatWorld &world, WorldZone &zone) {
     ground.collectZone(*this, world, zone);
 }
 
-void FlatWorldCollector::addTerrain(long key, const Terrain &terrain) {
+void FlatWorldCollector::addTerrain(TerrainKey key, const Terrain &terrain) {
     if (_disabledTerrains.find(key) != _disabledTerrains.end()) {
         return;
     }
@@ -59,7 +62,7 @@ void FlatWorldCollector::addTerrain(long key, const Terrain &terrain) {
     }
 }
 
-void FlatWorldCollector::disableTerrain(long key) {
+void FlatWorldCollector::disableTerrain(TerrainKey key) {
     _terrains.erase(key);
     _disabledTerrains.insert(key);
 }

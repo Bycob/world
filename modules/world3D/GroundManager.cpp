@@ -15,6 +15,8 @@ using namespace scene;
 using namespace io;
 using namespace video;
 
+using TerrainKey = FlatWorldCollector::TerrainKey;
+
 GroundManager::GroundManager(Application & application, IrrlichtDevice *device)
         : RenderingModule(application, device) {
 
@@ -37,18 +39,16 @@ void GroundManager::update(FlatWorldCollector &collector) {
     std::unique_ptr<Terrain> terrain(generator.generate());
 	addNode({ *terrain, 0, 0 }, ground);
     //*/
-    std::map<long, bool> toKeep;
+    std::map<TerrainKey, bool> toKeep;
 
     // Add terrains if they're not already here
     auto terrainIt = collector.iterateTerrains();
 
-    int c = 0;
     for (; terrainIt.hasNext(); ++terrainIt) {
         auto pair = *terrainIt;
 
         if (_terrainNodes.find(pair.first) == _terrainNodes.end()) {
             _terrainNodes[pair.first] = createNode(*pair.second);
-            c++;
         }
         toKeep[pair.first] = true;
     }
@@ -118,7 +118,6 @@ ITerrainSceneNode* GroundManager::createNode(const Terrain &terrain) {
     u32 lin_ts = (u32)(log(size.x / 250) / log(2) * 50);
     material.DiffuseColor.set(255, 255 - lin_ts, 178, lin_ts);
     //material.DiffuseColor.set(255, 200, 178, 126);
-
 
     /*/ Collision pour la camera
     scene::ITriangleSelector* selector

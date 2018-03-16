@@ -9,7 +9,9 @@ WorldCollector::WorldCollector()
 
 }
 
-WorldCollector::~WorldCollector() = default;
+WorldCollector::~WorldCollector() {
+	delete _internal;
+}
 
 void WorldCollector::reset() {
     _internal->_chunks.clear();
@@ -51,8 +53,12 @@ WorldCollector::ChunkKey WorldCollector::getChunkKey(ObjectKey key) {
 // ==== COLLECTOR OBJECT
 
 CollectorObject::CollectorObject(WorldZone &zone, WorldObject &object)
-        : _internal(std::make_unique<PrivateCollectorObject>(zone, object)) {
+        : _internal(new PrivateCollectorObject(zone, object)) {
 
+}
+
+CollectorObject::~CollectorObject() {
+	delete _internal;
 }
 
 void CollectorObject::putPart(const WorldCollector::PartKey &key, const Object3D &object) {
@@ -79,8 +85,12 @@ const Object3D& CollectorObject::getPartAsObject3D(const WorldCollector::PartKey
 // ==== COLLECTOR OBJECT PART
 
 CollectorObjectPart::CollectorObjectPart(const Object3D &object3D) :
-        _internal(std::make_unique<PrivateCollectorObjectPart>(object3D)) {
+        _internal(new PrivateCollectorObjectPart(object3D)) {
 
+}
+
+CollectorObjectPart::~CollectorObjectPart() {
+	delete _internal;
 }
 
 const Object3D& CollectorObjectPart::getObject3D() const {
@@ -117,7 +127,9 @@ CollectorIterator::CollectorIterator(const CollectorIterator &other)
     _internal->_objectIt = other._internal->_objectIt;
 }
 
-CollectorIterator::~CollectorIterator() = default;
+CollectorIterator::~CollectorIterator() {
+	delete _internal;
+}
 
 void CollectorIterator::operator++() {
     _internal->_objectIt++;

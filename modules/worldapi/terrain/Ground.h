@@ -68,7 +68,7 @@ private:
     std::unique_ptr<TerrainGenerator> _terrainGenerator;
 
 	// Données
-	int _cacheSize;
+	int _cacheSize = 0;
 	mutable GroundCache * _cache;
 
 	// ACCESS
@@ -87,7 +87,7 @@ private:
 	// DATA
 	/** Donne un identifiant unique pour la section de terrain à
 	 * l'emplacement donné. */
-	long getTerrainDataId(int x, int y, int lvl) const;
+	uint64_t getTerrainDataId(int x, int y, int lvl) const;
     double getTerrainSize(int level) const;
 	int getLevelForChunk(const WorldZone &zone) const;
 	maths::vec3i getParentId(const maths::vec3i &childId) const;
