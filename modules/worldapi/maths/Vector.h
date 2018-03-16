@@ -31,15 +31,15 @@ namespace maths {
 		template<typename R> bool operator<(const vec3<R> & rhs) const;
 
 		vec3<T> normalize() const;
-		T norm() const;
+		double norm() const;
 
 		vec3<T> crossProduct(const vec3<T> &rhs) const;
 		T dotProduct(const vec3<T> &rhs) const;
 
 		T squaredLength(const vec3<T> &rhs) const;
-		T length(const vec3<T> &rhs) const;
+		double length(const vec3<T> &rhs) const;
 
-		static T length(const vec3<T> &vec1, const vec3<T> &vec2);
+		static double length(const vec3<T> &vec1, const vec3<T> &vec2);
 	};
 
 	template <typename T>
@@ -59,14 +59,14 @@ namespace maths {
 		template <typename R> bool operator<(const vec2<R> & rhs) const;
 
 		vec2<T> normalize() const;
-		T norm() const;
+		double norm() const;
 
 		T dotProduct(const vec2<T> &rhs) const;
 
 		T squaredLength(const vec2<T> &rhs) const;
-		T length(const vec2<T> &rhs) const;
+		double length(const vec2<T> &rhs) const;
 
-		static T length(const vec2<T> &vec1, const vec2<T> &vec2);
+		static double length(const vec2<T> &vec1, const vec2<T> &vec2);
 	};
 
 
@@ -128,14 +128,14 @@ namespace maths {
 				x == rhs.x && y == rhs.y && z < rhs.z);
 	}
 
-	template<typename T> inline T vec3<T>::norm() const {
+	template<typename T> inline double vec3<T>::norm() const {
 		return sqrt(this->x * this->x + this->y * this->y + this->z * this->z);
 	}
 
 	template<typename T> inline vec3<T> vec3<T>::normalize() const {
-		T norm = this->norm();
-		if (norm <= std::numeric_limits<T>::epsilon()) return *this;
-		return vec3(this->x / norm, this->y / norm, this->z / norm);
+		double norm = this->norm();
+		if (norm <= std::numeric_limits<double>::epsilon()) return *this;
+		return vec3((T) (this->x / norm), (T) (this->y / norm), (T) (this->z / norm));
 	}
 
 	template<typename T> inline vec3<T> vec3<T>::crossProduct(const vec3<T> & rhs) const {
@@ -151,26 +151,26 @@ namespace maths {
 	}
 
 	template<typename T> inline T vec3<T>::squaredLength(const vec3<T> & rhs) const {
-		double x = this->x - rhs.x;
-		double y = this->y - rhs.y;
-		double z = this->z - rhs.z;
+		T x = this->x - rhs.x;
+		T y = this->y - rhs.y;
+		T z = this->z - rhs.z;
 		return x * x + y * y + z * z;
 	}
 
-	template<typename T> inline T vec3<T>::length(const vec3<T> & rhs) const {
+	template<typename T> inline double vec3<T>::length(const vec3<T> & rhs) const {
 		return sqrt(squaredLength(rhs));
 	}
 
-	template<typename T> inline T vec3<T>::length(const vec3<T> & vec1, const vec3<T> & vec2) {
+	template<typename T> inline double vec3<T>::length(const vec3<T> & vec1, const vec3<T> & vec2) {
 		return vec1.length(vec2);
 	}
 
-	template<typename T> inline T getAngle(const vec3<T> & vec1, const vec3<T> & vec2) {
-		T n1 = vec1.norm();
-		T n2 = vec2.norm();
-		T n12 = n1 * n2;
-		if (n12 < std::numeric_limits<T>::epsilon()) return 0;
-		T c = vec1.dotProduct(vec2) / n12;
+	template<typename T> inline double getAngle(const vec3<T> & vec1, const vec3<T> & vec2) {
+		double n1 = vec1.norm();
+		double n2 = vec2.norm();
+		double n12 = n1 * n2;
+		if (n12 < std::numeric_limits<double>::epsilon()) return 0;
+		double c = vec1.dotProduct(vec2) / n12;
 		if (c > 1) c = 1; if (c < -1) c = -1;
 		return acos(c);
 	}
@@ -205,14 +205,14 @@ namespace maths {
 		return x < rhs.x ? true : x == rhs.x && y < rhs.y;
 	}
 
-	template<typename T> inline T vec2<T>::norm() const {
+	template<typename T> inline double vec2<T>::norm() const {
 		return sqrt(this->x * this->x + this->y * this->y);
 	}
 
 	template<typename T> inline vec2<T> vec2<T>::normalize() const {
-		T norm = this->norm();
-		if (norm <= std::numeric_limits<T>::epsilon()) return *this;
-		return vec2(this->x / norm, this->y / norm);
+		double norm = this->norm();
+		if (norm <= std::numeric_limits<double>::epsilon()) return *this;
+		return vec2<T>((T) (this->x / norm), (T) (this->y / norm));
 	}
 
 	template<typename T> inline T vec2<T>::dotProduct(const vec2<T> & rhs) const {
@@ -220,16 +220,16 @@ namespace maths {
 	}
 
 	template<typename T> inline T vec2<T>::squaredLength(const vec2<T> & rhs) const {
-		double x = this->x - rhs.x;
-		double y = this->y - rhs.y;
+		T x = this->x - rhs.x;
+		T y = this->y - rhs.y;
 		return x * x + y * y;
 	}
 
-	template<typename T> inline T vec2<T>::length(const vec2<T> & rhs) const {
+	template<typename T> inline double vec2<T>::length(const vec2<T> & rhs) const {
 		return sqrt(squaredLength(rhs));
 	}
 
-	template<typename T> inline T vec2<T>::length(const vec2<T> & vec1, const vec2<T> & vec2) {
+	template<typename T> inline double vec2<T>::length(const vec2<T> & vec1, const vec2<T> & vec2) {
 		return vec1.length(vec2);
 	}
 
