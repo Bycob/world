@@ -47,7 +47,7 @@ void ObjectNodeHandler::updateObject3D(const Object3D & object) {
 
 	material.AmbientColor.set(255, 0, 0, 0);
 	material.SpecularColor.set(255, 255, 255, 255);
-	material.DiffuseColor.set(255, 200, 0, 0);
+	material.DiffuseColor.set(255, 100, 50, 0);
 
 	irrMesh->drop();
 
@@ -112,10 +112,7 @@ void ObjectsManager::update(FlatWorldCollector &collector) {
 SMesh * ObjectsManager::convertToIrrlichtMesh(const Mesh & mesh, IVideoDriver * driver) {
 	SMesh * irrMesh = new SMesh();
 	s32 maxPrimitives = driver->getMaximalPrimitiveCount();
-
-	auto & positions = mesh.getVertices<VType::POSITION>();
-	auto & texCoords = mesh.getVertices<VType::TEXTURE>();
-	auto & normals = mesh.getVertices<VType::NORMAL>();
+	auto & vertices = mesh.getVertices();
 
 	auto & faces = mesh.getFaces();
 	int primitiveCount = 0;
@@ -152,18 +149,12 @@ SMesh * ObjectsManager::convertToIrrlichtMesh(const Mesh & mesh, IVideoDriver * 
 
 		// Add face data
 		for (int i = 0; i < 3; i++) {
-			int posID = face.getID<VType::POSITION>(i);
-			int texID = face.getID<VType::TEXTURE>(i);
-			int normID = face.getID<VType::NORMAL>(i);
+			int id = face.getID(i);
 
 			S3DVertex& v = buffer->Vertices[primitiveCount];
-			v.Pos = toIrrlicht(positions[posID].toVec3() * 10.0); // TODO check if posID == -1;
-			
-			if (texID != -1)
-				v.TCoords = toIrrlicht(positions[texID].toVec2());
-
-			if (normID != -1)
-				v.Normal = toIrrlicht(positions[normID].toVec3());
+			v.Pos = toIrrlicht(vertices.at(id).getPosition() * 10.0); // TODO check if posID == -1;
+			v.TCoords = toIrrlicht(vertices.at(id).getTexture());
+			v.Normal = toIrrlicht(vertices.at(id).getNormal());
 
 			v.Color = SColor(255, 255, 255, 255);
 

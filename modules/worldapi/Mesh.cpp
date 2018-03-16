@@ -6,33 +6,31 @@
 
 //----- FACE
 
-Face::Face() : _vcount(0) {
-	this->_positionIDs.reserve(3);
-	this->_normalIDs.reserve(3);
-	this->_textureIDs.reserve(3);
-	this->_paramIDs.reserve(3);
+Face::Face()  {
+	this->_ids.reserve(3);
 }
 Face::~Face() {}
 
-void Face::addVertex(int vertexID, int normalID, int textureID, int paramID) {
-	if (vertexID < 0) {
-		std::cerr << "Face::addVertex : indice non valide : " << vertexID << std::endl;
-		throw std::runtime_error("");
-	}
-
-	//std::cout << "v" << vertexID << " vt" << textureID << " vn" << normalID << std::endl;
-
-	this->_positionIDs.push_back(vertexID);
-	this->_normalIDs.push_back(normalID);
-	this->_textureIDs.push_back(textureID);
-	this->_paramIDs.push_back(paramID);
-
-	_vcount++;
+void Face::addID(int id) {
+	_ids.push_back(id);
 }
 
-void Face::addVertexUniqueID(int vertexID) {
-	addVertex(vertexID, vertexID, vertexID, vertexID);
+int Face::getID(int vert) const {
+	return _ids[vert];
 }
+
+void Face::setID(int vert, int id) {
+	_ids[vert] = id;
+}
+
+const std::vector<int>& Face::getIDs() const {
+	return _ids;
+}
+
+int Face::vertexCount() const { 
+	return (int)_ids.size();
+}
+
 
 
 //----- MESH
@@ -48,17 +46,42 @@ const std::vector<Face> & Mesh::getFaces() const {
 	return _faces;
 }
 
+const Vertex & Mesh::getVertex(int id) const {
+	return _vertices.at(id);
+}
+
+Vertex & Mesh::getVertex(int id) {
+	return _vertices.at(id);
+}
+
 void Mesh::allocateFaces(int count) {
 	_faces.reserve(count);
+}
+
+const std::vector<Vertex> & Mesh::getVertices() const {
+	return _vertices;
+}
+
+int Mesh::getCount() const {
+	return _vertices.size();
+}
+
+void Mesh::clearVertices() {
+	_vertices.clear();
+}
+
+void Mesh::allocateVertices(int count) {
+	_vertices.reserve(count);
+}
+
+void Mesh::addVertex(const Vertex & vertex) {
+	_vertices.push_back(vertex);
 }
 
 void Mesh::setMaterialName(const std::string & name) {
 	_materialName = name;
 }
 
-void Mesh::optimize() {
-	
-	for (Vertex<VType::POSITION> & vert : getList<VType::POSITION>()) {
-
-	}
+const std::string& Mesh::getMaterialName() const {
+	return _materialName;
 }

@@ -139,11 +139,11 @@ template <class T> void WeightedSkeletton<T>::populateMesh(Mesh * mesh, Node<T> 
 	// Noeud marqué == toutes les connexions ont été établies pour ce noeud.
 	if (!node->_mark) {
 		node->_mark = true;
-		node->_id = mesh->getCount<VType::POSITION>();
+		node->_id = mesh->getCount();
 
 		//Ajout du vertex correspondant
-		Vertex<VType::POSITION> vert;
-		vert.add(node->_x).add(node->_y).add(node->_z);
+		Vertex vert;
+		vert.setPosition(node->_x, node->_y, node->_z);
 		mesh->addVertex(vert);
 	}
 
@@ -158,11 +158,11 @@ template <class T> void WeightedSkeletton<T>::populateMesh(Mesh * mesh, Node<T> 
 
 	// On ajoute les liaisons, puis on appelle récursivement chaque noeud.
 	for (Node<T> * child : processList) {
-		int id = child->_mark ? child->_id : mesh->getCount<VType::POSITION>();
+		int id = child->_mark ? child->_id : mesh->getCount();
 
 		Face face;
-		face.addVertexUniqueID(node->_id);
-		face.addVertexUniqueID(id);
+		face.addID(node->_id);
+		face.addID(id);
 		
 		mesh->addFace(face);
 

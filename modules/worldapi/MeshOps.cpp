@@ -5,14 +5,14 @@
 using namespace maths;
 
 void MeshOps::recalculateNormals(Mesh & mesh) {
-	auto vertList = mesh.getVertices<VType::POSITION>();
-	auto faceList = mesh.getFaces();
+	auto &vertList = mesh.getVertices();
+	auto &faceList = mesh.getFaces();
 
 	std::vector<vec3d> normalSum(vertList.size(), vec3d());
 	std::vector<int> normalCount(vertList.size(), 0);
 
-	for (Face & face : faceList) {
-		auto faceVertices = face.getIDs<VType::POSITION>();
+	for (const Face & face : faceList) {
+		auto faceVertices = face.getIDs();
 		int count = face.vertexCount();
 
 		for (int j = 0; j < count; j++) {
@@ -21,12 +21,12 @@ void MeshOps::recalculateNormals(Mesh & mesh) {
 			int id1 = faceVertices.at(mod(j + 1, count));
 			int id2 = faceVertices.at(mod(j - 1, count));
 
-			auto pt1 = vertList.at(id0).getValues();
-			auto pt2 = vertList.at(id1).getValues();
-			auto pt3 = vertList.at(id2).getValues();
+			auto pt1 = vertList.at(id0).getPosition();
+			auto pt2 = vertList.at(id1).getPosition();
+			auto pt3 = vertList.at(id2).getPosition();
 
-			vec3d v1(pt2[0] - pt1[0], pt2[1] - pt1[1], pt2[2] - pt1[2]);
-			vec3d v2(pt3[0] - pt1[0], pt3[1] - pt1[1], pt3[2] - pt1[2]);
+			vec3d v1 = pt2 - pt1;
+			vec3d v2 = pt3 - pt1;
 			vec3d normal = v1.crossProduct(v2).normalize();
 
 			// Ajout de la normale au calcul de la moyenne
@@ -34,15 +34,10 @@ void MeshOps::recalculateNormals(Mesh & mesh) {
 			inplace = inplace + normal;
 
 			normalCount.at(id0)++;
-
-			// Ajout de la normale à la face
-			face.setID<VType::NORMAL>(j, id0);
 		}
 	}
 
-	// Ajout de toutes les normales au mesh
-	mesh.clearVertices<VType::NORMAL>();
-
+	// On set les normales
 	for (int i = 0; i < normalSum.size(); i++) {
 		int count = normalCount.at(i);
 		vec3d normal;
@@ -54,8 +49,7 @@ void MeshOps::recalculateNormals(Mesh & mesh) {
 			normal = vec3d(0, 0, 1);
 		}
 		
-		Vertex<VType::NORMAL> vn;
-		vn.add((float) normal.x).add((float) normal.y).add((float) normal.z);
-		mesh.addVertex(vn);
+		Vertex &vn = mesh.getVertex(i);
+		vn.setNormal(normal);
 	}
 }

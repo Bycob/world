@@ -40,9 +40,9 @@ void TreeGenerator::fillBezier(Mesh &trunkMesh, const BezierCurve & curve, int d
 	double startWeight, double endWeight, int mergePos) const {
 
 	double segmentCountd = (double)_segmentCount;
-	auto v0 = trunkMesh.getVertices<VType::POSITION>().at(mergePos).getValues();
+	auto v0 = trunkMesh.getVertex(mergePos).getPosition();
 	vec3d c0 = curve.getPointAt(0);
-	vec3d oldAx(v0[0] - c0.x, v0[1] - c0.y, v0[2] - c0.z);
+	vec3d oldAx = v0 - c0;
 
 	// Création du mesh selon la courbe de Bezier
 	for (int i = 1; i <= divCount; i++) {
@@ -77,8 +77,8 @@ void TreeGenerator::fillBezier(Mesh &trunkMesh, const BezierCurve & curve, int d
 
 			vec3d pt = ax * (cos(angle) * localRadius) + ay * (sin(angle) * localRadius);
 
-			Vertex<VType::POSITION> vert;
-			vert.add(pt.x + ptT.x).add(pt.y + ptT.y).add(pt.z + ptT.z);
+			Vertex vert;
+			vert.setPosition(pt + ptT);
 
 			// TODO C - Détermination de la coordonnée de texture
 
@@ -92,21 +92,21 @@ void TreeGenerator::fillBezier(Mesh &trunkMesh, const BezierCurve & curve, int d
 			int j2 = maths::mod(j1 - 1, _segmentCount);
 
 			// Les deux vertices appartenant au cercle traité actuellement.
-			const int v1 = trunkMesh.getCount<VType::POSITION>() - 1;
+			const int v1 = trunkMesh.getCount() - 1;
 			const int v2 = j == 0 ? v1 - 1 + _segmentCount : v1 - 1;
 			// Les deux vertices appartenant au cercle précédent.
 			const int v4 = i == 1 ? mergePos + j1 : v1 - j + j1 - _segmentCount;
 			const int v3 = i == 1 ? mergePos + j2 : v1 - j + j2 - _segmentCount;
 			
 			Face face1;
-			face1.addVertex(v1);
-			face1.addVertex(v2);
-			face1.addVertex(v3);
+			face1.addID(v1);
+			face1.addID(v2);
+			face1.addID(v3);
 
 			Face face2;
-			face2.addVertex(v1);
-			face2.addVertex(v3);
-			face2.addVertex(v4);
+			face2.addID(v1);
+			face2.addID(v3);
+			face2.addID(v4);
 
 			trunkMesh.addFace(face1);
 			trunkMesh.addFace(face2);
@@ -179,7 +179,7 @@ void TreeGenerator::populateTrunkMesh(Mesh & trunkMesh, const Node<TreeInfo>* no
 			const double w2 = avgChildrenWeight + (mergeLenChild / info._size) * (node->getWeight() - avgChildrenWeight);
 			mergeWeight1 = w2;
 
-			fillBezier(trunkMesh, curve, divider, w1, w2, trunkMesh.getCount<VType::POSITION>() - _segmentCount);
+			fillBezier(trunkMesh, curve, divider, w1, w2, trunkMesh.getCount() - _segmentCount);
 		}
 		else {
 			const double localRadius = sqrt(node->getWeight()) * 0.15;
@@ -198,8 +198,8 @@ void TreeGenerator::populateTrunkMesh(Mesh & trunkMesh, const Node<TreeInfo>* no
 				const double x1 = x0 * cosPhi * cosTheta - y0 * sinTheta;
 				const double y1 = x0 * cosPhi * sinTheta + y0 * cosTheta;
 
-				Vertex<VType::POSITION> vert;
-				vert.add(x1 + pos.x).add(y1 + pos.y).add(z1 + pos.z);
+				Vertex vert;
+				vert.setPosition(x1 + pos.x, y1 + pos.y, z1 + pos.z);
 
 				// TODO B - Détermination de la normale
 
@@ -225,7 +225,7 @@ void TreeGenerator::populateTrunkMesh(Mesh & trunkMesh, const Node<TreeInfo>* no
 	// -> Cas des autres étages
 
 	// On retient la position de la dernière corolle du parent pour lier tous les enfants.
-	const int mark = trunkMesh.getCount<VType::POSITION>() - _segmentCount;
+	const int mark = trunkMesh.getCount() - _segmentCount;
 	// Origine commune côté parent
 	const vec3d parentSide = pos - (pos - parentPos) * (mergeLenChild / info._size);
 	const vec3d parentDirection = (pos - parentPos) * (0.5 * mergeLenChild / info._size);

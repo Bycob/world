@@ -115,9 +115,7 @@ Mesh * Terrain::convertToMesh(double offsetX, double offsetY, double offsetZ, do
 
 	// Réservation de mémoire
 	int vertCount = _array.n_rows * _array.n_cols;
-	mesh->allocateVertices<VType::POSITION>(vertCount);
-	mesh->allocateVertices<VType::TEXTURE>(vertCount);
-	mesh->allocateVertices<VType::NORMAL>(vertCount);
+	mesh->allocateVertices(vertCount);
 
 	//Vertices
 	int i = 0;
@@ -126,21 +124,12 @@ Mesh * Terrain::convertToMesh(double offsetX, double offsetY, double offsetZ, do
 			float xd = (float)x / (_array.n_rows - 1);
 			float yd = (float)y / (_array.n_cols - 1);
 
-			Vertex<VType::POSITION> vert;
+			Vertex vert;
 
-			vert.add(xd * sizeX + offsetX)
-				.add(yd * sizeY + offsetY)
-				.add(_array(x, y) * sizeZ + offsetZ);
+			vert.setPosition(xd * sizeX + offsetX, yd * sizeY + offsetY, _array(x, y) * sizeZ + offsetZ);
+			vert.setTexture(xd, 1 - yd);
 
 			mesh->addVertex(vert);
-
-
-			Vertex<VType::TEXTURE> vertext;
-
-			vertext.add(xd)
-				.add(1 - yd);
-
-			mesh->addVertex(vertext);
 		}
 	}
 
@@ -152,13 +141,13 @@ Mesh * Terrain::convertToMesh(double offsetX, double offsetY, double offsetZ, do
 		for (int y = 0; y < _array.n_cols - 1; y++) {
 			Face face1, face2;
 			
-			face1.addVertexUniqueID(indice(x, y));
-			face1.addVertexUniqueID(indice(x + 1, y));
-			face1.addVertexUniqueID(indice(x, y + 1));
+			face1.addID(indice(x, y));
+			face1.addID(indice(x + 1, y));
+			face1.addID(indice(x, y + 1));
 
-			face2.addVertexUniqueID(indice(x + 1, y + 1));
-			face2.addVertexUniqueID(indice(x, y + 1));
-			face2.addVertexUniqueID(indice(x + 1, y));
+			face2.addID(indice(x + 1, y + 1));
+			face2.addID(indice(x, y + 1));
+			face2.addID(indice(x + 1, y));
 
 			mesh->addFace(face1);
 			mesh->addFace(face2);

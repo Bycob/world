@@ -41,14 +41,10 @@ Scene * ObjLoader::read(const std::string & filename) const {
 		//positions
 		std::vector<float> & positions = shape.mesh.positions;
 		assert(positions.size() % 3 == 0);
-
+		
 		for (int i = 0; i < positions.size() / 3; i++) {
-			Vertex<VType::POSITION> vert;
-
-			vert.add(positions.at(i * 3))
-				.add(positions.at(i * 3 + 1))
-				.add(positions.at(i * 3 + 2));
-
+			Vertex vert;
+			vert.setPosition(positions.at(i * 3), positions.at(i * 3 + 1), positions.at(i * 3 + 2));
 			mesh.addVertex(vert);
 		}
 
@@ -57,13 +53,7 @@ Scene * ObjLoader::read(const std::string & filename) const {
 		assert(normals.size() % 3 == 0);
 
 		for (int i = 0; i < normals.size() / 3; i++) {
-			Vertex<VType::NORMAL> vert;
-
-			vert.add(normals.at(i * 3))
-				.add(normals.at(i * 3 + 1))
-				.add(normals.at(i * 3 + 2));
-
-			mesh.addVertex(vert);
+			mesh.getVertex(i).setNormal(normals.at(i * 3), normals.at(i * 3 + 1), normals.at(i * 3 + 2));
 		}
 
 		//texture
@@ -71,12 +61,7 @@ Scene * ObjLoader::read(const std::string & filename) const {
 		assert(textures.size() % 2 == 0);
 
 		for (int i = 0; i < textures.size() / 2; i++) {
-			Vertex<VType::TEXTURE> vert;
-
-			vert.add(textures.at(i * 2))
-				.add(textures.at(i * 2 + 1));
-
-			mesh.addVertex(vert);
+			mesh.getVertex(i).setTexture(textures.at(i * 2), textures.at(i * 2 + 1));
 		}
 
 		//faces
@@ -87,11 +72,7 @@ Scene * ObjLoader::read(const std::string & filename) const {
 			for (int i = offset; i < offset + ngon; i++) {
 				int indice = shape.mesh.indices.at(i);
 
-				//Dans tinyObjLoader, l'indice est le même pour tout, et les vertices sont dupliquées.
-				int vt = mesh.getVertices<VType::TEXTURE>().size() > indice ? indice : -1;
-				int vn = mesh.getVertices<VType::NORMAL>().size() > indice ? indice : -1;
-
-				face.addVertex(indice, vn, vt);
+				face.addID(indice);
 			}
 
 			offset += ngon;
@@ -100,6 +81,8 @@ Scene * ObjLoader::read(const std::string & filename) const {
 
 		result->createObject(shared_mesh);
 	}
+
+	return result;
 }
 
 void ObjLoader::write(const Scene & object3D, std::string filename) const {
@@ -138,13 +121,12 @@ void ObjLoader::write(const Scene & object3D, std::string filename) const {
 }
 
 // Fonctions utiles
-template <VType T> void writeValues(std::ostream & file, const Vertex<T> & vert) {
-	const std::vector<float> & values = vert.getValues();
-	for (const float & value : values) {
-		file << " " << value;
-	}
+void writeValues(std::ostream & file, const maths::vec3d & vert) {
+	file << " " << vert.x << " " << vert.y << " " << vert.z << std::endl;
+}
 
-	file << std::endl;
+void writeValues(std::ostream & file, const maths::vec2d & vert) {
+	file << " " << vert.x << " " << vert.y << std::endl;
 }
 
 void ObjLoader::write(const Scene & scene, std::ostream & objstream, std::ostream & mtlstream) const {
@@ -188,30 +170,26 @@ void ObjLoader::write(const Scene & scene, std::ostream & objstream, std::ostrea
 		int texCoordOffset = texCoordRead;
 
 		// Ecriture des vertices
-		const std::vector<Vertex<VType::POSITION>> & vertList = mesh.getVertices<VType::POSITION>();
+		const std::vector<Vertex> & vertList = mesh.getVertices();
 
-		for (const Vertex<VType::POSITION> & vert : vertList) {
+		for (const Vertex & vert : vertList) {
 			verticesRead++;
 			objstream << "v";
-			writeValues(objstream, vert);
+			writeValues(objstream, vert.getPosition());
 		}
 
 		// Ecriture des normales
-		const std::vector<Vertex<VType::NORMAL>> & normalList = mesh.getVertices<VType::NORMAL>();
-
-		for (const Vertex<VType::NORMAL> & normal : normalList) {
+		for (const Vertex & vert : vertList) {
 			normalRead++;
 			objstream << "vn";
-			writeValues(objstream, normal);
+			writeValues(objstream, vert.getNormal());
 		}
 
 		// Ecriture des coordonnées de texture
-		const std::vector<Vertex<VType::TEXTURE>> & texCoordList = mesh.getVertices<VType::TEXTURE>();
-
-		for (const Vertex<VType::TEXTURE> & texCoord : texCoordList) {
+		for (const Vertex & vert : vertList) {
 			texCoordRead++;
 			objstream << "vt";
-			writeValues(objstream, texCoord);
+			writeValues(objstream, vert.getTexture());
 		}
 
 		// Ecriture des faces
@@ -220,9 +198,10 @@ void ObjLoader::write(const Scene & scene, std::ostream & objstream, std::ostrea
 		for (const Face & face : faceList) {
 			objstream << "f";
 
-			const std::vector<int> vertIndices = face.getIDs<VType::POSITION>(),
-				texCoordIndices = face.getIDs<VType::TEXTURE>(),
-				normalIndices = face.getIDs<VType::NORMAL>();
+			// This code enables to implement optionnal indices easily, despite the fact that it's not yet supported
+			const std::vector<int> vertIndices = face.getIDs(),
+				texCoordIndices = face.getIDs(),
+				normalIndices = face.getIDs();
 
 			for (int i = 0; i < vertIndices.size(); i++) {
 				objstream << " " << vertIndices[i] + verticesOffset + 1 << "/";
@@ -241,7 +220,7 @@ void ObjLoader::write(const Scene & scene, std::ostream & objstream, std::ostrea
 	}
 
 
-	// Ajout des matériaux
+	// ===== Ajout des matériaux
 	// On vérifie que le nom du "default material" n'est pas déjà pris
 	if (includeDefaultMaterial) {
 		for (std::shared_ptr<Material> & material : materials) {
