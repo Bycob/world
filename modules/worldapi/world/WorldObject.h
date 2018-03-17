@@ -5,17 +5,23 @@
 #include "../maths/MathsHelper.h"
 #include "ChunkSystem.h"
 
-class CollectorObject;
+namespace world {
 
-class WORLDAPI_EXPORT WorldObject {
-public:
-	WorldObject();
-	virtual ~WorldObject();
+	class CollectorObject;
 
-	void setPosition3D(const maths::vec3d & pos);
-	maths::vec3d getPosition3D() const {return _position;}
+	class WORLDAPI_EXPORT WorldObject {
+	public:
+		WorldObject();
 
-	virtual void collectWholeObject(WorldZone &zone, CollectorObject &collector);
-protected:
-	maths::vec3d _position;
-};
+		virtual ~WorldObject();
+
+		void setPosition3D(const vec3d &pos);
+
+		vec3d getPosition3D() const { return _position; }
+
+		virtual void collectWholeObject(WorldZone &zone, CollectorObject &collector);
+
+	protected:
+		vec3d _position;
+	};
+}

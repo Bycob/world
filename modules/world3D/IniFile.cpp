@@ -1,7 +1,3 @@
-//
-// Created by louis on 23/04/17.
-//
-
 #include "IniFile.h"
 
 #include <iostream>
@@ -47,17 +43,17 @@ std::string IniFile::getOrSetValue(const std::string &key, const std::string &de
 
 void IniFile::parse(const std::string &content) {
     _values.clear();
-    std::string currentSection("");
-    auto lines = split(content, '\n', true);
+    std::string currentSection;
+    auto lines = world::split(content, '\n', true);
 
-    std::regex sectionrgx("^\\[(.*)\\]$");
-    std::regex keyvalrgx("^([^=\\s]*)\\s*=\\s*([^=]*)$");
+    std::regex sectionrgx(R"(^\[(.*)\]$)");
+    std::regex keyvalrgx(R"(^([^=\s]*)\s*=\s*([^=]*)$)");
 
     for (std::string & line : lines) {
         std::smatch res;
 
         if (std::regex_match(line, res, keyvalrgx)) {
-            std::string key = currentSection == "" ? res[1] : currentSection + "." + res[1].str();
+            std::string key = currentSection.empty() ? res[1] : currentSection + "." + res[1].str();
             _values[key] = res[2];
         }
         else if (std::regex_match(line, res, sectionrgx)) {

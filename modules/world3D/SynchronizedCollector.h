@@ -12,14 +12,14 @@ class SynchronizedCollector {
 public:
     SynchronizedCollector();
 
-    FlatWorldCollector & get();
+    world::FlatWorldCollector & get();
     void lock();
     void unlock();
 
 private:
     std::mutex _mutex;
     std::atomic_bool _locked;
-    std::unique_ptr<FlatWorldCollector> _collector;
+    std::unique_ptr<world::FlatWorldCollector> _collector;
 };
 
 #endif //WORLD_SYNCHRONIZEDWORLD_H

@@ -6,7 +6,7 @@
 #include <limits>
 #include <iostream>
 
-namespace maths {
+namespace world {
 
 	template <typename T>
 	struct vec3 {

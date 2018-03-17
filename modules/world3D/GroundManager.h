@@ -18,13 +18,13 @@ public:
     GroundManager(Application & app, irr::IrrlichtDevice * device);
 	virtual ~GroundManager();
 
-    void initialize(FlatWorldCollector &collector) override;
-	void update(FlatWorldCollector &collector) override;
+    void initialize(world::FlatWorldCollector &collector) override;
+	void update(world::FlatWorldCollector &collector) override;
 private:
-	std::map<FlatWorldCollector::TerrainKey, irr::scene::ITerrainSceneNode*> _terrainNodes;
+	std::map<world::FlatWorldCollector::TerrainKey, irr::scene::ITerrainSceneNode*> _terrainNodes;
 
 	void clearAllNodes();
-    irr::scene::ITerrainSceneNode* createNode(const Terrain& terrain);
+    irr::scene::ITerrainSceneNode* createNode(const world::Terrain& terrain);
 };
 
 

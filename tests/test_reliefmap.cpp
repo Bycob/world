@@ -6,7 +6,7 @@
 
 #include "testutil.h"
 
-using namespace img;
+using namespace world;
 
 void testReliefMap(int, char**);
 
@@ -26,8 +26,8 @@ void testReliefMap(int argc, char** argv) {
 	
 	std::cout << "Generation du dossier world/relief" << std::endl;
 
-	ioutil::createDirectory("world");
-	ioutil::createDirectory("world/relief");
+	world::createDirectory("world");
+	world::createDirectory("world/relief");
 
 	std::cout << "Creation du generateur" << std::endl;
 

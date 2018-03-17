@@ -2,7 +2,7 @@
 
 #include "MathsHelper.h"
 
-namespace maths {
+namespace world {
 	double length(const arma::vec3 & vec1, const arma::vec3 & vec2) {
 		double x = vec1[0] - vec2[0];
 		double y = vec1[1] - vec2[1];

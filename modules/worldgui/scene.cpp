@@ -1,6 +1,6 @@
 #include "scene.h"
 
-#include <worldapi/ObjLoader.h>
+#include <worldapi/assets/ObjLoader.h>
 
 Scene::Scene()
 {

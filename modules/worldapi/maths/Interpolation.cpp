@@ -2,7 +2,7 @@
 
 #include <math.h>
 
-namespace maths {
+namespace world {
 	double CosineInterpolation::operator()(double x) const {
 		return (1 - cos(x * M_PI)) * 0.5;
 	}

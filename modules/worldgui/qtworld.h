@@ -5,7 +5,7 @@
 #include <qimage.h>
 
 #include <worldapi/mesh.h>
-#include <worldapi/Image.h>
+#include <worldapi/assets/Image.h>
 
 class QtWorld
 {
@@ -13,7 +13,7 @@ public:
     QtWorld() = delete;
 
     static Qt3DCore::QEntity * getQMesh(const Mesh & mesh, Qt3DCore::QEntity * parent);
-    static QImage * getQImage(const img::Image & image);
+    static QImage * getQImage(const Image & image);
 };
 
 #endif // QTWORLD_H

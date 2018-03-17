@@ -5,24 +5,28 @@
 #include <worldapi/worldapidef.h>
 
 #include "../world/WorldObject.h"
-#include "../Mesh.h"
-#include "../Material.h"
+#include "worldapi/assets/Mesh.h"
+#include "worldapi/assets/Material.h"
 #include "TreeSkeletton.h"
 
-class WORLDAPI_EXPORT Tree : public WorldObject {
-public:
-	Tree();
-	virtual ~Tree();
+namespace world {
 
-	const Mesh & getTrunkMesh() {
-		return _trunkMesh;
-	}
+	class WORLDAPI_EXPORT Tree : public WorldObject {
+	public:
+		Tree();
 
-	void collectWholeObject(WorldZone &zone, CollectorObject &collector) override;
-private :
-	friend class TreeGenerator;
+		virtual ~Tree();
 
-	Mesh _trunkMesh;
-	Material _trunkMaterial;
-};
+		const Mesh &getTrunkMesh() {
+			return _trunkMesh;
+		}
 
+		void collectWholeObject(WorldZone &zone, CollectorObject &collector) override;
+
+	private :
+		friend class TreeGenerator;
+
+		Mesh _trunkMesh;
+		Material _trunkMaterial;
+	};
+}

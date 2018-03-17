@@ -1,16 +1,18 @@
 #include "Tree.h"
 
-#include "../world/WorldCollector.h"
+#include "worldapi/world/Collector.h"
 
-Tree::Tree() {
+namespace world {
+    Tree::Tree() {
 
-}
+    }
 
-Tree::~Tree() {
+    Tree::~Tree() {
 
-}
+    }
 
-void Tree::collectWholeObject(WorldZone &zone, CollectorObject &collector) {
-    Object3D mainPart(_trunkMesh);
-    collector.putPart(0, mainPart);
+    void Tree::collectWholeObject(WorldZone &zone, CollectorObject &collector) {
+        Object3D mainPart(_trunkMesh);
+        collector.putPart(0, mainPart);
+    }
 }

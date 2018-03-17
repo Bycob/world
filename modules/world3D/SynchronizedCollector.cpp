@@ -6,11 +6,11 @@
 
 //private 
 SynchronizedCollector::SynchronizedCollector()
-        : _collector(std::make_unique<FlatWorldCollector>()) {
+        : _collector(std::make_unique<world::FlatWorldCollector>()) {
 
 }
 
-FlatWorldCollector& SynchronizedCollector::get() {
+world::FlatWorldCollector& SynchronizedCollector::get() {
     if (!_locked) {
         throw std::runtime_error("You may lock the world before getting it.");
     }

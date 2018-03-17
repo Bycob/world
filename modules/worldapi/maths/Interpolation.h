@@ -8,7 +8,7 @@
 
 #include "MathsHelper.h"
 
-namespace maths {
+namespace world {
 	class WORLDAPI_EXPORT CosineInterpolation : public Function<double> {
 	public:
 		virtual double operator() (double x) const;

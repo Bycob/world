@@ -6,7 +6,7 @@
 
 #include <worldapi/maths/MathsHelper.h>
 #include <worldapi/world/World.h>
-#include <worldapi/Object3D.h>
+#include <worldapi/assets/Object3D.h>
 
 #include "RenderingModule.h"
 
@@ -14,10 +14,10 @@ class ObjectsManager;
 
 class ObjectNodeHandler {
 public:
-	ObjectNodeHandler(ObjectsManager& objectsManager, const Object3D & object);
+	ObjectNodeHandler(ObjectsManager& objectsManager, const world::Object3D & object);
 	virtual ~ObjectNodeHandler();
 
-	void updateObject3D(const Object3D & object);
+	void updateObject3D(const world::Object3D & object);
 
 	bool removeTag = false;
 private:
@@ -31,11 +31,11 @@ public:
 	ObjectsManager(Application & app, irr::IrrlichtDevice * device);
 	virtual ~ObjectsManager();
 
-	void initialize(FlatWorldCollector &collector) override;
-	void update(FlatWorldCollector &collector) override;
+	void initialize(world::FlatWorldCollector &collector) override;
+	void update(world::FlatWorldCollector &collector) override;
 
-	static irr::scene::SMesh * convertToIrrlichtMesh(const Mesh & mesh, irr::video::IVideoDriver * driver);
+	static irr::scene::SMesh * convertToIrrlichtMesh(const world::Mesh & mesh, irr::video::IVideoDriver * driver);
 private:
-	std::map<WorldCollector::ObjectKey, std::unique_ptr<ObjectNodeHandler>> _objects;
+	std::map<world::Collector::ObjectKey, std::unique_ptr<ObjectNodeHandler>> _objects;
 };
 

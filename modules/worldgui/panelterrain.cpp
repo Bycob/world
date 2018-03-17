@@ -5,7 +5,7 @@
 #include <worldapi/terrain/TerrainGenerator.h>
 #include <worldapi/terrain/terrain.h>
 #include <worldapi/mesh.h>
-#include <worldapi/ObjLoader.h>
+#include <worldapi/assets/ObjLoader.h>
 
 #include "panelterrain.h"
 #include "ui_panelterrain.h"
@@ -71,7 +71,7 @@ void PanelTerrain::generate()
         //---
 
         arma::Mat<double> randomArray = perlin.generatePerlinNoise2D(size * 8, 0, 7, 16, (float)0.9);
-        img::Image texture = generator.generateTexture(*_generated, texmapBuilder, randomArray);
+        Image texture = generator.generateTexture(*_generated, texmapBuilder, randomArray);
 
         emit imageChanged(QtWorld::getQImage(texture));
     }

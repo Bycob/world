@@ -4,6 +4,8 @@
 
 #include <worldapi/world/World.h>
 
+using namespace world;
+
 void generate_test_world(int argc, char** argv);
 
 int main(int argc, char** argv) {

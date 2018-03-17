@@ -1,30 +1,34 @@
 #pragma once
+
 #include <worldapi/worldapidef.h>
 
 #include "World.h"
 #include "IWorldDecorator.h"
 #include "../terrain/Ground.h"
 
-class FlatWorld;
+namespace world {
+	class FlatWorld;
 
-typedef IWorldDecorator<FlatWorld> IFlatWorldDecorator;
+	typedef IWorldDecorator<FlatWorld> IFlatWorldDecorator;
 
-class PrivateFlatWorld;
+	class PrivateFlatWorld;
 
-class WORLDAPI_EXPORT FlatWorld : public World {
-public:
-	FlatWorld();
-	~FlatWorld() override;
+	class WORLDAPI_EXPORT FlatWorld : public World {
+	public:
+		FlatWorld();
 
-	void addFlatWorldDecorator(IFlatWorldDecorator *decorator);
+		~FlatWorld() override;
 
-	Ground& ground();
-protected:
-	void onFirstExploration(WorldZone &chunk) override;
+		void addFlatWorldDecorator(IFlatWorldDecorator *decorator);
 
-private:
-	PrivateFlatWorld * _internal;
+		Ground &ground();
 
-	Ground _ground;
-};
+	protected:
+		void onFirstExploration(WorldZone &chunk) override;
 
+	private:
+		PrivateFlatWorld *_internal;
+
+		Ground _ground;
+	};
+}

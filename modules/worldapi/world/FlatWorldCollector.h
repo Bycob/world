@@ -5,49 +5,61 @@
 
 #include <map>
 
-#include "WorldCollector.h"
+#include "Collector.h"
 #include "FlatWorld.h"
 #include "../terrain/Terrain.h"
 
-class FlatWorldCollector;
+namespace world {
 
-class PrivateTerrainIterator;
+    class FlatWorldCollector;
 
-class WORLDAPI_EXPORT TerrainIterator
-        : public std::iterator<std::forward_iterator_tag, std::pair<long, Terrain*>> {
-public:
-    TerrainIterator(FlatWorldCollector &collector);
-    ~TerrainIterator();
+    class PrivateTerrainIterator;
 
-    void operator++();
-    std::pair<uint64_t, Terrain*> operator*();
-    bool hasNext() const;
-private:
-    PrivateTerrainIterator* _internal;
+    class WORLDAPI_EXPORT TerrainIterator
+            : public std::iterator<std::forward_iterator_tag, std::pair<long, Terrain *>> {
+    public:
+        TerrainIterator(FlatWorldCollector &collector);
 
-    FlatWorldCollector &_collector;
-};
+        ~TerrainIterator();
 
-class WORLDAPI_EXPORT FlatWorldCollector : public WorldCollector, public IWorldCollector<FlatWorld> {
-public:
-	typedef uint64_t TerrainKey;
-	
-    FlatWorldCollector();
-    ~FlatWorldCollector() override;
+        void operator++();
 
-    void reset() override;
-    void collect(FlatWorld &world, WorldZone &zone) override;
+        std::pair<uint64_t, Terrain *> operator*();
 
-    // TODO TerrainStream
-    void addTerrain(TerrainKey key, const Terrain &terrain);
-    void disableTerrain(TerrainKey key);
-    TerrainIterator iterateTerrains();
-private:
-    friend class TerrainIterator;
+        bool hasNext() const;
 
-    std::set<TerrainKey> _disabledTerrains;
-    std::map<TerrainKey, Terrain> _terrains;
-};
+    private:
+        PrivateTerrainIterator *_internal;
 
+        FlatWorldCollector &_collector;
+    };
+
+    class WORLDAPI_EXPORT FlatWorldCollector : public Collector, public ICollector<FlatWorld> {
+    public:
+        typedef uint64_t TerrainKey;
+
+        FlatWorldCollector();
+
+        ~FlatWorldCollector() override;
+
+        void reset() override;
+
+        void collect(FlatWorld &world, WorldZone &zone) override;
+
+        // TODO TerrainStream
+        void addTerrain(TerrainKey key, const Terrain &terrain);
+
+        void disableTerrain(TerrainKey key);
+
+        TerrainIterator iterateTerrains();
+
+    private:
+        friend class TerrainIterator;
+
+        std::set<TerrainKey> _disabledTerrains;
+        std::map<TerrainKey, Terrain> _terrains;
+    };
+
+}
 
 #endif //WORLD_FLATWORLDCOLLECTOR_H

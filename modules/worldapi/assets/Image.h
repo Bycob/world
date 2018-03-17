@@ -1,10 +1,10 @@
 #pragma once
-#include "worldapidef.h"
+#include "worldapi/worldapidef.h"
 
 #include <armadillo/armadillo>
 #include <stdint.h>
 
-namespace img {
+namespace world {
 	class PrivateImage;
 	class Image;
 

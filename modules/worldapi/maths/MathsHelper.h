@@ -9,7 +9,7 @@
 
 #include "Vector.h"
 
-namespace maths {
+namespace world {
 
 	template <typename T>
 	class WORLDAPI_EXPORT Function {

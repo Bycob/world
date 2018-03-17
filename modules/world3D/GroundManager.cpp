@@ -15,6 +15,8 @@ using namespace scene;
 using namespace io;
 using namespace video;
 
+using namespace world;
+
 using TerrainKey = FlatWorldCollector::TerrainKey;
 
 GroundManager::GroundManager(Application & application, IrrlichtDevice *device)
@@ -81,8 +83,8 @@ ITerrainSceneNode* GroundManager::createNode(const Terrain &terrain) {
 
 	// Données concernant la position et les dimensions du terrain
 	int terrainRes = (terrain.getSize() - 1);
-	maths::vec3d offset = terrain.getBoundingBox().getLowerBound();
-	maths::vec3d size = terrain.getBoundingBox().getUpperBound() - offset;
+	vec3d offset = terrain.getBoundingBox().getLowerBound();
+	vec3d size = terrain.getBoundingBox().getUpperBound() - offset;
     size = size / terrainRes;
 
 	// Construction du noeud irrlicht

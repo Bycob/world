@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <opencv/cv.h>
 
-namespace img {
+namespace world {
 
 	inline int getCVType(const ImageType &type) {
 		switch (type) {

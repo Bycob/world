@@ -8,83 +8,94 @@
 
 #include "../maths/MathsHelper.h"
 #include "../maths/BoundingBox.h"
-#include "../Mesh.h"
-#include "../Image.h"
+#include "worldapi/assets/Mesh.h"
+#include "worldapi/assets/Image.h"
 
-/* NB : Toutes les ressources générées par cette classe utilisent le COLUMN MAJOR ORDER,
+namespace world {
+
+	/* NB : Toutes les ressources générées par cette classe utilisent le COLUMN MAJOR ORDER,
 	c'est à dire que la première colonne de matrice armadillo correspondra à la première
 	ligne d'un fichier image correspondant.
 	-> x indique l'indice de la ligne,
 	-> y indique l'indice de la colonne.*/
 
-class WORLDAPI_EXPORT TerrainGenerator;
+	class WORLDAPI_EXPORT TerrainGenerator;
 
-/** Cette classe permet de manipuler des terrains planaires avec plusieurs niveaux
-de détails. 
-Les terrains définis par cette classe sont définis par des surfaces. A chaque point
-(x, y) du plan, correspond une ou plusieurs altitude(s) z(i), suivant si le terrain
-est simple couche ou multi couche. */
-class WORLDAPI_EXPORT Terrain {
+	/** Cette classe permet de manipuler des terrains planaires avec plusieurs niveaux
+	de détails.
+	Les terrains définis par cette classe sont définis par des surfaces. A chaque point
+	(x, y) du plan, correspond une ou plusieurs altitude(s) z(i), suivant si le terrain
+	est simple couche ou multi couche. */
+	class WORLDAPI_EXPORT Terrain {
 
-public :
-	explicit Terrain(int size);
+	public :
+		explicit Terrain(int size);
 
-	explicit Terrain(const arma::Mat<double> & data);
+		explicit Terrain(const arma::Mat<double> &data);
 
-	Terrain(const Terrain & terrain);
-	Terrain(Terrain && terrain);
+		Terrain(const Terrain &terrain);
 
-	virtual ~Terrain();
+		Terrain(Terrain &&terrain);
 
-	Terrain& operator=(const Terrain& terrain);
+		virtual ~Terrain();
 
-	void setBounds(double xmin, double ymin, double zmin, double xmax, double ymax, double zmax);
-	const maths::BoundingBox & getBoundingBox() const;
+		Terrain &operator=(const Terrain &terrain);
 
-    uint32_t getSize() const {
-        return (uint32_t) _array.n_rows;
-    }
+		void setBounds(double xmin, double ymin, double zmin, double xmax, double ymax, double zmax);
 
-	double& operator()(int x, int y);
+		const BoundingBox &getBoundingBox() const;
 
-	/** Permet d'obtenir l'altitude au point (x, y), avec x et y les
-	coordonnées en pourcentage des dimensions totales du terrain.
-	x et y sont compris entre 0 et 1.
-	Le résultat n'est pas interpolé.*/
-	double getZ(double x, double y) const;
+		uint32_t getSize() const {
+			return (uint32_t) _array.n_rows;
+		}
 
-	/** Même chose que #getZ sauf que cette fois le résultat est interpolé*/
-	double getZInterpolated(double x, double y) const;
+		double &operator()(int x, int y);
 
-	// ------ IO
+		/** Permet d'obtenir l'altitude au point (x, y), avec x et y les
+        coordonnées en pourcentage des dimensions totales du terrain.
+        x et y sont compris entre 0 et 1.
+        Le résultat n'est pas interpolé.*/
+		double getZ(double x, double y) const;
 
-	//Interfaçage avec les fichiers .obj
-    Mesh * convertToMesh();
-	Mesh * convertToMesh(double sizeX, double sizeY, double sizeZ) const;
-	Mesh * convertToMesh(double offsetX, double offsetY, double offsetZ, double sizeX, double sizeY, double sizeZ) const;
-	
-	//Méthodes pour la conversion du terrain en image.
-	img::Image convertToImage() const;
+		/** Même chose que #getZ sauf que cette fois le résultat est interpolé*/
+		double getZInterpolated(double x, double y) const;
 
-	//Raw map TODO raw data stream ?
-	char * getRawData(int & rawDataSize, float height = 1, float offset = 0) const;
-	int getRawDataSize() const;
+		// ------ IO
 
-	img::Image getTexture() const;
+		//Interfaçage avec les fichiers .obj
+		Mesh *convertToMesh();
 
-	const img::Image & texture() const;
+		Mesh *convertToMesh(double sizeX, double sizeY, double sizeZ) const;
 
-private :
+		Mesh *
+		convertToMesh(double offsetX, double offsetY, double offsetZ, double sizeX, double sizeY, double sizeZ) const;
 
-    maths::BoundingBox _bbox;
-	arma::Mat<double> _array;
-	std::unique_ptr<img::Image> _texture;
+		//Méthodes pour la conversion du terrain en image.
+		Image convertToImage() const;
 
-	// ------
+		//Raw map TODO raw data stream ?
+		char *getRawData(int &rawDataSize, float height = 1, float offset = 0) const;
 
-	friend class TerrainGenerator;
-	friend class PerlinTerrainGenerator;
-	friend class TerrainManipulator;
+		int getRawDataSize() const;
 
-	maths::vec2i getPixelPos(double x, double y) const;
-};
+		Image getTexture() const;
+
+		const Image &texture() const;
+
+	private :
+
+		BoundingBox _bbox;
+		arma::Mat<double> _array;
+		std::unique_ptr<Image> _texture;
+
+		// ------
+
+		friend class TerrainGenerator;
+
+		friend class PerlinTerrainGenerator;
+
+		friend class TerrainManipulator;
+
+		vec2i getPixelPos(double x, double y) const;
+	};
+}

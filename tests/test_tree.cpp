@@ -1,14 +1,16 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <worldapi/ObjLoader.h>
-#include <worldapi/Scene.h>
-#include <worldapi/Mesh.h>
+#include <worldapi/assets/ObjLoader.h>
+#include <worldapi/assets/Scene.h>
+#include <worldapi/assets/Mesh.h>
 #include <worldapi/IOUtil.h>
 #include <worldapi/tree/TreeSkelettonGenerator.h>
 #include <worldapi/tree/TreeGenerator.h>
 #include <worldapi/tree/TreeSkeletton.h>
 #include <worldapi/tree/Tree.h>
+
+using namespace world;
 
 void testCircularSkeletton(int argc, char** argv);
 void testTree(int argc, char **argv);
@@ -53,7 +55,7 @@ void testTree(int argc, char ** argv) {
 	}
 	
 	std::cout << "Création du dossier \"tree\"..." << std::endl;
-	ioutil::createDirectory("trees");
+	createDirectory("trees");
 
 	std::cout << "Génération d'un squelette d'arbre" << std::endl;
 	std::unique_ptr<TreeSkeletton> treeSkeletton(generator.generate());

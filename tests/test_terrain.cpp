@@ -3,18 +3,18 @@
 
 #include <armadillo/armadillo>
 
-#include <worldapi/ObjLoader.h>
-#include <worldapi/Scene.h>
-#include <worldapi/Material.h>
-#include <worldapi/Interop.h>
+#include <worldapi/assets/ObjLoader.h>
+#include <worldapi/assets/Scene.h>
+#include <worldapi/assets/Material.h>
+#include <worldapi/assets/Interop.h>
 #include <worldapi/IOUtil.h>
 #include <worldapi/maths/Perlin.h>
 #include <worldapi/terrain/Terrain.h>
 #include <worldapi/terrain/TerrainGenerator.h>
 #include <worldapi/terrain/TerrainTexmapBuilder.h>
 
-using namespace perlin;
 using namespace arma;
+using namespace world;
 
 //DECLARATIONS
 void testTinyObjLoader(int argc, char** argv);
@@ -67,7 +67,7 @@ void testRepeatable(int argc, char** argv) {
     // CREATION D'UN PERLIN REPETABLE
     std::cout << "Génération de bruit de perlin répétable..." << std::endl;
     Mat<double> repeatable = perlin.generatePerlinNoise2D(size, 0, octaves, freq, persistence, true);
-    img::Image repeat(repeatable);
+    Image repeat(repeatable);
     repeat.write("tests/repeat.png");
 
     std::cout << "Génération du terrain associé..." << std::endl;
@@ -110,7 +110,7 @@ void testPerlin(int argc, char** argv) {
 
 	//CREATION DU DOSSIER DE TESTS
 	std::cout << "Création du dossier de tests..." << std::endl;
-	ioutil::createDirectory("tests");
+	createDirectory("tests");
 
 	Perlin perlin;
 
@@ -121,9 +121,9 @@ void testPerlin(int argc, char** argv) {
         auto perlin1 = perlin.generatePerlinNoise2D(size, 0, octaves, freq, persistence);
         auto perlin2 = perlin.generatePerlinNoise2D(size, 0, octaves, freq, persistence);
         std::cout << "Join des deux bruits de perlin..." << std::endl;
-        perlin.join(perlin1, perlin2, Direction::AXIS_Y, octaves, freq, persistence, true);
-        img::Image perlin1img(perlin1);
-        img::Image perlin2img(perlin2);
+        perlin.join(perlin1, perlin2, perlin::Direction::AXIS_Y, octaves, freq, persistence, true);
+        Image perlin1img(perlin1);
+        Image perlin2img(perlin2);
         perlin1img.write("tests/perlin1.png");
         perlin2img.write("tests/perlin2.png");
 
@@ -150,7 +150,7 @@ void testPerlin(int argc, char** argv) {
     generator.process(terrain);
 
 	std::cout << "ecriture de l'image du terrain..." <<std::endl;
-	img::Image image = terrain.convertToImage();
+	Image image = terrain.convertToImage();
 	try {
 		image.write("tests/terrain.png");
 	}
@@ -207,7 +207,7 @@ void testPerlin(int argc, char** argv) {
 	//---
 
 	arma::Mat<double> randomArray = perlin.generatePerlinNoise2D(size * 8, 0, 7, 16, (float)0.9);
-	img::Image texture = generator.generateTexture(terrain, texmapBuilder, randomArray);
+	Image texture = generator.generateTexture(terrain, texmapBuilder, randomArray);
 
 	std::cout << "ecriture de la texture..." << std::endl;
 	try {
@@ -219,7 +219,7 @@ void testPerlin(int argc, char** argv) {
 
 	std::cout << "ecriture de la carte" << std::endl;
 	try {
-		img::Image(texmapBuilder.convertToMap()).write("tests/test2_map.png");
+		Image(texmapBuilder.convertToMap()).write("tests/test2_map.png");
 	}
 	catch (std::exception & e) {
 		std::cout << "erreur : " << e.what() << std::endl;
@@ -244,7 +244,7 @@ void testPerlin(int argc, char** argv) {
 	std::cout << "Fichier écrit !" << std::endl;
 	
 	std::cout << "Ecriture de l'image associée..." << std::endl;
-	img::Image image2 = subtree.terrain().convertToImage();
+	Image image2 = subtree.terrain().convertToImage();
 	image2.write("tests/subterrain.png");
 	std::cout << "Image écrite !" << std::endl;
 }

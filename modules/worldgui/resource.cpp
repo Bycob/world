@@ -20,7 +20,7 @@ void MeshResource::save(QString path) {
 }
 
 
-using namespace img;
+
 
 ImageResource::ImageResource(QString name, Image *image)
     : Resource(name), _image(image) {

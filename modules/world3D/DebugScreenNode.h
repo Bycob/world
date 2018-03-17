@@ -28,6 +28,6 @@ private:
 	irr::video::SMaterial _material;
 
 	bool _visible;
-	maths::vec3d _userPos;
+	world::vec3d _userPos;
 };
 

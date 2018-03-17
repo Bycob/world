@@ -7,132 +7,133 @@
 
 #include "TreeSkelettonGenerator.h"
 
-using namespace tree;
-using namespace maths;
 
-TreeSkelettonGenerator::TreeSkelettonGenerator()
-	: _rng(std::make_unique<uniform_d>(0, 1)),
+namespace world {
+	using namespace tree;
 
-	_seedLocation(std::make_unique<const_d>(0)),
-	_rootWeight(std::make_unique<const_d>(1)),
+	TreeSkelettonGenerator::TreeSkelettonGenerator()
+			: _rng(std::make_unique<uniform_d>(0, 1)),
 
-	_phi(std::make_unique<wrapper_d>(const_d(M_PI / 6.0))),
-	_sizeFactor(std::make_unique<wrapper_d>(const_d(3.0 / 5.0))),
-	_offsetTheta(std::make_unique<wrapper_d>(const_d(0))),
+			  _seedLocation(std::make_unique<const_d>(0)),
+			  _rootWeight(std::make_unique<const_d>(1)),
 
-	_weight(std::make_unique<DefaultWeightParameter>()),
-	_count(std::make_unique<const_i>(4)),
-	_maxLevel(std::make_unique<const_i>(4)) {
+			  _phi(std::make_unique<wrapper_d>(const_d(M_PI / 6.0))),
+			  _sizeFactor(std::make_unique<wrapper_d>(const_d(3.0 / 5.0))),
+			  _offsetTheta(std::make_unique<wrapper_d>(const_d(0))),
 
-}
+			  _weight(std::make_unique<DefaultWeightParameter>()),
+			  _count(std::make_unique<const_i>(4)),
+			  _maxLevel(std::make_unique<const_i>(4)) {
 
-TreeSkelettonGenerator::TreeSkelettonGenerator(const TreeSkelettonGenerator &other)
-	: _rng(other._rng->clone()),
+	}
 
-	  _seedLocation(other._seedLocation->clone()),
-	  _rootWeight(other._rootWeight->clone()),
+	TreeSkelettonGenerator::TreeSkelettonGenerator(const TreeSkelettonGenerator &other)
+			: _rng(other._rng->clone()),
 
-	  _phi(other._phi->clone()),
-	  _sizeFactor(other._sizeFactor->clone()),
-	  _offsetTheta(other._offsetTheta->clone()),
+			  _seedLocation(other._seedLocation->clone()),
+			  _rootWeight(other._rootWeight->clone()),
 
-	  _weight(other._weight->clone()),
-	  _count(other._count->clone()),
-	  _maxLevel(other._maxLevel->clone()) {
+			  _phi(other._phi->clone()),
+			  _sizeFactor(other._sizeFactor->clone()),
+			  _offsetTheta(other._offsetTheta->clone()),
 
-}
+			  _weight(other._weight->clone()),
+			  _count(other._count->clone()),
+			  _maxLevel(other._maxLevel->clone()) {
 
-TreeSkelettonGenerator::~TreeSkelettonGenerator() {
+	}
 
-}
+	TreeSkelettonGenerator::~TreeSkelettonGenerator() {
 
-TreeSkelettonGenerator* TreeSkelettonGenerator::clone() const {
-	return new TreeSkelettonGenerator(*this);
-}
+	}
 
-void TreeSkelettonGenerator::setConstantInclination(double phi) {
-	_phi = std::make_unique<wrapper_d>(const_d(phi));
-}
+	TreeSkelettonGenerator *TreeSkelettonGenerator::clone() const {
+		return new TreeSkelettonGenerator(*this);
+	}
 
-void TreeSkelettonGenerator::setConstantForkingCount(int count) {
-	_count = std::make_unique<const_i>(count);
-}
+	void TreeSkelettonGenerator::setConstantInclination(double phi) {
+		_phi = std::make_unique<wrapper_d>(const_d(phi));
+	}
 
-void TreeSkelettonGenerator::setConstantSizeFactor(double sizeFactor) {
-	_sizeFactor = std::make_unique<wrapper_d>(const_d(sizeFactor));
-}
+	void TreeSkelettonGenerator::setConstantForkingCount(int count) {
+		_count = std::make_unique<const_i>(count);
+	}
 
-void TreeSkelettonGenerator::setConstantMaxForkingLevel(int level) {
-	_maxLevel = std::make_unique<const_i>(level);
-}
+	void TreeSkelettonGenerator::setConstantSizeFactor(double sizeFactor) {
+		_sizeFactor = std::make_unique<wrapper_d>(const_d(sizeFactor));
+	}
 
-TreeSkeletton * TreeSkelettonGenerator::generate() {
-	TreeSkeletton * result = new TreeSkeletton();
+	void TreeSkelettonGenerator::setConstantMaxForkingLevel(int level) {
+		_maxLevel = std::make_unique<const_i>(level);
+	}
 
-	Node<TreeInfo> * primaryNode = result->getPrimaryNode();
-	primaryNode->setPosition(0, 0, (*_seedLocation)(primaryNode->getInfo()));
-	primaryNode->setWeight((*_rootWeight)(primaryNode->getInfo()));
-	primaryNode->getInfo()._level = 0;
+	TreeSkeletton *TreeSkelettonGenerator::generate() {
+		TreeSkeletton *result = new TreeSkeletton();
 
-	forkNode(primaryNode);
+		Node<TreeInfo> *primaryNode = result->getPrimaryNode();
+		primaryNode->setPosition(0, 0, (*_seedLocation)(primaryNode->getInfo()));
+		primaryNode->setWeight((*_rootWeight)(primaryNode->getInfo()));
+		primaryNode->getInfo()._level = 0;
 
-	return result;
-}
+		forkNode(primaryNode);
 
-void TreeSkelettonGenerator::forkNode(Node<TreeInfo>* node) {
-	TreeInfo & info = node->getInfo();
-	vec3d pos = node->getPosition();
-	std::list<Node<TreeInfo>*> addedNodes;
+		return result;
+	}
 
-	//std::cout << info._phi << " " << info._theta << " " << info._level << " " << info._size << std::endl;
+	void TreeSkelettonGenerator::forkNode(Node<TreeInfo> *node) {
+		TreeInfo &info = node->getInfo();
+		vec3d pos = node->getPosition();
+		std::list<Node<TreeInfo> *> addedNodes;
 
-	if (info._level != 0) {
+		//std::cout << info._phi << " " << info._theta << " " << info._level << " " << info._size << std::endl;
 
-		// Détermination du nombre de nouvelles branches
-		const int count = (*_count)(info);
+		if (info._level != 0) {
 
-		for (int i = 0; i < count; i++) {
-			// Détermination de l'angle de rotation
-			const double newTheta = (2.0 * M_PI * i) / count + (*_offsetTheta)(info, count);
+			// Détermination du nombre de nouvelles branches
+			const int count = (*_count)(info);
 
-			// Détermination de la nouvelle inclinaison
-			const double phi = (*_phi)(info, count, newTheta);
-			const double newPhi = phi + cos(info._theta - newTheta) * info._phi;
+			for (int i = 0; i < count; i++) {
+				// Détermination de l'angle de rotation
+				const double newTheta = (2.0 * M_PI * i) / count + (*_offsetTheta)(info, count);
 
-			// Détermination du poids de la nouvelle branche
-			const double weight = (*_weight)(info, count, newTheta, phi);
+				// Détermination de la nouvelle inclinaison
+				const double phi = (*_phi)(info, count, newTheta);
+				const double newPhi = phi + cos(info._theta - newTheta) * info._phi;
 
-			// Détermination de la taille de la nouvelle branche
-			const double newSize = info._size * (*_sizeFactor)(info, count, newTheta, phi, weight);
+				// Détermination du poids de la nouvelle branche
+				const double weight = (*_weight)(info, count, newTheta, phi);
 
-			// Ajout du noeud
-			Node<TreeInfo> * newNode = node->createChild(weight,
-				pos.x + cos(newTheta) * sin(newPhi) * newSize,
-				pos.y + sin(newTheta) * sin(newPhi) * newSize,
-				pos.z + cos(newPhi) * newSize);
-			addedNodes.push_back(newNode);
-			TreeInfo &newInfo = newNode->getInfo();
+				// Détermination de la taille de la nouvelle branche
+				const double newSize = info._size * (*_sizeFactor)(info, count, newTheta, phi, weight);
 
-			newInfo._phi = newPhi;
-			newInfo._theta = newTheta;
+				// Ajout du noeud
+				Node<TreeInfo> *newNode = node->createChild(weight,
+															pos.x + cos(newTheta) * sin(newPhi) * newSize,
+															pos.y + sin(newTheta) * sin(newPhi) * newSize,
+															pos.z + cos(newPhi) * newSize);
+				addedNodes.push_back(newNode);
+				TreeInfo &newInfo = newNode->getInfo();
+
+				newInfo._phi = newPhi;
+				newInfo._theta = newTheta;
+			}
+		} else {
+			// On fait le tronc. Juste le tronc.
+			addedNodes.push_back(node->createChild(1.0, 0, 0, 1));
 		}
-	}
-	else {
-		// On fait le tronc. Juste le tronc.
-		addedNodes.push_back(node->createChild(1.0, 0, 0, 1));
-	}
 
-	for (auto addedNode : addedNodes) {
-		// Mise à jour des variables
-		TreeInfo & newInfo = addedNode->getInfo();
-		newInfo._level = info._level + 1;
-		newInfo._size = vec3d::length(node->getPosition(), addedNode->getPosition());
+		for (auto addedNode : addedNodes) {
+			// Mise à jour des variables
+			TreeInfo &newInfo = addedNode->getInfo();
+			newInfo._level = info._level + 1;
+			newInfo._size = vec3d::length(node->getPosition(), addedNode->getPosition());
 
-		// On fork ensuite tous les nodes créés.
-		const int maxLevel = (*_maxLevel)(info);
+			// On fork ensuite tous les nodes créés.
+			const int maxLevel = (*_maxLevel)(info);
 
-		if (info._level < maxLevel) {
-			forkNode(addedNode);
+			if (info._level < maxLevel) {
+				forkNode(addedNode);
+			}
 		}
 	}
 }

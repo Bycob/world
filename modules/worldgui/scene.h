@@ -6,7 +6,7 @@
 #include <QString>
 
 #include <worldapi/mesh.h>
-#include <worldapi/Material.h>
+#include <worldapi/assets/Material.h>
 
 class Scene
 {

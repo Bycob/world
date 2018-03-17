@@ -1,7 +1,7 @@
 #include "qtworld.h"
 
 using namespace Qt3DCore;
-using namespace img;
+
 
 QEntity * QtWorld::getQMesh(const Mesh & mesh, QEntity * parent)
 {

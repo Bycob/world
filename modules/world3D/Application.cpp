@@ -4,13 +4,13 @@
 
 #include "util.h"
 
-using namespace maths;
+using namespace world;
 
 Application::Application()
         : _running(false),
 	      _mainView(std::make_unique<MainView>(*this)),
 		  _lastUpdatePos(0, 0, 0),
-		  _explorer(std::make_unique<FirstPersonWorldExplorer>()),
+		  _explorer(std::make_unique<FirstPersonExplorer>()),
 		  _collector(std::make_unique<SynchronizedCollector>()){
 
 	_explorer->setOrigin({0, 0, 0});
@@ -64,13 +64,13 @@ void Application::requestStop() {
     _running = false;
 }
 
-void Application::setUserPosition(maths::vec3d pos) {
+void Application::setUserPosition(vec3d pos) {
 	_paramLock.lock();
 	_newUpdatePos = pos;
 	_paramLock.unlock();
 }
 
-maths::vec3d Application::getUserPosition() const {
+vec3d Application::getUserPosition() const {
 	_paramLock.lock();
 	auto pos = _newUpdatePos;
 	_paramLock.unlock();

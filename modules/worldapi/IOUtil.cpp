@@ -11,7 +11,8 @@
 
 #include <tinydir/tinydir.h>
 
-namespace ioutil {
+namespace world {
+
 	void createDirectory(const std::string &directory) {
 		int error;
 #ifdef _WIN32
@@ -22,13 +23,14 @@ namespace ioutil {
 		if (error != 0) {
 			if (errno == EEXIST) {}
 			else {
-				throw std::runtime_error("the directory " + directory + " was not created\nError code : " + std::to_string(errno));
+				throw std::runtime_error(
+						"the directory " + directory + " was not created\nError code : " + std::to_string(errno));
 			}
 		}
 	}
 
 	std::vector<std::string> getFileList(const std::string &directory) {
-		std::vector <std::string> result;
+		std::vector<std::string> result;
 
 		tinydir_dir dir;
 		int error = tinydir_open(&dir, directory.c_str());
@@ -39,8 +41,7 @@ namespace ioutil {
 
 			if (file.is_dir) {
 				result.push_back(std::string(file.name) + "/");
-			}
-			else {
+			} else {
 				result.emplace_back(file.name);
 			}
 
@@ -48,7 +49,7 @@ namespace ioutil {
 		}
 
 		tinydir_close(&dir);
-		
+
 		if (error != 0) {
 			throw std::runtime_error("file not found");
 		}

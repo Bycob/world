@@ -5,7 +5,7 @@
 
 #include "MathsHelper.h"
 
-namespace maths {
+namespace world {
     class WORLDAPI_EXPORT BoundingBox {
     public:
         BoundingBox(const vec3d& b1, const vec3d& b2);

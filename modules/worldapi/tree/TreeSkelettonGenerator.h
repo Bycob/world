@@ -6,72 +6,90 @@
 #include "TreeSkelettonParameters.h"
 #include "TreeSkeletton.h"
 
-class WORLDAPI_EXPORT TreeSkelettonGenerator : public ICloneable<TreeSkelettonGenerator> {
-public:
-	TreeSkelettonGenerator();
-	TreeSkelettonGenerator(const TreeSkelettonGenerator & other);
-	virtual ~TreeSkelettonGenerator();
+namespace world {
 
-	TreeSkelettonGenerator* clone() const override;
+	class WORLDAPI_EXPORT TreeSkelettonGenerator : public ICloneable<TreeSkelettonGenerator> {
+	public:
+		TreeSkelettonGenerator();
 
-	template <class F> void setSeedLocation(const F & seedLocFunc) {
-		_seedLocation = std::make_unique<F>(seedLocFunc);
-	}
+		TreeSkelettonGenerator(const TreeSkelettonGenerator &other);
 
-	template <class F> void setRootWeight(const F & rootWeightFunc) {
-		_rootWeight = std::make_unique<F>(rootWeightFunc);
-	}
+		virtual ~TreeSkelettonGenerator();
 
-	void setConstantInclination(double phi);
-	template <class F> void setInclination(const F & phiFunc) {
-		_phi = std::make_unique<F>(phiFunc);
-	}
+		TreeSkelettonGenerator *clone() const override;
 
-	template <class F> void setRotationOffset(const F & offsetThetaFunc) {
-		_offsetTheta = std::make_unique<F>(offsetThetaFunc);
-	}
+		template<class F>
+		void setSeedLocation(const F &seedLocFunc) {
+			_seedLocation = std::make_unique<F>(seedLocFunc);
+		}
 
-	void setConstantForkingCount(int count);
-	template <class F> void setForkingCount(const F & countFunc) {
-		_count = std::make_unique<F>(countFunc);
-	}
+		template<class F>
+		void setRootWeight(const F &rootWeightFunc) {
+			_rootWeight = std::make_unique<F>(rootWeightFunc);
+		}
 
-	void setConstantSizeFactor(double sizeFactor);
-	template <class F> void setSizeFactor(const F & sizeFactorFunc) {
-		_sizeFactor = std::make_unique<F>(sizeFactorFunc);
-	}
+		void setConstantInclination(double phi);
 
-	void setConstantMaxForkingLevel(int level);
-	template <class F> void setMaxForkingLevel(const F & maxLevelFunc) {
-		_maxLevel = std::make_unique<F>(maxLevelFunc);
-	}
+		template<class F>
+		void setInclination(const F &phiFunc) {
+			_phi = std::make_unique<F>(phiFunc);
+		}
 
-	template <class F> void setWeight(const F & weight) {
-		_weight = std::make_unique<F>(weight);
-	}
+		template<class F>
+		void setRotationOffset(const F &offsetThetaFunc) {
+			_offsetTheta = std::make_unique<F>(offsetThetaFunc);
+		}
 
-	virtual TreeSkeletton * generate();
-private :
-	void forkNode(Node<TreeInfo> * node);
+		void setConstantForkingCount(int count);
 
-	// Génération de nombres alétoires uniforme entre 0 et 1. 
-	std::unique_ptr<tree::param_d> _rng;
+		template<class F>
+		void setForkingCount(const F &countFunc) {
+			_count = std::make_unique<F>(countFunc);
+		}
 
-	// Localisation du point de départ de l'arbre
-	std::unique_ptr<tree::param_d> _seedLocation;
-	// Poids de départ de l'arbre
-	std::unique_ptr<tree::param_d> _rootWeight;
+		void setConstantSizeFactor(double sizeFactor);
 
-	std::unique_ptr<tree::tree_param_d> _phi;
-	std::unique_ptr<tree::tree_param_d> _offsetTheta;
-	std::unique_ptr<tree::tree_param_d> _sizeFactor;
+		template<class F>
+		void setSizeFactor(const F &sizeFactorFunc) {
+			_sizeFactor = std::make_unique<F>(sizeFactorFunc);
+		}
 
-	std::unique_ptr<tree::tree_param_d> _weight;
-	// Nombre de branches à chaque division
-	std::unique_ptr<tree::param_i> _count;
-	// Nombre maximum de divisions.
-	std::unique_ptr<tree::param_i> _maxLevel;
-};
+		void setConstantMaxForkingLevel(int level);
+
+		template<class F>
+		void setMaxForkingLevel(const F &maxLevelFunc) {
+			_maxLevel = std::make_unique<F>(maxLevelFunc);
+		}
+
+		template<class F>
+		void setWeight(const F &weight) {
+			_weight = std::make_unique<F>(weight);
+		}
+
+		virtual TreeSkeletton *generate();
+
+	private :
+		void forkNode(Node<TreeInfo> *node);
+
+		// Génération de nombres alétoires uniforme entre 0 et 1.
+		std::unique_ptr<tree::param_d> _rng;
+
+		// Localisation du point de départ de l'arbre
+		std::unique_ptr<tree::param_d> _seedLocation;
+		// Poids de départ de l'arbre
+		std::unique_ptr<tree::param_d> _rootWeight;
+
+		std::unique_ptr<tree::tree_param_d> _phi;
+		std::unique_ptr<tree::tree_param_d> _offsetTheta;
+		std::unique_ptr<tree::tree_param_d> _sizeFactor;
+
+		std::unique_ptr<tree::tree_param_d> _weight;
+		// Nombre de branches à chaque division
+		std::unique_ptr<tree::param_i> _count;
+		// Nombre maximum de divisions.
+		std::unique_ptr<tree::param_i> _maxLevel;
+	};
+}
 
 // Fonctions spécifiques pour les arbres
 

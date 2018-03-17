@@ -14,34 +14,42 @@
 #include "LODData.h"
 #include "IWorldDecorator.h"
 
-class World;
+namespace world {
 
-typedef IWorldDecorator<World> IWorldChunkDecorator;
+	class World;
 
-class PrivateWorld;
+	typedef IWorldDecorator<World> IWorldChunkDecorator;
 
-class WORLDAPI_EXPORT World {
-public:
-	/** Create a complete and rich world that can be used
-	 * as a demonstration of the API power ! */
-	static World * createDemoWorld();
+	class PrivateWorld;
 
-	World();
-	World(const World & world) = delete;
-	virtual ~World();
+	class WORLDAPI_EXPORT World {
+	public:
+		/** Create a complete and rich world that can be used
+         * as a demonstration of the API power ! */
+		static World *createDemoWorld();
 
-    void addChunkDecorator(IWorldChunkDecorator * decorator);
+		World();
 
-	// NAVIGATION
-	WorldZone exploreNeighbour(const WorldZone &zone, const maths::vec3d &direction);
-	WorldZone exploreLocation(const maths::vec3d &location);
-	std::vector<WorldZone> exploreInside(const WorldZone &zone);
-protected:
-	virtual void onFirstExploration(WorldZone &chunk);
+		World(const World &world) = delete;
 
-private:
-	PrivateWorld * _internal;
+		virtual ~World();
 
-	ChunkSystem _chunkSystem;
-	WorldFolder _directory; // TODO remplacer ça par un ICache, qui peut être un dossier, une interface réseau, rien...
-};
+		void addChunkDecorator(IWorldChunkDecorator *decorator);
+
+		// NAVIGATION
+		WorldZone exploreNeighbour(const WorldZone &zone, const vec3d &direction);
+
+		WorldZone exploreLocation(const vec3d &location);
+
+		std::vector<WorldZone> exploreInside(const WorldZone &zone);
+
+	protected:
+		virtual void onFirstExploration(WorldZone &chunk);
+
+	private:
+		PrivateWorld *_internal;
+
+		ChunkSystem _chunkSystem;
+		WorldFolder _directory; // TODO remplacer ça par un ICache, qui peut être un dossier, une interface réseau, rien...
+	};
+}

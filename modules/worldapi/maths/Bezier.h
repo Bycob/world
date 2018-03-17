@@ -2,7 +2,7 @@
 
 #include "MathsHelper.h"
 
-namespace maths {
+namespace world {
 	
 	class BezierCurve {
 	public:

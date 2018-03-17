@@ -10,7 +10,7 @@
 #include <memory>
 
 #include <worldapi/world/FlatWorld.h>
-#include <worldapi/world/FirstPersonWorldExplorer.h>
+#include <worldapi/world/FirstPersonExplorer.h>
 #include <worldapi/world/FlatWorldCollector.h>
 
 #include "MainView.h"
@@ -23,20 +23,20 @@ public:
     void run(int argc, char** argv);
     void requestStop();
 
-	void setUserPosition(maths::vec3d pos);
-	maths::vec3d getUserPosition() const;
+	void setUserPosition(world::vec3d pos);
+	world::vec3d getUserPosition() const;
 
 	SynchronizedCollector & getCollector();
 private:
     std::atomic_bool _running;
 	mutable std::mutex _paramLock;
 
-	std::unique_ptr<FlatWorld> _world;
-	std::unique_ptr<FirstPersonWorldExplorer> _explorer;
+	std::unique_ptr<world::FlatWorld> _world;
+	std::unique_ptr<world::FirstPersonExplorer> _explorer;
 	std::unique_ptr<SynchronizedCollector> _collector;
 
-	maths::vec3d _newUpdatePos;
-	maths::vec3d _lastUpdatePos;
+	world::vec3d _newUpdatePos;
+	world::vec3d _lastUpdatePos;
 
     std::unique_ptr<MainView> _mainView;
 

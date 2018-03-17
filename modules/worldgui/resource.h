@@ -5,7 +5,7 @@
 
 #include <QObject>
 
-#include <worldapi/Image.h>
+#include <worldapi/assets/Image.h>
 
 #include "scene.h"
 
@@ -34,11 +34,11 @@ private:
 
 class ImageResource : public Resource {
 public:
-    ImageResource(QString name, img::Image * image);
+    ImageResource(QString name, Image * image);
 
     virtual void save(QString path);
 private:
-    img::Image * _image;
+    Image * _image;
 };
 
 #endif // RESOURCE_H

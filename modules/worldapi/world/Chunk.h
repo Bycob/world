@@ -9,40 +9,48 @@
 
 #include <worldapi/maths/MathsHelper.h>
 
-class WorldObject;
+namespace world {
+	class WorldObject;
 
-class ChunkIterator;
+	class ChunkIterator;
 
-class PrivateChunk;
+	class PrivateChunk;
 
-class WORLDAPI_EXPORT Chunk {
-public:
-	Chunk(const maths::vec3d& offset, const maths::vec3d & size);
-	Chunk(const Chunk &chunk) = delete;
-	virtual ~Chunk();
+	class WORLDAPI_EXPORT Chunk {
+	public:
+		Chunk(const vec3d &offset, const vec3d &size);
 
-	void setDetailSizeBounds(double min, double max);
-	double getMinDetailSize() const { return _minDetailSize; }
-	double getMaxDetailSize() const { return _maxDetailSize; }
+		Chunk(const Chunk &chunk) = delete;
 
-	const maths::vec3d & getSize() const { return _size; }
-    const maths::vec3d & getOffset() const { return _offset; }
+		virtual ~Chunk();
 
-	void addObject(WorldObject * object);
-	
-	template <typename T, typename... Args>
-	T & createObject(Args... args) {
-		addObjectInternal(new T(args...));
-	}
+		void setDetailSizeBounds(double min, double max);
 
-	void forEachObject(const std::function<void(WorldObject&)> & action);
-private:
-	double _minDetailSize = 0;
-	double _maxDetailSize = 1e100;
-	maths::vec3d _offset;
-	maths::vec3d _size;
+		double getMinDetailSize() const { return _minDetailSize; }
 
-	PrivateChunk * _internal;
+		double getMaxDetailSize() const { return _maxDetailSize; }
 
-	void addObjectInternal(WorldObject * object);
-};
+		const vec3d &getSize() const { return _size; }
+
+		const vec3d &getOffset() const { return _offset; }
+
+		void addObject(WorldObject *object);
+
+		template<typename T, typename... Args>
+		T &createObject(Args... args) {
+			addObjectInternal(new T(args...));
+		}
+
+		void forEachObject(const std::function<void(WorldObject &)> &action);
+
+	private:
+		double _minDetailSize = 0;
+		double _maxDetailSize = 1e100;
+		vec3d _offset;
+		vec3d _size;
+
+		PrivateChunk *_internal;
+
+		void addObjectInternal(WorldObject *object);
+	};
+}

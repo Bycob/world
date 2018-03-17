@@ -135,12 +135,12 @@ void MainView::updateScene() {
 	SynchronizedCollector & syncCollector = _app.getCollector();
 
 	auto camPos = _camera->getPosition();
-	_app.setUserPosition(maths::vec3d(camPos.X, camPos.Z, camPos.Y));
+	_app.setUserPosition(world::vec3d(camPos.X, camPos.Z, camPos.Y));
 
     if (_resetScene) {
 
 		syncCollector.lock();
-		FlatWorldCollector & collector = syncCollector.get();
+		world::FlatWorldCollector & collector = syncCollector.get();
 
         recreateModules();
 
@@ -155,7 +155,7 @@ void MainView::updateScene() {
     }
     else if (_worldChanged) {
         syncCollector.lock();
-        FlatWorldCollector & collector = syncCollector.get();
+        world::FlatWorldCollector & collector = syncCollector.get();
 
         for (auto & module : _modules) {
             module->update(collector);

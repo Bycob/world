@@ -3,24 +3,32 @@
 
 #include <worldapi/worldapidef.h>
 
-class WORLDAPI_EXPORT ChunkID {
-public:
-    static ChunkID NONE;
+namespace world {
+    class WORLDAPI_EXPORT ChunkID {
+    public:
+        static ChunkID NONE;
 
-    ChunkID(int x, int y, int z, int lod = 0);
-    ChunkID(const maths::vec3i & pos, int lod = 0);
-    ChunkID(const ChunkID & other);
-    ~ChunkID();
+        ChunkID(int x, int y, int z, int lod = 0);
 
-    const maths::vec3i & getPosition3D() const;
-    int getLOD() const { return _lod; }
+        ChunkID(const vec3i &pos, int lod = 0);
 
-    bool operator<(const ChunkID & other) const;
-    bool operator==(const ChunkID & other) const;
-private:
-    maths::vec3i _pos;
-    int _lod;
-};
+        ChunkID(const ChunkID &other);
+
+        ~ChunkID();
+
+        const vec3i &getPosition3D() const;
+
+        int getLOD() const { return _lod; }
+
+        bool operator<(const ChunkID &other) const;
+
+        bool operator==(const ChunkID &other) const;
+
+    private:
+        vec3i _pos;
+        int _lod;
+    };
+}
 
 
 #endif //WORLD_CHUNKID_H

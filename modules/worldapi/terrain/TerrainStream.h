@@ -3,13 +3,15 @@
 
 #include "Terrain.h"
 
-class TerrainInputStream {
-public:
-    TerrainInputStream(const Terrain& terrain);
+namespace world {
 
-private:
-    const Terrain& _terrain;
-};
+    class TerrainInputStream {
+    public:
+        TerrainInputStream(const Terrain &terrain);
 
+    private:
+        const Terrain &_terrain;
+    };
+}
 
 #endif //WORLD_TERRAINSTREAM_H

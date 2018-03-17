@@ -29,8 +29,8 @@ private:
     std::shared_ptr<Terrain> _generated;
 
     // Ressources
-    std::unique_ptr<img::Image> _terrainImage;
-    std::unique_ptr<img::Image> _texture;
+    std::unique_ptr<Image> _terrainImage;
+    std::unique_ptr<Image> _texture;
 
     Ui::PanelTerrain *ui;
 };

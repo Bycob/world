@@ -6,46 +6,49 @@
 
 #include "IOUtil.h"
 
-WorldFolder::WorldFolder(const std::string & path) 
-	: _path(path), _filelist() {
+namespace world {
 
-	init();
-}
+	WorldFolder::WorldFolder(const std::string &path)
+			: _path(path), _filelist() {
 
-WorldFolder::~WorldFolder() {
+		init();
+	}
 
-}
+	WorldFolder::~WorldFolder() {
 
-void WorldFolder::setPath(const std::string & path) {
-	_path = path;
-	init();
-}
+	}
 
-bool WorldFolder::exists() const {
-	return _exists;
-}
+	void WorldFolder::setPath(const std::string &path) {
+		_path = path;
+		init();
+	}
 
-const std::vector<std::string> & WorldFolder::getFileList() const {
-	return _filelist;
-}
+	bool WorldFolder::exists() const {
+		return _exists;
+	}
 
-std::ofstream WorldFolder::getFile(const std::string & name) {
-	std::ofstream result(_path + name);
+	const std::vector<std::string> &WorldFolder::getFileList() const {
+		return _filelist;
+	}
 
-	return result;
-}
+	std::ofstream WorldFolder::getFile(const std::string &name) {
+		std::ofstream result(_path + name);
 
-bool WorldFolder::hasFile(const std::string & name) const {
-	return std::find(_filelist.begin(), _filelist.end(), name) != _filelist.end();
-}
+		return result;
+	}
 
-void WorldFolder::refresh() {
-	init();
-}
+	bool WorldFolder::hasFile(const std::string &name) const {
+		return std::find(_filelist.begin(), _filelist.end(), name) != _filelist.end();
+	}
 
-void WorldFolder::init() {
-	_exists = false;
-	if (_path == "") return;
+	void WorldFolder::refresh() {
+		init();
+	}
 
-	_filelist = ioutil::getFileList(_path);
+	void WorldFolder::init() {
+		_exists = false;
+		if (_path == "") return;
+
+		_filelist = world::getFileList(_path);
+	}
 }

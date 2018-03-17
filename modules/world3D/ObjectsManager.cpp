@@ -9,7 +9,8 @@ using namespace irr;
 using namespace scene;
 using namespace video;
 
-using ObjectKey = WorldCollector::ObjectKey;
+using namespace world;
+using ObjectKey = Collector::ObjectKey;
 
 //----- ObjectNodeHandler
 

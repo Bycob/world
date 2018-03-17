@@ -1,12 +1,14 @@
 #include <iostream>
 #include <list>
 
-#include "Mesh.h"
+#include "worldapi/assets/Mesh.h"
 #include "WeightedSkeletton.h"
 
-template <class T> Node<T>::Node(double weight, double x, double y, double z) : 
+namespace world {
+
+template <class T> Node<T>::Node(double weight, double x, double y, double z) :
 	_weight(weight), _x(x), _y(y), _z(z), _parent(nullptr), _info(std::make_unique<T>(this)) {
-	
+
 }
 
 template <class T> Node<T>::~Node() {
@@ -47,8 +49,8 @@ template<class T> void Node<T>::setPosition(double x, double y, double z) {
 	_z = z;
 }
 
-template<class T> maths::vec3d Node<T>::getPosition() const {
-	return maths::vec3d(_x, _y, _z);
+template<class T> vec3d Node<T>::getPosition() const {
+	return vec3d(_x, _y, _z);
 }
 
 template<class T> void Node<T>::addChild(Node<T> * child) {
@@ -92,7 +94,7 @@ template<class T> std::vector<Node<T>*> Node<T>::getChildrenOrNeighboursList() c
 
 
 
-template <class T> WeightedSkeletton<T>::WeightedSkeletton() : 
+template <class T> WeightedSkeletton<T>::WeightedSkeletton() :
 	_primaryNode(new Node<T>()) {
 
 
@@ -128,7 +130,7 @@ template<class T> Mesh * WeightedSkeletton<T>::convertToMesh() {
 template<class T> void WeightedSkeletton<T>::resetNode(Node<T>* node) {
 	node->_mark = false;
 	node->_id = 0;
-	
+
 	for (auto child : node->_children_or_neighbour) {
 		if (child->_mark) resetNode(child);
 	}
@@ -163,7 +165,7 @@ template <class T> void WeightedSkeletton<T>::populateMesh(Mesh * mesh, Node<T> 
 		Face face;
 		face.addID(node->_id);
 		face.addID(id);
-		
+
 		mesh->addFace(face);
 
 		populateMesh(mesh, child);
@@ -173,8 +175,10 @@ template <class T> void WeightedSkeletton<T>::populateMesh(Mesh * mesh, Node<T> 
 template<class T> void WeightedSkeletton<T>::populateVector(std::vector<Node<T> *> & vector, Node<T>* node) {
 	vector.push_back(node);
 	node->_mark = true;
-	
+
 	for (Node<T> * child : node->_children_or_neighbour) {
 		if (!child->_mark) populateVector(vector, child);
 	}
+}
+
 }

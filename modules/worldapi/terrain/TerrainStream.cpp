@@ -1,11 +1,8 @@
-//
-// Created by louis on 05/03/18.
-//
-
 #include "TerrainStream.h"
 
+namespace world {
+    TerrainInputStream::TerrainInputStream(const Terrain &terrain)
+            : _terrain(terrain) {
 
-TerrainInputStream::TerrainInputStream(const Terrain &terrain)
-        : _terrain(terrain) {
-
+    }
 }

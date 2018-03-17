@@ -1,6 +1,6 @@
 #include "BoundingBox.h"
 
-namespace maths {
+namespace world {
 
     BoundingBox::BoundingBox(const vec3d &b1, const vec3d &b2)
             : _lower(min(b1.x, b2.x), min(b1.y, b2.y), min(b1.z, b2.z)),

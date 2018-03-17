@@ -6,28 +6,32 @@
 
 #include "../Parameters.h"
 
-namespace relief {
-	typedef Parameter<std::pair<double, double>, double> diff_law;
+namespace world {
 
-	class CustomWorldDifferential : public diff_law {
-	public:
-		CustomWorldDifferential(double range = 4) : _range(range) {}
+	namespace relief {
+		typedef Parameter<std::pair<double, double>, double> diff_law;
 
-		virtual double operator()(const std::pair<double, double> & in) {
-			double elevation = in.first;
-			double rand = in.second;
+		class CustomWorldDifferential : public diff_law {
+		public:
+			CustomWorldDifferential(double range = 4) : _range(range) {}
 
-			double start = _range * (elevation - 1);
-			double startY = tanh(start);
-			double endY = tanh(start + _range);
+			virtual double operator()(const std::pair<double, double> &in) {
+				double elevation = in.first;
+				double rand = in.second;
 
-			return (tanh(rand * _range + start) - startY) / (endY - startY) ;
-		}
+				double start = _range * (elevation - 1);
+				double startY = tanh(start);
+				double endY = tanh(start + _range);
 
-		virtual CustomWorldDifferential * clone() const {
-			return new CustomWorldDifferential(*this);
-		}
-	private:
-		double _range;
-	};
+				return (tanh(rand * _range + start) - startY) / (endY - startY);
+			}
+
+			virtual CustomWorldDifferential *clone() const {
+				return new CustomWorldDifferential(*this);
+			}
+
+		private:
+			double _range;
+		};
+	}
 }

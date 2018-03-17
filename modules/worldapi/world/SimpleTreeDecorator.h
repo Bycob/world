@@ -8,23 +8,28 @@
 #include "../tree/TreeGenerator.h"
 #include "../tree/TreeSkelettonGenerator.h"
 
-class WORLDAPI_EXPORT SimpleTreeDecorator : public IFlatWorldDecorator {
-public:
-	SimpleTreeDecorator(int maxTreesPerChunk = 1);
-	SimpleTreeDecorator(const SimpleTreeDecorator & other);
-	virtual ~SimpleTreeDecorator();
+namespace world {
 
-	void setTreeSkelettonGenerator(TreeSkelettonGenerator * generator);
-	void setTreeGenerator(TreeGenerator * generator);
+	class WORLDAPI_EXPORT SimpleTreeDecorator : public IFlatWorldDecorator {
+	public:
+		SimpleTreeDecorator(int maxTreesPerChunk = 1);
 
-	void decorate(FlatWorld &world, WorldZone &zone) override;
+		SimpleTreeDecorator(const SimpleTreeDecorator &other);
 
-private:
-	int _maxTreesPerChunk;
+		virtual ~SimpleTreeDecorator();
 
-	std::mt19937 _rng;
+		void setTreeSkelettonGenerator(TreeSkelettonGenerator *generator);
 
-	std::unique_ptr<TreeSkelettonGenerator> _skelettonGenerator;
-	std::unique_ptr<TreeGenerator> _treeGenerator;
-};
+		void setTreeGenerator(TreeGenerator *generator);
 
+		void decorate(FlatWorld &world, WorldZone &zone) override;
+
+	private:
+		int _maxTreesPerChunk;
+
+		std::mt19937 _rng;
+
+		std::unique_ptr<TreeSkelettonGenerator> _skelettonGenerator;
+		std::unique_ptr<TreeGenerator> _treeGenerator;
+	};
+}
