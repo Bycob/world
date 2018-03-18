@@ -4,12 +4,17 @@
 #include <worldapi/worldapidef.h>
 
 #include "World.h"
-#include "Collector.h"
+#include "ICollector.h"
 
 namespace world {
 
     class WORLDAPI_EXPORT FirstPersonExplorer {
     public:
+        /** Build a FirstPersonExplorer with the given parameters.
+         * @param minAngle The smallest distance so that we can
+         * distinguish two points separated by this distance.
+         * @param punctumProximum The minimum distance under which we
+         * cannot see. */
         FirstPersonExplorer(double minAngle = 0.002, double punctumProximum = 1);
 
         void setOrigin(const vec3d &origin);

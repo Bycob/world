@@ -14,3 +14,5 @@ if (${WORLD_BUILD_TESTS})
     add_executable(test_world test_world.cpp)
     target_link_libraries(test_world worldapi)
 endif()
+
+add_subdirectory(worldapi)

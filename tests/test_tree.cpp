@@ -37,6 +37,7 @@ void testCircularSkeletton(int argc, char** argv) {
 using namespace tree;
 
 void testTree(int argc, char ** argv) {
+	// TODO resoudre le leak sur le generator
 	TreeSkelettonGenerator generator;
 
 	generator.setInclination(SideBranchPhiParameter(wrapper_d(gaussian(0.9, 0.2))));

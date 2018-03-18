@@ -63,8 +63,8 @@ namespace world {
         bool createChunk(ChunkID id);
     };
 
-/** Contains a reference to a chunk, and metadata from the
- * chunk system */
+    /** Contains a reference to a chunk, and metadata from the
+     * chunk system */
     class WORLDAPI_EXPORT ChunkHandler : public IWorldZoneHandler {
     public:
         ChunkHandler(ChunkSystem &system, const ChunkID &id, Chunk &chunk);
