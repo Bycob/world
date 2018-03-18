@@ -18,7 +18,7 @@ namespace world {
         }
 
         const Terrain &getNeighbour(int x, int y) const override {
-            return _ground.terrain(x + _x, y + _y, _lvl);
+            return _ground.rawTerrain(x + _x, y + _y, _lvl);
         }
 
     private:
@@ -26,15 +26,19 @@ namespace world {
         Ground &_ground;
     };
 
-    class GroundCache {
+    struct Tile {
+        std::unique_ptr<Terrain> _raw;
+        std::unique_ptr<Terrain> _final;
+    };
+
+    class PrivateGround {
     public:
-        GroundCache() : _terrains(), _mapUnitPerTerrain(2) {}
+        PrivateGround() : _terrains(), _mapUnitPerTerrain(2) {}
 
         /** Le nombre de pixel de map de relief par terrains de niveau 0  */
         double _mapUnitPerTerrain;
-        std::map<vec2i, std::unique_ptr<Terrain>> _heightMap;
-        std::map<vec2i, std::unique_ptr<Terrain>> _heightDiffMap;
-        std::map<vec3i, std::unique_ptr<Terrain>> _terrains;
+        std::map<vec2i, std::pair<std::unique_ptr<Terrain>, std::unique_ptr<Terrain>>> _map;
+        std::map<vec3i, Tile> _terrains;
     };
 
 // Idees d'ameliorations :
@@ -46,27 +50,14 @@ namespace world {
 // dans une classe avec des templates)
 
     Ground::Ground() :
-            _cache(new GroundCache()),
+            _internal(new PrivateGround()),
             _unitSize(4000), _maxAltitude(4000), _minAltitude(-2000) {
         _terrainGenerator = std::make_unique<PerlinTerrainGenerator>(0, 1, 4);
         _mapGenerator = std::make_unique<CustomWorldRMGenerator>();
     }
 
     Ground::~Ground() {
-        delete _cache;
-    }
-
-    double Ground::observeAltitudeAt(double x, double y, int lvl) {
-        double size = getTerrainSize(lvl);
-        int xi = (int) floor(x / size);
-        int yi = (int) floor(y / size);
-
-        if (!terrainExists(xi, yi, lvl)) {
-            generateTerrain(xi, yi, lvl);
-        }
-
-        const Terrain &terrain = const_cast<Ground *>(this)->terrain(xi, yi, lvl);
-        return _minAltitude + getAltitudeRange() * terrain.getZInterpolated(x / size - xi, y / size - yi);
+        delete _internal;
     }
 
     double Ground::observeAltitudeAt(WorldZone zone, double x, double y) {
@@ -98,30 +89,17 @@ namespace world {
         }
     }
 
-    std::map<vec3i, std::unique_ptr<Terrain>> &Ground::terrains() const {
-        return _cache->_terrains;
-    }
+    double Ground::observeAltitudeAt(double x, double y, int lvl) {
+        double size = getTerrainSize(lvl);
+        int xi = (int) floor(x / size);
+        int yi = (int) floor(y / size);
 
-    Terrain &Ground::terrain(int x, int y, int lvl) {
-        auto terrain = _cache->_terrains.find({x, y, lvl});
-
-        if (terrain != _cache->_terrains.end()) {
-            return *(*terrain).second;
+        if (!terrainExists(xi, yi, lvl)) {
+            generateTerrain(xi, yi, lvl);
         }
 
-        throw std::runtime_error("Le terrain à l'emplacement (" + std::to_string(x) + ", " + std::to_string(y) + " ; " +
-                                 std::to_string(lvl) + ") n'est pas généré.");
-    }
-
-    Terrain &Ground::terrainAt(double x, double y, int lvl) {
-        int xi = (int) floor(x / _unitSize);
-        int yi = (int) floor(y / _unitSize);
-
-        return terrain(xi, yi);
-    }
-
-    bool Ground::terrainExists(int x, int y, int lvl) const {
-        return terrains().find({x, y, lvl}) != terrains().end();
+        const Terrain &terrain = const_cast<Ground *>(this)->terrain(xi, yi, lvl);
+        return _minAltitude + getAltitudeRange() * terrain.getZInterpolated(x / size - xi, y / size - yi);
     }
 
     void Ground::replaceTerrain(int xp, int yp, int lvl, FlatWorldCollector &collector) {
@@ -135,6 +113,18 @@ namespace world {
                 collector.addTerrain(getTerrainDataId(x, y, lvl + 1), terrain(x, y, lvl + 1));
             }
         }
+    }
+
+    Terrain &Ground::terrain(int x, int y, int lvl) {
+        return *_internal->_terrains.at({x, y, lvl})._final;
+    }
+
+    Terrain &Ground::rawTerrain(int x, int y, int lvl) {
+        return *_internal->_terrains.at({x, y, lvl})._raw;
+    }
+
+    bool Ground::terrainExists(int x, int y, int lvl) const {
+        return _internal->_terrains.find({x, y, lvl}) != _internal->_terrains.end();
     }
 
     uint64_t Ground::getTerrainDataId(int x, int y, int lvl) const {
@@ -184,46 +174,78 @@ namespace world {
     }
 
     void Ground::generateTerrain(int x, int y, int lvl) {
-        // Map turned off
-        std::vector<vec3i> unmapped;
-        unmapped.emplace_back(x - 1, y, lvl);
-        unmapped.emplace_back(x + 1, y, lvl);
-        unmapped.emplace_back(x, y - 1, lvl);
-        unmapped.emplace_back(x, y + 1, lvl);
-
-        for (auto &pos : unmapped) {
-            if (terrainExists(pos.x, pos.y, pos.z)) {
-                applyPreviousLayer(pos.x, pos.y, pos.z, true);
-            }
-        }
-
         // Terrain creation
-        std::unique_ptr<Terrain> created = std::make_unique<Terrain>(_terrainRes);
-        _terrainGenerator->process(*created, GroundContext(*this, x, y, lvl));
+        std::unique_ptr<Terrain> raw = std::make_unique<Terrain>(_terrainRes);
+        _terrainGenerator->process(*raw, GroundContext(*this, x, y, lvl));
+
+        std::unique_ptr<Terrain> final = std::make_unique<Terrain>(*raw);
 
         // Bounds
         double terrainSize = getTerrainSize(lvl);
         // TODO min altitude and max altitude also depend on lvl
-        created->setBounds(terrainSize * x, terrainSize * y, _minAltitude,
+        final->setBounds(terrainSize * x, terrainSize * y, _minAltitude,
                            terrainSize * (x + 1), terrainSize * (y + 1), _maxAltitude);
 
-        _cache->_terrains[{x, y, lvl}] = std::move(created);
+        _internal->_terrains[{x, y, lvl}] = {std::move(raw), std::move(final)};
 
-        // Map turned on
-        unmapped.emplace_back(x, y, lvl);
-
-        for (auto &pos : unmapped) {
-            if (terrainExists(pos.x, pos.y, pos.z)) {
-                applyPreviousLayer(pos.x, pos.y, pos.z, false);
-            }
-        }
+        // Integration
+        applyPreviousLayer(x, y, lvl);
     }
 
     void Ground::applyPreviousLayer(int x, int y, int lvl, bool unapply) {
         if (lvl == 0) {
             applyMap(x, y, lvl, unapply);
         } else {
+            if (!unapply) {
+                applyMap(x, y, lvl, unapply);
+            }
             applyParent(x, y, lvl, unapply);
+            if (unapply) {
+                applyMap(x, y, lvl, unapply);
+            }
+        }
+    }
+
+    void Ground::applyParent(int tX, int tY, int lvl, bool unapply) {
+        vec3i childId{tX, tY, lvl};
+        Terrain &child = this->terrain(tX, tY, lvl);
+        int size = child.getSize();
+
+        // Get parent. Generate it if needed
+        auto parentId = getParentId(childId);
+
+        if (!terrainExists(parentId.x, parentId.y, parentId.z)) {
+            generateTerrain(parentId.x, parentId.y, parentId.z);
+        }
+
+        Terrain &parent = this->terrain(parentId.x, parentId.y, parentId.z);
+
+        // Useful variables
+        const double parentProp = 0.9;
+        const double childProp = 1. - parentProp;
+        const double oX = (double) mod(tX, _factor) / _factor;
+        const double oY = (double) mod(tY, _factor) / _factor;
+        const double ratio = 1. / _factor;
+
+        std::unique_ptr<ITerrainManipulator> manipulator(ITerrainManipulator::createManipulator());
+
+        arma::mat bufferParent(size, size);
+
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                bufferParent(x, y) = parent.getZInterpolated(
+                        oX + ((double) x / size) * ratio,
+                        oY + ((double) y / size) * ratio
+                ) * parentProp * (unapply ? -1. : 1.);
+            }
+        }
+
+        if (unapply) {
+            manipulator->applyOffset(child, bufferParent);
+            manipulator->multiply(child, 1. / childProp);
+        } else {
+            manipulator->multiply(child, childProp);
+            manipulator->applyOffset(child, bufferParent);
         }
     }
 
@@ -234,21 +256,12 @@ namespace world {
         uint32_t size = terrain.getSize();
 
         // Map
-        vec2i mapLoc(0, 0);
-
-        // (TODO optimize)
-
-        // We generate the map if it's not done
-        if (_cache->_heightMap.find(mapLoc) == _cache->_heightMap.end()) {
-            _cache->_heightMap[mapLoc] = std::make_unique<Terrain>(100);
-            _cache->_heightDiffMap[mapLoc] = std::make_unique<Terrain>(100);
-            _mapGenerator->generate(*_cache->_heightMap[mapLoc], *_cache->_heightDiffMap[mapLoc]);
-        }
+        Terrain &heightMap = getOrCreateOffsetMap(0, 0);
+        Terrain &diffMap = getOrCreateDiffMap(0, 0);
 
         // Setup variables
-        Terrain &heightMap = *_cache->_heightMap[{0, 0}];
-        Terrain &diffMap = *_cache->_heightDiffMap[{0, 0}];
-        const double ratio = _cache->_mapUnitPerTerrain / heightMap.getSize();
+        const double terrainRelativeSize = getTerrainSize(lvl) / getTerrainSize(0);
+        const double ratio = _internal->_mapUnitPerTerrain * terrainRelativeSize / heightMap.getSize();
         const double mapOx = 0.5 + tX * ratio;
         const double mapOy = 0.5 + tY * ratio;
 
@@ -289,47 +302,25 @@ namespace world {
         }
     }
 
-    void Ground::applyParent(int tX, int tY, int lvl, bool unapply) {
-        vec3i childId{tX, tY, lvl};
-        Terrain &child = this->terrain(tX, tY, lvl);
-        int size = child.getSize();
+    std::pair<std::unique_ptr<Terrain>, std::unique_ptr<Terrain>>& Ground::getOrCreateMap(int x, int y) {
+        vec2i mapLoc(x, y);
+        auto it = _internal->_map.find(mapLoc);
 
-        // Get parent. Generate it if needed
-        auto parentId = getParentId(childId);
-
-        if (!terrainExists(parentId.x, parentId.y, parentId.z)) {
-            generateTerrain(parentId.x, parentId.y, parentId.z);
+        if (it == _internal->_map.end()) {
+            it = _internal->_map.emplace(mapLoc, std::make_pair(
+                    std::make_unique<Terrain>(100), std::make_unique<Terrain>(100)
+            )).first;
+            _mapGenerator->generate(*it->second.first, *it->second.second);
         }
 
-        Terrain &parent = this->terrain(parentId.x, parentId.y, parentId.z);
-
-        // Useful variables
-        const double parentProp = 0.97;
-        const double childProp = 1. - parentProp;
-        const double oX = (double) mod(tX, _factor) / _factor;
-        const double oY = (double) mod(tY, _factor) / _factor;
-        const double ratio = 1. / _factor;
-
-        std::unique_ptr<ITerrainManipulator> manipulator(ITerrainManipulator::createManipulator());
-
-        arma::mat bufferParent(size, size);
-
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
-                bufferParent(x, y) = parent.getZInterpolated(
-                        oX + ((double) x / size) * ratio,
-                        oY + ((double) y / size) * ratio
-                ) * parentProp * (unapply ? -1. : 1.);
-            }
-        }
-
-        if (unapply) {
-            manipulator->applyOffset(child, bufferParent);
-            manipulator->multiply(child, 1. / childProp);
-        } else {
-            manipulator->multiply(child, childProp);
-            manipulator->applyOffset(child, bufferParent);
-        }
+        return it->second;
     }
 
+    Terrain& Ground::getOrCreateOffsetMap(int x, int y) {
+        return *getOrCreateMap(x, y).first;
+    }
+
+    Terrain& Ground::getOrCreateDiffMap(int x, int y) {
+        return *getOrCreateMap(x, y).second;
+    }
 }

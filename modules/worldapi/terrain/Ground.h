@@ -17,7 +17,7 @@ namespace world {
 
 	class FlatWorldCollector;
 
-	class GroundCache;
+	class PrivateGround;
 
 	/** Cette classe gère le sol du monde. Le sol est composé de plusieurs
 	terrains carrés accolés les uns aux autres. Des détails sont ensuite
@@ -50,13 +50,13 @@ namespace world {
 		double getUnitSize() const { return _unitSize; }
 
 		// EXPLORATION
-		double observeAltitudeAt(double x, double y, int lvl = 0);
-
 		double observeAltitudeAt(WorldZone zone, double x, double y);
 
 		void collectZone(FlatWorldCollector &collector, FlatWorld &world, WorldZone &zone);
 
 	private:
+		PrivateGround *_internal;
+
 		// Paramètres
 		/** L'altitude maximum du monde. Le niveau de la mer est fixé à 0. */
 		double _maxAltitude;
@@ -76,24 +76,22 @@ namespace world {
 		std::unique_ptr<ReliefMapGenerator> _mapGenerator;
 		std::unique_ptr<TerrainGenerator> _terrainGenerator;
 
-		// Données
-		int _cacheSize = 0;
-		mutable GroundCache *_cache;
+
+		double observeAltitudeAt(double x, double y, int lvl = 0);
+
+		/** Replace a parent terrain by its children in the collector */
+		void replaceTerrain(int x, int y, int lvl, FlatWorldCollector &collector);
 
 		// ACCESS
-		std::map<vec3i, std::unique_ptr<Terrain>> &terrains() const;
-
 		Terrain &terrain(int x, int y, int lvl = 0);
 
-		Terrain &terrainAt(double x, double y, int lvl = 0);
+		Terrain &rawTerrain(int x, int y, int lvl = 0);
 
 		/** Indique si le terrain à l'indice (x, y) existe déjà ou au
         contraire doit être généré par le générateur de terrain.
         @returns true si le terrain existe, false s'il doit être généré.*/
 		bool terrainExists(int x, int y, int lvl = 0) const;
 
-		/** Replace a parent terrain by its children in the collector */
-		void replaceTerrain(int x, int y, int lvl, FlatWorldCollector &collector);
 
 		// DATA
 		/** Donne un identifiant unique pour la section de terrain à
@@ -106,6 +104,7 @@ namespace world {
 
 		vec3i getParentId(const vec3i &childId) const;
 
+
 		// GENERATION
 		void generateZone(FlatWorld &world, WorldZone &zone);
 
@@ -117,9 +116,15 @@ namespace world {
 
 		void applyPreviousLayer(int x, int y, int lvl, bool unapply = false);
 
+		void applyParent(int tX, int tY, int lvl, bool unapply = false);
+
 		void applyMap(int x, int y, int lvl, bool unapply = false);
 
-		void applyParent(int tX, int tY, int lvl, bool unapply = false);
+		std::pair<std::unique_ptr<Terrain>, std::unique_ptr<Terrain>> & getOrCreateMap(int x, int y);
+
+		Terrain& getOrCreateOffsetMap(int x, int y);
+
+		Terrain& getOrCreateDiffMap(int x, int y);
 
 		friend class GroundContext;
 	};
