@@ -96,9 +96,11 @@ namespace world {
 		// DATA
 		/** Donne un identifiant unique pour la section de terrain à
          * l'emplacement donné. */
-		uint64_t getTerrainDataId(int x, int y, int lvl) const;
+		std::string getTerrainDataId(int x, int y, int lvl) const;
 
 		double getTerrainSize(int level) const;
+
+        double getLayerContribution(int level) const;
 
 		int getLevelForChunk(const WorldZone &zone) const;
 

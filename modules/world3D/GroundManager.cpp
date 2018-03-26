@@ -89,14 +89,14 @@ ITerrainSceneNode* GroundManager::createNode(const Terrain &terrain) {
 
 	// Construction du noeud irrlicht
     int dataSize;
-    const char* data = terrain.getRawData(dataSize, (float) terrainRes);
+    const char* data = terrain.getRawData(dataSize, (float) (terrainRes * size.z / size.x));
     IReadFile * memoryFile = _fileSystem->createMemoryReadFile((void*)data, dataSize, "", false);
 
     ITerrainSceneNode * result =
             _sceneManager->addTerrainSceneNode(nullptr, nullptr, -1,
                                                vector3df((float) offset.x, (float) offset.z, (float) offset.y),
                                                vector3df(0.0f, 0.0f, 0.0f),
-                                               vector3df((float) size.x, (float) size.z, (float) (size.y)),
+                                               vector3df((float) size.x, (float) size.x, (float) size.x),
                                                SColor(255, 255, 255, 255),
                                                2, ETPS_17, 4, true);
     result->loadHeightMapRAW(memoryFile, 32, true, true, 0, SColor(255,255,255,255), 4);

@@ -45,8 +45,8 @@ namespace world {
 
 		const BoundingBox &getBoundingBox() const;
 
-		uint32_t getSize() const {
-			return (uint32_t) _array.n_rows;
+		int getSize() const {
+			return (int) _array.n_rows;
 		}
 
 		double &operator()(int x, int y);

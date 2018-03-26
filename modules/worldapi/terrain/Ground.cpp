@@ -127,16 +127,20 @@ namespace world {
         return _internal->_terrains.find({x, y, lvl}) != _internal->_terrains.end();
     }
 
-    uint64_t Ground::getTerrainDataId(int x, int y, int lvl) const {
-        uint64_t id = (uint64_t) (x & 0x0FFFFFFF)
-                      + ((uint64_t) (y & 0x0FFFFFFF) << 24)
-                      + ((uint64_t) (lvl & 0xFF) << 48);
-        return id;
+    std::string Ground::getTerrainDataId(int x, int y, int lvl) const {
+        u64 id = (u64) (x & 0x0FFFFFFF)
+                      + ((u64) (y & 0x0FFFFFFF) << 24)
+                      + ((u64) (lvl & 0xFF) << 48);
+        return std::to_string(id);
     }
 
 
     double Ground::getTerrainSize(int lvl) const {
         return _unitSize * powi((double) _factor, -lvl);
+    }
+
+    double Ground::getLayerContribution(int level) const {
+        return level == 0 ? 1 : 0.1 * powi(0.5, level - 1);
     }
 
     int Ground::getLevelForChunk(const WorldZone &zone) const {
@@ -221,8 +225,8 @@ namespace world {
         Terrain &parent = this->terrain(parentId.x, parentId.y, parentId.z);
 
         // Useful variables
-        const double parentProp = 0.9;
-        const double childProp = 1. - parentProp;
+        const double parentProp = 1;
+        const double childProp = getLayerContribution(lvl);
         const double oX = (double) mod(tX, _factor) / _factor;
         const double oY = (double) mod(tY, _factor) / _factor;
         const double ratio = 1. / _factor;
@@ -234,8 +238,8 @@ namespace world {
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
                 bufferParent(x, y) = parent.getZInterpolated(
-                        oX + ((double) x / size) * ratio,
-                        oY + ((double) y / size) * ratio
+                        oX + ((double) x / (size - 1)) * ratio,
+                        oY + ((double) y / (size - 1)) * ratio
                 ) * parentProp * (unapply ? -1. : 1.);
             }
         }
@@ -253,7 +257,7 @@ namespace world {
 
         // Terrain
         Terrain &terrain = this->terrain(tX, tY, lvl);
-        uint32_t size = terrain.getSize();
+        int size = terrain.getSize();
 
         // Map
         Terrain &heightMap = getOrCreateOffsetMap(0, 0);
@@ -275,8 +279,8 @@ namespace world {
         arma::mat bufferOffset(size, size);
         arma::mat bufferDiff(size, size);
 
-        for (uint32_t x = 0; x < size; x++) {
-            for (uint32_t y = 0; y < size; y++) {
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
                 double mapX = mapOx + ((double) x / (size - 1)) * ratio;
                 double mapY = mapOy + ((double) y / (size - 1)) * ratio;
 

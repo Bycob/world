@@ -34,9 +34,9 @@ namespace world {
 	public:
 		typedef std::pair<T_Pts, T_Data> DataPoint;
 
-		IDWInterpolator(uint32_t p = 1, double radius = 1000000) : _p(p), _radius(radius) {}
+		IDWInterpolator(int p = 1, double radius = 1000000) : _p(p), _radius(radius) {}
 
-		void setP(uint32_t p) {
+		void setP(int p) {
 			_p = p;
 		}
 
@@ -53,14 +53,13 @@ namespace world {
 			double wSum = 0;
 
 			for (const DataPoint & dp : _data) {
-				// TODO resoudre les warnings de type
 				auto length = T_Pts::length(pt, dp.first);
 				
 				if (length < std::numeric_limits<decltype(length)>::epsilon()) {
 					return dp.second;
 				}
 				else {
-					double weight = length < _radius ? 1 / pow(length, _p) : 0;
+					double weight = length < _radius ? powi(length, - _p) : 0;
 
 					wSum = wSum + weight;
 					sum = sum + dp.second * weight;
@@ -75,7 +74,7 @@ namespace world {
 			return sum * (1 / wSum);
 		}
 	private:
-		uint32_t _p;
+		int _p;
 		double _radius;
 		std::vector<DataPoint> _data;
 	};

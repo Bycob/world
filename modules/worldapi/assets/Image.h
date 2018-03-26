@@ -2,7 +2,8 @@
 #include "worldapi/worldapidef.h"
 
 #include <armadillo/armadillo>
-#include <stdint.h>
+
+#include "../worldtypes.h"
 
 namespace world {
 	class PrivateImage;
@@ -16,17 +17,17 @@ namespace world {
 
 	class WORLDAPI_EXPORT ConstPixel {
 	public:
-		uint8_t getAlpha() const;
-		uint8_t getRed() const;
-		uint8_t getGreen() const;
-		uint8_t getBlue() const;
+		u8 getAlpha() const;
+		u8 getRed() const;
+		u8 getGreen() const;
+		u8 getBlue() const;
 
 	protected:
 		friend class Image;
 
 		ConstPixel(int width, int height, Image *ref);
 
-		uint8_t getComponent(int id) const;
+		u8 getComponent(int id) const;
 
 		int _x; int _y;
 		Image * _ref;
@@ -34,20 +35,20 @@ namespace world {
 
 	class WORLDAPI_EXPORT Pixel : public ConstPixel {
 	public:
-		void set(uint8_t r, uint8_t g = 0, uint8_t b = 0, uint8_t a = 255);
+		void set(u8 r, u8 g = 0, u8 b = 0, u8 a = 255);
 		void setf(float r, float g = 0, float b = 0, float a = 1);
 
-		void setAlpha(uint8_t a);
-		void setRed(uint8_t r);
-		void setGreen(uint8_t g);
-		void setBlue(uint8_t b);
+		void setAlpha(u8 a);
+		void setRed(u8 r);
+		void setGreen(u8 g);
+		void setBlue(u8 b);
 
 		void setAlphaf(float a);
 		void setRedf(float r);
 		void setGreenf(float g);
 		void setBluef(float b);
 
-		void setLevel(uint8_t l);
+		void setLevel(u8 l);
 		void setLevelf(float l);
 
 	private:
@@ -55,7 +56,7 @@ namespace world {
 
 		Pixel(int width, int height, Image *ref);
 
-		void setComponent(int id, uint8_t type);
+		void setComponent(int id, u8 type);
 	};
 
 	class WORLDAPI_EXPORT Image {
@@ -72,8 +73,8 @@ namespace world {
 
 		// infos
 		ImageType type() const;
-		uint32_t width() const;
-		uint32_t height() const;
+		int width() const;
+		int height() const;
 
 		// access
 		Pixel at(int x, int y);

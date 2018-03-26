@@ -25,13 +25,13 @@ namespace world {
 
 	class WORLDAPI_EXPORT CustomWorldRMGenerator : public ReliefMapGenerator {
 	public:
-		CustomWorldRMGenerator(double biomeDensity = 1, uint32_t limitBrightness = 4);
+		CustomWorldRMGenerator(double biomeDensity = 1, int limitBrightness = 4);
 
 		CustomWorldRMGenerator(const CustomWorldRMGenerator &other);
 
 		void setBiomeDensity(float biomeDensity);
 
-		void setLimitBrightness(uint32_t);
+		void setLimitBrightness(int);
 
 		void setDifferentialLaw(const relief::diff_law &law);
 
@@ -44,7 +44,7 @@ namespace world {
 		double _biomeDensity;
 		/** La netteté des limites entre les biomes. En pratique c'est
         le "p" dans l'algo de l'interpolation. */
-		uint32_t _limitBrightness;
+		int _limitBrightness;
 
 		/** Loi de probabilité du différentiel d'altitude en fonction
         de l'altitude. */

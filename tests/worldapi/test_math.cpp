@@ -25,4 +25,16 @@ TEST_CASE("Math", "[math]") {
         REQUIRE(clamp(2.71, -1, 3) == Approx(2.71));
         REQUIRE(clamp(-6.28, -1, 3) == Approx(-1));
     }
+
+    SECTION("integer fast exponential with integer base") {
+        REQUIRE(powi(5, 7) == 78125);
+        REQUIRE(powi(5, 0) == 1);
+        REQUIRE(powi(5, -7) == 0);
+    }
+
+    SECTION("integer fast exponential with double base") {
+        REQUIRE(powi(5.0, 7) == Approx(78125.0));
+        REQUIRE(powi(5.0, 0) == Approx(1.0));
+        REQUIRE(powi(5.0, -7) == Approx(1.0 / 78125.0));
+    }
 }

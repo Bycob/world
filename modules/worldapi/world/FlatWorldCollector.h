@@ -11,32 +11,11 @@
 
 namespace world {
 
-    class FlatWorldCollector;
-
-    class PrivateTerrainIterator;
-
-    class WORLDAPI_EXPORT TerrainIterator
-            : public std::iterator<std::forward_iterator_tag, std::pair<long, Terrain *>> {
-    public:
-        TerrainIterator(FlatWorldCollector &collector);
-
-        ~TerrainIterator();
-
-        void operator++();
-
-        std::pair<uint64_t, Terrain *> operator*();
-
-        bool hasNext() const;
-
-    private:
-        PrivateTerrainIterator *_internal;
-
-        FlatWorldCollector &_collector;
-    };
+    class TerrainIterator;
 
     class WORLDAPI_EXPORT FlatWorldCollector : public Collector, public ICollector<FlatWorld> {
     public:
-        typedef uint64_t TerrainKey;
+        typedef std::string TerrainKey;
 
         FlatWorldCollector();
 
@@ -58,6 +37,27 @@ namespace world {
 
         std::set<TerrainKey> _disabledTerrains;
         std::map<TerrainKey, Terrain> _terrains;
+    };
+
+    class PrivateTerrainIterator;
+
+    class WORLDAPI_EXPORT TerrainIterator
+            : public std::iterator<std::forward_iterator_tag, std::pair<long, Terrain *>> {
+    public:
+        TerrainIterator(FlatWorldCollector &collector);
+
+        ~TerrainIterator();
+
+        void operator++();
+
+        std::pair<FlatWorldCollector::TerrainKey, Terrain *> operator*();
+
+        bool hasNext() const;
+
+    private:
+        PrivateTerrainIterator *_internal;
+
+        FlatWorldCollector &_collector;
     };
 
 }

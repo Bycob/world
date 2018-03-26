@@ -14,7 +14,7 @@ using namespace arma;
 namespace world {
 
 	// -----
-	ReliefMapGenerator::ReliefMapGenerator() {
+	ReliefMapGenerator::ReliefMapGenerator() : _rng(time(NULL)) {
 
 	}
 
@@ -22,7 +22,7 @@ namespace world {
 	// -----
 	const double CustomWorldRMGenerator::PIXEL_UNIT = 10;
 
-	CustomWorldRMGenerator::CustomWorldRMGenerator(double biomeDensity, uint32_t limitBrightness) :
+	CustomWorldRMGenerator::CustomWorldRMGenerator(double biomeDensity, int limitBrightness) :
 			_biomeDensity(biomeDensity),
 			_limitBrightness(limitBrightness),
 			_diffLaw(std::make_unique<relief::CustomWorldDifferential>()) {
@@ -40,7 +40,7 @@ namespace world {
 		_biomeDensity = biomeDensity;
 	}
 
-	void CustomWorldRMGenerator::setLimitBrightness(uint32_t p) {
+	void CustomWorldRMGenerator::setLimitBrightness(int p) {
 		_limitBrightness = p;
 	}
 
@@ -50,8 +50,8 @@ namespace world {
 
 	void CustomWorldRMGenerator::generate(Terrain &height, Terrain &heightDiff) const {
 		// Nombre de biomes à générer.
-		uint32_t size = (uint32_t) (height.getSize() * height.getSize());
-		uint32_t biomeCount = (uint32_t) (_biomeDensity * (double) size / (PIXEL_UNIT * PIXEL_UNIT));
+		int size = height.getSize() * height.getSize();
+		int biomeCount = (int) (_biomeDensity * (double) size / (PIXEL_UNIT * PIXEL_UNIT));
 
 
 		// -> Création de la grille pour le placement des points de manière aléatoire,
@@ -61,17 +61,18 @@ namespace world {
 		double minDistance = PIXEL_UNIT / 2.0 * sqrt(_biomeDensity);
 
 		// TODO unifier
-		uint32_t sliceCount = max<uint32_t>((uint32_t) ((float) height.getSize() / minDistance), 1);
+		int sliceCount = max<int>((int) ((float) height.getSize() / minDistance), 1);
 		float sliceSize = (float) height.getSize() / (float) sliceCount;
 
-		uint32_t caseCount = max<uint32_t>((uint32_t) ((float) height.getSize() / minDistance), 1);
-		float caseSize = (float) height.getSize() / (float) caseCount;
+		// the terrains are squared so there are as much slices as there are cases per slice
+		int caseCount = sliceCount;
+		float caseSize = sliceCount;
 
 		// Préparation de la grille
 		typedef std::pair<vec2d, vec2d> point; // pour plus de lisibilité
 		std::vector<std::vector<point>> pointsMap;
 		pointsMap.reserve(sliceCount);
-		std::vector<std::pair<uint32_t, uint32_t>> grid;
+		std::vector<std::pair<int, int>> grid;
 		grid.reserve(sliceCount * caseCount);
 
 		for (int x = 0; x < sliceCount; x++) {
@@ -91,12 +92,12 @@ namespace world {
 
 		for (int i = 0; i < biomeCount; i++) { // TODO dans les cas limites la grille peut se vider totalement
 			// Génération des coordonnées des points
-			uint32_t randIndex = (uint32_t) (rand(_rng) * grid.size());
-			std::pair<uint32_t, uint32_t> randPoint = grid.at(randIndex);
+			int randIndex = (int) (rand(_rng) * grid.size());
+			std::pair<int, int> randPoint = grid.at(randIndex);
 			grid.erase(grid.begin() + randIndex);
 
-			uint32_t x = randPoint.first;
-			uint32_t y = randPoint.second;
+			int x = randPoint.first;
+			int y = randPoint.second;
 
 			// Calcul des limites dans lesquelles on peut avoir un point
 			double limNegX = 0;
@@ -138,13 +139,13 @@ namespace world {
 			double randY = rand(_rng);
 
 			// TODO L'utilisateur n'a aucun contrôle sur le premier paramètre.
-			float elevation = rand(_rng);
-			float diff = (*_diffLaw)(std::pair<double, double>(elevation, rand(_rng)));
+			double elevation = rand(_rng);
+			double diff = (*_diffLaw)(std::pair<double, double>(elevation, rand(_rng)));
 
 			pointsMap[x][y] = std::make_pair<vec2d, vec2d>(
 					vec2d(
-							(float) (randX * (limPosX - limNegX) + limNegX + x * sliceSize),
-							(float) (randY * (limPosY - limNegY) + limNegY + y * caseSize)),
+							randX * (limPosX - limNegX) + limNegX + x * sliceSize,
+							randY * (limPosY - limNegY) + limNegY + y * caseSize),
 					vec2d(elevation, diff));
 		}
 
@@ -164,9 +165,9 @@ namespace world {
 		}
 
 		// On remplit la grille à l'aide de l'interpolateur. And enjoy.
-		for (uint32_t x = 0; x < height.getSize(); x++) {
-			for (uint32_t y = 0; y < height.getSize(); y++) {
-				vec2d pt((double) x + 0.5, (double) y + 0.5);
+		for (int x = 0; x < height.getSize(); x++) {
+			for (int y = 0; y < height.getSize(); y++) {
+				vec2d pt(x + 0.5, y + 0.5);
 				vec2d result = interpolator.getData(pt);
 				height(x, y) = result.x;
 				heightDiff(x, y) = result.y;

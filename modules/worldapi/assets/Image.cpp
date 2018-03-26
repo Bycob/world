@@ -32,8 +32,8 @@ namespace world {
 		}
 	}
 
-	inline uint8_t fromFloat(float f) {
-		return f >= 1.0 ? 255 : (f <= 0.0 ? 0 : (uint8_t) (f * 256.0));
+	inline u8 fromFloat(float f) {
+		return f >= 1.0 ? (u8) 255 : (f <= 0.0 ? (u8) 0 : (u8) (f * 256.0));
 	}
 
 	class PrivateImage {
@@ -54,7 +54,7 @@ namespace world {
 
 	}
 
-	void Pixel::set(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+	void Pixel::set(u8 r, u8 g, u8 b, u8 a) {
 		// TODO améliorer les performances
 		switch (_ref->_type) {
 		case ImageType::RGB :
@@ -64,7 +64,7 @@ namespace world {
 			_ref->_private->_image.at<cv::Vec4b>(_y, _x) = cv::Vec4b(b, g, r, a);
 			break;
 		default :
-			_ref->_private->_image.at<uint8_t>(_y, _x) = r;
+			_ref->_private->_image.at<u8>(_y, _x) = r;
 		}
 	}
 
@@ -72,19 +72,19 @@ namespace world {
 		set(fromFloat(r), fromFloat(g), fromFloat(b), fromFloat(a));
 	}
 
-	void Pixel::setRed(uint8_t r) {
+	void Pixel::setRed(u8 r) {
 		setComponent(2, r);
 	}
 
-	void Pixel::setGreen(uint8_t g) {
+	void Pixel::setGreen(u8 g) {
 		setComponent(1, g);
 	}
 
-	void Pixel::setBlue(uint8_t b) {
+	void Pixel::setBlue(u8 b) {
 		setComponent(0, b);
 	}
 
-	void Pixel::setAlpha(uint8_t a) {
+	void Pixel::setAlpha(u8 a) {
 		setComponent(3, a);
 	}
 
@@ -104,7 +104,7 @@ namespace world {
 		setComponent(3, fromFloat(r));
 	}
 
-	void Pixel::setLevel(uint8_t l) {
+	void Pixel::setLevel(u8 l) {
 		setComponent(0, l);
 	}
 
@@ -112,23 +112,23 @@ namespace world {
 		setComponent(0, fromFloat(l));
 	}
 
-	uint8_t ConstPixel::getAlpha() const {
+	u8 ConstPixel::getAlpha() const {
 		return getComponent(3);
 	}
 
-	uint8_t ConstPixel::getRed() const {
+	u8 ConstPixel::getRed() const {
 		return getComponent(2);
 	}
 
-	uint8_t ConstPixel::getGreen() const {
+	u8 ConstPixel::getGreen() const {
 		return getComponent(1);
 	}
 
-	uint8_t ConstPixel::getBlue() const {
+	u8 ConstPixel::getBlue() const {
 		return getComponent(0);
 	}
 
-	uint8_t ConstPixel::getComponent(int id) const {
+	u8 ConstPixel::getComponent(int id) const {
 		switch (_ref->_type) {
 		case ImageType::RGBA:
 			return _ref->_private->_image.data[4 * (_ref->_private->_image.cols * _y + _x) + id];
@@ -141,7 +141,7 @@ namespace world {
 		}
 	}
 
-	void Pixel::setComponent(int id, uint8_t value) {
+	void Pixel::setComponent(int id, u8 value) {
 		switch (_ref->_type) {
 		case ImageType::RGB:
 			if (id == 3) return;
@@ -199,11 +199,11 @@ namespace world {
 		return _type;
 	}
 
-	uint32_t Image::width() const {
+	int Image::width() const {
 		return _private->_image.cols;
 	}
 
-	uint32_t Image::height() const {
+	int Image::height() const {
 		return _private->_image.rows;
 	}
 
