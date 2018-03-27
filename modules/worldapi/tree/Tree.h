@@ -21,7 +21,7 @@ namespace world {
 			return _trunkMesh;
 		}
 
-		void collectWholeObject(WorldZone &zone, CollectorObject &collector) override;
+		void collectWholeObject(ICollector &collector) override;
 
 	private :
 		friend class TreeGenerator;

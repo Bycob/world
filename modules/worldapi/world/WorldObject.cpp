@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <iostream>
 
-#include "ChunkSystem.h"
+#include "LODGridChunkSystem.h"
 #include "Collector.h"
 
 namespace world {
@@ -20,7 +20,7 @@ namespace world {
 		_position = pos;
 	}
 
-	void WorldObject::collectWholeObject(WorldZone &zone, CollectorObject &collector) {
+	void WorldObject::collectWholeObject(ICollector &collector) {
 
 	}
 }

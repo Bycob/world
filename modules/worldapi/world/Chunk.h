@@ -7,17 +7,21 @@
 #include <iterator>
 #include <functional>
 
+#include <worldapi/maths/BoundingBox.h>
 #include <worldapi/maths/MathsHelper.h>
+#include "ICollector.h"
+#include "WorldZone.h"
 
 namespace world {
 	class WorldObject;
 
-	class ChunkIterator;
-
 	class PrivateChunk;
 
+    /**  */
 	class WORLDAPI_EXPORT Chunk {
 	public:
+		typedef int ObjectKey;
+
 		Chunk(const vec3d &offset, const vec3d &size);
 
 		Chunk(const Chunk &chunk) = delete;
@@ -41,7 +45,9 @@ namespace world {
 			addObjectInternal(new T(args...));
 		}
 
-		void forEachObject(const std::function<void(WorldObject &)> &action);
+		void collectWholeChunk(ICollector &collector);
+
+        void collectPart(const BoundingBox &bbox, double maxDetailSize, ICollector &collector);
 
 	private:
 		double _minDetailSize = 0;

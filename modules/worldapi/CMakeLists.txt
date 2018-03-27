@@ -7,7 +7,7 @@ file(GLOB_RECURSE
 assign_source_group(${WORLD_API_SOURCES})
 
 # Ajout de la lib
-if(${WORLD_BUILD_STATIC})
+if(${WORLD_STATIC_BUILD})
 	set(WORLD_BUILD_MODE "STATIC")
 	message("-- Build static library")
 else()

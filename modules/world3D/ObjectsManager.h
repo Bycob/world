@@ -36,6 +36,6 @@ public:
 
 	static irr::scene::SMesh * convertToIrrlichtMesh(const world::Mesh & mesh, irr::video::IVideoDriver * driver);
 private:
-	std::map<world::Collector::ObjectKey, std::unique_ptr<ObjectNodeHandler>> _objects;
+	std::map<world::Collector::ItemKey, std::unique_ptr<ObjectNodeHandler>> _objects;
 };
 

@@ -82,6 +82,5 @@ SynchronizedCollector& Application::getCollector() {
 }
 
 void Application::loadWorld(int argc, char **argv) {
-	// TODO changer quand ce sera plus forcément un flatworld
-    _world = std::unique_ptr<FlatWorld>((FlatWorld*) World::createDemoWorld());
+    _world = std::unique_ptr<FlatWorld>(FlatWorld::createDemoFlatWorld());
 }

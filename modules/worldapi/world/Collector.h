@@ -14,22 +14,12 @@
 
 namespace world {
 
-    class CollectorObject;
-
-    class CollectorObjectPart;
-
     class CollectorIterator;
-
-    class PrivateCollectorChunk;
 
     class PrivateCollector;
 
-    class WORLDAPI_EXPORT Collector : public ICollector<World> {
+    class WORLDAPI_EXPORT Collector : public ICollector {
     public:
-        typedef ChunkID ChunkKey;
-        typedef std::pair<ChunkKey, long> ObjectKey;
-        typedef long PartKey;
-
         Collector();
 
         virtual ~Collector();
@@ -38,60 +28,30 @@ namespace world {
          * "collect" calls */
         virtual void reset();
 
-        /** Harvest all the resources in the given chunk. This includes
-         * the object located in this chunk, and the object parts from
-         * objects in parent chunks.
-         * If the collector has already collected the zone, it won't collect
-         * it again. Call the resetZone() method to make a zone collectable
-         * again (or even the reset() method)*/
-        virtual void collect(World &world, WorldZone &zone);
+        void addItem(const ItemKey &key, const Object3D &item);
 
-        CollectorObject &getCollectedObject(const ObjectKey &key);
-
-        CollectorIterator iterateObjects();
+        CollectorIterator iterateItems();
 
     protected:
         PrivateCollector *_internal;
 
-        ChunkKey getChunkKey(ObjectKey key);
-
         friend class CollectorIterator;
     };
 
-    class PrivateCollectorObject;
+    class PrivateCollectorItem;
 
-    class WORLDAPI_EXPORT CollectorObject {
+    class WORLDAPI_EXPORT CollectorItem {
     public:
-        CollectorObject(WorldZone &zone, WorldObject &object);
+        CollectorItem(const Object3D &object3D);
 
-        ~CollectorObject();
-
-        void putPart(const Collector::PartKey &key, const Object3D &object);
-
-        CollectorObjectPart &getPart(const Collector::PartKey &key);
-
-        const Object3D &getPartAsObject3D(const Collector::PartKey &key) const;
-
-    private:
-        PrivateCollectorObject *_internal;
-
-        friend class Collector;
-    };
-
-    class PrivateCollectorObjectPart;
-
-    class WORLDAPI_EXPORT CollectorObjectPart {
-    public:
-        CollectorObjectPart(const Object3D &object3D);
-
-        ~CollectorObjectPart();
+        ~CollectorItem();
 
         const Object3D &getObject3D() const;
 
         Object3D &getObject3D();
 
     private:
-        PrivateCollectorObjectPart *_internal;
+        PrivateCollectorItem *_internal;
 
         friend class Collector;
     };
@@ -109,7 +69,7 @@ namespace world {
 
         void operator++();
 
-        std::pair<Collector::ObjectKey, CollectorObject *> operator*();
+        std::pair<Collector::ItemKey, CollectorItem* > operator*();
 
         bool hasNext() const;
 
@@ -117,10 +77,6 @@ namespace world {
         PrivateCollectorIterator *_internal;
 
         Collector &_collector;
-
-        std::map<Collector::ObjectKey, std::unique_ptr<CollectorObject>> &objects() const;
-
-        std::map<Collector::ChunkKey, std::unique_ptr<PrivateCollectorChunk>> &chunks() const;
     };
 }
 

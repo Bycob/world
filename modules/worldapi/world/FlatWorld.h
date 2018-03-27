@@ -9,19 +9,25 @@
 namespace world {
 	class FlatWorld;
 
-	typedef IWorldDecorator<FlatWorld> IFlatWorldDecorator;
+	typedef IWorldDecorator<FlatWorld> FlatWorldDecorator;
 
 	class PrivateFlatWorld;
 
 	class WORLDAPI_EXPORT FlatWorld : public World {
 	public:
+		/** Create a complete and rich world that can be used
+         * as a demonstration of the API power ! */
+		static FlatWorld *createDemoFlatWorld();
+
 		FlatWorld();
 
 		~FlatWorld() override;
 
-		void addFlatWorldDecorator(IFlatWorldDecorator *decorator);
-
 		Ground &ground();
+
+		void addFlatWorldDecorator(FlatWorldDecorator *decorator);
+
+		void collect(const WorldZone &zone, FlatWorldCollector &collector);
 
 	protected:
 		void onFirstExploration(WorldZone &chunk) override;

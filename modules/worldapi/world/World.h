@@ -9,16 +9,17 @@
 #include <functional>
 
 #include "../WorldFolder.h"
-#include "ChunkSystem.h"
+#include "IChunkSystem.h"
 #include "WorldObject.h"
 #include "LODData.h"
 #include "IWorldDecorator.h"
+#include "ICollector.h"
 
 namespace world {
 
 	class World;
 
-	typedef IWorldDecorator<World> IWorldChunkDecorator;
+	typedef IWorldDecorator<World> WorldDecorator;
 
 	class PrivateWorld;
 
@@ -34,7 +35,7 @@ namespace world {
 
 		virtual ~World();
 
-		void addChunkDecorator(IWorldChunkDecorator *decorator);
+		void addWorldDecorator(WorldDecorator *decorator);
 
 		// NAVIGATION
 		WorldZone exploreNeighbour(const WorldZone &zone, const vec3d &direction);
@@ -43,13 +44,16 @@ namespace world {
 
 		std::vector<WorldZone> exploreInside(const WorldZone &zone);
 
+        // ASSETS
+        virtual void collect(const WorldZone &zone, ICollector &collector);
+
 	protected:
 		virtual void onFirstExploration(WorldZone &chunk);
 
 	private:
 		PrivateWorld *_internal;
 
-		ChunkSystem _chunkSystem;
+		std::unique_ptr<IChunkSystem> _chunkSystem;
 		WorldFolder _directory; // TODO remplacer ça par un ICache, qui peut être un dossier, une interface réseau, rien...
 	};
 }

@@ -8,7 +8,7 @@
 #include <functional>
 
 #include "Terrain.h"
-#include "../world/ChunkSystem.h"
+#include "worldapi/world/LODGridChunkSystem.h"
 #include "../world/MapGenerator.h"
 
 namespace world {
@@ -52,7 +52,7 @@ namespace world {
 		// EXPLORATION
 		double observeAltitudeAt(WorldZone zone, double x, double y);
 
-		void collectZone(FlatWorldCollector &collector, FlatWorld &world, WorldZone &zone);
+		void collectZone(FlatWorldCollector &collector, FlatWorld &world, const WorldZone &zone);
 
 	private:
 		PrivateGround *_internal;
@@ -108,7 +108,7 @@ namespace world {
 
 
 		// GENERATION
-		void generateZone(FlatWorld &world, WorldZone &zone);
+		void generateZone(FlatWorld &world, const WorldZone &zone);
 
 		/** Generate the terrain with given coordinates. Assume that:
          * - the terrain wasn't generated yet,

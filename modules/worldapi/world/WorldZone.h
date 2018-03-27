@@ -6,7 +6,7 @@
 #include <memory>
 
 #include "../maths/Vector.h"
-#include "ChunkID.h"
+#include "LODGridCoordinates.h"
 
 namespace world {
 
@@ -16,27 +16,26 @@ namespace world {
 
     class WORLDAPI_EXPORT IWorldZoneHandler {
     public:
+        virtual IWorldZoneHandler *clone() const = 0;
+
+        /** Gives an ID for the zone. This ID enable the chunk system
+         * to recognize the zone among all the zone loaded. */
+        virtual const std::string &getID() const = 0;
+
         virtual Chunk &chunk() = 0;
 
         virtual const Chunk &getChunk() const = 0;
 
-        // TODO Le chunkID est un type trop specifique pour l'usage reserve ici. changer en long UID ?
-        virtual const ChunkID &getID() const = 0;
-
-        virtual bool hasParent() = 0;
+        virtual bool hasParent() const = 0;
 
         virtual WorldZone getParent() const = 0;
 
-        virtual std::pair<WorldZone, bool> getOrCreateNeighbourZone(const vec3i &direction) = 0;
+        vec3d getAbsoluteOffset() const;
 
-        virtual std::vector<std::pair<WorldZone, bool>> getOrCreateChildren() = 0;
-
-        virtual vec3d getAbsoluteOffset() = 0;
-
-        virtual IWorldZoneHandler *clone() = 0;
+        vec3d getRelativeOffset(const WorldZone &other) const;
     };
 
-// TODO rename "ChunkPointer" ?
+    // TODO rename "ChunkPointer" ?
     class WORLDAPI_EXPORT WorldZone {
     public:
         template<typename T, typename... Args>
@@ -60,6 +59,7 @@ namespace world {
     private:
         std::unique_ptr<IWorldZoneHandler> _handler;
     };
+
 }
 
 #endif //WORLD_WORLDZONE_H

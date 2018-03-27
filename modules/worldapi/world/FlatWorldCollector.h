@@ -13,7 +13,7 @@ namespace world {
 
     class TerrainIterator;
 
-    class WORLDAPI_EXPORT FlatWorldCollector : public Collector, public ICollector<FlatWorld> {
+    class WORLDAPI_EXPORT FlatWorldCollector : public Collector {
     public:
         typedef std::string TerrainKey;
 
@@ -22,8 +22,6 @@ namespace world {
         ~FlatWorldCollector() override;
 
         void reset() override;
-
-        void collect(FlatWorld &world, WorldZone &zone) override;
 
         // TODO TerrainStream
         void addTerrain(TerrainKey key, const Terrain &terrain);

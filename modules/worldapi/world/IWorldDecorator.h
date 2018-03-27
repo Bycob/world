@@ -3,7 +3,7 @@
 #include <worldapi/worldapidef.h>
 
 namespace world {
-	class Chunk;
+	class WorldZone;
 
 	template<typename T>
 	class IWorldDecorator {

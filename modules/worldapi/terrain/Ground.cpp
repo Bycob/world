@@ -66,7 +66,7 @@ namespace world {
         return observeAltitudeAt(offset.x + x, offset.y + y, lvl);
     }
 
-    void Ground::collectZone(FlatWorldCollector &collector, FlatWorld &world, WorldZone &zone) {
+    void Ground::collectZone(FlatWorldCollector &collector, FlatWorld &world, const WorldZone &zone) {
         generateZone(world, zone);
         Chunk &chunk = zone->chunk();
 
@@ -144,9 +144,15 @@ namespace world {
     }
 
     int Ground::getLevelForChunk(const WorldZone &zone) const {
-        double maxDetailSize = zone->getChunk().getMaxDetailSize(); // .getMinDetailSize();
-        return clamp((int) (log(_unitSize / (maxDetailSize * _terrainRes)) / log(_factor)), 0, _maxLOD);
-        // Formula obtained from the equation : getTerrainSize(lvl) / terrainRes = maxDetailSize
+        double minDetailSize = zone->getChunk().getMinDetailSize();
+
+        // Avoid division by zero
+        if (minDetailSize < std::numeric_limits<double>::epsilon()) {
+            return _maxLOD;
+        }
+
+        // Formula obtained from the equation : getTerrainSize(lvl) / terrainRes = minDetailSize
+        return clamp((int) (log(_unitSize / (minDetailSize * _terrainRes)) / log(_factor)), 0, _maxLOD);
     }
 
     vec3i Ground::getParentId(const vec3i &childId) const {
@@ -157,7 +163,7 @@ namespace world {
         };
     }
 
-    void Ground::generateZone(FlatWorld &world, WorldZone &zone) {
+    void Ground::generateZone(FlatWorld &world, const WorldZone &zone) {
         Chunk &chunk = zone->chunk();
 
         // Calculate lvl for the given chunk

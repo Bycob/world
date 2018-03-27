@@ -3,11 +3,10 @@
 #include <worldapi/worldapidef.h>
 
 #include "../maths/MathsHelper.h"
-#include "ChunkSystem.h"
+#include "IChunkSystem.h"
+#include "ICollector.h"
 
 namespace world {
-
-	class CollectorObject;
 
 	class WORLDAPI_EXPORT WorldObject {
 	public:
@@ -19,7 +18,7 @@ namespace world {
 
 		vec3d getPosition3D() const { return _position; }
 
-		virtual void collectWholeObject(WorldZone &zone, CollectorObject &collector);
+		virtual void collectWholeObject(ICollector &collector);
 
 	protected:
 		vec3d _position;

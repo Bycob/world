@@ -45,13 +45,6 @@ namespace world {
         _disabledTerrains.clear();
     }
 
-    void FlatWorldCollector::collect(FlatWorld &world, WorldZone &zone) {
-        Collector::collect(world, zone);
-
-        Ground &ground = world.ground();
-        ground.collectZone(*this, world, zone);
-    }
-
     void FlatWorldCollector::addTerrain(TerrainKey key, const Terrain &terrain) {
         if (_disabledTerrains.find(key) != _disabledTerrains.end()) {
             return;

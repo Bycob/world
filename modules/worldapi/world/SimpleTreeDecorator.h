@@ -10,7 +10,7 @@
 
 namespace world {
 
-	class WORLDAPI_EXPORT SimpleTreeDecorator : public IFlatWorldDecorator {
+	class WORLDAPI_EXPORT SimpleTreeDecorator : public FlatWorldDecorator {
 	public:
 		SimpleTreeDecorator(int maxTreesPerChunk = 1);
 

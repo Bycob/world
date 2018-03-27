@@ -24,7 +24,7 @@ void testPerlin(int argc, char** argv);
 
 //MAIN
 int main(int argc, char** argv) {
-	testRepeatable(argc, argv);
+	testPerlin(argc, argv);
 }
 
 

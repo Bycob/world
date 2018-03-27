@@ -23,11 +23,11 @@ namespace world {
 
         void setPunctumProximum(double punctumProximum);
 
-        template<typename T>
-        void explore(T &world, ICollector<T> &collector);
+        template<typename T, typename C>
+        void explore(T &world, C &collector);
 
-        template<typename T>
-        void exploreVertical(T &world, const WorldZone &zone, ICollector<T> &collector);
+        template<typename T, typename C>
+        void exploreVertical(T &world, const WorldZone &zone, C &collector);
 
         vec3d getChunkNearestPoint(const WorldZone &zone);
 

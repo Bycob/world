@@ -27,7 +27,7 @@ void generate_test_world(int argc, char** argv) {
     explorer.explore<FlatWorld>(*((FlatWorld*)world.get()), collector);
 
     std::cout << "Exploration terminée. Collecte des résultats" << std::endl;
-    auto it = collector.iterateObjects();
+    auto it = collector.iterateItems();
 
     while (!it.hasNext()) {
         ++it;

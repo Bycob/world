@@ -11,8 +11,8 @@ namespace world {
 
     }
 
-    void Tree::collectWholeObject(WorldZone &zone, CollectorObject &collector) {
+    void Tree::collectWholeObject(ICollector &collector) {
         Object3D mainPart(_trunkMesh);
-        collector.putPart(0, mainPart);
+        collector.addItem(0, mainPart);
     }
 }

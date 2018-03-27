@@ -10,7 +10,6 @@ using namespace scene;
 using namespace video;
 
 using namespace world;
-using ObjectKey = Collector::ObjectKey;
 
 //----- ObjectNodeHandler
 
@@ -80,15 +79,14 @@ void ObjectsManager::update(FlatWorldCollector &collector) {
 	}
 
 	// Add new objects
-	auto it = collector.iterateObjects();
+	auto it = collector.iterateItems();
 
 	for (; it.hasNext(); ++it) {
 		auto pair = *it;
 
 		if (_objects.find(pair.first) == _objects.end()) {
-			auto & mainPart = pair.second->getPart(0);
 			_objects[pair.first] =
-					std::make_unique<ObjectNodeHandler>(*this, mainPart.getObject3D());
+					std::make_unique<ObjectNodeHandler>(*this, pair.second->getObject3D());
 		}
 		else {
 			_objects[pair.first]->removeTag = false;

@@ -1,7 +1,9 @@
 
+#include "Chunk.h"
+
 namespace world {
-    template<typename T>
-    void FirstPersonExplorer::explore(T &world, ICollector<T> &collector) {
+    template<typename T, typename C>
+    void FirstPersonExplorer::explore(T &world, C &collector) {
         std::set<WorldZone> explored;
         std::set<WorldZone> toExplore;
         toExplore.insert(world.exploreLocation(_origin));
@@ -13,7 +15,7 @@ namespace world {
             const Chunk &currentChunk = (*it)->getChunk();
 
             // Retrieve content
-            collector.collect(world, currentZone);
+            world.collect(currentZone, collector);
 
             // Vertical exploration : we explore the inside
             exploreVertical(world, *it, collector);
@@ -44,8 +46,8 @@ namespace world {
         }
     }
 
-    template<typename T>
-    void FirstPersonExplorer::exploreVertical(T &world, const WorldZone &zone, ICollector<T> &collector) {
+    template<typename T, typename C>
+    void FirstPersonExplorer::exploreVertical(T &world, const WorldZone &zone, C &collector) {
         const Chunk &currentChunk = zone->getChunk();
         const double detailSize = getDetailSizeAt(getChunkNearestPoint(zone));
         //std::cout << detailSize << std::endl;
@@ -54,7 +56,7 @@ namespace world {
             auto smallerZones = world.exploreInside(zone);
 
             for (WorldZone &smallerZone : smallerZones) {
-                collector.collect(world, smallerZone);
+                world.collect(smallerZone, collector);
 
                 exploreVertical(world, smallerZone, collector);
             }
