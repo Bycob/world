@@ -34,7 +34,7 @@ namespace world {
 
 	/** @returns n modulo r, compris entre 0 et r - 1 */
 	template <typename T>
-	constexpr inline T mod(T n, T r) {
+	inline T mod(T n, T r) {
 		T m = n % r;
 		return m < 0 ? m + r : m;
 	}
@@ -42,7 +42,7 @@ namespace world {
 	/** @returns b^e, using fast exponential algorithm.
 	 * @param e The signed integer exponent*/
 	template <typename T>
-	constexpr inline T powi(T b, int e) {
+	inline T powi(T b, int e) {
 		const int m = e % 2;
 		if (e < 0) {
 			return powi(1 / b, - e);

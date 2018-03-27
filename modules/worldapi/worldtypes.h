@@ -1,7 +1,7 @@
 #ifndef WORLD_WORLDTYPES_H
 #define WORLD_WORLDTYPES_H
 
-#include <endian.h>
+#include <cstdint>
 
 // TODO should we use the standard library here ?
 

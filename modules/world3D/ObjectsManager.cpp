@@ -110,7 +110,7 @@ void ObjectsManager::update(FlatWorldCollector &collector) {
 
 SMesh * ObjectsManager::convertToIrrlichtMesh(const Mesh & mesh, IVideoDriver * driver) {
 	SMesh * irrMesh = new SMesh();
-	s32 maxPrimitives = driver->getMaximalPrimitiveCount();
+	irr::s32 maxPrimitives = driver->getMaximalPrimitiveCount();
 	auto & vertices = mesh.getVertices();
 
 	auto & faces = mesh.getFaces();
