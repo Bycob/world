@@ -63,7 +63,7 @@ namespace world {
 		// ------ IO
 
 		//Interfaçage avec les fichiers .obj
-		Mesh *convertToMesh();
+		Mesh *convertToMesh() const;
 
 		Mesh *convertToMesh(double sizeX, double sizeY, double sizeZ) const;
 

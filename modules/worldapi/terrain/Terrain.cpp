@@ -91,18 +91,40 @@ namespace world {
 
 		x *= width;
 		y *= height;
-		int posX1 = clamp((int) floor(x), 0, width);
-		int posY1 = clamp((int) floor(y), 0, height);
-		int posX2 = min(posX1 + 1, width);
-		int posY2 = min(posY1 + 1, height);
+		int xi = clamp((int) floor(x), 0, width - 1);
+		int yi = clamp((int) floor(y), 0, height - 1);
 
-		double ip1 = interpolateLinear(posX1, _array(posX1, posY1), posX2, _array(posX2, posY1), x);
-		double ip2 = interpolateLinear(posX1, _array(posX1, posY2), posX2, _array(posX2, posY2), x);
+		// Interpolation to get the exact height of the point on the mesh (triangular interpolation)
+		// TODO method triangular interp ?
+		double xd = x - xi;
+		double yd = y - yi;
+		double sumd = xd + yd;
+		double a;
 
-		return interpolateLinear(posY1, ip1, posY2, ip2, y);
+		if (sumd > 1) {
+			double temp = xd;
+			xd = 1 - yd;
+			yd = 1 - temp;
+			sumd = 2 - sumd;
+			a = _array(xi + 1, yi + 1);
+		}
+		else {
+			a = _array(xi, yi);
+		}
+
+		if (sumd <= std::numeric_limits<double>::epsilon()) {
+			return a;
+		}
+
+		double b = _array(xi + 1, yi);
+		double c = _array(xi, yi + 1);
+
+		double ab = a * (1 - sumd) + b * sumd;
+		double ac = a * (1 - sumd) + c * sumd;
+		return ab * (xd / sumd) + ac * (yd / sumd);
 	}
 
-	Mesh *Terrain::convertToMesh() {
+	Mesh *Terrain::convertToMesh() const {
 		auto lower = _bbox.getLowerBound();
 		auto size = _bbox.getUpperBound() - lower;
 		return convertToMesh(lower.x, lower.y, lower.z, size.x, size.y, size.z);
