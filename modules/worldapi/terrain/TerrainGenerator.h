@@ -60,7 +60,7 @@ namespace world {
 
 	class WORLDAPI_EXPORT PerlinTerrainGenerator : public TerrainGenerator {
 	public :
-		PerlinTerrainGenerator(int offset = 0, int octaveCount = 5, float frequency = 8, float persistence = 0.5);
+		PerlinTerrainGenerator(int offset = 0, int octaveCount = 5, double frequency = 8, double persistence = 0.5);
 
 		~PerlinTerrainGenerator() override;
 
@@ -85,8 +85,8 @@ namespace world {
 
 		int _offset;
 		int _octaveCount;
-		float _frequency;
-		float _persistence;
+		double _frequency;
+		double _persistence;
 		double _subdivNoiseRatio = 0.1;
 
 		// -------

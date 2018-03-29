@@ -29,23 +29,23 @@ namespace world {
         void generatePerlinNoise2D(arma::Mat<double> &output,
                                    int offset,
                                    int octaves,
-                                   float frequency,
-                                   float persistence,
+                                   double frequency,
+                                   double persistence,
                                    bool repeatable = false);
 
         void generatePerlinNoise2D(arma::Mat<double> &output,
                                    int offset,
                                    int octaves,
-                                   float frequency,
-                                   float persistence,
+                                   double frequency,
+                                   double persistence,
                                    bool repeatable,
                                    const modifier &sourceModifier);
 
         arma::Mat<double> generatePerlinNoise2D(int size,
                                                 int offset,
                                                 int octaves,
-                                                float frequency,
-                                                float persistence,
+                                                double frequency,
+                                                double persistence,
                                                 bool repeatable = false);
 
 
@@ -66,8 +66,8 @@ namespace world {
                   arma::Mat<double> &matUp,
                   const perlin::Direction &direction,
                   int octaves,
-                  float frequency,
-                  float persistence,
+                  double frequency,
+                  double persistence,
                   bool joinableSides = false);
 
     private :
@@ -81,7 +81,7 @@ namespace world {
 
         void generatePerlinOctave(arma::Mat<double> &output,
                                   int offset,
-                                  float frequency,
+                                  double frequency,
                                   bool repeatable,
                                   const modifier &sourceModifier);
     };

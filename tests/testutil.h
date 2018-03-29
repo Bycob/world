@@ -10,7 +10,7 @@ void parseInt(std::istream & input, int &value) {
     try {
         value = std::stoi(line);
     }
-    catch (std::exception & e) {}
+    catch (std::exception &) {}
 }
 
 void parseDouble(std::istream & input, double &value) {
@@ -19,7 +19,7 @@ void parseDouble(std::istream & input, double &value) {
     try {
         value = std::stod(line);
     }
-    catch (std::exception & e) {}
+    catch (std::exception &) {}
 }
 
 // Tests unitaires
@@ -60,7 +60,7 @@ void assertFail(const std::function<void()> & function, const std::string & what
         function();
         throw TestFailure(std::string("function did not fail : ") + whatifitfails );
     }
-    catch (std::exception & e) {
+    catch (std::exception &) {
         //success
     }
 }

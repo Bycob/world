@@ -34,7 +34,7 @@ void Application::run(int argc, char **argv) {
 			vec3d newUpdatePos = _newUpdatePos;
 			_paramLock.unlock();
 
-			if ((newUpdatePos - _lastUpdatePos).norm() > 2000 || firstExpand) {
+			if ((newUpdatePos - _lastUpdatePos).norm() > 50 || firstExpand) {
 				_explorer->setOrigin(newUpdatePos);
 
 				// Mise à jour du monde

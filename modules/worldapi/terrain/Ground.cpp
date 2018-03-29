@@ -52,7 +52,7 @@ namespace world {
     Ground::Ground() :
             _internal(new PrivateGround()),
             _unitSize(4000), _maxAltitude(4000), _minAltitude(-2000) {
-        _terrainGenerator = std::make_unique<PerlinTerrainGenerator>(0, 1, 4);
+        _terrainGenerator = std::make_unique<PerlinTerrainGenerator>(0, 1, 4.);
         _mapGenerator = std::make_unique<CustomWorldRMGenerator>();
     }
 
@@ -290,7 +290,7 @@ namespace world {
                 double mapX = mapOx + ((double) x / (size - 1)) * ratio;
                 double mapY = mapOy + ((double) y / (size - 1)) * ratio;
 
-                double offset = offsetCoef * heightMap.getZInterpolated(mapX, mapY);
+                double offset = heightMap.getZInterpolated(mapX, mapY) * offsetCoef;
                 double diff = diffMap.getZInterpolated(mapX, mapY) * diffCoef;
 
                 if (unapply) {

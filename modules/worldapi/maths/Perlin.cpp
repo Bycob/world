@@ -53,7 +53,7 @@ namespace world {
 
     void Perlin::generatePerlinOctave(Mat<double> &output,
                                       int offset,
-                                      float frequency,
+                                      double frequency,
                                       bool repeatable,
                                       const modifier &sourceModifier) {
 
@@ -104,16 +104,16 @@ namespace world {
         }
     }
 
-    void Perlin::generatePerlinNoise2D(arma::Mat<double> &output, int offset, int octaves, float frequency,
-                                       float persistence, bool repeatable) {
+    void Perlin::generatePerlinNoise2D(arma::Mat<double> &output, int offset, int octaves, double frequency,
+                                       double persistence, bool repeatable) {
         generatePerlinNoise2D(output, offset, octaves, frequency, persistence, repeatable, DEFAULT_MODIFIER);
     }
 
     void Perlin::generatePerlinNoise2D(Mat<double> &output,
                                        int offset,
                                        int octaveCount,
-                                       float frequency,
-                                       float persistence,
+                                       double frequency,
+                                       double persistence,
                                        bool repeatable,
                                        const modifier &sourceModifier) {
 
@@ -134,8 +134,8 @@ namespace world {
     Mat<double> Perlin::generatePerlinNoise2D(int size,
                                               int offset,
                                               int octaves,
-                                              float frequency,
-                                              float persistence,
+                                              double frequency,
+                                              double persistence,
                                               bool repeatable) {
 
         Mat<double> result((uword) size, (uword) size);
@@ -151,8 +151,8 @@ namespace world {
                       arma::Mat<double> &mat2,
                       const Direction &direction,
                       int octaves,
-                      float frequency,
-                      float persistence,
+                      double frequency,
+                      double persistence,
                       bool joinableSides) {
 
         // Vérification des dimensions de mat1 et mat2

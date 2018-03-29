@@ -151,7 +151,7 @@ SMesh * ObjectsManager::convertToIrrlichtMesh(const Mesh & mesh, IVideoDriver * 
 			int id = face.getID(i);
 
 			S3DVertex& v = buffer->Vertices[primitiveCount];
-			v.Pos = toIrrlicht(vertices.at(id).getPosition() * 10.0); // TODO check if posID == -1;
+			v.Pos = toIrrlicht(vertices.at(id).getPosition());
 			v.TCoords = toIrrlicht(vertices.at(id).getTexture());
 			v.Normal = toIrrlicht(vertices.at(id).getNormal());
 

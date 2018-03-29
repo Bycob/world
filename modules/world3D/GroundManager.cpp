@@ -118,8 +118,8 @@ ITerrainSceneNode* GroundManager::createNode(const Terrain &terrain) {
     material.SpecularColor.set(255, 255, 255, 255);
 
     irr::u32 lin_ts = (irr::u32)(log(size.x / 250) / log(2) * 50);
-    material.DiffuseColor.set(255, 255 - lin_ts, 178, lin_ts);
-    //material.DiffuseColor.set(255, 200, 178, 126);
+    //material.DiffuseColor.set(255, 255 - lin_ts, 178, lin_ts);
+    material.DiffuseColor.set(255, 200, 178, 126);
 
     /*/ Collision pour la camera
     scene::ITriangleSelector* selector

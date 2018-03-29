@@ -60,7 +60,7 @@ void testRepeatable(int argc, char** argv) {
     int size = 257;
     int octaves = 4;
     int freq = 4;
-    float persistence = 0.4;
+    double persistence = 0.4;
 
 	Perlin perlin;
 
@@ -86,7 +86,7 @@ void testPerlin(int argc, char** argv) {
 	int size = 129;
 	int octaves = 4;
 	int freq = 4;
-	float persistence = 0.3;
+	double persistence = 0.3;
 
 	for (int i = 1; i < argc; i++) {
 		std::string arg = argv[i];

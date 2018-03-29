@@ -97,7 +97,7 @@ namespace world {
 
 // GENERATEUR DE PERLIN
 
-	PerlinTerrainGenerator::PerlinTerrainGenerator(int offset, int octaveCount, float frequency, float persistence) :
+	PerlinTerrainGenerator::PerlinTerrainGenerator(int offset, int octaveCount, double frequency, double persistence) :
 			_buffer(std::map<std::pair<int, int>, arma::Mat<double>>()),
 			_offset(offset), _octaveCount(octaveCount), _frequency(frequency), _persistence(persistence) {
 
