@@ -22,14 +22,19 @@ namespace world {
 
         void addItem(const ItemKey &key, const Object3D &object) override;
 
+		void removeItem(const ItemKey &key) override;
+
+		bool hasItem(const ItemKey &key) const override;
     protected:
-        void addItem(const ItemKey &key, Object3D &object) override;
+        void addItemUnsafe(const ItemKey &key, Object3D &object) override;
 
     private:
         std::pair<bool, ChunkKey> _currentChunk;
         std::pair<bool, ObjectKey> _currentObject;
 
         vec3d _offset;
+
+		ItemKey mutateKey(const ItemKey &key) const;
     };
 }
 

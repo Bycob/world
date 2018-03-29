@@ -25,6 +25,14 @@ namespace world {
         _internal->_items.emplace(key, std::make_unique<CollectorItem>(item));
     }
 
+	bool Collector::hasItem(const ItemKey &key) const {
+		return _internal->_items.find(key) != _internal->_items.end();
+	}
+
+	void Collector::removeItem(const ItemKey &key) {
+		_internal->_items.erase(key);
+	}
+
     CollectorIterator Collector::iterateItems() {
         return CollectorIterator(*this);
     }

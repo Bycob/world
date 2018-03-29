@@ -13,6 +13,6 @@ namespace world {
 
     void Tree::collectWholeObject(ICollector &collector) {
         Object3D mainPart(_trunkMesh);
-        collector.addItem(0, mainPart);
+        collector.addItem(ICollector::ItemKeys::from(0), mainPart);
     }
 }

@@ -28,7 +28,11 @@ namespace world {
          * "collect" calls */
         virtual void reset();
 
-        void addItem(const ItemKey &key, const Object3D &item);
+        void addItem(const ItemKey &key, const Object3D &item) override;
+
+		bool hasItem(const ItemKey &key) const override;
+
+		void removeItem(const ItemKey &key) override;
 
         CollectorIterator iterateItems();
 

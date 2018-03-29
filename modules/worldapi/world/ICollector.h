@@ -15,26 +15,32 @@ namespace world {
     public:
         typedef std::tuple<ChunkKey, ObjectKey, AssetKey> ItemKey;
 
+		struct ItemKeys {
+			static ItemKey from(const ChunkKey &chunkKey, const ObjectKey &objKey, const AssetKey &assetKey) {
+				return std::make_tuple(chunkKey, objKey, assetKey);
+			}
+
+			static ItemKey from(const ObjectKey &objKey, const AssetKey &assetKey) {
+				return from(ChunkKeys::none(), objKey, assetKey);
+			}
+
+			static ItemKey from(const AssetKey &assetKey) {
+				return from(ChunkKeys::none(), ObjectKeys::defaultKey(), assetKey);
+			}
+		};
+
         virtual void addItem(const ItemKey &key, const Object3D &object) = 0;
 
-        virtual void addItem(const ChunkKey &chunkId, const ObjectKey &objId, const AssetKey &partId, const Object3D &object) {
-            addItem(ItemKey(chunkId, objId, partId), object);
-        }
+		virtual bool hasItem(const ItemKey &key) const = 0;
 
-        virtual void addItem(const ObjectKey &objId, const AssetKey &partId, const Object3D &object) {
-            addItem(ItemKey(ChunkKeys::none(), objId, partId), object);
-        }
-
-        virtual void addItem(const AssetKey &partId, const Object3D &object) {
-            addItem(ItemKey(ChunkKeys::none(), ObjectKeys::defaultKey(), partId), object);
-        }
+		virtual void removeItem(const ItemKey &key) = 0;
     protected:
         void passItemTo(ICollector &collector, const ItemKey &key, Object3D &object) {
-            collector.addItem(key, object);
+            collector.addItemUnsafe(key, object);
         }
 
-        virtual void addItem(const ItemKey &key, Object3D &object) {
-            addItem(key, const_cast<const Object3D &>(object));
+        virtual void addItemUnsafe(const ItemKey &key, Object3D &object) {
+            addItem(key, object);
         }
     };
 }

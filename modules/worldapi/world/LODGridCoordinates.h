@@ -22,6 +22,8 @@ namespace world {
 
         int getLOD() const { return _lod; }
 
+		std::string uid() const;
+
         bool operator<(const LODGridCoordinates &other) const;
 
         bool operator==(const LODGridCoordinates &other) const;

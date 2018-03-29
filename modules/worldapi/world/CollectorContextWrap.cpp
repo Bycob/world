@@ -26,15 +26,27 @@ namespace world {
 
     void CollectorContextWrap::addItem(const ItemKey &key, const Object3D &object) {
         Object3D clone = object;
-        addItem(key, clone);
+        addItemUnsafe(key, clone);
     }
 
-    void CollectorContextWrap::addItem(const ItemKey &key, Object3D &object) {
+    void CollectorContextWrap::addItemUnsafe(const ItemKey &key, Object3D &object) {
         object.setPosition(object.getPosition() + _offset);
-        passItemTo(_collector, ItemKey(
-                _currentChunk.first ? _currentChunk.second : std::get<0>(key),
-                _currentObject.first ? _currentObject.second : std::get<1>(key),
-                std::get<2>(key)
-        ), object);
+        passItemTo(_collector, mutateKey(key), object);
     }
+
+	void CollectorContextWrap::removeItem(const ItemKey &key) {
+		_collector.removeItem(mutateKey(key));
+	}
+
+	bool CollectorContextWrap::hasItem(const ItemKey &key) const {
+		return _collector.hasItem(mutateKey(key));
+	}
+
+	ICollector::ItemKey CollectorContextWrap::mutateKey(const ItemKey &key) const {
+		return ItemKeys::from(
+			_currentChunk.first ? _currentChunk.second : std::get<0>(key),
+			_currentObject.first ? _currentObject.second : std::get<1>(key),
+			std::get<2>(key)
+		);
+	}
 }

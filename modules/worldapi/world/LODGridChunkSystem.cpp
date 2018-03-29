@@ -1,5 +1,6 @@
 #include "LODGridChunkSystem.h"
 
+#include <string>
 #include <map>
 #include <vector>
 
@@ -153,8 +154,8 @@ namespace world {
 
     ChunkKey LODGridChunkSystem::getChunkKey(const ChunkKey &parent, const LODGridCoordinates &coords) const {
         std::stringstream stream;
-        // TODO faire ça en moins dégueu (transformer le tout en une suite de données hexa)
-        stream << parent << coords.getPosition3D() << coords.getLOD();
+		stream << parent;
+		stream << coords.uid();
         return stream.str();
     }
 
