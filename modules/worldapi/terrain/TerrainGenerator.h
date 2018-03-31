@@ -6,6 +6,7 @@
 #include <map>
 #include <utility>
 
+#include "../worldtypes.h"
 #include "worldapi/assets/Image.h"
 #include "../maths/Perlin.h"
 #include "TerrainTexmapBuilder.h"
@@ -16,9 +17,7 @@ namespace world {
 
 	class WORLDAPI_EXPORT ITerrainGeneratorContext {
 	public:
-		virtual bool neighbourExists(int x, int y) const = 0;
-
-		virtual const Terrain &getNeighbour(int x, int y) const = 0;
+		virtual optional<const Terrain &> getNeighbour(int x, int y) const = 0;
 	};
 
 	class WORLDAPI_EXPORT TerrainGenerator {

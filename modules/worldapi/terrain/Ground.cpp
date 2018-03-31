@@ -13,12 +13,13 @@ namespace world {
     public:
         GroundContext(Ground &ground, int x, int y, int lvl) : _x(x), _y(y), _lvl(lvl), _ground(ground) {}
 
-        bool neighbourExists(int x, int y) const override {
-            return _ground.terrainExists(x + _x, y + _y, _lvl);
-        }
-
-        const Terrain &getNeighbour(int x, int y) const override {
-            return _ground.rawTerrain(x + _x, y + _y, _lvl);
+        optional<const Terrain &> getNeighbour(int x, int y) const override {
+			if (_ground.terrainExists(x + _x, y + _y, _lvl)) {
+				return _ground.rawTerrain(x + _x, y + _y, _lvl);
+			}
+			else {
+				return nullopt;
+			}
         }
 
     private:
@@ -42,8 +43,6 @@ namespace world {
     };
 
 // Idees d'ameliorations :
-// - Au lieu d'apply et d'unapply la map et les terrains parents,
-// conserver le terrain brut en cache aussi longtemps que nécessaire
 // - Systeme de coordonnees semblable a celui du chunk system : les
 // coordonnees sont relatives au niveau du dessus
 // (Pour ce point, on generalisera peut-etre le system de chunk emboite
@@ -91,15 +90,17 @@ namespace world {
 
     double Ground::observeAltitudeAt(double x, double y, int lvl) {
         double size = getTerrainSize(lvl);
-        int xi = (int) floor(x / size);
-        int yi = (int) floor(y / size);
+		double xd = x / size;
+		double yd = y / size;
+        int xi = (int) floor(xd);
+        int yi = (int) floor(yd);
 
         if (!terrainExists(xi, yi, lvl)) {
             generateTerrain(xi, yi, lvl);
         }
 
         const Terrain &terrain = const_cast<Ground *>(this)->terrain(xi, yi, lvl);
-        return _minAltitude + getAltitudeRange() * terrain.getZInterpolated(x / size - xi, y / size - yi);
+        return _minAltitude + getAltitudeRange() * terrain.getZInterpolated(xd - xi, yd - yi);
     }
 
     void Ground::replaceTerrain(int xp, int yp, int lvl, FlatWorldCollector &collector) {
@@ -115,6 +116,7 @@ namespace world {
         }
     }
 
+	// TODO optional ?
     Terrain &Ground::terrain(int x, int y, int lvl) {
         return *_internal->_terrains.at({x, y, lvl})._final;
     }

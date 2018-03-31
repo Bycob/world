@@ -80,8 +80,8 @@ namespace world {
         // Build octave
         for (int x = 0; x < output.n_rows; x++) {
             for (int y = 0; y < output.n_cols; y++) {
-                double xd = (double) x / output.n_rows;
-                double yd = (double) y / output.n_cols;
+                double xd = (double) x / (output.n_rows - 1);
+                double yd = (double) y / (output.n_cols - 1);
 
                 // Bounds
                 double f1 = frequency;

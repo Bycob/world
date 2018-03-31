@@ -112,16 +112,27 @@ namespace world {
 	}
 
 	void PerlinTerrainGenerator::process(Terrain &terrain, const ITerrainGeneratorContext &context) {
-		// TODO implement with optionnal types
-		const Terrain *top = context.neighbourExists(0, 1) ? &context.getNeighbour(0, 1) : nullptr;
-		const Terrain *bottom = context.neighbourExists(0, -1) ? &context.getNeighbour(0, -1) : nullptr;
-		const Terrain *left = context.neighbourExists(-1, 0) ? &context.getNeighbour(-1, 0) : nullptr;
-		const Terrain *right = context.neighbourExists(1, 0) ? &context.getNeighbour(1, 0) : nullptr;
+		auto top = context.getNeighbour(0, 1);
+		auto bottom = context.getNeighbour(0, -1);
+		auto left = context.getNeighbour(-1, 0);
+		auto right = context.getNeighbour(1, 0);
+		auto topleft = context.getNeighbour(-1, 1);
+		auto topright = context.getNeighbour(1, 1);
+		auto bottomleft = context.getNeighbour(-1, -1);
+		auto bottomright = context.getNeighbour(1, -1);
+
 		const double eps = std::numeric_limits<double>::epsilon();
 
 		Perlin::modifier modifier = [&](double x, double y, double val) {
-			// TODO optimisation : getZ
-			if (x < eps && left) {
+			if (x < eps && y < eps && bottomleft) {
+				return bottomleft->getZInterpolated(1, 1);
+			} else if (x < eps && 1 - y < eps && topleft) {
+				return topleft->getZInterpolated(1, 0);
+			} else if (1 - x < eps && y < eps && bottomright) {
+				return bottomright->getZInterpolated(0, 1);
+			} else if (1 - x < eps && 1 - y < eps && topright) {
+				return topright->getZInterpolated(0, 0);
+			} else if (x < eps && left) {
 				return left->getZInterpolated(1, y);
 			} else if (1 - x < eps && right) {
 				return right->getZInterpolated(0, y);

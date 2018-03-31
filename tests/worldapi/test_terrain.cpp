@@ -39,14 +39,14 @@ TEST_CASE("Terrain - getZInterpolated", "[terrain]") {
 
 	SECTION("getZIntepolated non trivial coordinates, non trivial heights") {
 
-#ifdef TERRAIN_DEBUG_INFO
+		std::stringstream str;
 		for (double y = 1; y >= -0.02; y -= 0.05) {
 			for (double x = 0; x <= 1.01; x += 0.05) {
-				std::cout << terrain.getZInterpolated(x, y) << " ";
+				str << terrain.getZInterpolated(x, y) << " ";
 			}
-			std::cout << std::endl;
+			str << std::endl;
 		}
-#endif // TERRAIN_DEBUG_INFO
+		INFO(str.str());
 
 		REQUIRE(terrain.getZInterpolated(0.5, 0) == Approx(0.3));
 		REQUIRE(terrain.getZInterpolated(0, 0.5) == Approx(0.25));
