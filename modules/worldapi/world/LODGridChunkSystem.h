@@ -59,7 +59,7 @@ namespace world {
 
         Chunk &getChunk(const ChunkKey &id);
 
-        WorldZone getZone(const ChunkKey &id);
+        optional<WorldZone> getZone(const ChunkKey &id);
 
         /** @returns true if the chunk wasn't created yet */
         std::pair<ChunkKey, bool> createChunk(const ChunkKey &parent, const LODGridCoordinates &coords);
@@ -88,7 +88,7 @@ namespace world {
 
         bool hasParent() const override;
 
-        WorldZone getParent() const override;
+        optional<WorldZone> getParent() const override;
 
         vec3d getRelativeOffset(const LODGridChunkHandler &other);
     private:

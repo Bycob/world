@@ -5,6 +5,7 @@
 
 #include <memory>
 
+#include "../worldtypes.h"
 #include "../maths/Vector.h"
 #include "LODGridCoordinates.h"
 
@@ -28,7 +29,7 @@ namespace world {
 
         virtual bool hasParent() const = 0;
 
-        virtual WorldZone getParent() const = 0;
+        virtual optional<WorldZone> getParent() const = 0;
 
         vec3d getAbsoluteOffset() const;
 

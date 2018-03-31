@@ -5,12 +5,11 @@
 namespace world {
 
     vec3d IWorldZoneHandler::getAbsoluteOffset() const {
-        WorldZone parent(this->clone());
-        vec3d offset = parent->getChunk().getOffset();
+        optional<WorldZone> parent(this->clone());
+        vec3d offset = (*parent)->getChunk().getOffset();
 
-        while (parent->hasParent()) {
-            parent = parent->getParent();
-            offset = offset + parent->getChunk().getOffset();
+        while ((parent = (*parent)->getParent())) {
+            offset = offset + (*parent)->getChunk().getOffset();
         }
 
         return offset;

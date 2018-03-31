@@ -3,6 +3,8 @@
 
 #include <cstdint>
 
+#include <optional/optional.hpp>
+
 // TODO should we use the standard library here ?
 
 namespace world {
@@ -19,6 +21,12 @@ namespace world {
 
     typedef float f32;
     typedef double f64;
+
+	// Optionals (TODO restrict)
+	template <class T> using optional = std::experimental::optional<T>;
+	//template <class T> using optional<T&> = std::experimental::optional<T&>;
+	using std::experimental::nullopt;
+	using std::experimental::make_optional;
 }
 
 #endif //WORLD_WORLDTYPES_H

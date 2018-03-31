@@ -51,7 +51,7 @@ void test(const std::function<void()> & test, const std::string & testName,
     }
 }
 
-void assert(bool result, const std::string & assertion = "") {
+void assertTrue(bool result, const std::string & assertion = "") {
     if (!result) throw TestFailure(assertion);
 }
 

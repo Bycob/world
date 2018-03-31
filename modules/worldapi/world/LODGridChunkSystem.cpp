@@ -102,7 +102,7 @@ namespace world {
                 (int) floor(intPos.z), 0);
 
         auto id = createChunk(ChunkKeys::none(), coords);
-        return {getZone(id.first), id.second};
+        return { *getZone(id.first), id.second};
     }
 
     QueryResult
@@ -113,7 +113,7 @@ namespace world {
         LODGridCoordinates ncoords = LODGridCoordinates(coords.getPosition3D() + direction, coords.getLOD());
 
         auto id = createChunk(entry._parentID, ncoords);
-        return {getZone(id.first), id.second};
+        return { *getZone(id.first), id.second};
     }
 
     std::vector<QueryResult> LODGridChunkSystem::getChildren(const WorldZone &zone) {
@@ -146,7 +146,7 @@ namespace world {
                        entry._children.end(),
                        std::inserter(vector, vector.end()), [&](const ChunkKey &id) {
 
-                    return QueryResult { getZone(id), created };
+                    return QueryResult { *getZone(id), created };
                 });
 
         return vector;
@@ -159,12 +159,20 @@ namespace world {
         return stream.str();
     }
 
+	// TODO optional ?
     Chunk &LODGridChunkSystem::getChunk(const std::string &id) {
         return _internal->_chunks[id]->_chunk;
     }
 
-    WorldZone LODGridChunkSystem::getZone(const std::string &id) {
-        return WorldZone(new LODGridChunkHandler(*this, id, getChunk(id)));
+    optional<WorldZone> LODGridChunkSystem::getZone(const std::string &id) {
+		auto it = _internal->_chunks.find(id);
+        
+		if (it == _internal->_chunks.end()) {
+			return nullopt;
+		}
+		else {
+			return WorldZone(new LODGridChunkHandler(*this, id, getChunk(id)));
+		}
     }
 
     std::pair<ChunkKey, bool> LODGridChunkSystem::createChunk(const ChunkKey &parent, const LODGridCoordinates &coords) {
@@ -225,45 +233,8 @@ namespace world {
         return entry->_parentID != ChunkKeys::none();
     }
 
-    WorldZone LODGridChunkHandler::getParent() const {
+    optional<WorldZone> LODGridChunkHandler::getParent() const {
         auto &entry = _system._internal->_chunks[_id];
         return _system.getZone(entry->_parentID);
-    }
-
-    vec3d LODGridChunkHandler::getRelativeOffset(const LODGridChunkHandler &other) {
-        // TODO
-
-        // We look for the nearest common ancestor between the two
-        // We remember the offset of each with their respective ancestors
-        /*
-        if (*this == other) {
-            return {0, 0, 0};
-        }
-
-        vec3d thisOffset;
-        vec3d otherOffset;
-
-        WorldZone thisCurrent(*this);
-        WorldZone otherCurrent(other);
-
-        std::vector<std::unique_ptr<WorldZone>> thisChain;
-        std::vector<std::unique_ptr<WorldZone>> otherChain;
-
-        bool ancestorFound = false;
-
-        while(!ancestorFound && (thisCurrent.hasParent() && otherCurrent.hasParent())) {
-            if (thisCurrent.hasParent()) {
-                thisCurrent = thisCurrent.getParent();
-
-                if (std::find_if(otherChain.begin(), otherChain.end(),
-                                 [] (const std::unique_ptr<WorldZone> & zone) {
-                                     return *zone == thisCurrent;
-                                 }) != otherChain.end()) {
-
-                    ancestorFound = true;
-                }
-            }
-        }*/
-        return {};
     }
 }
