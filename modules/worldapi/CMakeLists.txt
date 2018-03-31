@@ -4,18 +4,31 @@ file(GLOB_RECURSE
 	WORLD_API_SOURCES
 	./*)
 
+# Visual studio source groups
 assign_source_group(${WORLD_API_SOURCES})
 
-# Ajout de la lib
+# Register target
 if(${WORLD_STATIC_BUILD})
 	set(WORLD_BUILD_MODE "STATIC")
-	message("-- Build static library")
+	message("-- Build WorldAPI as a static library")
 else()
 	set(WORLD_BUILD_MODE "SHARED")
-	message("-- Build dynamic library")
+	message("-- Build WorldAPI as a dynamic library")
 endif()
 
 add_library(worldapi ${WORLD_BUILD_MODE} ${WORLD_API_SOURCES})
-# TODO remplacer OpenCV_Libs par WorldAPI_Dependencies ou un truc du genre (nom à trouver)
-target_link_libraries(worldapi ${OpenCV_LIBS} ${THIRD_PARTY_LIBRARIES})
+
+# External libraries
+if (${WORLD_BUILD_OPENCV_MODULES})
+	if (${WORLD_HAS_OPENCV})
+		message("-- Build OpenCV modules")
+		target_link_libraries(worldapi ${OpenCV_LIBS})
+        target_compile_definitions(worldapi PRIVATE USE_OPENCV=1)
+	else()
+		message("-- Cannot build OpenCV modules : Missing dependencies (OpenCV)")
+	endif()
+endif()
+
+# Register target
+target_link_libraries(worldapi ${THIRD_PARTY_LIBRARIES})
 target_include_directories(worldapi PUBLIC ${THIRD_PARTY_INCLUDES})

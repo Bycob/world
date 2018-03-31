@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.8.6)
 # Declaration du projet
 project(World)
 
-# Includes
+# Includes cmake
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 include(cmake/WorldUtils.cmake)
 
@@ -13,8 +13,7 @@ option(WORLD_STATIC_BUILD "Build le projet sous formes de librairies statiques" 
 
 option(WORLD_BUILD_TESTS "Build les target de tests" ON)
 option(WORLD_BUILD_WORLD3D "Build la visualisation en 3D" OFF)
-
-option(WORLD_USE_OPENCV "Compile les modules utilisant opencv" ON)
+option(WORLD_BUILD_OPENCV_MODULES "Compile les modules utilisant opencv" OFF)
 
 
 # Setup de certaines variables
@@ -53,14 +52,15 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "^MSVC$")
 endif()
 
 
-# Dépendances
+# Dependances externes
 include(cmake/WorldDependencies.cmake)
 
-include_directories(3rdparty/
-			modules/)
-
+# Dependances internes
 add_subdirectory(3rdparty/)
 
+include_directories(
+		modules/
+		3rdparty/)
 
 # Ajout de World API
 add_subdirectory(modules/worldapi/)
