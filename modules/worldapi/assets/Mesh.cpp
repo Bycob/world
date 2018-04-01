@@ -7,15 +7,11 @@ namespace world {
 
 //----- FACE
 
-	Face::Face() {
-		this->_ids.reserve(3);
+	Face::Face() : _ids{ 0, 0, 0 } {
+		
 	}
 
 	Face::~Face() {}
-
-	void Face::addID(int id) {
-		_ids.push_back(id);
-	}
 
 	int Face::getID(int vert) const {
 		return _ids[vert];
@@ -25,12 +21,8 @@ namespace world {
 		_ids[vert] = id;
 	}
 
-	const std::vector<int> &Face::getIDs() const {
-		return _ids;
-	}
-
 	int Face::vertexCount() const {
-		return (int) _ids.size();
+		return 3;
 	}
 
 
@@ -41,12 +33,33 @@ namespace world {
 
 	Mesh::~Mesh() {}
 
-	void Mesh::addFace(Face &face) {
-		_faces.push_back(face);
+	void Mesh::allocateFaces(int count) {
+		_faces.reserve(count);
+	}
+
+	Face &Mesh::getFace(int id) {
+		return _faces.at(id);
+	}
+
+	const Face &Mesh::getFace(int id) const {
+		return _faces.at(id);
 	}
 
 	const std::vector<Face> &Mesh::getFaces() const {
 		return _faces;
+	}
+
+	void Mesh::addFace(const Face &face) {
+		_faces.emplace_back(face);
+	}
+
+	Face &Mesh::newFace() {
+		_faces.emplace_back();
+		return _faces.back();
+	}
+
+	void Mesh::allocateVertices(int count) {
+		_vertices.reserve(count);
 	}
 
 	const Vertex &Mesh::getVertex(int id) const {
@@ -57,35 +70,22 @@ namespace world {
 		return _vertices.at(id);
 	}
 
-	void Mesh::allocateFaces(int count) {
-		_faces.reserve(count);
-	}
-
 	const std::vector<Vertex> &Mesh::getVertices() const {
 		return _vertices;
+	}
+	
+	void Mesh::addVertex(const Vertex &vert) {
+		_vertices.emplace_back(vert);
+	}
+
+	Vertex &Mesh::newVertex() {
+		_vertices.emplace_back();
+		return _vertices.back();
 	}
 
 	int Mesh::getCount() const {
 		return _vertices.size();
 	}
 
-	void Mesh::clearVertices() {
-		_vertices.clear();
-	}
-
-	void Mesh::allocateVertices(int count) {
-		_vertices.reserve(count);
-	}
-
-	void Mesh::addVertex(const Vertex &vertex) {
-		_vertices.push_back(vertex);
-	}
-
-	void Mesh::setMaterialName(const std::string &name) {
-		_materialName = name;
-	}
-
-	const std::string &Mesh::getMaterialName() const {
-		return _materialName;
-	}
+	// TODO allocateNVertices -> les vertices devraient être allouées mais inutilisées ?
 }

@@ -85,6 +85,7 @@ namespace world {
 		return _array(posX, posY);
 	}
 
+	// TODO change name
 	double Terrain::getZInterpolated(double x, double y) const {
 		int width = (int) (_array.n_rows - 1);
 		int height = (int) (_array.n_cols - 1);
@@ -138,44 +139,45 @@ namespace world {
 								 double sizeZ) const {
 		Mesh *mesh = new Mesh();
 
-		// Réservation de mémoire
-		int vertCount = _array.n_rows * _array.n_cols;
+		const int size = static_cast<int>(_array.n_rows);
+		const int size_1 = size - 1;
+		const double inv_size_1 = 1. / size_1;
+
+		// Memory allocation
+		int vertCount = size * size;
 		mesh->allocateVertices(vertCount);
 
 		//Vertices
-		int i = 0;
-		for (int x = 0; x < _array.n_rows; x++) {
-			for (int y = 0; y < _array.n_cols; y++) {
-				float xd = (float) x / (_array.n_rows - 1);
-				float yd = (float) y / (_array.n_cols - 1);
+		for (int x = 0; x < size; x++) {
+			const double xd = x * inv_size_1;
+			const double xpos = xd * sizeX + offsetX;
 
-				Vertex vert;
+			for (int y = 0; y < size; y++) {
+				const double yd = y * inv_size_1;
 
-				vert.setPosition(xd * sizeX + offsetX, yd * sizeY + offsetY, _array(x, y) * sizeZ + offsetZ);
+				Vertex &vert = mesh->newVertex();
+
+				vert.setPosition(xpos, yd * sizeY + offsetY, _array(x, y) * sizeZ + offsetZ);
 				vert.setTexture(xd, 1 - yd);
-
-				mesh->addVertex(vert);
 			}
 		}
 
 		//Faces
 		auto indice = [this](int x, int y) -> int { return x * this->_array.n_cols + y; };
-		mesh->allocateFaces((_array.n_rows - 1) * (_array.n_cols - 1) * 2);
+		mesh->allocateFaces(size_1 * size_1 * 2);
 
-		for (int x = 0; x < _array.n_rows - 1; x++) {
-			for (int y = 0; y < _array.n_cols - 1; y++) {
-				Face face1, face2;
+		for (int x = 0; x < size_1; x++) {
+			for (int y = 0; y < size_1; y++) {
+				Face &face1 = mesh->newFace();
+				Face &face2 = mesh->newFace();
 
-				face1.addID(indice(x, y));
-				face1.addID(indice(x + 1, y));
-				face1.addID(indice(x, y + 1));
+				face1.setID(0, indice(x, y));
+				face1.setID(1, indice(x + 1, y));
+				face1.setID(2, indice(x, y + 1));
 
-				face2.addID(indice(x + 1, y + 1));
-				face2.addID(indice(x, y + 1));
-				face2.addID(indice(x + 1, y));
-
-				mesh->addFace(face1);
-				mesh->addFace(face2);
+				face2.setID(0, indice(x + 1, y + 1));
+				face2.setID(1, indice(x, y + 1));
+				face2.setID(2, indice(x + 1, y));
 			}
 		}
 

@@ -163,8 +163,10 @@ template <class T> void WeightedSkeletton<T>::populateMesh(Mesh * mesh, Node<T> 
 		int id = child->_mark ? child->_id : mesh->getCount();
 
 		Face face;
-		face.addID(node->_id);
-		face.addID(id);
+		face.setID(0, node->_id);
+		face.setID(1, id);
+		// TODO Faces with only 2 vertices (lines)
+		face.setID(2, node->_id);
 
 		mesh->addFace(face);
 

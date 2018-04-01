@@ -33,6 +33,10 @@ namespace world {
 
 		const vec3d &getScale() const { return _scale; }
 
+		void setMaterialID(const std::string &materialID);
+
+		std::string getMaterialID() const;
+
 	private:
 		std::shared_ptr<Mesh> _mesh;
 

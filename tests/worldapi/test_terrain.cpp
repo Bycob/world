@@ -37,7 +37,7 @@ TEST_CASE("Terrain - getZInterpolated", "[terrain]") {
 		REQUIRE(terrain.getZInterpolated(1, 1) == Approx(0.7));
 	}
 
-	SECTION("getZIntepolated non trivial coordinates, non trivial heights") {
+	SECTION("getZInterpolated non trivial coordinates, non trivial heights") {
 
 		std::stringstream str;
 		for (double y = 1; y >= -0.02; y -= 0.05) {
@@ -52,5 +52,14 @@ TEST_CASE("Terrain - getZInterpolated", "[terrain]") {
 		REQUIRE(terrain.getZInterpolated(0, 0.5) == Approx(0.25));
 		REQUIRE(terrain.getZInterpolated(0.5, 1) == Approx(0.55));
 		REQUIRE(terrain.getZInterpolated(1, 0.5) == Approx(0.6));
+	}
+}
+
+TEST_CASE("Terrain - Mesh generation benchmark", "[terrain][!benchmark]") {
+	Terrain terrain(129);
+
+	BENCHMARK("Create a mesh") {
+		Mesh* mesh = terrain.convertToMesh();
+		delete mesh;
 	}
 }

@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 
+#include "../worldtypes.h"
 #include "World.h"
 #include "ICollector.h"
 #include "worldapi/assets/Object3D.h"
@@ -34,6 +35,8 @@ namespace world {
 
 		void removeItem(const ItemKey &key) override;
 
+		void addMaterial(const ItemKey &key, const std::string &name, const Material &material);
+
         CollectorIterator iterateItems();
 
     protected:
@@ -53,6 +56,8 @@ namespace world {
         const Object3D &getObject3D() const;
 
         Object3D &getObject3D();
+
+		optional<const Material&> getMaterial(const std::string &key) const;
 
     private:
         PrivateCollectorItem *_internal;

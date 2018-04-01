@@ -13,6 +13,7 @@ namespace world {
         PrivateCollectorItem(const Object3D &object3D) : _object3D(object3D) {}
 
         Object3D _object3D;
+		std::map<std::string, Material> _materials;
     };
 
     class PrivateCollector {

@@ -34,4 +34,12 @@ namespace world {
 	void Object3D::setScale(const vec3d &scale) {
 		_scale = scale;
 	}
+
+	void Object3D::setMaterialID(const std::string & materialID) {
+		_materialID = materialID;
+	}
+
+	std::string Object3D::getMaterialID() const {
+		return _materialID;
+	}
 }

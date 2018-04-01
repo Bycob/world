@@ -58,18 +58,14 @@ namespace world {
 
 		virtual ~Face();
 
-		void addID(int id);
-
 		void setID(int vert, int id);
 
 		int getID(int vert) const;
 
-		const std::vector<int> &getIDs() const;
-
 		int vertexCount() const;
 
 	private :
-		std::vector<int> _ids;
+		int _ids[3];
 	};
 
 
@@ -80,36 +76,32 @@ namespace world {
 
 		virtual ~Mesh();
 
-		/* Ajoute une face au mesh. Cette méthode n'effectue aucune
-        vérification quand à l'existence des vertices correspondant
-        aux indices de la face. */
-		void addFace(Face &face);
+		void allocateFaces(int capacity);
+
+		Face &getFace(int id);
+
+		const Face &getFace(int id) const;
 
 		const std::vector<Face> &getFaces() const;
 
-		void addVertex(const Vertex &vertex);
+		void addFace(const Face &face);
+
+		Face &newFace();
+
+		void allocateVertices(int capacity);
 
 		Vertex &getVertex(int id);
 
 		const Vertex &getVertex(int id) const;
 
-		int getCount() const;
-
 		const std::vector<Vertex> &getVertices() const;
 
-		void clearVertices();
+		void addVertex(const Vertex &vert);
 
-		void allocateVertices(int capacity);
+		Vertex &newVertex();
 
-		void allocateFaces(int capacity);
-
-		void setMaterialName(const std::string &material);
-
-		const std::string &getMaterialName() const;
-
+		int getCount() const;
 	private:
-		std::string _materialName;
-
 		std::vector<Vertex> _vertices;
 		std::vector<Face> _faces;
 	};

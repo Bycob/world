@@ -33,6 +33,10 @@ namespace world {
 		_internal->_items.erase(key);
 	}
 
+	void Collector::addMaterial(const ItemKey & key, const std::string & name, const Material & material) {
+		_internal->_items.at(key)->_internal->_materials.emplace(name, material);
+	}
+
     CollectorIterator Collector::iterateItems() {
         return CollectorIterator(*this);
     }
@@ -56,6 +60,16 @@ namespace world {
         return _internal->_object3D;
     }
 
+	optional<const Material&> world::CollectorItem::getMaterial(const std::string & key) const {
+		auto it = _internal->_materials.find(key);
+
+		if (it != _internal->_materials.end()) {
+			return it->second;
+		}
+		else {
+			return nullopt;
+		}
+	}
 
     // ==== COLLECTOR ITERATOR
 

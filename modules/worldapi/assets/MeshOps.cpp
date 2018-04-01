@@ -12,14 +12,13 @@ namespace world {
 		std::vector<int> normalCount(vertList.size(), 0);
 
 		for (const Face &face : faceList) {
-			auto faceVertices = face.getIDs();
-			int count = face.vertexCount();
+			const int count = face.vertexCount();
 
 			for (int j = 0; j < count; j++) {
 				// Calcul de la normale de la face par rapport au point j
-				int id0 = faceVertices.at(j);
-				int id1 = faceVertices.at(mod(j + 1, count));
-				int id2 = faceVertices.at(mod(j - 1, count));
+				int id0 = face.getID(j);
+				int id1 = face.getID(mod(j + 1, count));
+				int id2 = face.getID(mod(j - 1, count));
 
 				auto pt1 = vertList.at(id0).getPosition();
 				auto pt2 = vertList.at(id1).getPosition();

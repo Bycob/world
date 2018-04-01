@@ -13,6 +13,7 @@
 
 namespace world {
 
+	// TODO delete triangulate parameter (unused)
 	ObjLoader::ObjLoader(bool triangulate) : _triangulate(triangulate) {
 		_defaultMaterial = std::make_shared<Material>(DEFAULT_MATERIAL_NAME);
 	}
@@ -27,7 +28,7 @@ namespace world {
 		std::vector<tinyobj::shape_t> shapes;
 		std::vector<tinyobj::material_t> materials;
 
-		bool success = tinyobj::LoadObj(shapes, materials, errstr, filename.c_str(), NULL, _triangulate);
+		bool success = tinyobj::LoadObj(shapes, materials, errstr, filename.c_str(), NULL, true);
 
 		if (!success) {
 			throw std::ios_base::failure(errstr);
@@ -74,7 +75,7 @@ namespace world {
 				for (int i = offset; i < offset + ngon; i++) {
 					int indice = shape.mesh.indices.at(i);
 
-					face.addID(indice);
+					face.setID(i - offset, indice);
 				}
 
 				offset += ngon;
@@ -156,7 +157,7 @@ namespace world {
 
 			//Materiau
 			objstream << "usemtl ";
-			std::string materialName = mesh.getMaterialName();
+			std::string materialName = object->getMaterialID();
 
 			if (materialName == "") {
 				objstream << defaultMaterialName;
@@ -200,12 +201,14 @@ namespace world {
 			for (const Face &face : faceList) {
 				objstream << "f";
 
-				// This code enables to implement optionnal indices easily, despite the fact that it's not yet supported
-				const std::vector<int> vertIndices = face.getIDs(),
+				const int vertexCount = face.vertexCount();
+
+				/*/ This code enables to implement optionnal indices easily, despite the fact that it's not yet supported
+				const vector<int> vertIndices = face.getIDs(),
 						texCoordIndices = face.getIDs(),
 						normalIndices = face.getIDs();
 
-				for (int i = 0; i < vertIndices.size(); i++) {
+				for (int i = 0; i < vertexIndices.size(); i++) {
 					objstream << " " << vertIndices[i] + verticesOffset + 1 << "/";
 					if (i < texCoordIndices.size() && texCoordIndices[i] != -1 && texCoordIndices[i] < texCoordRead) {
 						objstream << texCoordIndices[i] + texCoordOffset + 1;
@@ -214,6 +217,10 @@ namespace world {
 					if (i < normalIndices.size() && normalIndices[i] != -1 && normalIndices[i] < normalRead) {
 						objstream << normalIndices[i] + normalOffset + 1;
 					}
+				}//*/
+
+				for (int i = 0; i < vertexCount; i++) {
+					objstream << " " << face.getID(i) << "/" << face.getID(i) << "/" << face.getID(i) << std::endl;
 				}
 				objstream << std::endl;
 			}

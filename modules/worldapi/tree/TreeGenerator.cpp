@@ -98,14 +98,14 @@ namespace world {
 				const int v3 = i == 1 ? mergePos + j2 : v1 - j + j2 - _segmentCount;
 
 				Face face1;
-				face1.addID(v1);
-				face1.addID(v2);
-				face1.addID(v3);
+				face1.setID(0, v1);
+				face1.setID(1, v2);
+				face1.setID(2, v3);
 
 				Face face2;
-				face2.addID(v1);
-				face2.addID(v3);
-				face2.addID(v4);
+				face2.setID(0, v1);
+				face2.setID(1, v3);
+				face2.setID(2, v4);
 
 				trunkMesh.addFace(face1);
 				trunkMesh.addFace(face2);
