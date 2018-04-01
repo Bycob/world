@@ -69,7 +69,7 @@ namespace world {
          * La taille d'un terrain en fonction de son niveau de détail est
          * calculée ainsi : _unitSize * _factor ^ lod */
 		int _factor = 2;
-		int _terrainRes = 129;
+		int _terrainRes = 65;
 		int _maxLOD = 4;
 
 		// Generator

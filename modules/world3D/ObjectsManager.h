@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <chrono>
 
 #include <irrlicht.h>
 
@@ -37,5 +38,11 @@ public:
 	static irr::scene::SMesh * convertToIrrlichtMesh(const world::Mesh & mesh, irr::video::IVideoDriver * driver);
 private:
 	std::map<world::Collector::ItemKey, std::unique_ptr<ObjectNodeHandler>> _objects;
+
+	// Debug variables
+	bool _dbgOn = false;
+	int _dbgAdded = 0;
+	int _dbgRemoved = 0;
+	long _elapsedTime = 0;
 };
 

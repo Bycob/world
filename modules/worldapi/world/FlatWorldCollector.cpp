@@ -45,20 +45,47 @@ namespace world {
         _disabledTerrains.clear();
     }
 
+	inline ICollector::ItemKey terrainToItem(const TerrainKey &key) {
+		return ICollector::ItemKeys::from(std::string("_") + key, ObjectKeys::defaultKey(), 0);
+	}
+
     void FlatWorldCollector::addTerrain(TerrainKey key, const Terrain &terrain) {
         if (_disabledTerrains.find(key) != _disabledTerrains.end()) {
             return;
         }
 
-        auto it = _terrains.find(key);
+#ifdef COLLECT_MESH
+		ItemKey itemKey = terrainToItem(key);
+
+		if (!hasItem(itemKey)) {
+			// Relocate the terrain
+			auto & bbox = terrain.getBoundingBox();
+			vec3d offset = bbox.getLowerBound();
+			vec3d size = bbox.getUpperBound() - offset;
+
+			std::shared_ptr<Mesh> mesh(terrain.convertToMesh(0, 0, 0, size.x, size.y, size.z));
+			Object3D object(mesh);
+			object.setPosition(offset);
+			addItemUnsafe(itemKey, object);
+		}
+#else
+		auto it = _terrains.find(key);
 
         if (it == _terrains.end()) {
             _terrains.emplace_hint(it, key, terrain);
         }
+#endif
     }
 
     void FlatWorldCollector::disableTerrain(TerrainKey key) {
-        _terrains.erase(key);
+
+#ifdef COLLECT_MESH
+		ItemKey itemKey = terrainToItem(key);
+		removeItem(itemKey);
+#else
+		_terrains.erase(key);
+#endif
+
         _disabledTerrains.insert(key);
     }
 

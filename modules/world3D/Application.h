@@ -40,6 +40,8 @@ private:
 
     std::unique_ptr<MainView> _mainView;
 
+	bool _dbgOn = true;
+
     void loadWorld(int argc, char** argv);
 };
 

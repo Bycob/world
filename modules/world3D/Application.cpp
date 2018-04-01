@@ -1,5 +1,7 @@
 #include "Application.h"
 
+#include <chrono>
+
 #include <worldapi/world/FlatWorld.h>
 
 #include "util.h"
@@ -10,7 +12,7 @@ Application::Application()
         : _running(false),
 	      _mainView(std::make_unique<MainView>(*this)),
 		  _lastUpdatePos(0, 0, 0),
-		  _explorer(std::make_unique<FirstPersonExplorer>()),
+		  _explorer(std::make_unique<FirstPersonExplorer>(0.004)),
 		  _collector(std::make_unique<SynchronizedCollector>()){
 
 	_explorer->setOrigin({0, 0, 0});
@@ -42,7 +44,12 @@ void Application::run(int argc, char **argv) {
 				FlatWorldCollector &collector = _collector->get();
 				collector.reset();
 
+				auto start = std::chrono::steady_clock::now();
 				_explorer->explore<FlatWorld>(*_world, collector);
+				
+				if (_dbgOn) {
+					std::cout << "Temps d'exploration : " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count() << " ms " << std::endl;
+				}
 
 				_collector->unlock();
 

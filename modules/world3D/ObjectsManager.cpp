@@ -41,13 +41,12 @@ void ObjectNodeHandler::updateObject3D(const Object3D & object) {
 	_meshNode->setMaterialFlag(EMF_LIGHTING, true);
 	
 	SMaterial & material = _meshNode->getMaterial(0);
-	material.NormalizeNormals = true;
 	material.BackfaceCulling = false;
 	material.ColorMaterial = ECM_NONE;
 
 	material.AmbientColor.set(255, 0, 0, 0);
 	material.SpecularColor.set(255, 255, 255, 255);
-	material.DiffuseColor.set(255, 100, 50, 0);
+	material.DiffuseColor.set(255, 200, 178, 126);//100, 50, 0);
 
 	irrMesh->drop();
 
@@ -73,6 +72,8 @@ void ObjectsManager::initialize(FlatWorldCollector &collector) {
 }
 
 void ObjectsManager::update(FlatWorldCollector &collector) {
+	auto start = std::chrono::steady_clock::now();
+
 	// Set remove tag to true
 	for (auto & pair : _objects) {
 		pair.second->removeTag = true;
@@ -87,6 +88,7 @@ void ObjectsManager::update(FlatWorldCollector &collector) {
 		if (_objects.find(pair.first) == _objects.end()) {
 			_objects[pair.first] =
 					std::make_unique<ObjectNodeHandler>(*this, pair.second->getObject3D());
+			_dbgAdded++;
 		}
 		else {
 			_objects[pair.first]->removeTag = false;
@@ -99,10 +101,17 @@ void ObjectsManager::update(FlatWorldCollector &collector) {
 	for (; iter != _objects.end();) {
 		if (iter->second->removeTag) {
 			iter = _objects.erase(iter);
+			_dbgRemoved++;
 		}
 		else {
 			++iter;
 		}
+	}
+
+	_elapsedTime += std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count();
+
+	if (_dbgOn) {
+		std::cout << _dbgAdded << " " << _dbgRemoved << " " << _elapsedTime << std::endl;
 	}
 }
 
