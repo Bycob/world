@@ -4,7 +4,7 @@
 
 #include <armadillo/armadillo>
 
-#ifdef USE_OPENCV
+#ifdef WORLD_BUILD_OPENCV_MODULES
 
 #include <opencv2/opencv.hpp>
 

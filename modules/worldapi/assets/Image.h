@@ -36,20 +36,20 @@ namespace world {
 	class WORLDAPI_EXPORT Pixel : public ConstPixel {
 	public:
 		void set(u8 r, u8 g = 0, u8 b = 0, u8 a = 255);
-		void setf(float r, float g = 0, float b = 0, float a = 1);
+		void setf(double r, double g = 0, double b = 0, double a = 1);
 
 		void setAlpha(u8 a);
 		void setRed(u8 r);
 		void setGreen(u8 g);
 		void setBlue(u8 b);
 
-		void setAlphaf(float a);
-		void setRedf(float r);
-		void setGreenf(float g);
-		void setBluef(float b);
+		void setAlphaf(double a);
+		void setRedf(double r);
+		void setGreenf(double g);
+		void setBluef(double b);
 
 		void setLevel(u8 l);
-		void setLevelf(float l);
+		void setLevelf(double l);
 
 	private:
 		friend class Image;

@@ -1,6 +1,6 @@
 #include "Interop.h"
 
-#ifdef USE_OPENCV
+#ifdef WORLD_BUILD_OPENCV_MODULES
 
 namespace world {
 
