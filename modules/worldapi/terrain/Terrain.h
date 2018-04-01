@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 
+#include "../maths/Interpolation.h"
 #include "../maths/MathsHelper.h"
 #include "../maths/BoundingBox.h"
 #include "worldapi/assets/Mesh.h"
@@ -51,14 +52,20 @@ namespace world {
 
 		double &operator()(int x, int y);
 
-		/** Permet d'obtenir l'altitude au point (x, y), avec x et y les
-        coordonnées en pourcentage des dimensions totales du terrain.
-        x et y sont compris entre 0 et 1.
-        Le résultat n'est pas interpolé.*/
-		double getZ(double x, double y) const;
+		/** Gives the height from the height map case which is the
+		 * nearest to (x, y).  */
+		double getRawHeight(double x, double y) const;
 
-		/** Même chose que #getZ sauf que cette fois le résultat est interpolé*/
-		double getZInterpolated(double x, double y) const;
+		double getInterpolatedHeight(double x, double y, const Interpolation::interpFunc &func) const;
+
+		/** Gives the height of the terrain at the specified point.
+		 * The height given by this method corresponds to the exact
+		 * height of the terrain mesh at the point (x, y), given
+		 * that it's xy bounds are [0,1] on both axis.
+		 * @param x coordinate in terrain-coordinates space, ie. from
+		 * 0 to 1.
+		 * @param y see above */
+		double getExactHeightAt(double x, double y) const;
 
 		// ------ IO
 

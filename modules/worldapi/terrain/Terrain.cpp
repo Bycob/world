@@ -5,7 +5,6 @@
 #include <math.h>
 
 #include <worldapi/maths/MathsHelper.h>
-#include <worldapi/maths/Interpolation.h>
 
 #include "worldapi/assets/Interop.h"
 #include "worldapi/assets/Image.h"
@@ -77,16 +76,33 @@ namespace world {
 		return _array(x, y);
 	}
 
-	double Terrain::getZ(double x, double y) const {
-		// TODO gerer depassement de bornes
-		int posX = (int) (x * (_array.n_rows - 1));
-		int posY = (int) (y * (_array.n_cols - 1));
+	double Terrain::getRawHeight(double x, double y) const {
+        int size = getSize();
+		int posX = clamp(static_cast<int>(round(x * (size - 1))), 0, size - 1);
+		int posY = clamp(static_cast<int>(round(y * (size - 1))), 0, size - 1);
 
 		return _array(posX, posY);
 	}
 
-	// TODO change name
-	double Terrain::getZInterpolated(double x, double y) const {
+    double Terrain::getInterpolatedHeight(double x, double y, const Interpolation::interpFunc &func) const {
+        int width = (int) (_array.n_rows - 1);
+        int height = (int) (_array.n_cols - 1);
+
+        x *= width;
+        y *= height;
+        int xi = clamp((int) floor(x), 0, width - 1);
+        int yi = clamp((int) floor(y), 0, height - 1);
+
+		double v1 = Interpolation::interpolate(
+				xi, _array(xi, yi), xi + 1, _array(xi + 1, yi), x, func
+		);
+		double v2 = Interpolation::interpolate(
+				xi, _array(xi, yi + 1), xi + 1, _array(xi + 1, yi + 1), x, func
+		);
+		return Interpolation::interpolate(yi, v1, yi + 1, v2, y, func);
+    }
+
+	double Terrain::getExactHeightAt(double x, double y) const {
 		int width = (int) (_array.n_rows - 1);
 		int height = (int) (_array.n_cols - 1);
 
@@ -145,7 +161,7 @@ namespace world {
 
 		// Memory allocation
 		int vertCount = size * size;
-		mesh->allocateVertices(vertCount);
+		mesh->reserveVertices(vertCount);
 
 		//Vertices
 		for (int x = 0; x < size; x++) {
@@ -164,7 +180,7 @@ namespace world {
 
 		//Faces
 		auto indice = [this](int x, int y) -> int { return x * this->_array.n_cols + y; };
-		mesh->allocateFaces(size_1 * size_1 * 2);
+		mesh->reserveFaces(size_1 * size_1 * 2);
 
 		for (int x = 0; x < size_1; x++) {
 			for (int y = 0; y < size_1; y++) {

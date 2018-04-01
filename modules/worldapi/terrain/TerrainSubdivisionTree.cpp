@@ -59,7 +59,7 @@ namespace world {
 		double posXd, posYd;
 		getLocalPosition(subtree, x, y, posXd, posYd);
 
-		return subtree._terrain->getZ(posXd, posYd);
+		return subtree._terrain->getRawHeight(posXd, posYd);
 	}
 
 	double TerrainSubdivisionTree::getZInterpolated(double x, double y, int stage) const {
@@ -69,7 +69,7 @@ namespace world {
 		double posXd, posYd;
 		getLocalPosition(subtree, x, y, posXd, posYd);
 
-		return subtree._terrain->getZInterpolated(posXd, posYd);
+		return subtree._terrain->getExactHeightAt(posXd, posYd);
 	}
 
 	bool TerrainSubdivisionTree::isSubdivided() const {

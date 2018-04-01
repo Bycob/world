@@ -1,4 +1,4 @@
-#include "MapGenerator.h"
+#include "ReliefMap.h"
 
 #include <utility>
 #include <list>

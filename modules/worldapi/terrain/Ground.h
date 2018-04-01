@@ -9,7 +9,7 @@
 
 #include "Terrain.h"
 #include "worldapi/world/LODGridChunkSystem.h"
-#include "../world/MapGenerator.h"
+#include "worldapi/world/ReliefMap.h"
 
 namespace world {
 

@@ -100,9 +100,10 @@ namespace world {
         }
 
         const Terrain &terrain = const_cast<Ground *>(this)->terrain(xi, yi, lvl);
-        return _minAltitude + getAltitudeRange() * terrain.getZInterpolated(xd - xi, yd - yi);
+        return _minAltitude + getAltitudeRange() * terrain.getExactHeightAt(xd - xi, yd - yi);
     }
 
+    // FIXME : Sometimes a level of details is skipped, and then problems happen
     void Ground::replaceTerrain(int xp, int yp, int lvl, FlatWorldCollector &collector) {
         collector.disableTerrain(getTerrainDataId(xp, yp, lvl));
 
@@ -153,8 +154,10 @@ namespace world {
             return _maxLOD;
         }
 
-        // Formula obtained from the equation : getTerrainSize(lvl) / terrainRes = minDetailSize
-        return clamp((int) (log(_unitSize / (minDetailSize * _terrainRes)) / log(_factor)), 0, _maxLOD);
+        double detailRes = _terrainRes;
+
+        // Formula obtained from the equation : getTerrainSize(lvl) / detailRes = minDetailSize
+        return clamp((int) (log(_unitSize / (minDetailSize * detailRes)) / log(_factor)), 0, _maxLOD);
     }
 
     vec3i Ground::getParentId(const vec3i &childId) const {
@@ -245,9 +248,10 @@ namespace world {
 
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
-                bufferParent(x, y) = parent.getZInterpolated(
+                bufferParent(x, y) = parent.getInterpolatedHeight(
                         oX + ((double) x / (size - 1)) * ratio,
-                        oY + ((double) y / (size - 1)) * ratio
+                        oY + ((double) y / (size - 1)) * ratio,
+                        Interpolation::COSINE
                 ) * parentProp * (unapply ? -1. : 1.);
             }
         }
@@ -292,8 +296,8 @@ namespace world {
                 double mapX = mapOx + ((double) x / (size - 1)) * ratio;
                 double mapY = mapOy + ((double) y / (size - 1)) * ratio;
 
-                double offset = heightMap.getZInterpolated(mapX, mapY) * offsetCoef;
-                double diff = diffMap.getZInterpolated(mapX, mapY) * diffCoef;
+                double offset = heightMap.getInterpolatedHeight(mapX, mapY, Interpolation::COSINE) * offsetCoef;
+                double diff = diffMap.getInterpolatedHeight(mapX, mapY, Interpolation::COSINE) * diffCoef;
 
                 if (unapply) {
                     bufferOffset(x, y) = -offset;

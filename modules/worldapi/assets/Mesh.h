@@ -76,7 +76,7 @@ namespace world {
 
 		virtual ~Mesh();
 
-		void allocateFaces(int capacity);
+		void reserveFaces(int capacity);
 
 		Face &getFace(int id);
 
@@ -88,7 +88,7 @@ namespace world {
 
 		Face &newFace();
 
-		void allocateVertices(int capacity);
+		void reserveVertices(int capacity);
 
 		Vertex &getVertex(int id);
 
@@ -100,7 +100,7 @@ namespace world {
 
 		Vertex &newVertex();
 
-		int getCount() const;
+		int getVerticesCount() const;
 	private:
 		std::vector<Vertex> _vertices;
 		std::vector<Face> _faces;

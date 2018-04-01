@@ -79,7 +79,7 @@ template <class T> Node<T> * Node<T>::getParent() const {
 	return _parent;
 }
 
-template<class T> std::vector<Node<T>*> Node<T>::getChildrenOrNeighboursList() const {
+template<class T> std::vector<Node<T> *> Node<T>::getChildrenOrNeighboursList() const {
 	std::vector<Node<T>*> result;
 
 	for (auto value : _children_or_neighbour) {
@@ -141,7 +141,7 @@ template <class T> void WeightedSkeletton<T>::populateMesh(Mesh * mesh, Node<T> 
 	// Noeud marqué == toutes les connexions ont été établies pour ce noeud.
 	if (!node->_mark) {
 		node->_mark = true;
-		node->_id = mesh->getCount();
+		node->_id = mesh->getVerticesCount();
 
 		//Ajout du vertex correspondant
 		Vertex vert;
@@ -160,7 +160,7 @@ template <class T> void WeightedSkeletton<T>::populateMesh(Mesh * mesh, Node<T> 
 
 	// On ajoute les liaisons, puis on appelle récursivement chaque noeud.
 	for (Node<T> * child : processList) {
-		int id = child->_mark ? child->_id : mesh->getCount();
+		int id = child->_mark ? child->_id : mesh->getVerticesCount();
 
 		Face face;
 		face.setID(0, node->_id);

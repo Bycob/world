@@ -9,19 +9,28 @@
 #include "MathsHelper.h"
 
 namespace world {
-	class WORLDAPI_EXPORT CosineInterpolation : public Function<double> {
-	public:
-		virtual double operator() (double x) const;
-	};
 
-	class WORLDAPI_EXPORT LinearInterpolation : public Function<double> {
-	public:
-		virtual double operator() (double x) const;
-	};
+	struct Interpolation {
+		typedef std::function<double(double)> interpFunc;
 
-	double WORLDAPI_EXPORT interpolate(double x1, double y1, double x2, double y2, double x, const Function<double> * func);
-    double WORLDAPI_EXPORT interpolateCosine(double x1, double y1, double x2, double y2, double x);
-    double WORLDAPI_EXPORT interpolateLinear(double x1, double y1, double x2, double y2, double x);
+		static inline double interpolate(double x1, double y1, double x2, double y2, double x, const interpFunc &f) {
+			double d = x2 - x1;
+
+			if (d < std::numeric_limits<double>::epsilon()) {
+				return y1;
+			}
+
+			double xFunc = f(clamp((x - x1) / d, 0, 1));
+			//double yFunc = 6 * pow(xFunc, 5) - 15 * pow(xFunc, 4) + 10 * pow(xFunc, 3);
+			return y2 * xFunc + y1 * (1 - xFunc);
+		}
+
+		static const interpFunc LINEAR;
+		static const interpFunc COSINE;
+
+		static double interpolateCosine(double x1, double y1, double x2, double y2, double x);
+		static double interpolateLinear(double x1, double y1, double x2, double y2, double x);
+	};
 
 
 

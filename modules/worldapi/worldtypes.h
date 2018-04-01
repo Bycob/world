@@ -5,8 +5,6 @@
 
 #include <optional/optional.hpp>
 
-// TODO should we use the standard library here ?
-
 namespace world {
 
     typedef int8_t s8;
@@ -22,7 +20,7 @@ namespace world {
     typedef float f32;
     typedef double f64;
 
-	// Optionals (TODO restrict)
+	// Optionals
 	template <class T> using optional = std::experimental::optional<T>;
 	//template <class T> using optional<T&> = std::experimental::optional<T&>;
 	using std::experimental::nullopt;

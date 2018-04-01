@@ -45,6 +45,8 @@ namespace world {
         _disabledTerrains.clear();
     }
 
+//#define COLLECT_MESH
+
 	inline ICollector::ItemKey terrainToItem(const TerrainKey &key) {
 		return ICollector::ItemKeys::from(std::string("_") + key, ObjectKeys::defaultKey(), 0);
 	}

@@ -91,15 +91,15 @@ namespace world {
                 int borneY2 = min(borneY1 + 1, (int) fi);
 
                 // Interpolation
-                double v1 = interpolateCosine(borneX1 / f1, _buffer(borneX1, borneY1),
+                double v1 = Interpolation::interpolateCosine(borneX1 / f1, _buffer(borneX1, borneY1),
                                               borneX2 / f1, _buffer(borneX2, borneY1),
                                               xd);
 
-                double v2 = interpolateCosine(borneX1 / f1, _buffer(borneX1, borneY2),
+                double v2 = Interpolation::interpolateCosine(borneX1 / f1, _buffer(borneX1, borneY2),
                                               borneX2 / f1, _buffer(borneX2, borneY2),
                                               xd);
 
-                output(x, y) = interpolateCosine(borneY1 / f1, v1, borneY2 / f1, v2, yd);
+                output(x, y) = Interpolation::interpolateCosine(borneY1 / f1, v1, borneY2 / f1, v2, yd);
             }
         }
     }
@@ -228,7 +228,7 @@ namespace world {
                     // Si le décor doit être juxtaposable sur le côté,
                     // on fait un schéma plus simple pour les bords
                     if (joinableSides && (x == length - 1 || x == 0)) {
-                        octave(x, y) = interpolateCosine(0, at(x, 0), joinDepth - 1, at(x, joinDepth - 1), y);
+                        octave(x, y) = Interpolation::interpolateCosine(0, at(x, 0), joinDepth - 1, at(x, joinDepth - 1), y);
                         //if (x == length - 1) std::cout << "y=" << y << " : " << octave(x, y) << std::endl;
                     } else {
                         octave(x, y) = _random(_rng);
@@ -270,7 +270,7 @@ namespace world {
                                 return at(x, borneY);
                             } else {
                                 //if (joinableSides && x == length - 1) std::cout << "at " << borneX2 << " there is " << octave(borneX2, borneY) << std::endl;
-                                return interpolateCosine(borneX1, octave(borneX1, borneY), borneX2,
+                                return Interpolation::interpolateCosine(borneX1, octave(borneX1, borneY), borneX2,
                                                          octave(borneX2, borneY), x);
                             }
                         };
@@ -279,7 +279,7 @@ namespace world {
                         double v2 = interpolateX(borneY2);
 
                         // Interpolation en y
-                        octave(x, y) = interpolateCosine(borneY2, v2, borneY1, v1, y);
+                        octave(x, y) = Interpolation::interpolateCosine(borneY2, v2, borneY1, v1, y);
 
                         //if (joinableSides && x == length - 1 ) std::cout  << "with " << y << " we have " << borneX1 << " , " << borneX2 << " and " << borneY1 << " , " << borneY2 << " : " << octave(x, y) <<  std::endl;
                     }

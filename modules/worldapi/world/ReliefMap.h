@@ -11,8 +11,14 @@
 
 namespace world {
 
-	/** Classe de base des modules du générateur de cartes servant
-	à générer la carte de relief. */
+	/** Base class for generating relief maps.
+	 * A relief map is compound of 2 layers : an "offset" layer
+	 * and a "diff" layer. The offset is the minimum/average
+	 * altitude at each point, and the diff quantify the variation
+	 * of altitude.
+	 * For example, mountains have a high offset and a high diff,
+	 * countryside has a low offset and a low diff, and a plateau
+	 * would have a high offset but a low diff. */
 	class WORLDAPI_EXPORT ReliefMapGenerator {
 	public:
 		ReliefMapGenerator();

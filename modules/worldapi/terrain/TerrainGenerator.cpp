@@ -81,7 +81,7 @@ namespace world {
 				double x1 = (double) x / randomArray.n_rows;
 				double y1 = (double) y / randomArray.n_cols;
 
-				double z = terrain.getZInterpolated(x1, y1);
+				double z = terrain.getExactHeightAt(x1, y1);
 				double randParam = randomArray(x, y);
 
 				result(x, y, 0) = map((int) (z * (RESOLUTION - 1)), (int) (randParam * (RESOLUTION - 1)), 0);
@@ -125,21 +125,21 @@ namespace world {
 
 		Perlin::modifier modifier = [&](double x, double y, double val) {
 			if (x < eps && y < eps && bottomleft) {
-				return bottomleft->getZInterpolated(1, 1);
+				return bottomleft->getExactHeightAt(1, 1);
 			} else if (x < eps && 1 - y < eps && topleft) {
-				return topleft->getZInterpolated(1, 0);
+				return topleft->getExactHeightAt(1, 0);
 			} else if (1 - x < eps && y < eps && bottomright) {
-				return bottomright->getZInterpolated(0, 1);
+				return bottomright->getExactHeightAt(0, 1);
 			} else if (1 - x < eps && 1 - y < eps && topright) {
-				return topright->getZInterpolated(0, 0);
+				return topright->getExactHeightAt(0, 0);
 			} else if (x < eps && left) {
-				return left->getZInterpolated(1, y);
+				return left->getExactHeightAt(1, y);
 			} else if (1 - x < eps && right) {
-				return right->getZInterpolated(0, y);
+				return right->getExactHeightAt(0, y);
 			} else if (y < eps && bottom) {
-				return bottom->getZInterpolated(x, 1);
+				return bottom->getExactHeightAt(x, 1);
 			} else if (1 - y < eps && top) {
-				return top->getZInterpolated(x, 0);
+				return top->getExactHeightAt(x, 0);
 			} else {
 				return val;
 			}

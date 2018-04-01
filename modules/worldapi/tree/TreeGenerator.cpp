@@ -91,7 +91,7 @@ namespace world {
 				int j2 = mod(j1 - 1, _segmentCount);
 
 				// Les deux vertices appartenant au cercle traité actuellement.
-				const int v1 = trunkMesh.getCount() - 1;
+				const int v1 = trunkMesh.getVerticesCount() - 1;
 				const int v2 = j == 0 ? v1 - 1 + _segmentCount : v1 - 1;
 				// Les deux vertices appartenant au cercle précédent.
 				const int v4 = i == 1 ? mergePos + j1 : v1 - j + j1 - _segmentCount;
@@ -180,7 +180,7 @@ namespace world {
 						avgChildrenWeight + (mergeLenChild / info._size) * (node->getWeight() - avgChildrenWeight);
 				mergeWeight1 = w2;
 
-				fillBezier(trunkMesh, curve, divider, w1, w2, trunkMesh.getCount() - _segmentCount);
+				fillBezier(trunkMesh, curve, divider, w1, w2, trunkMesh.getVerticesCount() - _segmentCount);
 			} else {
 				const double localRadius = sqrt(node->getWeight()) * 0.15;
 
@@ -225,7 +225,7 @@ namespace world {
 		// -> Cas des autres étages
 
 		// On retient la position de la dernière corolle du parent pour lier tous les enfants.
-		const int mark = trunkMesh.getCount() - _segmentCount;
+		const int mark = trunkMesh.getVerticesCount() - _segmentCount;
 		// Origine commune côté parent
 		const vec3d parentSide = pos - (pos - parentPos) * (mergeLenChild / info._size);
 		const vec3d parentDirection = (pos - parentPos) * (0.5 * mergeLenChild / info._size);

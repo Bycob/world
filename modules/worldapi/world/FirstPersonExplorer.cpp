@@ -21,6 +21,10 @@ namespace world {
         _punctumProximum = punctumProximum;
     }
 
+    void FirstPersonExplorer::setMaxDistance(double maxDistance) {
+        _maxDistance = maxDistance;
+    }
+
     vec3d FirstPersonExplorer::getChunkNearestPoint(const WorldZone &zone) {
         return zone->getAbsoluteOffset() + zone->getChunk().getSize() / 2;
     }

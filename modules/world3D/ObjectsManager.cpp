@@ -126,7 +126,7 @@ SMesh * ObjectsManager::convertToIrrlichtMesh(const Mesh & mesh, IVideoDriver * 
 	int primitiveCount = 0;
 
 	int bufID = -1;
-	SMeshBuffer * buffer;
+	SMeshBuffer * buffer = nullptr;
 
 	for (const Face & face : faces) {
 		if (face.vertexCount() != 3)
@@ -170,6 +170,10 @@ SMesh * ObjectsManager::convertToIrrlichtMesh(const Mesh & mesh, IVideoDriver * 
 
 			primitiveCount++;
 		}
+	}
+
+	if (buffer != nullptr) {
+		buffer->recalculateBoundingBox();
 	}
 
 	irrMesh->setDirty();

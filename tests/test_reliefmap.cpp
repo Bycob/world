@@ -1,7 +1,7 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <worldapi/world/MapGenerator.h>
+#include <worldapi/world/ReliefMap.h>
 #include <worldapi/IOUtil.h>
 
 #include "testutil.h"

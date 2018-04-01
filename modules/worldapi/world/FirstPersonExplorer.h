@@ -23,6 +23,8 @@ namespace world {
 
         void setPunctumProximum(double punctumProximum);
 
+        void setMaxDistance(double maxDistance);
+
         template<typename T, typename C>
         void explore(T &world, C &collector);
 

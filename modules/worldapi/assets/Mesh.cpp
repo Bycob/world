@@ -33,7 +33,7 @@ namespace world {
 
 	Mesh::~Mesh() {}
 
-	void Mesh::allocateFaces(int count) {
+	void Mesh::reserveFaces(int count) {
 		_faces.reserve(count);
 	}
 
@@ -58,7 +58,7 @@ namespace world {
 		return _faces.back();
 	}
 
-	void Mesh::allocateVertices(int count) {
+	void Mesh::reserveVertices(int count) {
 		_vertices.reserve(count);
 	}
 
@@ -83,9 +83,7 @@ namespace world {
 		return _vertices.back();
 	}
 
-	int Mesh::getCount() const {
+	int Mesh::getVerticesCount() const {
 		return _vertices.size();
 	}
-
-	// TODO allocateNVertices -> les vertices devraient être allouées mais inutilisées ?
 }

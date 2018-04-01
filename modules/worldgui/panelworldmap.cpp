@@ -1,7 +1,7 @@
 #include "panelworldmap.h"
 #include "ui_panelworldmap.h"
 
-#include <worldapi/world/MapGenerator.h>
+#include <worldapi/world/ReliefMap.h>
 
 #include "qtworld.h"
 
