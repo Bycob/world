@@ -41,6 +41,6 @@ void testReliefMap(int argc, char** argv) {
 
 	std::cout << "Conversion en image et ecriture" << std::endl;
 
-	height.convertToImage().write("world/relief/height.png");
-	heightDiff.convertToImage().write("world/relief/heightDiff.png");
+    height.createImage().write("world/relief/height.png");
+    heightDiff.createImage().write("world/relief/heightDiff.png");
 }

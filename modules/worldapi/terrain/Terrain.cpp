@@ -141,18 +141,18 @@ namespace world {
 		return ab * (xd / sumd) + ac * (yd / sumd);
 	}
 
-	Mesh *Terrain::convertToMesh() const {
+	Mesh *Terrain::createMesh() const {
 		auto lower = _bbox.getLowerBound();
 		auto size = _bbox.getUpperBound() - lower;
-		return convertToMesh(lower.x, lower.y, lower.z, size.x, size.y, size.z);
+		return createMesh(lower.x, lower.y, lower.z, size.x, size.y, size.z);
 	}
 
-	Mesh *Terrain::convertToMesh(double sizeX, double sizeY, double sizeZ) const {
-		return convertToMesh(-sizeX / 2, -sizeY / 2, 0, sizeX, sizeY, sizeZ);
+	Mesh *Terrain::createMesh(double sizeX, double sizeY, double sizeZ) const {
+		return createMesh(-sizeX / 2, -sizeY / 2, 0, sizeX, sizeY, sizeZ);
 	}
 
-	Mesh *Terrain::convertToMesh(double offsetX, double offsetY, double offsetZ, double sizeX, double sizeY,
-								 double sizeZ) const {
+	Mesh *Terrain::createMesh(double offsetX, double offsetY, double offsetZ, double sizeX, double sizeY,
+							  double sizeZ) const {
 		Mesh *mesh = new Mesh();
 
 		const int size = static_cast<int>(_array.n_rows);
@@ -202,7 +202,7 @@ namespace world {
 		return mesh;
 	}
 
-	Image Terrain::convertToImage() const {
+	Image Terrain::createImage() const {
 		return Image(this->_array);
 	}
 
@@ -224,13 +224,10 @@ namespace world {
 		return (int) (_array.n_rows * _array.n_cols) * sizeof(float) / sizeof(char);
 	}
 
-	Image Terrain::getTexture() const {
-		if (_texture == nullptr) throw std::runtime_error("No texture");
-		return *_texture;
-	}
-
-	const Image &Terrain::texture() const {
-		if (_texture == nullptr) throw std::runtime_error("No texture");
+	optional<const Image &> Terrain::getTexture() const {
+		if (_texture == nullptr) {
+			return nullopt;
+		}
 		return *_texture;
 	}
 

@@ -59,7 +59,7 @@ TEST_CASE("Terrain - Mesh generation benchmark", "[terrain][!benchmark]") {
 	Terrain terrain(129);
 
 	BENCHMARK("Create a mesh") {
-		Mesh* mesh = terrain.convertToMesh();
+		Mesh* mesh = terrain.createMesh();
 		delete mesh;
 	}
 }

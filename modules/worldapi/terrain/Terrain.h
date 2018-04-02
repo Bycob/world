@@ -22,11 +22,10 @@ namespace world {
 
 	class WORLDAPI_EXPORT TerrainGenerator;
 
-	/** Cette classe permet de manipuler des terrains planaires avec plusieurs niveaux
-	de détails.
-	Les terrains définis par cette classe sont définis par des surfaces. A chaque point
-	(x, y) du plan, correspond une ou plusieurs altitude(s) z(i), suivant si le terrain
-	est simple couche ou multi couche. */
+	/** A Terrain is a squared Heightmap with spatial bounds and
+	 * a bunch of convenience methods. A terrain can be converted
+	 * to a mesh, or an image, depending on what use one needs.
+	 * The terrain can embed a texture. */
 	class WORLDAPI_EXPORT Terrain {
 
 	public :
@@ -47,18 +46,22 @@ namespace world {
 		const BoundingBox &getBoundingBox() const;
 
 		int getSize() const {
-			return (int) _array.n_rows;
+			return static_cast<int>(_array.n_rows);
 		}
 
 		double &operator()(int x, int y);
 
-		/** Gives the height from the height map case which is the
+		/** Gets the height from the height map case which is the
 		 * nearest to (x, y).  */
 		double getRawHeight(double x, double y) const;
 
+		/** Gets the height of the terrain at the specified point,
+		 * using the given interpolation method. This method perform
+		 * an interpolation on both x and y axis between the nearest
+		 * heightmap points around (x, y). */
 		double getInterpolatedHeight(double x, double y, const Interpolation::interpFunc &func) const;
 
-		/** Gives the height of the terrain at the specified point.
+		/** Gets the height of the terrain at the specified point.
 		 * The height given by this method corresponds to the exact
 		 * height of the terrain mesh at the point (x, y), given
 		 * that it's xy bounds are [0,1] on both axis.
@@ -69,25 +72,29 @@ namespace world {
 
 		// ------ IO
 
-		//Interfaçage avec les fichiers .obj
-		Mesh *convertToMesh() const;
+		/** Creates a mesh from this heightmap. Each vertex represents a
+		 * case in the heightmap. xy bounds of the terrain are
+		 * determined from the bounding box, and the mesh is scaled along
+		 * z-axis depending of the z-size of the bounding box. */
+		Mesh *createMesh() const;
 
-		Mesh *convertToMesh(double sizeX, double sizeY, double sizeZ) const;
+		/** Creates a mesh from this heightmap. Each vertex represents a
+		 * case in the heightmap. The mesh is centred on the origin, and
+		 * scaled to the given dimensions. */
+		Mesh *createMesh(double sizeX, double sizeY, double sizeZ) const;
 
 		Mesh *
-		convertToMesh(double offsetX, double offsetY, double offsetZ, double sizeX, double sizeY, double sizeZ) const;
+		createMesh(double offsetX, double offsetY, double offsetZ, double sizeX, double sizeY, double sizeZ) const;
 
 		//Méthodes pour la conversion du terrain en image.
-		Image convertToImage() const;
+		Image createImage() const;
 
 		//Raw map TODO raw data stream ?
 		char *getRawData(int &rawDataSize, float height = 1, float offset = 0) const;
 
 		int getRawDataSize() const;
 
-		Image getTexture() const;
-
-		const Image &texture() const;
+		optional<const Image &> getTexture() const;
 
 	private :
 

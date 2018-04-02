@@ -73,7 +73,7 @@ void testRepeatable(int argc, char** argv) {
     std::cout << "Génération du terrain associé..." << std::endl;
     Terrain tr(repeatable);
     Scene repeatableobj;
-	repeatableobj.createObject(std::shared_ptr<Mesh>(tr.convertToMesh()));
+	repeatableobj.createObject(std::shared_ptr<Mesh>(tr.createMesh()));
 
 	ObjLoader loader;
     loader.write(repeatableobj, "tests/repeatable");
@@ -131,8 +131,8 @@ void testPerlin(int argc, char** argv) {
 		Terrain t2(perlin2);
 
 		ObjLoader files;
-		files.addMesh(std::shared_ptr<Mesh>(t1.convertToMesh()));
-		files.addMesh(std::shared_ptr<Mesh>(t2.convertToMesh(0, 1, 0, 1.0, 1.0, 0.4)));
+		files.addMesh(std::shared_ptr<Mesh>(t1.createMesh()));
+		files.addMesh(std::shared_ptr<Mesh>(t2.createMesh(0, 1, 0, 1.0, 1.0, 0.4)));
 		files.write("tests/join.obj");*/
     }
     catch (std::exception &e) {
@@ -150,7 +150,7 @@ void testPerlin(int argc, char** argv) {
     generator.process(terrain);
 
 	std::cout << "ecriture de l'image du terrain..." <<std::endl;
-	Image image = terrain.convertToImage();
+	Image image = terrain.createImage();
 	try {
 		image.write("tests/terrain.png");
 	}
@@ -164,7 +164,7 @@ void testPerlin(int argc, char** argv) {
 
 	std::cout << "Conversion du terrain en mesh... " << std::endl;
 	Scene scene1;
-	std::shared_ptr<Mesh> mesh = std::shared_ptr<Mesh>(terrain.convertToMesh());
+	std::shared_ptr<Mesh> mesh = std::shared_ptr<Mesh>(terrain.createMesh());
 	scene1.createObject(mesh);
 	
 	std::shared_ptr<Material> material = std::make_shared<Material>("material01");
@@ -244,7 +244,7 @@ void testPerlin(int argc, char** argv) {
 	std::cout << "Fichier écrit !" << std::endl;
 	
 	std::cout << "Ecriture de l'image associée..." << std::endl;
-	Image image2 = subtree.terrain().convertToImage();
+	Image image2 = subtree.terrain().createImage();
 	image2.write("tests/subterrain.png");
 	std::cout << "Image écrite !" << std::endl;
 }

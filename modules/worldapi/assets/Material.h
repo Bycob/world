@@ -5,11 +5,13 @@
 #include <string>
 #include <armadillo/armadillo>
 
+#include "Color.h"
+
 namespace world {
 
 	class WORLDAPI_EXPORT Material {
 	public:
-		Material(std::string name = "");
+		Material(const std::string &name);
 
 		virtual ~Material();
 
@@ -19,23 +21,23 @@ namespace world {
 
 		void setKd(double r, double g, double b);
 
-		arma::vec3 getKd() {
+		Color4d getKd() const {
 			return _Kd;
 		}
 
 		void setKa(double r, double g, double b);
 
-		arma::vec3 getKa() {
+		Color4d getKa() const {
 			return _Ka;
 		}
 
 		void setKs(double r, double g, double b);
 
-		arma::vec3 getKs() {
+		Color4d getKs() const {
 			return _Ks;
 		}
 
-		void setMapKd(std::string texName);
+		void setMapKd(const std::string &texName);
 
 		std::string getMapKd() {
 			return _mapKd;
@@ -44,9 +46,9 @@ namespace world {
 	private :
 		std::string _name;
 
-		arma::vec3 _Kd;
-		arma::vec3 _Ka;
-		arma::vec3 _Ks;
+		Color4d _Kd;
+		Color4d _Ka;
+		Color4d _Ks;
 		std::string _mapKd;
 	};
 }

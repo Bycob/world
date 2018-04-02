@@ -48,7 +48,7 @@ namespace world {
 //#define COLLECT_MESH
 
 	inline ICollector::ItemKey terrainToItem(const TerrainKey &key) {
-		return ICollector::ItemKeys::from(std::string("_") + key, ObjectKeys::defaultKey(), 0);
+		return ICollector::ItemKeys::inWorld(std::string("_") + key, ObjectKeys::defaultKey(), 0);
 	}
 
     void FlatWorldCollector::addTerrain(TerrainKey key, const Terrain &terrain) {
@@ -65,7 +65,7 @@ namespace world {
 			vec3d offset = bbox.getLowerBound();
 			vec3d size = bbox.getUpperBound() - offset;
 
-			std::shared_ptr<Mesh> mesh(terrain.convertToMesh(0, 0, 0, size.x, size.y, size.z));
+			std::shared_ptr<Mesh> mesh(terrain.createMesh(0, 0, 0, size.x, size.y, size.z));
 			Object3D object(mesh);
 			object.setPosition(offset);
 			addItemUnsafe(itemKey, object);

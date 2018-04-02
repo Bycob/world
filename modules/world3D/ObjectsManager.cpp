@@ -23,6 +23,14 @@ ObjectNodeHandler::~ObjectNodeHandler() {
 	_meshNode->remove();
 }
 
+void ObjectNodeHandler::setMaterial(const Material &mat) {
+	SMaterial & irrmat = _meshNode->getMaterial(0);
+
+	irrmat.AmbientColor = toIrrColor(mat.getKa());
+	irrmat.SpecularColor = toIrrColor(mat.getKs());
+	irrmat.DiffuseColor = toIrrColor(mat.getKd());
+}
+
 void ObjectNodeHandler::updateObject3D(const Object3D & object) {
 	SMesh * irrMesh = ObjectsManager::convertToIrrlichtMesh(object.getMesh(), _objManager._driver);
 
@@ -86,8 +94,17 @@ void ObjectsManager::update(FlatWorldCollector &collector) {
 		auto pair = *it;
 
 		if (_objects.find(pair.first) == _objects.end()) {
-			_objects[pair.first] =
-					std::make_unique<ObjectNodeHandler>(*this, pair.second->getObject3D());
+			Object3D &object = pair.second->getObject3D();
+			auto objNode = std::make_unique<ObjectNodeHandler>(*this, pair.second->getObject3D());
+
+			// Material
+			auto material = pair.second->getMaterial(object.getMaterialID());
+			if (material) {
+				objNode->setMaterial(*material);
+			}
+
+			_objects[pair.first] = std::move(objNode);
+
 			_dbgAdded++;
 		}
 		else {

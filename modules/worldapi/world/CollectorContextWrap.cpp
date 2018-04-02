@@ -42,11 +42,15 @@ namespace world {
 		return _collector.hasItem(mutateKey(key));
 	}
 
+	void CollectorContextWrap::addMaterial(const ItemKey &key, const Material &material) {
+        _collector.addMaterial(mutateKey(key), material);
+    }
+
 	ICollector::ItemKey CollectorContextWrap::mutateKey(const ItemKey &key) const {
-		return ItemKeys::from(
-			_currentChunk.first ? _currentChunk.second : std::get<0>(key),
-			_currentObject.first ? _currentObject.second : std::get<1>(key),
-			std::get<2>(key)
-		);
+		return ItemKeys::inWorld(
+                _currentChunk.first ? _currentChunk.second : std::get<0>(key),
+                _currentObject.first ? _currentObject.second : std::get<1>(key),
+                std::get<2>(key)
+        );
 	}
 }

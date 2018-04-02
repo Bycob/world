@@ -35,7 +35,7 @@ namespace world {
 
 		void removeItem(const ItemKey &key) override;
 
-		void addMaterial(const ItemKey &key, const std::string &name, const Material &material);
+		void addMaterial(const ItemKey &key, const Material &material) override;
 
         CollectorIterator iterateItems();
 
@@ -57,6 +57,7 @@ namespace world {
 
         Object3D &getObject3D();
 
+        /** */
 		optional<const Material&> getMaterial(const std::string &key) const;
 
     private:

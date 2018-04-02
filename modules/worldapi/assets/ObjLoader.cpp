@@ -258,16 +258,12 @@ namespace world {
 			mtlstream << materialName << std::endl;
 
 			//Kd, Ka, Ks
-			auto writeData = [&mtlstream = mtlstream](const std::string &name, const arma::vec value) {
-				mtlstream << name;
-				for (auto val : value) {
-					mtlstream << " " << val;
-				}
-				mtlstream << std::endl;
+			auto writeColor = [&mtlstream = mtlstream](const std::string &name, const Color4d& value) {
+				mtlstream << name << " " << value._r << " " << value._g << " " << value._b << std::endl;
 			};
-			writeData("Kd", material->getKd());
-			writeData("Ka", material->getKa());
-			writeData("Ks", material->getKs());
+			writeColor("Kd", material->getKd());
+			writeColor("Ka", material->getKa());
+			writeColor("Ks", material->getKs());
 
 			//maps
 			auto writeMap = [&mtlstream = mtlstream](const std::string &name, const std::string &value) {

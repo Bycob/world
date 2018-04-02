@@ -3,8 +3,8 @@
 #include "worldapi/world/Collector.h"
 
 namespace world {
-    Tree::Tree() {
-
+    Tree::Tree() : _trunkMaterial("trunk") {
+        _trunkMaterial.setKd(0.5, 0.2, 0);
     }
 
     Tree::~Tree() {
@@ -12,7 +12,13 @@ namespace world {
     }
 
     void Tree::collectWholeObject(ICollector &collector) {
+        using ItemKeys = ICollector::ItemKeys;
+
         Object3D mainPart(_trunkMesh);
-        collector.addItem(ICollector::ItemKeys::from(0), mainPart);
+        mainPart.setMaterialID("trunk");
+        collector.addItem(ItemKeys::inObject(0), mainPart);
+
+        // Material
+        collector.addMaterial(ItemKeys::inObject(0), _trunkMaterial);
     }
 }

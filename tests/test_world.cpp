@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
 
 void generate_test_world(int argc, char** argv) {
     std::cout << "Creation du monde" << std::endl;
-    std::unique_ptr<World> world(World::createDemoWorld());
+    std::unique_ptr<FlatWorld> world(FlatWorld::createDemoFlatWorld());
 
     std::cout << "Creation de l'explorer et du collecteur" << std::endl;
     FirstPersonExplorer explorer(0.002, 0.5);
@@ -24,12 +24,12 @@ void generate_test_world(int argc, char** argv) {
     FlatWorldCollector collector;
 
     std::cout << "Exploration du monde..." << std::endl;
-    explorer.explore<FlatWorld>(*((FlatWorld*)world.get()), collector);
+    explorer.explore<FlatWorld>(*world, collector);
 
     std::cout << "Exploration terminée. Collecte des résultats" << std::endl;
     auto it = collector.iterateItems();
 
-    while (!it.hasNext()) {
+    while (it.hasNext()) {
         ++it;
     }
 }

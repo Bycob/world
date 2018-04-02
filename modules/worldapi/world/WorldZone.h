@@ -19,7 +19,7 @@ namespace world {
     public:
         virtual IWorldZoneHandler *clone() const = 0;
 
-        /** Gives an ID for the zone. This ID enable the chunk system
+        /** Gets an ID for the zone. This ID enable the chunk system
          * to recognize the zone among all the zone loaded. */
         virtual const std::string &getID() const = 0;
 

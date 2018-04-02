@@ -2,7 +2,7 @@
 
 namespace world {
 
-	Material::Material(std::string name) : _name(name) {
+	Material::Material(const std::string &name) : _name(name) {
 		setKd(1, 1, 1);
 		setKa(0.2, 0.2, 0.2);
 		setKs(1, 1, 1);
@@ -13,24 +13,18 @@ namespace world {
 	}
 
 	void Material::setKd(double r, double g, double b) {
-		_Kd[0] = r;
-		_Kd[1] = g;
-		_Kd[2] = b;
+		_Kd.set(r, g, b);
 	}
 
 	void Material::setKa(double r, double g, double b) {
-		_Ka[0] = r;
-		_Ka[1] = g;
-		_Ka[2] = b;
+		_Ka.set(r, g, b);
 	}
 
 	void Material::setKs(double r, double g, double b) {
-		_Ks[0] = r;
-		_Ks[1] = g;
-		_Ks[2] = b;
+		_Ks.set(r, g, b);
 	}
 
-	void Material::setMapKd(std::string texName) {
+	void Material::setMapKd(const std::string &texName) {
 		_mapKd = texName;
 	}
 }

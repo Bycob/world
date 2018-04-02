@@ -7,6 +7,7 @@
 
 #include <worldapi/maths/MathsHelper.h>
 #include <worldapi/world/World.h>
+#include <worldapi/assets/Material.h>
 #include <worldapi/assets/Object3D.h>
 
 #include "RenderingModule.h"
@@ -18,6 +19,7 @@ public:
 	ObjectNodeHandler(ObjectsManager& objectsManager, const world::Object3D & object);
 	virtual ~ObjectNodeHandler();
 
+	void setMaterial(const world::Material &material);
 	void updateObject3D(const world::Object3D & object);
 
 	bool removeTag = false;
@@ -30,7 +32,7 @@ private:
 class ObjectsManager : public RenderingModule {
 public:
 	ObjectsManager(Application & app, irr::IrrlichtDevice * device);
-	virtual ~ObjectsManager();
+	~ObjectsManager() override;
 
 	void initialize(world::FlatWorldCollector &collector) override;
 	void update(world::FlatWorldCollector &collector) override;

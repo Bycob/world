@@ -1,6 +1,7 @@
 #include <catch/catch.hpp>
 
 #include <worldapi/world/LODGridCoordinates.h>
+#include <worldapi/world/LODGridChunkSystem.h>
 
 using namespace world;
 
@@ -24,4 +25,8 @@ TEST_CASE("LODGridCoordinates", "[chunksystem]") {
         REQUIRE(c1a.uid() != c3.uid());
         REQUIRE(c2.uid() != c3.uid());
     }
+}
+
+TEST_CASE("LODGridChunkSystem", "[chunksystem]") {
+
 }

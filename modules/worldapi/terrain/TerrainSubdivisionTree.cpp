@@ -147,7 +147,7 @@ namespace world {
 		offsetX *= rootSizeX;
 		offsetY *= rootSizeY;
 
-		return _terrain->convertToMesh(offsetX - rootSizeX / 2, offsetY - rootSizeY / 2, offsetZ, sizeX, sizeY, sizeZ);
+		return _terrain->createMesh(offsetX - rootSizeX / 2, offsetY - rootSizeY / 2, offsetZ, sizeX, sizeY, sizeZ);
 	}
 
 	void
