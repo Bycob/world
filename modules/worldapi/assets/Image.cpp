@@ -8,6 +8,8 @@
 #include <stdexcept>
 #include <opencv/cv.h>
 
+#include "math/MathsHelper.h"
+
 namespace world {
 
 	inline int getCVType(const ImageType &type) {

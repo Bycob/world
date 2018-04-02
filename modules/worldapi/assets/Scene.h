@@ -1,13 +1,12 @@
 #pragma once
 
-#include <worldapi/worldapidef.h>
+#include "core/WorldConfig.h"
 
 #include <memory>
 #include <vector>
 
-#include "Mesh.h"
-#include "Material.h"
 #include "Object3D.h"
+#include "Material.h"
 
 namespace world {
 

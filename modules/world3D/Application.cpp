@@ -2,8 +2,6 @@
 
 #include <chrono>
 
-#include <worldapi/world/FlatWorld.h>
-
 #include "util.h"
 
 using namespace world;

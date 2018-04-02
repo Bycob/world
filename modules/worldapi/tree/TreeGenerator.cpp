@@ -1,7 +1,7 @@
 #include "TreeGenerator.h"
-#include "worldapi/assets/Mesh.h"
-#include "worldapi/assets/MeshOps.h"
-#include "../maths/MathsHelper.h"
+#include "assets/Mesh.h"
+#include "assets/MeshOps.h"
+#include "math/MathsHelper.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>

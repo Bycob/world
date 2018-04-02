@@ -1,7 +1,7 @@
 #ifndef WORLD_COLOR_H
 #define WORLD_COLOR_H
 
-#include "../worldtypes.h"
+#include "core/WorldTypes.h"
 
 namespace world {
     struct Color4u;

@@ -3,15 +3,8 @@
 
 #include <armadillo/armadillo>
 
-#include <worldapi/assets/ObjLoader.h>
-#include <worldapi/assets/Scene.h>
-#include <worldapi/assets/Material.h>
-#include <worldapi/assets/Interop.h>
-#include <worldapi/IOUtil.h>
-#include <worldapi/maths/Perlin.h>
-#include <worldapi/terrain/Terrain.h>
-#include <worldapi/terrain/TerrainGenerator.h>
-#include <worldapi/terrain/TerrainTexmapBuilder.h>
+#include <worldcore.h>
+#include <worldterrain.h>
 
 using namespace arma;
 using namespace world;

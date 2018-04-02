@@ -1,7 +1,7 @@
 
 #include "TerrainGenerator.h"
-#include "../maths/Perlin.h"
-#include "worldapi/assets/Image.h"
+#include "math/Perlin.h"
+#include "assets/Image.h"
 
 
 using namespace perlin;

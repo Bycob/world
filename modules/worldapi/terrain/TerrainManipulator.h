@@ -1,15 +1,15 @@
 #pragma once
 
-#include <worldapi/worldapidef.h>
+#include "core/WorldConfig.h"
 
 #include "Terrain.h"
 
 namespace world {
+	// TODO Change to static method, rename to TerrainOps
+
 	class WORLDAPI_EXPORT ITerrainManipulator {
 	public:
 		static ITerrainManipulator *createManipulator();
-
-		virtual void setZ(Terrain &terrain, double x, double y, double value, int lvl = 0) const = 0;
 
 		virtual void applyOffset(Terrain &terrain, const arma::mat &offset) const = 0;
 
@@ -20,8 +20,6 @@ namespace world {
 
 	class TerrainManipulator : public ITerrainManipulator {
 	public:
-		void setZ(Terrain &terrain, double x, double y, double value, int stage) const override;
-
 		void applyOffset(Terrain &terrain, const arma::mat &offset) const override;
 
 		void multiply(Terrain &terrain, const arma::mat &factor) const override;

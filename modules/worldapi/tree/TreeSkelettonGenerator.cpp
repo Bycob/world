@@ -3,7 +3,7 @@
 #include <list>
 #include <math.h>
 
-#include "../maths/MathsHelper.h"
+#include "math/MathsHelper.h"
 
 #include "TreeSkelettonGenerator.h"
 

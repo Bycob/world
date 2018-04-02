@@ -1,12 +1,12 @@
 #pragma once
 
-#include "worldapi/worldapidef.h"
+#include "core/WorldConfig.h"
 
 #include <string>
 #include <vector>
 #include <stdexcept>
 
-#include "worldapi/maths/MathsHelper.h"
+#include "math/Vector.h"
 
 namespace world {
 

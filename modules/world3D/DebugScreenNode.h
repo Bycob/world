@@ -2,7 +2,7 @@
 
 #include <irrlicht.h>
 
-#include <worldapi/maths/MathsHelper.h>
+#include <worldcore.h>
 
 class Application;
 

@@ -1,17 +1,13 @@
 #pragma once
 
-#include "worldapi/worldapidef.h"
+#include "core/WorldConfig.h"
 
 #include <vector>
 #include <memory>
 
+#include "Scene.h"
+
 namespace world {
-
-	class Mesh;
-
-	class Material;
-
-	class Scene;
 
 #define DEFAULT_MATERIAL_NAME "default"
 

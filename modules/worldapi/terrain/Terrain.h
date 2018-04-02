@@ -1,16 +1,16 @@
 #pragma once
 
-#include <worldapi/worldapidef.h>
+#include "core/WorldConfig.h"
 
 #include <armadillo/armadillo>
 #include <vector>
 #include <memory>
 
-#include "../maths/Interpolation.h"
-#include "../maths/MathsHelper.h"
-#include "../maths/BoundingBox.h"
-#include "worldapi/assets/Mesh.h"
-#include "worldapi/assets/Image.h"
+#include "math/Interpolation.h"
+#include "math/MathsHelper.h"
+#include "math/BoundingBox.h"
+#include "assets/Mesh.h"
+#include "assets/Image.h"
 
 namespace world {
 

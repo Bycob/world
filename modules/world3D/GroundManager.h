@@ -7,9 +7,9 @@
 
 #include <irrlicht.h>
 
-#include <worldapi/terrain/Terrain.h>
-#include <worldapi/terrain/Ground.h>
-#include <worldapi/world/World.h>
+#include <worldcore.h>
+#include <worldflat.h>
+#include <worldterrain.h>
 
 #include "RenderingModule.h"
 

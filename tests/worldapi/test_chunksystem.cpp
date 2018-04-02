@@ -1,7 +1,6 @@
 #include <catch/catch.hpp>
 
-#include <worldapi/world/LODGridCoordinates.h>
-#include <worldapi/world/LODGridChunkSystem.h>
+#include <worldcore.h>
 
 using namespace world;
 

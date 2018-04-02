@@ -1,8 +1,8 @@
 #pragma once
 
-#include <worldapi/worldapidef.h>
+#include "core/WorldConfig.h"
 
-#include "../WeightedSkeletton.h"
+#include "core/WeightedSkeletton.h"
 
 namespace world {
 
@@ -36,11 +36,6 @@ namespace world {
 	public:
 		TreeSkeletton();
 
-		~TreeSkeletton();
-
-	private :
-		friend class TreeSkelettonGenerator;
-
-		friend class TreeGenerator;
+		~TreeSkeletton() override;
 	};
 }

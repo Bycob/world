@@ -1,8 +1,8 @@
 #include "TerrainTexmapBuilder.h"
 
 #include <iostream>
-#include "../maths/MathsHelper.h"
-#include "../maths/Interpolation.h"
+#include "math/MathsHelper.h"
+#include "math/Interpolation.h"
 
 using namespace arma;
 

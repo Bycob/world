@@ -3,14 +3,8 @@
 
 #include <memory>
 
-#include <worldapi/maths/Vector.h>
-#include <worldapi/maths/BoundingBox.h>
-#include <worldapi/world/FirstPersonExplorer.h>
-#include <worldapi/world/Collector.h>
-#include <worldapi/world/WorldObject.h>
-#include <worldapi/world/Chunk.h>
-#include <worldapi/world/World.h>
-#include <worldapi/tree/Tree.h>
+#include <worldcore.h>
+#include <worldtree.h>
 
 using namespace world;
 

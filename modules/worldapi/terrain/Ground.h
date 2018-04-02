@@ -1,15 +1,15 @@
 #ifndef WORLD_TERRAINNODE_H
 #define WORLD_TERRAINNODE_H
 
-#include <worldapi/worldapidef.h>
+#include "core/WorldConfig.h"
 
 #include <map>
 #include <utility>
 #include <functional>
 
+#include "core/WorldZone.h"
 #include "Terrain.h"
-#include "worldapi/world/LODGridChunkSystem.h"
-#include "worldapi/world/ReliefMap.h"
+#include "ReliefMap.h"
 
 namespace world {
 

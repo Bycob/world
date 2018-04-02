@@ -2,8 +2,7 @@
 
 #include <irrlicht.h>
 
-#include <worldapi/assets/Color.h>
-#include <worldapi/maths/MathsHelper.h>
+#include <worldcore.h>
 
 template <typename T> inline irr::core::vector3df toIrrlicht(const world::vec3<T> & vec) {
 	return irr::core::vector3df(

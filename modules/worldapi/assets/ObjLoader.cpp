@@ -9,7 +9,7 @@
 
 #include "Mesh.h"
 #include "Scene.h"
-#include "worldapi/StringOps.h"
+#include "core/StringOps.h"
 
 namespace world {
 

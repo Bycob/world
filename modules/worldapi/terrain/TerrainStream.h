@@ -1,6 +1,8 @@
 #ifndef WORLD_TERRAINSTREAM_H
 #define WORLD_TERRAINSTREAM_H
 
+#include "core/WorldConfig.h"
+
 #include "Terrain.h"
 
 namespace world {

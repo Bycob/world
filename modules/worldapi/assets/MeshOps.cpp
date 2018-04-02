@@ -1,6 +1,6 @@
 #include "MeshOps.h"
 
-#include "worldapi/maths/MathsHelper.h"
+#include "math/MathsHelper.h"
 
 namespace world {
 

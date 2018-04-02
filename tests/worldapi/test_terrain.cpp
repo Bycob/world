@@ -1,6 +1,7 @@
 #include <catch/catch.hpp>
 
-#include <worldapi/terrain/Terrain.h>
+#include <worldcore.h>
+#include <worldterrain.h>
 
 using namespace world;
 

@@ -61,8 +61,8 @@ include(cmake/WorldDependencies.cmake)
 add_subdirectory(3rdparty/)
 
 include_directories(
-		modules/
-		3rdparty/)
+        3rdparty/
+		modules/worldapi/)
 
 # Ajout de World API
 add_subdirectory(modules/worldapi/)

@@ -5,10 +5,8 @@
 
 #include <irrlicht.h>
 
-#include <worldapi/maths/MathsHelper.h>
-#include <worldapi/world/World.h>
-#include <worldapi/assets/Material.h>
-#include <worldapi/assets/Object3D.h>
+#include <worldcore.h>
+#include <worldflat.h>
 
 #include "RenderingModule.h"
 

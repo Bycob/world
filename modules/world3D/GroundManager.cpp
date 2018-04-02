@@ -4,9 +4,6 @@
 
 #include "GroundManager.h"
 
-#include <worldapi/world/FlatWorld.h>
-#include <worldapi/terrain/TerrainGenerator.h>
-
 #include "Application.h"
 
 using namespace irr;

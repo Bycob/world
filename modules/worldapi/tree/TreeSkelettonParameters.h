@@ -1,12 +1,12 @@
 #pragma once
 
-#include <memory>
+#include "core/WorldConfig.h"
 
-#define _USE_MATH_DEFINES
-#include <math.h>
+#include <memory>
+#include <cmath>
 
 #include "TreeSkeletton.h"
-#include "worldapi/Parameters.h"
+#include "core/Parameters.h"
 
 namespace world {
 	namespace tree {

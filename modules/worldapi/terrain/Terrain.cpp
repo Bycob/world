@@ -4,13 +4,13 @@
 #include <iostream>
 #include <math.h>
 
-#include <worldapi/maths/MathsHelper.h>
+#include <math/MathsHelper.h>
 
-#include "worldapi/assets/Interop.h"
-#include "worldapi/assets/Image.h"
-#include "worldapi/assets/Mesh.h"
-#include "worldapi/assets/MeshOps.h"
-#include "../Stream.h"
+#include "assets/Interop.h"
+#include "assets/Image.h"
+#include "assets/Mesh.h"
+#include "assets/MeshOps.h"
+#include "core/Stream.h"
 
 
 

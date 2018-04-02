@@ -1,14 +1,8 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <worldapi/assets/ObjLoader.h>
-#include <worldapi/assets/Scene.h>
-#include <worldapi/assets/Mesh.h>
-#include <worldapi/IOUtil.h>
-#include <worldapi/tree/TreeSkelettonGenerator.h>
-#include <worldapi/tree/TreeGenerator.h>
-#include <worldapi/tree/TreeSkeletton.h>
-#include <worldapi/tree/Tree.h>
+#include <worldcore.h>
+#include <worldtree.h>
 
 using namespace world;
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "worldapi/worldapidef.h"
+#include "core/WorldConfig.h"
 
 #include <armadillo/armadillo>
 

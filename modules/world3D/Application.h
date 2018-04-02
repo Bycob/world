@@ -9,9 +9,8 @@
 #include <mutex>
 #include <memory>
 
-#include <worldapi/world/FlatWorld.h>
-#include <worldapi/world/FirstPersonExplorer.h>
-#include <worldapi/world/FlatWorldCollector.h>
+#include <worldcore.h>
+#include <worldflat.h>
 
 #include "MainView.h"
 #include "SynchronizedCollector.h"

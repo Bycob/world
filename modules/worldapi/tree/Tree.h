@@ -1,12 +1,12 @@
 #pragma once
 
+#include "core/WorldConfig.h"
+
 #include <memory>
 
-#include <worldapi/worldapidef.h>
-
-#include "../world/WorldObject.h"
-#include "worldapi/assets/Mesh.h"
-#include "worldapi/assets/Material.h"
+#include "core/WorldObject.h"
+#include "assets/Mesh.h"
+#include "assets/Material.h"
 #include "TreeSkeletton.h"
 
 namespace world {

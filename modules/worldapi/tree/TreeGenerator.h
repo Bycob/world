@@ -1,9 +1,9 @@
 #pragma once
 
-#include <worldapi/worldapidef.h>
+#include "core/WorldConfig.h"
 
-#include "../ICloneable.h"
-#include "../maths/Bezier.h"
+#include "core/ICloneable.h"
+#include "math/Bezier.h"
 #include "TreeSkeletton.h"
 #include "Tree.h"
 

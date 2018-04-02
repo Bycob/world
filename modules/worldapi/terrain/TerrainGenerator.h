@@ -1,16 +1,16 @@
 #pragma once
 
-#include <worldapi/worldapidef.h>
+#include "core/WorldConfig.h"
 
 #include <memory>
 #include <map>
 #include <utility>
 
-#include "../worldtypes.h"
-#include "worldapi/assets/Image.h"
-#include "../maths/Perlin.h"
-#include "TerrainTexmapBuilder.h"
+#include "core/WorldTypes.h"
+#include "math/Perlin.h"
+#include "assets/Image.h"
 #include "Terrain.h"
+#include "TerrainTexmapBuilder.h"
 #include "TerrainSubdivisionTree.h"
 
 namespace world {

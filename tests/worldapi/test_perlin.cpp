@@ -1,6 +1,6 @@
 #include <catch/catch.hpp>
 
-#include <worldapi/maths/Perlin.h>
+#include <worldcore.h>
 
 using namespace world;
 

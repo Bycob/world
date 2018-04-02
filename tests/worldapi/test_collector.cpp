@@ -1,7 +1,6 @@
 #include <catch/catch.hpp>
 
-#include <worldapi/world/Collector.h>
-#include <worldapi/world/CollectorContextWrap.h>
+#include <worldcore.h>
 
 using namespace world;
 

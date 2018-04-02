@@ -1,7 +1,5 @@
 #include "Tree.h"
 
-#include "worldapi/world/Collector.h"
-
 namespace world {
     Tree::Tree() : _trunkMaterial("trunk") {
         _trunkMaterial.setKd(0.5, 0.2, 0);

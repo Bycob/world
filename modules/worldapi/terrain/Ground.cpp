@@ -4,7 +4,7 @@
 
 #include "TerrainManipulator.h"
 #include "TerrainGenerator.h"
-#include "../world/FlatWorldCollector.h"
+#include "flat/FlatWorldCollector.h"
 
 namespace world {
 

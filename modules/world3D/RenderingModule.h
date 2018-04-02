@@ -1,7 +1,9 @@
 #pragma once
 
 #include <irrlicht.h>
-#include <worldapi/world/FlatWorldCollector.h>
+
+#include <worldcore.h>
+#include <worldflat.h>
 
 class Application;
 

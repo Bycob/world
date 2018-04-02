@@ -1,6 +1,6 @@
 #include <catch/catch.hpp>
 
-#include <worldapi/worldtypes.h>
+#include <worldcore.h>
 
 using namespace world;
 

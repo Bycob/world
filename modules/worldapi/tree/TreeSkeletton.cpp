@@ -6,11 +6,7 @@ namespace world {
 		;
 	}
 
-	TreeSkeletton::TreeSkeletton() {
+	TreeSkeletton::TreeSkeletton() {}
 
-	}
-
-	TreeSkeletton::~TreeSkeletton() {
-
-	}
+	TreeSkeletton::~TreeSkeletton() = default;
 }

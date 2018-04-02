@@ -5,7 +5,8 @@
 #include <mutex>
 #include <atomic>
 
-#include <worldapi/world/FlatWorldCollector.h>
+#include <worldcore.h>
+#include <worldflat.h>
 
 // TODO supprimer cette classe une fois que le collector sera synchronisé
 class SynchronizedCollector {

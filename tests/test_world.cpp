@@ -2,9 +2,8 @@
 #include <stdexcept>
 #include <memory>
 
-#include <worldapi/world/FlatWorld.h>
-#include <worldapi/world/FlatWorldCollector.h>
-#include <worldapi/world/FirstPersonExplorer.h>
+#include <worldcore.h>
+#include <worldflat.h>
 
 using namespace world;
 

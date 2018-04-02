@@ -1,8 +1,8 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <worldapi/world/ReliefMap.h>
-#include <worldapi/IOUtil.h>
+#include <worldcore.h>
+#include <worldterrain.h>
 
 #include "testutil.h"
 
