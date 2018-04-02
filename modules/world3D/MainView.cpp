@@ -54,8 +54,15 @@ bool MainView::OnEvent(const SEvent& event) {
 				_camera->setInputReceiverEnabled(_fpsModeActive);
 				_device->getCursorControl()->setVisible(!_fpsModeActive);
 			}
-			else if (event.KeyInput.Key == KEY_KEY_Q) {
+			else if (event.KeyInput.Key == KEY_KEY_Q && event.KeyInput.Control) {
 				_device->closeDevice();
+			}
+			else if (event.KeyInput.Key == KEY_KEY_S) {
+                _cameraFast = !_cameraFast;
+                float cameraSpeed = _cameraFast ? 1.f : 0.01f;
+                auto anims = _camera->getAnimators();
+                auto *fps = (ISceneNodeAnimatorCameraFPS*) (*anims.begin());
+                fps->setMoveSpeed(cameraSpeed);
 			}
 		}
 	}
@@ -83,7 +90,8 @@ void MainView::runInternal() {
     _driver = _device->getVideoDriver();
 
     // Initialisation des différents modules de rendu
-    _camera = _scenemanager->addCameraSceneNodeFPS(0, 100.0f, 1.f);
+    float cameraSpeed = _cameraFast ? 1.f : 0.005f;
+    _camera = _scenemanager->addCameraSceneNodeFPS(0, 100.0f, cameraSpeed);
 	_camera->setFOV(1.57);
     _camera->setNearValue(0.1f);
     _camera->setFarValue(40000);

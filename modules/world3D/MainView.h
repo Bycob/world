@@ -51,6 +51,7 @@ private:
 	std::vector<std::unique_ptr<RenderingModule>> _modules;
 
 	bool _fpsModeActive = true;
+	bool _cameraFast = true;
 
     void runInternal();
 	void recreateModules();
