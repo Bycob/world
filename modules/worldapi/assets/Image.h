@@ -81,7 +81,7 @@ namespace world {
 		const ConstPixel at(int x, int y) const;
 
 		// IO
-		void write(const std::string &file);
+		void write(const std::string &file) const;
 	private:
 		ImageType _type;
 

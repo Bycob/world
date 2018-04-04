@@ -224,6 +224,10 @@ namespace world {
 		return (int) (_array.n_rows * _array.n_cols) * sizeof(float) / sizeof(char);
 	}
 
+	void Terrain::setTexture(const Image &image) {
+		_texture = std::make_unique<Image>(image);
+	}
+
 	optional<const Image &> Terrain::getTexture() const {
 		if (_texture == nullptr) {
 			return nullopt;

@@ -108,6 +108,10 @@ void MainView::runInternal() {
     auto light = _scenemanager->addLightSceneNode(0, vector3df(0, 0, 1), video::SColorf(1.0f,1.0f,1.0f), 100.0f);
     light->setRotation(vector3df(60, 0, 0));
     light->getLightData().Type = ELT_DIRECTIONAL;
+	
+	irr::video::SColor bgColor(255, 190, 199, 220);
+	auto fogColor = bgColor; fogColor.setAlpha(0);
+	_driver->setFog(bgColor, irr::video::EFT_FOG_LINEAR, 2500, 10000, 0.01f, false, true);
 
 	// Affichage de debug
 	_debug = new DebugScreenNode(_app, _device, _scenemanager->getRootSceneNode(), -1);

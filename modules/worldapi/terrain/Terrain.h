@@ -92,6 +92,8 @@ namespace world {
 
 		int getRawDataSize() const;
 
+		void setTexture(const Image &image);
+
 		optional<const Image &> getTexture() const;
 
 	private :

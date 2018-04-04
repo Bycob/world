@@ -14,6 +14,7 @@ Application::Application()
 		  _collector(std::make_unique<SynchronizedCollector>()){
 
 	_explorer->setOrigin({0, 0, 0});
+	_explorer->setMaxDistance(10000);
 }
 
 void Application::run(int argc, char **argv) {

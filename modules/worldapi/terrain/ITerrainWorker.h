@@ -12,6 +12,10 @@ namespace world {
         /** Returns neighbour terrains. */
         virtual optional<const Terrain &> getNeighbour(int x, int y) const = 0;
 
+		virtual optional<const Terrain &> getParent() const = 0;
+
+		virtual int getParentCount() const = 0;
+
         /** Tells the context that a version of the processed terrain
          * should be cached right after this generation stage is finished.
          * The cached terrain will then be returned by the method

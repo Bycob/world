@@ -9,11 +9,10 @@
 #include "terrain/Terrain.h"
 #include "terrain/TerrainOps.h"
 #include "terrain/TerrainStream.h"
+#include "terrain/AltitudeTexturer.h"
 
 // deprecated
 #include "terrain/TerrainSubdivisionGenerator.h"
 #include "terrain/TerrainSubdivisionTree.h"
-#include "terrain/TerrainTexmapBuilder.h"
-#include "terrain/TerrainTexmapModifier.h"
 
 #endif // WORLD_WORLDTERRAIN_H

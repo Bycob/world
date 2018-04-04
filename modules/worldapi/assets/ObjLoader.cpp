@@ -220,7 +220,9 @@ namespace world {
 				}//*/
 
 				for (int i = 0; i < vertexCount; i++) {
-					objstream << " " << face.getID(i) << "/" << face.getID(i) << "/" << face.getID(i) << std::endl;
+					objstream << " " << face.getID(i) + verticesOffset + 1 << "/" 
+						<< face.getID(i) + texCoordOffset + 1 << "/" 
+						<< face.getID(i) + normalOffset + 1;
 				}
 				objstream << std::endl;
 			}

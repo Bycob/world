@@ -109,9 +109,7 @@ namespace world {
          * generated.*/
 		void generateTerrain(int x, int y, int lvl);
 
-		void applyPreviousLayer(int x, int y, int lvl, bool unapply = false);
-
-		void applyParent(int tX, int tY, int lvl, bool unapply = false);
+		void applyParent(int tX, int tY, int lvl);
 
 		friend class GroundContext;
 	};

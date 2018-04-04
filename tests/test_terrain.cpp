@@ -177,32 +177,19 @@ void testPerlin(int argc, char** argv) {
 	//GENERATION DE LA TEXTURE DU TERRAIN
 
 	std::cout << "creation de la texture" << std::endl;
-
-	//---
-	TerrainTexmapBuilder texmapBuilder(0, 255);
-
-	std::vector<ColorPart> slice1;
-	slice1.emplace_back(47.0 / 255, 128.0 / 255, 43.0 / 255, 0.75);
-	slice1.emplace_back(65.0 / 255, 53.0 / 255, 22.0 / 255, 0.25);
-
-	std::vector<ColorPart> slice2;
-	slice2.emplace_back(47.0 / 255, 128.0 / 255, 43.0 / 255, 0.15);
-	slice2.emplace_back(65.0 / 255, 53.0 / 255, 22.0 / 255, 0.25);
-	slice2.emplace_back(0.25, 0.25, 0.25, 0.6);
-
-	std::vector<ColorPart> slice3;
-	slice3.emplace_back(1, 1, 1, 0.7);
-	slice3.emplace_back(0.25, 0.25, 0.25, 0.3);
 	
-	texmapBuilder.addSlice(1, slice1);
-	texmapBuilder.addSlice(180, slice2);
-	texmapBuilder.addSlice(230, slice3);
-	//---
+	AltitudeTexturer texturer;
 
-	TerrainTexmapModifier texmapModifier;
+	auto &colorMap = texturer.getColorMap();
+	colorMap.addPoint({ 0.37, 0 }, Color4u(144, 183, 123));
+	colorMap.addPoint({ 0.3, 1 }, Color4u(144, 183, 123));
+	colorMap.addPoint({ 0.48, 1 }, Color4u(114, 90, 48));
+	colorMap.addPoint({ 0.55, 0 }, Color4u(114, 90, 48));
+	colorMap.addPoint({ 0.65, 1 }, Color4u(160, 160, 160));
+	colorMap.addPoint({ 1, 0.5 }, Color4u(244, 252, 250));
 
-	arma::Mat<double> randomArray = perlin.generatePerlinNoise2D(size * 8, 0, 7, 16, (float)0.9);
-	Image texture = texmapModifier.generateTexture(terrain, texmapBuilder, randomArray);
+	texturer.process(terrain);
+	const Image &texture = *terrain.getTexture();
 
 	std::cout << "ecriture de la texture..." << std::endl;
 	try {
@@ -213,13 +200,13 @@ void testPerlin(int argc, char** argv) {
 	}
 
 	std::cout << "ecriture de la carte" << std::endl;
+	std::unique_ptr<Image> colorMapImg(colorMap.createImage());
 	try {
-		Image(texmapBuilder.convertToMap()).write("tests/test2_map.png");
+		colorMapImg->write("tests/test2_map.png");
 	}
 	catch (std::exception & e) {
 		std::cout << "erreur : " << e.what() << std::endl;
 	}
-
 }
 
 void testSubdivisions(int argc, char** argv) {

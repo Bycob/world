@@ -219,7 +219,7 @@ namespace world {
 		return ConstPixel(x, y, const_cast<Image *>(this));
 	}
 
-	void Image::write(const std::string &file) {
+	void Image::write(const std::string &file) const {
 		cv::imwrite(file, _private->_image);
 	}
 }
@@ -379,7 +379,7 @@ namespace world {
 		return ConstPixel(x, y, const_cast<Image *>(this));
 	}
 
-	void Image::write(const std::string &file) {
+	void Image::write(const std::string &file) const {
 
 	}
 }

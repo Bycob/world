@@ -43,6 +43,7 @@
 #include "core/Stream.h"
 #include "core/StringOps.h"
 #include "core/WeightedSkeletton.h"
+#include "core/ColorMap.h"
 #include "core/Parameters.h"
 
 #endif //WORLD_WORLDAPI_H

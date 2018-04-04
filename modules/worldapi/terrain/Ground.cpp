@@ -39,6 +39,25 @@ namespace world {
 			}
         }
 
+		optional<const Terrain &> getParent() const override {
+			if (_lvl == 0)
+				return nullopt;
+
+			auto parentId = _ground.getParentId({ _x, _y, _lvl });
+			auto ret = _ground.cachedTerrain(parentId.x, parentId.y, parentId.z, _genID);
+
+			if (ret) {
+				return *ret;
+			}
+			else {
+				return nullopt;
+			}
+		}
+
+		int getParentCount() const override {
+			return _lvl;
+		}
+
         void registerCurrentState() override {
             _registerState = true;
         }
@@ -235,16 +254,13 @@ namespace world {
         _internal->_terrains[{x, y, lvl}] = {std::move(cache), std::move(terrain)};
 
         // Integration
-        applyPreviousLayer(x, y, lvl);
+        applyParent(x, y, lvl);
     }
 
-    void Ground::applyPreviousLayer(int x, int y, int lvl, bool unapply) {
-        if (lvl != 0) {
-            applyParent(x, y, lvl, unapply);
-        }
-    }
+    void Ground::applyParent(int tX, int tY, int lvl) {
+		if (lvl == 0)
+			return;
 
-    void Ground::applyParent(int tX, int tY, int lvl, bool unapply) {
         vec3i childId{tX, tY, lvl};
         Terrain &child = this->terrain(tX, tY, lvl);
         int size = child.getResolution();
@@ -273,16 +289,18 @@ namespace world {
                         oX + ((double) x / (size - 1)) * ratio,
                         oY + ((double) y / (size - 1)) * ratio,
                         Interpolation::COSINE
-                ) * parentProp * (unapply ? -1. : 1.);
+                ) * parentProp;
+
+				// to unapply :
+				// * (unapply ? -1. : 1.)
             }
         }
 
-        if (unapply) {
-            TerrainOps::applyOffset(child, bufferParent);
-            TerrainOps::multiply(child, 1. / childProp);
-        } else {
-            TerrainOps::multiply(child, childProp);
-            TerrainOps::applyOffset(child, bufferParent);
-        }
+        TerrainOps::multiply(child, childProp);
+        TerrainOps::applyOffset(child, bufferParent);
+		
+		// to unapply
+		// TerrainOps::applyOffset(child, bufferParent);
+		// TerrainOps::multiply(child, 1. / childProp);
     }
 }

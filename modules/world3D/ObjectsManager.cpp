@@ -47,6 +47,7 @@ void ObjectNodeHandler::updateObject3D(const Object3D & object) {
 
 	// Materiau
 	_meshNode->setMaterialFlag(EMF_LIGHTING, true);
+	_meshNode->setMaterialFlag(EMF_FOG_ENABLE, true);
 	
 	SMaterial & material = _meshNode->getMaterial(0);
 	material.BackfaceCulling = false;
