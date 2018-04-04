@@ -3,7 +3,6 @@
 #include "core/WorldConfig.h"
 
 #include <memory>
-#include <cmath>
 
 #include "TreeSkeletton.h"
 #include "core/Parameters.h"

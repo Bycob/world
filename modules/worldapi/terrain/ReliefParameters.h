@@ -2,8 +2,6 @@
 
 #include "core/WorldConfig.h"
 
-#include <cmath>
-
 #include "core/Parameters.h"
 
 namespace world {

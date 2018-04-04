@@ -5,6 +5,12 @@
 #include <iostream>
 #include <algorithm>
 #include <limits>
+#include <cmath>
+
+// Math defines on MSVC
+#ifdef _MSC_VER
+#include <math.h>
+#endif
 
 #include <armadillo/armadillo>
 

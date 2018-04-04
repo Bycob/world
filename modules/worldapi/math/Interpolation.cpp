@@ -1,7 +1,5 @@
 #include "Interpolation.h"
 
-#include <cmath>
-
 namespace world {
     const Interpolation::interpFunc Interpolation::LINEAR = [](double x) {return x;};
     const Interpolation::interpFunc Interpolation::COSINE = [](double x) {return (1 - cos(x * M_PI)) * 0.5;};

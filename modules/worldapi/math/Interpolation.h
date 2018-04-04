@@ -5,6 +5,7 @@
 #include "core/WorldConfig.h"
 
 #include <utility>
+#include <functional>
 
 #include "MathsHelper.h"
 
