@@ -3,10 +3,11 @@
 #include "core/WorldConfig.h"
 
 #include <vector>
+#include <map>
 #include <random>
 #include <memory>
 
-#include "Terrain.h"
+#include "ITerrainWorker.h"
 #include "ReliefParameters.h"
 
 namespace world {
@@ -19,21 +20,29 @@ namespace world {
 	 * For example, mountains have a high offset and a high diff,
 	 * countryside has a low offset and a low diff, and a plateau
 	 * would have a high offset but a low diff. */
-	class WORLDAPI_EXPORT ReliefMapGenerator {
+	class WORLDAPI_EXPORT ReliefMapModifier : public ITerrainWorker {
 	public:
-		ReliefMapGenerator();
+		ReliefMapModifier();
+
+		void setMapResolution(int mapres);
+
+		void process(Terrain &terrain) override;
+
+		void process(Terrain &terrain, ITerrainWorkerContext &context) override;
+
+		const std::pair<Terrain, Terrain> &obtainMap(int x, int y);
+	protected:
+        int _mapResolution = 200;
+		double _mapPointSize = 2000;
+		mutable std::mt19937 _rng;
+		std::map<vec2i, std::pair<Terrain, Terrain>> _reliefMap;
 
 		virtual void generate(Terrain &height, Terrain &heightDiff) const = 0;
-
-	protected:
-		mutable std::mt19937 _rng;
 	};
 
-	class WORLDAPI_EXPORT CustomWorldRMGenerator : public ReliefMapGenerator {
+	class WORLDAPI_EXPORT CustomWorldRMModifier : public ReliefMapModifier {
 	public:
-		CustomWorldRMGenerator(double biomeDensity = 1, int limitBrightness = 4);
-
-		CustomWorldRMGenerator(const CustomWorldRMGenerator &other);
+		CustomWorldRMModifier(double biomeDensity = 1, int limitBrightness = 4);
 
 		void setBiomeDensity(float biomeDensity);
 
@@ -41,6 +50,7 @@ namespace world {
 
 		void setDifferentialLaw(const relief::diff_law &law);
 
+	protected:
 		void generate(Terrain &height, Terrain &heightDiff) const override;
 
 	private:

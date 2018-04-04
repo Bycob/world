@@ -87,7 +87,7 @@ namespace world {
 		for (int x = 0; x < subdivideFactor; x++) {
 			for (int y = 0; y < subdivideFactor; y++) {
 				std::unique_ptr<TerrainSubdivisionTree> subtree = std::unique_ptr<TerrainSubdivisionTree>(
-						new TerrainSubdivisionTree(new Terrain(_terrain->getSize())));
+						new TerrainSubdivisionTree(new Terrain(_terrain->getResolution())));
 
 				subtree->_parent = this;
 				subtree->_subdivisionStage = _subdivisionStage + 1;

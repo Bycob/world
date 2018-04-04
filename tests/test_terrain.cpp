@@ -199,8 +199,10 @@ void testPerlin(int argc, char** argv) {
 	texmapBuilder.addSlice(230, slice3);
 	//---
 
+	TerrainTexmapModifier texmapModifier;
+
 	arma::Mat<double> randomArray = perlin.generatePerlinNoise2D(size * 8, 0, 7, 16, (float)0.9);
-	Image texture = generator.generateTexture(terrain, texmapBuilder, randomArray);
+	Image texture = texmapModifier.generateTexture(terrain, texmapBuilder, randomArray);
 
 	std::cout << "ecriture de la texture..." << std::endl;
 	try {
@@ -218,9 +220,19 @@ void testPerlin(int argc, char** argv) {
 		std::cout << "erreur : " << e.what() << std::endl;
 	}
 
+}
+
+void testSubdivisions(int argc, char** argv) {
+	ObjLoader meshIO;
+	Terrain terrain(129);
+	PerlinTerrainGenerator generator;
+	generator.process(terrain);
+
+	TerrainSubdivisionGenerator subdiv;
+
 	// CREATION DES SUBDIVISIONS DU TERRAIN
 	std::cout << "génération des subdivisions" << std::endl;
-	TerrainSubdivisionTree * terrainTree = generator.generateSubdivisions(terrain, 4, 1);
+	TerrainSubdivisionTree * terrainTree = subdiv.generateSubdivisions(terrain, 4, 1);
 	std::cout << "génération terminée !" << std::endl;
 
 	std::cout << "Conversion en mesh de 4 sous-terrains..." << std::endl;
@@ -231,11 +243,11 @@ void testPerlin(int argc, char** argv) {
 	subterrainScene.createObject(std::shared_ptr<Mesh>(terrainTree->getSubtree(1, 0).convertToSubmesh()));
 	subterrainScene.createObject(std::shared_ptr<Mesh>(terrainTree->getSubtree(1, 1).convertToSubmesh()));
 	subterrainScene.createObject(std::shared_ptr<Mesh>(terrainTree->getSubtree(0, 1).convertToSubmesh()));
-	
+
 	std::cout << "Ecriture du fichier .obj..." << std::endl;
 	meshIO.write(subterrainScene, "tests/subterrain");
 	std::cout << "Fichier écrit !" << std::endl;
-	
+
 	std::cout << "Ecriture de l'image associée..." << std::endl;
 	Image image2 = subtree.terrain().createImage();
 	image2.write("tests/subterrain.png");

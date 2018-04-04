@@ -3,8 +3,7 @@
 #include "core/WorldConfig.h"
 
 #include "core/World.h"
-// TODO IGround
-#include "terrain/Ground.h"
+#include "IGround.h"
 
 namespace world {
 	class FlatWorld;
@@ -23,7 +22,7 @@ namespace world {
 
 		~FlatWorld() override;
 
-		Ground &ground();
+		IGround &ground();
 
 		void addFlatWorldDecorator(FlatWorldDecorator *decorator);
 
@@ -35,6 +34,6 @@ namespace world {
 	private:
 		PrivateFlatWorld *_internal;
 
-		Ground _ground;
+		std::unique_ptr<IGround> _ground;
 	};
 }

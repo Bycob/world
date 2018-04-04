@@ -1,5 +1,6 @@
 #include "FlatWorld.h"
 
+#include "terrain/Ground.h"
 #include "SimpleTreeDecorator.h"
 #include "FlatWorldCollector.h"
 
@@ -20,7 +21,9 @@ namespace world {
 		return world;
 	}
 
-	FlatWorld::FlatWorld() : _internal(new PrivateFlatWorld()) {
+	FlatWorld::FlatWorld()
+			: _internal(new PrivateFlatWorld()),
+			  _ground(std::make_unique<Ground>()) {
 
 	}
 
@@ -28,8 +31,8 @@ namespace world {
 		delete _internal;
 	}
 
-	Ground &FlatWorld::ground() {
-		return _ground;
+	IGround &FlatWorld::ground() {
+		return *_ground;
 	}
 
 	void FlatWorld::addFlatWorldDecorator(FlatWorldDecorator *decorator) {

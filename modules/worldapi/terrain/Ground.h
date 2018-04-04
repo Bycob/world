@@ -8,14 +8,11 @@
 #include <functional>
 
 #include "core/WorldZone.h"
+#include "flat/IGround.h"
 #include "Terrain.h"
-#include "ReliefMap.h"
+#include "ITerrainWorker.h"
 
 namespace world {
-
-	class FlatWorld;
-
-	class FlatWorldCollector;
 
 	class PrivateGround;
 
@@ -27,7 +24,7 @@ namespace world {
 	la classe Ground lorsque l'utilisateur le demande. Un terrain donné est
 	considéré comme non généré s'il n'est ni dans le cache, ni dans le dossier
 	référencé. */
-	class WORLDAPI_EXPORT Ground {
+	class WORLDAPI_EXPORT Ground : public IGround {
 	public:
 		Ground();
 
@@ -50,9 +47,9 @@ namespace world {
 		double getUnitSize() const { return _unitSize; }
 
 		// EXPLORATION
-		double observeAltitudeAt(WorldZone zone, double x, double y);
+		double observeAltitudeAt(WorldZone zone, double x, double y) override;
 
-		void collectZone(FlatWorldCollector &collector, FlatWorld &world, const WorldZone &zone);
+		void collectZone(FlatWorldCollector &collector, FlatWorld &world, const WorldZone &zone) override;
 
 	private:
 		PrivateGround *_internal;
@@ -72,10 +69,6 @@ namespace world {
 		int _terrainRes = 65;
 		int _maxLOD = 4;
 
-		// Generator
-		std::unique_ptr<ReliefMapGenerator> _mapGenerator;
-		std::unique_ptr<TerrainGenerator> _terrainGenerator;
-
 
 		double observeAltitudeAt(double x, double y, int lvl = 0);
 
@@ -85,7 +78,7 @@ namespace world {
 		// ACCESS
 		Terrain &terrain(int x, int y, int lvl = 0);
 
-		Terrain &rawTerrain(int x, int y, int lvl = 0);
+		optional<Terrain &> cachedTerrain(int x, int y, int lvl, int genID);
 
 		/** Indique si le terrain à l'indice (x, y) existe déjà ou au
         contraire doit être généré par le générateur de terrain.
@@ -119,14 +112,6 @@ namespace world {
 		void applyPreviousLayer(int x, int y, int lvl, bool unapply = false);
 
 		void applyParent(int tX, int tY, int lvl, bool unapply = false);
-
-		void applyMap(int x, int y, int lvl, bool unapply = false);
-
-		std::pair<std::unique_ptr<Terrain>, std::unique_ptr<Terrain>> & getOrCreateMap(int x, int y);
-
-		Terrain& getOrCreateOffsetMap(int x, int y);
-
-		Terrain& getOrCreateDiffMap(int x, int y);
 
 		friend class GroundContext;
 	};

@@ -13,6 +13,8 @@ namespace world {
 
         vec3d getLowerBound() const;
         vec3d getUpperBound() const;
+
+        vec3d getDimensions() const;
     private:
         vec3d _lower;
         vec3d _upper;

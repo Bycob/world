@@ -77,7 +77,7 @@ namespace world {
 	}
 
 	double Terrain::getRawHeight(double x, double y) const {
-        int size = getSize();
+        int size = getResolution();
 		int posX = clamp(static_cast<int>(round(x * (size - 1))), 0, size - 1);
 		int posY = clamp(static_cast<int>(round(y * (size - 1))), 0, size - 1);
 

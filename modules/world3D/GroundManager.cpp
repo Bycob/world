@@ -79,7 +79,7 @@ void GroundManager::clearAllNodes() {
 ITerrainSceneNode* GroundManager::createNode(const Terrain &terrain) {
 
 	// Données concernant la position et les dimensions du terrain
-	int terrainRes = (terrain.getSize() - 1);
+	int terrainRes = (terrain.getResolution() - 1);
 	vec3d offset = terrain.getBoundingBox().getLowerBound();
 	vec3d size = terrain.getBoundingBox().getUpperBound() - offset;
     size = size / terrainRes;

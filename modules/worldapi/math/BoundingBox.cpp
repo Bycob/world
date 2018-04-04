@@ -26,4 +26,8 @@ namespace world {
     vec3d BoundingBox::getUpperBound() const {
         return _upper;
     }
+
+    vec3d BoundingBox::getDimensions() const {
+        return _upper - _lower;
+    }
 }

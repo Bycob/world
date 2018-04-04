@@ -20,8 +20,6 @@ namespace world {
 	-> x indique l'indice de la ligne,
 	-> y indique l'indice de la colonne.*/
 
-	class WORLDAPI_EXPORT TerrainGenerator;
-
 	/** A Terrain is a squared Heightmap with spatial bounds and
 	 * a bunch of convenience methods. A terrain can be converted
 	 * to a mesh, or an image, depending on what use one needs.
@@ -45,7 +43,7 @@ namespace world {
 
 		const BoundingBox &getBoundingBox() const;
 
-		int getSize() const {
+		int getResolution() const {
 			return static_cast<int>(_array.n_rows);
 		}
 
@@ -104,11 +102,9 @@ namespace world {
 
 		// ------
 
-		friend class TerrainGenerator;
-
 		friend class PerlinTerrainGenerator;
 
-		friend class TerrainManipulator;
+		friend class TerrainOps;
 
 		vec2i getPixelPos(double x, double y) const;
 	};

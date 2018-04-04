@@ -1,4 +1,4 @@
-#include "ReliefMap.h"
+#include "ReliefMapModifier.h"
 
 #include <utility>
 #include <list>
@@ -7,50 +7,115 @@
 #include "assets/Image.h"
 #include "math/MathsHelper.h"
 #include "math/Interpolation.h"
+#include "TerrainOps.h"
 
 using namespace arma;
-
 
 namespace world {
 
 	// -----
-	ReliefMapGenerator::ReliefMapGenerator() : _rng(time(NULL)) {
+	ReliefMapModifier::ReliefMapModifier() : _rng(time(NULL)) {
 
 	}
 
+	void ReliefMapModifier::setMapResolution(int mapres) {
+	    _mapResolution = mapres;
+	}
+
+	void ReliefMapModifier::process(world::Terrain &terrain) {
+		// Terrain
+		int size = terrain.getResolution();
+
+		// Map
+        // TODO plutôt qu'un const cast faire une méthode privée
+		std::pair<Terrain, Terrain> &reliefMap = const_cast<std::pair<Terrain, Terrain>&>(obtainMap(0, 0));
+		Terrain &heightMap = reliefMap.first;
+		Terrain &diffMap = reliefMap.second;
+
+		// Setup variables
+		const vec3d terrainDims = terrain.getBoundingBox().getDimensions();
+		const vec3d terrainPos = terrain.getBoundingBox().getLowerBound();
+		const double mapSize = heightMap.getResolution() * _mapPointSize;
+		const double ratio = terrainDims.x / mapSize;
+		const double mapOx = 0.5 + terrainPos.x / mapSize;
+		const double mapOy = 0.5 + terrainPos.y / mapSize;
+
+		const double offsetCoef = 0.5;
+		const double diffCoef = 1 - offsetCoef;
+
+		// std::cout << "apply to " << mapOx << ", " << mapOy << std::endl;
+
+		arma::mat bufferOffset(size, size);
+		arma::mat bufferDiff(size, size);
+
+		for (int x = 0; x < size; x++) {
+			for (int y = 0; y < size; y++) {
+				double mapX = mapOx + ((double) x / (size - 1)) * ratio;
+				double mapY = mapOy + ((double) y / (size - 1)) * ratio;
+
+				double offset = heightMap.getInterpolatedHeight(mapX, mapY, Interpolation::COSINE) * offsetCoef;
+				double diff = diffMap.getInterpolatedHeight(mapX, mapY, Interpolation::COSINE) * diffCoef;
+
+                bufferOffset(x, y) = offset;
+                bufferDiff(x, y) = diff;
+
+                //to unapply
+                //bufferOffset(x, y) = -offset;
+                //bufferDiff(x, y) = diff > std::numeric_limits<double>::epsilon() ? 1 / diff : 0;
+			}
+		}
+
+        TerrainOps::multiply(terrain, bufferDiff);
+        TerrainOps::applyOffset(terrain, bufferOffset);
+
+        // To unapply
+		// TerrainOps::applyOffset(terrain, bufferOffset);
+		// TerrainOps::multiply(terrain, bufferDiff);
+	}
+
+	void ReliefMapModifier::process(Terrain &terrain, ITerrainWorkerContext &context) {
+		process(terrain);
+	}
+
+	const std::pair<Terrain, Terrain>& ReliefMapModifier::obtainMap(int x, int y) {
+		auto it = _reliefMap.find({x, y});
+
+		if (it == _reliefMap.end()) {
+			it = _reliefMap.emplace(
+					vec2i{x, y},
+					std::make_pair<Terrain, Terrain>(
+							Terrain(_mapResolution), Terrain(_mapResolution)
+					)).first;
+			generate(it->second.first, it->second.second);
+		}
+		return it->second;
+	}
 
 	// -----
-	const double CustomWorldRMGenerator::PIXEL_UNIT = 10;
+	const double CustomWorldRMModifier::PIXEL_UNIT = 10;
 
-	CustomWorldRMGenerator::CustomWorldRMGenerator(double biomeDensity, int limitBrightness) :
+	CustomWorldRMModifier::CustomWorldRMModifier(double biomeDensity, int limitBrightness) :
 			_biomeDensity(biomeDensity),
 			_limitBrightness(limitBrightness),
 			_diffLaw(std::make_unique<relief::CustomWorldDifferential>()) {
 
 	}
 
-	CustomWorldRMGenerator::CustomWorldRMGenerator(const CustomWorldRMGenerator &other)
-			: _biomeDensity(other._biomeDensity),
-			  _limitBrightness(other._limitBrightness),
-			  _diffLaw(other._diffLaw->clone()) {
-
-	}
-
-	void CustomWorldRMGenerator::setBiomeDensity(float biomeDensity) {
+	void CustomWorldRMModifier::setBiomeDensity(float biomeDensity) {
 		_biomeDensity = biomeDensity;
 	}
 
-	void CustomWorldRMGenerator::setLimitBrightness(int p) {
+	void CustomWorldRMModifier::setLimitBrightness(int p) {
 		_limitBrightness = p;
 	}
 
-	void CustomWorldRMGenerator::setDifferentialLaw(const relief::diff_law &law) {
+	void CustomWorldRMModifier::setDifferentialLaw(const relief::diff_law &law) {
 		_diffLaw = std::unique_ptr<relief::diff_law>(law.clone());
 	}
 
-	void CustomWorldRMGenerator::generate(Terrain &height, Terrain &heightDiff) const {
+	void CustomWorldRMModifier::generate(Terrain &height, Terrain &heightDiff) const {
 		// Nombre de biomes à générer.
-		int size = height.getSize() * height.getSize();
+		int size = height.getResolution() * height.getResolution();
 		int biomeCount = (int) (_biomeDensity * (double) size / (PIXEL_UNIT * PIXEL_UNIT));
 
 
@@ -60,13 +125,12 @@ namespace world {
 		// Calcul des dimensions de la grille
 		double minDistance = PIXEL_UNIT / 2.0 * sqrt(_biomeDensity);
 
-		// TODO unifier
-		int sliceCount = max<int>((int) ((float) height.getSize() / minDistance), 1);
-		float sliceSize = (float) height.getSize() / (float) sliceCount;
+		int sliceCount = max<int>((int) ((float) height.getResolution() / minDistance), 1);
+		float sliceSize = (float) height.getResolution() / (float) sliceCount;
 
 		// the terrains are squared so there are as much slices as there are cases per slice
 		int caseCount = sliceCount;
-		float caseSize = sliceCount;
+		float caseSize = sliceSize;
 
 		// Préparation de la grille
 		typedef std::pair<vec2d, vec2d> point; // pour plus de lisibilité
@@ -165,8 +229,8 @@ namespace world {
 		}
 
 		// On remplit la grille à l'aide de l'interpolateur. And enjoy.
-		for (int x = 0; x < height.getSize(); x++) {
-			for (int y = 0; y < height.getSize(); y++) {
+		for (int x = 0; x < height.getResolution(); x++) {
+			for (int y = 0; y < height.getResolution(); y++) {
 				vec2d pt(x + 0.5, y + 0.5);
 				vec2d result = interpolator.getData(pt);
 				height(x, y) = result.x;
