@@ -26,7 +26,7 @@ namespace world {
 	référencé. */
 	class WORLDAPI_EXPORT Ground : public IGround {
 	public:
-		Ground();
+		Ground(double unitSize = 6000, double minAltitude = -2000, double maxAltitude = 4000);
 
 		virtual ~Ground();
 
@@ -55,35 +55,43 @@ namespace world {
 		PrivateGround *_internal;
 
 		// Paramètres
-		/** L'altitude maximum du monde. Le niveau de la mer est fixé à 0. */
-		double _maxAltitude;
 		/** L'altitude minimum du monde. Le niveau de la mer est fixé à 0. */
 		double _minAltitude;
+		/** L'altitude maximum du monde. Le niveau de la mer est fixé à 0. */
+		double _maxAltitude;
 		/** La taille d'un terrain de niveau 0 utilisé pour paver la Map. Normalement,
         cette taille est la même que celle d'un pixel de la Map. */
 		double _unitSize;
 		/** Le facteur de subdivision pour les différents niveaux de détails.
          * La taille d'un terrain en fonction de son niveau de détail est
          * calculée ainsi : _unitSize * _factor ^ lod */
-		int _factor = 2;
+
+		int _factor = 4;
 		int _terrainRes = 65;
-		int _maxLOD = 4;
+		/** Texture resolution, relatively to the terrain resolution */
+		int _textureRes = 4;
+		int _maxLOD = 3;
 
 
-		double observeAltitudeAt(double x, double y, int lvl = 0);
+		double observeAltitudeAt(double x, double y, int lvl);
 
 		/** Replace a parent terrain by its children in the collector */
 		void replaceTerrain(int x, int y, int lvl, FlatWorldCollector &collector);
 
+		void addTerrain(int x, int y, int lvl, ICollector &collector);
+
+
 		// ACCESS
-		Terrain &terrain(int x, int y, int lvl = 0);
+		Terrain &terrain(int x, int y, int lvl);
+
+		optional<Mesh &> mesh(int x, int y, int lvl);
 
 		optional<Terrain &> cachedTerrain(int x, int y, int lvl, int genID);
 
 		/** Indique si le terrain à l'indice (x, y) existe déjà ou au
         contraire doit être généré par le générateur de terrain.
         @returns true si le terrain existe, false s'il doit être généré.*/
-		bool terrainExists(int x, int y, int lvl = 0) const;
+		bool terrainExists(int x, int y, int lvl) const;
 
 
 		// DATA
@@ -93,7 +101,7 @@ namespace world {
 
 		double getTerrainSize(int level) const;
 
-        double getLayerContribution(int level) const;
+		double getTerrainResolution(int level) const;
 
 		int getLevelForChunk(const WorldZone &zone) const;
 
@@ -108,8 +116,6 @@ namespace world {
          * - the terrains with higher level at the same place are already
          * generated.*/
 		void generateTerrain(int x, int y, int lvl);
-
-		void applyParent(int tX, int tY, int lvl);
 
 		friend class GroundContext;
 	};

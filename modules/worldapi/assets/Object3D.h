@@ -4,6 +4,7 @@
 
 #include <memory>
 
+#include "core/Memory.h"
 #include "math/MathsHelper.h"
 #include "Mesh.h"
 
@@ -11,19 +12,21 @@ namespace world {
 
 	class WORLDAPI_EXPORT Object3D {
 	public:
+		Object3D();
+
 		Object3D(const Mesh &mesh);
 
-		Object3D(const std::shared_ptr<Mesh> &mesh = nullptr);
+		Object3D(Mesh &mesh, bool keepRef = false);
 
 		virtual ~Object3D();
 
 		void setMesh(const Mesh &mesh);
 
-		void setMesh(const std::shared_ptr<Mesh> &mesh);
+		void setMesh(Mesh &mesh, bool keepRef = false);
 
 		const Mesh &getMesh() const { return *_mesh; }
 
-		const std::shared_ptr<Mesh> &getMeshPtr() const { return _mesh; }
+		Mesh &getMesh() { return *_mesh; }
 
 		void setPosition(const vec3d &position);
 
@@ -38,7 +41,7 @@ namespace world {
 		std::string getMaterialID() const;
 
 	private:
-		std::shared_ptr<Mesh> _mesh;
+		RefOrValue<Mesh> _mesh;
 
 		std::string _materialID;
 		vec3d _position;

@@ -31,7 +31,7 @@ public:
 	void resetScene();
 	void onWorldChange();
 
-	virtual bool OnEvent(const irr::SEvent& event);
+	bool OnEvent(const irr::SEvent& event) override;
 private:
     Application & _app;
 

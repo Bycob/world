@@ -6,7 +6,7 @@ namespace world {
     void FirstPersonExplorer::explore(T &world, C &collector) {
         std::set<WorldZone> explored;
         std::set<WorldZone> toExplore;
-        toExplore.insert(world.exploreLocation(_origin));
+        toExplore.insert(world.exploreLocation(_position));
 
         while (!toExplore.empty()) {
             auto it = toExplore.begin();
@@ -35,7 +35,7 @@ namespace world {
                 auto offset = getChunkNearestPoint(neighbour);
 
                 if (explored.find(neighbour) == explored.end()
-                    && _origin.squaredLength(offset) < _maxDistance * _maxDistance) {
+                    && _position.squaredLength(offset) < _farDistance * _farDistance) {
 
                     toExplore.insert(neighbour);
                 }
@@ -49,10 +49,9 @@ namespace world {
     template<typename T, typename C>
     void FirstPersonExplorer::exploreVertical(T &world, const WorldZone &zone, C &collector) {
         const Chunk &currentChunk = zone->getChunk();
-        const double detailSize = getDetailSizeAt(getChunkNearestPoint(zone));
-        //std::cout << detailSize << std::endl;
+        const double resolution = getResolutionAt(getChunkNearestPoint(zone));
 
-        if (currentChunk.getMinDetailSize() > detailSize) {
+        if (currentChunk.getMaxResolution() < resolution) {
             auto smallerZones = world.exploreInside(zone);
 
             for (WorldZone &smallerZone : smallerZones) {

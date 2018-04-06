@@ -37,8 +37,8 @@ namespace world {
 	void SimpleTreeDecorator::decorate(FlatWorld &world, WorldZone &zone) {
 		Chunk &chunk = zone->chunk();
 
-		const double avgTreeDetailSize = 0.5;
-		if (!(chunk.getMinDetailSize() < avgTreeDetailSize && avgTreeDetailSize <= chunk.getMaxDetailSize()))
+		const double treeResolution = 5;
+		if (chunk.getMaxResolution() < treeResolution || treeResolution <= chunk.getMinResolution())
 			return;
 
 		vec3d chunkSize = chunk.getSize();

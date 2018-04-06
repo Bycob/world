@@ -18,10 +18,15 @@ namespace world {
 
     void Collector::reset() {
         _internal->_items.clear();
+        _internal->_disabled.clear();
     }
 
     void Collector::addItem(const ItemKey &key, const Object3D &item) {
-        _internal->_items.emplace(key, std::make_unique<CollectorItem>(item));
+        if (_internal->_disabled.find(key) != _internal->_disabled.end()) {
+            return;
+        }
+
+        _internal->_items.emplace(key, std::make_unique<CollectorItem>(key, item));
     }
 
 	bool Collector::hasItem(const ItemKey &key) const {
@@ -32,9 +37,27 @@ namespace world {
 		_internal->_items.erase(key);
 	}
 
+	void Collector::disableItem(const world::ICollector::ItemKey &key) {
+        removeItem(key);
+        _internal->_disabled.emplace(key);
+    }
+
 	void Collector::addMaterial(const ItemKey & key, const Material & material) {
+        if (_internal->_disabled.find(key) != _internal->_disabled.end()) {
+            return;
+        }
+
+        // TODO find before doing anything
 		_internal->_items.at(key)->_internal->_materials.emplace(material.getName(), material);
 	}
+
+	void Collector::addTexture(const ItemKey &key, const std::string &texName, const Image &texture, bool keepRef) {
+        if (_internal->_disabled.find(key) != _internal->_disabled.end()) {
+            return;
+        }
+
+        _internal->_items.at(key)->_internal->_image.emplace(texName, ConstRefOrValue<Image>(texture, keepRef));
+    }
 
     CollectorIterator Collector::iterateItems() {
         return CollectorIterator(*this);
@@ -42,8 +65,8 @@ namespace world {
 
     // ==== COLLECTOR OBJECT PART
 
-    CollectorItem::CollectorItem(const Object3D &object3D) :
-            _internal(new PrivateCollectorItem(object3D)) {
+    CollectorItem::CollectorItem(const ICollector::ItemKey &key, const Object3D &object3D) :
+            _internal(new PrivateCollectorItem(key, object3D)) {
 
     }
 
@@ -66,9 +89,23 @@ namespace world {
 			return it->second;
 		}
 		else {
+		    // TODO search in higher levels
 			return nullopt;
 		}
 	}
+
+	optional<CollectorItem::texture> CollectorItem::getTexture(const std::string &key) const {
+        auto it = _internal->_image.find(key);
+
+        if (it != _internal->_image.end()) {
+            std::string uniqueStr = ICollector::ItemKeys::toString(_internal->_myKey) + "/" + key;
+            return texture{ uniqueStr, *it->second };
+        }
+        else {
+            // TODO search in higher levels
+            return nullopt;
+        }
+    }
 
     // ==== COLLECTOR ITERATOR
 

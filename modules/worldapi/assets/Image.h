@@ -15,12 +15,29 @@ namespace world {
 		GREYSCALE = 2
 	};
 
+	class WORLDAPI_EXPORT ImageStream {
+	public:
+		ImageStream(const Image &image);
+
+		int remaining();
+
+		int read(char* buffer, int count);
+	private:
+		int _position = 0;
+		const Image &_image;
+	};
+
 	class WORLDAPI_EXPORT ConstPixel {
 	public:
 		u8 getAlpha() const;
 		u8 getRed() const;
 		u8 getGreen() const;
 		u8 getBlue() const;
+
+        double getAlphaf() const;
+        double getRedf() const;
+        double getGreenf() const;
+        double getBluef() const;
 
 	protected:
 		friend class Image;
@@ -48,7 +65,10 @@ namespace world {
 		void setGreenf(double g);
 		void setBluef(double b);
 
+        /** Sets the pixel to grey with given intensity. */
 		void setLevel(u8 l);
+
+        /** Sets the pixel to grey with given intensity. */
 		void setLevelf(double l);
 
 	private:
@@ -65,6 +85,7 @@ namespace world {
 		Image(const arma::Cube<double> & data);
 		Image(const arma::Mat<double> & data);
 		Image(const std::string & filename);
+		Image(const char *filename);
 		// move constructor
 		Image(Image && img);
 		// copy constructor
@@ -85,11 +106,11 @@ namespace world {
 	private:
 		ImageType _type;
 
-		// pointeur sur l'image, pour éviter d'avoir à inclure opencv dans le .h
 		PrivateImage *_private;
 		
 		friend class Pixel;
 		friend class ConstPixel;
+		friend class ImageStream;
 	};
 }
 

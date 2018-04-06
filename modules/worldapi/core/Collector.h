@@ -34,7 +34,11 @@ namespace world {
 
 		void removeItem(const ItemKey &key) override;
 
+		void disableItem(const ItemKey &key) override;
+
 		void addMaterial(const ItemKey &key, const Material &material) override;
+
+        void addTexture(const ItemKey &key, const std::string &texName, const Image &texture, bool keepRef) override;
 
         CollectorIterator iterateItems();
 
@@ -48,7 +52,7 @@ namespace world {
 
     class WORLDAPI_EXPORT CollectorItem {
     public:
-        CollectorItem(const Object3D &object3D);
+        CollectorItem(const ICollector::ItemKey &key, const Object3D &object3D);
 
         ~CollectorItem();
 
@@ -58,6 +62,12 @@ namespace world {
 
         /** */
 		optional<const Material&> getMaterial(const std::string &key) const;
+
+		typedef struct {
+		    std::string _uid;
+            const Image &_image;
+		} texture;
+		optional<texture> getTexture(const std::string &key) const;
 
     private:
         PrivateCollectorItem *_internal;

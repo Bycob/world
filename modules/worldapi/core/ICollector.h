@@ -6,6 +6,7 @@
 #include <tuple>
 
 #include "WorldKeys.h"
+#include "assets/Image.h"
 #include "assets/Material.h"
 #include "assets/Object3D.h"
 
@@ -33,6 +34,14 @@ namespace world {
 			static ItemKey inObject(const AssetKey &assetKey) {
 				return inWorld(ChunkKeys::none(), ObjectKeys::defaultKey(), assetKey);
 			}
+
+			/** Gets an unique string representation for this key. The
+			 * string is printable and usable in a file system. */
+			static std::string toString(const ItemKey &key) {
+				return ChunkKeys::toString(std::get<0>(key)) + "/"
+						+ ObjectKeys::toString(std::get<1>(key)) + "/"
+						+ AssetKeys::toString(std::get<2>(key));
+			}
 		};
 
         virtual void addItem(const ItemKey &key, const Object3D &object) = 0;
@@ -41,14 +50,18 @@ namespace world {
 
 		virtual void removeItem(const ItemKey &key) = 0;
 
+		virtual void disableItem(const ItemKey &key) = 0;
+
 		virtual void addMaterial(const ItemKey &key, const Material &material) = 0;
+
+		virtual void addTexture(const ItemKey &key, const std::string &texName, const Image &texture, bool keepRef = false) = 0;
     protected:
         void passItemTo(ICollector &collector, const ItemKey &key, Object3D &object) {
             collector.addItemUnsafe(key, object);
         }
 
         virtual void addItemUnsafe(const ItemKey &key, Object3D &object) {
-            addItem(key, object);
+			addItem(key, object);
         }
     };
 }

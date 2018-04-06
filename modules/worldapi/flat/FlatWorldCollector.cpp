@@ -65,10 +65,26 @@ namespace world {
 			vec3d offset = bbox.getLowerBound();
 			vec3d size = bbox.getUpperBound() - offset;
 
-			std::shared_ptr<Mesh> mesh(terrain.createMesh(0, 0, 0, size.x, size.y, size.z));
-			Object3D object(mesh);
+			// Create the mesh
+			std::unique_ptr<Mesh> mesh(terrain.createMesh(0, 0, 0, size.x, size.y, size.z));
+            Object3D object(*mesh);
 			object.setPosition(offset);
+			object.setMaterialID("terrain");
+
+			// Create the material
+            Material material("terrain");
+            material.setKd(1, 1, 1);
+            material.setMapKd("texture01");
+
+            // Retrieve the texture
+            auto texture = terrain.getTexture();
+
 			addItemUnsafe(itemKey, object);
+			addMaterial(itemKey, material);
+
+			if (texture) {
+                addTexture(itemKey, "texture01", *texture, true);
+			}
 		}
 #else
 		auto it = _terrains.find(key);

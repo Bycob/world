@@ -7,12 +7,16 @@
 #include <stdexcept>
 
 #include "math/Vector.h"
+#include "core/WorldTypes.h"
 
 namespace world {
 
 	class Vertex {
 	public :
 		Vertex() : _position{}, _normal{}, _texture{} {}
+
+		Vertex(const vec3d &position, const vec3d &normal, const vec2d &texture)
+				: _position(position), _normal(normal), _texture(texture) {}
 
 		vec3d getPosition() const { return _position; }
 
@@ -56,6 +60,8 @@ namespace world {
 	public :
 		Face();
 
+		Face(int ids[3]);
+
 		virtual ~Face();
 
 		void setID(int vert, int id);
@@ -76,33 +82,45 @@ namespace world {
 
 		virtual ~Mesh();
 
+		/** Tells the mesh that we are going to add a certain amount
+		 * of faces. This method enables the mesh to adapt its buffer
+		 * for the desired amount, and thus to improve performances.
+		 * @param capacity The amount of faces we want to add. */
 		void reserveFaces(int capacity);
+
+		u32 getFaceCount() const;
 
 		Face &getFace(int id);
 
 		const Face &getFace(int id) const;
 
-		const std::vector<Face> &getFaces() const;
-
 		void addFace(const Face &face);
 
 		Face &newFace();
 
+		Face &newFace(int ids[3]);
+
+		/** Tells the mesh that we are going to add a certain amount
+		 * of vertices. This method enables the mesh to adapt its buffer
+		 * for the desired amount, and thus to improve performances.
+		 * @param capacity The amount of vertices we want to add. */
 		void reserveVertices(int capacity);
+
+		u32 getVerticesCount() const;
 
 		Vertex &getVertex(int id);
 
 		const Vertex &getVertex(int id) const;
 
-		const std::vector<Vertex> &getVertices() const;
-
 		void addVertex(const Vertex &vert);
 
 		Vertex &newVertex();
 
-		int getVerticesCount() const;
+		Vertex &newVertex(const vec3d &position, const vec3d &normal = {0, 0, 1}, const vec2d &texture = {0, 0});
 	private:
+		u32 _verticesCount = 0;
 		std::vector<Vertex> _vertices;
+		u32 _faceCount = 0;
 		std::vector<Face> _faces;
 	};
 }

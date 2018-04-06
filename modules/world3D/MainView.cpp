@@ -9,6 +9,7 @@
 #include "Application.h"
 #include "GroundManager.h"
 #include "ObjectsManager.h"
+#include "WorldIrrlicht.h"
 
 using namespace irr;
 using namespace irr::core;
@@ -95,7 +96,7 @@ void MainView::runInternal() {
 	_camera->setFOV(1.57);
     _camera->setNearValue(0.1f);
     _camera->setFarValue(40000);
-    _camera->setPosition(vector3df(0, 1200, 0));
+    _camera->setPosition(toIrrlicht(_app.getUserPosition()));
     //_camera = _scenemanager->addCameraSceneNode(0, vector3df(200 + 64, 200 + 119, 200 + 64), vector3df(64, 119, 64));
 	
     /*/ ----- Tests (temporaire)
@@ -130,8 +131,6 @@ void MainView::runInternal() {
         _driver->endScene();
     }
 
-    _device->closeDevice();
-
     _running = false;
     _resetScene = true;
 }
@@ -144,37 +143,31 @@ void MainView::recreateModules() {
 }
 
 void MainView::updateScene() {
-	SynchronizedCollector & syncCollector = _app.getCollector();
-
 	auto camPos = _camera->getPosition();
 	_app.setUserPosition(world::vec3d(camPos.X, camPos.Z, camPos.Y));
 
+    auto collector = _app.popFull();
+
+    if (!collector)
+        return;
+
     if (_resetScene) {
-
-		syncCollector.lock();
-		world::FlatWorldCollector & collector = syncCollector.get();
-
         recreateModules();
 
         for (auto & module : _modules) {
-            module->initialize(collector);
+            module->initialize(*collector);
         }
 
         _resetScene = false;
         _worldChanged = false;
-
-		syncCollector.unlock();
     }
     else if (_worldChanged) {
-        syncCollector.lock();
-        world::FlatWorldCollector & collector = syncCollector.get();
-
         for (auto & module : _modules) {
-            module->update(collector);
+            module->update(*collector);
         }
 
         _worldChanged = false;
-
-        syncCollector.unlock();
     }
+
+    _app.refill(std::move(collector));
 }

@@ -14,18 +14,21 @@ namespace world {
 	}
 
 	void ColorMap::rebuild() {
-		IDWInterpolator<position, color> interp(5);
-
-		for (auto &point : _points) {
-			interp.addData(point.first, point.second);
-		}
-
+		// We scale one dimension to have a coherent map
 		auto w = _cache.n_rows;
 		auto h = _cache.n_cols;
+		double scale = (double) h / w;
+
+		IDWInterpolator<position, color> interp(3);
+
+		for (auto &point : _points) {
+			position scaled {point.first.x, point.first.y * scale};
+			interp.addData(scaled, point.second);
+		}
 
 		for (arma::uword x = 0; x < w; x++) {
 			for (arma::uword y = 0; y < h; y++) {
-				vec2d pt{ (double) x / (w - 1), (double) y / (h - 1)};
+				vec2d pt{ (double) x / (w - 1), (double) y / (w - 1)};
 				auto data = interp.getData(pt);
 
 				_cache(x, y, 0) = data.x;

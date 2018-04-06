@@ -85,8 +85,11 @@ ITerrainSceneNode* GroundManager::createNode(const Terrain &terrain) {
     size = size / terrainRes;
 
 	// Construction du noeud irrlicht
-    int dataSize;
-    const char* data = terrain.getRawData(dataSize, (float) (terrainRes * size.z / size.x));
+    HeightMapInputStream input(terrain, 0, (float) (terrainRes * size.z / size.x));
+    int dataSize = input.remaining();
+    char* data = new char[dataSize];
+    input.read(data, dataSize);
+
     IReadFile * memoryFile = _fileSystem->createMemoryReadFile((void*)data, dataSize, "", false);
 
     ITerrainSceneNode * result =

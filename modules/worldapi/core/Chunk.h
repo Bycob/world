@@ -28,11 +28,11 @@ namespace world {
 
 		virtual ~Chunk();
 
-		void setDetailSizeBounds(double min, double max);
+		void setResolutionLimits(double min, double max);
 
-		double getMinDetailSize() const { return _minDetailSize; }
+		double getMinResolution() const { return _minResolution; }
 
-		double getMaxDetailSize() const { return _maxDetailSize; }
+		double getMaxResolution() const { return _maxResolution; }
 
 		const vec3d &getSize() const { return _size; }
 
@@ -50,8 +50,8 @@ namespace world {
         void collectPart(const BoundingBox &bbox, double maxDetailSize, ICollector &collector);
 
 	private:
-		double _minDetailSize = 0;
-		double _maxDetailSize = 1e100;
+		double _minResolution = 0;
+		double _maxResolution = 1e100;
 		vec3d _offset;
 		vec3d _size;
 

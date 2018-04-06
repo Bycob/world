@@ -16,7 +16,7 @@ namespace world {
 	FlatWorld* FlatWorld::createDemoFlatWorld() {
 		FlatWorld *world = new FlatWorld();
 
-		world->addFlatWorldDecorator(new SimpleTreeDecorator(1));
+		world->addFlatWorldDecorator(new SimpleTreeDecorator(3));
 
 		return world;
 	}

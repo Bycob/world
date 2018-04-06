@@ -34,7 +34,6 @@ void testTinyObjLoader(int argc, char** argv) {
 
 			std::vector<Object3D*> output;
 			scene->getObjects(output);
-			std::shared_ptr<Mesh> mesh2 = output.at(0)->getMeshPtr();
 
 			std::cout << "Reecriture du fichier sous un autre nom" << std::endl;
 			obj.write(*scene, "tests/result.obj");
@@ -66,7 +65,8 @@ void testRepeatable(int argc, char** argv) {
     std::cout << "Génération du terrain associé..." << std::endl;
     Terrain tr(repeatable);
     Scene repeatableobj;
-	repeatableobj.createObject(std::shared_ptr<Mesh>(tr.createMesh()));
+    std::unique_ptr<Mesh> mesh(tr.createMesh());
+	repeatableobj.createObject(*mesh);
 
 	ObjLoader loader;
     loader.write(repeatableobj, "tests/repeatable");
@@ -158,7 +158,7 @@ void testPerlin(int argc, char** argv) {
 	std::cout << "Conversion du terrain en mesh... " << std::endl;
 	Scene scene1;
 	std::shared_ptr<Mesh> mesh = std::shared_ptr<Mesh>(terrain.createMesh());
-	scene1.createObject(mesh);
+	scene1.createObject(*mesh);
 	
 	std::shared_ptr<Material> material = std::make_shared<Material>("material01");
 	material->setMapKd("test2_tex.png");
@@ -181,12 +181,16 @@ void testPerlin(int argc, char** argv) {
 	AltitudeTexturer texturer;
 
 	auto &colorMap = texturer.getColorMap();
-	colorMap.addPoint({ 0.37, 0 }, Color4u(144, 183, 123));
+	colorMap.addPoint({ 0, 0}, Color4u(209, 207, 153));
+	colorMap.addPoint({ 0, 1}, Color4u(209, 207, 153));
+	colorMap.addPoint({ 0.37, 0 }, Color4u(133, 183, 144));
 	colorMap.addPoint({ 0.3, 1 }, Color4u(144, 183, 123));
-	colorMap.addPoint({ 0.48, 1 }, Color4u(114, 90, 48));
+	colorMap.addPoint({ 0.48, 1 }, Color4u(96, 76, 40));
 	colorMap.addPoint({ 0.55, 0 }, Color4u(114, 90, 48));
 	colorMap.addPoint({ 0.65, 1 }, Color4u(160, 160, 160));
-	colorMap.addPoint({ 1, 0.5 }, Color4u(244, 252, 250));
+	colorMap.addPoint({ 0.8, 0.5 }, Color4u(160, 160, 160));
+	colorMap.addPoint({ 1, 0 }, Color4u(244, 252, 250));
+	colorMap.addPoint({ 1, 1 }, Color4u(244, 252, 250));
 
 	texturer.process(terrain);
 	const Image &texture = *terrain.getTexture();
@@ -226,10 +230,10 @@ void testSubdivisions(int argc, char** argv) {
 	Scene subterrainScene;
 	TerrainSubdivisionTree & subtree = terrainTree->getSubtree(0, 0);
 	std::shared_ptr<Mesh> submesh = std::shared_ptr<Mesh>(subtree.convertToSubmesh());
-	subterrainScene.createObject(submesh);
-	subterrainScene.createObject(std::shared_ptr<Mesh>(terrainTree->getSubtree(1, 0).convertToSubmesh()));
+	subterrainScene.createObject(*submesh);
+	/*subterrainScene.createObject(std::shared_ptr<Mesh>(terrainTree->getSubtree(1, 0).convertToSubmesh()));
 	subterrainScene.createObject(std::shared_ptr<Mesh>(terrainTree->getSubtree(1, 1).convertToSubmesh()));
-	subterrainScene.createObject(std::shared_ptr<Mesh>(terrainTree->getSubtree(0, 1).convertToSubmesh()));
+	subterrainScene.createObject(std::shared_ptr<Mesh>(terrainTree->getSubtree(0, 1).convertToSubmesh()));*/
 
 	std::cout << "Ecriture du fichier .obj..." << std::endl;
 	meshIO.write(subterrainScene, "tests/subterrain");

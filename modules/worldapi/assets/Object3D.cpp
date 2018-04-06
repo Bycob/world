@@ -2,17 +2,21 @@
 
 namespace world {
 
-	Object3D::Object3D(const Mesh &mesh)
-			: Object3D(std::make_shared<Mesh>(mesh)) {
+	Object3D::Object3D()
+			: Object3D(Mesh()) {
 
 	}
 
-	Object3D::Object3D(const std::shared_ptr<Mesh> &mesh)
-			: _position(0, 0, 0), _scale(1, 1, 1), _mesh(mesh) {
+	Object3D::Object3D(const Mesh &mesh)
+			: _position(0, 0, 0), _scale(1, 1, 1),
+			  _mesh(mesh) {
 
-		if (mesh == nullptr) {
-			_mesh = std::make_shared<Mesh>();
-		}
+	}
+
+	Object3D::Object3D(world::Mesh &mesh, bool keepRef)
+			: _position(0, 0, 0), _scale(1, 1, 1),
+			  _mesh(mesh, keepRef) {
+
 	}
 
 	Object3D::~Object3D() {
@@ -20,11 +24,11 @@ namespace world {
 	}
 
 	void Object3D::setMesh(const Mesh &mesh) {
-		_mesh = std::make_shared<Mesh>(mesh);
+		_mesh = RefOrValue<Mesh>(mesh);
 	}
 
-	void Object3D::setMesh(const std::shared_ptr<Mesh> &mesh) {
-		_mesh = mesh;
+	void Object3D::setMesh(Mesh &mesh, bool keepRef) {
+		_mesh = RefOrValue<Mesh>(mesh, keepRef);
 	}
 
 	void Object3D::setPosition(const vec3d &position) {

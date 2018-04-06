@@ -47,7 +47,13 @@ namespace world {
 			return static_cast<int>(_array.n_rows);
 		}
 
-		double &operator()(int x, int y);
+		double &operator()(int x, int y) {
+			return _array(x, y);
+		}
+
+		const double &operator()(int x, int y) const {
+			return _array(x, y);
+		}
 
 		/** Gets the height from the height map case which is the
 		 * nearest to (x, y).  */
@@ -86,11 +92,6 @@ namespace world {
 
 		//Méthodes pour la conversion du terrain en image.
 		Image createImage() const;
-
-		//Raw map TODO raw data stream ?
-		char *getRawData(int &rawDataSize, float height = 1, float offset = 0) const;
-
-		int getRawDataSize() const;
 
 		void setTexture(const Image &image);
 

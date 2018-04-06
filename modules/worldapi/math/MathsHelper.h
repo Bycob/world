@@ -22,6 +22,11 @@ namespace world {
 		virtual T operator() (T x) const = 0;
 	};
 
+	template <typename T>
+	constexpr inline auto abs(T v) -> T {
+		return v >= 0 ? v : - v;
+	}
+
 	template <typename T1, typename T2>
 	constexpr inline auto max(T1 v1, T2 v2) -> decltype(v1 + v2) {
 		return v1 > v2 ? v1 : v2;

@@ -61,7 +61,7 @@ void testTree(int argc, char ** argv) {
 	std::cout << "Modèle converti ! Ecriture du modèle..." << std::endl;
 	ObjLoader file;
 	Scene scene;
-	scene.createObject(mesh);
+	scene.createObject(*mesh);
 	file.write(scene, "trees/skeletton");
 
 	std::cout << "Génération du tronc de l'arbre" << std::endl;

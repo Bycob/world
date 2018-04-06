@@ -10,7 +10,7 @@ namespace world {
     public:
         LODData();
 
-        LODData(const vec3d &chunkSize);
+        LODData(const vec3d &chunkSize, double maxResolution = 0.2);
 
         LODData(const LODData &other);
 
@@ -18,10 +18,10 @@ namespace world {
 
         const vec3d &getChunkSize() const { return _chunkSize; }
 
-        double getMinDetailSize() const { return _minDetailSize; }
+        double getMaxResolution() const { return _maxResolution; }
 
     private:
         vec3d _chunkSize;
-        double _minDetailSize;
+        double _maxResolution;
     };
 }

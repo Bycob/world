@@ -26,9 +26,9 @@ namespace world {
 		delete _internal;
 	}
 
-	void Chunk::setDetailSizeBounds(double min, double max) {
-		_minDetailSize = min;
-		_maxDetailSize = max;
+	void Chunk::setResolutionLimits(double min, double max) {
+		_minResolution = min;
+		_maxResolution = max;
 	}
 
 	void Chunk::addObject(WorldObject *object) {

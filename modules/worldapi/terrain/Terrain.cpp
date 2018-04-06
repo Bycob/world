@@ -10,9 +10,6 @@
 #include "assets/Image.h"
 #include "assets/Mesh.h"
 #include "assets/MeshOps.h"
-#include "core/Stream.h"
-
-
 
 using namespace arma;
 
@@ -20,7 +17,7 @@ namespace world {
 
 	Terrain::Terrain(int size) :
 			_array(size, size),
-			_texture(std::make_unique<Image>(1, 1, ImageType::RGB)),
+			_texture(nullptr),
 			_bbox({-0.5, -0.5, -0.0}, {0.5, 0.5, 0.4}) {
 
 	}
@@ -70,10 +67,6 @@ namespace world {
 
 	const BoundingBox &Terrain::getBoundingBox() const {
 		return _bbox;
-	}
-
-	double &Terrain::operator()(int x, int y) {
-		return _array(x, y);
 	}
 
 	double Terrain::getRawHeight(double x, double y) const {
@@ -204,24 +197,6 @@ namespace world {
 
 	Image Terrain::createImage() const {
 		return Image(this->_array);
-	}
-
-	char *Terrain::getRawData(int &rawDataSize, float height, float offset) const {
-		float *result = new float[_array.n_rows * _array.n_cols];
-
-		for (int x = 0; x < _array.n_rows; x++) {
-			for (int y = 0; y < _array.n_cols; y++) {
-				result[x * _array.n_cols + y] = (float) _array(x, y) * height + offset;
-			}
-		}
-
-		rawDataSize = getRawDataSize();
-
-		return (char *) result;
-	}
-
-	int Terrain::getRawDataSize() const {
-		return (int) (_array.n_rows * _array.n_cols) * sizeof(float) / sizeof(char);
 	}
 
 	void Terrain::setTexture(const Image &image) {

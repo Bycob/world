@@ -11,19 +11,21 @@ namespace world {
     class WORLDAPI_EXPORT FirstPersonExplorer {
     public:
         /** Build a FirstPersonExplorer with the given parameters.
-         * @param minAngle The smallest distance so that we can
-         * distinguish two points separated by this distance.
+         * @param eyeResolution the resolution of our eye
+         * @param fov the field of view
          * @param punctumProximum The minimum distance under which we
          * cannot see. */
-        FirstPersonExplorer(double minAngle = 0.002, double punctumProximum = 1);
+        FirstPersonExplorer(double eyeResolution = 1000, double fov = 90, double punctumProximum = 1);
 
-        void setOrigin(const vec3d &origin);
+        void setPosition(const vec3d &position);
 
-        void setMinAngle(double minAngle);
+        void setEyeResolution(double resolution);
+
+        void setFOV(double fov);
 
         void setPunctumProximum(double punctumProximum);
 
-        void setMaxDistance(double maxDistance);
+        void setFarDistance(double maxDistance);
 
         // TODO std::enableif
         template<typename T, typename C>
@@ -34,16 +36,17 @@ namespace world {
 
         vec3d getChunkNearestPoint(const WorldZone &zone);
 
-        double getDetailSizeAt(const vec3d &pos);
+        double getResolutionAt(const vec3d &pos);
 
     private:
-        double _angularResolution;
+        double _eyeResolution;
+        double _fov;
         double _punctumProximum;
         /** The maximum distance the explorer can see over. In real world,
          * we cannot see farther than a certain distance due to mist, for
          * example. */
-        double _maxDistance;
-        vec3d _origin;
+        double _farDistance;
+        vec3d _position;
     };
 }
 

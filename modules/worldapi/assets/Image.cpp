@@ -36,8 +36,12 @@ namespace world {
 		}
 	}
 
-	inline u8 fromFloat(double f) {
-		return f >= 1.0 ? (u8) 255 : (f <= 0.0 ? (u8) 0 : (u8) (f * 256.0));
+	inline u8 fromDouble(double f) {
+		return clamp(static_cast<u8>(f * 255.0), (u8)0, (u8)255);
+	}
+
+	inline double toDouble(u8 u) {
+		return u / 255.0;
 	}
 
 	class PrivateImage {
@@ -46,6 +50,45 @@ namespace world {
 
 		cv::Mat _image;
 	};
+
+	// ImageStream implementation
+
+	ImageStream::ImageStream(const world::Image &image)
+			: _image(image) {
+
+	}
+
+	int ImageStream::remaining() {
+		auto &mat = _image._private->_image;
+		// size (in bytes) - position
+		return static_cast<int>(mat.total() * mat.elemSize()) - _position;
+	}
+
+	int ImageStream::read(char *buffer, int count) {
+		auto &mat = _image._private->_image;
+		int read = 0;
+		const int s = static_cast<int>(mat.elemSize());
+
+		while (count >= s) {
+			u8* data = mat.data + _position;
+
+			switch (_image._type) {
+				case ImageType::RGBA:
+					// BGRA to ARGB
+					buffer[read] = data[3]; read++;
+				case ImageType::RGB:
+					buffer[read] = data[2]; read++;
+					buffer[read] = data[1]; read++;
+				case ImageType::GREYSCALE:
+					buffer[read] = data[0]; read++;
+			}
+
+			count -= s;
+			_position += s;
+		}
+
+		return _position;
+	}
 
 	// Implémentation de Pixel
 
@@ -59,7 +102,6 @@ namespace world {
 	}
 
 	void Pixel::set(u8 r, u8 g, u8 b, u8 a) {
-		// TODO améliorer les performances
 		switch (_ref->_type) {
 		case ImageType::RGB :
 			_ref->_private->_image.at<cv::Vec3b>(_y, _x) = cv::Vec3b(b, g, r);
@@ -73,7 +115,7 @@ namespace world {
 	}
 
 	void Pixel::setf(double r, double g, double b, double a) {
-		set(fromFloat(r), fromFloat(g), fromFloat(b), fromFloat(a));
+		set(fromDouble(r), fromDouble(g), fromDouble(b), fromDouble(a));
 	}
 
 	void Pixel::setRed(u8 r) {
@@ -93,19 +135,19 @@ namespace world {
 	}
 
 	void Pixel::setRedf(double r) {
-		setComponent(2, fromFloat(r));
+		setComponent(2, fromDouble(r));
 	}
 
 	void Pixel::setGreenf(double r) {
-		setComponent(1, fromFloat(r));
+		setComponent(1, fromDouble(r));
 	}
 
 	void Pixel::setBluef(double r) {
-		setComponent(0, fromFloat(r));
+		setComponent(0, fromDouble(r));
 	}
 
 	void Pixel::setAlphaf(double r) {
-		setComponent(3, fromFloat(r));
+		setComponent(3, fromDouble(r));
 	}
 
 	void Pixel::setLevel(u8 l) {
@@ -113,7 +155,7 @@ namespace world {
 	}
 
 	void Pixel::setLevelf(double l) {
-		setComponent(0, fromFloat(l));
+		setComponent(0, fromDouble(l));
 	}
 
 	u8 ConstPixel::getAlpha() const {
@@ -130,6 +172,22 @@ namespace world {
 
 	u8 ConstPixel::getBlue() const {
 		return getComponent(0);
+	}
+
+	double ConstPixel::getRedf() const {
+		return toDouble(getComponent(2));
+	}
+
+	double ConstPixel::getGreenf() const {
+		return toDouble(getComponent(1));
+	}
+
+	double ConstPixel::getBluef() const {
+		return toDouble(getComponent(0));
+	}
+
+	double ConstPixel::getAlphaf() const {
+		return toDouble(getComponent(3));
 	}
 
 	u8 ConstPixel::getComponent(int id) const {
@@ -181,8 +239,18 @@ namespace world {
 	}
 
 	Image::Image(const std::string & filename) {
-		_private = new PrivateImage(cv::Mat(cv::imread(filename)));
+        cv::Mat mat = cv::imread(filename);
+
+        if (mat.data == nullptr) {
+            throw std::ios_base::failure("File not found : " + filename);
+        }
+
+		_private = new PrivateImage(std::move(mat));
 		_type = getImageType(_private->_image.type());
+	}
+
+	Image::Image(const char *filename) : Image(std::string(filename)) {
+
 	}
 
 	Image::Image(Image && image) : _private(image._private), _type(image._type) {
@@ -232,6 +300,10 @@ namespace world {
 
 	inline u8 fromDouble(double f) {
 		return f >= 1.0 ? (u8) 255 : (f <= 0.0 ? (u8) 0 : (u8) (f * 256.0));
+	}
+
+	inline double toDouble(u8 u) {
+		return u / 255.0;
 	}
 
 	class PrivateImage {
@@ -315,6 +387,22 @@ namespace world {
 		return getComponent(0);
 	}
 
+	double ConstPixel::getRedf() const {
+		return toDouble(getComponent(2));
+	}
+
+	double ConstPixel::getGreenf() const {
+		return toDouble(getComponent(1));
+	}
+
+	double ConstPixel::getBluef() const {
+		return toDouble(getComponent(0));
+	}
+
+	double ConstPixel::getAlphaf() const {
+		return toDouble(getComponent(3));
+	}
+
 	u8 ConstPixel::getComponent(int id) const {
 		return 0;
 	}
@@ -343,6 +431,10 @@ namespace world {
 
 	Image::Image(const std::string & filename) {
 		_private = new PrivateImage();
+	}
+
+	Image::Image(const char *filename) : Image(std::string(filename)) {
+
 	}
 
 	Image::Image(Image && image) : _private(image._private), _type(image._type) {

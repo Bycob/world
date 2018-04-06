@@ -15,11 +15,23 @@ namespace world {
         static std::string none() {
             return std::string("");
         }
+
+        static std::string toString(const ChunkKey &key);
     };
 
     struct ObjectKeys {
         constexpr static int defaultKey() {
             return 0;
+        }
+
+        static std::string toString(const ObjectKey &key) {
+            return std::to_string(key);
+        }
+    };
+
+    struct AssetKeys {
+        static std::string toString(const AssetKey &key) {
+            return std::to_string(key);
         }
     };
 }

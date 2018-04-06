@@ -18,8 +18,8 @@ void generate_test_world(int argc, char** argv) {
     std::unique_ptr<FlatWorld> world(FlatWorld::createDemoFlatWorld());
 
     std::cout << "Creation de l'explorer et du collecteur" << std::endl;
-    FirstPersonExplorer explorer(0.002, 0.5);
-    explorer.setOrigin({0, 0, 0});
+    FirstPersonExplorer explorer(1000, 70, 0.5);
+    explorer.setPosition({0, 0, 0});
     FlatWorldCollector collector;
 
     std::cout << "Exploration du monde..." << std::endl;

@@ -33,9 +33,17 @@ public:
         _lastRemoved = key;
     };
 
+    void disableItem(const ItemKey &key) override {
+
+    }
+
     void addMaterial(const ItemKey &key, const Material &material) override {
         _lastMaterialAdded = key;
     };
+
+    void addTexture(const ItemKey &key, const std::string &texName, const Image &texture, bool keepRef) override {
+
+    }
 
     ItemKey _lastAdded;
     vec3d _lastAddedPosition;

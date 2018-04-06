@@ -38,12 +38,20 @@ namespace world {
 		_collector.removeItem(mutateKey(key));
 	}
 
+	void CollectorContextWrap::disableItem(const ItemKey &key) {
+        _collector.disableItem(mutateKey(key));
+    }
+
 	bool CollectorContextWrap::hasItem(const ItemKey &key) const {
 		return _collector.hasItem(mutateKey(key));
 	}
 
 	void CollectorContextWrap::addMaterial(const ItemKey &key, const Material &material) {
         _collector.addMaterial(mutateKey(key), material);
+    }
+
+    void CollectorContextWrap::addTexture(const ItemKey &key, const std::string &texName, const Image &texture, bool keepRef) {
+        _collector.addTexture(mutateKey(key), texName, texture, false);
     }
 
 	ICollector::ItemKey CollectorContextWrap::mutateKey(const ItemKey &key) const {

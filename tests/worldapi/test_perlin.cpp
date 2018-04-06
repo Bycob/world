@@ -11,18 +11,18 @@ TEST_CASE("Perlin - General test case", "[perlin]") {
 
     SECTION("generating perlin noise changes the matrix") {
         perlin.generatePerlinNoise2D(subject, 0, 1, 4, 0.5);
-        REQUIRE(arma::accu(abs(subject-reference)) > 1e-3);
+        REQUIRE(arma::accu(arma::abs(subject-reference)) > 1e-3);
     }
 
     SECTION("two patterns generated in a row are different") {
         perlin.generatePerlinNoise2D(subject, 0, 1, 4, 0.5);
         perlin.generatePerlinNoise2D(reference, 0, 1, 4, 0.5);
-        REQUIRE(arma::accu(abs(subject-reference)) > 1e-3);
+        REQUIRE(arma::accu(arma::abs(subject-reference)) > 1e-3);
     }
 
     // test sanity check
     SECTION("test sanity check") {
-        REQUIRE(arma::accu(abs(subject-reference)) < 1e-3);
+        REQUIRE(arma::accu(arma::abs(subject-reference)) < 1e-3);
     }
 }
 
@@ -50,6 +50,6 @@ TEST_CASE("Perlin - Random values modifier") {
 		}
 
 		// But the noise should not be 0
-		REQUIRE(arma::accu(abs(noise)) > 98 * 98 * eps);
+		REQUIRE(arma::accu(arma::abs(noise)) > 98 * 98 * eps);
 	}
 }

@@ -39,7 +39,7 @@ namespace world {
 
 		void setMapKd(const std::string &texName);
 
-		std::string getMapKd() {
+		std::string getMapKd() const {
 			return _mapKd;
 		}
 

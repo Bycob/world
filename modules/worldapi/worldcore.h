@@ -38,9 +38,9 @@
 #include "core/FirstPersonExplorer.h"
 
 #include "core/ICloneable.h"
+#include "core/Memory.h"
 #include "core/IOUtil.h"
 #include "core/LODData.h"
-#include "core/Stream.h"
 #include "core/StringOps.h"
 #include "core/WeightedSkeletton.h"
 #include "core/ColorMap.h"

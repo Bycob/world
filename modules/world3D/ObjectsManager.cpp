@@ -1,6 +1,7 @@
 #include "ObjectsManager.h"
 
 #include <memory>
+#include <worldcore.h>
 
 #include "WorldIrrlicht.h"
 #include "Application.h"
@@ -13,22 +14,68 @@ using namespace world;
 
 //----- ObjectNodeHandler
 
-ObjectNodeHandler::ObjectNodeHandler(ObjectsManager &objectsManager, const Object3D & object)
+ObjectNodeHandler::ObjectNodeHandler(ObjectsManager &objectsManager, const CollectorItem &provider)
 	: _objManager(objectsManager), _meshNode(NULL) {
 
+	const Object3D &object = provider.getObject3D();
 	updateObject3D(object);
+
+	// Material
+	auto material = provider.getMaterial(object.getMaterialID());
+	if (material) {
+		setMaterial(*material, provider);
+	}
 }
 
 ObjectNodeHandler::~ObjectNodeHandler() {
 	_meshNode->remove();
+
+	for (std::string &texId : _usedTextures) {
+		_objManager.removeTextureUser(texId);
+	}
 }
 
-void ObjectNodeHandler::setMaterial(const Material &mat) {
+void ObjectNodeHandler::setTexture(int id, const std::string &path, const world::CollectorItem &provider) {
+	auto texture = provider.getTexture(path);
+
+	if (!texture) {
+		return;
+	}
+
+	auto driver = _objManager._driver;
+	SMaterial & irrmat = _meshNode->getMaterial(0);
+
+	std::string uid = texture->_uid;
+
+	if (!driver->findTexture(uid.c_str())) {
+		const Image &image = texture->_image;
+
+		ImageStream stream(image);
+		int dataSize = stream.remaining();
+		char *data = new char[dataSize];
+		stream.read(data, dataSize);
+
+		IImage *irrimg = driver->createImageFromData(
+				image.type() == ImageType::RGBA ? ECF_A8R8G8B8 : ECF_R8G8B8, // TODO support greyscale
+				{(u32)image.width(), (u32)image.height()},
+				data, true);
+
+		driver->addTexture(uid.c_str(), irrimg);
+	}
+
+	irrmat.setTexture(id, driver->getTexture(uid.c_str()));
+	_usedTextures.emplace_back(uid);
+	_objManager.addTextureUser(uid);
+}
+
+void ObjectNodeHandler::setMaterial(const Material &mat, const CollectorItem &provider) {
 	SMaterial & irrmat = _meshNode->getMaterial(0);
 
 	irrmat.AmbientColor = toIrrColor(mat.getKa());
 	irrmat.SpecularColor = toIrrColor(mat.getKs());
 	irrmat.DiffuseColor = toIrrColor(mat.getKd());
+
+	setTexture(0, mat.getMapKd(), provider);
 }
 
 void ObjectNodeHandler::updateObject3D(const Object3D & object) {
@@ -96,13 +143,7 @@ void ObjectsManager::update(FlatWorldCollector &collector) {
 
 		if (_objects.find(pair.first) == _objects.end()) {
 			Object3D &object = pair.second->getObject3D();
-			auto objNode = std::make_unique<ObjectNodeHandler>(*this, pair.second->getObject3D());
-
-			// Material
-			auto material = pair.second->getMaterial(object.getMaterialID());
-			if (material) {
-				objNode->setMaterial(*material);
-			}
+			auto objNode = std::make_unique<ObjectNodeHandler>(*this, *pair.second);
 
 			_objects[pair.first] = std::move(objNode);
 
@@ -133,20 +174,46 @@ void ObjectsManager::update(FlatWorldCollector &collector) {
 	}
 }
 
+void ObjectsManager::addTextureUser(const std::string &texId) {
+	auto it = _loadedTextures.find(texId);
+
+	if (it != _loadedTextures.end()) {
+		++it->second;
+	}
+	else {
+		_loadedTextures.emplace(texId, 1);
+	}
+}
+
+void ObjectsManager::removeTextureUser(const std::string &texId) {
+	auto it = _loadedTextures.find(texId);
+
+	if (it != _loadedTextures.end()) {
+		--it->second;
+
+		if (it->second == 0) {
+			_loadedTextures.erase(it);
+			_driver->removeTexture(_driver->getTexture(texId.c_str()));
+		}
+	}
+	else {
+		_loadedTextures.emplace(texId, 1);
+	}
+}
+
 
 
 SMesh * ObjectsManager::convertToIrrlichtMesh(const Mesh & mesh, IVideoDriver * driver) {
 	SMesh * irrMesh = new SMesh();
 	irr::s32 maxPrimitives = driver->getMaximalPrimitiveCount();
-	auto & vertices = mesh.getVertices();
-
-	auto & faces = mesh.getFaces();
 	int primitiveCount = 0;
 
 	int bufID = -1;
 	SMeshBuffer * buffer = nullptr;
 
-	for (const Face & face : faces) {
+	for (int fid = 0; fid < mesh.getFaceCount(); fid++) {
+		const Face &face = mesh.getFace(fid);
+
 		if (face.vertexCount() != 3)
 			continue;
 
@@ -169,8 +236,8 @@ SMesh * ObjectsManager::convertToIrrlichtMesh(const Mesh & mesh, IVideoDriver * 
 				buffer->drop();
 			}
 
-			buffer->Vertices.set_used(faces.size() * 3);
-			buffer->Indices.set_used(faces.size() * 3);
+			buffer->Vertices.set_used(mesh.getFaceCount() * 3);
+			buffer->Indices.set_used(mesh.getFaceCount() * 3);
 		}
 
 		// Add face data
@@ -178,13 +245,13 @@ SMesh * ObjectsManager::convertToIrrlichtMesh(const Mesh & mesh, IVideoDriver * 
 			int id = face.getID(i);
 
 			S3DVertex& v = buffer->Vertices[primitiveCount];
-			v.Pos = toIrrlicht(vertices.at(id).getPosition());
-			v.TCoords = toIrrlicht(vertices.at(id).getTexture());
-			v.Normal = toIrrlicht(vertices.at(id).getNormal());
+			v.Pos = toIrrlicht(mesh.getVertex(id).getPosition());
+			v.TCoords = toIrrlicht(mesh.getVertex(id).getTexture());
+			v.Normal = toIrrlicht(mesh.getVertex(id).getNormal());
 
 			v.Color = SColor(255, 255, 255, 255);
 
-			buffer->Indices[primitiveCount] = primitiveCount;
+			buffer->Indices[primitiveCount] = static_cast<u16>(primitiveCount);
 
 			primitiveCount++;
 		}

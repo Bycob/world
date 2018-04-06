@@ -27,7 +27,6 @@ namespace world {
 		Scene *read(const std::string &filename) const;
 
 	private:
-
 		bool _triangulate;
 		std::shared_ptr<Material> _defaultMaterial;
 	};

@@ -8,12 +8,12 @@
 #include <atomic>
 #include <mutex>
 #include <memory>
+#include <list>
 
 #include <worldcore.h>
 #include <worldflat.h>
 
 #include "MainView.h"
-#include "SynchronizedCollector.h"
 
 class Application {
 public:
@@ -25,14 +25,17 @@ public:
 	void setUserPosition(world::vec3d pos);
 	world::vec3d getUserPosition() const;
 
-	SynchronizedCollector & getCollector();
+	void refill(std::unique_ptr<world::FlatWorldCollector> && toRefill);
+	std::unique_ptr<world::FlatWorldCollector> popFull();
 private:
     std::atomic_bool _running;
 	mutable std::mutex _paramLock;
 
 	std::unique_ptr<world::FlatWorld> _world;
 	std::unique_ptr<world::FirstPersonExplorer> _explorer;
-	std::unique_ptr<SynchronizedCollector> _collector;
+
+	std::list<std::unique_ptr<world::FlatWorldCollector>> _emptyCollectors;
+	std::list<std::unique_ptr<world::FlatWorldCollector>> _fullCollectors;
 
 	world::vec3d _newUpdatePos;
 	world::vec3d _lastUpdatePos;

@@ -5,13 +5,11 @@
 namespace world {
 
 	void MeshOps::recalculateNormals(Mesh &mesh) {
-		auto &vertList = mesh.getVertices();
-		auto &faceList = mesh.getFaces();
+		std::vector<vec3d> normalSum(mesh.getVerticesCount(), vec3d());
+		std::vector<int> normalCount(mesh.getVerticesCount(), 0);
 
-		std::vector<vec3d> normalSum(vertList.size(), vec3d());
-		std::vector<int> normalCount(vertList.size(), 0);
-
-		for (const Face &face : faceList) {
+		for (int i = 0; i < mesh.getFaceCount(); i++) {
+			const Face &face = mesh.getFace(i);
 			const int count = face.vertexCount();
 
 			for (int j = 0; j < count; j++) {
@@ -20,9 +18,9 @@ namespace world {
 				int id1 = face.getID(mod(j + 1, count));
 				int id2 = face.getID(mod(j - 1, count));
 
-				auto pt1 = vertList.at(id0).getPosition();
-				auto pt2 = vertList.at(id1).getPosition();
-				auto pt3 = vertList.at(id2).getPosition();
+				auto pt1 = mesh.getVertex(id0).getPosition();
+				auto pt2 = mesh.getVertex(id1).getPosition();
+				auto pt3 = mesh.getVertex(id2).getPosition();
 
 				vec3d v1 = pt2 - pt1;
 				vec3d v2 = pt3 - pt1;

@@ -38,8 +38,8 @@ namespace world {
 		Scene *result = new Scene();
 
 		for (auto shape : shapes) {
-			std::shared_ptr<Mesh> shared_mesh(std::make_shared<Mesh>());
-			Mesh &mesh = *shared_mesh;
+			Object3D &object3D = result->createObject();
+			Mesh &mesh = object3D.getMesh();
 
 			//positions
 			std::vector<float> &positions = shape.mesh.positions;
@@ -81,8 +81,6 @@ namespace world {
 				offset += ngon;
 				mesh.addFace(face);
 			}
-
-			result->createObject(shared_mesh);
 		}
 
 		return result;
@@ -173,34 +171,31 @@ namespace world {
 			int texCoordOffset = texCoordRead;
 
 			// Ecriture des vertices
-			const std::vector<Vertex> &vertList = mesh.getVertices();
-
-			for (const Vertex &vert : vertList) {
+			for (int vi = 0; vi < mesh.getVerticesCount(); vi++) {
 				verticesRead++;
 				objstream << "v";
-				writeValues(objstream, vert.getPosition());
+				writeValues(objstream, mesh.getVertex(vi).getPosition());
 			}
 
 			// Ecriture des normales
-			for (const Vertex &vert : vertList) {
+			for (int vi = 0; vi < mesh.getVerticesCount(); vi++) {
 				normalRead++;
 				objstream << "vn";
-				writeValues(objstream, vert.getNormal());
+				writeValues(objstream, mesh.getVertex(vi).getNormal());
 			}
 
 			// Ecriture des coordonnées de texture
-			for (const Vertex &vert : vertList) {
+			for (int vi = 0; vi < mesh.getVerticesCount(); vi++) {
 				texCoordRead++;
 				objstream << "vt";
-				writeValues(objstream, vert.getTexture());
+				writeValues(objstream, mesh.getVertex(vi).getTexture());
 			}
 
 			// Ecriture des faces
-			const std::vector<Face> &faceList = mesh.getFaces();
-
-			for (const Face &face : faceList) {
+			for (int fi = 0; fi < mesh.getFaceCount(); fi++) {
 				objstream << "f";
 
+				const Face &face = mesh.getFace(fi);
 				const int vertexCount = face.vertexCount();
 
 				/*/ This code enables to implement optionnal indices easily, despite the fact that it's not yet supported

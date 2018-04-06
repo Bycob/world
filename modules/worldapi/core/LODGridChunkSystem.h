@@ -13,29 +13,27 @@ namespace world {
 
     class WORLDAPI_EXPORT LODGridChunkSystem : public IChunkSystem {
     public:
-        LODGridChunkSystem();
+        LODGridChunkSystem(double baseChunkSize = 1000);
 
         ~LODGridChunkSystem();
 
-        void setLODData(int lod, const LODData &data);
-
         LODData &getLODData(int lod) const;
 
-        /** Give the maximum detail size for all the chunks with
-         * this level of detail.
-         * All objects with a bigger detail size should be in a larger
-         * chunk.
-         * The detail size is given in meters. */
-        double getMaxDetailSize(int lod) const;
+        /** Gives the maximum resolution the given LOD can hold. All
+         * objects with a better resolution should be stored in a
+         * higher LOD.
+         * The resolution is given in points per meter. For exemple, a mesh
+         * whose faces are 20 cm large has a resolution of 5-6. */
+        double getMaxResolution(int lod) const;
 
-        /** Give the minimum detail size for all the chunks with
-         * this level of detail.
-         * All objects with a smaller detail size should be in a
-         * smaller chunk.
-         * The detail size is given in meters. */
-        double getMinDetailSize(int lod) const;
+        /** Gives the minimum resolution required for an object to be
+         * contained in the given LOD. All objects with a worse resolution
+         * should be stored in a lower LOD.
+         * The resolution is given in points per meter. For exemple, a mesh
+         * whose faces are 20 cm large has a resolution of 5-6. */
+        double getMinResolution(int lod) const;
 
-        virtual int getLODForDetailSize(double detailSize) const;
+        virtual int getLODForResolution(double mrd) const;
 
         // NAVIGATION
         QueryResult getChunk(const vec3d &position) override;
@@ -48,11 +46,13 @@ namespace world {
         class Impl;
         Impl *_internal;
 
-        int _maxLOD = 6;
+        /** If an object has a greater resolution than this value,
+         * we can't put it in the minimum LOD. */
+        double _subdivResolutionThreshold = 0.5;
+        int _factor = 4;
+        int _maxLOD = 7;
 
         friend class LODGridChunkHandler;
-
-        LODData &getOrCreateLODData(int lod);
 
         ChunkKey getChunkKey(const ChunkKey &parent, const LODGridCoordinates &coords) const;
 

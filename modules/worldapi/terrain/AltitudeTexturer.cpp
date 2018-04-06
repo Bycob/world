@@ -2,8 +2,8 @@
 
 namespace world {
 
-	AltitudeTexturer::AltitudeTexturer() 
-		: _colorMap({ 513, 65 }) {
+	AltitudeTexturer::AltitudeTexturer(int pixelPerVertex)
+		: _pixelPerVertex(pixelPerVertex), _colorMap({ 513, 65 }), _rng(time(NULL)){
 
 	}
 
@@ -13,7 +13,7 @@ namespace world {
 
 	void AltitudeTexturer::process(Terrain & terrain) {
 		int res = terrain.getResolution();
-		int imgSize = 8 * (res - 1);
+		int imgSize = _pixelPerVertex * (res - 1);
 		Image texture(imgSize, imgSize, ImageType::RGB);
 
 		std::uniform_real_distribution<double> positive(0, 1);
@@ -25,14 +25,14 @@ namespace world {
 				double yd = (double)y / (imgSize - 1);
 
 				// get the parameters to pick in the colormap
-				double altitude = clamp(terrain.getExactHeightAt(xd, yd) + jitter(_rng) * 0.01, 0, 1);
+				double altitude = clamp(terrain.getExactHeightAt(xd, 1 - yd) + jitter(_rng) * 0.01, 0, 1);
 				double climate = positive(_rng);
 
 				// pick the color
 				Color4d color = _colorMap.getColorAt({ altitude, climate });
 
 				// jitter the color and set in the texture
-				double j = 3. / 255.;
+				double j = 5. / 255.;
 				texture.at(x, y).setf(
 					clamp(color._r + jitter(_rng) * j, 0, 1),
 					clamp(color._g + jitter(_rng) * j, 0, 1),
@@ -45,7 +45,6 @@ namespace world {
 	}
 
 	void AltitudeTexturer::process(Terrain & terrain, ITerrainWorkerContext & context) {
-		// TODO
 		process(terrain);
 	}
 }
