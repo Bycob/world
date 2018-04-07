@@ -14,45 +14,59 @@
 
 namespace world {
 
+    struct Ground::TerrainKey {
+        vec2i pos;
+        int lod;
+
+        TerrainKey(int x, int y, int lod) : pos{x, y}, lod(lod) {}
+    };
+
+    struct Ground::Tile {
+        std::vector<optional<Terrain>> _cache;
+        std::unique_ptr<Terrain> _final;
+        std::unique_ptr<Mesh> _mesh;
+        u64 _lastAccess;
+    };
+
+    using TerrainKey = Ground::TerrainKey;
+
+    using Tile = Ground::Tile;
+
+    bool operator<(const TerrainKey &key1, const TerrainKey &key2) {
+        return key1.lod < key2.lod ? true :
+               (key1.lod == key2.lod && key1.pos < key2.pos);
+    }
+
     // Utility class
     class GroundContext : public ITerrainWorkerContext {
     public:
-        int _x, _y, _lvl;
+        TerrainKey _key;
         int _genID;
         Ground &_ground;
 
         bool _registerState = false;
 
-        GroundContext(Ground &ground, int x, int y, int lvl, int genID)
-                : _x(x), _y(y), _lvl(lvl), _genID(genID), _ground(ground) {}
+        GroundContext(Ground &ground, const TerrainKey &key, int genID)
+                : _key(key), _genID(genID), _ground(ground) {}
 
         optional<const Terrain &> getNeighbour(int x, int y) const override {
-			if (_ground.terrainExists(x + _x, y + _y, _lvl)) {
-				auto ret = _ground.cachedTerrain(x + _x, y + _y, _lvl, _genID);
+            TerrainKey nKey{_key.pos.x + x, _key.pos.y + y, _key.lod};
+            auto ret = _ground.getCachedTerrain(nKey, _genID);
 
-				if (ret) {
-				    return *ret;
-				}
-				else {
-				    return nullopt;
-				}
-			}
-			else {
-				return nullopt;
-			}
+            if (ret) {
+                return *ret;
+            }
+            else {
+                return nullopt;
+            }
         }
 
 		optional<const Terrain &> getParent() const override {
-			if (_lvl == 0)
+			if (_key.lod == 0)
 				return nullopt;
 
-			auto parentId = _ground.getParentId({ _x, _y, _lvl });
-
-			if (!_ground.terrainExists(parentId.x, parentId.y, parentId.z)) {
-			    _ground.generateTerrain(parentId.x, parentId.y, parentId.z);
-			}
-
-			auto ret = _ground.cachedTerrain(parentId.x, parentId.y, parentId.z, _genID);
+			auto parentId = _ground.getParentKey(_key);
+			auto ret = _ground.getCachedTerrain(parentId, _genID);
 
 			if (ret) {
 				return *ret;
@@ -63,7 +77,7 @@ namespace world {
 		}
 
 		int getParentCount() const override {
-			return _lvl;
+			return _key.lod;
 		}
 
         void registerCurrentState() override {
@@ -71,18 +85,15 @@ namespace world {
         }
     };
 
-    struct Tile {
-        std::vector<optional<Terrain>> _cache;
-        std::unique_ptr<Terrain> _final;
-        std::unique_ptr<Mesh> _mesh;
-    };
-
     class PrivateGround {
     public:
         PrivateGround() : _terrains() {}
 
-        std::map<vec3i, Tile> _terrains;
+        std::map<TerrainKey, Tile> _terrains;
         std::list<std::unique_ptr<ITerrainWorker>> _generators;
+
+        u64 _accessCounter = 0;
+        std::map<u64, TerrainKey> _accesses;
     };
 
 // Idees d'ameliorations :
@@ -140,9 +151,6 @@ namespace world {
             return;
         }
 
-        // Generate the zone if needed
-        generateZone(world, zone);
-
         // Find terrains to generate
         int lvl = getLevelForChunk(zone);
         double terrainSize = lvl == 0 ? getTerrainSize(lvl) : getTerrainSize(lvl - 1);
@@ -153,12 +161,14 @@ namespace world {
             for (int y = (int) floor(lower.y); y < ceil(upper.y); y++) {
 
                 if (lvl == 0) {
-                    addTerrain(x, y, lvl, collector);
+                    addTerrain({x, y, lvl}, collector);
                 } else {
-                    replaceTerrain(x, y, lvl - 1, collector);
+                    replaceTerrain({x, y, lvl - 1}, collector);
                 }
             }
         }
+
+        updateCache();
     }
 
     double Ground::observeAltitudeAt(double x, double y, int lvl) {
@@ -167,12 +177,10 @@ namespace world {
 		double yd = y / size;
         int xi = (int) floor(xd);
         int yi = (int) floor(yd);
+        TerrainKey key(xi, yi, lvl);
 
-        if (!terrainExists(xi, yi, lvl)) {
-            generateTerrain(xi, yi, lvl);
-        }
-
-        const Terrain &terrain = this->terrain(xi, yi, lvl);
+        const Terrain &terrain = this->provideTerrain(key);
+        updateCache();
         return _minAltitude + getAltitudeRange() * terrain.getExactHeightAt(xd - xi, yd - yi);
     }
 
@@ -181,22 +189,21 @@ namespace world {
     }
 
     // FIXME : Sometimes a level of details is skipped, and then problems happen
-    void Ground::replaceTerrain(int xp, int yp, int lvl, FlatWorldCollector &collector) {
-        collector.disableItem(terrainToItem(getTerrainDataId(xp, yp, lvl)));
+    void Ground::replaceTerrain(const TerrainKey &pKey, FlatWorldCollector &collector) {
+        collector.disableItem(terrainToItem(getTerrainDataId(pKey)));
+        auto cp = pKey.pos;
 
-        for (int x = xp * _factor; x < xp * _factor + _factor; x++) {
-            for (int y = yp * _factor; y < yp * _factor + _factor; y++) {
-                if (!terrainExists(x, y, lvl + 1)) {
-                    generateTerrain(x, y, lvl + 1);
-                }
-                addTerrain(x, y, lvl + 1, collector);
+        for (int x = cp.x * _factor; x < cp.x * _factor + _factor; x++) {
+            for (int y = cp.y * _factor; y < cp.y * _factor + _factor; y++) {
+                TerrainKey cKey(x, y, pKey.lod + 1);
+                addTerrain(cKey, collector);
             }
         }
     }
 
-    void Ground::addTerrain(int x, int y, int lvl, ICollector &collector) {
-        ICollector::ItemKey itemKey = terrainToItem(getTerrainDataId(x, y, lvl));
-        Terrain &terrain = this->terrain(x, y, lvl);
+    void Ground::addTerrain(const TerrainKey &key, ICollector &collector) {
+        ICollector::ItemKey itemKey = terrainToItem(getTerrainDataId(key));
+        Terrain &terrain = this->provideTerrain(key);
 
         if (!collector.hasItem(itemKey)) {
             // Relocate the terrain
@@ -205,7 +212,7 @@ namespace world {
             vec3d size = bbox.getUpperBound() - offset;
 
             // Create the mesh
-            auto meshbe = mesh(x, y, lvl);
+            auto meshbe = provideMesh(key);
             Object3D object;
 
             if (meshbe) {
@@ -213,7 +220,7 @@ namespace world {
             }
             else {
                 std::unique_ptr<Mesh> &mesh =
-                        (_internal->_terrains[{x, y, lvl}]._mesh =
+                        (_internal->_terrains[key]._mesh =
                                  std::unique_ptr<Mesh>(terrain.createMesh(0, 0, 0, size.x, size.y, size.z)));
                 object.setMesh(*mesh, true);
             }
@@ -238,13 +245,63 @@ namespace world {
         }
     }
 
-	// TODO optional ?
-    Terrain &Ground::terrain(int x, int y, int lvl) {
-        return *_internal->_terrains.at({x, y, lvl})._final;
+    void Ground::updateCache() {
+        if (_internal->_terrains.size() > _maxCacheSize) {
+
+            // We shrink one third of the memory
+            auto count = _internal->_terrains.size() / 3;
+
+            while (count != 0) {
+                auto accessEntry = _internal->_accesses.begin();
+
+                // Free memory
+                // TODO call to a drop manager
+                _internal->_terrains.erase(accessEntry->second);
+
+                // Remove access entry
+                _internal->_accesses.erase(accessEntry);
+
+                count--;
+            }
+            std::cout << "Dropped memory : " << _internal->_terrains.size() << " left." << std::endl;
+        }
     }
 
-    optional<Mesh &> Ground::mesh(int x, int y, int lvl) {
-        auto &meshPtr = _internal->_terrains.at({x, y, lvl})._mesh;
+    Tile& Ground::provide(const TerrainKey &key) {
+        auto it = _internal->_terrains.find(key);
+
+        if (it == _internal->_terrains.end()) {
+            generateTerrain(key);
+            it = _internal->_terrains.find(key);
+        }
+
+        registerAccess(key, it->second);
+        return it->second;
+    }
+
+    void Ground::registerAccess(const TerrainKey &key, Tile &tile) {
+        _internal->_accessCounter++;
+
+        // Remove last access entry for this tile
+        _internal->_accesses.erase(tile._lastAccess);
+
+        // Make a new entry
+        tile._lastAccess = _internal->_accessCounter;
+        _internal->_accesses.emplace(tile._lastAccess, key);
+
+        // Update parent
+        if (key.lod != 0) {
+            auto parentKey = getParentKey(key);
+            registerAccess(parentKey, provide(parentKey));
+        }
+    }
+
+    Terrain &Ground::provideTerrain(const TerrainKey &key) {
+        return *provide(key)._final;
+    }
+
+    optional<Mesh &> Ground::provideMesh(const TerrainKey &key) {
+        auto &meshPtr = provide(key)._mesh;
         if (meshPtr) {
             return *meshPtr;
         }
@@ -253,21 +310,24 @@ namespace world {
         }
     }
 
-    optional<Terrain &> Ground::cachedTerrain(int x, int y, int lvl, int genID) {
-        return *_internal->_terrains.at({x, y, lvl})._cache[genID];
+    optional<Terrain &> Ground::getCachedTerrain(const TerrainKey &key, int genID) {
+        auto it = _internal->_terrains.find(key);
+
+        if (it == _internal->_terrains.end()) {
+            return nullopt;
+        }
+        else {
+            registerAccess(key, it->second);
+            return *it->second._cache[genID];
+        }
     }
 
-    bool Ground::terrainExists(int x, int y, int lvl) const {
-        return _internal->_terrains.find({x, y, lvl}) != _internal->_terrains.end();
-    }
-
-    std::string Ground::getTerrainDataId(int x, int y, int lvl) const {
-        u64 id = (u64) (x & 0x0FFFFFFF)
-                      + ((u64) (y & 0x0FFFFFFF) << 24)
-                      + ((u64) (lvl & 0xFF) << 48);
+    std::string Ground::getTerrainDataId(const TerrainKey &key) const {
+        u64 id = (u64) (key.pos.x & 0x0FFFFFFF)
+                      + ((u64) (key.pos.y & 0x0FFFFFFF) << 24)
+                      + ((u64) (key.lod & 0xFF) << 48);
         return std::to_string(id);
     }
-
 
     double Ground::getTerrainSize(int lvl) const {
         return _unitSize * powi((double) _factor, -lvl);
@@ -289,46 +349,31 @@ namespace world {
         return _maxLOD;
     }
 
-    vec3i Ground::getParentId(const vec3i &childId) const {
+    TerrainKey Ground::getParentKey(const TerrainKey &childId) const {
         return {
-                (childId.x - mod(childId.x, _factor)) / _factor,
-                (childId.y - mod(childId.y, _factor)) / _factor,
-                childId.z - 1
+                (childId.pos.x - mod(childId.pos.x, _factor)) / _factor,
+                (childId.pos.y - mod(childId.pos.y, _factor)) / _factor,
+                childId.lod - 1
         };
     }
 
-    void Ground::generateZone(FlatWorld &world, const WorldZone &zone) {
-        Chunk &chunk = zone->chunk();
-
-        // Calculate lvl for the given chunk
-        int lvl = getLevelForChunk(zone);
-
-        // Find terrains to generate
-        double terrainSize = getTerrainSize(lvl);
-        vec3d lower = chunk.getOffset() / terrainSize;
-        vec3d upper = lower + chunk.getSize() / terrainSize;
-
-        for (int x = (int) floor(lower.x); x < ceil(upper.x); x++) {
-            for (int y = (int) floor(lower.y); y < ceil(upper.y); y++) {
-                if (!terrainExists(x, y, lvl)) {
-                    generateTerrain(x, y, lvl);
-                }
-            }
+    void Ground::generateTerrain(const TerrainKey &key) {
+        // Ensure that parent was created
+        if (key.lod != 0) {
+            provide(getParentKey(key));
         }
-    }
 
-    void Ground::generateTerrain(int x, int y, int lvl) {
         // Terrain creation
         std::unique_ptr<Terrain> terrain = std::make_unique<Terrain>(_terrainRes);
 
         // Bounds
-        double terrainSize = getTerrainSize(lvl);
+        double terrainSize = getTerrainSize(key.lod);
         // TODO min altitude and max altitude also depend on lvl
-        terrain->setBounds(terrainSize * x, terrainSize * y, _minAltitude,
-                           terrainSize * (x + 1), terrainSize * (y + 1), _maxAltitude);
+        terrain->setBounds(terrainSize * key.pos.x, terrainSize * key.pos.y, _minAltitude,
+                           terrainSize * (key.pos.x + 1), terrainSize * (key.pos.y + 1), _maxAltitude);
 
         // Generation
-        GroundContext context(*this, x, y, lvl, 0);
+        GroundContext context(*this, key, 0);
         std::vector<optional<Terrain>> cache;
 
         for (auto &generator : _internal->_generators) {
@@ -345,6 +390,6 @@ namespace world {
             context._genID++;
         }
 
-        _internal->_terrains[{x, y, lvl}] = {std::move(cache), std::move(terrain)};
+        _internal->_terrains[key] = {std::move(cache), std::move(terrain)};
     }
 }

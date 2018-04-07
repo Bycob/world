@@ -16,16 +16,17 @@ namespace world {
 
 	class PrivateGround;
 
-	/** Cette classe gère le sol du monde. Le sol est composé de plusieurs
-	terrains carrés accolés les uns aux autres. Des détails sont ensuite
-	ajoutés pour les différents niveaux de détail.
-	Cette classe peut faire référence à un dossier contenant des terrains
-	déjà générés. Dans ce cas, les terrains sont chargés dynamiquement par
-	la classe Ground lorsque l'utilisateur le demande. Un terrain donné est
-	considéré comme non généré s'il n'est ni dans le cache, ni dans le dossier
-	référencé. */
+	/** This class manages an infinite ground with as much details
+	 * as we want. The access method are quite similar to the ones
+	 * used on the WorldObjects : you can get parts of the ground by
+	 * specifying which part of the world you're wanting to get content
+	 * from. */
 	class WORLDAPI_EXPORT Ground : public IGround {
 	public:
+        struct TerrainKey;
+
+        struct Tile;
+
 		Ground(double unitSize = 6000, double minAltitude = -2000, double maxAltitude = 4000);
 
 		virtual ~Ground();
@@ -72,32 +73,35 @@ namespace world {
 		int _textureRes = 4;
 		int _maxLOD = 3;
 
+		int _maxCacheSize = 750;
 
 		double observeAltitudeAt(double x, double y, int lvl);
 
 		/** Replace a parent terrain by its children in the collector */
-		void replaceTerrain(int x, int y, int lvl, FlatWorldCollector &collector);
+		void replaceTerrain(const TerrainKey &key, FlatWorldCollector &collector);
 
-		void addTerrain(int x, int y, int lvl, ICollector &collector);
+		void addTerrain(const TerrainKey &key, ICollector &collector);
+
+		/** Updates the cache, free old used memory if needed (by saving
+		 * the terrains to files or discard them) */
+		void updateCache();
 
 
 		// ACCESS
-		Terrain &terrain(int x, int y, int lvl);
+        Ground::Tile &provide(const TerrainKey &key);
 
-		optional<Mesh &> mesh(int x, int y, int lvl);
+        void registerAccess(const TerrainKey &key, Tile &tile);
 
-		optional<Terrain &> cachedTerrain(int x, int y, int lvl, int genID);
+		Terrain &provideTerrain(const TerrainKey &key);
 
-		/** Indique si le terrain à l'indice (x, y) existe déjà ou au
-        contraire doit être généré par le générateur de terrain.
-        @returns true si le terrain existe, false s'il doit être généré.*/
-		bool terrainExists(int x, int y, int lvl) const;
+		optional<Mesh &> provideMesh(const TerrainKey &key);
+
+		optional<Terrain &> getCachedTerrain(const TerrainKey &key, int genID);
 
 
-		// DATA
-		/** Donne un identifiant unique pour la section de terrain à
-         * l'emplacement donné. */
-		std::string getTerrainDataId(int x, int y, int lvl) const;
+        // DATA
+		/** Gets a unique string id for the given tile in the Ground. */
+		std::string getTerrainDataId(const TerrainKey &key) const;
 
 		double getTerrainSize(int level) const;
 
@@ -105,18 +109,17 @@ namespace world {
 
 		int getLevelForChunk(const WorldZone &zone) const;
 
-		vec3i getParentId(const vec3i &childId) const;
+		TerrainKey getParentKey(const TerrainKey &childId) const;
 
 
 		// GENERATION
-		void generateZone(FlatWorld &world, const WorldZone &zone);
-
 		/** Generate the terrain with given coordinates. Assume that:
          * - the terrain wasn't generated yet,
          * - the terrains with higher level at the same place are already
          * generated.*/
-		void generateTerrain(int x, int y, int lvl);
+		void generateTerrain(const TerrainKey &key);
 
+		friend class PrivateGround;
 		friend class GroundContext;
 	};
 }
