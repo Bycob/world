@@ -26,6 +26,8 @@ namespace world {
 
 		void addFlatWorldDecorator(FlatWorldDecorator *decorator);
 
+		void collect(const WorldZone &zone, ICollector &collector) override;
+
 		void collect(const WorldZone &zone, FlatWorldCollector &collector);
 
 	protected:

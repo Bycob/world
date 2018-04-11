@@ -4,6 +4,7 @@
 #include "core/WorldConfig.h"
 
 #include "core/WorldZone.h"
+#include "core/ICollector.h"
 
 namespace world {
 
@@ -14,7 +15,10 @@ namespace world {
     public:
         virtual double observeAltitudeAt(WorldZone zone, double x, double y) = 0;
 
-        virtual void collectZone(FlatWorldCollector &collector, FlatWorld &world, const WorldZone &zone) = 0;
+		virtual void collectZone(const WorldZone &zone, ICollector &collector) = 0;
+
+		// TODO change arguments order
+        virtual void collectZone(const WorldZone &zone, FlatWorld &world, FlatWorldCollector &collector) = 0;
     };
 }
 

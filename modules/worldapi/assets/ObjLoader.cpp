@@ -1,8 +1,10 @@
-#define TINYOBJLOADER_IMPLEMENTATION
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <regex>
+#include <set>
 
+#define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader/tiny_obj_loader.h>
 
 #include "ObjLoader.h"
@@ -121,9 +123,13 @@ namespace world {
 
 		objfile.close();
 		mtlfile.close();
+		
+		//Textures
+		std::string folderPath = filename.substr(0, lastSlashIndex + 1);
+		writeTextures(object3D, folderPath);
 	}
 
-// Fonctions utiles
+	// Useful functions
 	void writeValues(std::ostream &file, const vec3d &vert) {
 		file << " " << vert.x << " " << vert.y << " " << vert.z << std::endl;
 	}
@@ -132,7 +138,13 @@ namespace world {
 		file << " " << vert.x << " " << vert.y << std::endl;
 	}
 
+	std::string getTexturePath(const std::string &texID) {
+		std::regex e("/");
+		return std::regex_replace(texID, e, "_") + ".png";
+	}
+
 	void ObjLoader::write(const Scene &scene, std::ostream &objstream, std::ostream &mtlstream) const {
+
 		std::vector<std::shared_ptr<Material>> materials;
 		scene.getMaterials(materials);
 		std::vector<Object3D *> objects;
@@ -174,7 +186,7 @@ namespace world {
 			for (int vi = 0; vi < mesh.getVerticesCount(); vi++) {
 				verticesRead++;
 				objstream << "v";
-				writeValues(objstream, mesh.getVertex(vi).getPosition());
+				writeValues(objstream, mesh.getVertex(vi).getPosition() + object->getPosition());
 			}
 
 			// Ecriture des normales
@@ -263,27 +275,33 @@ namespace world {
 			writeColor("Ks", material->getKs());
 
 			//maps
-			auto writeMap = [&mtlstream = mtlstream](const std::string &name, const std::string &value) {
+			auto writeMap = [&](const std::string &name, const std::string &value) {
 				if (value != "") {
-					mtlstream << name << " " << value << std::endl;
+					mtlstream << name << " " << getTexturePath(value) << std::endl;
 				}
 			};
 			writeMap("map_Kd", material->getMapKd());
 		}
-
-		if (includeDefaultMaterial) {
-			materials.pop_back();
-		}
 	}
 
-///PRIVATE : méthode permettant d'agrandir un vector avant d'accéder à l'élément
-///@returns Une référence vers l'élement à l'emplacement <tt>index</tt>
-	template<typename T>
-	T &extAt(std::vector<T> &vector, int index) {
-		while (vector.size() <= index) {
-			vector.push_back(0);
-		}
+	void ObjLoader::writeTextures(const Scene &scene, const std::string &folder) const {
+		std::set<std::string> texturesIDs;
 
-		return vector.at(index);
+		// Collecting texture IDs
+		std::vector<std::shared_ptr<Material>> materials;
+		scene.getMaterials(materials);
+
+		for (auto &material : materials) {
+			texturesIDs.insert(material->getMapKd());
+		}
+		
+		// Writing texture IDs
+		for (auto &texID : texturesIDs) {
+			optional<const Image&> texture = scene.getTexture(texID);
+			
+			if (texture) {
+				texture->write(folder + getTexturePath(texID));
+			}
+		}
 	}
 }

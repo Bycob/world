@@ -12,6 +12,10 @@ namespace world {
 
 	}
 
+	void Material::setName(const std::string &name) {
+		_name = name;
+	}
+
 	void Material::setKd(double r, double g, double b) {
 		_Kd.set(r, g, b);
 	}

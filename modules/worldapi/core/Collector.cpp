@@ -63,6 +63,42 @@ namespace world {
         return CollectorIterator(*this);
     }
 
+	Scene * world::Collector::createScene() {
+		Scene *result = new Scene();
+
+		for (auto it = iterateItems(); it.hasNext(); ++it) {
+			const auto &item = (*it).second;
+
+			auto &object = result->createObject(item->getObject3D());
+
+			// Material
+			std::string materialID = object.getMaterialID();
+			auto material = item->getMaterial(materialID);
+			
+			if (material) {
+				Material addedMat = *material;
+
+				// Change the name to have distinct materials
+				// TODO we should not have to do that
+				materialID = ItemKeys::toString((*it).first) + materialID;
+				addedMat.setName(materialID);
+				object.setMaterialID(materialID);
+
+				// Textures
+				auto texture = item->getTexture(material->getMapKd());
+				if (texture) {
+					result->addTexture(texture->_uid, texture->_image);
+					// TODO we should not have to change the uid.
+					addedMat.setMapKd(texture->_uid);
+				}
+
+				result->addMaterial(addedMat);
+			}
+		}
+
+		return result;
+	}
+
     // ==== COLLECTOR OBJECT PART
 
     CollectorItem::CollectorItem(const ICollector::ItemKey &key, const Object3D &object3D) :

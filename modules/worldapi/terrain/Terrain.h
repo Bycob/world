@@ -93,7 +93,10 @@ namespace world {
 		//Méthodes pour la conversion du terrain en image.
 		Image createImage() const;
 
+		// ------ Texture
 		void setTexture(const Image &image);
+		
+		void setTexture(Image && image);
 
 		optional<const Image &> getTexture() const;
 

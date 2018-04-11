@@ -1,11 +1,14 @@
 #include "Scene.h"
 
+#include <map>
+
 namespace world {
 
 	class PrivateScene {
 	public:
 		std::vector<std::unique_ptr<Object3D>> _objects;
 		std::vector<std::shared_ptr<Material>> _materials;
+		std::map<std::string, Image> _images;
 	};
 
 	Scene::Scene() : _internal(new PrivateScene()) {
@@ -26,8 +29,8 @@ namespace world {
 		}
 	}
 
-	void Scene::addMaterial(const std::shared_ptr<Material> &material) {
-		_internal->_materials.push_back(material);
+	void world::Scene::addObject(const Object3D & object) {
+		addObjectInternal(new Object3D(object));
 	}
 
 	void Scene::getObjects(std::vector<Object3D *> &output) const {
@@ -42,6 +45,14 @@ namespace world {
 		return output;
 	}
 
+	void world::Scene::addMaterial(const Material & material) {
+		addMaterial(std::make_shared<Material>(material));
+	}
+
+	void Scene::addMaterial(const std::shared_ptr<Material> &material) {
+		_internal->_materials.push_back(material);
+	}
+
 	void Scene::getMaterials(std::vector<std::shared_ptr<Material>> &output) const {
 		for (const std::shared_ptr<Material> &material : _internal->_materials)
 			output.push_back(material);
@@ -51,6 +62,21 @@ namespace world {
 		std::vector<std::shared_ptr<Material>> output;
 		getMaterials(output);
 		return output;
+	}
+
+	void world::Scene::addTexture(const std::string & id, const Image & image) {
+		_internal->_images.emplace(id, image);
+	}
+
+	optional<const Image &> world::Scene::getTexture(const std::string & id) const {
+		auto it = _internal->_images.find(id);
+		
+		if (it != _internal->_images.end()) {
+			return it->second;
+		}
+		else {
+			return nullopt;
+		}
 	}
 
 	void Scene::addObjectInternal(Object3D *object) {

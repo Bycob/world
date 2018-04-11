@@ -5,8 +5,10 @@
 #include <memory>
 #include <vector>
 
+#include "core/WorldTypes.h"
 #include "Object3D.h"
 #include "Material.h"
+#include "Image.h"
 
 namespace world {
 
@@ -18,8 +20,7 @@ namespace world {
 
 		virtual ~Scene();
 
-		/** Ajoute tout le contenu de la scène passée en paramètres, dans cette
-        scène. */
+		/** Add all the content from the other scene in this scene. */
 		void addAll(const Scene &other);
 
 		template<typename... Args>
@@ -29,17 +30,24 @@ namespace world {
 			return *object;
 		}
 
-		void addMaterial(const std::shared_ptr<Material> &material);
+		void addObject(const Object3D &object);
 
 		void getObjects(std::vector<Object3D *> &output) const;
 
 		std::vector<Object3D *> getObjects() const;
 
-		/** Insert tous les matériaux contenus dans cette scène à la fin du vecteur
-        "output".*/
+		void addMaterial(const Material &material);
+
+		void addMaterial(const std::shared_ptr<Material> &material);
+
+		/** Insert all the materials from this scene in the output vector.*/
 		void getMaterials(std::vector<std::shared_ptr<Material>> &output) const;
 
 		std::vector<std::shared_ptr<Material>> getMaterials() const;
+
+		void addTexture(const std::string &id, const Image &image);
+
+		optional<const Image&> getTexture(const std::string &id) const;
 
 	private:
 		void addObjectInternal(Object3D *object);

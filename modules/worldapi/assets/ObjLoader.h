@@ -24,6 +24,8 @@ namespace world {
 
 		void write(const Scene &scene, std::ostream &objstream, std::ostream &mtlstream) const;
 
+		void writeTextures(const Scene &scene, const std::string &directory) const;
+
 		Scene *read(const std::string &filename) const;
 
 	private:

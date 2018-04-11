@@ -15,6 +15,8 @@ namespace world {
 
 		virtual ~Material();
 
+		void setName(const std::string &name);
+
 		std::string getName() const {
 			return _name;
 		}

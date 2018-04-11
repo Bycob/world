@@ -50,7 +50,9 @@ namespace world {
 		// EXPLORATION
 		double observeAltitudeAt(WorldZone zone, double x, double y) override;
 
-		void collectZone(FlatWorldCollector &collector, FlatWorld &world, const WorldZone &zone) override;
+		void collectZone(const WorldZone &zone, ICollector &collector);
+
+		void collectZone(const WorldZone &zone, FlatWorld &world, FlatWorldCollector &collector) override;
 
 	private:
 		PrivateGround *_internal;
@@ -78,7 +80,7 @@ namespace world {
 		double observeAltitudeAt(double x, double y, int lvl);
 
 		/** Replace a parent terrain by its children in the collector */
-		void replaceTerrain(const TerrainKey &key, FlatWorldCollector &collector);
+		void replaceTerrain(const TerrainKey &key, ICollector &collector);
 
 		void addTerrain(const TerrainKey &key, ICollector &collector);
 

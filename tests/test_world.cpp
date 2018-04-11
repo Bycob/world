@@ -14,21 +14,23 @@ int main(int argc, char** argv) {
 }
 
 void generate_test_world(int argc, char** argv) {
+	world::createDirectory("world");
+	world::createDirectory("world/world");
+
     std::cout << "Creation du monde" << std::endl;
     std::unique_ptr<FlatWorld> world(FlatWorld::createDemoFlatWorld());
 
     std::cout << "Creation de l'explorer et du collecteur" << std::endl;
-    FirstPersonExplorer explorer(1000, 70, 0.5);
+    FirstPersonExplorer explorer;
     explorer.setPosition({0, 0, 0});
     FlatWorldCollector collector;
 
     std::cout << "Exploration du monde..." << std::endl;
     explorer.explore<FlatWorld>(*world, collector);
 
-    std::cout << "Exploration terminée. Collecte des résultats" << std::endl;
-    auto it = collector.iterateItems();
+    std::cout << "Exploration terminee. Collecte des resultats et ecriture de la scene" << std::endl;
+	std::unique_ptr<Scene> scene(collector.createScene());
 
-    while (it.hasNext()) {
-        ++it;
-    }
+	ObjLoader loader;
+	loader.write(*scene, "world/world/world.obj");
 }

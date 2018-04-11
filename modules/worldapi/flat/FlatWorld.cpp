@@ -39,10 +39,16 @@ namespace world {
 		_internal->_chunkDecorators.emplace_back(decorator);
 	}
 
+	void world::FlatWorld::collect(const WorldZone & zone, ICollector & collector) {
+		World::collect(zone, collector);
+
+		ground().collectZone(zone, collector);
+	}
+
 	void FlatWorld::collect(const WorldZone &zone, FlatWorldCollector &collector) {
 		World::collect(zone, collector);
 
-		ground().collectZone(collector, *this, zone);
+		ground().collectZone(zone, *this, collector);
 	}
 
 	void FlatWorld::onFirstExploration(WorldZone &chunk) {

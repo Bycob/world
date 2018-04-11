@@ -41,7 +41,7 @@ namespace world {
 			}
 		}
 
-		terrain.setTexture(texture);
+		terrain.setTexture(std::move(texture));
 	}
 
 	void AltitudeTexturer::process(Terrain & terrain, ITerrainWorkerContext & context) {

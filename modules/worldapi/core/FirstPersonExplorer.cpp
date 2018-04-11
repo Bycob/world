@@ -5,7 +5,7 @@
 namespace world {
 
     FirstPersonExplorer::FirstPersonExplorer(double eyeResolution, double fov, double punctumProximum)
-            : _eyeResolution(eyeResolution), _fov(fov), _punctumProximum(punctumProximum), _farDistance(20000), _position({0, 0, 0}) {
+            : _eyeResolution(eyeResolution), _fov(fov), _punctumProximum(punctumProximum), _farDistance(5000), _position({0, 0, 0}) {
 
     }
 

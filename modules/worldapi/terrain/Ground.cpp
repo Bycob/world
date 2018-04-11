@@ -137,38 +137,43 @@ namespace world {
         return observeAltitudeAt(offset.x + x, offset.y + y, lvl);
     }
 
-    void Ground::collectZone(FlatWorldCollector &collector, FlatWorld &world, const WorldZone &zone) {
-        Chunk &chunk = zone->chunk();
-        vec3d offset = zone->getAbsoluteOffset();
-        vec3d chunkSize = chunk.getSize();
+	void Ground::collectZone(const WorldZone &zone, ICollector &collector) {
+		Chunk &chunk = zone->chunk();
+		vec3d offset = zone->getAbsoluteOffset();
+		vec3d chunkSize = chunk.getSize();
 
-        // skip if zone is not in altitude range
-        double estimAltitude = observeAltitudeAt(offset.x + chunkSize.x / 2, offset.y + chunkSize.y / 2, 0);
+		// skip if zone is not in altitude range
+		double estimAltitude = observeAltitudeAt(offset.x + chunkSize.x / 2, offset.y + chunkSize.y / 2, 0);
 
-        if (abs(estimAltitude - offset.z) >= chunkSize.z / 2
-            && abs(estimAltitude - offset.z - chunkSize.z) >= chunkSize.z / 2) {
+		if (abs(estimAltitude - offset.z) >= chunkSize.z / 2
+			&& abs(estimAltitude - offset.z - chunkSize.z) >= chunkSize.z / 2) {
 
-            return;
-        }
+			return;
+		}
 
-        // Find terrains to generate
-        int lvl = getLevelForChunk(zone);
-        double terrainSize = lvl == 0 ? getTerrainSize(lvl) : getTerrainSize(lvl - 1);
-        vec3d lower = offset / terrainSize;
-        vec3d upper = lower + chunkSize / terrainSize;
+		// Find terrains to generate
+		int lvl = getLevelForChunk(zone);
+		double terrainSize = lvl == 0 ? getTerrainSize(lvl) : getTerrainSize(lvl - 1);
+		vec3d lower = offset / terrainSize;
+		vec3d upper = lower + chunkSize / terrainSize;
 
-        for (int x = (int) floor(lower.x); x < ceil(upper.x); x++) {
-            for (int y = (int) floor(lower.y); y < ceil(upper.y); y++) {
+		for (int x = (int)floor(lower.x); x < ceil(upper.x); x++) {
+			for (int y = (int)floor(lower.y); y < ceil(upper.y); y++) {
 
-                if (lvl == 0) {
-                    addTerrain({x, y, lvl}, collector);
-                } else {
-                    replaceTerrain({x, y, lvl - 1}, collector);
-                }
-            }
-        }
+				if (lvl == 0) {
+					addTerrain({ x, y, lvl }, collector);
+				}
+				else {
+					replaceTerrain({ x, y, lvl - 1 }, collector);
+				}
+			}
+		}
 
-        updateCache();
+		updateCache();
+	}
+
+    void Ground::collectZone(const WorldZone &zone, FlatWorld &world, FlatWorldCollector &collector) {
+		collectZone(zone, collector);
     }
 
     double Ground::observeAltitudeAt(double x, double y, int lvl) {
@@ -189,7 +194,7 @@ namespace world {
     }
 
     // FIXME : Sometimes a level of details is skipped, and then problems happen
-    void Ground::replaceTerrain(const TerrainKey &pKey, FlatWorldCollector &collector) {
+    void Ground::replaceTerrain(const TerrainKey &pKey, ICollector &collector) {
         collector.disableItem(terrainToItem(getTerrainDataId(pKey)));
         auto cp = pKey.pos;
 

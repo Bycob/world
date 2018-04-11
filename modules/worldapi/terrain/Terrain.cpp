@@ -203,6 +203,10 @@ namespace world {
 		_texture = std::make_unique<Image>(image);
 	}
 
+	void Terrain::setTexture(Image &&image) {
+		_texture = std::make_unique <Image>(image);
+	}
+
 	optional<const Image &> Terrain::getTexture() const {
 		if (_texture == nullptr) {
 			return nullopt;

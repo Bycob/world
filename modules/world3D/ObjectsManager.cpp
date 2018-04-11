@@ -57,7 +57,7 @@ void ObjectNodeHandler::setTexture(int id, const std::string &path, const world:
 
 		IImage *irrimg = driver->createImageFromData(
 				image.type() == ImageType::RGBA ? ECF_A8R8G8B8 : ECF_R8G8B8, // TODO support greyscale
-				{(u32)image.width(), (u32)image.height()},
+				{static_cast<irr::u32>(image.width()), static_cast<irr::u32>(image.height())},
 				data, true);
 
 		driver->addTexture(uid.c_str(), irrimg);
@@ -251,7 +251,7 @@ SMesh * ObjectsManager::convertToIrrlichtMesh(const Mesh & mesh, IVideoDriver * 
 
 			v.Color = SColor(255, 255, 255, 255);
 
-			buffer->Indices[primitiveCount] = static_cast<u16>(primitiveCount);
+			buffer->Indices[primitiveCount] = static_cast<irr::u16>(primitiveCount);
 
 			primitiveCount++;
 		}

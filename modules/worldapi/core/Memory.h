@@ -149,6 +149,7 @@ namespace world {
         RefOrValue &operator=(RefOrValue &&other) {
             _rov = other._rov;
             other._rov = nullptr;
+			return *this;
         }
 
         T &get() {
@@ -216,6 +217,7 @@ namespace world {
         ConstRefOrValue &operator=(ConstRefOrValue &&other) {
             _crov = other._crov;
             other._crov = nullptr;
+			return *this;
         }
 
         const T &get() const {

@@ -9,6 +9,7 @@
 #include "WorldTypes.h"
 #include "assets/Object3D.h"
 #include "assets/Material.h"
+#include "assets/Scene.h"
 
 #include "ICollector.h"
 
@@ -41,6 +42,8 @@ namespace world {
         void addTexture(const ItemKey &key, const std::string &texName, const Image &texture, bool keepRef) override;
 
         CollectorIterator iterateItems();
+
+		Scene *createScene();
 
     protected:
         PrivateCollector *_internal;
