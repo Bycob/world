@@ -140,7 +140,7 @@ namespace world {
 
 	std::string getTexturePath(const std::string &texID) {
 		std::regex e("/");
-		return std::regex_replace(texID, e, "_") + ".png";
+		return std::regex_replace(texID, e, "_") + (endsWith(texID, ".png") ? "" : ".png");
 	}
 
 	void ObjLoader::write(const Scene &scene, std::ostream &objstream, std::ostream &mtlstream) const {

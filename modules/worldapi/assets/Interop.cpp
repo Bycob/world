@@ -21,8 +21,8 @@ namespace world {
 
 		if (cube.n_elem < 3) throw std::runtime_error("conversion cube -> image : pas assez de données");
 
-		for (int x = 0; x < cube.n_rows; x++) {
-			for (int y = 0; y < cube.n_cols; y++) {
+		for (int y = 0; y < cube.n_cols; y++) {
+		    for (int x = 0; x < cube.n_rows; x++) {
 				output.at<cv::Vec3b>(y, x) = cv::Vec3b(
 						(unsigned char) (cube(x, y, 2) * 255),
 						(unsigned char) (cube(x, y, 1) * 255),

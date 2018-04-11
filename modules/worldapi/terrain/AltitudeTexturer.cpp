@@ -19,8 +19,8 @@ namespace world {
 		std::uniform_real_distribution<double> positive(0, 1);
 		std::uniform_real_distribution<double> jitter(-1, 1);
 
-		for (int x = 0; x < imgSize; x++) {
-			for (int y = 0; y < imgSize; y++) {
+		for (int y = 0; y < imgSize; y++) {
+			for (int x = 0; x < imgSize; x++) {
 				double xd = (double)x / (imgSize - 1);
 				double yd = (double)y / (imgSize - 1);
 
@@ -33,7 +33,7 @@ namespace world {
 
 				// jitter the color and set in the texture
 				double j = 5. / 255.;
-				texture.at(x, y).setf(
+				texture.rgb(x, y).setf(
 					clamp(color._r + jitter(_rng) * j, 0, 1),
 					clamp(color._g + jitter(_rng) * j, 0, 1),
 					clamp(color._b + jitter(_rng) * j, 0, 1)

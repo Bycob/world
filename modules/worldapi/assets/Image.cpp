@@ -1,14 +1,25 @@
 #include "Image.h"
 
+#include <stdexcept>
 #include <memory>
+
+#include "math/MathsHelper.h"
+
+namespace world {
+
+	inline u8 fromDouble(double f) {
+		return clamp(static_cast<u8>(f * 255.0), (u8)0, (u8)255);
+	}
+
+	inline double toDouble(u8 u) {
+		return u / 255.0;
+	}
+}
 
 #ifdef WORLD_BUILD_OPENCV_MODULES
 #include "Interop.h"
 
-#include <stdexcept>
 #include <opencv/cv.h>
-
-#include "math/MathsHelper.h"
 
 namespace world {
 
@@ -34,14 +45,6 @@ namespace world {
 		default:
 			throw std::runtime_error("Unknown type");
 		}
-	}
-
-	inline u8 fromDouble(double f) {
-		return clamp(static_cast<u8>(f * 255.0), (u8)0, (u8)255);
-	}
-
-	inline double toDouble(u8 u) {
-		return u / 255.0;
 	}
 
 	class PrivateImage {
@@ -90,137 +93,115 @@ namespace world {
 		return _position;
 	}
 
-	// Implémentation de Pixel
+	// GreyPixel
 
-	ConstPixel::ConstPixel(int x, int y, Image * ref)
-		: _x(x), _y(y), _ref(ref) {
+    void GreyPixel::setLevel(u8 l) {
+        _g = l;
+    }
 
-	}
+    void GreyPixel::setLevelf(double l) {
+		_g = fromDouble(l);
+    }
 
-	Pixel::Pixel(int x, int y, Image * ref) : ConstPixel(x, y, ref) {
+    u8 GreyPixel::getLevel() const {
+        return _g;
+    }
 
-	}
+    double GreyPixel::getLevelf(double l) {
+        return toDouble(_g);
+    }
 
-	void Pixel::set(u8 r, u8 g, u8 b, u8 a) {
-		switch (_ref->_type) {
-		case ImageType::RGB :
-			_ref->_private->_image.at<cv::Vec3b>(_y, _x) = cv::Vec3b(b, g, r);
-			break;
-		case ImageType::RGBA :
-			_ref->_private->_image.at<cv::Vec4b>(_y, _x) = cv::Vec4b(b, g, r, a);
-			break;
-		default :
-			_ref->_private->_image.at<u8>(_y, _x) = r;
-		}
-	}
+    // RGBPixel
 
-	void Pixel::setf(double r, double g, double b, double a) {
-		set(fromDouble(r), fromDouble(g), fromDouble(b), fromDouble(a));
-	}
+    u8 RGBPixel::getRed() const {
+        return _b;
+    }
 
-	void Pixel::setRed(u8 r) {
-		setComponent(2, r);
-	}
+    u8 RGBPixel::getGreen() const {
+        return _g;
+    }
 
-	void Pixel::setGreen(u8 g) {
-		setComponent(1, g);
-	}
+    u8 RGBPixel::getBlue() const {
+        return _r;
+    }
 
-	void Pixel::setBlue(u8 b) {
-		setComponent(0, b);
-	}
+    double RGBPixel::getRedf() const {
+        return toDouble(_b);
+    }
 
-	void Pixel::setAlpha(u8 a) {
-		setComponent(3, a);
-	}
+    double RGBPixel::getGreenf() const {
+        return toDouble(_g);
+    }
 
-	void Pixel::setRedf(double r) {
-		setComponent(2, fromDouble(r));
-	}
+    double RGBPixel::getBluef() const {
+        return toDouble(_r);
+    }
 
-	void Pixel::setGreenf(double r) {
-		setComponent(1, fromDouble(r));
-	}
+    void RGBPixel::setRed(u8 r) {
+		_b = r;
+    }
 
-	void Pixel::setBluef(double r) {
-		setComponent(0, fromDouble(r));
-	}
+    void RGBPixel::setGreen(u8 g) {
+		_g = g;
+    }
 
-	void Pixel::setAlphaf(double r) {
-		setComponent(3, fromDouble(r));
-	}
+    void RGBPixel::setBlue(u8 b) {
+		_r = b;
+    }
 
-	void Pixel::setLevel(u8 l) {
-		setComponent(0, l);
-	}
+    void RGBPixel::setRedf(double r) {
+		_b = fromDouble(r);
+    }
 
-	void Pixel::setLevelf(double l) {
-		setComponent(0, fromDouble(l));
-	}
+    void RGBPixel::setGreenf(double g) {
+		_g = fromDouble(g);
+    }
 
-	u8 ConstPixel::getAlpha() const {
-		return getComponent(3);
-	}
+    void RGBPixel::setBluef(double b) {
+		_r = fromDouble(b);
+    }
 
-	u8 ConstPixel::getRed() const {
-		return getComponent(2);
-	}
+    void RGBPixel::set(u8 r, u8 g, u8 b) {
+		_b = r;
+		_g = g;
+		_r = b;
+    }
 
-	u8 ConstPixel::getGreen() const {
-		return getComponent(1);
-	}
+    void RGBPixel::setf(double r, double g, double b) {
+		_b = fromDouble(r);
+		_g = fromDouble(g);
+		_r = fromDouble(b);
+    }
 
-	u8 ConstPixel::getBlue() const {
-		return getComponent(0);
-	}
+    // RGBAPixel
 
-	double ConstPixel::getRedf() const {
-		return toDouble(getComponent(2));
-	}
+    u8 RGBAPixel::getAlpha() const {
+        return _a;
+    }
 
-	double ConstPixel::getGreenf() const {
-		return toDouble(getComponent(1));
-	}
+    double RGBAPixel::getAlphaf() const {
+        return toDouble(_a);
+    }
 
-	double ConstPixel::getBluef() const {
-		return toDouble(getComponent(0));
-	}
+    void RGBAPixel::setAlpha(u8 a) {
+		_a = a;
+    }
 
-	double ConstPixel::getAlphaf() const {
-		return toDouble(getComponent(3));
-	}
+    void RGBAPixel::setAlphaf(double a) {
+		_a = fromDouble(a);
+    }
 
-	u8 ConstPixel::getComponent(int id) const {
-		switch (_ref->_type) {
-		case ImageType::RGBA:
-			return _ref->_private->_image.data[4 * (_ref->_private->_image.cols * _y + _x) + id];
-		case ImageType::RGB:
-			if (id == 3) return 255;
-			return _ref->_private->_image.data[3 * (_ref->_private->_image.cols * _y + _x) + id];
-		default:
-			if (id == 3) return 255;
-			return _ref->_private->_image.data[_ref->_private->_image.cols * _y + _x];
-		}
-	}
+    void RGBAPixel::set(u8 r, u8 g, u8 b, u8 a) {
+		RGBPixel::set(r, g, b);
+		_a = a;
+    }
 
-	void Pixel::setComponent(int id, u8 value) {
-		switch (_ref->_type) {
-		case ImageType::RGB:
-			if (id == 3) return;
-			_ref->_private->_image.data[3 * (_ref->_private->_image.cols * _y + _x) + id] = value;
-			break;
-		case ImageType::RGBA:
-			_ref->_private->_image.data[4 * (_ref->_private->_image.cols * _y + _x) + id] = value;
-			break;
-		default:
-			if (id == 3) return;
-			_ref->_private->_image.data[_ref->_private->_image.cols * _y + _x] = value;
-		}
-	}
+    void RGBAPixel::setf(double r, double g, double b, double a) {
+		RGBPixel::setf(r, g, b);
+		_a = fromDouble(a);
+    }
 
-
-
-	// Implémentation de Image
+	// Image
 
 	Image::Image(int width, int height, const ImageType &type)
 		: _private(new PrivateImage(cv::Mat(height, width, getCVType(type)))),
@@ -279,12 +260,31 @@ namespace world {
 		return _private->_image.rows;
 	}
 
-	Pixel Image::at(int x, int y) {
-		return Pixel(x, y, this);
+    RGBAPixel &Image::rgba(int x, int y) {
+		return _private->_image.at<RGBAPixel>(y, x);
 	}
 
-	const ConstPixel Image::at(int x, int y) const {
-		return ConstPixel(x, y, const_cast<Image *>(this));
+	const RGBAPixel &Image::rgba(int x, int y) const {
+        auto &img = _private->_image;
+        return _private->_image.at<RGBAPixel>(y, x);
+	}
+
+	const RGBPixel& Image::rgb(int x, int y) const {
+        auto &img = _private->_image;
+        return _private->_image.at<RGBPixel>(y, x);
+	}
+
+	RGBPixel& Image::rgb(int x, int y) {
+        return _private->_image.at<RGBPixel>(y, x);
+	}
+
+	const GreyPixel& Image::grey(int x, int y) const {
+        return _private->_image.at<GreyPixel>(y, x);
+	}
+
+	GreyPixel& Image::grey(int x, int y) {
+        auto &img = _private->_image;
+        return _private->_image.at<GreyPixel>(y, x);
 	}
 
 	void Image::write(const std::string &file) const {
@@ -298,151 +298,261 @@ namespace world {
 
 namespace world {
 
-	inline u8 fromDouble(double f) {
-		return f >= 1.0 ? (u8) 255 : (f <= 0.0 ? (u8) 0 : (u8) (f * 256.0));
-	}
-
-	inline double toDouble(u8 u) {
-		return u / 255.0;
-	}
+    u32 elemSize(const ImageType &type) {
+        switch (type) {
+            case ImageType::GREYSCALE:
+                return 1;
+            case ImageType::RGB:
+                return 3;
+            case ImageType::RGBA:
+                return 4;
+        }
+    }
 
 	class PrivateImage {
 	public:
-		/*PrivateImage(png_structp img) : _image(img) {}
+		PrivateImage(u32 sizeX, u32 sizeY, u32 elemSize)
+                : _data(new u8[sizeX * sizeY]), _sizeX(sizeX), _sizeY(sizeY), _elemSize(elemSize) {}
 
-		png_structp _image;*/
+        PrivateImage(u8* data, u32 sizeX, u32 sizeY, u32 elemSize)
+                : _data(data), _sizeX(sizeX), _sizeY(sizeY), _elemSize(elemSize) {}
+
+        ~PrivateImage() {
+		    delete[] _data;
+		};
+
+		u8* at(u32 x, u32 y) {
+		    return _data + (_sizeX * y + x) * _elemSize;
+		}
+
+		u32 total() {
+		    return _sizeX * _sizeY * _elemSize;
+		}
+
+        u8* _data;
+        u32 _sizeX;
+        u32 _sizeY;
+        u32 _elemSize;
 	};
 
+    // ImageStream implementation
 
-	ConstPixel::ConstPixel(int x, int y, Image * ref)
-		: _x(x), _y(y), _ref(ref) {
+    ImageStream::ImageStream(const world::Image &image)
+            : _image(image) {
 
-	}
+    }
 
-	Pixel::Pixel(int x, int y, Image * ref) : ConstPixel(x, y, ref) {
+    int ImageStream::remaining() {
+        // size (in bytes) - position
+        auto totalSize = _image._private->total();
+        return static_cast<int>(totalSize) - _position;
+    }
 
-	}
+    int ImageStream::read(char *buffer, int count) {
+        auto &mat = *_image._private;
+        int read = 0;
+        const int s = static_cast<int>(mat._elemSize);
 
-	void Pixel::set(u8 r, u8 g, u8 b, u8 a) {
+        while (count >= s) {
+            u8* data = mat._data + _position;
 
-	}
+            switch (_image._type) {
+                case ImageType::RGBA:
+                    // RGBA to ARGB
+                    buffer[read] = data[3]; read++;
+                case ImageType::RGB:
+                    buffer[read] = data[0]; read++;
+                    buffer[read] = data[1]; read++;
+                    buffer[read] = data[2]; read++;
+                    break;
+                case ImageType::GREYSCALE:
+                    buffer[read] = data[0]; read++;
+            }
 
-	void Pixel::setf(double r, double g, double b, double a) {
-		set(fromDouble(r), fromDouble(g), fromDouble(b), fromDouble(a));
-	}
+            count -= s;
+            _position += s;
+        }
 
-	void Pixel::setRed(u8 r) {
-		setComponent(2, r);
-	}
+        return _position;
+    }
 
-	void Pixel::setGreen(u8 g) {
-		setComponent(1, g);
-	}
+    // GreyPixel
 
-	void Pixel::setBlue(u8 b) {
-		setComponent(0, b);
-	}
+    void GreyPixel::setLevel(u8 l) {
+        _g = l;
+    }
 
-	void Pixel::setAlpha(u8 a) {
-		setComponent(3, a);
-	}
+    void GreyPixel::setLevelf(double l) {
+        _g = fromDouble(l);
+    }
 
-	void Pixel::setRedf(double r) {
-		setComponent(2, fromDouble(r));
-	}
+    u8 GreyPixel::getLevel() const {
+        return _g;
+    }
 
-	void Pixel::setGreenf(double r) {
-		setComponent(1, fromDouble(r));
-	}
+    double GreyPixel::getLevelf(double l) {
+        return toDouble(_g);
+    }
 
-	void Pixel::setBluef(double r) {
-		setComponent(0, fromDouble(r));
-	}
+    // RGBPixel
 
-	void Pixel::setAlphaf(double r) {
-		setComponent(3, fromDouble(r));
-	}
+    u8 RGBPixel::getRed() const {
+        return _r;
+    }
 
-	void Pixel::setLevel(u8 l) {
-		setComponent(0, l);
-	}
+    u8 RGBPixel::getGreen() const {
+        return _g;
+    }
 
-	void Pixel::setLevelf(double l) {
-		setComponent(0, fromDouble(l));
-	}
+    u8 RGBPixel::getBlue() const {
+        return _b;
+    }
 
-	u8 ConstPixel::getAlpha() const {
-		return getComponent(3);
-	}
+    double RGBPixel::getRedf() const {
+        return toDouble(_r);
+    }
 
-	u8 ConstPixel::getRed() const {
-		return getComponent(2);
-	}
+    double RGBPixel::getGreenf() const {
+        return toDouble(_g);
+    }
 
-	u8 ConstPixel::getGreen() const {
-		return getComponent(1);
-	}
+    double RGBPixel::getBluef() const {
+        return toDouble(_b);
+    }
 
-	u8 ConstPixel::getBlue() const {
-		return getComponent(0);
-	}
+    void RGBPixel::setRed(u8 r) {
+        _r = r;
+    }
 
-	double ConstPixel::getRedf() const {
-		return toDouble(getComponent(2));
-	}
+    void RGBPixel::setGreen(u8 g) {
+        _g = g;
+    }
 
-	double ConstPixel::getGreenf() const {
-		return toDouble(getComponent(1));
-	}
+    void RGBPixel::setBlue(u8 b) {
+        _b = b;
+    }
 
-	double ConstPixel::getBluef() const {
-		return toDouble(getComponent(0));
-	}
+    void RGBPixel::setRedf(double r) {
+        _r = fromDouble(r);
+    }
 
-	double ConstPixel::getAlphaf() const {
-		return toDouble(getComponent(3));
-	}
+    void RGBPixel::setGreenf(double g) {
+        _g = fromDouble(g);
+    }
 
-	u8 ConstPixel::getComponent(int id) const {
-		return 0;
-	}
+    void RGBPixel::setBluef(double b) {
+        _b = fromDouble(b);
+    }
 
-	void Pixel::setComponent(int id, u8 value) {
+    void RGBPixel::set(u8 r, u8 g, u8 b) {
+        _r = r;
+        _g = g;
+        _b = b;
+    }
 
-	}
+    void RGBPixel::setf(double r, double g, double b) {
+        _r = fromDouble(r);
+        _g = fromDouble(g);
+        _b = fromDouble(b);
+    }
 
+    // RGBAPixel
 
+    u8 RGBAPixel::getAlpha() const {
+        return _a;
+    }
+
+    double RGBAPixel::getAlphaf() const {
+        return toDouble(_a);
+    }
+
+    void RGBAPixel::setAlpha(u8 a) {
+        _a = a;
+    }
+
+    void RGBAPixel::setAlphaf(double a) {
+        _a = fromDouble(a);
+    }
+
+    void RGBAPixel::set(u8 r, u8 g, u8 b, u8 a) {
+        RGBPixel::set(r, g, b);
+        _a = a;
+    }
+
+    void RGBAPixel::setf(double r, double g, double b, double a) {
+        RGBPixel::setf(r, g, b);
+        _a = fromDouble(a);
+    }
 
 	// Implémentation de Image
 
 	Image::Image(int width, int height, const ImageType &type)
-		: _private(),
+		: _private(new PrivateImage(static_cast<u32>(width), static_cast<u32>(height), elemSize(type))),
 		_type(type) {
 
 	}
 
-	Image::Image(const arma::Cube<double> & data) {
-		_private = new PrivateImage();
+	Image::Image(const arma::Cube<double> & data)
+            : _type(ImageType::RGB) {
+
+        _private = new PrivateImage(
+                static_cast<u32>(data.n_rows),
+                static_cast<u32>(data.n_cols), 3
+        );
+
+        auto width = _private->_sizeX;
+        auto height = _private->_sizeY;
+
+        for (u32 y = 0; y < height; ++y) {
+            for (u32 x = 0; x < width; ++x) {
+                auto ptr = _private->at(x, y);
+                ptr[0] = fromDouble(data(x, y, 0));
+                ptr[1] = fromDouble(data(x, y, 1));
+                ptr[2] = fromDouble(data(x, y, 2));
+            }
+        }
 	}
 
-	Image::Image(const arma::Mat<double> & data) {
-		_private = new PrivateImage();
+	Image::Image(const arma::Mat<double> & data)
+            : _type(ImageType::GREYSCALE) {
+
+        _private = new PrivateImage(
+                static_cast<u32>(data.n_rows),
+                static_cast<u32>(data.n_cols), 1
+        );
+
+        auto width = _private->_sizeX;
+        auto height = _private->_sizeY;
+
+        for (u32 y = 0; y < height; ++y) {
+            for (u32 x = 0; x < width; ++x) {
+                *_private->at(x, y) = fromDouble(data(x, y));
+            }
+        }
 	}
 
 	Image::Image(const std::string & filename) {
-		_private = new PrivateImage();
+		throw std::runtime_error("Not supported");
 	}
 
-	Image::Image(const char *filename) : Image(std::string(filename)) {
+	Image::Image(const char *filename)
+            : Image(std::string(filename)) {
 
 	}
 
-	Image::Image(Image && image) : _private(image._private), _type(image._type) {
+	Image::Image(Image && image)
+            : _private(image._private), _type(image._type) {
 		image._private = nullptr;
 	}
 
 	Image::Image(const Image & image) {
-		_private = new PrivateImage();
+        auto pother = image._private;
+        _private = new PrivateImage(
+                pother->_sizeX,
+                pother->_sizeY,
+                pother->_elemSize
+        );
+        memcpy(_private->_data, pother->_data, pother->total());
 		_type = image._type;
 	}
 
@@ -456,20 +566,36 @@ namespace world {
 	}
 
 	int Image::width() const {
-		return 0;
+		return _private->_sizeX;
 	}
 
 	int Image::height() const {
-		return 0;
+		return _private->_sizeY;
 	}
 
-	Pixel Image::at(int x, int y) {
-		return Pixel(x, y, this);
-	}
+    RGBAPixel &Image::rgba(int x, int y) {
+        return *reinterpret_cast<RGBAPixel*>(_private->at(x, y));
+    }
 
-	const ConstPixel Image::at(int x, int y) const {
-		return ConstPixel(x, y, const_cast<Image *>(this));
-	}
+    const RGBAPixel &Image::rgba(int x, int y) const {
+        return *reinterpret_cast<RGBAPixel*>(_private->at(x, y));
+    }
+
+    RGBPixel &Image::rgb(int x, int y) {
+        return *reinterpret_cast<RGBPixel*>(_private->at(x, y));
+    }
+
+    const RGBPixel &Image::rgb(int x, int y) const {
+        return *reinterpret_cast<RGBPixel*>(_private->at(x, y));
+    }
+
+    GreyPixel &Image::grey(int x, int y) {
+        return *reinterpret_cast<GreyPixel*>(_private->at(x, y));
+    }
+
+    const GreyPixel &Image::grey(int x, int y) const {
+        return *reinterpret_cast<GreyPixel*>(_private->at(x, y));
+    }
 
 	void Image::write(const std::string &file) const {
 

@@ -27,59 +27,62 @@ namespace world {
 		const Image &_image;
 	};
 
-	class WORLDAPI_EXPORT ConstPixel {
+	class WORLDAPI_EXPORT GreyPixel {
 	public:
-		u8 getAlpha() const;
+		/** Sets the pixel to grey with given intensity. */
+		void setLevel(u8 l);
+
+		/** Sets the pixel to grey with given intensity. */
+		void setLevelf(double l);
+
+		u8 getLevel() const;
+
+		double getLevelf(double l);
+	private:
+		u8 _g;
+	};
+
+	struct WORLDAPI_EXPORT RGBPixel {
+	public:
 		u8 getRed() const;
 		u8 getGreen() const;
 		u8 getBlue() const;
 
-        double getAlphaf() const;
-        double getRedf() const;
-        double getGreenf() const;
-        double getBluef() const;
+		double getRedf() const;
+		double getGreenf() const;
+		double getBluef() const;
 
-	protected:
-		friend class Image;
-
-		ConstPixel(int width, int height, Image *ref);
-
-		u8 getComponent(int id) const;
-
-		int _x; int _y;
-		Image * _ref;
-	};
-
-	class WORLDAPI_EXPORT Pixel : public ConstPixel {
-	public:
-		void set(u8 r, u8 g = 0, u8 b = 0, u8 a = 255);
-		void setf(double r, double g = 0, double b = 0, double a = 1);
-
-		void setAlpha(u8 a);
 		void setRed(u8 r);
 		void setGreen(u8 g);
 		void setBlue(u8 b);
 
-		void setAlphaf(double a);
 		void setRedf(double r);
 		void setGreenf(double g);
 		void setBluef(double b);
 
-        /** Sets the pixel to grey with given intensity. */
-		void setLevel(u8 l);
-
-        /** Sets the pixel to grey with given intensity. */
-		void setLevelf(double l);
-
-	private:
-		friend class Image;
-
-		Pixel(int width, int height, Image *ref);
-
-		void setComponent(int id, u8 type);
+		void set(u8 r, u8 g, u8 b);
+		void setf(double r, double g, double b);
+	protected:
+		u8 _r, _g, _b;
 	};
 
-	class WORLDAPI_EXPORT Image {
+	struct WORLDAPI_EXPORT RGBAPixel : public RGBPixel {
+	public:
+		u8 getAlpha() const;
+
+		double getAlphaf() const;
+
+		void setAlpha(u8 a);
+
+		void setAlphaf(double a);
+
+		void set(u8 r, u8 g, u8 b, u8 a = 255);
+		void setf(double r, double g, double b, double a = 1);
+    private:
+        u8 _a;
+	};
+
+	struct WORLDAPI_EXPORT Image {
 	public:
 		Image(int width, int height, const ImageType &type);
 		Image(const arma::Cube<double> & data);
@@ -98,10 +101,53 @@ namespace world {
 		int height() const;
 
 		// access
-		Pixel at(int x, int y);
-		const ConstPixel at(int x, int y) const;
+		/** Gets a rgba access on the pixel at (x, y). This
+		 * method only works properly on RGBA image.
+		 * @param x column of the pixel.
+		 * @param y line of the pixel. */
+		RGBAPixel &rgba(int x, int y);
+
+		/** Gets a rgba access on the pixel at (x, y) (const
+		 * version). This method only works properly on RGBA
+		 * image.
+		 * @param x column of the pixel.
+		 * @param y line of the pixel. */
+		const RGBAPixel &rgba(int x, int y) const;
+
+		/** Gets a rgb access on the pixel at (x, y). This
+		 * method works on both types RGBA and RGB.
+		 * @warning behaviour on RGBA type is not confirmed yet.
+		 * @param x column of the pixel.
+		 * @param y line of the pixel. */
+		RGBPixel &rgb(int x, int y);
+
+		/** Gets a rgb access on the pixel at (x, y) (const version).
+		 * This method works on both types RGBA and RGB.
+		 * @warning behaviour on RGBA type is not confirmed yet.
+		 * @param x column of the pixel.
+		 * @param y line of the pixel. */
+		const RGBPixel &rgb(int x, int y) const;
+
+		/** Gets a greyscale access on the pixel at (x, y). The
+		 * behaviour on images other than greyscale type is
+		 * undefined.
+		 * @param x column of the pixel.
+		 * @param y line of the pixel. */
+		GreyPixel &grey(int x, int y);
+
+		/** Gets a greyscale access on the pixel at (x, y) (const
+		 * version). The behaviour on images other than greyscale
+		 * type is undefined.
+		 * @param x column of the pixel.
+		 * @param y line of the pixel. */
+		const GreyPixel &grey(int x, int y) const;
 
 		// IO
+		/** Writes the image at the specified location. The
+		 * extension of the file is used to determine the format
+		 * of the written image.
+		 * @param file a relative or absolute pathname to
+		 * the file.*/
 		void write(const std::string &file) const;
 	private:
 		ImageType _type;
