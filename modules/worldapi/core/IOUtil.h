@@ -6,7 +6,9 @@
 #include <vector>
 
 namespace world {
-	void WORLDAPI_EXPORT createDirectory(const std::string &directory);
+	bool WORLDAPI_EXPORT createDirectory(const std::string &directory);
+
+	void WORLDAPI_EXPORT createDirectories(const std::string &directory);
 
 	std::vector<std::string> WORLDAPI_EXPORT getFileList(const std::string &directory);
 }

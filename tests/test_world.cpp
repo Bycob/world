@@ -14,8 +14,7 @@ int main(int argc, char** argv) {
 }
 
 void generate_test_world(int argc, char** argv) {
-	world::createDirectory("world");
-	world::createDirectory("world/world");
+	world::createDirectories("assets/world");
 
     std::cout << "Creation du monde" << std::endl;
     std::unique_ptr<FlatWorld> world(FlatWorld::createDemoFlatWorld());

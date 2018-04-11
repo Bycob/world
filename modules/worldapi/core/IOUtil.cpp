@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <vector>
 #include <sys/stat.h>
+#include <regex>
 
 #ifdef _WIN32
 #include <direct.h>
@@ -11,9 +12,11 @@
 
 #include <tinydir/tinydir.h>
 
+#include "StringOps.h"
+
 namespace world {
 
-	void createDirectory(const std::string &directory) {
+	bool createDirectory(const std::string &directory) {
 		int error;
 #ifdef _WIN32
 		error = _mkdir(directory.c_str());
@@ -21,11 +24,32 @@ namespace world {
 		error = mkdir(directory.c_str(), 0700);
 #endif
 		if (error != 0) {
-			if (errno == EEXIST) {}
-			else {
-				throw std::runtime_error(
-						"the directory " + directory + " was not created\nError code : " + std::to_string(errno));
+			if (errno == EEXIST) {
+				return false;
 			}
+			else {
+				perror("Error creating directory ");
+				throw std::runtime_error("The directory " + directory + " was not created.");
+			}
+		}
+
+		return true;
+	}
+
+	void createDirectories(const std::string &path) {
+		auto directories = split(path, '/');
+		std::string currentPath;
+
+		int dirsCreated = 0;
+
+		for (auto &dir : directories) {
+			if (dirsCreated == directories.size() - 1 && dir.empty()) {
+				continue;
+			}
+
+			currentPath += dir + "/";
+			createDirectory(currentPath);
+			dirsCreated++;
 		}
 	}
 

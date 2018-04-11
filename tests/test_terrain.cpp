@@ -36,7 +36,7 @@ void testTinyObjLoader(int argc, char** argv) {
 			scene->getObjects(output);
 
 			std::cout << "Reecriture du fichier sous un autre nom" << std::endl;
-			obj.write(*scene, "tests/result.obj");
+			obj.write(*scene, "assets/terrain/result.obj");
 		}
 		catch (std::exception & e) {
 			std::cout << e.what() << std::endl;
@@ -60,7 +60,7 @@ void testRepeatable(int argc, char** argv) {
     std::cout << "Génération de bruit de perlin répétable..." << std::endl;
     Mat<double> repeatable = perlin.generatePerlinNoise2D(size, 0, octaves, freq, persistence, true);
     Image repeat(repeatable);
-    repeat.write("tests/repeat.png");
+    repeat.write("assets/terrain/repeat.png");
 
     std::cout << "Génération du terrain associé..." << std::endl;
     Terrain tr(repeatable);
@@ -69,7 +69,7 @@ void testRepeatable(int argc, char** argv) {
 	repeatableobj.createObject(*mesh);
 
 	ObjLoader loader;
-    loader.write(repeatableobj, "tests/repeatable");
+    loader.write(repeatableobj, "assets/terrain/repeatable");
 }
 
 void testPerlin(int argc, char** argv) {
@@ -103,7 +103,7 @@ void testPerlin(int argc, char** argv) {
 
 	//CREATION DU DOSSIER DE TESTS
 	std::cout << "Création du dossier de tests..." << std::endl;
-	createDirectory("tests");
+	createDirectories("assets/terrain");
 
 	Perlin perlin;
 
@@ -117,8 +117,8 @@ void testPerlin(int argc, char** argv) {
         perlin.join(perlin1, perlin2, perlin::Direction::AXIS_Y, octaves, freq, persistence, true);
         Image perlin1img(perlin1);
         Image perlin2img(perlin2);
-        perlin1img.write("tests/perlin1.png");
-        perlin2img.write("tests/perlin2.png");
+        perlin1img.write("assets/terrain/perlin1.png");
+        perlin2img.write("assets/terrain/perlin2.png");
 
 		/*Terrain t1(perlin1);
 		Terrain t2(perlin2);
@@ -126,7 +126,7 @@ void testPerlin(int argc, char** argv) {
 		ObjLoader files;
 		files.addMesh(std::shared_ptr<Mesh>(t1.createMesh()));
 		files.addMesh(std::shared_ptr<Mesh>(t2.createMesh(0, 1, 0, 1.0, 1.0, 0.4)));
-		files.write("tests/join.obj");*/
+		files.write("assets/terrain/join.obj");*/
     }
     catch (std::exception &e) {
         std::cerr << "Le test de join a levé une exception : " << e.what() << std::endl;
@@ -145,7 +145,7 @@ void testPerlin(int argc, char** argv) {
 	std::cout << "ecriture de l'image du terrain..." <<std::endl;
 	Image image = terrain.createImage();
 	try {
-		image.write("tests/terrain.png");
+		image.write("assets/terrain/terrain.png");
 	}
 	catch (std::exception & e) {
 		std::cout << "erreur : " << e.what() << std::endl;
@@ -168,7 +168,7 @@ void testPerlin(int argc, char** argv) {
 	std::cout << "Ecriture du mesh dans un fichier .obj..." << std::endl;
 
 	try {
-		meshIO.write(scene1, "tests/terrain.obj");
+		meshIO.write(scene1, "assets/terrain/terrain.obj");
 	}
 	catch (std::exception & e) {
 		std::cout << "erreur : " << e.what() << std::endl;
@@ -197,7 +197,7 @@ void testPerlin(int argc, char** argv) {
 
 	std::cout << "ecriture de la texture..." << std::endl;
 	try {
-		texture.write("tests/test2_tex.png");
+		texture.write("assets/terrain/test2_tex.png");
 	}
 	catch (std::exception & e) {
 		std::cout << "erreur : " << e.what() << std::endl;
@@ -206,7 +206,7 @@ void testPerlin(int argc, char** argv) {
 	std::cout << "ecriture de la carte" << std::endl;
 	std::unique_ptr<Image> colorMapImg(colorMap.createImage());
 	try {
-		colorMapImg->write("tests/test2_map.png");
+		colorMapImg->write("assets/terrain/test2_map.png");
 	}
 	catch (std::exception & e) {
 		std::cout << "erreur : " << e.what() << std::endl;
@@ -236,11 +236,11 @@ void testSubdivisions(int argc, char** argv) {
 	subterrainScene.createObject(std::shared_ptr<Mesh>(terrainTree->getSubtree(0, 1).convertToSubmesh()));*/
 
 	std::cout << "Ecriture du fichier .obj..." << std::endl;
-	meshIO.write(subterrainScene, "tests/subterrain");
+	meshIO.write(subterrainScene, "assets/terrain/subterrain");
 	std::cout << "Fichier écrit !" << std::endl;
 
 	std::cout << "Ecriture de l'image associée..." << std::endl;
 	Image image2 = subtree.terrain().createImage();
-	image2.write("tests/subterrain.png");
+	image2.write("assets/terrain/subterrain.png");
 	std::cout << "Image écrite !" << std::endl;
 }

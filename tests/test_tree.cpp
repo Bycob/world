@@ -50,7 +50,7 @@ void testTree(int argc, char ** argv) {
 	}
 	
 	std::cout << "Création du dossier \"tree\"..." << std::endl;
-	createDirectory("trees");
+	createDirectories("assets/tree");
 
 	std::cout << "Génération d'un squelette d'arbre" << std::endl;
 	std::unique_ptr<TreeSkeletton> treeSkeletton(generator.generate());
@@ -62,7 +62,7 @@ void testTree(int argc, char ** argv) {
 	ObjLoader file;
 	Scene scene;
 	scene.createObject(*mesh);
-	file.write(scene, "trees/skeletton");
+	file.write(scene, "assets/tree/skeletton");
 
 	std::cout << "Génération du tronc de l'arbre" << std::endl;
 	TreeGenerator generator2;
@@ -72,5 +72,5 @@ void testTree(int argc, char ** argv) {
 	const Mesh & trunkMesh = tree->getTrunkMesh();
 	Scene scene2;
 	scene2.createObject(trunkMesh);
-	file.write(scene2, "trees/trunk");
+	file.write(scene2, "assets/tree/trunk");
 }

@@ -24,10 +24,9 @@ void testReliefMap(int argc, char** argv) {
 	std::cout << "Indiquez la netteté des limites : ";
 	parseInt(std::cin, limitBrightness);
 	
-	std::cout << "Generation du dossier world/relief" << std::endl;
+	std::cout << "Generation du dossier testing/reliefmap" << std::endl;
 
-	world::createDirectory("world");
-	world::createDirectory("world/relief");
+	world::createDirectories("assets/reliefmap/");
 
 	std::cout << "Creation du generateur" << std::endl;
 
@@ -42,6 +41,6 @@ void testReliefMap(int argc, char** argv) {
 
 	std::cout << "Conversion en image et ecriture" << std::endl;
 
-    height.createImage().write("world/relief/height.png");
-    heightDiff.createImage().write("world/relief/heightDiff.png");
+    height.createImage().write("assets/reliefmap/height.png");
+    heightDiff.createImage().write("assets/reliefmap/heightDiff.png");
 }
