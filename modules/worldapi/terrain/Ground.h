@@ -70,9 +70,9 @@ namespace world {
          * calculée ainsi : _unitSize * _factor ^ lod */
 
 		int _factor = 4;
-		int _terrainRes = 65;
+		int _terrainRes = 33;
 		/** Texture resolution, relatively to the terrain resolution */
-		int _textureRes = 4;
+		int _textureRes = 8;
 		int _maxLOD = 3;
 
 		int _maxCacheSize = 750;

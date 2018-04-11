@@ -87,31 +87,31 @@ namespace world {
 	template<typename T>
 	template<typename R>
 	inline auto vec3<T>::operator/(R rhs) const -> vec3<decltype(x / rhs)> {
-		return vec3(this->x / rhs, this->y / rhs, this->z / rhs);
+		return vec3<decltype(x/rhs)>(this->x / rhs, this->y / rhs, this->z / rhs);
 	}
 
 	template<typename T>
 	template<typename R>
 	inline auto vec3<T>::operator+(const vec3<R> & rhs) const -> vec3<decltype(x + rhs.x)> {
-		return vec3(this->x + rhs.x, this->y + rhs.y, this->z + rhs.z);
+		return vec3<decltype(x + rhs.x)>(this->x + rhs.x, this->y + rhs.y, this->z + rhs.z);
 	}
 
 	template<typename T>
 	template<typename R>
 	inline auto vec3<T>::operator-(const vec3<R> & rhs) const -> vec3<decltype(x - rhs.x)> {
-		return vec3(this->x - rhs.x, this->y - rhs.y, this->z - rhs.z);
+		return vec3<decltype(x - rhs.x)>(this->x - rhs.x, this->y - rhs.y, this->z - rhs.z);
 	}
 
 	template<typename T>
 	template<typename R>
 	inline auto vec3<T>::operator*(const vec3<R> & rhs) const -> vec3<decltype(x * rhs.x)> {
-		return vec3(this->x * rhs.x, this->y * rhs.y, this->z * rhs.z);
+		return vec3<decltype(x * rhs.x)>(this->x * rhs.x, this->y * rhs.y, this->z * rhs.z);
 	}
 
 	template<typename T>
 	template<typename R>
 	inline auto vec3<T>::operator/(const vec3<R> & rhs) const -> vec3<decltype(x / rhs.x)> {
-		return vec3(this->x / rhs.x, this->y / rhs.y, this->z / rhs.z);
+		return vec3<decltype(x / rhs.x)>(this->x / rhs.x, this->y / rhs.y, this->z / rhs.z);
 	}
 
 	template <typename T>

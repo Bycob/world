@@ -38,3 +38,83 @@ TEST_CASE("Math", "[math]") {
         REQUIRE(powi(5.0, -7) == Approx(1.0 / 78125.0));
     }
 }
+
+TEST_CASE("vec3i and vec3d - mixed operators", "[math]") {
+    vec3i veci{5, -5, 5};
+    vec3d vecd{2.1, 2.1, 2.1};
+
+    SECTION("vec3i plus vec3d") {
+        auto result = veci + vecd;
+        REQUIRE(result.x == Approx(7.1));
+        REQUIRE(result.y == Approx(-2.9));
+        REQUIRE(result.z == Approx(7.1));
+    }
+
+    SECTION("vec3i minus vec3d") {
+        auto result = veci - vecd;
+        REQUIRE(result.x == Approx(2.9));
+        REQUIRE(result.y == Approx(-7.1));
+        REQUIRE(result.z == Approx(2.9));
+    }
+
+    SECTION("vec3i multiplied by vec3d") {
+        auto result = veci * vecd;
+        REQUIRE(result.x == Approx(5 * 2.1));
+        REQUIRE(result.y == Approx(-5 * 2.1));
+        REQUIRE(result.z == Approx(5 * 2.1));
+    }
+
+    SECTION("vec3i divided by double") {
+        auto result = veci / 2.;
+        REQUIRE(result.x == Approx(2.5));
+        REQUIRE(result.y == Approx(-2.5));
+        REQUIRE(result.z == Approx(2.5));
+    }
+
+    vecd = {2., -2., 2.};
+
+    SECTION("vec3i divided by vec3d") {
+        auto result = veci / vecd;
+        REQUIRE(result.x == 2.5);
+        REQUIRE(result.y == 2.5);
+        REQUIRE(result.z == 2.5);
+    }
+}
+
+TEST_CASE("vec2i and vec2d - mixed operators", "[math]") {
+    vec2i veci{5, -5};
+    vec2d vecd{2.1, 2.1};
+
+    INFO("vec2i and vec2d - mixed operators : not implemented yet");
+    /*SECTION("vec3i plus vec3d") {
+        auto result = veci + vecd;
+        REQUIRE(result.x == Approx(7.1));
+        REQUIRE(result.y == Approx(-2.9));
+    }
+
+    SECTION("vec3i minus vec3d") {
+        auto result = veci - vecd;
+        REQUIRE(result.x == Approx(2.9));
+        REQUIRE(result.y == Approx(-7.1));
+    }
+
+    SECTION("vec3i multiplied by vec3d") {
+        auto result = veci * vecd;
+        REQUIRE(result.x == Approx(5 * 2.1));
+        REQUIRE(result.y == Approx(-5 * 2.1));
+    }
+
+    SECTION("vec3i divided by double") {
+        auto result = veci / 2.;
+        REQUIRE(result.x == Approx(2.5));
+        REQUIRE(result.y == Approx(-2.5));
+    }
+
+    vecd = {2., -2.};
+
+    SECTION("vec3i divided by vec3d") {
+        auto result = veci / vecd;
+        REQUIRE(result.x == 2.5);
+        REQUIRE(result.y == 2.5);
+    }*/
+}

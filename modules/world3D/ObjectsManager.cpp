@@ -118,7 +118,8 @@ ObjectsManager::ObjectsManager(Application & app, IrrlichtDevice * device)
 }
 
 ObjectsManager::~ObjectsManager() {
-
+	// To remove objects and thus textures.
+	_objects.clear();
 }
 
 void ObjectsManager::initialize(FlatWorldCollector &collector) {
@@ -195,9 +196,6 @@ void ObjectsManager::removeTextureUser(const std::string &texId) {
 			_loadedTextures.erase(it);
 			_driver->removeTexture(_driver->getTexture(texId.c_str()));
 		}
-	}
-	else {
-		_loadedTextures.emplace(texId, 1);
 	}
 }
 

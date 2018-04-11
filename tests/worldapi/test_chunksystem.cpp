@@ -4,6 +4,13 @@
 
 using namespace world;
 
+TEST_CASE("WorldKeys", "[chunksystem]") {
+
+    ChunkKey key{0, 0, 0, 0};
+
+    REQUIRE(ChunkKeys::toString(key) == "00000000");
+}
+
 TEST_CASE("LODGridCoordinates", "[chunksystem]") {
     LODGridCoordinates none = LODGridCoordinates::NONE;
     LODGridCoordinates c1a(0, 0, 0, 0);
