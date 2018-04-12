@@ -28,11 +28,10 @@ TEST_CASE("ref or value", "[memory]") {
     }
 
     SECTION("copy") {
-        auto v = ref;
-        REQUIRE(v->_copy == 0);
-        const auto &r = ref;
-        v = r;
-        REQUIRE(v->_copy == 1);
+        auto v1 = ref;
+        REQUIRE(v1->_copy == 0);
+        auto v2 = value;
+        REQUIRE(v2->_copy == 2);
     }
 }
 

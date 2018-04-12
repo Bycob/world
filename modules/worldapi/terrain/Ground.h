@@ -75,7 +75,7 @@ namespace world {
 		int _textureRes = 8;
 		int _maxLOD = 3;
 
-		int _maxCacheSize = 750;
+		int _maxCacheSize = 2000;
 
 		double observeAltitudeAt(double x, double y, int lvl);
 

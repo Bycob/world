@@ -36,6 +36,8 @@ namespace world {
             Ref(T &t)
                     : _ref(t) {}
 
+            ~Ref() override = default;
+
             T &get() override {
                 return _ref;
             }
@@ -54,6 +56,8 @@ namespace world {
             ConstRef(const T &t)
                     : _ref(t) {}
 
+            ~ConstRef() override = default;
+
             virtual const T &get() const {
                 return _ref;
             }
@@ -71,6 +75,8 @@ namespace world {
         public:
             Value(const T &t)
                     : _value(t) {}
+
+            ~Value() override = default;
 
             T &get() override {
                 return _value;
@@ -113,11 +119,8 @@ namespace world {
             }
         }
 
-        RefOrValue(RefOrValue &other)
-                : _rov(other._rov->copy()) {}
-
         RefOrValue(const RefOrValue &other)
-                : _rov(new __prov__::Value<T>(*other)) {}
+                : _rov(other._rov->copy()) {}
 
         RefOrValue(RefOrValue &&other)
                 : _rov(other._rov) {
@@ -131,22 +134,14 @@ namespace world {
         }
 
         RefOrValue &operator=(const RefOrValue &other) {
-            if (_rov != nullptr) {
-                delete _rov;
-            }
-            _rov = new __prov__::Value<T>(*other);
-            return *this;
-        }
-
-        RefOrValue &operator=(RefOrValue &other) {
-            if (_rov != nullptr) {
-                delete _rov;
-            }
             _rov = other._rov->copy();
             return *this;
         }
 
         RefOrValue &operator=(RefOrValue &&other) {
+            if (_rov != nullptr) {
+                delete _rov;
+            }
             _rov = other._rov;
             other._rov = nullptr;
 			return *this;
@@ -215,6 +210,9 @@ namespace world {
         }
 
         ConstRefOrValue &operator=(ConstRefOrValue &&other) {
+            if (_crov != nullptr) {
+                delete _crov;
+            }
             _crov = other._crov;
             other._crov = nullptr;
 			return *this;

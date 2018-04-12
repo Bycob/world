@@ -50,7 +50,7 @@ namespace world {
          * we can't put it in the minimum LOD. */
         double _subdivResolutionThreshold = 0.5;
         int _factor = 4;
-        int _maxLOD = 7;
+        int _maxLOD = 4;
 
         friend class LODGridChunkHandler;
 

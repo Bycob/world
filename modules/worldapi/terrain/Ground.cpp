@@ -25,7 +25,7 @@ namespace world {
         std::vector<optional<Terrain>> _cache;
         std::unique_ptr<Terrain> _final;
         std::unique_ptr<Mesh> _mesh;
-        u64 _lastAccess;
+        u64 _lastAccess = 0;
     };
 
     using TerrainKey = Ground::TerrainKey;
@@ -288,7 +288,9 @@ namespace world {
         _internal->_accessCounter++;
 
         // Remove last access entry for this tile
-        _internal->_accesses.erase(tile._lastAccess);
+        if (tile._lastAccess != 0) {
+            _internal->_accesses.erase(tile._lastAccess);
+        }
 
         // Make a new entry
         tile._lastAccess = _internal->_accessCounter;
