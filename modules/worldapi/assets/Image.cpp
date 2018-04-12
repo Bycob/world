@@ -296,6 +296,8 @@ namespace world {
 
 #include <libpng/png.h>
 
+#include "core/StringOps.h"
+
 namespace world {
 
     u32 elemSize(const ImageType &type) {
@@ -312,7 +314,7 @@ namespace world {
 	class PrivateImage {
 	public:
 		PrivateImage(u32 sizeX, u32 sizeY, u32 elemSize)
-                : _data(new u8[sizeX * sizeY]), _sizeX(sizeX), _sizeY(sizeY), _elemSize(elemSize) {}
+                : _data(new u8[sizeX * sizeY * elemSize]), _sizeX(sizeX), _sizeY(sizeY), _elemSize(elemSize) {}
 
         PrivateImage(u8* data, u32 sizeX, u32 sizeY, u32 elemSize)
                 : _data(data), _sizeX(sizeX), _sizeY(sizeY), _elemSize(elemSize) {}
@@ -597,8 +599,63 @@ namespace world {
         return *reinterpret_cast<GreyPixel*>(_private->at(x, y));
     }
 
-	void Image::write(const std::string &file) const {
+    // inspired by the example here : http://zarb.org/~gc/html/libpng.html
+	void Image::write(const std::string &path) const {
+        // check path ends with .png
+        if (!endsWith(path, ".png")) {
+            throw std::runtime_error("Unsupported format. We only support png at the moment.");
+        }
 
+        FILE* file = fopen(path.c_str(), "w");
+
+        if (!file) {
+            perror("Open file failed ");
+            throw std::ios_base::failure("Can't open " + path);
+        }
+
+        png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+        png_infop info_ptr = png_create_info_struct(png_ptr);
+        png_init_io(png_ptr, file);
+
+        if (setjmp(png_jmpbuf(png_ptr))) {
+            // TODO error handling
+        }
+
+        int colortype;
+        switch(_type) {
+            case ImageType::GREYSCALE:
+                colortype = PNG_COLOR_TYPE_GRAY;
+                break;
+            case ImageType::RGB:
+                colortype = PNG_COLOR_TYPE_RGB;
+                break;
+            case ImageType::RGBA:
+                colortype = PNG_COLOR_TYPE_RGB_ALPHA;
+                break;
+        }
+
+        png_set_IHDR(png_ptr, info_ptr, _private->_sizeX, _private->_sizeY,
+                     8, colortype, PNG_INTERLACE_NONE,
+                     PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+
+        png_write_info(png_ptr, info_ptr);
+
+        // write image
+        png_bytep *rowptrs = new png_bytep[_private->_sizeY];
+
+        for (u32 y = 0; y < _private->_sizeY; y++) {
+            rowptrs[y] = _private->at(0, y);
+        }
+
+        png_write_image(png_ptr, rowptrs);
+
+        // write end and close file
+        // We pass NULL as second parameter to avoid writing comments and metadata a second time
+        png_write_end(png_ptr, NULL);
+        fclose(file);
+
+        // free memory
+        delete[] rowptrs;
 	}
 }
 
