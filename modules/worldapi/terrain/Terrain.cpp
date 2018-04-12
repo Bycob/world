@@ -157,26 +157,27 @@ namespace world {
 		mesh->reserveVertices(vertCount);
 
 		//Vertices
-		for (int x = 0; x < size; x++) {
-			const double xd = x * inv_size_1;
-			const double xpos = xd * sizeX + offsetX;
+		for (int y = 0; y < size; y++) {
+			const double yd = y * inv_size_1;
+			const double ypos = yd * sizeY + offsetY;
 
-			for (int y = 0; y < size; y++) {
-				const double yd = y * inv_size_1;
+			for (int x = 0; x < size; x++) {
+				const double xd = x * inv_size_1;
+				const double xpos = xd * sizeX + offsetX;
 
 				Vertex &vert = mesh->newVertex();
 
-				vert.setPosition(xpos, yd * sizeY + offsetY, _array(x, y) * sizeZ + offsetZ);
+				vert.setPosition(xpos, ypos, _array(x, y) * sizeZ + offsetZ);
 				vert.setTexture(xd, 1 - yd);
 			}
 		}
 
 		//Faces
-		auto indice = [this](int x, int y) -> int { return x * this->_array.n_cols + y; };
+		auto indice = [this](int x, int y) -> int { return y * this->_array.n_rows + x; };
 		mesh->reserveFaces(size_1 * size_1 * 2);
 
-		for (int x = 0; x < size_1; x++) {
-			for (int y = 0; y < size_1; y++) {
+		for (int y = 0; y < size_1; y++) {
+			for (int x = 0; x < size_1; x++) {
 				Face &face1 = mesh->newFace();
 				Face &face2 = mesh->newFace();
 

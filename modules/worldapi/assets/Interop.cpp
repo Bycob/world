@@ -1,5 +1,7 @@
 #include "Interop.h"
 
+#include "core/WorldTypes.h"
+
 #ifdef WORLD_BUILD_OPENCV_MODULES
 
 namespace world {
@@ -9,7 +11,7 @@ namespace world {
 
 		for (int x = 0; x < mat.n_rows; x++) {
 			for (int y = 0; y < mat.n_cols; y++) {
-				output.at<unsigned char>(y, x) = (unsigned char) (mat(x, y) * 255);
+				output.at<u8>(y, x) = (u8) (mat(x, y) * 255);
 			}
 		}
 
@@ -24,9 +26,9 @@ namespace world {
 		for (int y = 0; y < cube.n_cols; y++) {
 		    for (int x = 0; x < cube.n_rows; x++) {
 				output.at<cv::Vec3b>(y, x) = cv::Vec3b(
-						(unsigned char) (cube(x, y, 2) * 255),
-						(unsigned char) (cube(x, y, 1) * 255),
-						(unsigned char) (cube(x, y, 0) * 255));
+						(u8) (cube(x, y, 2) * 255),
+						(u8) (cube(x, y, 1) * 255),
+						(u8) (cube(x, y, 0) * 255));
 			}
 		}
 

@@ -19,13 +19,13 @@ namespace world {
 		std::uniform_real_distribution<double> positive(0, 1);
 		std::uniform_real_distribution<double> jitter(-1, 1);
 
-		for (int y = 0; y < imgSize; y++) {
-			for (int x = 0; x < imgSize; x++) {
+		for (int x = 0; x < imgSize; x++) {
+			for (int y = 0; y < imgSize; y++) {
 				double xd = (double)x / (imgSize - 1);
 				double yd = (double)y / (imgSize - 1);
 
 				// get the parameters to pick in the colormap
-				double altitude = clamp(terrain.getExactHeightAt(xd, 1 - yd) + jitter(_rng) * 0.01, 0, 1);
+				double altitude = clamp(terrain.getExactHeightAt(xd, yd) + jitter(_rng) * 0.01, 0, 1);
 				double climate = positive(_rng);
 
 				// pick the color

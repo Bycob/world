@@ -61,6 +61,7 @@ void ObjectNodeHandler::setTexture(int id, const std::string &path, const world:
 				data, true);
 
 		driver->addTexture(uid.c_str(), irrimg);
+		irrimg->drop();
 	}
 
 	irrmat.setTexture(id, driver->getTexture(uid.c_str()));
@@ -244,7 +245,7 @@ SMesh * ObjectsManager::convertToIrrlichtMesh(const Mesh & mesh, IVideoDriver * 
 
 			S3DVertex& v = buffer->Vertices[primitiveCount];
 			v.Pos = toIrrlicht(mesh.getVertex(id).getPosition());
-			v.TCoords = toIrrlicht(mesh.getVertex(id).getTexture());
+			v.TCoords = toIrrlicht(mesh.getVertex(id).getTexture() * vec2d{1, -1} + vec2d{0, 1});
 			v.Normal = toIrrlicht(mesh.getVertex(id).getNormal());
 
 			v.Color = SColor(255, 255, 255, 255);

@@ -31,5 +31,5 @@ void generate_test_world(int argc, char** argv) {
 	std::unique_ptr<Scene> scene(collector.createScene());
 
 	ObjLoader loader;
-	loader.write(*scene, "world/world/world.obj");
+	loader.write(*scene, "assets/world/world.obj");
 }

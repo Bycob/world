@@ -324,7 +324,7 @@ namespace world {
 		};
 
 		u8* at(u32 x, u32 y) {
-		    return _data + (_sizeX * y + x) * _elemSize;
+		    return _data + (y * _sizeX + x) * _elemSize;
 		}
 
 		u32 total() {

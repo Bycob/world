@@ -60,16 +60,40 @@ TEST_CASE("Image - general test case", "[image]") {
 }
 
 TEST_CASE("Image - armadillo interoperability", "[image]") {
-    WARN("armadillo interoperability : the behaviour is not defined");
-
-    Image refGrey(3, 3, ImageType::GREYSCALE);
+    Image refGrey(4, 4, ImageType::GREYSCALE);
     refGrey.grey(0, 1).setLevel(255);
     refGrey.grey(1, 0).setLevel(127);
 
     SECTION("creating image from arma::mat") {
-        arma::mat matrix(3, 3, arma::fill::zeros);
+        arma::mat matrix(4, 4, arma::fill::zeros);
+        matrix(0, 1) = 1;
+        matrix(1, 0) = .5;
         Image img(matrix);
-        // REQUIRE ?
+        REQUIRE(img.type() == ImageType::GREYSCALE);
+        REQUIRE(img.grey(0, 1).getLevel() == refGrey.grey(0, 1).getLevel());
+        REQUIRE(img.grey(1, 0).getLevel() == refGrey.grey(1, 0).getLevel());
+    }
+
+    Image refRGB(4, 4, ImageType::RGB);
+    refRGB.rgb(0, 1).set(255, 127, 255);
+    refRGB.rgb(1, 0).set(127, 255, 127);
+
+    SECTION("creating image from arma::cube") {
+        arma::cube cube(4, 4, 4);
+        cube(0, 1, 0) = 1;
+        cube(0, 1, 1) = .5;
+        cube(0, 1, 2) = 1;
+        cube(1, 0, 0) = .5;
+        cube(1, 0, 1) = 1;
+        cube(1, 0, 2) = .5;
+        Image img(cube);
+        REQUIRE(img.type() == ImageType::RGB);
+        REQUIRE(img.rgb(0, 1).getRed() == refRGB.rgb(0, 1).getRed());
+        REQUIRE(img.rgb(0, 1).getGreen() == refRGB.rgb(0, 1).getGreen());
+        REQUIRE(img.rgb(0, 1).getBlue() == refRGB.rgb(0, 1).getBlue());
+        REQUIRE(img.rgb(1, 0).getRed() == refRGB.rgb(1, 0).getRed());
+        REQUIRE(img.rgb(1, 0).getGreen() == refRGB.rgb(1, 0).getGreen());
+        REQUIRE(img.rgb(1, 0).getBlue() == refRGB.rgb(1, 0).getBlue());
     }
 }
 

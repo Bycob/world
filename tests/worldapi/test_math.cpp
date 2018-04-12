@@ -85,7 +85,7 @@ TEST_CASE("vec2i and vec2d - mixed operators", "[math]") {
     vec2i veci{5, -5};
     vec2d vecd{2.1, 2.1};
 
-    INFO("vec2i and vec2d - mixed operators : not implemented yet");
+    WARN("vec2i and vec2d - mixed operators : not implemented yet");
     /*SECTION("vec3i plus vec3d") {
         auto result = veci + vecd;
         REQUIRE(result.x == Approx(7.1));
