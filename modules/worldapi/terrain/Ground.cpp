@@ -25,7 +25,7 @@ namespace world {
         std::vector<optional<Terrain>> _cache;
         std::unique_ptr<Terrain> _final;
         std::unique_ptr<Mesh> _mesh;
-        u64 _lastAccess = 0;
+        u64 _lastAccess;
     };
 
     using TerrainKey = Ground::TerrainKey;
@@ -401,6 +401,6 @@ namespace world {
             context._genID++;
         }
 
-        _internal->_terrains[key] = {std::move(cache), std::move(terrain)};
+        _internal->_terrains[key] = Tile{ std::move(cache), std::move(terrain), std::unique_ptr<Mesh>(), 0 };
     }
 }

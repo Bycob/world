@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <memory>
+#include <chrono>
 
 #include <worldcore.h>
 #include <worldflat.h>

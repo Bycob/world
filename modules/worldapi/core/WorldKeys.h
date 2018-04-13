@@ -11,7 +11,7 @@ namespace world {
     typedef int ObjectKey;
     typedef int AssetKey;
 
-    struct ChunkKeys {
+    struct WORLDAPI_EXPORT ChunkKeys {
         static std::string none() {
             return std::string("");
         }

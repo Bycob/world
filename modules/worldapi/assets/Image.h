@@ -82,7 +82,7 @@ namespace world {
         u8 _a;
 	};
 
-	struct WORLDAPI_EXPORT Image {
+	class WORLDAPI_EXPORT Image {
 	public:
 		Image(int width, int height, const ImageType &type);
 		Image(const arma::Cube<double> & data);
