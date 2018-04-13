@@ -24,9 +24,9 @@ namespace world {
 
 	}
 
-	Scene *ObjLoader::read(const std::string &filename) const {
+	void ObjLoader::read(Scene &scene, const std::string &filename) const {
 		//Lecture via tinyobj
-		std::string errstr = "";
+		std::string errstr;
 		std::vector<tinyobj::shape_t> shapes;
 		std::vector<tinyobj::material_t> materials;
 
@@ -37,11 +37,9 @@ namespace world {
 		}
 
 		//Conversion en objet 3D
-		Scene *result = new Scene();
-
 		for (auto shape : shapes) {
-			Object3D &object3D = result->createObject();
-			Mesh &mesh = object3D.getMesh();
+			Object3D object3D;
+			Mesh mesh;
 
 			//positions
 			std::vector<float> &positions = shape.mesh.positions;
@@ -83,9 +81,10 @@ namespace world {
 				offset += ngon;
 				mesh.addFace(face);
 			}
-		}
 
-		return result;
+			object3D.setMesh(mesh);
+			scene.addObject(object3D);
+		}
 	}
 
 	void ObjLoader::write(const Scene &object3D, std::string filename) const {

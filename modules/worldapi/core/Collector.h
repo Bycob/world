@@ -39,11 +39,11 @@ namespace world {
 
 		void addMaterial(const ItemKey &key, const Material &material) override;
 
-        void addTexture(const ItemKey &key, const std::string &texName, const Image &texture, bool keepRef) override;
+        void addTexture(const ItemKey &key, const std::string &texName, const Image &texture) override;
 
         CollectorIterator iterateItems();
 
-		Scene *createScene();
+		void fillScene(Scene &scene);
 
     protected:
         PrivateCollector *_internal;

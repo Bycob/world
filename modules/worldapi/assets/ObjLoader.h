@@ -26,7 +26,7 @@ namespace world {
 
 		void writeTextures(const Scene &scene, const std::string &directory) const;
 
-		Scene *read(const std::string &filename) const;
+		void read(Scene &scene, const std::string &filename) const;
 
 	private:
 		bool _triangulate;

@@ -61,7 +61,7 @@ void testTree(int argc, char ** argv) {
 	std::cout << "Modèle converti ! Ecriture du modèle..." << std::endl;
 	ObjLoader file;
 	Scene scene;
-	scene.createObject(*mesh);
+	scene.addObject(Object3D(*mesh));
 	file.write(scene, "assets/tree/skeletton");
 
 	std::cout << "Génération du tronc de l'arbre" << std::endl;
@@ -71,6 +71,6 @@ void testTree(int argc, char ** argv) {
 	std::cout << "Généré ! Ecriture du modèle" << std::endl;
 	const Mesh & trunkMesh = tree->getTrunkMesh();
 	Scene scene2;
-	scene2.createObject(trunkMesh);
+	scene2.addObject(Object3D(trunkMesh));
 	file.write(scene2, "assets/tree/trunk");
 }

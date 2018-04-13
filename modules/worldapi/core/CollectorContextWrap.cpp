@@ -50,8 +50,8 @@ namespace world {
         _collector.addMaterial(mutateKey(key), material);
     }
 
-    void CollectorContextWrap::addTexture(const ItemKey &key, const std::string &texName, const Image &texture, bool keepRef) {
-        _collector.addTexture(mutateKey(key), texName, texture, false);
+    void CollectorContextWrap::addTexture(const ItemKey &key, const std::string &texName, const Image &texture) {
+        _collector.addTexture(mutateKey(key), texName, texture);
     }
 
 	ICollector::ItemKey CollectorContextWrap::mutateKey(const ItemKey &key) const {

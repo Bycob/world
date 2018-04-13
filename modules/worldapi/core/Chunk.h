@@ -40,14 +40,11 @@ namespace world {
 
 		void addObject(WorldObject *object);
 
-		template<typename T, typename... Args>
-		T &createObject(Args... args) {
-			addObjectInternal(new T(args...));
-		}
+		template<typename T, typename... Args> T &addObject(Args... args);
 
 		void collectWholeChunk(ICollector &collector);
 
-        void collectPart(const BoundingBox &bbox, double maxDetailSize, ICollector &collector);
+        // void collectPart(const BoundingBox &bbox, double maxDetailSize, ICollector &collector);
 
 	private:
 		double _minResolution = 0;
@@ -59,4 +56,11 @@ namespace world {
 
 		void addObjectInternal(WorldObject *object);
 	};
+
+	template<typename T, typename... Args>
+	T & Chunk::addObject(Args... args) {
+		T* object = new T(args...);
+		addObjectInternal(object);
+		return *object;
+	}
 }

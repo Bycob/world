@@ -22,6 +22,9 @@ namespace world {
 
 		~FlatWorld() override;
 
+		template <typename T, typename... Args>
+		T &setGround(Args... args);
+
 		IGround &ground();
 
 		void addFlatWorldDecorator(FlatWorldDecorator *decorator);
@@ -37,5 +40,14 @@ namespace world {
 		PrivateFlatWorld *_internal;
 
 		std::unique_ptr<IGround> _ground;
+
+		void setGroundInternal(IGround *ground);
 	};
+
+	template <typename T, typename... Args>
+	T & FlatWorld::setGround(Args... args) {
+		T *ground = new T(args...);
+		setGroundInternal(ground);
+		return *ground;
+	}
 }

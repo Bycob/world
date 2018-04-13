@@ -23,13 +23,6 @@ namespace world {
 		/** Add all the content from the other scene in this scene. */
 		void addAll(const Scene &other);
 
-		template<typename... Args>
-		Object3D &createObject(Args... args) {
-			Object3D *object = new Object3D(args...);
-			addObjectInternal(object);
-			return *object;
-		}
-
 		void addObject(const Object3D &object);
 
 		void getObjects(std::vector<Object3D *> &output) const;

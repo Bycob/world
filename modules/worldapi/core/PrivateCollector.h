@@ -18,7 +18,7 @@ namespace world {
         ICollector::ItemKey _myKey;
         Object3D _object3D;
 		std::map<std::string, Material> _materials;
-		std::map<std::string, ConstRefOrValue<Image>> _image;
+		std::map<std::string, std::unique_ptr<Image>> _image;
     };
 
     class PrivateCollector {

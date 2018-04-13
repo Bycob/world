@@ -47,29 +47,31 @@ namespace world {
             return;
         }
 
-        // TODO find before doing anything
 		_internal->_items.at(key)->_internal->_materials.emplace(material.getName(), material);
 	}
 
-	void Collector::addTexture(const ItemKey &key, const std::string &texName, const Image &texture, bool keepRef) {
+	void Collector::addTexture(const ItemKey &key, const std::string &texName, const Image &texture) {
         if (_internal->_disabled.find(key) != _internal->_disabled.end()) {
             return;
         }
 
-        _internal->_items.at(key)->_internal->_image.emplace(texName, ConstRefOrValue<Image>(texture, keepRef));
+        auto &texMap = _internal->_items.at(key)->_internal->_image;
+        auto it = texMap.find(texName);
+
+        if (it == texMap.end()) {
+            texMap.emplace(texName, std::make_unique<Image>(texture));
+        }
     }
 
     CollectorIterator Collector::iterateItems() {
         return CollectorIterator(*this);
     }
 
-	Scene * world::Collector::createScene() {
-		Scene *result = new Scene();
-
+	void world::Collector::fillScene(Scene &scene) {
 		for (auto it = iterateItems(); it.hasNext(); ++it) {
 			const auto &item = (*it).second;
 
-			auto &object = result->createObject(item->getObject3D());
+			auto object = item->getObject3D();
 
 			// Material
 			std::string materialID = object.getMaterialID();
@@ -87,16 +89,16 @@ namespace world {
 				// Textures
 				auto texture = item->getTexture(material->getMapKd());
 				if (texture) {
-					result->addTexture(texture->_uid, texture->_image);
+					scene.addTexture(texture->_uid, texture->_image);
 					// TODO we should not have to change the uid.
 					addedMat.setMapKd(texture->_uid);
 				}
 
-				result->addMaterial(addedMat);
+				scene.addMaterial(addedMat);
 			}
-		}
 
-		return result;
+			scene.addObject(object);
+		}
 	}
 
     // ==== COLLECTOR OBJECT PART

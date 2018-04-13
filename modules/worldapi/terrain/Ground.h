@@ -47,6 +47,10 @@ namespace world {
 
 		double getUnitSize() const { return _unitSize; }
 
+		// TERRAIN WORKERS
+
+		template <typename T, typename... Args> T &addWorker(Args&&... args);
+
 		// EXPLORATION
 		double observeAltitudeAt(WorldZone zone, double x, double y) override;
 
@@ -76,6 +80,9 @@ namespace world {
 		int _maxLOD = 3;
 
 		int _maxCacheSize = 2000;
+
+		// WORKER
+		void addWorkerInternal(ITerrainWorker* worker);
 
 		double observeAltitudeAt(double x, double y, int lvl);
 
@@ -123,6 +130,13 @@ namespace world {
 
 		friend class PrivateGround;
 		friend class GroundContext;
+	};
+
+	template <typename T, typename... Args>
+	T & Ground::addWorker(Args&&... args) {
+		T* worker = new T(args...);
+		addWorkerInternal(worker);
+		return *worker;
 	};
 }
 

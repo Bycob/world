@@ -83,7 +83,7 @@ namespace world {
 			addMaterial(itemKey, material);
 
 			if (texture) {
-                addTexture(itemKey, "texture01", *texture, true);
+                addTexture(itemKey, "texture01", *texture);
 			}
 		}
 #else

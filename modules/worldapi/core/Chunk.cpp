@@ -46,10 +46,6 @@ namespace world {
         }
     }
 
-    void Chunk::collectPart(const BoundingBox &bbox, double maxDetailSize, ICollector &collector) {
-
-    }
-
 	void Chunk::addObjectInternal(WorldObject *object) {
 		_internal->_objects.emplace(_internal->_counter, std::unique_ptr<WorldObject>(object));
         _internal->_counter++;

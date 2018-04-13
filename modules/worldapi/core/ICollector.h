@@ -54,7 +54,7 @@ namespace world {
 
 		virtual void addMaterial(const ItemKey &key, const Material &material) = 0;
 
-		virtual void addTexture(const ItemKey &key, const std::string &texName, const Image &texture, bool keepRef = false) = 0;
+		virtual void addTexture(const ItemKey &key, const std::string &texName, const Image &texture) = 0;
     protected:
         void passItemTo(ICollector &collector, const ItemKey &key, Object3D &object) {
             collector.addItemUnsafe(key, object);

@@ -22,9 +22,8 @@ namespace world {
 	}
 
 	FlatWorld::FlatWorld()
-			: _internal(new PrivateFlatWorld()),
-			  _ground(std::make_unique<Ground>()) {
-
+			: _internal(new PrivateFlatWorld()) {
+		setGround<Ground>();
 	}
 
 	FlatWorld::~FlatWorld() {
@@ -57,5 +56,9 @@ namespace world {
 		for (auto &decorator : _internal->_chunkDecorators) {
 			decorator->decorate(*this, chunk);
 		}
+	}
+
+	void FlatWorld::setGroundInternal(IGround *ground) {
+		_ground = std::unique_ptr<IGround>(ground);
 	}
 }

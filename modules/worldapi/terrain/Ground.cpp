@@ -176,6 +176,10 @@ namespace world {
 		collectZone(zone, collector);
     }
 
+    void Ground::addWorkerInternal(ITerrainWorker *worker) {
+        _internal->_generators.push_back(std::unique_ptr<ITerrainWorker>(worker));
+    }
+
     double Ground::observeAltitudeAt(double x, double y, int lvl) {
         double size = getTerrainSize(lvl);
 		double xd = x / size;
@@ -221,13 +225,13 @@ namespace world {
             Object3D object;
 
             if (meshbe) {
-                object.setMesh(*meshbe, true);
+                object.setMesh(*meshbe);
             }
             else {
                 std::unique_ptr<Mesh> &mesh =
                         (_internal->_terrains[key]._mesh =
                                  std::unique_ptr<Mesh>(terrain.createMesh(0, 0, 0, size.x, size.y, size.z)));
-                object.setMesh(*mesh, true);
+                object.setMesh(*mesh);
             }
             object.setPosition(offset);
             object.setMaterialID("terrain");
@@ -245,7 +249,7 @@ namespace world {
             collector.addMaterial(itemKey, material);
 
             if (texture) {
-                collector.addTexture(itemKey, "texture01", *texture, true);
+                collector.addTexture(itemKey, "texture01", *texture);
             }
         }
     }

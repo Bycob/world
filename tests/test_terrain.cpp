@@ -29,14 +29,15 @@ void testTinyObjLoader(int argc, char** argv) {
 			ObjLoader obj;
 			std::cout << "Lecture du mesh" << std::endl;
 
-			std::unique_ptr<Scene> scene(obj.read(argv[1]));
+			Scene scene;
+			obj.read(scene, argv[1]);
 			std::cout << "Mesh lu !" << std::endl;
 
 			std::vector<Object3D*> output;
-			scene->getObjects(output);
+			scene.getObjects(output);
 
 			std::cout << "Reecriture du fichier sous un autre nom" << std::endl;
-			obj.write(*scene, "assets/terrain/result.obj");
+			obj.write(scene, "assets/terrain/result.obj");
 		}
 		catch (std::exception & e) {
 			std::cout << e.what() << std::endl;
@@ -66,7 +67,7 @@ void testRepeatable(int argc, char** argv) {
     Terrain tr(repeatable);
     Scene repeatableobj;
     std::unique_ptr<Mesh> mesh(tr.createMesh());
-	repeatableobj.createObject(*mesh);
+	repeatableobj.addObject(Object3D(*mesh));
 
 	ObjLoader loader;
     loader.write(repeatableobj, "assets/terrain/repeatable");
@@ -158,7 +159,7 @@ void testPerlin(int argc, char** argv) {
 	std::cout << "Conversion du terrain en mesh... " << std::endl;
 	Scene scene1;
 	std::shared_ptr<Mesh> mesh = std::shared_ptr<Mesh>(terrain.createMesh());
-	scene1.createObject(*mesh);
+	scene1.addObject(Object3D(*mesh));
 	
 	std::shared_ptr<Material> material = std::make_shared<Material>("material01");
 	material->setMapKd("test2_tex.png");
@@ -230,10 +231,10 @@ void testSubdivisions(int argc, char** argv) {
 	Scene subterrainScene;
 	TerrainSubdivisionTree & subtree = terrainTree->getSubtree(0, 0);
 	std::shared_ptr<Mesh> submesh = std::shared_ptr<Mesh>(subtree.convertToSubmesh());
-	subterrainScene.createObject(*submesh);
-	/*subterrainScene.createObject(std::shared_ptr<Mesh>(terrainTree->getSubtree(1, 0).convertToSubmesh()));
-	subterrainScene.createObject(std::shared_ptr<Mesh>(terrainTree->getSubtree(1, 1).convertToSubmesh()));
-	subterrainScene.createObject(std::shared_ptr<Mesh>(terrainTree->getSubtree(0, 1).convertToSubmesh()));*/
+	subterrainScene.addObject(Object3D(*submesh));
+	/*subterrainScene.addObject(Object3D(std::shared_ptr<Mesh>(terrainTree->getSubtree(1, 0).convertToSubmesh())));
+	subterrainScene.addObject(Object3D(std::shared_ptr<Mesh>(terrainTree->getSubtree(1, 1).convertToSubmesh())));
+	subterrainScene.addObject(Object3D(std::shared_ptr<Mesh>(terrainTree->getSubtree(0, 1).convertToSubmesh())));*/
 
 	std::cout << "Ecriture du fichier .obj..." << std::endl;
 	meshIO.write(subterrainScene, "assets/terrain/subterrain");

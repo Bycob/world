@@ -41,7 +41,7 @@ public:
         _lastMaterialAdded = key;
     };
 
-    void addTexture(const ItemKey &key, const std::string &texName, const Image &texture, bool keepRef) override {
+    void addTexture(const ItemKey &key, const std::string &texName, const Image &texture) override {
 
     }
 
