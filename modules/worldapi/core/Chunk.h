@@ -38,8 +38,6 @@ namespace world {
 
 		const vec3d &getOffset() const { return _offset; }
 
-		void addObject(WorldObject *object);
-
 		template<typename T, typename... Args> T &addObject(Args... args);
 
 		void collectWholeChunk(ICollector &collector);

@@ -1,7 +1,7 @@
 #include "FlatWorld.h"
 
 #include "terrain/Ground.h"
-#include "SimpleTreeDecorator.h"
+#include "tree/SimpleTreeDecorator.h"
 #include "FlatWorldCollector.h"
 
 namespace world {
@@ -23,7 +23,9 @@ namespace world {
 
 	FlatWorld::FlatWorld()
 			: _internal(new PrivateFlatWorld()) {
-		setGround<Ground>();
+
+		Ground &ground = setGround<Ground>();
+		ground.setDefaultWorkerSet();
 	}
 
 	FlatWorld::~FlatWorld() {

@@ -31,46 +31,47 @@ void testCircularSkeletton(int argc, char** argv) {
 using namespace tree;
 
 void testTree(int argc, char ** argv) {
-	// TODO resoudre le leak sur le generator
-	TreeSkelettonGenerator generator;
-
-	generator.setInclination(SideBranchPhiParameter(wrapper_d(gaussian(0.9, 0.2))));
-	generator.setRotationOffset(SideBranchOffsetThetaParameter(wrapper_d(gaussian(0, 0.5))));
-	generator.setForkingCount(tree::uniform_i(4, 6));
-	generator.setSizeFactor(SideBranchSizeParameter(wrapper_d(gaussian(4.0 / 5.0, 0.1))));
-	generator.setMaxForkingLevel(MaxLevelByWeightParameter(0.02));
-	generator.setWeight(SideBranchWeightParameter(DefaultWeightParameter()));
 
 	for (int i = 1; i < argc; i++) {
 		std::string arg(argv[i]);
 		std::string key = arg.substr(0, 1);
 		std::string value = arg.substr(1);
 
-		
+		// to do
 	}
 	
 	std::cout << "Création du dossier \"tree\"..." << std::endl;
 	createDirectories("assets/tree");
 
-	std::cout << "Génération d'un squelette d'arbre" << std::endl;
-	std::unique_ptr<TreeSkeletton> treeSkeletton(generator.generate());
+	std::cout << "Parametrage de l'arbre" << std::endl;
+	Tree tree;
+	// TODO resoudre le leak sur le generator
+	auto &skelettonGenerator = tree.addWorker<TreeSkelettonGenerator>();
 
-	std::cout << "Généré ! Conversion en modèle..." << std::endl;
-	std::shared_ptr<Mesh> mesh(treeSkeletton->convertToMesh());
+	skelettonGenerator.setInclination(SideBranchPhiParameter(wrapper_d(gaussian(0.9, 0.2))));
+	skelettonGenerator.setRotationOffset(SideBranchOffsetThetaParameter(wrapper_d(gaussian(0, 0.5))));
+	skelettonGenerator.setForkingCount(tree::uniform_i(4, 6));
+	skelettonGenerator.setSizeFactor(SideBranchSizeParameter(wrapper_d(gaussian(4.0 / 5.0, 0.1))));
+	skelettonGenerator.setMaxForkingLevel(MaxLevelByWeightParameter(0.02));
+	skelettonGenerator.setWeight(SideBranchWeightParameter(DefaultWeightParameter()));
 
-	std::cout << "Modèle converti ! Ecriture du modèle..." << std::endl;
+	tree.addWorker<TrunkGenerator>();
+
+	std::cout << "Generation" << std::endl;
+	Collector collector;
+	tree.collectWholeObject(collector);
+
+	std::cout << "Converting skeletton into 3D model..." << std::endl;
+	std::shared_ptr<Mesh> mesh(tree.getSkeletton().convertToMesh());
+
+	std::cout << "Ecriture du modele du squelette..." << std::endl;
 	ObjLoader file;
 	Scene scene;
 	scene.addObject(Object3D(*mesh));
 	file.write(scene, "assets/tree/skeletton");
 
-	std::cout << "Génération du tronc de l'arbre" << std::endl;
-	TreeGenerator generator2;
-	std::unique_ptr<Tree> tree(generator2.generate(*treeSkeletton));
-
-	std::cout << "Généré ! Ecriture du modèle" << std::endl;
-	const Mesh & trunkMesh = tree->getTrunkMesh();
+	std::cout << "Ecriture du modele de l'arbre..." << std::endl;
 	Scene scene2;
-	scene2.addObject(Object3D(trunkMesh));
-	file.write(scene2, "assets/tree/trunk");
+	collector.fillScene(scene2);
+	file.write(scene2, "assets/tree/tree");
 }

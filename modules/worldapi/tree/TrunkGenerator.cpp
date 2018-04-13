@@ -1,4 +1,4 @@
-#include "TreeGenerator.h"
+#include "TrunkGenerator.h"
 #include "assets/Mesh.h"
 #include "assets/MeshOps.h"
 #include "math/MathsHelper.h"
@@ -9,33 +9,29 @@
 
 namespace world {
 
-	TreeGenerator::TreeGenerator(int segmentCount, float faceSize, float mergeSize, int mergeRes) :
+	TrunkGenerator::TrunkGenerator(int segmentCount, float faceSize, float mergeSize, int mergeRes) :
 			_segmentCount(segmentCount), _faceSize(faceSize), _mergeSize(mergeSize), _mergeRes(mergeRes) {
 
 	}
 
-	TreeGenerator::~TreeGenerator() {
+	TrunkGenerator::~TrunkGenerator() {
 
 	}
 
-	TreeGenerator *TreeGenerator::clone() const {
-		return new TreeGenerator(*this);
+	TrunkGenerator *TrunkGenerator::clone() const {
+		return new TrunkGenerator(*this);
 	}
 
-	Tree *TreeGenerator::generate(const TreeSkeletton &skeletton) const {
-		Tree *tree = new Tree();
-
+	void TrunkGenerator::process(world::Tree &tree) {
 		//Création du mesh
-		Mesh &trunkMesh = tree->_trunkMesh;
-		auto primary = skeletton.getPrimaryNode();
+		Mesh &trunkMesh = tree.getTrunkMesh();
+		auto primary = tree.getSkeletton().getPrimaryNode();
 		populateTrunkMesh(trunkMesh, primary, 0, primary->getWeight());
 
 		MeshOps::recalculateNormals(trunkMesh);
-
-		return tree;
 	}
 
-	void TreeGenerator::fillBezier(Mesh &trunkMesh, const BezierCurve &curve, int divCount,
+	void TrunkGenerator::fillBezier(Mesh &trunkMesh, const BezierCurve &curve, int divCount,
 								   double startWeight, double endWeight, int mergePos) const {
 
 		double segmentCountd = (double) _segmentCount;
@@ -115,7 +111,7 @@ namespace world {
 		}
 	}
 
-	void TreeGenerator::populateTrunkMesh(Mesh &trunkMesh, const Node<TreeInfo> *node,
+	void TrunkGenerator::populateTrunkMesh(Mesh &trunkMesh, const Node<TreeInfo> *node,
 										  double mergeLenParent, double mergeWeight) const {
 
 		auto getEndWeight = [](const std::vector<Node<TreeInfo> *> &children) -> double {

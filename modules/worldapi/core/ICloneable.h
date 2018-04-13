@@ -6,7 +6,6 @@ namespace world {
     template<typename T>
     class ICloneable {
     public:
-        virtual ~ICloneable() = default;
 
         virtual T *clone() const = 0;
     };

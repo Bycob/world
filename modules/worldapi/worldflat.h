@@ -3,6 +3,5 @@
 
 #include "flat/FlatWorldCollector.h"
 #include "flat/FlatWorld.h"
-#include "flat/SimpleTreeDecorator.h"
 
 #endif // WORLD_WORLDFLAT_H

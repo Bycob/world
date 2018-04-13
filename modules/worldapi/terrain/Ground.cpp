@@ -105,13 +105,21 @@ namespace world {
     Ground::Ground(double unitSize, double minAltitude, double maxAltitude) :
             _internal(new PrivateGround()),
             _unitSize(unitSize), _minAltitude(minAltitude), _maxAltitude(maxAltitude) {
-        _internal->_generators.emplace_back(std::make_unique<PerlinTerrainGenerator>(0, 1, 4.));
-        _internal->_generators.emplace_back(std::make_unique<CustomWorldRMModifier>());
-        _internal->_generators.emplace_back(std::make_unique<ApplyParentTerrain>());
+
+    }
+
+    Ground::~Ground() {
+        delete _internal;
+    }
+
+    void Ground::setDefaultWorkerSet() {
+        addWorker<PerlinTerrainGenerator>(0, 1, 4.);
+        addWorker<CustomWorldRMModifier>();
+        addWorker<ApplyParentTerrain>();
 
         // Texturer
-        auto texturer = std::make_unique<AltitudeTexturer>(_textureRes);
-        ColorMap &colorMap = texturer->getColorMap();
+        auto &texturer = addWorker<AltitudeTexturer>(_textureRes);
+        ColorMap &colorMap = texturer.getColorMap();
 
         colorMap.addPoint({ 0, 0}, Color4u(209, 207, 153));
         colorMap.addPoint({ 0, 1}, Color4u(209, 207, 153));
@@ -123,12 +131,6 @@ namespace world {
         colorMap.addPoint({ 0.8, 0.5 }, Color4u(160, 160, 160));
         colorMap.addPoint({ 1, 0 }, Color4u(244, 252, 250));
         colorMap.addPoint({ 1, 1 }, Color4u(244, 252, 250));
-
-        _internal->_generators.emplace_back(std::move(texturer));
-    }
-
-    Ground::~Ground() {
-        delete _internal;
     }
 
     double Ground::observeAltitudeAt(WorldZone zone, double x, double y) {

@@ -2,13 +2,14 @@
 
 #include "core/WorldConfig.h"
 
-#include "core/ICloneable.h"
+#include "ITreeWorker.h"
+#include "Tree.h"
 #include "TreeSkelettonParameters.h"
 #include "TreeSkeletton.h"
 
 namespace world {
 
-	class WORLDAPI_EXPORT TreeSkelettonGenerator : public ICloneable<TreeSkelettonGenerator> {
+	class WORLDAPI_EXPORT TreeSkelettonGenerator : public ITreeWorker {
 	public:
 		TreeSkelettonGenerator();
 
@@ -66,7 +67,7 @@ namespace world {
 			_weight = std::make_unique<F>(weight);
 		}
 
-		virtual TreeSkeletton *generate();
+		void process(Tree &tree) override;
 
 	private :
 		void forkNode(Node<TreeInfo> *node);

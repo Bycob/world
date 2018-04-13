@@ -31,10 +31,6 @@ namespace world {
 		_maxResolution = max;
 	}
 
-	void Chunk::addObject(WorldObject *object) {
-		addObjectInternal(object);
-	}
-
     void Chunk::collectWholeChunk(ICollector &collector) {
 		CollectorContextWrap wcollector(collector);
 

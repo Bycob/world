@@ -7,31 +7,18 @@
 namespace world {
 
 	SimpleTreeDecorator::SimpleTreeDecorator(int maxTreesPerChunk)
-			: _rng(time(NULL)), _maxTreesPerChunk(maxTreesPerChunk),
-			  _skelettonGenerator(std::make_unique<TreeSkelettonGenerator>()),
-			  _treeGenerator(std::make_unique<TreeGenerator>(12, 0.25, 0.2, 4)) {
+			: _rng(time(NULL)), _maxTreesPerChunk(maxTreesPerChunk) {
 
-		_skelettonGenerator->setConstantMaxForkingLevel(2);
-		_skelettonGenerator->setConstantForkingCount(3);
-	}
+		auto &skeletton = _model.addWorker<TreeSkelettonGenerator>();
+		skeletton.setConstantMaxForkingLevel(2);
+		skeletton.setConstantForkingCount(3);
 
-	SimpleTreeDecorator::SimpleTreeDecorator(const SimpleTreeDecorator &other)
-			: _rng(other._rng), _maxTreesPerChunk(other._maxTreesPerChunk),
-			  _skelettonGenerator(other._skelettonGenerator->clone()),
-			  _treeGenerator(other._treeGenerator->clone()) {
+		_model.addWorker<TrunkGenerator>(12, 0.25, 0.2, 4);
 
 	}
 
-	SimpleTreeDecorator::~SimpleTreeDecorator() {
-
-	}
-
-	void SimpleTreeDecorator::setTreeSkelettonGenerator(TreeSkelettonGenerator *generator) {
-		_skelettonGenerator = std::unique_ptr<TreeSkelettonGenerator>(generator);
-	}
-
-	void SimpleTreeDecorator::setTreeGenerator(TreeGenerator *generator) {
-		_treeGenerator = std::unique_ptr<TreeGenerator>(generator);
+	void SimpleTreeDecorator::setModel(const world::Tree &model) {
+		_model.setup(model);
 	}
 
 	void SimpleTreeDecorator::decorate(FlatWorld &world, WorldZone &zone) {
@@ -78,12 +65,11 @@ namespace world {
 			// std::cout << pos3D << std::endl;
 
 			// Création de l'arbre
-			std::unique_ptr<TreeSkeletton> skeletton(_skelettonGenerator->generate());
-			Tree *tree = _treeGenerator->generate(*skeletton);
-			tree->setPosition3D(pos3D);
+			Tree &tree = chunk.addObject<Tree>();
+			tree.setup(_model);
+			tree.setPosition3D(pos3D);
 
-			// Ajout au chunk
-			chunk.addObject(tree);
+			// Remember position
 			positions.push_back(position);
 		}
 	}

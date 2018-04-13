@@ -1,12 +1,8 @@
-#define _USE_MATH_DEFINES
-
-#include <list>
-#include <math.h>
-
-#include "math/MathsHelper.h"
-
 #include "TreeSkelettonGenerator.h"
 
+#include <list>
+
+#include "math/MathsHelper.h"
 
 namespace world {
 	using namespace tree;
@@ -67,17 +63,13 @@ namespace world {
 		_maxLevel = std::make_unique<const_i>(level);
 	}
 
-	TreeSkeletton *TreeSkelettonGenerator::generate() {
-		TreeSkeletton *result = new TreeSkeletton();
-
-		Node<TreeInfo> *primaryNode = result->getPrimaryNode();
+	void TreeSkelettonGenerator::process(Tree &tree) {
+		Node<TreeInfo> *primaryNode = tree.getSkeletton().getPrimaryNode();
 		primaryNode->setPosition(0, 0, (*_seedLocation)(primaryNode->getInfo()));
 		primaryNode->setWeight((*_rootWeight)(primaryNode->getInfo()));
 		primaryNode->getInfo()._level = 0;
 
 		forkNode(primaryNode);
-
-		return result;
 	}
 
 	void TreeSkelettonGenerator::forkNode(Node<TreeInfo> *node) {

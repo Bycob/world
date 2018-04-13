@@ -4,7 +4,6 @@
 
 #include "CollectorContextWrap.h"
 #include "flat/FlatWorld.h"
-#include "flat/SimpleTreeDecorator.h"
 #include "LODGridChunkSystem.h"
 
 namespace world {
@@ -18,11 +17,7 @@ namespace world {
 
 
 	World *World::createDemoWorld() {
-		FlatWorld *world = new FlatWorld();
-
-		world->addFlatWorldDecorator(new SimpleTreeDecorator(1));
-
-		return world;
+		return FlatWorld::createDemoFlatWorld();
 	}
 
 
