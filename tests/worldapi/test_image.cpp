@@ -103,6 +103,42 @@ TEST_CASE("Image - IO", "[image]") {
     //Image img("unittests/test.png");
 }
 
+TEST_CASE("Image - ImageStream", "[image]") {
+    Image imgRGBA(3, 3, ImageType::RGBA);
+
+    for (int y = 0; y < 3; ++y) {
+        for (int x = 0; x < 3; ++x) {
+            imgRGBA.rgba(x, y).set((u8)x, (u8)y, 1);
+        }
+    }
+
+    ImageStream stream(imgRGBA);
+
+    SECTION("Check stream size for ARGB stream") {
+        REQUIRE(stream.remaining() == 3 * 3 * 4);
+    }
+
+    // Read the stream
+    char* buffer = new char[stream.remaining()];
+    stream.read(buffer, stream.remaining());
+
+    SECTION("Check that data are in row-order format, and ARGB") {
+        for (int y = 0; y < 3; ++y) {
+            for (int x = 0; x < 3; ++x) {
+                INFO(std::string("reading ") + std::to_string(x) + ", " + std::to_string(y));
+                // row major order, argb stream
+                auto ptr = buffer + (y * 3 + x) * 4;
+                REQUIRE((u8)ptr[0] == (u8) 255);
+                REQUIRE((u8)ptr[1] == (u8) x);
+                REQUIRE((u8)ptr[2] == (u8) y);
+                REQUIRE((u8)ptr[3] == (u8) 1);
+            }
+        }
+    }
+
+    delete[] buffer;
+}
+
 TEST_CASE("Image - Benchmarks", "[image][!benchmark]") {
 
     Image imgRGBA(1024, 1024, ImageType::RGBA);
