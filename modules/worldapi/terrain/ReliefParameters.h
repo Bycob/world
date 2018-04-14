@@ -6,30 +6,20 @@
 
 namespace world {
 
-	namespace relief {
-		typedef Parameter<std::pair<double, double>, double> diff_law;
+	typedef Parameter<double, std::pair<double, double>> diff_law;
 
-		class CustomWorldDifferential : public diff_law {
-		public:
-			CustomWorldDifferential(double range = 4) : _range(range) {}
+	inline diff_law CustomWorldDifferential(double range = 4) {
+		diff_law ret;
+		ret.setFunction([range](const std::pair<double, double> &in) {
+			double elevation = in.first;
+			double rand = in.second;
 
-			virtual double operator()(const std::pair<double, double> &in) {
-				double elevation = in.first;
-				double rand = in.second;
+			double start = range * (elevation - 1);
+			double startY = tanh(start);
+			double endY = tanh(start + range);
 
-				double start = _range * (elevation - 1);
-				double startY = tanh(start);
-				double endY = tanh(start + _range);
-
-				return (tanh(rand * _range + start) - startY) / (endY - startY);
-			}
-
-			virtual CustomWorldDifferential *clone() const {
-				return new CustomWorldDifferential(*this);
-			}
-
-		private:
-			double _range;
-		};
+			return (tanh(rand * range + start) - startY) / (endY - startY);
+		});
+		return ret;
 	}
 }

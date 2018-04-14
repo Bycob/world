@@ -10,90 +10,61 @@
 
 namespace world {
 
-//FONCTIONS-PARAMETRES
-
-	template<typename I, typename T>
-	class Parameter : public ICloneable<Parameter<I, T>> {
+	template<typename Out, typename... In>
+	class Parameter {
 	public:
-		virtual T operator()(const I &in) = 0;
+        void setFunction(std::function<Out(In...)> func) {
+            _function = func;
+        }
 
-		virtual Parameter<I, T> *clone() const = 0;
+		Out operator()(In... in) {
+            return _function(in...);
+		}
+
+    private:
+        std::function<Out(In...)> _function;
 	};
 
-	template<typename I, typename T>
-	class ConstantParameter : public Parameter<I, T> {
-	public :
-		ConstantParameter(T value) : _value(value) {}
+    template<typename Out, typename... In>
+	struct Params {
+        static std::mt19937 &rng() {
+            static std::mt19937 _rng(time(NULL));
+            return _rng;
+        };
 
-		virtual T operator()(const I &in) {
-			return _value;
-		}
+        static Parameter<Out, In...> constant(Out value) {
+            Parameter<Out, In...> ret;
+            ret.setFunction([value] (In... in) {
+                return value;
+            });
+            return ret;
+        }
 
-		virtual ConstantParameter<I, T> *clone() const {
-			return new ConstantParameter<I, T>(*this);
-		}
+        static Parameter<Out, In...> gaussian(double mean, double deviation) {
+            Parameter<Out, In...> ret;
+            ret.setFunction([mean, deviation] (In... in) {
+                std::normal_distribution<Out> distrib(mean, deviation);
+                return distrib(rng());
+            });
+            return ret;
+        }
 
-	private :
-		T _value;
-	};
+        static Parameter<Out, In...> uniform_int(Out min, Out max) {
+            Parameter<Out, In...> ret;
+            ret.setFunction([min, max] (In... in) {
+                std::uniform_int_distribution<Out> distrib(min, max);
+                return distrib(rng());
+            });
+            return ret;
+        }
 
-	template<typename I, typename T>
-	class RandomParameter : public Parameter<I, T> {
-	public :
-		RandomParameter() : _rng(time(NULL)) {}
-
-	protected :
-		std::mt19937 _rng;
-	};
-
-	template<typename I>
-	class GaussianParameter : public RandomParameter<I, double> {
-	public :
-		GaussianParameter(double median, double deviation) : _random(median, deviation) {}
-
-		virtual double operator()(const I &in) {
-			return this->_random(this->_rng);
-		}
-
-		virtual GaussianParameter<I> *clone() const {
-			return new GaussianParameter<I>(*this);
-		}
-
-	private :
-		std::normal_distribution<double> _random;
-	};
-
-	template<typename I>
-	class UniformRandomIntegerParameter : public RandomParameter<I, int> {
-	public :
-		UniformRandomIntegerParameter(int low, int high) : _random(low, high) {}
-
-		virtual int operator()(const I &in) {
-			return this->_random(this->_rng);
-		}
-
-		virtual UniformRandomIntegerParameter<I> *clone() const {
-			return new UniformRandomIntegerParameter<I>(*this);
-		}
-
-	private :
-		std::uniform_int_distribution<int> _random;
-	};
-
-	template<typename I>
-	class UniformRandomDoubleParameter : public RandomParameter<I, double> {
-	public:
-		UniformRandomDoubleParameter(double low, double high) : _random(low, high) {}
-
-		virtual double operator()(const I &in) {
-			return this->_random(this->_rng);
-		}
-
-		virtual UniformRandomDoubleParameter<I> *clone() const {
-			return new UniformRandomDoubleParameter<I>(*this);
-		}
-
-	private:
-		std::uniform_real_distribution<double> _random;
+        static Parameter<Out, In...> uniform_real(Out min, Out max) {
+            Parameter<Out, In...> ret;
+            ret.setFunction([min, max] (In... in) {
+                std::uniform_real_distribution<Out> distrib(min, max);
+                return distrib(rng());
+            });
+            return ret;
+        }
 	};
 }

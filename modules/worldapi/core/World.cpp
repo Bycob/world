@@ -31,10 +31,6 @@ namespace world {
 		delete _internal;
 	}
 
-	void World::addWorldDecorator(WorldDecorator *decorator) {
-		_internal->_chunkDecorators.emplace_back(decorator);
-	}
-
 	WorldZone World::exploreLocation(const vec3d &location) {
 		auto result = _chunkSystem->getChunk(location);
 		WorldZone &zone = result._zone;
@@ -84,5 +80,9 @@ namespace world {
 		for (auto &decorator : _internal->_chunkDecorators) {
 			decorator->decorate(*this, chunk);
 		}
+	}
+
+	void World::addDecoratorInternal(world::WorldDecorator *decorator) {
+		_internal->_chunkDecorators.emplace_back(decorator);
 	}
 }

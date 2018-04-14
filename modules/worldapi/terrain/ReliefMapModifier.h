@@ -37,7 +37,7 @@ namespace world {
 		mutable std::mt19937 _rng;
 		std::map<vec2i, std::pair<Terrain, Terrain>> _reliefMap;
 
-		virtual void generate(Terrain &height, Terrain &heightDiff) const = 0;
+		virtual void generate(Terrain &height, Terrain &heightDiff) = 0;
 	};
 
 	class WORLDAPI_EXPORT CustomWorldRMModifier : public ReliefMapModifier {
@@ -48,10 +48,10 @@ namespace world {
 
 		void setLimitBrightness(int);
 
-		void setDifferentialLaw(const relief::diff_law &law);
+		void setDifferentialLaw(const diff_law &law);
 
 	protected:
-		void generate(Terrain &height, Terrain &heightDiff) const override;
+		void generate(Terrain &height, Terrain &heightDiff) override;
 
 	private:
 		// la largeur d'un carré unité.
@@ -64,6 +64,6 @@ namespace world {
 
 		/** Loi de probabilité du différentiel d'altitude en fonction
         de l'altitude. */
-		std::unique_ptr<relief::diff_law> _diffLaw;
+		diff_law _diffLaw;
 	};
 }

@@ -27,7 +27,8 @@ namespace world {
 
 		IGround &ground();
 
-		void addFlatWorldDecorator(FlatWorldDecorator *decorator);
+		template <typename T, typename... Args>
+		T &addFlatWorldDecorator(Args... args);
 
 		void collect(const WorldZone &zone, ICollector &collector) override;
 
@@ -42,6 +43,8 @@ namespace world {
 		std::unique_ptr<IGround> _ground;
 
 		void setGroundInternal(IGround *ground);
+
+		void addFlatWorldDecoratorInternal(FlatWorldDecorator * decorator);
 	};
 
 	template <typename T, typename... Args>
@@ -49,5 +52,12 @@ namespace world {
 		T *ground = new T(args...);
 		setGroundInternal(ground);
 		return *ground;
+	}
+
+	template <typename T, typename... Args>
+	T & FlatWorld::addFlatWorldDecorator(Args... args) {
+		T * decorator = new T(args...);
+		addFlatWorldDecoratorInternal(decorator);
+		return *decorator;
 	}
 }

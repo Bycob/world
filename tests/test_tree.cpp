@@ -28,7 +28,6 @@ void testCircularSkeletton(int argc, char** argv) {
 	delete skeletton;
 }
 
-using namespace tree;
 
 void testTree(int argc, char ** argv) {
 
@@ -46,14 +45,20 @@ void testTree(int argc, char ** argv) {
 	std::cout << "Parametrage de l'arbre" << std::endl;
 	Tree tree;
 	// TODO resoudre le leak sur le generator
-	auto &skelettonGenerator = tree.addWorker<TreeSkelettonGenerator>();
+	auto &skelGen = tree.addWorker<TreeSkelettonGenerator>();
 
-	skelettonGenerator.setInclination(SideBranchPhiParameter(wrapper_d(gaussian(0.9, 0.2))));
-	skelettonGenerator.setRotationOffset(SideBranchOffsetThetaParameter(wrapper_d(gaussian(0, 0.5))));
-	skelettonGenerator.setForkingCount(tree::uniform_i(4, 6));
-	skelettonGenerator.setSizeFactor(SideBranchSizeParameter(wrapper_d(gaussian(4.0 / 5.0, 0.1))));
-	skelettonGenerator.setMaxForkingLevel(MaxLevelByWeightParameter(0.02));
-	skelettonGenerator.setWeight(SideBranchWeightParameter(DefaultWeightParameter()));
+	/*skelGen.setInclination(SideBranch::phi(Params::gaussian(0.9, 0.2)));
+	skelGen.setRotationOffset(SideBranch::offsetTheta(gaussian(0, 0.5)));
+	skelGen.setForkingCount(uniform_i(4, 6));
+	skelGen.setSizeFactor(SideBranch::size(gaussian(4.0 / 5.0, 0.1)));
+	skelGen.setMaxForkingLevel(MaxLevelByWeight(0.02));
+	skelGen.setWeight(SideBranch::weight(Trees::DefaultWeight()));*/
+	skelGen.setInclination(TreeParamsd::gaussian(0.9, 0.1));
+	skelGen.setRotationOffset(TreeParamsd::gaussian(0, 0.5));
+	skelGen.setForkingCount(TreeParamsi::uniform_int(2, 6));
+	skelGen.setSizeFactor(TreeParamsd::gaussian(2.5 / 5.0, 0.05));
+	skelGen.setMaxForkingLevel(TreeParamsi::MaxLevelByWeight(0.02));
+	skelGen.setWeight(TreeParamsd::DefaultWeight());
 
 	tree.addWorker<TrunkGenerator>();
 

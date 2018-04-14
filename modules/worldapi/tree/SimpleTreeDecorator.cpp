@@ -10,11 +10,13 @@ namespace world {
 			: _rng(time(NULL)), _maxTreesPerChunk(maxTreesPerChunk) {
 
 		auto &skeletton = _model.addWorker<TreeSkelettonGenerator>();
-		skeletton.setConstantMaxForkingLevel(2);
-		skeletton.setConstantForkingCount(3);
+		skeletton.setMaxForkingLevel(TreeParamsi::constant(2));
+		skeletton.setForkingCount(TreeParamsi::constant(3));
+		skeletton.setInclination(TreeParamsd::gaussian(0.25 * M_PI, 0.05 * M_PI));
+		skeletton.setRotationOffset(TreeParamsd::gaussian(0,  0.05 * M_PI));
+		skeletton.setSizeFactor(TreeParamsd::uniform_real(0.5, 0.75));
 
 		_model.addWorker<TrunkGenerator>(12, 0.25, 0.2, 4);
-
 	}
 
 	void SimpleTreeDecorator::setModel(const world::Tree &model) {

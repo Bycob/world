@@ -8,7 +8,7 @@
 namespace world {
 
 template <class T> Node<T>::Node(double weight, double x, double y, double z) :
-	_weight(weight), _x(x), _y(y), _z(z), _parent(nullptr), _info(std::make_unique<T>(this)) {
+	_weight(weight), _x(x), _y(y), _z(z), _parent(nullptr), _info(std::make_unique<T>()) {
 
 }
 

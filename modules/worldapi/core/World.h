@@ -34,7 +34,8 @@ namespace world {
 
 		virtual ~World();
 
-		void addWorldDecorator(WorldDecorator *decorator);
+		template <typename T, typename... Args>
+		T &addDecorator(Args...args);
 
 		// NAVIGATION
 		WorldZone exploreNeighbour(const WorldZone &zone, const vec3d &direction);
@@ -54,5 +55,9 @@ namespace world {
 
 		std::unique_ptr<IChunkSystem> _chunkSystem;
 		WorldFolder _directory; // TODO remplacer ça par un ICache, qui peut être un dossier, une interface réseau, rien...
+
+		void addDecoratorInternal(WorldDecorator * decorator);
 	};
 }
+
+#include "World.inl"

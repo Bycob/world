@@ -16,7 +16,7 @@ namespace world {
 	FlatWorld* FlatWorld::createDemoFlatWorld() {
 		FlatWorld *world = new FlatWorld();
 
-		world->addFlatWorldDecorator(new SimpleTreeDecorator(3));
+		world->addFlatWorldDecorator<SimpleTreeDecorator>(3);
 
 		return world;
 	}
@@ -34,10 +34,6 @@ namespace world {
 
 	IGround &FlatWorld::ground() {
 		return *_ground;
-	}
-
-	void FlatWorld::addFlatWorldDecorator(FlatWorldDecorator *decorator) {
-		_internal->_chunkDecorators.emplace_back(decorator);
 	}
 
 	void world::FlatWorld::collect(const WorldZone & zone, ICollector & collector) {
@@ -62,5 +58,9 @@ namespace world {
 
 	void FlatWorld::setGroundInternal(IGround *ground) {
 		_ground = std::unique_ptr<IGround>(ground);
+	}
+
+	void FlatWorld::addFlatWorldDecoratorInternal(world::FlatWorldDecorator *decorator) {
+		_internal->_chunkDecorators.emplace_back(decorator);
 	}
 }

@@ -97,7 +97,7 @@ namespace world {
 	CustomWorldRMModifier::CustomWorldRMModifier(double biomeDensity, int limitBrightness) :
 			_biomeDensity(biomeDensity),
 			_limitBrightness(limitBrightness),
-			_diffLaw(std::make_unique<relief::CustomWorldDifferential>()) {
+			_diffLaw(CustomWorldDifferential()) {
 
 	}
 
@@ -109,11 +109,11 @@ namespace world {
 		_limitBrightness = p;
 	}
 
-	void CustomWorldRMModifier::setDifferentialLaw(const relief::diff_law &law) {
-		_diffLaw = std::unique_ptr<relief::diff_law>(law.clone());
+	void CustomWorldRMModifier::setDifferentialLaw(const diff_law &law) {
+		_diffLaw = law;
 	}
 
-	void CustomWorldRMModifier::generate(Terrain &height, Terrain &heightDiff) const {
+	void CustomWorldRMModifier::generate(Terrain &height, Terrain &heightDiff) {
 		// Nombre de biomes à générer.
 		int size = height.getResolution() * height.getResolution();
 		int biomeCount = (int) (_biomeDensity * (double) size / (PIXEL_UNIT * PIXEL_UNIT));
@@ -204,7 +204,7 @@ namespace world {
 
 			// TODO L'utilisateur n'a aucun contrôle sur le premier paramètre.
 			double elevation = rand(_rng);
-			double diff = (*_diffLaw)(std::pair<double, double>(elevation, rand(_rng)));
+			double diff = _diffLaw(std::pair<double, double>(elevation, rand(_rng)));
 
 			pointsMap[x][y] = std::make_pair<vec2d, vec2d>(
 					vec2d(

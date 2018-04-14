@@ -6,30 +6,23 @@
 
 namespace world {
 
-/** Contient les information sur la branche débutée par ce noeud. */
 	class WORLDAPI_EXPORT TreeInfo {
 	public :
-		TreeInfo(Node<TreeInfo> *myNode);
+		TreeInfo() {}
 
 		int _level = 0;
-		/// Taille de la branche terminée par ce noeud.
+
+		/// Size of the branch terminated by this node.
 		double _size = 0;
-		/// Angle par rapport à l'axe Ox (sens direct), en radians
+		/// Rotation around z axis in radians, from 0 to 2 * PI.
+		/// 0 means that the branch points toward positive x.
 		double _theta = 0;
-		/// Angle par rapport à l'axe Oz (des z positifs aux z
-		/// négatifs), en radians
+		/// angle with z axis in radians, from 0 to PI.
+		/// 0 means that the branch points toward positive z.
 		double _phi = 0;
 
-		double getWeight() const {
-			return this->_myNode->getWeight();
-		}
-
-		const Node<TreeInfo> &getNode() const {
-			return *_myNode;
-		}
-
-	private :
-		Node<TreeInfo> *const _myNode;
+		/// weight of the branch, ie. thickness.
+		double _weight = 1;
 	};
 
 	class WORLDAPI_EXPORT TreeSkeletton : public WeightedSkeletton<TreeInfo> {
