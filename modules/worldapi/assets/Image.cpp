@@ -599,14 +599,19 @@ namespace world {
         return *reinterpret_cast<GreyPixel*>(_private->at(x, y));
     }
 
+	// Check endianness (method from opencv/util.hpp)
+	bool  isBigEndian(void) {
+		return (((const int*)"\0\x1\x2\x3\x4\x5\x6\x7")[0] & 255) != 0;
+	}
+
     // inspired by the example here : http://zarb.org/~gc/html/libpng.html
 	void Image::write(const std::string &path) const {
         // check path ends with .png
         if (!endsWith(path, ".png")) {
-            throw std::runtime_error("Unsupported format. We only support png at the moment.");
+            throw std::runtime_error(std::string("Unsupported format for file ") + path + ". We only support png at the moment.");
         }
 
-        FILE* file = fopen(path.c_str(), "w");
+        FILE* file = fopen(path.c_str(), "wb");
 
         if (!file) {
             perror("Open file failed ");
@@ -647,11 +652,16 @@ namespace world {
             rowptrs[y] = _private->at(0, y);
         }
 
+		if (!isBigEndian()) {
+			png_set_swap(png_ptr);
+		}
         png_write_image(png_ptr, rowptrs);
 
         // write end and close file
         // We pass NULL as second parameter to avoid writing comments and metadata a second time
         png_write_end(png_ptr, NULL);
+
+		png_destroy_write_struct(&png_ptr, &info_ptr);
         fclose(file);
 
         // free memory

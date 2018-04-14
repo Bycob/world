@@ -108,7 +108,7 @@ namespace world {
 		}
 
 		//Linking des deux fichiers
-		int lastSlashIndex = filename.find_last_of("/\\");
+		size_t lastSlashIndex = filename.find_last_of("/\\");
 		if (lastSlashIndex == std::string::npos) {
 			lastSlashIndex = 0;
 		}
@@ -182,28 +182,28 @@ namespace world {
 			int texCoordOffset = texCoordRead;
 
 			// Ecriture des vertices
-			for (int vi = 0; vi < mesh.getVerticesCount(); vi++) {
+			for (u32 vi = 0; vi < mesh.getVerticesCount(); vi++) {
 				verticesRead++;
 				objstream << "v";
 				writeValues(objstream, mesh.getVertex(vi).getPosition() + object->getPosition());
 			}
 
 			// Ecriture des normales
-			for (int vi = 0; vi < mesh.getVerticesCount(); vi++) {
+			for (u32 vi = 0; vi < mesh.getVerticesCount(); vi++) {
 				normalRead++;
 				objstream << "vn";
 				writeValues(objstream, mesh.getVertex(vi).getNormal());
 			}
 
 			// Ecriture des coordonnées de texture
-			for (int vi = 0; vi < mesh.getVerticesCount(); vi++) {
+			for (u32 vi = 0; vi < mesh.getVerticesCount(); vi++) {
 				texCoordRead++;
 				objstream << "vt";
 				writeValues(objstream, mesh.getVertex(vi).getTexture());
 			}
 
 			// Ecriture des faces
-			for (int fi = 0; fi < mesh.getFaceCount(); fi++) {
+			for (u32 fi = 0; fi < mesh.getFaceCount(); fi++) {
 				objstream << "f";
 
 				const Face &face = mesh.getFace(fi);

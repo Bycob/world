@@ -21,8 +21,8 @@ namespace world {
         @param mergeSize Longueur de la zone de fusion entre deux branches.
         @param mergeRes nombre de cercles dans une zone de fusion entre deux branches.*/
 		TrunkGenerator(int segmentCount = DEFAULT_SEGMENT_COUNT,
-					  float faceSize = DEFAULT_FACE_SIZE,
-					  float mergeSize = DEFAULT_MERGE_SIZE,
+					  double faceSize = DEFAULT_FACE_SIZE,
+					  double mergeSize = DEFAULT_MERGE_SIZE,
 					  int mergeRes = DEFAULT_MERGE_RES);
 
 		~TrunkGenerator();
@@ -39,8 +39,8 @@ namespace world {
 							   double mergeLen, double mergeWeight) const;
 
 		int _segmentCount;
-		float _faceSize;
-		float _mergeSize;
+		double _faceSize;
+		double _mergeSize;
 		int _mergeRes;
 	};
 }

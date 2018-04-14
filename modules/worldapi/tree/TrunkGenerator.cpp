@@ -9,7 +9,7 @@
 
 namespace world {
 
-	TrunkGenerator::TrunkGenerator(int segmentCount, float faceSize, float mergeSize, int mergeRes) :
+	TrunkGenerator::TrunkGenerator(int segmentCount, double faceSize, double mergeSize, int mergeRes) :
 			_segmentCount(segmentCount), _faceSize(faceSize), _mergeSize(mergeSize), _mergeRes(mergeRes) {
 
 	}
