@@ -12,7 +12,7 @@
 
 namespace world {
 
-	class PrivateScene;
+	class PScene;
 
 	class WORLDAPI_EXPORT Scene {
 	public:
@@ -43,8 +43,8 @@ namespace world {
 		optional<const Image&> getTexture(const std::string &id) const;
 
 	private:
-		void addObjectInternal(Object3D *object);
+		PScene *_internal;
 
-		PrivateScene *_internal;
+		void addObjectInternal(Object3D *object);
 	};
 }

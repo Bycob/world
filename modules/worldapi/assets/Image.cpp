@@ -47,9 +47,9 @@ namespace world {
 		}
 	}
 
-	class PrivateImage {
+	class PImage {
 	public:
-		PrivateImage(cv::Mat && image) : _image(image) {}
+		PImage(cv::Mat && image) : _image(image) {}
 
 		cv::Mat _image;
 	};
@@ -62,13 +62,13 @@ namespace world {
 	}
 
 	int ImageStream::remaining() {
-		auto &mat = _image._private->_image;
+		auto &mat = _image._internal->_image;
 		// size (in bytes) - position
 		return static_cast<int>(mat.total() * mat.elemSize()) - _position;
 	}
 
 	int ImageStream::read(char *buffer, int count) {
-		auto &mat = _image._private->_image;
+		auto &mat = _image._internal->_image;
 		int read = 0;
 		const int s = static_cast<int>(mat.elemSize());
 
@@ -204,19 +204,19 @@ namespace world {
 	// Image
 
 	Image::Image(int width, int height, const ImageType &type)
-		: _private(new PrivateImage(cv::Mat(height, width, getCVType(type)))),
+		: _internal(new PImage(cv::Mat(height, width, getCVType(type)))),
 		_type(type) {
 
 	}
 
 	Image::Image(const arma::Cube<double> & data) {
-		_private = new PrivateImage(cv::Mat(armaToCV(data)));
-		_type = getImageType(_private->_image.type());
+		_internal = new PImage(cv::Mat(armaToCV(data)));
+		_type = getImageType(_internal->_image.type());
 	}
 
 	Image::Image(const arma::Mat<double> & data) {
-		_private = new PrivateImage(cv::Mat(armaToCV(data)));
-		_type = getImageType(_private->_image.type());
+		_internal = new PImage(cv::Mat(armaToCV(data)));
+		_type = getImageType(_internal->_image.type());
 	}
 
 	Image::Image(const std::string & filename) {
@@ -226,26 +226,26 @@ namespace world {
             throw std::ios_base::failure("File not found : " + filename);
         }
 
-		_private = new PrivateImage(std::move(mat));
-		_type = getImageType(_private->_image.type());
+		_internal = new PImage(std::move(mat));
+		_type = getImageType(_internal->_image.type());
 	}
 
 	Image::Image(const char *filename) : Image(std::string(filename)) {
 
 	}
 
-	Image::Image(Image && image) : _private(image._private), _type(image._type) {
-		image._private = nullptr;
+	Image::Image(Image && image) : _internal(image._internal), _type(image._type) {
+		image._internal = nullptr;
 	}
 
 	Image::Image(const Image & image) {
-		_private = new PrivateImage(cv::Mat(image._private->_image));
+		_internal = new PImage(cv::Mat(image._internal->_image));
 		_type = image._type;
 	}
 
 	Image::~Image() {
-		if (_private != nullptr) // moved
-			delete _private;
+		if (_internal != nullptr) // moved
+			delete _internal;
 	}
 
 	ImageType Image::type() const {
@@ -253,42 +253,42 @@ namespace world {
 	}
 
 	int Image::width() const {
-		return _private->_image.cols;
+		return _internal->_image.cols;
 	}
 
 	int Image::height() const {
-		return _private->_image.rows;
+		return _internal->_image.rows;
 	}
 
     RGBAPixel &Image::rgba(int x, int y) {
-		return _private->_image.at<RGBAPixel>(y, x);
+		return _internal->_image.at<RGBAPixel>(y, x);
 	}
 
 	const RGBAPixel &Image::rgba(int x, int y) const {
-        auto &img = _private->_image;
-        return _private->_image.at<RGBAPixel>(y, x);
+        auto &img = _internal->_image;
+        return _internal->_image.at<RGBAPixel>(y, x);
 	}
 
 	const RGBPixel& Image::rgb(int x, int y) const {
-        auto &img = _private->_image;
-        return _private->_image.at<RGBPixel>(y, x);
+        auto &img = _internal->_image;
+        return _internal->_image.at<RGBPixel>(y, x);
 	}
 
 	RGBPixel& Image::rgb(int x, int y) {
-        return _private->_image.at<RGBPixel>(y, x);
+        return _internal->_image.at<RGBPixel>(y, x);
 	}
 
 	const GreyPixel& Image::grey(int x, int y) const {
-        return _private->_image.at<GreyPixel>(y, x);
+        return _internal->_image.at<GreyPixel>(y, x);
 	}
 
 	GreyPixel& Image::grey(int x, int y) {
-        auto &img = _private->_image;
-        return _private->_image.at<GreyPixel>(y, x);
+        auto &img = _internal->_image;
+        return _internal->_image.at<GreyPixel>(y, x);
 	}
 
 	void Image::write(const std::string &file) const {
-		cv::imwrite(file, _private->_image);
+		cv::imwrite(file, _internal->_image);
 	}
 }
 
@@ -311,15 +311,15 @@ namespace world {
         }
     }
 
-	class PrivateImage {
+	class PImage {
 	public:
-		PrivateImage(u32 sizeX, u32 sizeY, u32 elemSize)
+		PImage(u32 sizeX, u32 sizeY, u32 elemSize)
                 : _data(new u8[sizeX * sizeY * elemSize]), _sizeX(sizeX), _sizeY(sizeY), _elemSize(elemSize) {}
 
-        PrivateImage(u8* data, u32 sizeX, u32 sizeY, u32 elemSize)
+        PImage(u8* data, u32 sizeX, u32 sizeY, u32 elemSize)
                 : _data(data), _sizeX(sizeX), _sizeY(sizeY), _elemSize(elemSize) {}
 
-        ~PrivateImage() {
+        ~PImage() {
 		    delete[] _data;
 		};
 
@@ -346,12 +346,12 @@ namespace world {
 
     int ImageStream::remaining() {
         // size (in bytes) - position
-        auto totalSize = _image._private->total();
+        auto totalSize = _image._internal->total();
         return static_cast<int>(totalSize) - _position;
     }
 
     int ImageStream::read(char *buffer, int count) {
-        auto &mat = *_image._private;
+        auto &mat = *_image._internal;
         int read = 0;
         const int s = static_cast<int>(mat._elemSize);
 
@@ -489,7 +489,7 @@ namespace world {
 	// Implémentation de Image
 
 	Image::Image(int width, int height, const ImageType &type)
-		: _private(new PrivateImage(static_cast<u32>(width), static_cast<u32>(height), elemSize(type))),
+		: _internal(new PImage(static_cast<u32>(width), static_cast<u32>(height), elemSize(type))),
 		_type(type) {
 
 	}
@@ -497,17 +497,17 @@ namespace world {
 	Image::Image(const arma::Cube<double> & data)
             : _type(ImageType::RGB) {
 
-        _private = new PrivateImage(
+        _internal = new PImage(
                 static_cast<u32>(data.n_rows),
                 static_cast<u32>(data.n_cols), 3
         );
 
-        auto width = _private->_sizeX;
-        auto height = _private->_sizeY;
+        auto width = _internal->_sizeX;
+        auto height = _internal->_sizeY;
 
         for (u32 y = 0; y < height; ++y) {
             for (u32 x = 0; x < width; ++x) {
-                auto ptr = _private->at(x, y);
+                auto ptr = _internal->at(x, y);
                 ptr[0] = fromDouble(data(x, y, 0));
                 ptr[1] = fromDouble(data(x, y, 1));
                 ptr[2] = fromDouble(data(x, y, 2));
@@ -518,17 +518,17 @@ namespace world {
 	Image::Image(const arma::Mat<double> & data)
             : _type(ImageType::GREYSCALE) {
 
-        _private = new PrivateImage(
+        _internal = new PImage(
                 static_cast<u32>(data.n_rows),
                 static_cast<u32>(data.n_cols), 1
         );
 
-        auto width = _private->_sizeX;
-        auto height = _private->_sizeY;
+        auto width = _internal->_sizeX;
+        auto height = _internal->_sizeY;
 
         for (u32 y = 0; y < height; ++y) {
             for (u32 x = 0; x < width; ++x) {
-                *_private->at(x, y) = fromDouble(data(x, y));
+                *_internal->at(x, y) = fromDouble(data(x, y));
             }
         }
 	}
@@ -543,24 +543,24 @@ namespace world {
 	}
 
 	Image::Image(Image && image)
-            : _private(image._private), _type(image._type) {
-		image._private = nullptr;
+            : _internal(image._internal), _type(image._type) {
+		image._internal = nullptr;
 	}
 
 	Image::Image(const Image & image) {
-        auto pother = image._private;
-        _private = new PrivateImage(
+        auto pother = image._internal;
+        _internal = new PImage(
                 pother->_sizeX,
                 pother->_sizeY,
                 pother->_elemSize
         );
-        memcpy(_private->_data, pother->_data, pother->total());
+        memcpy(_internal->_data, pother->_data, pother->total());
 		_type = image._type;
 	}
 
 	Image::~Image() {
-		if (_private != nullptr) // moved
-			delete _private;
+		if (_internal != nullptr) // moved
+			delete _internal;
 	}
 
 	ImageType Image::type() const {
@@ -568,35 +568,35 @@ namespace world {
 	}
 
 	int Image::width() const {
-		return _private->_sizeX;
+		return _internal->_sizeX;
 	}
 
 	int Image::height() const {
-		return _private->_sizeY;
+		return _internal->_sizeY;
 	}
 
     RGBAPixel &Image::rgba(int x, int y) {
-        return *reinterpret_cast<RGBAPixel*>(_private->at(x, y));
+        return *reinterpret_cast<RGBAPixel*>(_internal->at(x, y));
     }
 
     const RGBAPixel &Image::rgba(int x, int y) const {
-        return *reinterpret_cast<RGBAPixel*>(_private->at(x, y));
+        return *reinterpret_cast<RGBAPixel*>(_internal->at(x, y));
     }
 
     RGBPixel &Image::rgb(int x, int y) {
-        return *reinterpret_cast<RGBPixel*>(_private->at(x, y));
+        return *reinterpret_cast<RGBPixel*>(_internal->at(x, y));
     }
 
     const RGBPixel &Image::rgb(int x, int y) const {
-        return *reinterpret_cast<RGBPixel*>(_private->at(x, y));
+        return *reinterpret_cast<RGBPixel*>(_internal->at(x, y));
     }
 
     GreyPixel &Image::grey(int x, int y) {
-        return *reinterpret_cast<GreyPixel*>(_private->at(x, y));
+        return *reinterpret_cast<GreyPixel*>(_internal->at(x, y));
     }
 
     const GreyPixel &Image::grey(int x, int y) const {
-        return *reinterpret_cast<GreyPixel*>(_private->at(x, y));
+        return *reinterpret_cast<GreyPixel*>(_internal->at(x, y));
     }
 
 	// Check endianness (method from opencv/util.hpp)
@@ -639,17 +639,17 @@ namespace world {
                 break;
         }
 
-        png_set_IHDR(png_ptr, info_ptr, _private->_sizeX, _private->_sizeY,
+        png_set_IHDR(png_ptr, info_ptr, _internal->_sizeX, _internal->_sizeY,
                      8, colortype, PNG_INTERLACE_NONE,
                      PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 
         png_write_info(png_ptr, info_ptr);
 
         // write image
-        png_bytep *rowptrs = new png_bytep[_private->_sizeY];
+        png_bytep *rowptrs = new png_bytep[_internal->_sizeY];
 
-        for (u32 y = 0; y < _private->_sizeY; y++) {
-            rowptrs[y] = _private->at(0, y);
+        for (u32 y = 0; y < _internal->_sizeY; y++) {
+            rowptrs[y] = _internal->at(0, y);
         }
 
 		if (!isBigEndian()) {

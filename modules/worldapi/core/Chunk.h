@@ -15,7 +15,7 @@
 
 namespace world {
 
-	class PrivateChunk;
+	class PChunk;
 
     /**  */
 	class WORLDAPI_EXPORT Chunk {
@@ -45,13 +45,13 @@ namespace world {
         // void collectPart(const BoundingBox &bbox, double maxDetailSize, ICollector &collector);
 
 	private:
+		PChunk *_internal;
+
 		double _minResolution = 0;
 		double _maxResolution = 1e100;
 		vec3d _offset;
 		vec3d _size;
-
-		PrivateChunk *_internal;
-
+		
 		void addObjectInternal(WorldObject *object);
 	};
 

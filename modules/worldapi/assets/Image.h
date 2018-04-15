@@ -6,7 +6,7 @@
 #include "core/WorldTypes.h"
 
 namespace world {
-	class PrivateImage;
+	class PImage;
 	class Image;
 
 	enum class WORLDAPI_EXPORT ImageType {
@@ -150,12 +150,10 @@ namespace world {
 		 * the file.*/
 		void write(const std::string &file) const;
 	private:
+		PImage *_internal;
+
 		ImageType _type;
 
-		PrivateImage *_private;
-		
-		friend class Pixel;
-		friend class ConstPixel;
 		friend class ImageStream;
 	};
 }

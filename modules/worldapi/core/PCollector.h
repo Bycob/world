@@ -10,9 +10,9 @@
 namespace world {
 
     // Private classes : no WORLDAPI_EXPORT
-    class PrivateCollectorItem {
+    class PCollectorItem {
     public:
-        PrivateCollectorItem(const ICollector::ItemKey &myKey, const Object3D &object3D)
+        PCollectorItem(const ICollector::ItemKey &myKey, const Object3D &object3D)
                 : _myKey(myKey), _object3D(object3D) {}
 
         ICollector::ItemKey _myKey;
@@ -21,7 +21,7 @@ namespace world {
 		std::map<std::string, std::unique_ptr<Image>> _image;
     };
 
-    class PrivateCollector {
+    class PCollector {
     public:
         std::map<Collector::ItemKey, std::unique_ptr<CollectorItem>> _items;
         std::set<Collector::ItemKey> _disabled;

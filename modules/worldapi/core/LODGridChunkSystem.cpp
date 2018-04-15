@@ -20,13 +20,13 @@ namespace world {
         std::vector<ChunkKey> _children;
     };
 
-    class LODGridChunkSystem::Impl {
+    class PLODGridChunkSystem {
     public:
         std::map<int, LODData> _lodData;
         std::map<ChunkKey, std::unique_ptr<ChunkEntry>> _chunks;
     };
 
-    LODGridChunkSystem::LODGridChunkSystem(double baseChunkSize) : _internal(new Impl()) {
+    LODGridChunkSystem::LODGridChunkSystem(double baseChunkSize) : _internal(new PLODGridChunkSystem()) {
         _internal->_lodData.emplace(0, LODData({baseChunkSize, baseChunkSize, baseChunkSize}, _subdivResolutionThreshold));
 
         for (int i = 0; i <= _maxLOD; i++) {

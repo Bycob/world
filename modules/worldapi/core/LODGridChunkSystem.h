@@ -11,6 +11,8 @@
 namespace world {
     class LODGridChunkHandler;
 
+    class PLODGridChunkSystem;
+
     class WORLDAPI_EXPORT LODGridChunkSystem : public IChunkSystem {
     public:
         LODGridChunkSystem(double baseChunkSize = 1000);
@@ -43,8 +45,7 @@ namespace world {
         std::vector<QueryResult> getChildren(const WorldZone &zone) override;
 
     private:
-        class Impl;
-        Impl *_internal;
+        PLODGridChunkSystem *_internal;
 
         /** If an object has a greater resolution than this value,
          * we can't put it in the minimum LOD. */

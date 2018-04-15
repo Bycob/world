@@ -9,14 +9,14 @@ namespace world {
 
 	using ObjectKey = Chunk::ObjectKey;
 
-	class PrivateChunk {
+	class PChunk {
 	public:
 		std::map<ObjectKey, std::unique_ptr<WorldObject>> _objects;
         int _counter = 0;
 	};
 
 	Chunk::Chunk(const vec3d &position, const vec3d &size)
-			: _internal(new PrivateChunk()),
+			: _internal(new PChunk()),
 			  _offset(position),
 			  _size(size) {
 

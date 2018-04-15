@@ -10,8 +10,9 @@ namespace world {
 	public :
 		MeshOps() = delete;
 
-		/** Calcule la normale points par points du mesh passé en paramètre.
-        Un vertex est associé à une normale */
+		/** Calculates all the normals of the vertices in the mesh,
+		 * based on face normals. The normal of a vertex is the normalized
+		 * sum of the normals of the contiguous faces. */
 		static void recalculateNormals(Mesh &mesh);
 	};
 }

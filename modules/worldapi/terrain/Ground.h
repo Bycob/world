@@ -14,7 +14,7 @@
 
 namespace world {
 
-	class PrivateGround;
+	class PGround;
 
 	/** This class manages an infinite ground with as much details
 	 * as we want. The access method are quite similar to the ones
@@ -67,7 +67,7 @@ namespace world {
 		void collectZone(const WorldZone &zone, FlatWorld &world, FlatWorldCollector &collector) override;
 
 	private:
-		PrivateGround *_internal;
+		PGround *_internal;
 
 		// Paramètres
 		/** L'altitude minimum du monde. Le niveau de la mer est fixé à 0. */
@@ -136,7 +136,7 @@ namespace world {
          * generated.*/
 		void generateTerrain(const TerrainKey &key);
 
-		friend class PrivateGround;
+		friend class PGround;
 		friend class GroundContext;
 	};
 

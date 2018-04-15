@@ -6,9 +6,9 @@
 
 namespace world {
 
-	class PrivateFlatWorld {
+	class PFlatWorld {
 	public:
-		PrivateFlatWorld() {}
+		PFlatWorld() {}
 
 		std::vector<std::unique_ptr<FlatWorldDecorator>> _chunkDecorators;
 	};
@@ -22,7 +22,7 @@ namespace world {
 	}
 
 	FlatWorld::FlatWorld()
-			: _internal(new PrivateFlatWorld()) {
+			: _internal(new PFlatWorld()) {
 
 		Ground &ground = setGround<Ground>();
 		ground.setDefaultWorkerSet();

@@ -10,7 +10,7 @@ namespace world {
 
 	typedef IWorldDecorator<FlatWorld> FlatWorldDecorator;
 
-	class PrivateFlatWorld;
+	class PFlatWorld;
 
 	class WORLDAPI_EXPORT FlatWorld : public World {
 	public:
@@ -38,7 +38,7 @@ namespace world {
 		void onFirstExploration(WorldZone &chunk) override;
 
 	private:
-		PrivateFlatWorld *_internal;
+		PFlatWorld *_internal;
 
 		std::unique_ptr<IGround> _ground;
 

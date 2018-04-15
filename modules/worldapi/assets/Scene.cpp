@@ -4,14 +4,14 @@
 
 namespace world {
 
-	class PrivateScene {
+	class PScene {
 	public:
 		std::vector<std::unique_ptr<Object3D>> _objects;
 		std::vector<std::shared_ptr<Material>> _materials;
 		std::map<std::string, Image> _images;
 	};
 
-	Scene::Scene() : _internal(new PrivateScene()) {
+	Scene::Scene() : _internal(new PScene()) {
 
 	}
 

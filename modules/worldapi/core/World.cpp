@@ -8,9 +8,9 @@
 
 namespace world {
 
-	class PrivateWorld {
+	class PWorld {
 	public:
-		PrivateWorld() = default;
+		PWorld() = default;
 
 		std::vector<std::unique_ptr<WorldDecorator>> _chunkDecorators;
 	};
@@ -21,7 +21,7 @@ namespace world {
 	}
 
 
-	World::World() : _internal(new PrivateWorld()),
+	World::World() : _internal(new PWorld()),
                      _chunkSystem(std::make_unique<LODGridChunkSystem>()),
                      _directory() {
 

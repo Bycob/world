@@ -1,5 +1,5 @@
 #include "Collector.h"
-#include "PrivateCollector.h"
+#include "PCollector.h"
 
 #include "Chunk.h"
 
@@ -8,7 +8,7 @@ namespace world {
     // ==== COLLECTOR
 
     Collector::Collector()
-            : _internal(new PrivateCollector()) {
+            : _internal(new PCollector()) {
 
     }
 
@@ -104,7 +104,7 @@ namespace world {
     // ==== COLLECTOR OBJECT PART
 
     CollectorItem::CollectorItem(const ICollector::ItemKey &key, const Object3D &object3D) :
-            _internal(new PrivateCollectorItem(key, object3D)) {
+            _internal(new PCollectorItem(key, object3D)) {
 
     }
 

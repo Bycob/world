@@ -20,7 +20,7 @@ namespace world {
 
 	typedef IWorldDecorator<World> WorldDecorator;
 
-	class PrivateWorld;
+	class PWorld;
 
 	class WORLDAPI_EXPORT World {
 	public:
@@ -51,7 +51,7 @@ namespace world {
 		virtual void onFirstExploration(WorldZone &chunk);
 
 	private:
-		PrivateWorld *_internal;
+		PWorld *_internal;
 
 		std::unique_ptr<IChunkSystem> _chunkSystem;
 		WorldFolder _directory; // TODO remplacer ça par un ICache, qui peut être un dossier, une interface réseau, rien...

@@ -85,9 +85,9 @@ namespace world {
         }
     };
 
-    class PrivateGround {
+    class PGround {
     public:
-        PrivateGround() : _terrains() {}
+        PGround() : _terrains() {}
 
         std::map<TerrainKey, Tile> _terrains;
         std::list<std::unique_ptr<ITerrainWorker>> _generators;
@@ -103,7 +103,7 @@ namespace world {
 // dans une classe avec des templates)
 
     Ground::Ground(double unitSize, double minAltitude, double maxAltitude) :
-            _internal(new PrivateGround()),
+            _internal(new PGround()),
             _unitSize(unitSize), _minAltitude(minAltitude), _maxAltitude(maxAltitude) {
 
     }

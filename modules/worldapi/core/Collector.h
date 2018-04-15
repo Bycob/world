@@ -17,7 +17,7 @@ namespace world {
 
     class CollectorIterator;
 
-    class PrivateCollector;
+    class PCollector;
 
     class WORLDAPI_EXPORT Collector : public ICollector {
     public:
@@ -46,12 +46,12 @@ namespace world {
 		void fillScene(Scene &scene);
 
     protected:
-        PrivateCollector *_internal;
+        PCollector *_internal;
 
         friend class CollectorIterator;
     };
 
-    class PrivateCollectorItem;
+    class PCollectorItem;
 
     class WORLDAPI_EXPORT CollectorItem {
     public:
@@ -73,7 +73,7 @@ namespace world {
 		optional<texture> getTexture(const std::string &key) const;
 
     private:
-        PrivateCollectorItem *_internal;
+        PCollectorItem *_internal;
 
         friend class Collector;
     };
