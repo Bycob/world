@@ -16,48 +16,48 @@
 
 namespace world {
 
-	class World;
+class World;
 
-	typedef IWorldDecorator<World> WorldDecorator;
+typedef IWorldDecorator<World> WorldDecorator;
 
-	class PWorld;
+class PWorld;
 
-	class WORLDAPI_EXPORT World {
-	public:
-		/** Create a complete and rich world that can be used
-         * as a demonstration of the API power ! */
-		static World *createDemoWorld();
+class WORLDAPI_EXPORT World {
+public:
+    /** Create a complete and rich world that can be used
+     * as a demonstration of the API power ! */
+    static World *createDemoWorld();
 
-		World();
+    World();
 
-		World(const World &world) = delete;
+    World(const World &world) = delete;
 
-		virtual ~World();
+    virtual ~World();
 
-		template <typename T, typename... Args>
-		T &addDecorator(Args...args);
+    template <typename T, typename... Args> T &addDecorator(Args... args);
 
-		// NAVIGATION
-		WorldZone exploreNeighbour(const WorldZone &zone, const vec3d &direction);
+    // NAVIGATION
+    WorldZone exploreNeighbour(const WorldZone &zone, const vec3d &direction);
 
-		WorldZone exploreLocation(const vec3d &location);
+    WorldZone exploreLocation(const vec3d &location);
 
-		std::vector<WorldZone> exploreInside(const WorldZone &zone);
+    std::vector<WorldZone> exploreInside(const WorldZone &zone);
 
-        // ASSETS
-        virtual void collect(const WorldZone &zone, ICollector &collector);
+    // ASSETS
+    virtual void collect(const WorldZone &zone, ICollector &collector);
 
-	protected:
-		virtual void onFirstExploration(WorldZone &chunk);
+protected:
+    virtual void onFirstExploration(WorldZone &chunk);
 
-	private:
-		PWorld *_internal;
+private:
+    PWorld *_internal;
 
-		std::unique_ptr<IChunkSystem> _chunkSystem;
-		WorldFolder _directory; // TODO remplacer ça par un ICache, qui peut être un dossier, une interface réseau, rien...
+    std::unique_ptr<IChunkSystem> _chunkSystem;
+    WorldFolder _directory; // TODO remplacer ça par un ICache, qui peut être un
+                            // dossier, une interface réseau, rien...
 
-		void addDecoratorInternal(WorldDecorator * decorator);
-	};
-}
+    void addDecoratorInternal(WorldDecorator *decorator);
+};
+} // namespace world
 
 #include "World.inl"

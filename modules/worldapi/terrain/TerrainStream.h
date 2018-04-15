@@ -9,37 +9,36 @@
 
 namespace world {
 
-    enum class HeightMapFormat {
-        F32,
-        F64,
-        U8
-    };
+enum class HeightMapFormat { F32, F64, U8 };
 
-    class WORLDAPI_EXPORT HeightMapInputStream {
-    public:
-        HeightMapInputStream(const Terrain &terrain, double offset = 0, double scale = 0, HeightMapFormat format = HeightMapFormat::F32);
+class WORLDAPI_EXPORT HeightMapInputStream {
+public:
+    HeightMapInputStream(const Terrain &terrain, double offset = 0,
+                         double scale = 0,
+                         HeightMapFormat format = HeightMapFormat::F32);
 
-        HeightMapInputStream(const HeightMapInputStream &stream);
+    HeightMapInputStream(const HeightMapInputStream &stream);
 
-        void setOffset(double offset);
+    void setOffset(double offset);
 
-        void setScale(double scale);
+    void setScale(double scale);
 
-        void setOutputFormat(HeightMapFormat format);
+    void setOutputFormat(HeightMapFormat format);
 
-        int remaining() const;
+    int remaining() const;
 
-        int read(char* buffer, int count);
-    private:
-        double _offset;
-        double _scale;
-        HeightMapFormat _format;
-        const Terrain &_terrain;
+    int read(char *buffer, int count);
 
-        int _position = 0;
+private:
+    double _offset;
+    double _scale;
+    HeightMapFormat _format;
+    const Terrain &_terrain;
 
-        int getTotalSize() const;
-    };
-}
+    int _position = 0;
 
-#endif //WORLD_TERRAINSTREAM_H
+    int getTotalSize() const;
+};
+} // namespace world
+
+#endif // WORLD_TERRAINSTREAM_H

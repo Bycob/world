@@ -8,30 +8,29 @@
 
 namespace world {
 
-	class WORLDAPI_EXPORT WorldFolder {
-	public:
-		WorldFolder(const std::string &path = "");
+class WORLDAPI_EXPORT WorldFolder {
+public:
+    WorldFolder(const std::string &path = "");
 
-		~WorldFolder();
+    ~WorldFolder();
 
-		bool exists() const;
+    bool exists() const;
 
-		void setPath(const std::string &path);
+    void setPath(const std::string &path);
 
-		const std::vector<std::string> &getFileList() const;
+    const std::vector<std::string> &getFileList() const;
 
-		std::ofstream getFile(const std::string &name);
+    std::ofstream getFile(const std::string &name);
 
-		bool hasFile(const std::string &name) const;
+    bool hasFile(const std::string &name) const;
 
-		void refresh();
+    void refresh();
 
-	private:
-		std::string _path;
-		bool _exists;
-		std::vector<std::string> _filelist;
+private:
+    std::string _path;
+    bool _exists;
+    std::vector<std::string> _filelist;
 
-		void init();
-	};
-}
-
+    void init();
+};
+} // namespace world

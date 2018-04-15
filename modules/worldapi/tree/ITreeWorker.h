@@ -6,13 +6,12 @@
 
 namespace world {
 
-    class Tree;
+class Tree;
 
-    class ITreeWorker : public ICloneable<ITreeWorker> {
-    public:
+class ITreeWorker : public ICloneable<ITreeWorker> {
+public:
+    virtual void process(Tree &tree) = 0;
+};
+} // namespace world
 
-        virtual void process(Tree &tree) = 0;
-    };
-}
-
-#endif //WORLD_ITREEWORKER_H
+#endif // WORLD_ITREEWORKER_H

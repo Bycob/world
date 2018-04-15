@@ -12,49 +12,47 @@
 
 namespace world {
 
-	class PTree;
+class PTree;
 
-	class WORLDAPI_EXPORT Tree : public WorldObject {
-	public:
-		Tree();
+class WORLDAPI_EXPORT Tree : public WorldObject {
+public:
+    Tree();
 
-		~Tree() override;
+    ~Tree() override;
 
-		void setup(const Tree &model);
+    void setup(const Tree &model);
 
-		template <typename T, typename...Args>
-		T &addWorker(Args&&... args);
+    template <typename T, typename... Args> T &addWorker(Args &&... args);
 
-		const TreeSkeletton &getSkeletton() const;
+    const TreeSkeletton &getSkeletton() const;
 
-		TreeSkeletton &getSkeletton();
+    TreeSkeletton &getSkeletton();
 
-		const Mesh &getTrunkMesh() const;
+    const Mesh &getTrunkMesh() const;
 
-		Mesh &getTrunkMesh();
+    Mesh &getTrunkMesh();
 
-		void collectWholeObject(ICollector &collector) override;
+    void collectWholeObject(ICollector &collector) override;
 
-	private :
-        PTree *_internal;
+private:
+    PTree *_internal;
 
-		TreeSkeletton _skeletton;
-		Mesh _trunkMesh;
-		Material _trunkMaterial;
+    TreeSkeletton _skeletton;
+    Mesh _trunkMesh;
+    Material _trunkMaterial;
 
-        bool _generated = false;
+    bool _generated = false;
 
-        void addWorkerInternal(ITreeWorker * worker);
+    void addWorkerInternal(ITreeWorker *worker);
 
-        void generateBase();
+    void generateBase();
 
-		friend class TrunkGenerator;
-	};
+    friend class TrunkGenerator;
+};
 
-	template <typename T, typename...Args>
-	T & Tree::addWorker(Args &&... args) {
-		T * worker = new T(args...);
-		addWorkerInternal(worker);
-		return *worker;
-	}
+template <typename T, typename... Args> T &Tree::addWorker(Args &&... args) {
+    T *worker = new T(args...);
+    addWorkerInternal(worker);
+    return *worker;
 }
+} // namespace world

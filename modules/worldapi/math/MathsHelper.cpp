@@ -2,6 +2,4 @@
 
 #include "MathsHelper.h"
 
-namespace world {
-
-}
+namespace world {}

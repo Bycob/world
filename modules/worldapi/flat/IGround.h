@@ -8,18 +8,19 @@
 
 namespace world {
 
-    class FlatWorld;
-    class FlatWorldCollector;
+class FlatWorld;
+class FlatWorldCollector;
 
-    class WORLDAPI_EXPORT IGround {
-    public:
-        virtual double observeAltitudeAt(WorldZone zone, double x, double y) = 0;
+class WORLDAPI_EXPORT IGround {
+public:
+    virtual double observeAltitudeAt(WorldZone zone, double x, double y) = 0;
 
-		virtual void collectZone(const WorldZone &zone, ICollector &collector) = 0;
+    virtual void collectZone(const WorldZone &zone, ICollector &collector) = 0;
 
-		// TODO change arguments order
-        virtual void collectZone(const WorldZone &zone, FlatWorld &world, FlatWorldCollector &collector) = 0;
-    };
-}
+    // TODO change arguments order
+    virtual void collectZone(const WorldZone &zone, FlatWorld &world,
+                             FlatWorldCollector &collector) = 0;
+};
+} // namespace world
 
-#endif //WORLD_IGROUND_H
+#endif // WORLD_IGROUND_H

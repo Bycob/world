@@ -8,19 +8,11 @@
 
 namespace world {
 
-	WorldObject::WorldObject() {
+WorldObject::WorldObject() {}
 
-	}
+WorldObject::~WorldObject() {}
 
-	WorldObject::~WorldObject() {
+void WorldObject::setPosition3D(const vec3d &pos) { _position = pos; }
 
-	}
-
-	void WorldObject::setPosition3D(const vec3d &pos) {
-		_position = pos;
-	}
-
-	void WorldObject::collectWholeObject(ICollector &collector) {
-
-	}
-}
+void WorldObject::collectWholeObject(ICollector &collector) {}
+} // namespace world

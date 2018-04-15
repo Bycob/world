@@ -10,21 +10,22 @@
 
 namespace world {
 
-	class WORLDAPI_EXPORT AltitudeTexturer : public ITerrainWorker {
-	public:
-		AltitudeTexturer(int pixelPerVertex = 4);
+class WORLDAPI_EXPORT AltitudeTexturer : public ITerrainWorker {
+public:
+    AltitudeTexturer(int pixelPerVertex = 4);
 
-		ColorMap &getColorMap();
+    ColorMap &getColorMap();
 
-		void process(Terrain& terrain) override;
+    void process(Terrain &terrain) override;
 
-		void process(Terrain& terrain, ITerrainWorkerContext &context) override;
-	private:
-		int _pixelPerVertex;
+    void process(Terrain &terrain, ITerrainWorkerContext &context) override;
 
-		std::mt19937 _rng;
-		ColorMap _colorMap;
-	};
-}
+private:
+    int _pixelPerVertex;
+
+    std::mt19937 _rng;
+    ColorMap _colorMap;
+};
+} // namespace world
 
 #endif // WORLD_ALTITUDETEXTURING_H

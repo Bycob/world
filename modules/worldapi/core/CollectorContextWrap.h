@@ -8,40 +8,42 @@
 
 namespace world {
 
-    class WORLDAPI_EXPORT CollectorContextWrap : public ICollector {
-    public:
-        ICollector &_collector;
+class WORLDAPI_EXPORT CollectorContextWrap : public ICollector {
+public:
+    ICollector &_collector;
 
-        CollectorContextWrap(ICollector &wrapped);
+    CollectorContextWrap(ICollector &wrapped);
 
-        void setCurrentChunk(ChunkKey key);
+    void setCurrentChunk(ChunkKey key);
 
-        void setCurrentObject(ObjectKey key);
+    void setCurrentObject(ObjectKey key);
 
-        void setOffset(const vec3d &offset);
+    void setOffset(const vec3d &offset);
 
-        void addItem(const ItemKey &key, const Object3D &object) override;
+    void addItem(const ItemKey &key, const Object3D &object) override;
 
-		void removeItem(const ItemKey &key) override;
+    void removeItem(const ItemKey &key) override;
 
-		void disableItem(const ItemKey &key) override;
+    void disableItem(const ItemKey &key) override;
 
-		bool hasItem(const ItemKey &key) const override;
+    bool hasItem(const ItemKey &key) const override;
 
-		void addMaterial(const ItemKey &key, const Material &material) override;
+    void addMaterial(const ItemKey &key, const Material &material) override;
 
-		void addTexture(const ItemKey &key, const std::string &texName, const Image &texture) override;
-    protected:
-        void addItemUnsafe(const ItemKey &key, Object3D &object) override;
+    void addTexture(const ItemKey &key, const std::string &texName,
+                    const Image &texture) override;
 
-    private:
-        std::pair<bool, ChunkKey> _currentChunk;
-        std::pair<bool, ObjectKey> _currentObject;
+protected:
+    void addItemUnsafe(const ItemKey &key, Object3D &object) override;
 
-        vec3d _offset;
+private:
+    std::pair<bool, ChunkKey> _currentChunk;
+    std::pair<bool, ObjectKey> _currentObject;
 
-		ItemKey mutateKey(const ItemKey &key) const;
-    };
-}
+    vec3d _offset;
 
-#endif //WORLD_COLLECTORCONTEXTWRAP_H
+    ItemKey mutateKey(const ItemKey &key) const;
+};
+} // namespace world
+
+#endif // WORLD_COLLECTORCONTEXTWRAP_H

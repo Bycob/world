@@ -8,19 +8,19 @@
 
 namespace world {
 
-	class WORLDAPI_EXPORT WorldObject {
-	public:
-		WorldObject();
+class WORLDAPI_EXPORT WorldObject {
+public:
+    WorldObject();
 
-		virtual ~WorldObject();
+    virtual ~WorldObject();
 
-		void setPosition3D(const vec3d &pos);
+    void setPosition3D(const vec3d &pos);
 
-		vec3d getPosition3D() const { return _position; }
+    vec3d getPosition3D() const { return _position; }
 
-		virtual void collectWholeObject(ICollector &collector);
+    virtual void collectWholeObject(ICollector &collector);
 
-	protected:
-		vec3d _position;
-	};
-}
+protected:
+    vec3d _position;
+};
+} // namespace world

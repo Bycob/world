@@ -15,50 +15,50 @@
 
 namespace world {
 
-	class PChunk;
+class PChunk;
 
-    /**  */
-	class WORLDAPI_EXPORT Chunk {
-	public:
-		typedef int ObjectKey;
+/**  */
+class WORLDAPI_EXPORT Chunk {
+public:
+    typedef int ObjectKey;
 
-		Chunk(const vec3d &offset, const vec3d &size);
+    Chunk(const vec3d &offset, const vec3d &size);
 
-		Chunk(const Chunk &chunk) = delete;
+    Chunk(const Chunk &chunk) = delete;
 
-		virtual ~Chunk();
+    virtual ~Chunk();
 
-		void setResolutionLimits(double min, double max);
+    void setResolutionLimits(double min, double max);
 
-		double getMinResolution() const { return _minResolution; }
+    double getMinResolution() const { return _minResolution; }
 
-		double getMaxResolution() const { return _maxResolution; }
+    double getMaxResolution() const { return _maxResolution; }
 
-		const vec3d &getSize() const { return _size; }
+    const vec3d &getSize() const { return _size; }
 
-		const vec3d &getOffset() const { return _offset; }
+    const vec3d &getOffset() const { return _offset; }
 
-		template<typename T, typename... Args> T &addObject(Args... args);
+    template <typename T, typename... Args> T &addObject(Args... args);
 
-		void collectWholeChunk(ICollector &collector);
+    void collectWholeChunk(ICollector &collector);
 
-        // void collectPart(const BoundingBox &bbox, double maxDetailSize, ICollector &collector);
+    // void collectPart(const BoundingBox &bbox, double maxDetailSize,
+    // ICollector &collector);
 
-	private:
-		PChunk *_internal;
+private:
+    PChunk *_internal;
 
-		double _minResolution = 0;
-		double _maxResolution = 1e100;
-		vec3d _offset;
-		vec3d _size;
-		
-		void addObjectInternal(WorldObject *object);
-	};
+    double _minResolution = 0;
+    double _maxResolution = 1e100;
+    vec3d _offset;
+    vec3d _size;
 
-	template<typename T, typename... Args>
-	T & Chunk::addObject(Args... args) {
-		T* object = new T(args...);
-		addObjectInternal(object);
-		return *object;
-	}
+    void addObjectInternal(WorldObject *object);
+};
+
+template <typename T, typename... Args> T &Chunk::addObject(Args... args) {
+    T *object = new T(args...);
+    addObjectInternal(object);
+    return *object;
 }
+} // namespace world

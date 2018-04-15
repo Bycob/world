@@ -9,56 +9,53 @@
 
 namespace world {
 
-	class WORLDAPI_EXPORT TreeSkelettonGenerator : public ITreeWorker {
-	public:
-		TreeSkelettonGenerator();
+class WORLDAPI_EXPORT TreeSkelettonGenerator : public ITreeWorker {
+public:
+    TreeSkelettonGenerator();
 
-		virtual ~TreeSkelettonGenerator();
+    virtual ~TreeSkelettonGenerator();
 
-		TreeSkelettonGenerator *clone() const override;
+    TreeSkelettonGenerator *clone() const override;
 
-		void setSeedLocation(const TreeParamd &param);
+    void setSeedLocation(const TreeParamd &param);
 
-		void setRootWeight(const TreeParamd &param);
+    void setRootWeight(const TreeParamd &param);
 
-		void setInclination(const TreeParamd &param);
+    void setInclination(const TreeParamd &param);
 
-		void setRotationOffset(const TreeParamd &param);
+    void setRotationOffset(const TreeParamd &param);
 
-		void setForkingCount(const TreeParami &param);
+    void setForkingCount(const TreeParami &param);
 
-		void setSizeFactor(const TreeParamd &sizeFactor);
+    void setSizeFactor(const TreeParamd &sizeFactor);
 
-		void setMaxForkingLevel(const TreeParami &param);
+    void setMaxForkingLevel(const TreeParami &param);
 
-		void setWeight(const TreeParamd &weight);
+    void setWeight(const TreeParamd &weight);
 
-		void process(Tree &tree) override;
+    void process(Tree &tree) override;
 
-	private :
-		void forkNode(Node<TreeInfo> *node);
+private:
+    void forkNode(Node<TreeInfo> *node);
 
-		// Génération de nombres alétoires uniforme entre 0 et 1.
-		Parameter<double> _rng;
+    // Génération de nombres alétoires uniforme entre 0 et 1.
+    Parameter<double> _rng;
 
-		// Localisation du point de départ de l'arbre
-		TreeParamd _seedLocation;
-		// Poids de départ de l'arbre
-		TreeParamd _rootWeight;
+    // Localisation du point de départ de l'arbre
+    TreeParamd _seedLocation;
+    // Poids de départ de l'arbre
+    TreeParamd _rootWeight;
 
-		TreeParamd _phi;
-		TreeParamd _offsetTheta;
-		TreeParamd _sizeFactor;
+    TreeParamd _phi;
+    TreeParamd _offsetTheta;
+    TreeParamd _sizeFactor;
 
-		TreeParamd _weight;
-		// Nombre de branches à chaque division
-		TreeParami _count;
-		// Nombre maximum de divisions.
-		TreeParami _maxLevel;
-	};
-}
+    TreeParamd _weight;
+    // Nombre de branches à chaque division
+    TreeParami _count;
+    // Nombre maximum de divisions.
+    TreeParami _maxLevel;
+};
+} // namespace world
 
 // Fonctions spécifiques pour les arbres
-
-
-

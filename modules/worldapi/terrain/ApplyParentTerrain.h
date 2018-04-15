@@ -7,19 +7,20 @@
 
 namespace world {
 
-    class WORLDAPI_EXPORT ApplyParentTerrain : public ITerrainWorker {
-    public:
-        ApplyParentTerrain();
+class WORLDAPI_EXPORT ApplyParentTerrain : public ITerrainWorker {
+public:
+    ApplyParentTerrain();
 
-        void process(Terrain& terrain) override;
+    void process(Terrain &terrain) override;
 
-        void process(Terrain& terrain, ITerrainWorkerContext &context) override;
-    private:
-        double _childRate;
-        double _parentOverflow;
+    void process(Terrain &terrain, ITerrainWorkerContext &context) override;
 
-        double getContribution(int parentCount, double ratio);
-    };
-}
+private:
+    double _childRate;
+    double _parentOverflow;
 
-#endif //WORLD_APPLYPARENTTERRAIN_H
+    double getContribution(int parentCount, double ratio);
+};
+} // namespace world
+
+#endif // WORLD_APPLYPARENTTERRAIN_H

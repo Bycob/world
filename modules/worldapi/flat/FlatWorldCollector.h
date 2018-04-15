@@ -12,53 +12,54 @@
 
 namespace world {
 
-    class TerrainIterator;
+class TerrainIterator;
 
-    class WORLDAPI_EXPORT FlatWorldCollector : public Collector {
-    public:
-        typedef std::string TerrainKey;
+class WORLDAPI_EXPORT FlatWorldCollector : public Collector {
+public:
+    typedef std::string TerrainKey;
 
-        FlatWorldCollector();
+    FlatWorldCollector();
 
-        ~FlatWorldCollector() override;
+    ~FlatWorldCollector() override;
 
-        void reset() override;
+    void reset() override;
 
-        // TODO TerrainStream
-        void addTerrain(TerrainKey key, const Terrain &terrain);
+    // TODO TerrainStream
+    void addTerrain(TerrainKey key, const Terrain &terrain);
 
-        void disableTerrain(TerrainKey key);
+    void disableTerrain(TerrainKey key);
 
-        TerrainIterator iterateTerrains();
+    TerrainIterator iterateTerrains();
 
-    private:
-        friend class TerrainIterator;
+private:
+    friend class TerrainIterator;
 
-        std::set<TerrainKey> _disabledTerrains;
-        std::map<TerrainKey, Terrain> _terrains;
-    };
+    std::set<TerrainKey> _disabledTerrains;
+    std::map<TerrainKey, Terrain> _terrains;
+};
 
-    class PrivateTerrainIterator;
+class PrivateTerrainIterator;
 
-    class WORLDAPI_EXPORT TerrainIterator
-            : public std::iterator<std::forward_iterator_tag, std::pair<long, Terrain *>> {
-    public:
-        TerrainIterator(FlatWorldCollector &collector);
+class WORLDAPI_EXPORT TerrainIterator
+        : public std::iterator<std::forward_iterator_tag,
+                               std::pair<long, Terrain *>> {
+public:
+    TerrainIterator(FlatWorldCollector &collector);
 
-        ~TerrainIterator();
+    ~TerrainIterator();
 
-        void operator++();
+    void operator++();
 
-        std::pair<FlatWorldCollector::TerrainKey, Terrain *> operator*();
+    std::pair<FlatWorldCollector::TerrainKey, Terrain *> operator*();
 
-        bool hasNext() const;
+    bool hasNext() const;
 
-    private:
-        PrivateTerrainIterator *_internal;
+private:
+    PrivateTerrainIterator *_internal;
 
-        FlatWorldCollector &_collector;
-    };
+    FlatWorldCollector &_collector;
+};
 
-}
+} // namespace world
 
-#endif //WORLD_FLATWORLDCOLLECTOR_H
+#endif // WORLD_FLATWORLDCOLLECTOR_H

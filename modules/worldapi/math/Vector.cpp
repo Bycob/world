@@ -1,5 +1,5 @@
 #include "Vector.h"
 
 namespace world {
-	// Rien pour le moment
+// Rien pour le moment
 }

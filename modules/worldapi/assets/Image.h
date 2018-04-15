@@ -6,155 +6,155 @@
 #include "core/WorldTypes.h"
 
 namespace world {
-	class PImage;
-	class Image;
+class PImage;
+class Image;
 
-	enum class WORLDAPI_EXPORT ImageType {
-		RGB = 0,
-		RGBA = 1,
-		GREYSCALE = 2
-	};
+enum class WORLDAPI_EXPORT ImageType { RGB = 0, RGBA = 1, GREYSCALE = 2 };
 
-	class WORLDAPI_EXPORT ImageStream {
-	public:
-		ImageStream(const Image &image);
+class WORLDAPI_EXPORT ImageStream {
+public:
+    ImageStream(const Image &image);
 
-		int remaining();
+    int remaining();
 
-		int read(char* buffer, int count);
-	private:
-		int _position = 0;
-		const Image &_image;
-	};
+    int read(char *buffer, int count);
 
-	class WORLDAPI_EXPORT GreyPixel {
-	public:
-		/** Sets the pixel to grey with given intensity. */
-		void setLevel(u8 l);
+private:
+    int _position = 0;
+    const Image &_image;
+};
 
-		/** Sets the pixel to grey with given intensity. */
-		void setLevelf(double l);
+class WORLDAPI_EXPORT GreyPixel {
+public:
+    /** Sets the pixel to grey with given intensity. */
+    void setLevel(u8 l);
 
-		u8 getLevel() const;
+    /** Sets the pixel to grey with given intensity. */
+    void setLevelf(double l);
 
-		double getLevelf(double l);
-	private:
-		u8 _g;
-	};
+    u8 getLevel() const;
 
-	struct WORLDAPI_EXPORT RGBPixel {
-	public:
-		u8 getRed() const;
-		u8 getGreen() const;
-		u8 getBlue() const;
+    double getLevelf(double l);
 
-		double getRedf() const;
-		double getGreenf() const;
-		double getBluef() const;
+private:
+    u8 _g;
+};
 
-		void setRed(u8 r);
-		void setGreen(u8 g);
-		void setBlue(u8 b);
+struct WORLDAPI_EXPORT RGBPixel {
+public:
+    u8 getRed() const;
+    u8 getGreen() const;
+    u8 getBlue() const;
 
-		void setRedf(double r);
-		void setGreenf(double g);
-		void setBluef(double b);
+    double getRedf() const;
+    double getGreenf() const;
+    double getBluef() const;
 
-		void set(u8 r, u8 g, u8 b);
-		void setf(double r, double g, double b);
-	protected:
-		u8 _r, _g, _b;
-	};
+    void setRed(u8 r);
+    void setGreen(u8 g);
+    void setBlue(u8 b);
 
-	struct WORLDAPI_EXPORT RGBAPixel : public RGBPixel {
-	public:
-		u8 getAlpha() const;
+    void setRedf(double r);
+    void setGreenf(double g);
+    void setBluef(double b);
 
-		double getAlphaf() const;
+    void set(u8 r, u8 g, u8 b);
+    void setf(double r, double g, double b);
 
-		void setAlpha(u8 a);
+protected:
+    u8 _r, _g, _b;
+};
 
-		void setAlphaf(double a);
+struct WORLDAPI_EXPORT RGBAPixel : public RGBPixel {
+public:
+    u8 getAlpha() const;
 
-		void set(u8 r, u8 g, u8 b, u8 a = 255);
-		void setf(double r, double g, double b, double a = 1);
-    private:
-        u8 _a;
-	};
+    double getAlphaf() const;
 
-	class WORLDAPI_EXPORT Image {
-	public:
-		Image(int width, int height, const ImageType &type);
-		Image(const arma::Cube<double> & data);
-		Image(const arma::Mat<double> & data);
-		Image(const std::string & filename);
-		Image(const char *filename);
-		// move constructor
-		Image(Image && img);
-		// copy constructor
-		Image(const Image & img);
-		~Image();
+    void setAlpha(u8 a);
 
-		// infos
-		ImageType type() const;
-		int width() const;
-		int height() const;
+    void setAlphaf(double a);
 
-		// access
-		/** Gets a rgba access on the pixel at (x, y). This
-		 * method only works properly on RGBA image.
-		 * @param x column of the pixel.
-		 * @param y line of the pixel. */
-		RGBAPixel &rgba(int x, int y);
+    void set(u8 r, u8 g, u8 b, u8 a = 255);
+    void setf(double r, double g, double b, double a = 1);
 
-		/** Gets a rgba access on the pixel at (x, y) (const
-		 * version). This method only works properly on RGBA
-		 * image.
-		 * @param x column of the pixel.
-		 * @param y line of the pixel. */
-		const RGBAPixel &rgba(int x, int y) const;
+private:
+    u8 _a;
+};
 
-		/** Gets a rgb access on the pixel at (x, y). This
-		 * method works on both types RGBA and RGB.
-		 * @warning behaviour on RGBA type is not confirmed yet.
-		 * @param x column of the pixel.
-		 * @param y line of the pixel. */
-		RGBPixel &rgb(int x, int y);
+class WORLDAPI_EXPORT Image {
+public:
+    Image(int width, int height, const ImageType &type);
+    Image(const arma::Cube<double> &data);
+    Image(const arma::Mat<double> &data);
+    Image(const std::string &filename);
+    Image(const char *filename);
+    // move constructor
+    Image(Image &&img);
+    // copy constructor
+    Image(const Image &img);
+    ~Image();
 
-		/** Gets a rgb access on the pixel at (x, y) (const version).
-		 * This method works on both types RGBA and RGB.
-		 * @warning behaviour on RGBA type is not confirmed yet.
-		 * @param x column of the pixel.
-		 * @param y line of the pixel. */
-		const RGBPixel &rgb(int x, int y) const;
+    // infos
+    ImageType type() const;
+    int width() const;
+    int height() const;
 
-		/** Gets a greyscale access on the pixel at (x, y). The
-		 * behaviour on images other than greyscale type is
-		 * undefined.
-		 * @param x column of the pixel.
-		 * @param y line of the pixel. */
-		GreyPixel &grey(int x, int y);
+    // access
+    /** Gets a rgba access on the pixel at (x, y). This
+     * method only works properly on RGBA image.
+     * @param x column of the pixel.
+     * @param y line of the pixel. */
+    RGBAPixel &rgba(int x, int y);
 
-		/** Gets a greyscale access on the pixel at (x, y) (const
-		 * version). The behaviour on images other than greyscale
-		 * type is undefined.
-		 * @param x column of the pixel.
-		 * @param y line of the pixel. */
-		const GreyPixel &grey(int x, int y) const;
+    /** Gets a rgba access on the pixel at (x, y) (const
+     * version). This method only works properly on RGBA
+     * image.
+     * @param x column of the pixel.
+     * @param y line of the pixel. */
+    const RGBAPixel &rgba(int x, int y) const;
 
-		// IO
-		/** Writes the image at the specified location. The
-		 * extension of the file is used to determine the format
-		 * of the written image.
-		 * @param file a relative or absolute pathname to
-		 * the file.*/
-		void write(const std::string &file) const;
-	private:
-		PImage *_internal;
+    /** Gets a rgb access on the pixel at (x, y). This
+     * method works on both types RGBA and RGB.
+     * @warning behaviour on RGBA type is not confirmed yet.
+     * @param x column of the pixel.
+     * @param y line of the pixel. */
+    RGBPixel &rgb(int x, int y);
 
-		ImageType _type;
+    /** Gets a rgb access on the pixel at (x, y) (const version).
+     * This method works on both types RGBA and RGB.
+     * @warning behaviour on RGBA type is not confirmed yet.
+     * @param x column of the pixel.
+     * @param y line of the pixel. */
+    const RGBPixel &rgb(int x, int y) const;
 
-		friend class ImageStream;
-	};
-}
+    /** Gets a greyscale access on the pixel at (x, y). The
+     * behaviour on images other than greyscale type is
+     * undefined.
+     * @param x column of the pixel.
+     * @param y line of the pixel. */
+    GreyPixel &grey(int x, int y);
 
+    /** Gets a greyscale access on the pixel at (x, y) (const
+     * version). The behaviour on images other than greyscale
+     * type is undefined.
+     * @param x column of the pixel.
+     * @param y line of the pixel. */
+    const GreyPixel &grey(int x, int y) const;
+
+    // IO
+    /** Writes the image at the specified location. The
+     * extension of the file is used to determine the format
+     * of the written image.
+     * @param file a relative or absolute pathname to
+     * the file.*/
+    void write(const std::string &file) const;
+
+private:
+    PImage *_internal;
+
+    ImageType _type;
+
+    friend class ImageStream;
+};
+} // namespace world
