@@ -27,7 +27,7 @@ public:
     std::set<Collector::ItemKey> _disabled;
 };
 
-class PrivateCollectorIterator {
+class PCollectorIterator {
 public:
     std::map<Collector::ItemKey, std::unique_ptr<CollectorItem>>::iterator
         _objectIt;

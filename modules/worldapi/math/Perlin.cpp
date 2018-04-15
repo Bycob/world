@@ -283,7 +283,8 @@ void Perlin::join(arma::Mat<double> &mat1, arma::Mat<double> &mat2,
                         borneY2, v2, borneY1, v1, y);
 
                     // if (joinableSides && x == length - 1 ) std::cout  <<
-                    // "with " << y << " we have " << borneX1 << " , " << borneX2
+                    // "with " << y << " we have " << borneX1 << " , " <<
+                    // borneX2
                     // << " and " << borneY1 << " , " << borneY2 << " : " <<
                     // octave(x, y) <<  std::endl;
                 }

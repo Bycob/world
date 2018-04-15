@@ -137,13 +137,12 @@ optional<CollectorItem::texture> CollectorItem::getTexture(
 // ==== COLLECTOR ITERATOR
 
 CollectorIterator::CollectorIterator(Collector &collector)
-        : _internal(new PrivateCollectorIterator()), _collector(collector) {
+        : _internal(new PCollectorIterator()), _collector(collector) {
     _internal->_objectIt = _collector._internal->_items.begin();
 }
 
 CollectorIterator::CollectorIterator(const CollectorIterator &other)
-        : _internal(new PrivateCollectorIterator()),
-          _collector(other._collector) {
+        : _internal(new PCollectorIterator()), _collector(other._collector) {
     _internal->_objectIt = other._internal->_objectIt;
 }
 

@@ -79,7 +79,7 @@ private:
     friend class Collector;
 };
 
-class PrivateCollectorIterator;
+class PCollectorIterator;
 
 class WORLDAPI_EXPORT CollectorIterator
         : public std::iterator<std::forward_iterator_tag, Collector> {
@@ -97,7 +97,7 @@ public:
     bool hasNext() const;
 
 private:
-    PrivateCollectorIterator *_internal;
+    PCollectorIterator *_internal;
 
     Collector &_collector;
 };
