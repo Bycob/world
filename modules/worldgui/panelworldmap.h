@@ -18,7 +18,7 @@ public:
     ~PanelWorldMap();
 
 public slots:
-    virtual void generate();
+    void generate() override;
 private:
     Ui::PanelWorldMap *ui;
 };

@@ -2,17 +2,14 @@
 
 #include <memory>
 
-#include <worldapi/terrain/TerrainGenerator.h>
-#include <worldapi/terrain/terrain.h>
-#include <worldapi/mesh.h>
-#include <worldapi/assets/ObjLoader.h>
-
 #include "panelterrain.h"
 #include "ui_panelterrain.h"
 #include "qtworld.h"
 
 #define MAX_MESH_SIZE 350
  // max ~100000 vertices
+
+using namespace world;
 
 PanelTerrain::PanelTerrain(QWidget *parent) :
     GeneratePanel(parent),
@@ -43,37 +40,12 @@ void PanelTerrain::generate()
     double persistence = this->ui->persistence_field->value();
     bool texture = ui->textureCheckBox->isChecked();
 
-    PerlinTerrainGenerator generator(size, 0, octaves, frequency, persistence);
-    _generated = std::shared_ptr<Terrain>(generator.generate());
+    PerlinTerrainGenerator generator(0, octaves, frequency, persistence);
+    _generated = std::make_shared<Terrain>(size);
+    generator.process(*_generated);
 
     if (texture) {
-        Perlin perlin;
-
-        //---
-        TerrainTexmapBuilder texmapBuilder(0, 255);
-
-        std::vector<ColorPart> slice1;
-        slice1.push_back(ColorPart(47.0 / 255, 128.0 / 255, 43.0 / 255, 0.75));
-        slice1.push_back(ColorPart(65.0 / 255, 53.0 / 255, 22.0 / 255, 0.25));
-
-        std::vector<ColorPart> slice2;
-        slice2.push_back(ColorPart(47.0 / 255, 128.0 / 255, 43.0 / 255, 0.15));
-        slice2.push_back(ColorPart(65.0 / 255, 53.0 / 255, 22.0 / 255, 0.25));
-        slice2.push_back(ColorPart(0.25, 0.25, 0.25, 0.6));
-
-        std::vector<ColorPart> slice3;
-        slice3.push_back(ColorPart(1, 1, 1, 0.7));
-        slice3.push_back(ColorPart(0.25, 0.25, 0.25, 0.3));
-
-        texmapBuilder.addSlice(1, slice1);
-        texmapBuilder.addSlice(180, slice2);
-        texmapBuilder.addSlice(230, slice3);
-        //---
-
-        arma::Mat<double> randomArray = perlin.generatePerlinNoise2D(size * 8, 0, 7, 16, (float)0.9);
-        Image texture = generator.generateTexture(*_generated, texmapBuilder, randomArray);
-
-        emit imageChanged(QtWorld::getQImage(texture));
+        /*emit imageChanged(QtWorld::getQImage(_texture));*/
     }
 
     // Ecriture du mesh (temporaire)
@@ -89,7 +61,8 @@ void PanelTerrain::generate()
     this->_myScene = std::make_unique<Scene>();
 
     if (size < MAX_MESH_SIZE) {
-        this->_myScene->addMesh(std::shared_ptr<Mesh>(_generated->convertToMesh()));
+        std::unique_ptr<world::Mesh> mesh(_generated->createMesh());
+        this->_myScene->addObject(*mesh);
     }
 
     // On indique qu'elle a changé
@@ -97,6 +70,6 @@ void PanelTerrain::generate()
 
     // Image
     if (!texture) {
-        emit imageChanged(QtWorld::getQImage(_generated->convertToImage()));
+        emit imageChanged(QtWorld::getQImage(_generated->createImage()));
     }
 }

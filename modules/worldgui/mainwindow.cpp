@@ -34,7 +34,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::setScene(const Scene *objects)
+void MainWindow::setScene(const world::Scene *objects)
 {
     _3DPanel.setScene(objects);
 }
@@ -90,7 +90,7 @@ void MainWindow::swapGeneratePanel(GeneratePanel *newPanel)
     if (newPanel != nullptr) {
         // Connexion signal / slot
         // Changement d'objets 3D
-        QObject::connect(newPanel, SIGNAL(meshesChanged(const Scene*)), this, SLOT(setScene(const Scene*)));
+        QObject::connect(newPanel, SIGNAL(meshesChanged(const world::Scene*)), this, SLOT(setScene(const world::Scene*)));
         // Changement d'image
         QObject::connect(newPanel, SIGNAL(imageChanged(const QImage*)), this, SLOT(setImage(const QImage*)));
     }

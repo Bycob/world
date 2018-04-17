@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <Qt3DCore/QEntity>
 
-#include "scene.h"
+#include <worldcore.h>
 
 class PreviewPanel3D
 {
@@ -14,7 +14,7 @@ public:
 
 public slots:
 
-    void setScene(const Scene * scene);
+    void setScene(const world::Scene * scene);
 private:
     QWidget * _widget = nullptr;
     Qt3DCore::QEntity * _rootEntity = nullptr;

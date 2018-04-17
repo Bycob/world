@@ -4,7 +4,9 @@
 #include <QWidget>
 
 #include <memory>
-#include <worldapi/terrain/terrain.h>
+
+#include <worldcore.h>
+#include <worldterrain.h>
 
 #include "generatepanel.h"
 
@@ -26,11 +28,11 @@ signals:
 public slots:
     virtual void generate();
 private:
-    std::shared_ptr<Terrain> _generated;
+    std::shared_ptr<world::Terrain> _generated;
 
     // Ressources
-    std::unique_ptr<Image> _terrainImage;
-    std::unique_ptr<Image> _texture;
+    std::unique_ptr<world::Image> _terrainImage;
+    std::unique_ptr<world::Image> _texture;
 
     Ui::PanelTerrain *ui;
 };

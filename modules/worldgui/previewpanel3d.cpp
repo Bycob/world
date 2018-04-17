@@ -11,6 +11,8 @@
 #include <Qt3DRender/qmesh.h>
 #include <Qt3DRender/qcamera.h>
 
+using namespace world;
+
 PreviewPanel3D::PreviewPanel3D(QWidget * parent) :
     _rootEntity(new Qt3DCore::QEntity())
 {
@@ -36,12 +38,12 @@ PreviewPanel3D::PreviewPanel3D(QWidget * parent) :
     // Lumière...
 }
 
-void PreviewPanel3D::setScene(const Scene * objects) {
+void PreviewPanel3D::setScene(const world::Scene * objects) {
     for (Qt3DCore::QNode * child : _rootEntity->childNodes()) {
         //child->deleteLater();
     }
 
-    for (std::shared_ptr<Mesh> mesh : objects->getMeshes()) {
+    for (auto object : objects->getObjects()) {
         Qt3DRender::QMesh *qmesh = new Qt3DRender::QMesh(_rootEntity);
         qmesh->setSource(QUrl::fromLocalFile(QStringLiteral("d:/Utilisateurs/Louis/Documents/Louis JEAN/programmation/Python/world/build/build_worldgui/mesh.obj")));
         //std::cout << qmesh->geometry()->attributes().size();

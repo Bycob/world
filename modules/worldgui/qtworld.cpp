@@ -3,27 +3,27 @@
 using namespace Qt3DCore;
 
 
-QEntity * QtWorld::getQMesh(const Mesh & mesh, QEntity * parent)
+QEntity * QtWorld::getQMesh(const world::Mesh & mesh, QEntity * parent)
 {
     QEntity * result = new QEntity(parent);
 
     return result;
 }
 
-QImage * QtWorld::getQImage(const Image & image)
+QImage * QtWorld::getQImage(const world::Image & image)
 {
     // Détermination du format Qt de l'image.
-    ImageType type = image.type();
+    world::ImageType type = image.type();
     QImage::Format format;
 
     switch (type) {
-    case ImageType::RGB:
+    case world::ImageType::RGB:
         format = QImage::Format::Format_RGB32;
         break;
-    case ImageType::RGBA:
+    case world::ImageType::RGBA:
         format = QImage::Format::Format_ARGB32;
         break;
-    case ImageType::GREYSCALE:
+    case world::ImageType::GREYSCALE:
         format = QImage::Format::Format_RGB32;
         break;
     }
@@ -36,8 +36,8 @@ QImage * QtWorld::getQImage(const Image & image)
 
     for (int x = 0 ; x < width ; x++) {
         for (int y = 0 ; y < height ; y++) {
-            const ConstPixel & pix = image.at(x, y);
-            QRgb value = qRgba(pix.getRed(), pix.getGreen(), pix.getBlue(), pix.getAlpha());
+            auto &pix = image.rgb(x, y);
+            QRgb value = qRgba(pix.getRed(), pix.getGreen(), pix.getBlue(), 255);
             qimage->setPixel(x, y, value);
         }
     }
