@@ -27,7 +27,7 @@ void generate_test_world(int argc, char** argv) {
 
     std::cout << "Exploration du monde..." << std::endl;
     auto start = std::chrono::steady_clock::now();
-    explorer.explore<FlatWorld>(*world, collector);
+    explorer.exploreAndCollect<FlatWorld>(*world, collector);
     std::cout << "Exploration terminee en "
               << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count()
               << " ms" << std::endl;
@@ -41,7 +41,7 @@ void generate_test_world(int argc, char** argv) {
 
 	std::cout << "We explore the same place (which is now generated) for comparison..." << std::endl;
     start = std::chrono::steady_clock::now();
-    explorer.explore<FlatWorld>(*world, collector);
+    explorer.exploreAndCollect<FlatWorld>(*world, collector);
     std::cout << "Exploration is finished, time elapsed :  "
               << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count()
               << " ms" << std::endl;

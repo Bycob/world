@@ -5,6 +5,7 @@
 
 #include "World.h"
 #include "ICollector.h"
+#include "ExplorationResult.h"
 
 namespace world {
 
@@ -28,15 +29,15 @@ public:
 
     void setFarDistance(double maxDistance);
 
-    // TODO std::enableif
-    template <typename T, typename C> void explore(T &world, C &collector);
-
-    template <typename T, typename C>
-    void exploreVertical(T &world, const WorldZone &zone, C &collector);
-
     vec3d getChunkNearestPoint(const WorldZone &zone);
 
     double getResolutionAt(const vec3d &pos);
+
+    // TODO std::enableif
+    template <typename T, typename C>
+    void exploreAndCollect(T &world, C &collector);
+
+    void explore(World &world, ExplorationResult &result);
 
 private:
     double _eyeResolution;
@@ -47,6 +48,9 @@ private:
      * example. */
     double _farDistance;
     vec3d _position;
+
+    void exploreVertical(World &world, const WorldZone &zone,
+                         ExplorationResult &result);
 };
 } // namespace world
 

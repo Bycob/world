@@ -39,8 +39,58 @@ vec3d FirstPersonExplorer::getChunkNearestPoint(const WorldZone &zone) {
 
 double FirstPersonExplorer::getResolutionAt(const vec3d &pos) {
     double length = max(_punctumProximum, _position.length(pos));
-    return _eyeResolution / (_fov * M_PI / 180 * length); // _fov * length can
-                                                          // be seen as the
-                                                          // "image size"
+    // _fov * length can be seen as the "image size"
+    return _eyeResolution / (_fov * M_PI / 180 * length);
+}
+
+void FirstPersonExplorer::explore(World &world, ExplorationResult &result) {
+    std::set<WorldZone> explored;
+    std::set<WorldZone> toExplore;
+    toExplore.insert(world.exploreLocation(_position));
+
+    while (!toExplore.empty()) {
+        auto it = toExplore.begin();
+
+        WorldZone currentZone = *it;
+        const Chunk &currentChunk = (*it)->getChunk();
+
+        // Vertical exploration : we explore the inside
+        exploreVertical(world, *it, result);
+
+        // Horizontal exploration : we explore the neighbourhood
+        vec3i directions[] = {{1, 0, 0},  {-1, 0, 0}, {0, 1, 0},
+                              {0, -1, 0}, {0, 0, 1},  {0, 0, -1}};
+
+        for (vec3i direction : directions) {
+            WorldZone neighbour = world.exploreNeighbour(*it, direction);
+            auto offset = getChunkNearestPoint(neighbour);
+
+            if (explored.find(neighbour) == explored.end() &&
+                _position.squaredLength(offset) < _farDistance * _farDistance) {
+
+                toExplore.insert(neighbour);
+            }
+        }
+
+        explored.insert(*it);
+        toExplore.erase(it);
+    }
+}
+
+void FirstPersonExplorer::exploreVertical(World &world, const WorldZone &zone,
+                                          ExplorationResult &result) {
+
+    const Chunk &currentChunk = zone->getChunk();
+    const double resolution = getResolutionAt(getChunkNearestPoint(zone));
+
+    if (currentChunk.getMaxResolution() < resolution) {
+        auto smallerZones = world.exploreInside(zone);
+
+        for (WorldZone &smallerZone : smallerZones) {
+            exploreVertical(world, smallerZone, result);
+        }
+    } else {
+        result.appendZone(zone);
+    }
 }
 } // namespace world
