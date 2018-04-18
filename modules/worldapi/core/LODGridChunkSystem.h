@@ -44,6 +44,8 @@ public:
 
     std::vector<QueryResult> getChildren(const WorldZone &zone) override;
 
+    Chunk &getChunk(const WorldZone &zone) override;
+
 private:
     PLODGridChunkSystem *_internal;
 

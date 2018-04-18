@@ -25,9 +25,12 @@ public:
      */
     virtual QueryResult getChunk(const vec3d &position) = 0;
 
-    virtual std::vector<QueryResult> getNeighbourChunks(const WorldZone &zone) = 0;
+    virtual std::vector<QueryResult> getNeighbourChunks(
+        const WorldZone &zone) = 0;
 
     virtual std::vector<QueryResult> getChildren(const WorldZone &zone) = 0;
+
+    virtual Chunk &getChunk(const WorldZone &zone) = 0;
 };
 } // namespace world
 #endif // WORLD_ICHUNKSYSTEM_H

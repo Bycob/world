@@ -103,7 +103,8 @@ QueryResult LODGridChunkSystem::getChunk(const vec3d &position) {
     return {*getZone(id.first), id.second};
 }
 
-std::vector<QueryResult> LODGridChunkSystem::getNeighbourChunks(const WorldZone &chunk) {
+std::vector<QueryResult> LODGridChunkSystem::getNeighbourChunks(
+    const WorldZone &chunk) {
     ChunkEntry &entry = *_internal->_chunks[chunk->getID()];
     LODGridCoordinates coords = entry._coords;
 
@@ -113,8 +114,8 @@ std::vector<QueryResult> LODGridChunkSystem::getNeighbourChunks(const WorldZone 
     std::vector<QueryResult> result;
 
     for (vec3i &direction : directions) {
-        LODGridCoordinates ncoords =
-                LODGridCoordinates(coords.getPosition3D() + direction, coords.getLOD());
+        LODGridCoordinates ncoords = LODGridCoordinates(
+            coords.getPosition3D() + direction, coords.getLOD());
 
         auto id = createChunk(entry._parentID, ncoords);
         result.emplace_back(QueryResult{*getZone(id.first), id.second});
@@ -156,6 +157,10 @@ std::vector<QueryResult> LODGridChunkSystem::getChildren(
                    });
 
     return vector;
+}
+
+Chunk &LODGridChunkSystem::getChunk(const WorldZone &zone) {
+    return getChunk(zone->getID());
 }
 
 ChunkKey LODGridChunkSystem::getChunkKey(

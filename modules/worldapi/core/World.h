@@ -36,6 +36,9 @@ public:
 
     template <typename T, typename... Args> T &addDecorator(Args... args);
 
+    template <typename T, typename... Args>
+    T &addObject(const WorldZone &zone, Args... args);
+
     // NAVIGATION
     std::vector<WorldZone> exploreNeighbours(const WorldZone &zone);
 
@@ -53,10 +56,13 @@ private:
     PWorld *_internal;
 
     std::unique_ptr<IChunkSystem> _chunkSystem;
-    WorldFolder _directory; // TODO remplacer ça par un ICache, qui peut être un
-                            // dossier, une interface réseau, rien...
+    // TODO remplacer ça par un ICache, qui peut être un
+    // dossier, une interface réseau, rien...
+    WorldFolder _directory;
 
     void addDecoratorInternal(WorldDecorator *decorator);
+
+    Chunk &getChunk(const WorldZone &zone);
 };
 } // namespace world
 

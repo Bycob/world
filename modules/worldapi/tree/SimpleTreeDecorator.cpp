@@ -71,7 +71,7 @@ void SimpleTreeDecorator::decorate(FlatWorld &world, WorldZone &zone) {
         // std::cout << pos3D << std::endl;
 
         // Création de l'arbre
-        Tree &tree = chunk.addObject<Tree>();
+        Tree &tree = world.addObject<Tree>(zone);
         tree.setup(_model);
         tree.setPosition3D(pos3D);
 

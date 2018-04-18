@@ -85,4 +85,8 @@ void World::onFirstExploration(WorldZone &chunk) {
 void World::addDecoratorInternal(world::WorldDecorator *decorator) {
     _internal->_chunkDecorators.emplace_back(decorator);
 }
+
+Chunk &World::getChunk(const world::WorldZone &zone) {
+    return _chunkSystem->getChunk(zone);
+}
 } // namespace world
