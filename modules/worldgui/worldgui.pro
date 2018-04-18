@@ -24,7 +24,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-INCLUDEPATH += "$${WORLDAPI_SOURCES}/modules" \
+INCLUDEPATH += "$${WORLDAPI_SOURCES}/modules/worldapi" \
                 "$${WORLDAPI_SOURCES}/3rdparty"
 
 LIBS    += -L$${WORLDAPI_LIBDIR} -lworldapi
@@ -33,7 +33,6 @@ SOURCES += main.cpp\
     mainwindow.cpp \
     panelterrain.cpp \
     generatepanel.cpp \
-    scene.cpp \
     qtworld.cpp \
     previewpanel3d.cpp \
     panelworldmap.cpp \
@@ -44,7 +43,6 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h \
     panelterrain.h \
     generatepanel.h \
-    scene.h \
     qtworld.h \
     previewpanel3d.h \
     panelworldmap.h \

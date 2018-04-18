@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <Qt3DCore/QEntity>
 
+#include <worldcore.h>
+
 #include "generatepanel.h"
 #include "previewpanel3d.h"
 
@@ -24,7 +26,7 @@ public slots:
 
     void generate();
 
-    void setScene(const Scene *objects);
+    void setScene(const world::Scene *objects);
     void setImage(const QImage *image);
 private:
     Ui::MainWindow *ui;

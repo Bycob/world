@@ -5,9 +5,7 @@
 
 #include <QObject>
 
-#include <worldapi/assets/Image.h>
-
-#include "scene.h"
+#include <worldcore.h>
 
 class Resource
 {
@@ -24,21 +22,21 @@ protected:
 
 class MeshResource : public Resource {
 public:
-    MeshResource(QString name, Scene * scene);
+    MeshResource(QString name, world::Scene * scene);
 
     virtual void save(QString path);
 
 private:
-    Scene* _scene;
+    world::Scene* _scene;
 };
 
 class ImageResource : public Resource {
 public:
-    ImageResource(QString name, Image * image);
+    ImageResource(QString name, world::Image * image);
 
     virtual void save(QString path);
 private:
-    Image * _image;
+    world::Image * _image;
 };
 
 #endif // RESOURCE_H

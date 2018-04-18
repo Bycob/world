@@ -6,6 +6,8 @@
 #include <limits>
 #include <iostream>
 
+#include "MathsHelper.h"
+
 namespace world {
 
 template <typename T> struct vec3 {

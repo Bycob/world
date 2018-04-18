@@ -5,7 +5,7 @@ GeneratePanel::GeneratePanel(QWidget *parent) : QWidget(parent)
 
 }
 
-const Scene * GeneratePanel::getMeshes()
+const world::Scene * GeneratePanel::getMeshes()
 {
     return this->_myScene.get();
 }

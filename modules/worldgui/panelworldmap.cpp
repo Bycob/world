@@ -1,9 +1,12 @@
 #include "panelworldmap.h"
 #include "ui_panelworldmap.h"
 
-#include <worldapi/world/ReliefMap.h>
+#include <worldcore.h>
+#include <worldterrain.h>
 
 #include "qtworld.h"
+
+using namespace world;
 
 PanelWorldMap::PanelWorldMap(QWidget *parent) :
     GeneratePanel(parent),
@@ -18,17 +21,15 @@ PanelWorldMap::~PanelWorldMap()
 }
 
 void PanelWorldMap::generate() {
-    WorldMapGenerator generator(500, 400);
 
     double biomeDensity = ui->biomeDensity->value();
     int limitBrightness = ui->limitBrigntness->value();
 
-    generator.emplaceReliefMapGenerator<CustomWorldRMGenerator>(biomeDensity, limitBrightness);
+    CustomWorldRMModifier generator(biomeDensity, limitBrightness);
+    generator.setMapResolution(513);
 
-    std::unique_ptr<WorldMap> generated(generator.generate());
-    Image img = generated->getReliefMapAsImage();
+    auto &result = generator.obtainMap(0, 0);
+    Image img = result.first.createImage();
 
     emit imageChanged(QtWorld::getQImage(img));
-
-    generated.reset();
 }

@@ -10,19 +10,20 @@ QString Resource::name() const {
 }
 
 
-MeshResource::MeshResource(QString name, Scene *scene)
+MeshResource::MeshResource(QString name, world::Scene *scene)
     : Resource(name), _scene(scene) {
 
 }
 
 void MeshResource::save(QString path) {
-    _scene->save(path);
+    world::ObjLoader loader;
+    loader.write(*_scene, path.toStdString());
 }
 
 
 
 
-ImageResource::ImageResource(QString name, Image *image)
+ImageResource::ImageResource(QString name, world::Image *image)
     : Resource(name), _image(image) {
 
 }
