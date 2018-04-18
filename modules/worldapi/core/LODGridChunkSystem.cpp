@@ -103,17 +103,23 @@ QueryResult LODGridChunkSystem::getChunk(const vec3d &position) {
     return {*getZone(id.first), id.second};
 }
 
-QueryResult LODGridChunkSystem::getNeighbourChunk(const WorldZone &chunk,
-                                                  const vec3i &direction) {
-    // TODO avoid creating the same chunk twice (if we call getOrCreateNeighbour
-    // wrongly)
+std::vector<QueryResult> LODGridChunkSystem::getNeighbourChunks(const WorldZone &chunk) {
     ChunkEntry &entry = *_internal->_chunks[chunk->getID()];
     LODGridCoordinates coords = entry._coords;
-    LODGridCoordinates ncoords =
-        LODGridCoordinates(coords.getPosition3D() + direction, coords.getLOD());
 
-    auto id = createChunk(entry._parentID, ncoords);
-    return {*getZone(id.first), id.second};
+    vec3i directions[] = {{1, 0, 0},  {-1, 0, 0}, {0, 1, 0},
+                          {0, -1, 0}, {0, 0, 1},  {0, 0, -1}};
+
+    std::vector<QueryResult> result;
+
+    for (vec3i &direction : directions) {
+        LODGridCoordinates ncoords =
+                LODGridCoordinates(coords.getPosition3D() + direction, coords.getLOD());
+
+        auto id = createChunk(entry._parentID, ncoords);
+        result.emplace_back(QueryResult{*getZone(id.first), id.second});
+    }
+    return result;
 }
 
 std::vector<QueryResult> LODGridChunkSystem::getChildren(

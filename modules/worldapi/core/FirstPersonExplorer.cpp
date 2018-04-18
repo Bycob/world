@@ -52,17 +52,14 @@ void FirstPersonExplorer::explore(World &world, ExplorationResult &result) {
         auto it = toExplore.begin();
 
         WorldZone currentZone = *it;
-        const Chunk &currentChunk = (*it)->getChunk();
 
         // Vertical exploration : we explore the inside
         exploreVertical(world, *it, result);
 
         // Horizontal exploration : we explore the neighbourhood
-        vec3i directions[] = {{1, 0, 0},  {-1, 0, 0}, {0, 1, 0},
-                              {0, -1, 0}, {0, 0, 1},  {0, 0, -1}};
+        auto neighbourhood = world.exploreNeighbours(currentZone);
 
-        for (vec3i direction : directions) {
-            WorldZone neighbour = world.exploreNeighbour(*it, direction);
+        for (auto &neighbour : neighbourhood) {
             auto offset = getChunkNearestPoint(neighbour);
 
             if (explored.find(neighbour) == explored.end() &&

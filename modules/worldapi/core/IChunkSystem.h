@@ -25,8 +25,7 @@ public:
      */
     virtual QueryResult getChunk(const vec3d &position) = 0;
 
-    virtual QueryResult getNeighbourChunk(const WorldZone &zone,
-                                          const vec3i &direction) = 0;
+    virtual std::vector<QueryResult> getNeighbourChunks(const WorldZone &zone) = 0;
 
     virtual std::vector<QueryResult> getChildren(const WorldZone &zone) = 0;
 };

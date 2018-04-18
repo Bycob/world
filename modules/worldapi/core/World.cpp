@@ -35,15 +35,20 @@ WorldZone World::exploreLocation(const vec3d &location) {
     return result._zone;
 }
 
-WorldZone World::exploreNeighbour(const WorldZone &zone,
-                                  const vec3d &direction) {
-    auto pair = _chunkSystem->getNeighbourChunk(zone, direction);
-    WorldZone &nzone = pair._zone;
+std::vector<WorldZone> World::exploreNeighbours(const WorldZone &zone) {
+    auto pairs = _chunkSystem->getNeighbourChunks(zone);
 
-    if (pair._created) {
-        onFirstExploration(nzone);
+    std::vector<WorldZone> result;
+
+    for (auto &pair : pairs) {
+        WorldZone &nzone = pair._zone;
+
+        if (pair._created) {
+            onFirstExploration(nzone);
+        }
+        result.emplace_back(pair._zone);
     }
-    return pair._zone;
+    return result;
 }
 
 std::vector<WorldZone> World::exploreInside(const WorldZone &zone) {

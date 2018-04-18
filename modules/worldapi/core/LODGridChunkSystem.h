@@ -40,8 +40,7 @@ public:
     // NAVIGATION
     QueryResult getChunk(const vec3d &position) override;
 
-    QueryResult getNeighbourChunk(const WorldZone &zone,
-                                  const vec3i &direction) override;
+    std::vector<QueryResult> getNeighbourChunks(const WorldZone &zone) override;
 
     std::vector<QueryResult> getChildren(const WorldZone &zone) override;
 

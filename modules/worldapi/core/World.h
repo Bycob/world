@@ -37,7 +37,7 @@ public:
     template <typename T, typename... Args> T &addDecorator(Args... args);
 
     // NAVIGATION
-    WorldZone exploreNeighbour(const WorldZone &zone, const vec3d &direction);
+    std::vector<WorldZone> exploreNeighbours(const WorldZone &zone);
 
     WorldZone exploreLocation(const vec3d &location);
 
