@@ -14,7 +14,7 @@ option(WORLD_STATIC_BUILD "Build le projet sous formes de librairies statiques" 
 option(WORLD_BUILD_TESTS "Build les target de tests" ON)
 option(WORLD_BUILD_WORLD3D "Build la visualisation en 3D" ON)
 option(WORLD_BUILD_OPENCV_MODULES "Compile les modules utilisant opencv" OFF)
-
+option(WORLD_BUILD_VULKAN_MODULES "Compile modules based on Vulkan" ON)
 
 # Setup de certaines variables
 if (NOT CMAKE_BUILD_TYPE)
@@ -55,6 +55,7 @@ endif()
 
 
 # Dependances externes
+message("--")
 include(cmake/WorldDependencies.cmake)
 
 # Dependances internes

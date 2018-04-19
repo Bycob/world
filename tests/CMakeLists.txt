@@ -1,4 +1,6 @@
 
+# TODO these are not tests, but more play-around with the API -> move elsewhere ?
+
 if (${WORLD_BUILD_TESTS})
     Message("-- Build tests")
 
@@ -13,6 +15,11 @@ if (${WORLD_BUILD_TESTS})
 
     add_executable(test_world test_world.cpp)
     target_link_libraries(test_world worldapi)
+    
+    if (WORLD_BUILD_VULKAN_MODULES AND WORLD_HAS_VULKAN)
+        add_executable(test_vulkan test_vulkan.cpp)
+        target_link_libraries(test_vulkan worldapi)
+    endif()
 endif()
 
 add_subdirectory(worldapi)
