@@ -2,11 +2,13 @@
 #include "Vulkan.h"
 
 #include <iostream>
+#include <fstream>
 #include <vector>
 
 #include <vulkan.h>
 
 #include "core/WorldTypes.h"
+#include "assets/Image.h"
 
 // VULKAN FUNCTIONS
 
@@ -42,6 +44,8 @@ public:
 
 	VkQueue _queue;
 
+	std::vector<VkShaderModule> _shaders;
+
 	bool _enableValidationLayers;
 
 	VkDebugReportCallbackEXT _debugCallback;
@@ -55,8 +59,12 @@ public:
 
 	void createLogicalDevice();
 
+	VkShaderModule createShader(const std::vector<char> &shaderCode);
+
 	/** Simple method to get a queue for computation */
-	int findQueueFamily(VkPhysicalDevice device);
+	int findQueueFamily();
+
+	std::vector<char> readFile(const std::string &filename);
 };
 
 const std::vector<const char*> validationLayers = {
@@ -111,7 +119,7 @@ void PVulkanContext::pickPhysicalDevice() {
 }
 
 void PVulkanContext::createLogicalDevice() {
-	int familyIndex = findQueueFamily(_physicalDevice);
+	int familyIndex = findQueueFamily();
 
 	// Information about the queue
 	VkDeviceQueueCreateInfo queueCreateInfo = {};
@@ -152,18 +160,35 @@ void PVulkanContext::createLogicalDevice() {
 	vkGetDeviceQueue(_device, familyIndex, 0, &_queue);
 }
 
+VkShaderModule PVulkanContext::createShader(const std::vector<char>& shaderCode) {
+	VkShaderModuleCreateInfo shaderInfo = {};
+	shaderInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+	shaderInfo.codeSize = shaderCode.size();
+	shaderInfo.pCode = reinterpret_cast<const u32*>(shaderCode.data());
+	
+	VkShaderModule shader;
+	if (vkCreateShaderModule(_device, &shaderInfo, nullptr, &shader) != VK_SUCCESS) {
+		throw std::runtime_error("[Vulkan] [Initialisation] failed to create shader!");
+	}
+
+	// Add to the internal register for further deleting
+	_shaders.push_back(shader);
+
+	return shader;
+}
+
 bool PVulkanContext::checkValidationLayerSupport() {
 	// TODO for each validation layer in validationLayers, check if it's supported and return false if at least one isn't.
 	return true;
 }
 
-int PVulkanContext::findQueueFamily(VkPhysicalDevice device) {
+int PVulkanContext::findQueueFamily() {
 	// Get queues family
 	u32 queueFamilyCount = 0;
-	vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+	vkGetPhysicalDeviceQueueFamilyProperties(_physicalDevice, &queueFamilyCount, nullptr);
 
 	std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
-	vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+	vkGetPhysicalDeviceQueueFamilyProperties(_physicalDevice, &queueFamilyCount, queueFamilies.data());
 
 	int i = 0;
 	for (auto &queueFamily : queueFamilies) {
@@ -175,6 +200,16 @@ int PVulkanContext::findQueueFamily(VkPhysicalDevice device) {
 	}
 
 	return -1;
+}
+
+std::vector<char> PVulkanContext::readFile(const std::string &filename) {
+	std::ifstream file(filename, std::ios::ate | std::ios::binary);
+	size_t filesize = static_cast<size_t>(file.tellg());
+	std::vector<char> result(filesize);
+	file.seekg(0, file.beg);
+	file.read(result.data(), filesize);
+	file.close();
+	return result;
 }
 
 // ---- PUBLIC METHODS
@@ -252,12 +287,13 @@ VulkanContext::~VulkanContext() {
 }
 
 // http://www.duskborn.com/a-simple-vulkan-compute-example/
+// https://github.com/Erkaman/vulkan_minimal_compute
 /** Simple perlin noise throught a 1024 * 1024 image */
 void VulkanContext::configTest() {
 	// TODO Currently this is a kind of toy to play around with Vulkan.
 	// Later we should split the differents parts of this function into useable methods for the API.
 	
-	const VkDeviceSize memorySize = 1024 * 1024 * 3;
+	const VkDeviceSize memorySize = 1024 * 1024 * 4 * sizeof(float);
 	
 	// Creating buffer
 	VkBufferCreateInfo bufferInfo = {};
@@ -283,24 +319,219 @@ void VulkanContext::configTest() {
 	vkGetPhysicalDeviceMemoryProperties(_internal->_physicalDevice, &properties);
 
 	u32 memoryTypeIndex;
+	bool foundMemoryType = false;
 
 	for (u32 i = 0; i < properties.memoryTypeCount; ++i) {
 		const VkMemoryType memoryType = properties.memoryTypes[i];
 
-		if (((VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) & memoryType.propertyFlags) != 0
-			&& (properties.memoryHeaps[memoryType.heapIndex].size < memorySize)) {
+		if ((VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT & memoryType.propertyFlags)
+			&& (VK_MEMORY_PROPERTY_HOST_COHERENT_BIT & memoryType.propertyFlags)
+			&& (properties.memoryHeaps[memoryType.heapIndex].size > memorySize)) {
 
 			memoryTypeIndex = i;
+			foundMemoryType = true;
 		}
+	}
+
+	if (!foundMemoryType) {
+		throw std::runtime_error("[Vulkan] [Config-Test] did not find suitable memory type");
 	}
 
 	memoryInfo.memoryTypeIndex = memoryTypeIndex;
 
 	VkDeviceMemory memory;
-	vkAllocateMemory(_internal->_device, &memoryInfo, nullptr, &memory);
+	if (vkAllocateMemory(_internal->_device, &memoryInfo, nullptr, &memory) != VK_SUCCESS) {
+		throw std::runtime_error("[Vulkan] [Config-Test] failed allocate memory");
+	}
 
 	// Bind memory
 	vkBindBufferMemory(_internal->_device, buffer, memory, 0);
+
+	// ==========
+
+	// Create descriptor set layout
+	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding = {};
+	descriptorSetLayoutBinding.binding = 0;
+	descriptorSetLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+	descriptorSetLayoutBinding.descriptorCount = 1;
+	descriptorSetLayoutBinding.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+
+	VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = {};
+	descriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	descriptorSetLayoutCreateInfo.bindingCount = 1; // only a single binding in this descriptor set layout. 
+	descriptorSetLayoutCreateInfo.pBindings = &descriptorSetLayoutBinding;
+
+	VkDescriptorSetLayout descriptorSetLayout;
+	if (vkCreateDescriptorSetLayout(_internal->_device, &descriptorSetLayoutCreateInfo, NULL, &descriptorSetLayout) != VK_SUCCESS) {
+		throw std::runtime_error("[Vulkan] [Config-Test] failed create descriptor set layout");
+	}
+
+	// Create descriptor pool
+	VkDescriptorPoolSize descriptorPoolSize = {};
+	descriptorPoolSize.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+	descriptorPoolSize.descriptorCount = 1;
+
+	VkDescriptorPoolCreateInfo descriptorPoolInfo = {};
+	descriptorPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	descriptorPoolInfo.maxSets = 1;
+	descriptorPoolInfo.poolSizeCount = 1;
+	descriptorPoolInfo.pPoolSizes = &descriptorPoolSize;
+
+	VkDescriptorPool descriptorPool;
+	if (vkCreateDescriptorPool(_internal->_device, &descriptorPoolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
+		throw std::runtime_error("[Vulkan] [Config-Test] failed create descriptor pool");
+	}
+
+
+	// Allocate descriptor set in the pool
+	VkDescriptorSetAllocateInfo descriptorSetInfo = {};
+	descriptorSetInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	descriptorSetInfo.descriptorPool = descriptorPool;
+	descriptorSetInfo.descriptorSetCount = 1;
+	descriptorSetInfo.pSetLayouts = &descriptorSetLayout;
+
+	VkDescriptorSet descriptorSet;
+	if (vkAllocateDescriptorSets(_internal->_device, &descriptorSetInfo, &descriptorSet) != VK_SUCCESS) {
+		throw std::runtime_error("[Vulkan] [Config-Test] failed allocate descriptor set");
+	}
+
+
+	// Connect buffer to descriptor
+	VkDescriptorBufferInfo descriptorBufferInfo = {};
+	descriptorBufferInfo.buffer = buffer;
+	descriptorBufferInfo.offset = 0;
+	descriptorBufferInfo.range = memorySize;
+
+	VkWriteDescriptorSet writeDescriptorSet = {};
+	writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	writeDescriptorSet.dstSet = descriptorSet; // write to this descriptor set.
+	writeDescriptorSet.dstBinding = 0; // write to the first, and only binding.
+	writeDescriptorSet.descriptorCount = 1; // update a single descriptor.
+	writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER; // storage buffer.
+	writeDescriptorSet.pBufferInfo = &descriptorBufferInfo;
+
+	vkUpdateDescriptorSets(_internal->_device, 1, &writeDescriptorSet, 0, nullptr);
+
+	// ==========
+
+	// Setup the computation pipeline
+	// Create shader
+	auto shader = _internal->createShader(_internal->readFile("config-test.spv"));
+
+	// Create pipeline stage info
+	VkPipelineShaderStageCreateInfo pipelineStageInfo = {};
+	pipelineStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+	pipelineStageInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+	pipelineStageInfo.module = shader;
+	pipelineStageInfo.pName = "main";
+
+	// Create pipeline layout
+	VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
+	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	pipelineLayoutInfo.setLayoutCount = 1;
+	pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
+	
+	VkPipelineLayout pipelineLayout;
+	if(vkCreatePipelineLayout(_internal->_device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
+		throw std::runtime_error("[Vulkan] [Config-Test] failed create pipeline layout");
+	}
+
+	// Create pipeline from layout and stage info
+	VkComputePipelineCreateInfo pipelineCreateInfo = {};
+	pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+	pipelineCreateInfo.stage = pipelineStageInfo;
+	pipelineCreateInfo.layout = pipelineLayout;
+
+	VkPipeline pipeline;
+	if (vkCreateComputePipelines(_internal->_device, VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &pipeline) != VK_SUCCESS) {
+		throw std::runtime_error("[Vulkan] [Config-Test] failed create pipeline");
+	}
+
+	// ==========
+
+	// Create command buffer
+	VkCommandPoolCreateInfo commandPoolCreateInfo = {};
+	commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	commandPoolCreateInfo.flags = 0;
+	commandPoolCreateInfo.queueFamilyIndex = _internal->findQueueFamily();
+
+	VkCommandPool commandPool;
+	if (vkCreateCommandPool(_internal->_device, &commandPoolCreateInfo, nullptr, &commandPool) != VK_SUCCESS) {
+		throw std::runtime_error("[Vulkan] [Config-Test] failed create command pool");
+	}
+
+	// Allocate a command buffer
+	VkCommandBufferAllocateInfo commandBufferAllocateInfo = {};
+	commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	commandBufferAllocateInfo.commandPool = commandPool;
+	commandBufferAllocateInfo.commandBufferCount = 1;
+	commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	
+	VkCommandBuffer commandBuffer;
+	// TODO Test VK_SUCCESS
+	vkAllocateCommandBuffers(_internal->_device, &commandBufferAllocateInfo, &commandBuffer);
+
+
+	// Writing the commands
+	VkCommandBufferBeginInfo beginInfo = {};
+	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT; // the buffer is only submitted and used once in this application.
+
+	vkBeginCommandBuffer(commandBuffer, &beginInfo);
+	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
+	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, 1, &descriptorSet, 0, NULL);
+
+	// Dispatching the working groups
+	vkCmdDispatch(commandBuffer, 32, 32, 1);
+	// End recording
+	// TODO Test VK_SUCCESS
+	vkEndCommandBuffer(commandBuffer);
+
+	// ==========
+	
+	VkSubmitInfo submitInfo = {};
+	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submitInfo.commandBufferCount = 1; // submit a single command buffer
+	submitInfo.pCommandBuffers = &commandBuffer; // the command buffer to submit.
+
+	// Create fence
+	VkFenceCreateInfo fenceCreateInfo = {};
+	fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	fenceCreateInfo.flags = 0;
+
+	VkFence fence;
+	// TODO Test VK_SUCCESS
+	vkCreateFence(_internal->_device, &fenceCreateInfo, NULL, &fence);
+
+	// Submid queue
+	// TODO Test VK_SUCCESS
+	vkQueueSubmit(_internal->_queue, 1, &submitInfo, fence);
+	
+	// TODO Test VK_SUCCESS
+	vkWaitForFences(_internal->_device, 1, &fence, VK_TRUE, 100000000000);
+
+	vkDestroyFence(_internal->_device, fence, NULL);
+
+	// ==========
+
+	// Read memory
+	float* mappedMemory = nullptr;
+	vkMapMemory(_internal->_device, memory, 0, memorySize, 0, reinterpret_cast<void**>(&mappedMemory));
+
+	// Fill and save image
+	Image image(1024, 1024, ImageType::RGBA);
+
+	// TODO make a method to fill buffer directly
+	for (u32 y = 0; y < 1024; ++y) {
+		for (u32 x = 0; x < 1024; ++x) {
+			float*ptr = &(mappedMemory[(y * 1024 + x) * 4]);
+			image.rgba(x, y).setf(ptr[0], ptr[1], ptr[2], ptr[3]);
+		}
+	}
+
+	image.write("config-test.png");
+
+	vkUnmapMemory(_internal->_device, memory);
 }
 
 void VulkanContext::displayAvailableExtensions() {
