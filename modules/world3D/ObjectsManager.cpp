@@ -61,7 +61,6 @@ void ObjectNodeHandler::setTexture(int id, const std::string &path, const world:
 				data, true);
 
 		driver->addTexture(uid.c_str(), irrimg);
-		irrimg->drop();
 	}
 
 	irrmat.setTexture(id, driver->getTexture(uid.c_str()));
