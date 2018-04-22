@@ -46,4 +46,4 @@ endif()
 target_link_libraries(worldapi ${THIRD_PARTY_LIBRARIES})
 target_include_directories(worldapi PUBLIC ${THIRD_PARTY_INCLUDES})
 
-add_subdirectory(vulkan/)
+add_subdirectory(shaders/)

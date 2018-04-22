@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <chrono>
 
 #include <vulkan.h>
 
@@ -416,7 +417,7 @@ void VulkanContext::configTest() {
 
 	// Setup the computation pipeline
 	// Create shader
-	auto shader = _internal->createShader(_internal->readFile("config-test.spv"));
+	auto shader = _internal->createShader(_internal->readFile("perlin.spv"));
 
 	// Create pipeline stage info
 	VkPipelineShaderStageCreateInfo pipelineStageInfo = {};
@@ -506,13 +507,18 @@ void VulkanContext::configTest() {
 	// Submid queue
 	// TODO Test VK_SUCCESS
 	vkQueueSubmit(_internal->_queue, 1, &submitInfo, fence);
-	
+
+	auto start = std::chrono::steady_clock::now();
 	// TODO Test VK_SUCCESS
 	vkWaitForFences(_internal->_device, 1, &fence, VK_TRUE, 100000000000);
+	std::cout << "Exploration terminee en "
+		<< std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - start).count()
+		<< " us" << std::endl;
 
 	vkDestroyFence(_internal->_device, fence, NULL);
 
 	// ==========
+	start = std::chrono::steady_clock::now();
 
 	// Read memory
 	float* mappedMemory = nullptr;
@@ -528,6 +534,9 @@ void VulkanContext::configTest() {
 			image.rgba(x, y).setf(ptr[0], ptr[1], ptr[2], ptr[3]);
 		}
 	}
+	std::cout << "Exploration terminee en "
+		<< std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - start).count()
+		<< " us" << std::endl;
 
 	image.write("config-test.png");
 

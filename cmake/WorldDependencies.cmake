@@ -46,21 +46,33 @@ if (${WORLD_BUILD_VULKAN_MODULES})
         PATH_SUFFIXES
             Lib/
             Lib32/
+            lib/
     )
-    
+
     find_path(Vulkan_INCLUDE_DIRS
         NAMES
             vulkan.hpp
         PATH_SUFFIXES
             Include
             Include/vulkan
+            include/
+    )
+
+    find_file(Vulkan_GLSL_VALIDATOR
+        NAMES
+            glslangValidator.exe
+            glslangValidator
+        PATH_SUFFIXES
+            Bin/
+            Bin32/
+            bin/
     )
 
     set(Vulkan_FOUND OFF)
     if (Vulkan_LIBRARIES AND NOT (Vulkan_INCLUDE_DIRS STREQUAL "Vulkan_INCLUDE_DIRS-NOTFOUND"))
         set(Vulkan_FOUND ON)
     endif()
-    
+
     # Configuring project
     if (Vulkan_FOUND)
         message("-- Found Vulkan")
