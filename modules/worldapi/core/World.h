@@ -50,7 +50,7 @@ public:
     virtual void collect(const WorldZone &zone, ICollector &collector);
 
 protected:
-    virtual void onFirstExploration(WorldZone &chunk);
+    virtual void onFirstExploration(const WorldZone &chunk);
 
 private:
     PWorld *_internal;

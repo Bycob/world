@@ -13,6 +13,11 @@ public:
     PWorld() = default;
 
     std::vector<std::unique_ptr<WorldDecorator>> _chunkDecorators;
+    /// Keep track of which zone has been generated
+    std::set<WorldZone> _generated;
+    // TODO Make a more elaborated object
+    // -> when a full chunk has been explored at a certain level
+    // sublevels are not copied.
 };
 
 
@@ -27,46 +32,28 @@ World::~World() { delete _internal; }
 
 WorldZone World::exploreLocation(const vec3d &location) {
     auto result = _chunkSystem->getChunk(location);
-    WorldZone &zone = result._zone;
-
-    if (result._created) {
-        onFirstExploration(zone);
-    }
-    return result._zone;
+    return result;
 }
 
 std::vector<WorldZone> World::exploreNeighbours(const WorldZone &zone) {
-    auto pairs = _chunkSystem->getNeighbourChunks(zone);
-
-    std::vector<WorldZone> result;
-
-    for (auto &pair : pairs) {
-        WorldZone &nzone = pair._zone;
-
-        if (pair._created) {
-            onFirstExploration(nzone);
-        }
-        result.emplace_back(pair._zone);
-    }
+    auto result = _chunkSystem->getNeighbourChunks(zone);
     return result;
 }
 
 std::vector<WorldZone> World::exploreInside(const WorldZone &zone) {
     auto zones = _chunkSystem->getChildren(zone);
-    std::vector<WorldZone> result;
-
-    for (auto &child : zones) {
-        if (child._created) {
-            onFirstExploration(child._zone);
-        }
-
-        result.emplace_back(child._zone);
-    }
-
-    return result;
+    return zones;
 }
 
 void World::collect(const WorldZone &zone, ICollector &collector) {
+    // Decorate zone if needed
+    // TODO if (shouldDecorate(zone)) {
+    if (_internal->_generated.find(zone) == _internal->_generated.end()) {
+        onFirstExploration(zone);
+        _internal->_generated.insert(zone);
+    }
+
+    // Collect zone
     CollectorContextWrap wcollector(collector);
     wcollector.setCurrentChunk(zone->getID());
     wcollector.setOffset(zone->getAbsoluteOffset());
@@ -76,7 +63,7 @@ void World::collect(const WorldZone &zone, ICollector &collector) {
     // TODO collect chunks from higher level
 }
 
-void World::onFirstExploration(WorldZone &chunk) {
+void World::onFirstExploration(const WorldZone &chunk) {
     for (auto &decorator : _internal->_chunkDecorators) {
         decorator->decorate(*this, chunk);
     }

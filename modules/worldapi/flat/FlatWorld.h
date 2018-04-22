@@ -34,7 +34,7 @@ public:
     void collect(const WorldZone &zone, FlatWorldCollector &collector);
 
 protected:
-    void onFirstExploration(WorldZone &chunk) override;
+    void onFirstExploration(const WorldZone &chunk) override;
 
 private:
     PFlatWorld *_internal;

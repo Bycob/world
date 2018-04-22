@@ -43,7 +43,7 @@ void FlatWorld::collect(const WorldZone &zone, FlatWorldCollector &collector) {
     ground().collectZone(zone, *this, collector);
 }
 
-void FlatWorld::onFirstExploration(WorldZone &chunk) {
+void FlatWorld::onFirstExploration(const WorldZone &chunk) {
     World::onFirstExploration(chunk);
 
     for (auto &decorator : _internal->_chunkDecorators) {

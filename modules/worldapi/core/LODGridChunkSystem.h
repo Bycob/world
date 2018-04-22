@@ -38,11 +38,11 @@ public:
     virtual int getLODForResolution(double mrd) const;
 
     // NAVIGATION
-    QueryResult getChunk(const vec3d &position) override;
+    WorldZone getChunk(const vec3d &position) override;
 
-    std::vector<QueryResult> getNeighbourChunks(const WorldZone &zone) override;
+    std::vector<WorldZone> getNeighbourChunks(const WorldZone &zone) override;
 
-    std::vector<QueryResult> getChildren(const WorldZone &zone) override;
+    std::vector<WorldZone> getChildren(const WorldZone &zone) override;
 
     Chunk &getChunk(const WorldZone &zone) override;
 

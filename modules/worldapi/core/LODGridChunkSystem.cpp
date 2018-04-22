@@ -6,8 +6,6 @@
 
 namespace world {
 
-using QueryResult = IChunkSystem::QueryResult;
-
 class ChunkEntry {
 public:
     template <typename... Args>
@@ -92,7 +90,7 @@ int LODGridChunkSystem::getLODForResolution(double mrd) const {
     return lod;
 }
 
-QueryResult LODGridChunkSystem::getChunk(const vec3d &position) {
+WorldZone LODGridChunkSystem::getChunk(const vec3d &position) {
     LODData &data = _internal->_lodData[0];
     vec3d intPos = position / data.getChunkSize();
 
@@ -100,10 +98,10 @@ QueryResult LODGridChunkSystem::getChunk(const vec3d &position) {
         (int)floor(intPos.x), (int)floor(intPos.y), (int)floor(intPos.z), 0);
 
     auto id = createChunk(ChunkKeys::none(), coords);
-    return {*getZone(id.first), id.second};
+    return *getZone(id.first);
 }
 
-std::vector<QueryResult> LODGridChunkSystem::getNeighbourChunks(
+std::vector<WorldZone> LODGridChunkSystem::getNeighbourChunks(
     const WorldZone &chunk) {
     ChunkEntry &entry = *_internal->_chunks[chunk->getID()];
     LODGridCoordinates coords = entry._coords;
@@ -111,24 +109,23 @@ std::vector<QueryResult> LODGridChunkSystem::getNeighbourChunks(
     vec3i directions[] = {{1, 0, 0},  {-1, 0, 0}, {0, 1, 0},
                           {0, -1, 0}, {0, 0, 1},  {0, 0, -1}};
 
-    std::vector<QueryResult> result;
+    std::vector<WorldZone> result;
 
     for (vec3i &direction : directions) {
         LODGridCoordinates ncoords = LODGridCoordinates(
             coords.getPosition3D() + direction, coords.getLOD());
 
         auto id = createChunk(entry._parentID, ncoords);
-        result.emplace_back(QueryResult{*getZone(id.first), id.second});
+        result.emplace_back(*getZone(id.first));
     }
     return result;
 }
 
-std::vector<QueryResult> LODGridChunkSystem::getChildren(
+std::vector<WorldZone> LODGridChunkSystem::getChildren(
     const WorldZone &zone) {
-    std::vector<QueryResult> vector;
+    std::vector<WorldZone> vector;
 
     ChunkEntry &entry = *_internal->_chunks[zone->getID()];
-    bool created = false;
 
     // Create children
     if (entry._children.empty() && entry._coords.getLOD() < _maxLOD) {
@@ -145,15 +142,12 @@ std::vector<QueryResult> LODGridChunkSystem::getChildren(
                 }
             }
         }
-
-        created = true;
     }
 
     std::transform(entry._children.begin(), entry._children.end(),
                    std::inserter(vector, vector.end()),
                    [&](const ChunkKey &id) {
-
-                       return QueryResult{*getZone(id), created};
+                       return *getZone(id);
                    });
 
     return vector;

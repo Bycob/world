@@ -23,7 +23,7 @@ void SimpleTreeDecorator::setModel(const world::Tree &model) {
     _model.setup(model);
 }
 
-void SimpleTreeDecorator::decorate(FlatWorld &world, WorldZone &zone) {
+void SimpleTreeDecorator::decorate(FlatWorld &world, const WorldZone &zone) {
     Chunk &chunk = zone->chunk();
 
     const double treeResolution = 5;
