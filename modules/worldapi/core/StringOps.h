@@ -18,26 +18,36 @@ inline std::vector<std::string> split(const std::string &splitted,
     std::string line;
 
     while (getline(ss, line, delim)) {
-        if (trimEmpty && line.size() == 0)
+        if (trimEmpty && line.empty())
             continue;
         result.push_back(line);
+    }
+
+    // at the end geline treats delim as a terminator.
+    // if we don't trim empty, we must re-add the empty string manually
+    if (!trimEmpty && splitted.back() == delim) {
+        result.emplace_back("");
     }
     return result;
 }
 
 inline std::string trimSpaces(const std::string &item) {
-    int startIndex = 0, endIndex = item.size();
-    for (int i = 0; i < item.size(); i++) {
+    size_t startIndex = 0, endIndex = item.size();
+
+    for (size_t i = 0; i < item.size(); i++) {
         if (item[i] == ' ' || item[i] == '\t') {
-            startIndex++;
+            ++startIndex;
         } else {
             break;
         }
     }
-    for (int i = endIndex - 1; i >= startIndex; i++) {
+    for (size_t i = endIndex - 1;; --i) {
         if (item[i] == ' ' || item[i] == '\t') {
             endIndex--;
         } else {
+            break;
+        }
+        if (i == startIndex) {
             break;
         }
     }
@@ -49,12 +59,15 @@ inline bool startsWith(const std::string &item, const std::string &prefix) {
         return false;
     }
 
-    // C'est pas drôle
-    for (int c = 0; c < prefix.size(); c++) {
-        // vous avez ri ?
-        if (item[c] != prefix[c]) {
+    auto itemIt = item.begin();
+    auto prefixIt = prefix.begin();
+
+    while (prefixIt != prefix.end()) {
+        if (*itemIt != *prefixIt)
             return false;
-        }
+
+        ++itemIt;
+        ++prefixIt;
     }
 
     return true;
@@ -65,10 +78,15 @@ inline bool endsWith(const std::string &item, const std::string &suffix) {
         return false;
     }
 
-    for (int i = item.size(), j = suffix.size(); j >= 0; i--, j--) {
-        if (item[i] != suffix[j]) {
+    auto itemIt = item.end();
+    auto suffixIt = suffix.end();
+
+    while (suffixIt != suffix.begin()) {
+        --itemIt;
+        --suffixIt;
+
+        if (*itemIt != *suffixIt)
             return false;
-        }
     }
 
     return true;
