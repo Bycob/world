@@ -42,6 +42,7 @@
 #include "core/IOUtil.h"
 #include "core/LODData.h"
 #include "core/StringOps.h"
+#include "core/Profiler.h"
 #include "core/WeightedSkeletton.h"
 #include "core/ColorMap.h"
 #include "core/Parameters.h"

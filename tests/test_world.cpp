@@ -26,11 +26,10 @@ void generate_test_world(int argc, char** argv) {
     FlatWorldCollector collector;
 
     std::cout << "Exploration du monde..." << std::endl;
-    auto start = std::chrono::steady_clock::now();
+    Profiler profiler;
+    profiler.endStartSection("First exploration");
     explorer.explore<FlatWorld>(*world, collector);
-    std::cout << "Exploration terminee en "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count()
-              << " ms" << std::endl;
+    profiler.endSection();
 
     std::cout << "Collecte des resultats et ecriture de la scene..." << std::endl;
 	Scene scene;
@@ -40,9 +39,9 @@ void generate_test_world(int argc, char** argv) {
 	loader.write(scene, "assets/world/world.obj");
 
 	std::cout << "We explore the same place (which is now generated) for comparison..." << std::endl;
-    start = std::chrono::steady_clock::now();
+    profiler.endStartSection("Second exploration");
     explorer.explore<FlatWorld>(*world, collector);
-    std::cout << "Exploration is finished, time elapsed :  "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count()
-              << " ms" << std::endl;
+    profiler.endSection();
+
+    profiler.dump();
 }
