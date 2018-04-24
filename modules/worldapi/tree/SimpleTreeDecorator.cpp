@@ -24,14 +24,12 @@ void SimpleTreeDecorator::setModel(const world::Tree &model) {
 }
 
 void SimpleTreeDecorator::decorate(FlatWorld &world, const WorldZone &zone) {
-    Chunk &chunk = zone->chunk();
-
     const double treeResolution = 5;
-    if (chunk.getMaxResolution() < treeResolution ||
-        treeResolution <= chunk.getMinResolution())
+    if (zone->getMaxResolution() < treeResolution ||
+        treeResolution <= zone->getMinResolution())
         return;
 
-    vec3d chunkSize = chunk.getSize();
+    vec3d chunkSize = zone->getDimensions();
     vec3d offset = zone->getAbsoluteOffset();
 
     std::vector<vec2d> positions;

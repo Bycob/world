@@ -38,11 +38,11 @@ public:
     virtual int getLODForResolution(double mrd) const;
 
     // NAVIGATION
-    WorldZone getChunk(const vec3d &position) override;
+    WorldZone getZone(const vec3d &position) override;
 
-    std::vector<WorldZone> getNeighbourChunks(const WorldZone &zone) override;
+    std::vector<WorldZone> getNeighbourZones(const WorldZone &zone) override;
 
-    std::vector<WorldZone> getChildren(const WorldZone &zone) override;
+    std::vector<WorldZone> getChildrenZones(const WorldZone &zone) override;
 
     Chunk &getChunk(const WorldZone &zone) override;
 
@@ -79,22 +79,17 @@ public:
 
     LODGridChunkHandler(const LODGridChunkHandler &other);
 
-    IWorldZoneHandler *clone() const override;
-
-    Chunk &chunk() override;
-
-    const Chunk &getChunk() const override;
-
-    const ChunkKey &getID() const override;
-
-    bool operator<(const LODGridChunkHandler &other) const;
-
-    bool operator==(const LODGridChunkHandler &other) const;
-
-    bool hasParent() const override;
+    ChunkKey getID() const override;
 
     optional<WorldZone> getParent() const override;
 
+    vec3d getParentOffset() const override;
+
+    double getMinResolution() const override;
+
+    double getMaxResolution() const override;
+
+    vec3d getDimensions() const override;
 private:
     ChunkKey _id;
     Chunk &_chunk;

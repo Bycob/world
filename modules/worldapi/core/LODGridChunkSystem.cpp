@@ -90,7 +90,7 @@ int LODGridChunkSystem::getLODForResolution(double mrd) const {
     return lod;
 }
 
-WorldZone LODGridChunkSystem::getChunk(const vec3d &position) {
+WorldZone LODGridChunkSystem::getZone(const vec3d &position) {
     LODData &data = _internal->_lodData[0];
     vec3d intPos = position / data.getChunkSize();
 
@@ -101,8 +101,8 @@ WorldZone LODGridChunkSystem::getChunk(const vec3d &position) {
     return *getZone(id.first);
 }
 
-std::vector<WorldZone> LODGridChunkSystem::getNeighbourChunks(
-    const WorldZone &chunk) {
+std::vector<WorldZone> LODGridChunkSystem::getNeighbourZones(
+        const WorldZone &chunk) {
     ChunkEntry &entry = *_internal->_chunks[chunk->getID()];
     LODGridCoordinates coords = entry._coords;
 
@@ -121,8 +121,8 @@ std::vector<WorldZone> LODGridChunkSystem::getNeighbourChunks(
     return result;
 }
 
-std::vector<WorldZone> LODGridChunkSystem::getChildren(
-    const WorldZone &zone) {
+std::vector<WorldZone> LODGridChunkSystem::getChildrenZones(
+        const WorldZone &zone) {
     std::vector<WorldZone> vector;
 
     ChunkEntry &entry = *_internal->_chunks[zone->getID()];
@@ -176,7 +176,7 @@ optional<WorldZone> LODGridChunkSystem::getZone(const ChunkKey &id) {
     if (it == _internal->_chunks.end()) {
         return nullopt;
     } else {
-        return WorldZone(new LODGridChunkHandler(*this, id, getChunk(id)));
+        return WorldZone(id, new LODGridChunkHandler(*this, id, getChunk(id)));
     }
 }
 
@@ -213,31 +213,26 @@ LODGridChunkHandler::LODGridChunkHandler(LODGridChunkSystem &system,
 LODGridChunkHandler::LODGridChunkHandler(const LODGridChunkHandler &other)
         : _system(other._system), _id(other._id), _chunk(other._chunk) {}
 
-IWorldZoneHandler *LODGridChunkHandler::clone() const {
-    return new LODGridChunkHandler(*this);
-}
-
-Chunk &LODGridChunkHandler::chunk() { return _chunk; }
-
-const Chunk &LODGridChunkHandler::getChunk() const { return _chunk; }
-
-const ChunkKey &LODGridChunkHandler::getID() const { return _id; }
-
-bool LODGridChunkHandler::operator<(const LODGridChunkHandler &other) const {
-    return _id < other._id;
-}
-
-bool LODGridChunkHandler::operator==(const LODGridChunkHandler &other) const {
-    return _id == other._id;
-}
-
-bool LODGridChunkHandler::hasParent() const {
-    auto &entry = _system._internal->_chunks[_id];
-    return entry->_parentID != ChunkKeys::none();
-}
+ChunkKey LODGridChunkHandler::getID() const { return _id; }
 
 optional<WorldZone> LODGridChunkHandler::getParent() const {
     auto &entry = _system._internal->_chunks[_id];
     return _system.getZone(entry->_parentID);
+}
+
+vec3d LODGridChunkHandler::getParentOffset() const {
+    return _chunk.getOffset();
+}
+
+double LODGridChunkHandler::getMaxResolution() const {
+    return _chunk.getMaxResolution();
+}
+
+double LODGridChunkHandler::getMinResolution() const {
+    return _chunk.getMinResolution();
+}
+
+vec3d LODGridChunkHandler::getDimensions() const {
+    return _chunk.getSize();
 }
 } // namespace world

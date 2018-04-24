@@ -31,17 +31,17 @@ World::World()
 World::~World() { delete _internal; }
 
 WorldZone World::exploreLocation(const vec3d &location) {
-    auto result = _chunkSystem->getChunk(location);
+    auto result = _chunkSystem->getZone(location);
     return result;
 }
 
 std::vector<WorldZone> World::exploreNeighbours(const WorldZone &zone) {
-    auto result = _chunkSystem->getNeighbourChunks(zone);
+    auto result = _chunkSystem->getNeighbourZones(zone);
     return result;
 }
 
 std::vector<WorldZone> World::exploreInside(const WorldZone &zone) {
-    auto zones = _chunkSystem->getChildren(zone);
+    auto zones = _chunkSystem->getChildrenZones(zone);
     return zones;
 }
 
@@ -58,7 +58,7 @@ void World::collect(const WorldZone &zone, ICollector &collector) {
     wcollector.setCurrentChunk(zone->getID());
     wcollector.setOffset(zone->getAbsoluteOffset());
 
-    zone->chunk().collectWholeChunk(wcollector);
+    _chunkSystem->getChunk(zone).collectWholeChunk(wcollector);
 
     // TODO collect chunks from higher level
 }

@@ -16,53 +16,54 @@ class WorldZone;
 
 class WORLDAPI_EXPORT IWorldZoneHandler {
 public:
-    virtual IWorldZoneHandler *clone() const = 0;
-
     /** Gets an ID for the zone. This ID enable the chunk system
      * to recognize the zone among all the zone loaded. */
-    virtual const ChunkKey &getID() const = 0;
+    virtual ChunkKey getID() const = 0;
 
-    virtual Chunk &chunk() = 0;
-
-    virtual const Chunk &getChunk() const = 0;
-
-    virtual bool hasParent() const = 0;
-
+    /** Gets parent WorldZone if it exists. Otherwise, returns nullopt. */
     virtual optional<WorldZone> getParent() const = 0;
 
+    /** Gets this WorldZone offset relative to parent WorldZone. */
+    virtual vec3d getParentOffset() const = 0;
+
+    /** Gets absolute offset in the world, in double precision.
+     * This method may give bad results when the world gets very
+     * large. */
     vec3d getAbsoluteOffset() const;
 
+    /** Gets relative offset to an other WorldZone.  */
     vec3d getRelativeOffset(const WorldZone &other) const;
+
+    virtual double getMaxResolution() const = 0;
+
+    virtual double getMinResolution() const = 0;
+
+    virtual vec3d getDimensions() const = 0;
 };
 
 // TODO rename "ChunkPointer" ?
 class WORLDAPI_EXPORT WorldZone {
 public:
-    template <typename T, typename... Args>
-    WorldZone(Args... args) : _handler(std::make_unique<T>(args...)) {}
-
-    WorldZone(IWorldZoneHandler *handler) : _handler(handler) {}
-
-    WorldZone(const WorldZone &other) : _handler(other._handler->clone()) {}
-
-    WorldZone &operator=(const WorldZone &other) {
-        _handler.reset(other._handler->clone());
-        return *this;
-    }
+    WorldZone(const ChunkKey &id, IWorldZoneHandler * handler)
+            : _id(id), _handler(std::shared_ptr<IWorldZoneHandler>(handler)) {}
 
     bool operator<(const WorldZone &other) const {
-        return _handler->getID() < other._handler->getID();
+        return _id < other._id;
     }
 
     bool operator==(const WorldZone &other) const {
-        return _handler->getID() == other._handler->getID();
+        return _id == _id;
     }
+
+    // TODO const
+    IWorldZoneHandler &getInfo() const { return *_handler; }
 
     // TODO return const IWorldZoneHandler*
     IWorldZoneHandler *operator->() const { return _handler.get(); };
 
 private:
-    std::unique_ptr<IWorldZoneHandler> _handler;
+    ChunkKey _id;
+    std::shared_ptr<IWorldZoneHandler> _handler;
 };
 
 } // namespace world

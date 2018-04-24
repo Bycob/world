@@ -30,7 +30,7 @@ void FirstPersonExplorer::setFarDistance(double maxDistance) {
 
 vec3d FirstPersonExplorer::getChunkNearestPoint(const WorldZone &zone) {
     vec3d lower = zone->getAbsoluteOffset();
-    vec3d upper = lower + zone->getChunk().getSize();
+    vec3d upper = lower + zone->getDimensions();
 
     return {clamp(_position.x, lower.x, upper.x),
             clamp(_position.y, lower.y, upper.y),
@@ -77,10 +77,9 @@ void FirstPersonExplorer::explore(World &world, ExplorationResult &result) {
 void FirstPersonExplorer::exploreVertical(World &world, const WorldZone &zone,
                                           ExplorationResult &result) {
 
-    const Chunk &currentChunk = zone->getChunk();
     const double resolution = getResolutionAt(getChunkNearestPoint(zone));
 
-    if (currentChunk.getMaxResolution() < resolution) {
+    if (zone->getMaxResolution() < resolution) {
         auto smallerZones = world.exploreInside(zone);
 
         for (WorldZone &smallerZone : smallerZones) {

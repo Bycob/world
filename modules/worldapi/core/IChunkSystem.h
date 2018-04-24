@@ -19,12 +19,12 @@ public:
      * @return A QueryResult containing the chunk and a boolean indicating
      * if it was newly created.
      */
-    virtual WorldZone getChunk(const vec3d &position) = 0;
+    virtual WorldZone getZone(const vec3d &position) = 0;
 
-    virtual std::vector<WorldZone> getNeighbourChunks(
-        const WorldZone &zone) = 0;
+    virtual std::vector<WorldZone> getNeighbourZones(
+            const WorldZone &zone) = 0;
 
-    virtual std::vector<WorldZone> getChildren(const WorldZone &zone) = 0;
+    virtual std::vector<WorldZone> getChildrenZones(const WorldZone &zone) = 0;
 
     virtual Chunk &getChunk(const WorldZone &zone) = 0;
 };
