@@ -1,5 +1,6 @@
 #ifdef WORLD_BUILD_VULKAN_MODULES
 #include "Vulkan.h"
+#include "PVulkan.h"
 
 #include <iostream>
 #include <fstream>
@@ -35,39 +36,6 @@ void DestroyDebugReportCallbackEXT(VkInstance instance, VkDebugReportCallbackEXT
 
 namespace world {
 
-class PVulkanContext {
-public:
-	VkInstance _instance;
-
-	VkPhysicalDevice _physicalDevice = VK_NULL_HANDLE;
-
-	VkDevice _device;
-
-	VkQueue _queue;
-
-	std::vector<VkShaderModule> _shaders;
-
-	bool _enableValidationLayers;
-
-	VkDebugReportCallbackEXT _debugCallback;
-
-
-	bool checkValidationLayerSupport();
-
-	void setupDebugCallback();
-
-	void pickPhysicalDevice();
-
-	void createLogicalDevice();
-
-	VkShaderModule createShader(const std::vector<char> &shaderCode);
-
-	/** Simple method to get a queue for computation */
-	int findQueueFamily();
-
-	std::vector<char> readFile(const std::string &filename);
-};
-
 const std::vector<const char*> validationLayers = {
 	"VK_LAYER_LUNARG_standard_validation"
 };
@@ -89,6 +57,11 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 
 // ---- INITIALISATION METHODS
 
+bool PVulkanContext::checkValidationLayerSupport() {
+	// TODO for each validation layer in validationLayers, check if it's supported and return false if at least one isn't.
+	return true;
+}
+
 void PVulkanContext::setupDebugCallback() {
 	VkDebugReportCallbackCreateInfoEXT createInfo = {};
 	createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
@@ -96,7 +69,7 @@ void PVulkanContext::setupDebugCallback() {
 	createInfo.pfnCallback = debugCallback;
 
 	if (CreateDebugReportCallbackEXT(_instance, &createInfo, nullptr, &_debugCallback) != VK_SUCCESS) {
-		throw std::runtime_error("[Vulkan] [Initialisation] failed to setup debug callback");
+		throw std::runtime_error("[Vulkan] [Initialization] failed to setup debug callback");
 	}
 }
 
@@ -105,7 +78,7 @@ void PVulkanContext::pickPhysicalDevice() {
 	vkEnumeratePhysicalDevices(_instance, &deviceCount, nullptr);
 
 	if (deviceCount == 0) {
-		throw std::runtime_error("[Vulkan] [Initialisation] could not find any device that supports Vulkan");
+		throw std::runtime_error("[Vulkan] [Initialization] could not find any device that supports Vulkan");
 	}
 	std::vector<VkPhysicalDevice> devices(deviceCount);
 	vkEnumeratePhysicalDevices(_instance, &deviceCount, devices.data());
@@ -120,7 +93,7 @@ void PVulkanContext::pickPhysicalDevice() {
 }
 
 void PVulkanContext::createLogicalDevice() {
-	int familyIndex = findQueueFamily();
+	int familyIndex = findComputeQueueFamily();
 
 	// Information about the queue
 	VkDeviceQueueCreateInfo queueCreateInfo = {};
@@ -129,8 +102,6 @@ void PVulkanContext::createLogicalDevice() {
 	queueCreateInfo.queueCount = 1;
 
 	float queuePriority = 1.0f;
-	// Apparently Vulkan makes a copy of the value, and that's why we pass a temporary value
-	// Discussion about that here : https://vulkan-tutorial.com/Drawing_a_triangle/Setup/Logical_device_and_queues
 	queueCreateInfo.pQueuePriorities = &queuePriority;
 
 	VkPhysicalDeviceFeatures deviceFeatures = {};
@@ -154,11 +125,43 @@ void PVulkanContext::createLogicalDevice() {
 	}
 
 	if (vkCreateDevice(_physicalDevice, &createInfo, nullptr, &_device) != VK_SUCCESS) {
-		throw std::runtime_error("[Vulkan] [Initialisation] failed to create logical device!");
+		throw std::runtime_error("[Vulkan] [Initialization] failed to create logical device!");
+	}
+}
+
+void PVulkanContext::createComputeResources() {
+	// Get queue
+	vkGetDeviceQueue(_device, findComputeQueueFamily(), 0, &_computeQueue);
+
+	// Create descriptor pool
+	// TODO Scale descriptor pool size according to needs. Change the system if it's no more sufficient.
+	VkDescriptorPoolSize descriptorPoolSizes[2];
+
+	descriptorPoolSizes[0].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+	descriptorPoolSizes[0].descriptorCount = 10;
+
+	descriptorPoolSizes[1].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorPoolSizes[1].descriptorCount = 10;
+
+	VkDescriptorPoolCreateInfo descriptorPoolInfo = {};
+	descriptorPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	descriptorPoolInfo.maxSets = 10;
+	descriptorPoolInfo.poolSizeCount = 2;
+	descriptorPoolInfo.pPoolSizes = descriptorPoolSizes;
+
+	if (vkCreateDescriptorPool(_device, &descriptorPoolInfo, nullptr, &_descriptorPool) != VK_SUCCESS) {
+		throw std::runtime_error("[Vulkan] [Initialization] failed create descriptor pool");
 	}
 
-	// Get queue
-	vkGetDeviceQueue(_device, familyIndex, 0, &_queue);
+	// Create compute command pool
+	VkCommandPoolCreateInfo commandPoolCreateInfo = {};
+	commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	commandPoolCreateInfo.flags = 0;
+	commandPoolCreateInfo.queueFamilyIndex = findComputeQueueFamily();
+
+	if (vkCreateCommandPool(_device, &commandPoolCreateInfo, nullptr, &_computeCommandPool) != VK_SUCCESS) {
+		throw std::runtime_error("[Vulkan] [Initialization] failed create command pool");
+	}
 }
 
 VkShaderModule PVulkanContext::createShader(const std::vector<char>& shaderCode) {
@@ -166,24 +169,17 @@ VkShaderModule PVulkanContext::createShader(const std::vector<char>& shaderCode)
 	shaderInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 	shaderInfo.codeSize = shaderCode.size();
 	shaderInfo.pCode = reinterpret_cast<const u32*>(shaderCode.data());
-	
+
 	VkShaderModule shader;
 	if (vkCreateShaderModule(_device, &shaderInfo, nullptr, &shader) != VK_SUCCESS) {
-		throw std::runtime_error("[Vulkan] [Initialisation] failed to create shader!");
+		throw std::runtime_error("[Vulkan] [Create-Shader] failed to create shader!");
 	}
 
 	// Add to the internal register for further deleting
-	_shaders.push_back(shader);
-
 	return shader;
 }
 
-bool PVulkanContext::checkValidationLayerSupport() {
-	// TODO for each validation layer in validationLayers, check if it's supported and return false if at least one isn't.
-	return true;
-}
-
-int PVulkanContext::findQueueFamily() {
+int PVulkanContext::findComputeQueueFamily() {
 	// Get queues family
 	u32 queueFamilyCount = 0;
 	vkGetPhysicalDeviceQueueFamilyProperties(_physicalDevice, &queueFamilyCount, nullptr);
@@ -203,8 +199,39 @@ int PVulkanContext::findQueueFamily() {
 	return -1;
 }
 
+int PVulkanContext::findMemoryType(u32 memorySize) {
+	VkPhysicalDeviceMemoryProperties properties;
+	vkGetPhysicalDeviceMemoryProperties(_physicalDevice, &properties);
+
+	u32 memoryTypeIndex;
+	bool foundMemoryType = false;
+
+	for (u32 i = 0; i < properties.memoryTypeCount; ++i) {
+		const VkMemoryType memoryType = properties.memoryTypes[i];
+
+		if ((VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT & memoryType.propertyFlags)
+			&& (VK_MEMORY_PROPERTY_HOST_COHERENT_BIT & memoryType.propertyFlags)
+			&& (properties.memoryHeaps[memoryType.heapIndex].size > memorySize)) {
+
+			memoryTypeIndex = i;
+			foundMemoryType = true;
+		}
+	}
+
+	if (!foundMemoryType) {
+		throw std::runtime_error("[Vulkan] [Config-Test] did not find suitable memory type");
+	}
+
+	return memoryTypeIndex;
+}
+
 std::vector<char> PVulkanContext::readFile(const std::string &filename) {
 	std::ifstream file(filename, std::ios::ate | std::ios::binary);
+
+	if (!file.good()) {
+		throw std::runtime_error("[Vulkan] [readFile] File not found");
+	}
+
 	size_t filesize = static_cast<size_t>(file.tellg());
 	std::vector<char> result(filesize);
 	file.seekg(0, file.beg);
@@ -269,12 +296,17 @@ VulkanContext::VulkanContext()
 	// Setup debug callback
 	_internal->setupDebugCallback();
 
-	// Initialisation
+	// Initialization
 	_internal->pickPhysicalDevice();
 	_internal->createLogicalDevice();
+
+	// Compute resources
+	_internal->createComputeResources();
 }
 
 VulkanContext::~VulkanContext() {
+	vkDestroyDescriptorPool(_internal->_device, _internal->_descriptorPool, nullptr);
+	vkDestroyCommandPool(_internal->_device, _internal->_computeCommandPool, nullptr);
 	vkDestroyDevice(_internal->_device, nullptr);
 
 	if (_internal->_enableValidationLayers) {
@@ -285,6 +317,10 @@ VulkanContext::~VulkanContext() {
 	vkDestroyInstance(_internal->_instance, nullptr);
 
 	delete _internal;
+}
+
+PVulkanContext &VulkanContext::internal() {
+	return *_internal;
 }
 
 // http://www.duskborn.com/a-simple-vulkan-compute-example/
@@ -314,31 +350,7 @@ void VulkanContext::configTest() {
 	memoryInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	memoryInfo.pNext = nullptr;
 	memoryInfo.allocationSize = memRequirements.size;
-
-	// Find memory type for the needed size
-	VkPhysicalDeviceMemoryProperties properties;
-	vkGetPhysicalDeviceMemoryProperties(_internal->_physicalDevice, &properties);
-
-	u32 memoryTypeIndex;
-	bool foundMemoryType = false;
-
-	for (u32 i = 0; i < properties.memoryTypeCount; ++i) {
-		const VkMemoryType memoryType = properties.memoryTypes[i];
-
-		if ((VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT & memoryType.propertyFlags)
-			&& (VK_MEMORY_PROPERTY_HOST_COHERENT_BIT & memoryType.propertyFlags)
-			&& (properties.memoryHeaps[memoryType.heapIndex].size > memorySize)) {
-
-			memoryTypeIndex = i;
-			foundMemoryType = true;
-		}
-	}
-
-	if (!foundMemoryType) {
-		throw std::runtime_error("[Vulkan] [Config-Test] did not find suitable memory type");
-	}
-
-	memoryInfo.memoryTypeIndex = memoryTypeIndex;
+	memoryInfo.memoryTypeIndex = _internal->findMemoryType(memorySize);
 
 	VkDeviceMemory memory;
 	if (vkAllocateMemory(_internal->_device, &memoryInfo, nullptr, &memory) != VK_SUCCESS) {
@@ -367,27 +379,10 @@ void VulkanContext::configTest() {
 		throw std::runtime_error("[Vulkan] [Config-Test] failed create descriptor set layout");
 	}
 
-	// Create descriptor pool
-	VkDescriptorPoolSize descriptorPoolSize = {};
-	descriptorPoolSize.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	descriptorPoolSize.descriptorCount = 1;
-
-	VkDescriptorPoolCreateInfo descriptorPoolInfo = {};
-	descriptorPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-	descriptorPoolInfo.maxSets = 1;
-	descriptorPoolInfo.poolSizeCount = 1;
-	descriptorPoolInfo.pPoolSizes = &descriptorPoolSize;
-
-	VkDescriptorPool descriptorPool;
-	if (vkCreateDescriptorPool(_internal->_device, &descriptorPoolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
-		throw std::runtime_error("[Vulkan] [Config-Test] failed create descriptor pool");
-	}
-
-
 	// Allocate descriptor set in the pool
 	VkDescriptorSetAllocateInfo descriptorSetInfo = {};
 	descriptorSetInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-	descriptorSetInfo.descriptorPool = descriptorPool;
+	descriptorSetInfo.descriptorPool = _internal->_descriptorPool;
 	descriptorSetInfo.descriptorSetCount = 1;
 	descriptorSetInfo.pSetLayouts = &descriptorSetLayout;
 
@@ -454,7 +449,7 @@ void VulkanContext::configTest() {
 	VkCommandPoolCreateInfo commandPoolCreateInfo = {};
 	commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 	commandPoolCreateInfo.flags = 0;
-	commandPoolCreateInfo.queueFamilyIndex = _internal->findQueueFamily();
+	commandPoolCreateInfo.queueFamilyIndex = _internal->findComputeQueueFamily();
 
 	VkCommandPool commandPool;
 	if (vkCreateCommandPool(_internal->_device, &commandPoolCreateInfo, nullptr, &commandPool) != VK_SUCCESS) {
@@ -506,7 +501,7 @@ void VulkanContext::configTest() {
 
 	// Submid queue
 	// TODO Test VK_SUCCESS
-	vkQueueSubmit(_internal->_queue, 1, &submitInfo, fence);
+	vkQueueSubmit(_internal->_computeQueue, 1, &submitInfo, fence);
 
 	auto start = std::chrono::steady_clock::now();
 	// TODO Test VK_SUCCESS

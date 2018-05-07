@@ -1,20 +1,32 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-#define WIDTH 1024
-#define HEIGHT 1024
 #define WORKGROUP_SIZE 32
 #define M_PI 3.1415926535897932384626433832795
 layout (local_size_x = WORKGROUP_SIZE, local_size_y = WORKGROUP_SIZE, local_size_z = 1 ) in;
 
-struct Pixel{
-  vec4 value;
+// Random values for hash function
+layout(binding = 0) uniform PerlinTable {
+    uint p[512];
 };
 
-layout(std140, binding = 0) buffer buf
-{
-   Pixel imageData[];
+layout(binding = 1) uniform OutputData {
+    uint width;
+    uint height;
 };
+
+layout(binding = 2) uniform PerlinData {
+    uint offsetX;
+    uint offsetY;
+    uint octaves;
+    float frequency;
+    float persistence;
+};
+
+layout(std140, binding = 3) buffer Output0 {
+   vec4 outputBuffer[];
+};
+
 
 float rand(vec2 pos) {
 	return fract(sin(dot(pos ,vec2(12.9898,78.233))) * 43758.5453);
@@ -22,13 +34,13 @@ float rand(vec2 pos) {
 
 void main() {
   
-  if(gl_GlobalInvocationID.x >= WIDTH || gl_GlobalInvocationID.y >= HEIGHT)
+  if(gl_GlobalInvocationID.x >= width || gl_GlobalInvocationID.y >= height)
     return;
 
-  float x = float(gl_GlobalInvocationID.x) / float(WIDTH);
-  float y = float(gl_GlobalInvocationID.y) / float(HEIGHT);
+  float x = float(gl_GlobalInvocationID.x) / float(width);
+  float y = float(gl_GlobalInvocationID.y) / float(height);
 
-  float f = 16 + 1;
+  float f = frequency + 1;
 
   float xf = x * f;
   float yf = y * f;
@@ -49,8 +61,6 @@ void main() {
   float l1 = mix(v10, v11, iy);
   float lf = mix(l0, l1, ix);
 
-  vec4 color = vec4(lf, lf, lf, 1.);
-
-  // store the rendered mandelbrot set into a storage buffer:
-  imageData[WIDTH * gl_GlobalInvocationID.y + gl_GlobalInvocationID.x].value = color;
+  uint id = width * gl_GlobalInvocationID.y + gl_GlobalInvocationID.x;
+  outputBuffer[id / 4][id % 4] = lf;
 }

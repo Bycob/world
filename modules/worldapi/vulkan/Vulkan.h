@@ -15,6 +15,8 @@ public:
 	void configTest();
 
 	void displayAvailableExtensions();
+
+	PVulkanContext &internal();
 private:
 	PVulkanContext *_internal;
 };
