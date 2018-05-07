@@ -17,7 +17,7 @@ class WorldZone;
 class WORLDAPI_EXPORT IWorldZoneHandler {
 public:
     /** Gets an ID for the zone. This ID enable the chunk system
-     * to recognize the zone among all the zone loaded. */
+     * to recognize the zone among all the zones loaded. */
     virtual ChunkKey getID() const = 0;
 
     /** Gets parent WorldZone if it exists. Otherwise, returns nullopt. */
@@ -44,16 +44,12 @@ public:
 // TODO rename "ChunkPointer" ?
 class WORLDAPI_EXPORT WorldZone {
 public:
-    WorldZone(const ChunkKey &id, IWorldZoneHandler * handler)
+    WorldZone(const ChunkKey &id, IWorldZoneHandler *handler)
             : _id(id), _handler(std::shared_ptr<IWorldZoneHandler>(handler)) {}
 
-    bool operator<(const WorldZone &other) const {
-        return _id < other._id;
-    }
+    bool operator<(const WorldZone &other) const { return _id < other._id; }
 
-    bool operator==(const WorldZone &other) const {
-        return _id == _id;
-    }
+    bool operator==(const WorldZone &other) const { return _id == _id; }
 
     // TODO const
     IWorldZoneHandler &getInfo() const { return *_handler; }

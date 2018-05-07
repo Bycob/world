@@ -9,7 +9,6 @@
 namespace world {
 class IChunkSystem {
 public:
-
     /**
      * Get the chunk at the given position. If multiple chunk with
      * different levels of detail are found, the one with the highest
@@ -21,8 +20,7 @@ public:
      */
     virtual WorldZone getZone(const vec3d &position) = 0;
 
-    virtual std::vector<WorldZone> getNeighbourZones(
-            const WorldZone &zone) = 0;
+    virtual std::vector<WorldZone> getNeighbourZones(const WorldZone &zone) = 0;
 
     virtual std::vector<WorldZone> getChildrenZones(const WorldZone &zone) = 0;
 

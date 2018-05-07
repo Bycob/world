@@ -51,7 +51,7 @@ void FirstPersonExplorer::explore(World &world, ExplorationResult &result) {
     while (!toExplore.empty()) {
         auto it = toExplore.begin();
 
-        WorldZone currentZone = *it;
+        const WorldZone &currentZone = *it;
 
         // Vertical exploration : we explore the inside
         exploreVertical(world, *it, result);
