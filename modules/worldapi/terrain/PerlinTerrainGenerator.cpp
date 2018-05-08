@@ -11,13 +11,22 @@ namespace world {
 
 PerlinTerrainGenerator::PerlinTerrainGenerator(int offset, int octaveCount,
                                                double frequency,
-                                               double persistence)
-        : _offset(offset), _octaveCount(octaveCount), _frequency(frequency),
-          _persistence(persistence) {}
+                                               double persistence) {
+
+    _perlinInfo.frequency = frequency;
+    _perlinInfo.octaves = octaveCount;
+    _perlinInfo.offsetX = 0;
+    _perlinInfo.offsetY = 0;
+    _perlinInfo.persistence = persistence;
+    _perlinInfo.repeatable = false;
+}
+
+void PerlinTerrainGenerator::setFrequency(float frequency) {
+    _perlinInfo.frequency = frequency;
+}
 
 void PerlinTerrainGenerator::process(Terrain &terrain) {
-    _perlin.generatePerlinNoise2D(terrain._array, _offset, _octaveCount,
-                                  _frequency, _persistence);
+    _perlin.generatePerlinNoise2D(terrain._array, _perlinInfo);
 }
 
 void PerlinTerrainGenerator::process(Terrain &terrain,
@@ -55,17 +64,9 @@ void PerlinTerrainGenerator::process(Terrain &terrain,
         }
     };
 
-    _perlin.generatePerlinNoise2D(terrain._array, _offset, _octaveCount,
-                                  _frequency, _persistence, false, modifier);
+    _perlin.generatePerlinNoise2D(terrain._array, _perlinInfo, modifier);
 
     context.registerCurrentState();
-}
-
-void PerlinTerrainGenerator::join(Terrain &terrain1, Terrain &terrain2,
-                                  bool axisX, bool joinableSides) {
-    _perlin.join(terrain1._array, terrain2._array,
-                 axisX ? Direction::AXIS_X : Direction::AXIS_Y, _octaveCount,
-                 _frequency, _persistence, joinableSides);
 }
 
 } // namespace world

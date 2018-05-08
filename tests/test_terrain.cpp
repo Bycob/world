@@ -59,7 +59,7 @@ void testRepeatable(int argc, char** argv) {
 
     // CREATION D'UN PERLIN REPETABLE
     std::cout << "Génération de bruit de perlin répétable..." << std::endl;
-    Mat<double> repeatable = perlin.generatePerlinNoise2D(size, 0, octaves, freq, persistence, true);
+    Mat<double> repeatable = perlin.generatePerlinNoise2D(size, {freq, octaves, 0, 0, persistence, true});
     Image repeat(repeatable);
     repeat.write("assets/terrain/repeat.png");
 
@@ -112,8 +112,8 @@ void testPerlin(int argc, char** argv) {
     // CREATION DE DEUX PERLIN ET JOIN
     try {
         std::cout << "Génération de deux bruits de perlin..." << std::endl;
-        auto perlin1 = perlin.generatePerlinNoise2D(size, 0, octaves, freq, persistence);
-        auto perlin2 = perlin.generatePerlinNoise2D(size, 0, octaves, freq, persistence);
+        auto perlin1 = perlin.generatePerlinNoise2D(size, {freq, octaves, 0, 0, persistence, false});
+        auto perlin2 = perlin.generatePerlinNoise2D(size, {freq, octaves, 0, 0, persistence, false});
         std::cout << "Join des deux bruits de perlin..." << std::endl;
         perlin.join(perlin1, perlin2, perlin::Direction::AXIS_Y, octaves, freq, persistence, true);
         Image perlin1img(perlin1);

@@ -10,13 +10,13 @@ TEST_CASE("Perlin - General test case", "[perlin]") {
     arma::mat subject(100, 100, arma::fill::zeros);
 
     SECTION("generating perlin noise changes the matrix") {
-        perlin.generatePerlinNoise2D(subject, 0, 1, 4, 0.5);
+        perlin.generatePerlinNoise2D(subject, {4., 1, 0, 0, 0.5, false});
         REQUIRE(arma::accu(arma::abs(subject-reference)) > 1e-3);
     }
 
     SECTION("two patterns generated in a row are different") {
-        perlin.generatePerlinNoise2D(subject, 0, 1, 4, 0.5);
-        perlin.generatePerlinNoise2D(reference, 0, 1, 4, 0.5);
+        perlin.generatePerlinNoise2D(subject, {4., 1, 0, 0, 0.5, false});
+        perlin.generatePerlinNoise2D(reference, {4., 1, 0, 0, 0.5, false});
         REQUIRE(arma::accu(arma::abs(subject-reference)) > 1e-3);
     }
 
@@ -32,7 +32,7 @@ TEST_CASE("Perlin - Random values modifier") {
 
 	SECTION("sides must be 0") {
 		const double eps = std::numeric_limits<double>::epsilon();
-		perlin.generatePerlinNoise2D(noise, 0, 1, 4, 0.5, false, [&](double x, double y, double val) {
+		perlin.generatePerlinNoise2D(noise, {4., 1, 0, 0, 0.5, false}, [&](double x, double y, double val) {
 			if (x < eps || 1 - x < eps || y < eps || 1 - y < eps) {
 				return .0;
 			}

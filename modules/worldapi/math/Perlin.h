@@ -16,6 +16,16 @@ enum class WORLDAPI_EXPORT Direction {
 
 namespace world {
 
+struct WORLDAPI_EXPORT PerlinInfo {
+    double frequency;
+    int octaves;
+    int offsetX;
+    int offsetY;
+    double persistence;
+
+    bool repeatable;
+};
+
 class WORLDAPI_EXPORT Perlin {
 public:
     typedef std::function<double(double, double, double)> modifier;
@@ -26,19 +36,14 @@ public:
 
     Perlin(long seed);
 
-    void generatePerlinNoise2D(arma::Mat<double> &output, int offset,
-                               int octaves, double frequency,
-                               double persistence, bool repeatable = false);
+    void generatePerlinNoise2D(arma::Mat<double> &output,
+                               const PerlinInfo &info);
 
-    void generatePerlinNoise2D(arma::Mat<double> &output, int offset,
-                               int octaves, double frequency,
-                               double persistence, bool repeatable,
+    void generatePerlinNoise2D(arma::Mat<double> &output,
+                               const PerlinInfo &info,
                                const modifier &sourceModifier);
 
-    arma::Mat<double> generatePerlinNoise2D(int size, int offset, int octaves,
-                                            double frequency,
-                                            double persistence,
-                                            bool repeatable = false);
+    arma::Mat<double> generatePerlinNoise2D(int size, const PerlinInfo &info);
 
 
     /** Cette fonction permet de modifier les bords des deux matrices passées
@@ -67,8 +72,11 @@ private:
 
     void growBuffer(arma::uword size);
 
-    void generatePerlinOctave(arma::Mat<double> &output, int offset,
-                              double frequency, bool repeatable,
+    void fillBuffer(int octave, const PerlinInfo &info,
+                    const modifier &sourceModifier);
+
+    void generatePerlinOctave(arma::Mat<double> &output, int octave,
+                              const PerlinInfo &info,
                               const modifier &sourceModifier);
 };
 } // namespace world
