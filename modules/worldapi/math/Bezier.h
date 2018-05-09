@@ -11,10 +11,9 @@ public:
             : _pt1(pt1), _pt2(pt2), _pt1Weight(pt1Weight),
               _pt2Weight(pt2Weight) {}
 
-    /** Retourne le point situé sur la courbe, de paramètre t.
-    Ce paramètre peut représenter "l'avancement" du point sur la
-    courbe : si t = 0 alors on retourne le point pt1, si t = 1
-    on retourne le point pt2.*/
+    /** Returns coordinates of the curve point for t equals to the
+     * given value. t is the parameter of the curve.
+     * Special case : t = 0 returns pt1, t = 1 returns pt2. */
     vec3d getPointAt(double t) const {
         const vec3d &pt1 = _pt1;
         const vec3d pt2 = _pt1 + _pt1Weight;
