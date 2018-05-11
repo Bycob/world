@@ -40,10 +40,7 @@ public:
 
     template <typename T, typename... Args> T &addObject(Args... args);
 
-    void collectWholeChunk(ICollector &collector);
-
-    // void collectPart(const BoundingBox &bbox, double maxDetailSize,
-    // ICollector &collector);
+    void collect(ICollector &collector, const IResolutionModel &explorer);
 
 private:
     PChunk *_internal;

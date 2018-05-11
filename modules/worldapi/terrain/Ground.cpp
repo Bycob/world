@@ -130,9 +130,8 @@ double Ground::observeAltitudeAt(WorldZone zone, double x, double y) {
 }
 
 void Ground::collectZone(const WorldZone &zone, ICollector &collector) {
-    Chunk &chunk = zone->chunk();
     vec3d offset = zone->getAbsoluteOffset();
-    vec3d chunkSize = chunk.getSize();
+    vec3d chunkSize = zone->getDimensions();
 
     // skip if zone is not in altitude range
     double estimAltitude = observeAltitudeAt(offset.x + chunkSize.x / 2,
@@ -346,7 +345,7 @@ double Ground::getTerrainResolution(int lvl) const {
 }
 
 int Ground::getLevelForChunk(const WorldZone &zone) const {
-    double chunkMaxRes = zone->getChunk().getMaxResolution();
+    double chunkMaxRes = zone->getMaxResolution();
 
     for (int lvl = 0; lvl < _maxLOD; lvl++) {
         if (getTerrainResolution(lvl + 1) > chunkMaxRes)

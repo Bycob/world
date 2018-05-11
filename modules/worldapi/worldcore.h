@@ -35,6 +35,9 @@
 #include "core/ICollector.h"
 #include "core/Collector.h"
 #include "core/CollectorContextWrap.h"
+
+#include "core/IResolutionModel.h"
+#include "core/ResolutionModelContextWrap.h"
 #include "core/FirstPersonExplorer.h"
 
 #include "core/ICloneable.h"

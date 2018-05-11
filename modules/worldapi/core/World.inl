@@ -8,4 +8,9 @@ template <typename T, typename... Args> T &World::addDecorator(Args... args) {
     addDecoratorInternal(decorator);
     return *decorator;
 }
+
+template <typename T, typename... Args>
+T &World::addObject(const world::WorldZone &zone, Args... args) {
+    return getChunk(zone).addObject<T>(args...);
+}
 } // namespace world

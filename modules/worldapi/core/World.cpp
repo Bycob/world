@@ -5,6 +5,7 @@
 #include "CollectorContextWrap.h"
 #include "flat/FlatWorld.h"
 #include "LODGridChunkSystem.h"
+#include "ResolutionModelContextWrap.h"
 
 namespace world {
 
@@ -13,6 +14,11 @@ public:
     PWorld() = default;
 
     std::vector<std::unique_ptr<WorldDecorator>> _chunkDecorators;
+    /// Keep track of which zone has been generated
+    std::set<WorldZone> _generated;
+    // TODO Make a more elaborated object
+    // -> when a full chunk has been explored at a certain level
+    // sublevels are not copied.
 };
 
 
@@ -26,52 +32,41 @@ World::World()
 World::~World() { delete _internal; }
 
 WorldZone World::exploreLocation(const vec3d &location) {
-    auto result = _chunkSystem->getChunk(location);
-    WorldZone &zone = result._zone;
-
-    if (result._created) {
-        onFirstExploration(zone);
-    }
-    return result._zone;
-}
-
-WorldZone World::exploreNeighbour(const WorldZone &zone,
-                                  const vec3d &direction) {
-    auto pair = _chunkSystem->getNeighbourChunk(zone, direction);
-    WorldZone &nzone = pair._zone;
-
-    if (pair._created) {
-        onFirstExploration(nzone);
-    }
-    return pair._zone;
-}
-
-std::vector<WorldZone> World::exploreInside(const WorldZone &zone) {
-    auto zones = _chunkSystem->getChildren(zone);
-    std::vector<WorldZone> result;
-
-    for (auto &child : zones) {
-        if (child._created) {
-            onFirstExploration(child._zone);
-        }
-
-        result.emplace_back(child._zone);
-    }
-
+    auto result = _chunkSystem->getZone(location);
     return result;
 }
 
-void World::collect(const WorldZone &zone, ICollector &collector) {
+std::vector<WorldZone> World::exploreNeighbours(const WorldZone &zone) {
+    auto result = _chunkSystem->getNeighbourZones(zone);
+    return result;
+}
+
+std::vector<WorldZone> World::exploreInside(const WorldZone &zone) {
+    auto zones = _chunkSystem->getChildrenZones(zone);
+    return zones;
+}
+
+void World::collect(const WorldZone &zone, ICollector &collector,
+                    const IResolutionModel &explorer) {
+    // Decorate zone if needed
+    // TODO if (shouldDecorate(zone)) {
+    if (_internal->_generated.find(zone) == _internal->_generated.end()) {
+        onFirstExploration(zone);
+        _internal->_generated.insert(zone);
+    }
+
+    // Collect zone
     CollectorContextWrap wcollector(collector);
     wcollector.setCurrentChunk(zone->getID());
     wcollector.setOffset(zone->getAbsoluteOffset());
 
-    zone->chunk().collectWholeChunk(wcollector);
+    ResolutionModelContextWrap wexplorer(explorer);
+    wexplorer.setOffset(zone->getAbsoluteOffset());
 
-    // TODO collect chunks from higher level
+    _chunkSystem->getChunk(zone).collect(wcollector, wexplorer);
 }
 
-void World::onFirstExploration(WorldZone &chunk) {
+void World::onFirstExploration(const WorldZone &chunk) {
     for (auto &decorator : _internal->_chunkDecorators) {
         decorator->decorate(*this, chunk);
     }
@@ -79,5 +74,9 @@ void World::onFirstExploration(WorldZone &chunk) {
 
 void World::addDecoratorInternal(world::WorldDecorator *decorator) {
     _internal->_chunkDecorators.emplace_back(decorator);
+}
+
+Chunk &World::getChunk(const world::WorldZone &zone) {
+    return _chunkSystem->getChunk(zone);
 }
 } // namespace world

@@ -31,19 +31,21 @@ FlatWorld::~FlatWorld() { delete _internal; }
 
 IGround &FlatWorld::ground() { return *_ground; }
 
-void world::FlatWorld::collect(const WorldZone &zone, ICollector &collector) {
-    World::collect(zone, collector);
+void FlatWorld::collect(const WorldZone &zone, ICollector &collector,
+                        const IResolutionModel &resolutionModel) {
+    World::collect(zone, collector, resolutionModel);
 
     ground().collectZone(zone, collector);
 }
 
-void FlatWorld::collect(const WorldZone &zone, FlatWorldCollector &collector) {
-    World::collect(zone, collector);
+void FlatWorld::collect(const WorldZone &zone, FlatWorldCollector &collector,
+                        const IResolutionModel &resolutionModel) {
+    World::collect(zone, collector, resolutionModel);
 
     ground().collectZone(zone, *this, collector);
 }
 
-void FlatWorld::onFirstExploration(WorldZone &chunk) {
+void FlatWorld::onFirstExploration(const WorldZone &chunk) {
     World::onFirstExploration(chunk);
 
     for (auto &decorator : _internal->_chunkDecorators) {
