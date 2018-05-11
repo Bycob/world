@@ -23,15 +23,13 @@ void SimpleTreeDecorator::setModel(const world::Tree &model) {
     _model.setup(model);
 }
 
-void SimpleTreeDecorator::decorate(FlatWorld &world, WorldZone &zone) {
-    Chunk &chunk = zone->chunk();
-
+void SimpleTreeDecorator::decorate(FlatWorld &world, const WorldZone &zone) {
     const double treeResolution = 5;
-    if (chunk.getMaxResolution() < treeResolution ||
-        treeResolution <= chunk.getMinResolution())
+    if (zone->getMaxResolution() < treeResolution ||
+        treeResolution <= zone->getMinResolution())
         return;
 
-    vec3d chunkSize = chunk.getSize();
+    vec3d chunkSize = zone->getDimensions();
     vec3d offset = zone->getAbsoluteOffset();
 
     std::vector<vec2d> positions;
@@ -71,7 +69,7 @@ void SimpleTreeDecorator::decorate(FlatWorld &world, WorldZone &zone) {
         // std::cout << pos3D << std::endl;
 
         // Création de l'arbre
-        Tree &tree = chunk.addObject<Tree>();
+        Tree &tree = world.addObject<Tree>(zone);
         tree.setup(_model);
         tree.setPosition3D(pos3D);
 

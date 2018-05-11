@@ -56,7 +56,7 @@ void Application::run(int argc, char **argv) {
 				_explorer->setPosition(newUpdatePos);
 
 				auto start = std::chrono::steady_clock::now();
-				_explorer->explore<FlatWorld>(*_world, *collector);
+                _explorer->exploreAndCollect<FlatWorld>(*_world, *collector);
 				
 				if (_dbgOn) {
 					std::cout << "Temps d'exploration : " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count() << " ms " << std::endl;
