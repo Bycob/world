@@ -64,7 +64,7 @@ void testTree(int argc, char ** argv) {
 
 	std::cout << "Generation" << std::endl;
 	Collector collector;
-	tree.collectAll(collector, 5);
+	tree.collectAll(collector, 15);
 
 	std::cout << "Converting skeletton into 3D model..." << std::endl;
 	std::shared_ptr<Mesh> mesh(tree.getSkeletton().convertToMesh());

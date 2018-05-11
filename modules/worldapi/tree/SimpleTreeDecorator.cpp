@@ -16,7 +16,7 @@ SimpleTreeDecorator::SimpleTreeDecorator(int maxTreesPerChunk)
     skeletton.setRotationOffset(TreeParamsd::gaussian(0, 0.05 * M_PI));
     skeletton.setSizeFactor(TreeParamsd::uniform_real(0.5, 0.75));
 
-    _model.addWorker<TrunkGenerator>(12, 0.25, 0.2, 4);
+    _model.addWorker<TrunkGenerator>(12);
 }
 
 void SimpleTreeDecorator::setModel(const world::Tree &model) {
