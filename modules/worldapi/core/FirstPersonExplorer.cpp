@@ -37,10 +37,15 @@ vec3d FirstPersonExplorer::getChunkNearestPoint(const WorldZone &zone) {
             clamp(_position.z, lower.z, upper.z)};
 }
 
-double FirstPersonExplorer::getResolutionAt(const vec3d &pos) {
+double FirstPersonExplorer::getResolutionAt(const vec3d &pos) const {
     double length = max(_punctumProximum, _position.length(pos));
     // _fov * length can be seen as the "image size"
     return _eyeResolution / (_fov * M_PI / 180 * length);
+}
+
+double FirstPersonExplorer::getResolutionAt(const WorldZone &zone,
+                                            const vec3d &pos) const {
+    return getResolutionAt(zone.getInfo().getAbsoluteOffset() + pos);
 }
 
 void FirstPersonExplorer::explore(World &world, ExplorationResult &result) {
@@ -77,6 +82,7 @@ void FirstPersonExplorer::explore(World &world, ExplorationResult &result) {
 void FirstPersonExplorer::exploreVertical(World &world, const WorldZone &zone,
                                           ExplorationResult &result) {
 
+    result.appendZone(zone);
     const double resolution = getResolutionAt(getChunkNearestPoint(zone));
 
     if (zone->getMaxResolution() < resolution) {
@@ -85,8 +91,6 @@ void FirstPersonExplorer::exploreVertical(World &world, const WorldZone &zone,
         for (WorldZone &smallerZone : smallerZones) {
             exploreVertical(world, smallerZone, result);
         }
-    } else {
-        result.appendZone(zone);
     }
 }
 } // namespace world

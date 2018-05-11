@@ -29,9 +29,11 @@ public:
     template <typename T, typename... Args>
     T &addFlatWorldDecorator(Args... args);
 
-    void collect(const WorldZone &zone, ICollector &collector) override;
+    void collect(const WorldZone &zone, ICollector &collector,
+                 const IResolutionModel &resolutionModel) override;
 
-    void collect(const WorldZone &zone, FlatWorldCollector &collector);
+    void collect(const WorldZone &zone, FlatWorldCollector &collector,
+                 const IResolutionModel &resolutionModel);
 
 protected:
     void onFirstExploration(const WorldZone &chunk) override;

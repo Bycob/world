@@ -3,13 +3,14 @@
 
 #include "core/WorldConfig.h"
 
+#include "IResolutionModel.h"
 #include "World.h"
 #include "ICollector.h"
 #include "ExplorationResult.h"
 
 namespace world {
 
-class WORLDAPI_EXPORT FirstPersonExplorer {
+class WORLDAPI_EXPORT FirstPersonExplorer : public IResolutionModel {
 public:
     /** Build a FirstPersonExplorer with the given parameters.
      * @param eyeResolution the resolution of our eye
@@ -29,9 +30,10 @@ public:
 
     void setFarDistance(double maxDistance);
 
-    vec3d getChunkNearestPoint(const WorldZone &zone);
+    double getResolutionAt(const vec3d &pos) const override;
 
-    double getResolutionAt(const vec3d &pos);
+    double getResolutionAt(const WorldZone &zone,
+                           const vec3d &pos) const override;
 
     // TODO std::enableif
     template <typename T, typename C>
@@ -48,6 +50,8 @@ private:
      * example. */
     double _farDistance;
     vec3d _position;
+
+    vec3d getChunkNearestPoint(const WorldZone &zone);
 
     void exploreVertical(World &world, const WorldZone &zone,
                          ExplorationResult &result);

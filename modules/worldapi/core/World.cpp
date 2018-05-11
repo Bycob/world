@@ -5,6 +5,7 @@
 #include "CollectorContextWrap.h"
 #include "flat/FlatWorld.h"
 #include "LODGridChunkSystem.h"
+#include "ResolutionModelContextWrap.h"
 
 namespace world {
 
@@ -45,7 +46,8 @@ std::vector<WorldZone> World::exploreInside(const WorldZone &zone) {
     return zones;
 }
 
-void World::collect(const WorldZone &zone, ICollector &collector) {
+void World::collect(const WorldZone &zone, ICollector &collector,
+                    const IResolutionModel &explorer) {
     // Decorate zone if needed
     // TODO if (shouldDecorate(zone)) {
     if (_internal->_generated.find(zone) == _internal->_generated.end()) {
@@ -58,9 +60,10 @@ void World::collect(const WorldZone &zone, ICollector &collector) {
     wcollector.setCurrentChunk(zone->getID());
     wcollector.setOffset(zone->getAbsoluteOffset());
 
-    _chunkSystem->getChunk(zone).collectWholeChunk(wcollector);
+    ResolutionModelContextWrap wexplorer(explorer);
+    wexplorer.setOffset(zone->getAbsoluteOffset());
 
-    // TODO collect chunks from higher level
+    _chunkSystem->getChunk(zone).collect(wcollector, wexplorer);
 }
 
 void World::onFirstExploration(const WorldZone &chunk) {

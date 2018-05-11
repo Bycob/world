@@ -47,7 +47,8 @@ public:
     std::vector<WorldZone> exploreInside(const WorldZone &zone);
 
     // ASSETS
-    virtual void collect(const WorldZone &zone, ICollector &collector);
+    virtual void collect(const WorldZone &zone, ICollector &collector,
+                         const IResolutionModel &explorer);
 
 protected:
     virtual void onFirstExploration(const WorldZone &chunk);

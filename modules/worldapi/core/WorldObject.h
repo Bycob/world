@@ -5,6 +5,7 @@
 #include "math/Vector.h"
 #include "math/MathsHelper.h"
 #include "ICollector.h"
+#include "IResolutionModel.h"
 
 namespace world {
 
@@ -18,7 +19,10 @@ public:
 
     vec3d getPosition3D() const { return _position; }
 
-    virtual void collectWholeObject(ICollector &collector);
+    void collectAll(ICollector &collector, double resolution);
+
+    virtual void collect(ICollector &collector,
+                         const IResolutionModel &resolutionModel);
 
 protected:
     vec3d _position;
