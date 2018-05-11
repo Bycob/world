@@ -13,7 +13,7 @@ class ConstantResolution : public IResolutionModel {
 public:
     double _resolution;
 
-    ConstantResolution(double resolution) {}
+    ConstantResolution(double resolution) : _resolution(resolution) {}
 
     double getResolutionAt(const vec3d &coord) const override {
         return _resolution;
