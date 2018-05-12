@@ -10,11 +10,10 @@ namespace world {
 
 class WORLDAPI_EXPORT CurveUtility {
 public:
-
 private:
     CurveUtility() = default;
 };
 
-}
+} // namespace world
 
-#endif //WORLD_CURVE_UTILITY_H
+#endif // WORLD_CURVE_UTILITY_H

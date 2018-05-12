@@ -1,5 +1,3 @@
 #include "CurveUtility.h"
 
-namespace world {
-
-}
+namespace world {}

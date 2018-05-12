@@ -44,42 +44,21 @@ void Tree::collect(ICollector &collector, const IResolutionModel &explorer) {
         // Collect a dummy mesh
         Mesh mesh;
 
-        vec3d vertices[8] = {
-            {-0.2, -0.2, 0},
-            {-0.2, 0.2, 0},
-            {0.2, 0.2, 0},
-            {0.2, -0.2, 0},
-            {-0.2, -0.2, 2},
-            {-0.2, 0.2, 2},
-            {0.2, 0.2, 2},
-            {0.2, -0.2, 2}
-        };
+        vec3d vertices[8] = {{-0.2, -0.2, 0}, {-0.2, 0.2, 0},  {0.2, 0.2, 0},
+                             {0.2, -0.2, 0},  {-0.2, -0.2, 2}, {-0.2, 0.2, 2},
+                             {0.2, 0.2, 2},   {0.2, -0.2, 2}};
 
-        vec3d normals[8] = {
-                {-0.2, -0.2, 0},
-                {-0.2, 0.2, 0},
-                {0.2, 0.2, 0},
-                {0.2, -0.2, 0},
-                {-0.2, -0.2, 0},
-                {-0.2, 0.2, 0},
-                {0.2, 0.2, 0},
-                {0.2, -0.2, 0}
-        };
+        vec3d normals[8] = {{-0.2, -0.2, 0}, {-0.2, 0.2, 0},  {0.2, 0.2, 0},
+                            {0.2, -0.2, 0},  {-0.2, -0.2, 0}, {-0.2, 0.2, 0},
+                            {0.2, 0.2, 0},   {0.2, -0.2, 0}};
 
-        int indices[8][3] = {
-            { 0, 4, 5},
-            { 0, 1, 5 },
-            { 1, 5, 6 },
-            { 1, 2, 6 },
-            { 2, 6, 7 },
-            { 2, 3, 7 },
-            { 3, 7, 4 },
-            { 3, 0, 4 }
-        };
+        int indices[8][3] = {{0, 4, 5}, {0, 1, 5}, {1, 5, 6}, {1, 2, 6},
+                             {2, 6, 7}, {2, 3, 7}, {3, 7, 4}, {3, 0, 4}};
 
         for (int i = 0; i < 8; ++i) {
             mesh.newVertex(vertices[i], normals[i]);
-        } for (int i = 0; i < 8; ++i) {
+        }
+        for (int i = 0; i < 8; ++i) {
             mesh.newFace(indices[i]);
         }
 
@@ -89,8 +68,7 @@ void Tree::collect(ICollector &collector, const IResolutionModel &explorer) {
 
         // Material
         collector.addMaterial(ItemKeys::inObject(1), _trunkMaterial);
-    }
-    else {
+    } else {
         Object3D mainPart(_trunkMesh);
         mainPart.setMaterialID("trunk");
         collector.addItem(ItemKeys::inObject(0), mainPart);

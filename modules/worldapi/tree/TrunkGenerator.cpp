@@ -18,43 +18,44 @@ TrunkGenerator *TrunkGenerator::clone() const {
     return new TrunkGenerator(*this);
 }
 
-double getRadius(double weight) {
-    return pow(weight, 0.75) / 12;
-}
+double getRadius(double weight) { return pow(weight, 0.75) / 12; }
 
 void TrunkGenerator::process(Tree &tree) {
     // Création du mesh
     Mesh &trunkMesh = tree.getTrunkMesh();
     auto primary = tree.getSkeletton().getPrimaryNode();
 
-    addRing(trunkMesh, primary->getPosition(), {1, 0, 0}, {0, 1, 0}, getRadius(primary->getWeight()));
+    addRing(trunkMesh, primary->getPosition(), {1, 0, 0}, {0, 1, 0},
+            getRadius(primary->getWeight()));
     addNode(trunkMesh, primary, {0, 0, 1}, 0);
 }
 
-void TrunkGenerator::addNode(Mesh &mesh, const Node<TreeInfo> *node, const vec3d &direction, int joinId) const {
+void TrunkGenerator::addNode(Mesh &mesh, const Node<TreeInfo> *node,
+                             const vec3d &direction, int joinId) const {
     auto &nodeInfo = node->getInfo();
     vec3d nodePos = node->getPosition();
 
     auto &children = node->getChildrenOrNeighboursAccess();
 
-    for (auto * child : children) {
+    for (auto *child : children) {
         auto &childInfo = child->getInfo();
         vec3d childPos = child->getPosition();
         vec3d newDirection = childPos - nodePos;
 
-        BezierCurve curve(
-            nodePos, childPos,
-            direction * 0.25, newDirection * -0.25
-        );
+        BezierCurve curve(nodePos, childPos, direction * 0.25,
+                          newDirection * -0.25);
 
-        addBezierTube(mesh, curve, getRadius(nodeInfo._weight), getRadius(childInfo._weight), joinId);
+        addBezierTube(mesh, curve, getRadius(nodeInfo._weight),
+                      getRadius(childInfo._weight), joinId);
 
-        addNode(mesh, child, newDirection, mesh.getVerticesCount() - _segmentCount);
+        addNode(mesh, child, newDirection,
+                mesh.getVerticesCount() - _segmentCount);
     }
 }
 
-void TrunkGenerator::addBezierTube(Mesh &mesh, const BezierCurve &curve, double startRadius,
-                                   double endRadius, int joinId) const {
+void TrunkGenerator::addBezierTube(Mesh &mesh, const BezierCurve &curve,
+                                   double startRadius, double endRadius,
+                                   int joinId) const {
 
     // TODO estimate cut count to match the resolution
     int cutCount = 12;
@@ -69,7 +70,8 @@ void TrunkGenerator::addBezierTube(Mesh &mesh, const BezierCurve &curve, double 
         vec3d ax(1, 0, 0);
         vec3d ay(0, 1, 0);
 
-        if (abs(direction.x) + abs(direction.y) >= std::numeric_limits<double>::epsilon() * 2) {
+        if (abs(direction.x) + abs(direction.y) >=
+            std::numeric_limits<double>::epsilon() * 2) {
             ay = ez.crossProduct(direction).normalize();
             ax = ay.crossProduct(direction).normalize();
         }
@@ -107,7 +109,8 @@ void TrunkGenerator::addFaces(Mesh &mesh, int start1, int start2) const {
 
     for (int i = 0; i < _segmentCount; ++i) {
         vec3d c3 = mesh.getVertex(start2 + i).getPosition();
-        vec3d c4 = mesh.getVertex(start2 + ((i + facing) % _segmentCount)).getPosition();
+        vec3d c4 = mesh.getVertex(start2 + ((i + facing) % _segmentCount))
+                       .getPosition();
         double sql = c1.squaredLength(c3) + c2.squaredLength(c4);
 
         if (sql < min) {
@@ -123,9 +126,7 @@ void TrunkGenerator::addFaces(Mesh &mesh, int start1, int start2) const {
         int v3 = (offset + i) % _segmentCount;
         int v4 = (v3 + 1) % _segmentCount;
 
-        int ids[] = {
-            start1 + v1, start1 + v2, start2 + v4
-        };
+        int ids[] = {start1 + v1, start1 + v2, start2 + v4};
         mesh.newFace(ids);
 
         ids[1] = start2 + v4;

@@ -23,7 +23,8 @@ public:
         double b3 = omt * t * t;
         double b4 = t * t * t;
 
-        return _pts[0] * b1 + _pts[1] * (b2 * 3) + _pts[2] * (b3 * 3) + _pts[3] * b4;
+        return _pts[0] * b1 + _pts[1] * (b2 * 3) + _pts[2] * (b3 * 3) +
+               _pts[3] * b4;
     }
 
     vec3d getDerivativeAt(double t) const {
