@@ -8,8 +8,8 @@
 namespace world {
 
 template <class T>
-Node<T>::Node(double weight, double x, double y, double z)
-        : _weight(weight), _x(x), _y(y), _z(z), _parent(nullptr),
+Node<T>::Node(double weight, vec3d position)
+        : _weight(weight), _pos(position), _parent(nullptr),
           _info(std::make_unique<T>()) {}
 
 template <class T> Node<T>::~Node() {
@@ -43,13 +43,13 @@ template <class T> Node<T>::~Node() {
 template <class T> void Node<T>::setWeight(double weight) { _weight = weight; }
 
 template <class T> void Node<T>::setPosition(double x, double y, double z) {
-    _x = x;
-    _y = y;
-    _z = z;
-}
+    _pos.x = x;
+    _pos.y = y;
+    _pos.z = z;
+};
 
 template <class T> vec3d Node<T>::getPosition() const {
-    return vec3d(_x, _y, _z);
+    return _pos;
 }
 
 template <class T> void Node<T>::addChild(Node<T> *child) {
@@ -59,7 +59,7 @@ template <class T> void Node<T>::addChild(Node<T> *child) {
 
 template <class T>
 Node<T> *Node<T>::createChild(double weight, double x, double y, double z) {
-    Node<T> *node = new Node<T>(weight, x, y, z);
+    Node<T> *node = new Node<T>(weight, {x, y, z});
     addChild(node);
     return node;
 }
@@ -71,7 +71,7 @@ template <class T> void Node<T>::addNeighbour(Node<T> *neighbour) {
 
 template <class T>
 Node<T> *Node<T>::createNeighbour(double weight, double x, double y, double z) {
-    Node<T> *node = new Node<T>(weight, x, y, z);
+    Node<T> *node = new Node<T>(weight, {x, y, z});
     addNeighbour(node);
     return node;
 }
@@ -91,7 +91,7 @@ std::vector<Node<T> *> Node<T>::getChildrenOrNeighboursList() const {
 
 
 template <class T>
-WeightedSkeletton<T>::WeightedSkeletton() : _primaryNode(new Node<T>()) {}
+WeightedSkeletton<T>::WeightedSkeletton() : _primaryNode(new Node<T>(1, {0, 0, 0})) {}
 
 template <class T> WeightedSkeletton<T>::~WeightedSkeletton() {}
 
@@ -138,7 +138,7 @@ void WeightedSkeletton<T>::populateMesh(Mesh *mesh, Node<T> *node) {
 
         // Ajout du vertex correspondant
         Vertex vert;
-        vert.setPosition(node->_x, node->_y, node->_z);
+        vert.setPosition(node->_pos);
         mesh->addVertex(vert);
     }
 

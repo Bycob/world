@@ -23,8 +23,8 @@ private:
     int _segmentCount;
     double _resolution;
 
-    void addNode(Mesh &mesh, const Node<TreeInfo> *node, const vec3d &direction,
-                 int joinId) const;
+    void addNode(Mesh &mesh, Node<TreeInfo> *node, const vec3d &direction,
+                 int joinId, bool writeVertIds) const;
 
     void addBezierTube(Mesh &mesh, const BezierCurve &curve, double startRadius,
                        double endRadius, int joinId) const;

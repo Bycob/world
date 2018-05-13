@@ -33,6 +33,10 @@ public:
 
     Mesh &getTrunkMesh();
 
+    const Mesh &getLeavesMesh() const;
+
+    Mesh &leavesMesh();
+
     void collect(ICollector &collector,
                  const IResolutionModel &explorer) override;
 
@@ -41,6 +45,7 @@ private:
 
     TreeSkeletton _skeletton;
     Mesh _trunkMesh;
+    Mesh _leavesMesh;
     Material _trunkMaterial;
 
     bool _generated = false;

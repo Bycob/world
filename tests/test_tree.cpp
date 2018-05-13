@@ -61,6 +61,7 @@ void testTree(int argc, char ** argv) {
 	skelGen.setWeight(TreeParamsd::DefaultWeight());
 
 	tree.addWorker<TrunkGenerator>();
+	tree.addWorker<LeavesGenerator>();
 
 	std::cout << "Generation" << std::endl;
 	Collector collector;

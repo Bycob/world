@@ -54,20 +54,19 @@ public:
 private:
     template <class S> friend class WeightedSkeletton;
 
-    Node(double weight = DEFAULT_WEIGHT, double x = 0, double y = 0,
-         double z = 0);
+    Node(double weight, vec3d position);
 
     // DONNEES SUR LE NOEUD
 
     double _weight;
-    double _x, _y, _z;
+    vec3d _pos;
     std::unique_ptr<T> _info;
 
     // RELATIONS DU NOEUD
 
     Node<T> *_parent;
     /**Peut contenir la liste des noeuds enfants, ou la liste des
-noeuds adjacents, selon le modèle adopté. */
+    * noeuds adjacents, selon le modèle adopté. */
     std::vector<Node<T> *> _children_or_neighbour;
 
     // TRAITEMENT DES GRAPHES

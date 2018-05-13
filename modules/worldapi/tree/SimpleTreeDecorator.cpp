@@ -3,6 +3,9 @@
 #include <vector>
 
 #include "math/MathsHelper.h"
+#include "TrunkGenerator.h"
+#include "TreeSkelettonGenerator.h"
+#include "LeavesGenerator.h"
 
 namespace world {
 
@@ -17,9 +20,10 @@ SimpleTreeDecorator::SimpleTreeDecorator(int maxTreesPerChunk)
     skeletton.setSizeFactor(TreeParamsd::uniform_real(0.5, 0.75));
 
     _model.addWorker<TrunkGenerator>(12);
+    _model.addWorker<LeavesGenerator>(0.2, 0.9);
 }
 
-void SimpleTreeDecorator::setModel(const world::Tree &model) {
+void SimpleTreeDecorator::setModel(const Tree &model) {
     _model.setup(model);
 }
 

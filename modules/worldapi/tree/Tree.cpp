@@ -31,6 +31,14 @@ const Mesh &Tree::getTrunkMesh() const { return _trunkMesh; }
 
 Mesh &Tree::getTrunkMesh() { return _trunkMesh; }
 
+const Mesh& Tree::getLeavesMesh() const {
+    return _leavesMesh;
+}
+
+Mesh& Tree::leavesMesh() {
+    return _leavesMesh;
+}
+
 void Tree::collect(ICollector &collector, const IResolutionModel &explorer) {
     using ItemKeys = ICollector::ItemKeys;
 
@@ -64,17 +72,25 @@ void Tree::collect(ICollector &collector, const IResolutionModel &explorer) {
 
         Object3D dummy(mesh);
         dummy.setMaterialID("trunk");
-        collector.addItem(ItemKeys::inObject(1), dummy);
-
-        // Material
-        collector.addMaterial(ItemKeys::inObject(1), _trunkMaterial);
-    } else {
-        Object3D mainPart(_trunkMesh);
-        mainPart.setMaterialID("trunk");
-        collector.addItem(ItemKeys::inObject(0), mainPart);
+        collector.addItem(ItemKeys::inObject(0), dummy);
 
         // Material
         collector.addMaterial(ItemKeys::inObject(0), _trunkMaterial);
+    } else {
+        Object3D mainPart(_trunkMesh);
+        mainPart.setMaterialID("trunk");
+        collector.addItem(ItemKeys::inObject(1), mainPart);
+
+        Object3D leaves(_leavesMesh);
+        leaves.setMaterialID("leaves");
+        collector.addItem(ItemKeys::inObject(2), leaves);
+
+        // Material
+        collector.addMaterial(ItemKeys::inObject(1), _trunkMaterial);
+
+        Material leavesMat("leaves");
+        leavesMat.setKd(0.4, 0.9, 0.4);
+        collector.addMaterial(ItemKeys::inObject(2), leavesMat);
     }
 }
 

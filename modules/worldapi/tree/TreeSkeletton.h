@@ -8,8 +8,6 @@ namespace world {
 
 class WORLDAPI_EXPORT TreeInfo {
 public:
-    TreeInfo() {}
-
     int _level = 0;
 
     /// Size of the branch terminated by this node.
@@ -23,12 +21,16 @@ public:
 
     /// weight of the branch, ie. thickness.
     double _weight = 1;
+
+    /// First vertex in the main trunk mesh (used when
+    /// generating leaves)
+    int _firstVert = 0;
+
+    /// Last vertex in the main trunk mesh (used when
+    /// generating leaves)
+    int _lastVert = 0;
 };
 
-class WORLDAPI_EXPORT TreeSkeletton : public WeightedSkeletton<TreeInfo> {
-public:
-    TreeSkeletton();
+using TreeSkeletton = WeightedSkeletton<TreeInfo>;
 
-    ~TreeSkeletton() override;
-};
 } // namespace world
