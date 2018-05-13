@@ -16,6 +16,8 @@ public:
 
     virtual int getParentCount() const = 0;
 
+    virtual vec2i getTileCoords() const = 0;
+
     /** Tells the context that a version of the processed terrain
      * should be cached right after this generation stage is finished.
      * The cached terrain will then be returned by the method

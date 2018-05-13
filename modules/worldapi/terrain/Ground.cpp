@@ -76,6 +76,8 @@ public:
 
     int getParentCount() const override { return _key.lod; }
 
+    vec2i getTileCoords() const override { return _key.pos; }
+
     void registerCurrentState() override { _registerState = true; }
 };
 
@@ -103,9 +105,8 @@ Ground::Ground(double unitSize, double minAltitude, double maxAltitude)
 Ground::~Ground() { delete _internal; }
 
 void Ground::setDefaultWorkerSet() {
-    addWorker<PerlinTerrainGenerator>(0, 1, 4.);
+    addWorker<PerlinTerrainGenerator>(3, 4., 0.35);
     addWorker<CustomWorldRMModifier>();
-    addWorker<ApplyParentTerrain>();
 
     // Texturer
     auto &texturer = addWorker<AltitudeTexturer>(_textureRes);
