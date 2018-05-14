@@ -62,7 +62,7 @@ private:
 
     Node<T> *_parent;
     /**Peut contenir la liste des noeuds enfants, ou la liste des
-    * noeuds adjacents, selon le modèle adopté. */
+     * noeuds adjacents, selon le modèle adopté. */
     std::vector<Node<T> *> _children_or_neighbour;
 
     // TRAITEMENT DES GRAPHES

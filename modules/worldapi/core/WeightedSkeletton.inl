@@ -8,9 +8,7 @@
 namespace world {
 
 template <class T>
-Node<T>::Node(const T &info)
-        : _parent(nullptr),
-          _info(info) {}
+Node<T>::Node(const T &info) : _parent(nullptr), _info(info) {}
 
 template <class T> Node<T>::~Node() {
     // Passage en suppression
@@ -45,8 +43,7 @@ template <class T> void Node<T>::addChild(Node<T> *child) {
     child->_parent = this;
 }
 
-template <class T>
-Node<T> *Node<T>::createChild(const T &info) {
+template <class T> Node<T> *Node<T>::createChild(const T &info) {
     Node<T> *node = new Node<T>(info);
     addChild(node);
     return node;
@@ -57,8 +54,7 @@ template <class T> void Node<T>::addNeighbour(Node<T> *neighbour) {
     neighbour->_children_or_neighbour.push_back(this);
 }
 
-template <class T>
-Node<T> *Node<T>::createNeighbour(const T &info) {
+template <class T> Node<T> *Node<T>::createNeighbour(const T &info) {
     Node<T> *node = new Node<T>(info);
     addNeighbour(node);
     return node;
@@ -67,7 +63,7 @@ Node<T> *Node<T>::createNeighbour(const T &info) {
 template <class T> Node<T> *Node<T>::getParent() const { return _parent; }
 
 template <class T>
-std::vector<Node<T> *>  Node<T>::getChildrenOrNeighboursList() const {
+std::vector<Node<T> *> Node<T>::getChildrenOrNeighboursList() const {
     std::vector<Node<T> *> result;
 
     for (auto value : _children_or_neighbour) {

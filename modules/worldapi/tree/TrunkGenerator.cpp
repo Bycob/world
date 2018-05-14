@@ -32,7 +32,8 @@ void TrunkGenerator::process(Tree &tree) {
 }
 
 void TrunkGenerator::addNode(Mesh &mesh, Node<TreeInfo> *node,
-                             const vec3d &direction, int joinId, bool writeVertIds) const {
+                             const vec3d &direction, int joinId,
+                             bool writeVertIds) const {
     auto &nodeInfo = node->getInfo();
     vec3d nodePos = nodeInfo._position;
 
@@ -66,7 +67,8 @@ void TrunkGenerator::addBezierTube(Mesh &mesh, const BezierCurve &curve,
                                    double startRadius, double endRadius,
                                    int joinId) const {
 
-    int cutCount = static_cast<int>(ceil(curve._pts[0].length(curve._pts[3]) * _resolution));
+    int cutCount = static_cast<int>(
+        ceil(curve._pts[0].length(curve._pts[3]) * _resolution));
 
     for (int i = 1; i <= cutCount; ++i) {
         double t = static_cast<double>(i) / cutCount;
@@ -84,7 +86,7 @@ void TrunkGenerator::addBezierTube(Mesh &mesh, const BezierCurve &curve,
             ax = ay.crossProduct(direction).normalize();
         }
 
-        double rf = 1 - exp(- 8 * t * t);
+        double rf = 1 - exp(-8 * t * t);
         double radius = startRadius * (1 - rf) + endRadius * rf;
 
         int ringStart = mesh.getVerticesCount();

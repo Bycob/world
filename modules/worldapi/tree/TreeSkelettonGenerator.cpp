@@ -17,8 +17,8 @@ TreeSkelettonGenerator::TreeSkelettonGenerator()
           _theta(TreeParamsd::UniformTheta(TreeParamsd::constant(0))),
 
           _weight(TreeParamsd::DefaultWeight()),
-          _count(TreeParamsi::WeightThreshold(
-                  0.02, TreeParamsi::constant(4))) {}
+          _count(TreeParamsi::WeightThreshold(0.02, TreeParamsi::constant(4))) {
+}
 
 TreeSkelettonGenerator::~TreeSkelettonGenerator() {}
 
@@ -46,9 +46,7 @@ void TreeSkelettonGenerator::setForkingCount(const TreeParami &param) {
     _count = param;
 }
 
-void TreeSkelettonGenerator::setSize(const TreeParamd &size) {
-    _size = size;
-}
+void TreeSkelettonGenerator::setSize(const TreeParamd &size) { _size = size; }
 
 void TreeSkelettonGenerator::setWeight(const TreeParamd &weight) {
     _weight = weight;
@@ -59,7 +57,7 @@ void TreeSkelettonGenerator::process(Tree &tree) {
     TreeInfo &info = primaryNode->getInfo();
     info._weight = _rootWeight(TreeInfo(), info);
     info._size = info._weight;
-    info._position = { 0, 0, _seedLocation(TreeInfo(), info)};
+    info._position = {0, 0, _seedLocation(TreeInfo(), info)};
     info._forkCount = 1;
 
     // Add trunk
@@ -96,10 +94,11 @@ void TreeSkelettonGenerator::forkNode(Node<TreeInfo> *node) {
         childInfo._size = _size(parentInfo, childInfo);
 
         childInfo._position = {
-                pos.x + cos(childInfo._theta) * sin(childInfo._phi) * childInfo._size,
-                pos.y + sin(childInfo._theta) * sin(childInfo._phi) * childInfo._size,
-                pos.z + cos(childInfo._phi) * childInfo._size
-        };
+            pos.x +
+                cos(childInfo._theta) * sin(childInfo._phi) * childInfo._size,
+            pos.y +
+                sin(childInfo._theta) * sin(childInfo._phi) * childInfo._size,
+            pos.z + cos(childInfo._phi) * childInfo._size};
         // Ajout du noeud
         Node<TreeInfo> *childNode = node->createChild(childInfo);
 

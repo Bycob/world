@@ -5,11 +5,10 @@
 namespace world {
 
 LeavesGenerator::LeavesGenerator(double leafDensity, double weightThreshold)
-        : _rng(time(NULL)), _distrib(0, 1), _leafDensity(leafDensity), _weightThreshold(weightThreshold)  {}
+        : _rng(time(NULL)), _distrib(0, 1), _leafDensity(leafDensity),
+          _weightThreshold(weightThreshold) {}
 
-void LeavesGenerator::setLeafDensity(double density) {
-    _leafDensity = density;
-}
+void LeavesGenerator::setLeafDensity(double density) { _leafDensity = density; }
 
 void LeavesGenerator::process(Tree &tree) {
     Mesh &leaves = tree.leavesMesh();
@@ -19,11 +18,12 @@ void LeavesGenerator::process(Tree &tree) {
     processNode(*skeletton.getPrimaryNode(), leaves, trunk);
 }
 
-LeavesGenerator* LeavesGenerator::clone() const {
+LeavesGenerator *LeavesGenerator::clone() const {
     return new LeavesGenerator(*this);
 }
 
-void LeavesGenerator::processNode(Node<TreeInfo> &node, Mesh &leavesMesh, Mesh &trunkMesh) {
+void LeavesGenerator::processNode(Node<TreeInfo> &node, Mesh &leavesMesh,
+                                  Mesh &trunkMesh) {
     auto &nodeInfo = node.getInfo();
 
     if (nodeInfo._weight < _weightThreshold) {
@@ -42,15 +42,15 @@ void LeavesGenerator::processNode(Node<TreeInfo> &node, Mesh &leavesMesh, Mesh &
     }
 }
 
-void LeavesGenerator::addLeaf(Mesh &mesh, const vec3d &position, const vec3d &normal) {
+void LeavesGenerator::addLeaf(Mesh &mesh, const vec3d &position,
+                              const vec3d &normal) {
     // Compute missing base vectors
     vec3d ez{0, 0, 1};
     vec3d ax = ez.crossProduct(normal);
 
     if (ax.norm() < std::numeric_limits<double>::epsilon()) {
         ax = {1, 0, 0};
-    }
-    else {
+    } else {
         ax = ax.normalize();
     }
 
@@ -81,10 +81,8 @@ void LeavesGenerator::addLeaf(Mesh &mesh, const vec3d &position, const vec3d &no
     mesh.newVertex(v2 + normal * height, leafNormal);
     mesh.newVertex(v1 + normal * height, leafNormal);
 
-    int ids[][3] = {
-        {idStart, idStart + 1, idStart + 2},
-        {idStart, idStart + 2, idStart + 3}
-    };
+    int ids[][3] = {{idStart, idStart + 1, idStart + 2},
+                    {idStart, idStart + 2, idStart + 3}};
     mesh.newFace(ids[0]);
     mesh.newFace(ids[1]);
 }

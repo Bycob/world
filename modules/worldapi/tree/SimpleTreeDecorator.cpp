@@ -14,22 +14,20 @@ SimpleTreeDecorator::SimpleTreeDecorator(int maxTreesPerChunk)
 
     auto &skeletton = _model.addWorker<TreeSkelettonGenerator>();
     skeletton.setRootWeight(TreeParamsd::gaussian(3, 0.2));
-    skeletton.setForkingCount(TreeParamsi::WeightThreshold(
-            0.15, TreeParamsi::uniform_int(3, 4)));
-    skeletton.setInclination(TreeParamsd::PhiOffset(
-            TreeParamsd::gaussian(0.2 * M_PI, 0.05 * M_PI)));
-    skeletton.setTheta(TreeParamsd::UniformTheta(
-            TreeParamsd::gaussian(0, 0.05 * M_PI)));
-    skeletton.setSize(TreeParamsd::SizeFactor(
-            TreeParamsd::uniform_real(0.5, 0.75)));
+    skeletton.setForkingCount(
+        TreeParamsi::WeightThreshold(0.15, TreeParamsi::uniform_int(3, 4)));
+    skeletton.setInclination(
+        TreeParamsd::PhiOffset(TreeParamsd::gaussian(0.2 * M_PI, 0.05 * M_PI)));
+    skeletton.setTheta(
+        TreeParamsd::UniformTheta(TreeParamsd::gaussian(0, 0.05 * M_PI)));
+    skeletton.setSize(
+        TreeParamsd::SizeFactor(TreeParamsd::uniform_real(0.5, 0.75)));
 
     _model.addWorker<TrunkGenerator>(12);
     _model.addWorker<LeavesGenerator>(0.2, 0.15);
 }
 
-void SimpleTreeDecorator::setModel(const Tree &model) {
-    _model.setup(model);
-}
+void SimpleTreeDecorator::setModel(const Tree &model) { _model.setup(model); }
 
 void SimpleTreeDecorator::decorate(FlatWorld &world, const WorldZone &zone) {
     const double treeResolution = 5;

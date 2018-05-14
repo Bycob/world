@@ -9,14 +9,12 @@
 
 namespace world {
 
-template <typename T>
-using TreeParam = Parameter<T, TreeInfo, TreeInfo>;
+template <typename T> using TreeParam = Parameter<T, TreeInfo, TreeInfo>;
 using TreeParamd = TreeParam<double>;
 using TreeParami = TreeParam<int>;
 
 template <typename T>
-struct TreeParams
-        : public Params<T, TreeInfo, TreeInfo> {};
+struct TreeParams : public Params<T, TreeInfo, TreeInfo> {};
 
 struct TreeParamsd : public TreeParams<double> {
     static TreeParamd DefaultWeight() {
@@ -43,8 +41,8 @@ struct TreeParamsd : public TreeParams<double> {
     static TreeParamd UniformTheta(const TreeParamd &jitter) {
         TreeParamd param;
         param.setFunction([jitter](TreeInfo parent, TreeInfo child) {
-            return jitter(parent, child)
-                   + (2.0 * M_PI * child._forkId) / parent._forkCount;
+            return jitter(parent, child) +
+                   (2.0 * M_PI * child._forkId) / parent._forkCount;
         });
         return param;
     }
@@ -52,7 +50,8 @@ struct TreeParamsd : public TreeParams<double> {
     static TreeParamd PhiOffset(const TreeParamd &offset) {
         TreeParamd param;
         param.setFunction([offset](TreeInfo parent, TreeInfo child) {
-            return offset(parent, child) + cos(parent._theta - child._theta) * parent._phi;
+            return offset(parent, child) +
+                   cos(parent._theta - child._theta) * parent._phi;
         });
         return param;
     }
@@ -75,10 +74,13 @@ struct TreeParamsd : public TreeParams<double> {
 };
 
 struct TreeParamsi : public TreeParams<int> {
-    static TreeParami WeightThreshold(double weightThreshold, const TreeParami &forkCount) {
+    static TreeParami WeightThreshold(double weightThreshold,
+                                      const TreeParami &forkCount) {
         TreeParami param;
-        param.setFunction([forkCount, weightThreshold](TreeInfo parent, TreeInfo child) {
-            return child._weight >= weightThreshold ? forkCount(parent, child) : 0;
+        param.setFunction([forkCount, weightThreshold](TreeInfo parent,
+                                                       TreeInfo child) {
+            return child._weight >= weightThreshold ? forkCount(parent, child)
+                                                    : 0;
         });
         return param;
     }
@@ -92,9 +94,10 @@ struct SideBranchd {
             double compFactor = factor(parent, child);
 
             if (child._forkId == 0) {
-                return parent._weight * (1 + (1 - compFactor) * (parent._forkCount - 1)) / parent._forkCount;
-            }
-            else {
+                return parent._weight *
+                       (1 + (1 - compFactor) * (parent._forkCount - 1)) /
+                       parent._forkCount;
+            } else {
                 return parent._weight * compFactor / parent._forkCount;
             }
         });
@@ -121,7 +124,8 @@ struct SideBranchd {
         param.setFunction([sideBranchPhi](TreeInfo parent, TreeInfo child) {
             if (child._forkId == 0)
                 return parent._phi;
-            else return sideBranchPhi(parent, child);
+            else
+                return sideBranchPhi(parent, child);
         });
         return param;
     }
@@ -129,13 +133,13 @@ struct SideBranchd {
     static TreeParamd Size(const TreeParamd &nextBranchDistance) {
         TreeParamd param;
         TreeParamd sizeByWeight = TreeParamsd::SizeByWeight(1);
-        param.setFunction([nextBranchDistance, sizeByWeight](TreeInfo parent, TreeInfo child) {
+        param.setFunction([nextBranchDistance, sizeByWeight](TreeInfo parent,
+                                                             TreeInfo child) {
             double baseSize = sizeByWeight(parent, child);
 
             if (child._forkId == 0 && parent._forkCount != 1) {
                 return baseSize * nextBranchDistance(parent, child);
-            }
-            else {
+            } else {
                 return baseSize;
             }
         });

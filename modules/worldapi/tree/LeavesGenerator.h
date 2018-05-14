@@ -19,7 +19,7 @@ public:
 
     void process(Tree &tree) override;
 
-    LeavesGenerator * clone() const override;
+    LeavesGenerator *clone() const override;
 
 private:
     std::mt19937 _rng;

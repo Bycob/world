@@ -31,13 +31,9 @@ const Mesh &Tree::getTrunkMesh() const { return _trunkMesh; }
 
 Mesh &Tree::getTrunkMesh() { return _trunkMesh; }
 
-const Mesh& Tree::getLeavesMesh() const {
-    return _leavesMesh;
-}
+const Mesh &Tree::getLeavesMesh() const { return _leavesMesh; }
 
-Mesh& Tree::leavesMesh() {
-    return _leavesMesh;
-}
+Mesh &Tree::leavesMesh() { return _leavesMesh; }
 
 void Tree::collect(ICollector &collector, const IResolutionModel &explorer) {
     using ItemKeys = ICollector::ItemKeys;
