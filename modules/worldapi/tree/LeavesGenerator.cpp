@@ -26,7 +26,7 @@ LeavesGenerator* LeavesGenerator::clone() const {
 void LeavesGenerator::processNode(Node<TreeInfo> &node, Mesh &leavesMesh, Mesh &trunkMesh) {
     auto &nodeInfo = node.getInfo();
 
-    if (node.getWeight() < _weightThreshold) {
+    if (nodeInfo._weight < _weightThreshold) {
         for (int i = nodeInfo._firstVert; i < nodeInfo._lastVert; ++i) {
             if (_leafDensity > _distrib(_rng)) {
                 auto &vert = trunkMesh.getVertex(i);
@@ -61,16 +61,25 @@ void LeavesGenerator::addLeaf(Mesh &mesh, const vec3d &position, const vec3d &no
     double height = 0.13;
     double angle = _distrib(_rng) * M_PI;
 
-    vec3d sideVec = ax * cos(angle) + ay * sin(angle);
+    double cs = cos(angle);
+    double sn = sin(angle);
+
+    vec3d sideVec = ax * cs + ay * sn;
+    vec3d leafNormal = ay * cs - ax * sn;
+
+    // Flip normal if it faces toward negative z
+    if (leafNormal.z < 0) {
+        leafNormal = leafNormal * (-1);
+    }
 
     vec3d v1 = position + sideVec * hwidth;
     vec3d v2 = position - sideVec * hwidth;
 
     int idStart = mesh.getVerticesCount();
-    mesh.newVertex(v1);
-    mesh.newVertex(v2);
-    mesh.newVertex(v2 + normal * height);
-    mesh.newVertex(v1 + normal * height);
+    mesh.newVertex(v1, leafNormal);
+    mesh.newVertex(v2, leafNormal);
+    mesh.newVertex(v2 + normal * height, leafNormal);
+    mesh.newVertex(v1 + normal * height, leafNormal);
 
     int ids[][3] = {
         {idStart, idStart + 1, idStart + 2},

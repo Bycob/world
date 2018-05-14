@@ -8,9 +8,9 @@
 namespace world {
 
 template <class T>
-Node<T>::Node(double weight, vec3d position)
-        : _weight(weight), _pos(position), _parent(nullptr),
-          _info(std::make_unique<T>()) {}
+Node<T>::Node(const T &info)
+        : _parent(nullptr),
+          _info(info) {}
 
 template <class T> Node<T>::~Node() {
     // Passage en suppression
@@ -40,26 +40,14 @@ template <class T> Node<T>::~Node() {
     }
 }
 
-template <class T> void Node<T>::setWeight(double weight) { _weight = weight; }
-
-template <class T> void Node<T>::setPosition(double x, double y, double z) {
-    _pos.x = x;
-    _pos.y = y;
-    _pos.z = z;
-};
-
-template <class T> vec3d Node<T>::getPosition() const {
-    return _pos;
-}
-
 template <class T> void Node<T>::addChild(Node<T> *child) {
     _children_or_neighbour.push_back(child);
     child->_parent = this;
 }
 
 template <class T>
-Node<T> *Node<T>::createChild(double weight, double x, double y, double z) {
-    Node<T> *node = new Node<T>(weight, {x, y, z});
+Node<T> *Node<T>::createChild(const T &info) {
+    Node<T> *node = new Node<T>(info);
     addChild(node);
     return node;
 }
@@ -70,8 +58,8 @@ template <class T> void Node<T>::addNeighbour(Node<T> *neighbour) {
 }
 
 template <class T>
-Node<T> *Node<T>::createNeighbour(double weight, double x, double y, double z) {
-    Node<T> *node = new Node<T>(weight, {x, y, z});
+Node<T> *Node<T>::createNeighbour(const T &info) {
+    Node<T> *node = new Node<T>(info);
     addNeighbour(node);
     return node;
 }
@@ -79,7 +67,7 @@ Node<T> *Node<T>::createNeighbour(double weight, double x, double y, double z) {
 template <class T> Node<T> *Node<T>::getParent() const { return _parent; }
 
 template <class T>
-std::vector<Node<T> *> Node<T>::getChildrenOrNeighboursList() const {
+std::vector<Node<T> *>  Node<T>::getChildrenOrNeighboursList() const {
     std::vector<Node<T> *> result;
 
     for (auto value : _children_or_neighbour) {
@@ -89,9 +77,8 @@ std::vector<Node<T> *> Node<T>::getChildrenOrNeighboursList() const {
     return result;
 }
 
-
 template <class T>
-WeightedSkeletton<T>::WeightedSkeletton() : _primaryNode(new Node<T>(1, {0, 0, 0})) {}
+WeightedSkeletton<T>::WeightedSkeletton() : _primaryNode(new Node<T>(T())) {}
 
 template <class T> WeightedSkeletton<T>::~WeightedSkeletton() {}
 
@@ -138,7 +125,7 @@ void WeightedSkeletton<T>::populateMesh(Mesh *mesh, Node<T> *node) {
 
         // Ajout du vertex correspondant
         Vertex vert;
-        vert.setPosition(node->_pos);
+        vert.setPosition(node->getInfo()._position);
         mesh->addVertex(vert);
     }
 

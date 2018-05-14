@@ -11,7 +11,7 @@ namespace world {
 
 class WORLDAPI_EXPORT TrunkGenerator : public ITreeWorker {
 public:
-    TrunkGenerator(int segmentCount = 12);
+    TrunkGenerator(int segmentCount = 12, double resolution = 20);
 
     ~TrunkGenerator();
 

@@ -6,10 +6,8 @@
 
 namespace world {
 
-class WORLDAPI_EXPORT TreeInfo {
+class WORLDAPI_EXPORT TreeInfo : public NodeInfo {
 public:
-    int _level = 0;
-
     /// Size of the branch terminated by this node.
     double _size = 0;
     /// Rotation around z axis in radians, from 0 to 2 * PI.
@@ -19,18 +17,20 @@ public:
     /// 0 means that the branch points toward positive z.
     double _phi = 0;
 
-    /// weight of the branch, ie. thickness.
-    double _weight = 1;
+    /// Number of children this branch has
+    int _forkCount = 0;
+    /// ID to identify a single child in a group of children.
+    int _forkId = 0;
 
     /// First vertex in the main trunk mesh (used when
     /// generating leaves)
     int _firstVert = 0;
-
     /// Last vertex in the main trunk mesh (used when
     /// generating leaves)
     int _lastVert = 0;
 };
 
 using TreeSkeletton = WeightedSkeletton<TreeInfo>;
+using TreeNode = Node<TreeInfo>;
 
 } // namespace world

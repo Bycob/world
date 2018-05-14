@@ -10,41 +10,139 @@
 namespace world {
 
 template <typename T>
-using TreeParam = Parameter<T, TreeInfo, int, double, double, double, double>;
+using TreeParam = Parameter<T, TreeInfo, TreeInfo>;
 using TreeParamd = TreeParam<double>;
 using TreeParami = TreeParam<int>;
 
 template <typename T>
 struct TreeParams
-        : public Params<T, TreeInfo, int, double, double, double, double> {};
+        : public Params<T, TreeInfo, TreeInfo> {};
 
 struct TreeParamsd : public TreeParams<double> {
     static TreeParamd DefaultWeight() {
         TreeParamd param;
-        param.setFunction([](TreeInfo parent, int divisionCount, double theta,
-                             double phi, double weight, double size) {
-            return parent._weight / divisionCount;
+        param.setFunction([](TreeInfo parent, TreeInfo child) {
+            return parent._weight / parent._forkCount;
+        });
+        return param;
+    }
+
+    /** Creates a basic weight function (each branch receive
+     * a part of the weight from the lower branch). Then you can
+     * add a function to jitter this weight of a certain amount
+     * @param jitter The weight obtained before will be multiplied
+     * by this parameter. */
+    static TreeParamd SharedWeight(const TreeParamd &jitter) {
+        TreeParamd param;
+        param.setFunction([jitter](TreeInfo parent, TreeInfo child) {
+            return jitter(parent, child) * parent._weight / parent._forkCount;
+        });
+        return param;
+    }
+
+    static TreeParamd UniformTheta(const TreeParamd &jitter) {
+        TreeParamd param;
+        param.setFunction([jitter](TreeInfo parent, TreeInfo child) {
+            return jitter(parent, child)
+                   + (2.0 * M_PI * child._forkId) / parent._forkCount;
+        });
+        return param;
+    }
+
+    static TreeParamd PhiOffset(const TreeParamd &offset) {
+        TreeParamd param;
+        param.setFunction([offset](TreeInfo parent, TreeInfo child) {
+            return offset(parent, child) + cos(parent._theta - child._theta) * parent._phi;
+        });
+        return param;
+    }
+
+    static TreeParamd SizeFactor(const TreeParamd &reductionFactor) {
+        TreeParamd param;
+        param.setFunction([reductionFactor](TreeInfo parent, TreeInfo child) {
+            return reductionFactor(parent, child) * parent._size;
+        });
+        return param;
+    }
+
+    static TreeParamd SizeByWeight(double density) {
+        TreeParamd param;
+        param.setFunction([density](TreeInfo parent, TreeInfo child) {
+            return pow(child._weight / density, 0.5);
         });
         return param;
     }
 };
 
 struct TreeParamsi : public TreeParams<int> {
-    static TreeParami MaxLevelByWeight(double weightThreshold) {
+    static TreeParami WeightThreshold(double weightThreshold, const TreeParami &forkCount) {
         TreeParami param;
-        param.setFunction([weightThreshold](TreeInfo info, int divisionCount,
-                                            double theta, double phi,
-                                            double weight, double size) {
+        param.setFunction([forkCount, weightThreshold](TreeInfo parent, TreeInfo child) {
+            return child._weight >= weightThreshold ? forkCount(parent, child) : 0;
+        });
+        return param;
+    }
+};
 
-            if (info._weight <= weightThreshold) {
-                return info._level;
-            } else {
-                return info._level + 1;
+
+struct SideBranchd {
+    static TreeParamd Weight(const TreeParamd &factor) {
+        TreeParamd param;
+        param.setFunction([factor](TreeInfo parent, TreeInfo child) {
+            double compFactor = factor(parent, child);
+
+            if (child._forkId == 0) {
+                return parent._weight * (1 + (1 - compFactor) * (parent._forkCount - 1)) / parent._forkCount;
+            }
+            else {
+                return parent._weight * compFactor / parent._forkCount;
             }
         });
         return param;
-    };
+    }
+
+    static TreeParamd Theta(const TreeParamd &jitter) {
+        TreeParamd param;
+        param.setFunction([jitter](TreeInfo parent, TreeInfo child) {
+            if (child._forkId == 0)
+                return parent._theta;
+
+            int i = child._forkId - 1;
+            int c = parent._forkCount - 1;
+
+            return jitter(parent, child) + (2.0 * M_PI * i) / c;
+        });
+        return param;
+    }
+
+    static TreeParamd Phi(const TreeParamd &sideBranchOffset) {
+        TreeParamd param;
+        TreeParamd sideBranchPhi = TreeParamsd::PhiOffset(sideBranchOffset);
+        param.setFunction([sideBranchPhi](TreeInfo parent, TreeInfo child) {
+            if (child._forkId == 0)
+                return parent._phi;
+            else return sideBranchPhi(parent, child);
+        });
+        return param;
+    }
+
+    static TreeParamd Size(const TreeParamd &nextBranchDistance) {
+        TreeParamd param;
+        TreeParamd sizeByWeight = TreeParamsd::SizeByWeight(1);
+        param.setFunction([nextBranchDistance, sizeByWeight](TreeInfo parent, TreeInfo child) {
+            double baseSize = sizeByWeight(parent, child);
+
+            if (child._forkId == 0 && parent._forkCount != 1) {
+                return baseSize * nextBranchDistance(parent, child);
+            }
+            else {
+                return baseSize;
+            }
+        });
+        return param;
+    }
 };
+
 /*
         // POIDS
 
@@ -85,127 +183,6 @@ struct TreeParamsi : public TreeParams<int> {
                         return new SpecialSizeParameter1(*this);
                 }
         };
-
-        // MAX LEVEL
-
-        class MaxLevelByWeightParameter : public param_i {
-        public :
-                MaxLevelByWeightParameter(double weighThreshold) :
-                                _weightThreshold(weighThreshold) {}
-
-                virtual int operator()(const TreeInfo &info) {
-                        if (info.getWeight() <= _weightThreshold) {
-                                return info._level;
-                        } else {
-                                return info._level + 1;
-                        }
-                }
-
-                virtual MaxLevelByWeightParameter *clone() const {
-                        return new MaxLevelByWeightParameter(*this);
-                }
-
-        private :
-                double _weightThreshold;
-        };
 */
 
-struct SideBranchd {
-    // TODO Les fonctions qui font des branches intermédiaires... des fois.
-};
-/*
-        class SideBranchPhiParameter : public chain_d {
-        public :
-                template<class F>
-                SideBranchPhiParameter(const F &wrapped) :
-                                chain_d(wrapped) {}
-
-                virtual double operator()(const TreeInfo &info,
-                                                                  int
-   divisionCount, double theta, double phi, double weight, double size) {
-
-                        const Node<TreeInfo> &node = info.getNode();
-                        double result = chain_d::operator()(info, divisionCount,
-   theta, phi, weight, size); if (node.getChildrenOrNeighboursCount() == 0 &&
-   info.getWeight() > 0.1) { result *= 0.1;
-                        }
-                        return result;
-                }
-
-                virtual SideBranchPhiParameter *clone() const {
-                        return new SideBranchPhiParameter(*this);
-                }
-
-        private :
-        };
-
-        class SideBranchOffsetThetaParameter : public chain_d {
-        public :
-                template<class F>
-                SideBranchOffsetThetaParameter(const F &chained) :
-   chain_d(chained) {}
-
-                virtual double operator()(const TreeInfo &info,
-                                                                  int
-   divisionCount, double theta, double phi, double weight, double size) {
-
-                        const Node<TreeInfo> &node = info.getNode();
-                        int id = node.getChildrenOrNeighboursCount();
-                        double result = chain_d::operator()(info, divisionCount,
-   theta, phi, weight, size); if (node.getChildrenOrNeighboursCount() != 0 &&
-   info.getWeight() > 0.1) { result += (1.0 / (divisionCount - 1) - 1.0 /
-   divisionCount) * id * M_PI * 2.0;
-                        }
-
-                        return result;
-                }
-
-                virtual SideBranchOffsetThetaParameter *clone() const {
-                        return new SideBranchOffsetThetaParameter(*this);
-                }
-        };
-
-        class SideBranchSizeParameter : public chain_d {
-        public :
-                template<class F>
-                SideBranchSizeParameter(const F &wrapped) : chain_d(wrapped) {}
-
-                virtual double operator()(const TreeInfo &info,
-                                                                  int
-   divisionCount, double theta, double phi, double weight, double size) {
-
-                        double result = chain_d::operator()(info, divisionCount,
-   theta, phi, weight, size); result *= pow(weight / info.getWeight(), 0.3)
-   * 1.4;
-
-                        return result;
-                }
-
-                virtual SideBranchSizeParameter *clone() const {
-                        return new SideBranchSizeParameter(*this);
-                }
-        };
-
-        class SideBranchWeightParameter : public chain_d {
-        public :
-                template<class F>
-                SideBranchWeightParameter(const F &wrapped) :
-                                chain_d(wrapped) {}
-
-                virtual double operator()(const TreeInfo &info,
-                                                                  int
-   divisionCount, double theta, double phi, double weight, double size) {
-
-                        double result = chain_d::operator()(info, divisionCount,
-   theta, phi, weight, size); if (phi <= M_PI / 36) { result = info.getWeight()
-   * pow(0.75, info._level); } else { result *= 0.6;
-                        }
-                        return result;
-                }
-
-                virtual SideBranchSizeParameter *clone() const {
-                        return new SideBranchSizeParameter(*this);
-                }
-        };
-        */
 } // namespace world

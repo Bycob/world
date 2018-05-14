@@ -9,8 +9,8 @@
 
 namespace world {
 
-TrunkGenerator::TrunkGenerator(int segmentCount)
-        : _segmentCount(segmentCount) {}
+TrunkGenerator::TrunkGenerator(int segmentCount, double resolution)
+        : _segmentCount(segmentCount), _resolution(resolution) {}
 
 TrunkGenerator::~TrunkGenerator() {}
 
@@ -24,36 +24,37 @@ void TrunkGenerator::process(Tree &tree) {
     // Création du mesh
     Mesh &trunkMesh = tree.getTrunkMesh();
     auto primary = tree.getSkeletton().getPrimaryNode();
+    auto &primInfo = primary->getInfo();
 
-    addRing(trunkMesh, primary->getPosition(), {1, 0, 0}, {0, 1, 0},
-            getRadius(primary->getWeight()));
+    addRing(trunkMesh, primInfo._position, {1, 0, 0}, {0, 1, 0},
+            getRadius(primInfo._weight));
     addNode(trunkMesh, primary, {0, 0, 1}, 0, true);
 }
 
 void TrunkGenerator::addNode(Mesh &mesh, Node<TreeInfo> *node,
                              const vec3d &direction, int joinId, bool writeVertIds) const {
     auto &nodeInfo = node->getInfo();
-    vec3d nodePos = node->getPosition();
+    vec3d nodePos = nodeInfo._position;
 
     auto &children = node->getChildrenOrNeighboursAccess();
 
     for (auto *child : children) {
         auto &childInfo = child->getInfo();
-        vec3d childPos = child->getPosition();
+        vec3d childPos = childInfo._position;
         vec3d newDirection = childPos - nodePos;
 
         BezierCurve curve(nodePos, childPos, direction * 0.25,
                           newDirection * -0.25);
 
         if (writeVertIds) {
-            nodeInfo._firstVert = mesh.getVerticesCount();
+            childInfo._firstVert = mesh.getVerticesCount();
         }
 
         addBezierTube(mesh, curve, getRadius(nodeInfo._weight),
                       getRadius(childInfo._weight), joinId);
 
         if (writeVertIds) {
-            nodeInfo._lastVert = mesh.getVerticesCount();
+            childInfo._lastVert = mesh.getVerticesCount();
         }
 
         addNode(mesh, child, newDirection,
@@ -65,8 +66,7 @@ void TrunkGenerator::addBezierTube(Mesh &mesh, const BezierCurve &curve,
                                    double startRadius, double endRadius,
                                    int joinId) const {
 
-    // TODO estimate cut count to match the resolution
-    int cutCount = 12;
+    int cutCount = static_cast<int>(ceil(curve._pts[0].length(curve._pts[3]) * _resolution));
 
     for (int i = 1; i <= cutCount; ++i) {
         double t = static_cast<double>(i) / cutCount;
@@ -84,7 +84,8 @@ void TrunkGenerator::addBezierTube(Mesh &mesh, const BezierCurve &curve,
             ax = ay.crossProduct(direction).normalize();
         }
 
-        double radius = startRadius * (1 - t) + endRadius * t;
+        double rf = 1 - exp(- 8 * t * t);
+        double radius = startRadius * (1 - rf) + endRadius * rf;
 
         int ringStart = mesh.getVerticesCount();
         addRing(mesh, origin, ax, ay, radius);
