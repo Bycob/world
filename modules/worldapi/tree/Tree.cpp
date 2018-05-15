@@ -44,7 +44,7 @@ void Tree::collect(ICollector &collector, const IResolutionModel &explorer) {
     }
 
     // Collection
-    if (explorer.getResolutionAt(vec3d{0, 0, 0}) < 5) {
+    if (explorer.getResolutionAt(vec3d{0, 0, 0}) < 10) {
         // Collect a dummy mesh
         Mesh mesh;
 

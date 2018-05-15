@@ -1,6 +1,7 @@
 #include "FlatWorld.h"
 
 #include "terrain/Ground.h"
+#include "tree/ForestLayer.h"
 #include "tree/SimpleTreeDecorator.h"
 #include "FlatWorldCollector.h"
 
@@ -16,7 +17,7 @@ public:
 FlatWorld *FlatWorld::createDemoFlatWorld() {
     FlatWorld *world = new FlatWorld();
 
-    world->addFlatWorldDecorator<SimpleTreeDecorator>(3);
+    world->addFlatWorldDecorator<ForestLayer>();
 
     return world;
 }
