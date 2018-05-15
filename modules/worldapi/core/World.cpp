@@ -63,7 +63,7 @@ void World::collect(const WorldZone &zone, ICollector &collector,
     ResolutionModelContextWrap wexplorer(explorer);
     wexplorer.setOffset(zone->getAbsoluteOffset());
 
-    _chunkSystem->getChunk(zone).collect(wcollector, wexplorer);
+    _chunkSystem->collectZone(zone, wcollector, wexplorer);
 }
 
 void World::onFirstExploration(const WorldZone &chunk) {

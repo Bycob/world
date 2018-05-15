@@ -12,6 +12,8 @@ class WorldZone;
 
 class WORLDAPI_EXPORT IResolutionModel {
 public:
+    virtual ~IResolutionModel() = default;
+
     virtual double getResolutionAt(const vec3d &coord) const = 0;
 
     virtual double getResolutionAt(const WorldZone &zone,

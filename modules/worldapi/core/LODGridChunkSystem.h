@@ -46,6 +46,8 @@ public:
 
     Chunk &getChunk(const WorldZone &zone) override;
 
+    void collectZone(const WorldZone &zone, ICollector &collector, IResolutionModel &resolutionModel) override;
+
 private:
     PLODGridChunkSystem *_internal;
 

@@ -16,6 +16,8 @@ class WorldZone;
 
 class WORLDAPI_EXPORT IWorldZoneHandler {
 public:
+    virtual ~IWorldZoneHandler() = default;
+
     /** Gets an ID for the zone. This ID enable the chunk system
      * to recognize the zone among all the zones loaded. */
     virtual ChunkKey getID() const = 0;

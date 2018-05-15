@@ -9,6 +9,8 @@
 namespace world {
 class IChunkSystem {
 public:
+    virtual ~IChunkSystem() = default;
+
     /**
      * Get the chunk at the given position. If multiple chunk with
      * different levels of detail are found, the one with the highest
@@ -25,6 +27,8 @@ public:
     virtual std::vector<WorldZone> getChildrenZones(const WorldZone &zone) = 0;
 
     virtual Chunk &getChunk(const WorldZone &zone) = 0;
+
+    virtual void collectZone(const WorldZone &zone, ICollector &collector, IResolutionModel &resolutionModel) = 0;
 };
 } // namespace world
 #endif // WORLD_ICHUNKSYSTEM_H
