@@ -28,8 +28,6 @@ void Application::run(int argc, char **argv) {
     _running = true;
     _mainView->show();
 
-	bool firstExpand = true;
-
     while(_running) {
         if (!_mainView->running()) {
             _running = false;
@@ -44,7 +42,7 @@ void Application::run(int argc, char **argv) {
 			}
 			_paramLock.unlock();
 
-			if (((newUpdatePos - _lastUpdatePos).norm() > 50 || firstExpand) && !_emptyCollectors.empty()) {
+			if ((newUpdatePos - _lastUpdatePos).norm() > 0.01 && !_emptyCollectors.empty()) {
 			    // get collector
 			    _paramLock.lock();
 			    std::unique_ptr<FlatWorldCollector> collector = std::move(_emptyCollectors.front());
@@ -56,7 +54,7 @@ void Application::run(int argc, char **argv) {
 				_explorer->setPosition(newUpdatePos);
 
 				auto start = std::chrono::steady_clock::now();
-				_explorer->explore<FlatWorld>(*_world, *collector);
+                _explorer->exploreAndCollect<FlatWorld>(*_world, *collector);
 				
 				if (_dbgOn) {
 					std::cout << "Temps d'exploration : " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count() << " ms " << std::endl;
@@ -69,8 +67,6 @@ void Application::run(int argc, char **argv) {
 				// Mise à jour de la vue
 				_mainView->onWorldChange();
 				_lastUpdatePos = newUpdatePos;
-
-				firstExpand = false;
 			}
 		}
 

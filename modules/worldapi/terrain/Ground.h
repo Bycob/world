@@ -30,7 +30,7 @@ public:
     Ground(double unitSize = 6000, double minAltitude = -2000,
            double maxAltitude = 4000);
 
-    virtual ~Ground();
+    ~Ground() override;
 
     // PARAMETERS
     // TODO constraints

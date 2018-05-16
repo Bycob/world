@@ -3,6 +3,7 @@
 #include "core/WorldConfig.h"
 
 #include <memory>
+#include <core/IResolutionModel.h>
 
 #include "core/WorldObject.h"
 #include "assets/Mesh.h"
@@ -32,7 +33,8 @@ public:
 
     Mesh &getTrunkMesh();
 
-    void collectWholeObject(ICollector &collector) override;
+    void collect(ICollector &collector,
+                 const IResolutionModel &explorer) override;
 
 private:
     PTree *_internal;

@@ -9,6 +9,8 @@ namespace world {
 
 class WORLDAPI_EXPORT ITerrainWorkerContext {
 public:
+    virtual ~ITerrainWorkerContext() = default;
+
     /** Returns neighbour terrains. */
     virtual optional<const Terrain &> getNeighbour(int x, int y) const = 0;
 
@@ -27,6 +29,8 @@ public:
 
 class WORLDAPI_EXPORT ITerrainWorker {
 public:
+    virtual ~ITerrainWorker() = default;
+
     virtual void process(Terrain &terrain) = 0;
 
     virtual void process(Terrain &terrain, ITerrainWorkerContext &context) = 0;

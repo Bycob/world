@@ -1,6 +1,7 @@
 #include "Tree.h"
 
 #include <vector>
+#include <core/IResolutionModel.h>
 
 namespace world {
 class PTree {
@@ -30,7 +31,7 @@ const Mesh &Tree::getTrunkMesh() const { return _trunkMesh; }
 
 Mesh &Tree::getTrunkMesh() { return _trunkMesh; }
 
-void Tree::collectWholeObject(ICollector &collector) {
+void Tree::collect(ICollector &collector, const IResolutionModel &explorer) {
     // Generation
     if (!_generated) {
         generateBase();

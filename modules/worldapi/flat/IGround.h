@@ -13,6 +13,8 @@ class FlatWorldCollector;
 
 class WORLDAPI_EXPORT IGround {
 public:
+    virtual ~IGround() = default;
+
     virtual double observeAltitudeAt(WorldZone zone, double x, double y) = 0;
 
     virtual void collectZone(const WorldZone &zone, ICollector &collector) = 0;

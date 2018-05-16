@@ -9,10 +9,7 @@
 namespace world {
 class IChunkSystem {
 public:
-    struct QueryResult {
-        WorldZone _zone;
-        bool _created;
-    };
+    virtual ~IChunkSystem() = default;
 
     /**
      * Get the chunk at the given position. If multiple chunk with
@@ -23,12 +20,15 @@ public:
      * @return A QueryResult containing the chunk and a boolean indicating
      * if it was newly created.
      */
-    virtual QueryResult getChunk(const vec3d &position) = 0;
+    virtual WorldZone getZone(const vec3d &position) = 0;
 
-    virtual QueryResult getNeighbourChunk(const WorldZone &zone,
-                                          const vec3i &direction) = 0;
+    virtual std::vector<WorldZone> getNeighbourZones(const WorldZone &zone) = 0;
 
-    virtual std::vector<QueryResult> getChildren(const WorldZone &zone) = 0;
+    virtual std::vector<WorldZone> getChildrenZones(const WorldZone &zone) = 0;
+
+    virtual Chunk &getChunk(const WorldZone &zone) = 0;
+
+    virtual void collectZone(const WorldZone &zone, ICollector &collector, IResolutionModel &resolutionModel) = 0;
 };
 } // namespace world
 #endif // WORLD_ICHUNKSYSTEM_H
