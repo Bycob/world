@@ -74,14 +74,11 @@ void FlatWorldCollector::addTerrain(TerrainKey key, const Terrain &terrain) {
         material.setMapKd("texture01");
 
         // Retrieve the texture
-        auto texture = terrain.getTexture();
+        auto &texture = terrain.getTexture();
 
         addItemUnsafe(itemKey, object);
         addMaterial(itemKey, material);
-
-        if (texture) {
-            addTexture(itemKey, "texture01", *texture);
-        }
+        addTexture(itemKey, "texture01", texture);
     }
 #else
     auto it = _terrains.find(key);

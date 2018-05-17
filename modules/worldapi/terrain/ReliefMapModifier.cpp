@@ -20,7 +20,7 @@ void ReliefMapModifier::setMapResolution(int mapres) {
     _mapResolution = mapres;
 }
 
-void ReliefMapModifier::process(world::Terrain &terrain) {
+void ReliefMapModifier::processTerrain(Terrain &terrain) {
     // Terrain
     int size = terrain.getResolution();
 
@@ -77,9 +77,8 @@ void ReliefMapModifier::process(world::Terrain &terrain) {
     // TerrainOps::multiply(terrain, bufferDiff);
 }
 
-void ReliefMapModifier::process(Terrain &terrain,
-                                ITerrainWorkerContext &context) {
-    process(terrain);
+void ReliefMapModifier::processTile(ITileContext &context) {
+    processTerrain(context.getTerrain());
 }
 
 const std::pair<Terrain, Terrain> &ReliefMapModifier::obtainMap(int x, int y) {

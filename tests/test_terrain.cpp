@@ -114,7 +114,7 @@ void testPerlin(int argc, char** argv) {
 
 	std::cout << "Génération du terrain..." << std::endl;
     Terrain terrain(size);
-    generator.process(terrain);
+    generator.processTerrain(terrain);
 
 	std::cout << "ecriture de l'image du terrain..." <<std::endl;
 	Image image = terrain.createImage();
@@ -166,8 +166,8 @@ void testPerlin(int argc, char** argv) {
 	colorMap.addPoint({ 1, 0 }, Color4u(244, 252, 250));
 	colorMap.addPoint({ 1, 1 }, Color4u(244, 252, 250));
 
-	texturer.process(terrain);
-	const Image &texture = *terrain.getTexture();
+    texturer.processTerrain(terrain);
+	const Image &texture = terrain.getTexture();
 
 	std::cout << "ecriture de la texture..." << std::endl;
 	try {
@@ -191,7 +191,7 @@ void testSubdivisions(int argc, char** argv) {
 	ObjLoader meshIO;
 	Terrain terrain(129);
 	PerlinTerrainGenerator generator;
-	generator.process(terrain);
+    generator.processTerrain(terrain);
 
 	TerrainSubdivisionGenerator subdiv;
 

@@ -16,25 +16,25 @@ using namespace arma;
 namespace world {
 
 Terrain::Terrain(int size)
-        : _array(size, size), _texture(nullptr),
-          _bbox({-0.5, -0.5, -0.0}, {0.5, 0.5, 0.4}) {}
+        : _array(size, size), _texture(1, 1, ImageType::RGB),
+          _bbox({-0.5, -0.5, -0.0}, {0.5, 0.5, 0.4}) {
+
+    _texture.rgb(0, 0).set(255, 255, 255);
+}
 
 Terrain::Terrain(const Mat<double> &data)
-        : _array(data), _texture(nullptr),
+        : _array(data), _texture(1, 1, ImageType::RGB),
           _bbox({-0.5, -0.5, -0.0}, {0.5, 0.5, 0.4}) {
 
     if (data.n_rows != data.n_cols) {
         throw std::runtime_error("Terrain must be squared !");
     }
+    _texture.rgb(0, 0).set(255, 255, 255);
 }
 
 Terrain::Terrain(const Terrain &terrain)
-        : _array(terrain._array), _bbox(terrain._bbox) {
-
-    if (terrain._texture != nullptr) {
-        _texture = std::make_unique<Image>(*terrain._texture);
-    }
-}
+        : _array(terrain._array), _bbox(terrain._bbox),
+          _texture(terrain._texture) {}
 
 Terrain::Terrain(Terrain &&terrain)
         : _array(std::move(terrain._array)),
@@ -44,12 +44,8 @@ Terrain::~Terrain() = default;
 
 Terrain &Terrain::operator=(const Terrain &terrain) {
     _array = terrain._array;
+    _texture = terrain._texture;
     _bbox = terrain._bbox;
-
-    if (terrain._texture != nullptr) {
-        _texture = std::make_unique<Image>(*terrain._texture);
-    }
-
     return *this;
 }
 
@@ -190,20 +186,13 @@ Mesh *Terrain::createMesh(double offsetX, double offsetY, double offsetZ,
 
 Image Terrain::createImage() const { return Image(this->_array); }
 
-void Terrain::setTexture(const Image &image) {
-    _texture = std::make_unique<Image>(image);
-}
+void Terrain::setTexture(const Image &image) { _texture = image; }
 
-void Terrain::setTexture(Image &&image) {
-    _texture = std::make_unique<Image>(image);
-}
+void Terrain::setTexture(Image &&image) { _texture = image; }
 
-optional<const Image &> Terrain::getTexture() const {
-    if (_texture == nullptr) {
-        return nullopt;
-    }
-    return *_texture;
-}
+Image &Terrain::getTexture() { return _texture; }
+
+const Image &Terrain::getTexture() const { return _texture; }
 
 vec2i Terrain::getPixelPos(double x, double y) const {
     return {(int)min(x * _array.n_rows, _array.n_rows - 1),

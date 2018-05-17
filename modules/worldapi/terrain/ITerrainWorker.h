@@ -7,9 +7,13 @@
 
 namespace world {
 
-class WORLDAPI_EXPORT ITerrainWorkerContext {
+class WORLDAPI_EXPORT ITileContext {
 public:
-    virtual ~ITerrainWorkerContext() = default;
+    virtual ~ITileContext() = default;
+
+    virtual Terrain &getTerrain() const = 0;
+
+    virtual Image &getTexture() const = 0;
 
     /** Returns neighbour terrains. */
     virtual optional<const Terrain &> getNeighbour(int x, int y) const = 0;
@@ -31,9 +35,9 @@ class WORLDAPI_EXPORT ITerrainWorker {
 public:
     virtual ~ITerrainWorker() = default;
 
-    virtual void process(Terrain &terrain) = 0;
+    virtual void processTerrain(Terrain &terrain) = 0;
 
-    virtual void process(Terrain &terrain, ITerrainWorkerContext &context) = 0;
+    virtual void processTile(ITileContext &context) = 0;
 };
 } // namespace world
 

@@ -34,17 +34,16 @@ void PerlinTerrainGenerator::setOctaveCount(int octaveCount) {
     _perlinInfo.octaves = octaveCount;
 }
 
-void PerlinTerrainGenerator::process(Terrain &terrain) {
+void PerlinTerrainGenerator::processTerrain(Terrain &terrain) {
     _perlin.generatePerlinNoise2D(terrain._array, _perlinInfo);
 }
 
-void PerlinTerrainGenerator::process(Terrain &terrain,
-                                     ITerrainWorkerContext &context) {
-    processByTileCoords(terrain, context);
+void PerlinTerrainGenerator::processTile(ITileContext &context) {
+    processByTileCoords(context.getTerrain(), context);
 }
 
-void PerlinTerrainGenerator::processByNeighbours(
-    world::Terrain &terrain, world::ITerrainWorkerContext &context) {
+void PerlinTerrainGenerator::processByNeighbours(world::Terrain &terrain,
+                                                 world::ITileContext &context) {
     auto top = context.getNeighbour(0, 1);
     auto bottom = context.getNeighbour(0, -1);
     auto left = context.getNeighbour(-1, 0);
@@ -83,11 +82,11 @@ void PerlinTerrainGenerator::processByNeighbours(
     context.registerCurrentState();
 }
 
-void PerlinTerrainGenerator::processByTileCoords(
-    Terrain &terrain, ITerrainWorkerContext &context) {
+void PerlinTerrainGenerator::processByTileCoords(Terrain &terrain,
+                                                 ITileContext &context) {
     PerlinInfo localInfo = _perlinInfo;
     // TODO explicitly get the reference from Ground data instead of hard-coding
-    localInfo.reference = context.getParentCount() * 2;
+    localInfo.reference = context.getParentCount();
     // TODO require the frequency to be integer to avoid confusion
     vec2i tileCoords =
         context.getTileCoords() * static_cast<int>(localInfo.frequency);

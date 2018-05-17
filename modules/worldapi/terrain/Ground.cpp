@@ -38,7 +38,7 @@ bool operator<(const TerrainKey &key1, const TerrainKey &key2) {
 }
 
 // Utility class
-class GroundContext : public ITerrainWorkerContext {
+class GroundContext : public ITileContext {
 public:
     TerrainKey _key;
     int _genID;
@@ -48,6 +48,14 @@ public:
 
     GroundContext(Ground &ground, const TerrainKey &key, int genID)
             : _key(key), _genID(genID), _ground(ground) {}
+
+    Terrain &getTerrain() const override {
+        return _ground.provideTerrain(_key);
+    }
+
+    Image &getTexture() const override {
+        return _ground.provideTerrain(_key).getTexture();
+    }
 
     optional<const Terrain &> getNeighbour(int x, int y) const override {
         TerrainKey nKey{_key.pos.x + x, _key.pos.y + y, _key.lod};
@@ -239,14 +247,11 @@ void Ground::addTerrain(const TerrainKey &key, ICollector &collector) {
         material.setMapKd("texture01");
 
         // Retrieve the texture
-        auto texture = terrain.getTexture();
+        auto &texture = terrain.getTexture();
 
         collector.addItem(itemKey, object);
         collector.addMaterial(itemKey, material);
-
-        if (texture) {
-            collector.addTexture(itemKey, "texture01", *texture);
-        }
+        collector.addTexture(itemKey, "texture01", texture);
     }
 }
 
@@ -329,9 +334,8 @@ optional<Terrain &> Ground::getCachedTerrain(const TerrainKey &key, int genID) {
 }
 
 std::string Ground::getTerrainDataId(const TerrainKey &key) const {
-    u64 id = (u64)(key.pos.x & 0x0FFFFFFF) +
-             ((u64)(key.pos.y & 0x0FFFFFFF) << 24) +
-             ((u64)(key.lod & 0xFF) << 48);
+    u64 id = static_cast<u64>(key.pos.x & 0x0FFFFFFFu) + (static_cast<u64>(key.pos.y & 0x0FFFFFFFu) << 24u) +
+             (static_cast<u64>(key.lod & 0xFFu) << 48u);
     return std::to_string(id);
 }
 
@@ -368,25 +372,31 @@ void Ground::generateTerrain(const TerrainKey &key) {
         provide(getParentKey(key));
     }
 
-    // Terrain creation
-    std::unique_ptr<Terrain> terrain = std::make_unique<Terrain>(_terrainRes);
+    // Tile creation
+    Tile &tile = _internal->_terrains[key] = Tile{
+        std::vector<optional<Terrain>>(),
+        std::make_unique<Terrain>(_terrainRes), std::unique_ptr<Mesh>(), 0};
 
-    // Bounds
+    Terrain &terrain = *tile._final;
+    std::vector<optional<Terrain>> &cache = _internal->_terrains[key]._cache;
+
+    // Parameters
+    auto texSize = _terrainRes * _textureRes;
+    terrain.setTexture(Image(texSize, texSize, ImageType::RGB));
+
     double terrainSize = getTerrainSize(key.lod);
-    // TODO min altitude and max altitude also depend on lvl
-    terrain->setBounds(terrainSize * key.pos.x, terrainSize * key.pos.y,
-                       _minAltitude, terrainSize * (key.pos.x + 1),
-                       terrainSize * (key.pos.y + 1), _maxAltitude);
+    terrain.setBounds(terrainSize * key.pos.x, terrainSize * key.pos.y,
+                      _minAltitude, terrainSize * (key.pos.x + 1),
+                      terrainSize * (key.pos.y + 1), _maxAltitude);
 
     // Generation
     GroundContext context(*this, key, 0);
-    std::vector<optional<Terrain>> cache;
 
     for (auto &generator : _internal->_generators) {
-        generator->process(*terrain, context);
+        generator->processTile(context);
 
         if (context._registerState) {
-            cache.emplace_back(*terrain);
+            cache.emplace_back(terrain);
             context._registerState = false;
         } else {
             cache.emplace_back(nullopt);
@@ -394,8 +404,5 @@ void Ground::generateTerrain(const TerrainKey &key) {
 
         context._genID++;
     }
-
-    _internal->_terrains[key] =
-        Tile{std::move(cache), std::move(terrain), std::unique_ptr<Mesh>(), 0};
 }
 } // namespace world

@@ -94,12 +94,14 @@ public:
 
     void setTexture(Image &&image);
 
-    optional<const Image &> getTexture() const;
+    Image &getTexture();
+
+    const Image &getTexture() const;
 
 private:
     BoundingBox _bbox;
     arma::Mat<double> _array;
-    std::unique_ptr<Image> _texture;
+    Image _texture;
 
     // ------
 

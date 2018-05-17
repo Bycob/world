@@ -26,9 +26,9 @@ public:
 
     void setMapResolution(int mapres);
 
-    void process(Terrain &terrain) override;
+    void processTerrain(Terrain &terrain) override;
 
-    void process(Terrain &terrain, ITerrainWorkerContext &context) override;
+    void processTile(ITileContext &context) override;
 
     const std::pair<Terrain, Terrain> &obtainMap(int x, int y);
 

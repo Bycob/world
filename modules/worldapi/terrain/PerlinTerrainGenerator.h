@@ -24,16 +24,16 @@ public:
 
     void setOctaveCount(int octaveCount);
 
-    void process(Terrain &terrain) override;
+    void processTerrain(Terrain &terrain) override;
 
-    void process(Terrain &terrain, ITerrainWorkerContext &context) override;
+    void processTile(ITileContext &context) override;
 
 private:
     PerlinInfo _perlinInfo;
     Perlin _perlin;
 
-    void processByNeighbours(Terrain &terrain, ITerrainWorkerContext &context);
+    void processByNeighbours(Terrain &terrain, ITileContext &context);
 
-    void processByTileCoords(Terrain &terrain, ITerrainWorkerContext &context);
+    void processByTileCoords(Terrain &terrain, ITileContext &context);
 };
 } // namespace world

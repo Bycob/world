@@ -77,17 +77,17 @@ private:
     /** L'altitude maximum du monde. Le niveau de la mer est fixé à 0. */
     double _maxAltitude;
     /** La taille d'un terrain de niveau 0 utilisé pour paver la Map.
-Normalement, cette taille est la même que celle d'un pixel de la Map. */
+     * Normalement, cette taille est la même que celle d'un pixel de la Map. */
     double _unitSize;
     /** Le facteur de subdivision pour les différents niveaux de détails.
      * La taille d'un terrain en fonction de son niveau de détail est
      * calculée ainsi : _unitSize * _factor ^ lod */
 
-    int _factor = 4;
+    int _factor = 2;
     int _terrainRes = 33;
     /** Texture resolution, relatively to the terrain resolution */
     int _textureRes = 8;
-    int _maxLOD = 3;
+    int _maxLOD = 5;
 
     int _maxCacheSize = 2000;
 

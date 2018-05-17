@@ -16,9 +16,9 @@ public:
 
     ColorMap &getColorMap();
 
-    void process(Terrain &terrain) override;
+    void processTerrain(Terrain &terrain) override;
 
-    void process(Terrain &terrain, ITerrainWorkerContext &context) override;
+    void processTile(ITileContext &context) override;
 
 private:
     int _pixelPerVertex;

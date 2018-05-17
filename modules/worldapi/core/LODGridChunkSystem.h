@@ -55,9 +55,9 @@ private:
      * we can't put it in the minimum LOD. */
     double _subdivResolutionThreshold = 0.5;
 
-    u32 _factor = 4;
+    u32 _factor = 2;
 
-    u32 _maxLOD = 4;
+    u32 _maxLOD = 6;
 
 
     friend class LODGridChunkHandler;
