@@ -454,6 +454,17 @@ Image::~Image() {
         delete _internal;
 }
 
+Image &Image::operator=(const Image &img) {
+    operator=(Image(img));
+    return *this;
+}
+
+Image &Image::operator=(Image &&img) {
+    _internal = img._internal;
+    img._internal = nullptr;
+    return *this;
+}
+
 ImageType Image::type() const { return _type; }
 
 int Image::width() const { return _internal->_sizeX; }

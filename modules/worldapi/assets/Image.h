@@ -93,7 +93,13 @@ public:
     Image(Image &&img);
     // copy constructor
     Image(const Image &img);
+    // destructor
     ~Image();
+
+    // copy assignment
+    Image &operator=(const Image &img);
+    // move assignment
+    Image &operator=(Image &&img);
 
     // infos
     ImageType type() const;

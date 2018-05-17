@@ -28,7 +28,8 @@ public:
 
     virtual Chunk &getChunk(const WorldZone &zone) = 0;
 
-    virtual void collectZone(const WorldZone &zone, ICollector &collector, IResolutionModel &resolutionModel) = 0;
+    virtual void collectZone(const WorldZone &zone, ICollector &collector,
+                             IResolutionModel &resolutionModel) = 0;
 };
 } // namespace world
 #endif // WORLD_ICHUNKSYSTEM_H

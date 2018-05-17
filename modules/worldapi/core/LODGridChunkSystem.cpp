@@ -154,7 +154,9 @@ Chunk &LODGridChunkSystem::getChunk(const WorldZone &zone) {
     return getChunk(zone->getID());
 }
 
-void LODGridChunkSystem::collectZone(const WorldZone &zone, ICollector &collector, IResolutionModel &resolutionModel) {
+void LODGridChunkSystem::collectZone(const WorldZone &zone,
+                                     ICollector &collector,
+                                     IResolutionModel &resolutionModel) {
     auto entry = _internal->_chunks.find(zone.getInfo().getID());
 
     if (entry != _internal->_chunks.end()) {
