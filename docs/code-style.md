@@ -14,7 +14,7 @@ this project.
 World uses armadillo to perform operations over 2-dimensional and
 3-dimensional arrays.
 
-When these arrays are used in a cartesian space with dimensions XYZ,
+When these arrays are used in a Cartesian space with dimensions XYZ,
 the row number corresponds to the x coordinate, the column number
 corresponds to the y coordinate, and the slice number corresponds to
 the z coordinate. (This is different from images, where x corresponds
