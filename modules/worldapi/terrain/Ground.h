@@ -113,7 +113,7 @@ private:
 
     Terrain &provideTerrain(const TerrainKey &key);
 
-    optional<Mesh &> provideMesh(const TerrainKey &key);
+    Mesh &provideMesh(const TerrainKey &key);
 
     optional<Terrain &> getCachedTerrain(const TerrainKey &key, int genID);
 
@@ -137,6 +137,8 @@ private:
      * - the terrains with higher level at the same place are already
      * generated.*/
     void generateTerrain(const TerrainKey &key);
+
+    void generateMesh(const TerrainKey &key);
 
     friend class PGround;
     friend class GroundContext;

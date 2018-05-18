@@ -222,20 +222,9 @@ void Ground::addTerrain(const TerrainKey &key, ICollector &collector) {
         // Relocate the terrain
         auto &bbox = terrain.getBoundingBox();
         vec3d offset = bbox.getLowerBound();
-        vec3d size = bbox.getUpperBound() - offset;
 
         // Create the mesh
-        auto meshbe = provideMesh(key);
-        Object3D object;
-
-        if (meshbe) {
-            object.setMesh(*meshbe);
-        } else {
-            std::unique_ptr<Mesh> &mesh =
-                (_internal->_terrains[key]._mesh = std::unique_ptr<Mesh>(
-                     terrain.createMesh(0, 0, 0, size.x, size.y, size.z)));
-            object.setMesh(*mesh);
-        }
+        Object3D object(provideMesh(key));
         object.setPosition(offset);
         object.setMaterialID("terrain");
 
@@ -313,13 +302,14 @@ Terrain &Ground::provideTerrain(const TerrainKey &key) {
     return *provide(key)._final;
 }
 
-optional<Mesh &> Ground::provideMesh(const TerrainKey &key) {
+Mesh &Ground::provideMesh(const TerrainKey &key) {
     auto &meshPtr = provide(key)._mesh;
-    if (meshPtr) {
-        return *meshPtr;
-    } else {
-        return nullopt;
+
+    if (!meshPtr) {
+        generateMesh(key);
     }
+
+    return *meshPtr;
 }
 
 optional<Terrain &> Ground::getCachedTerrain(const TerrainKey &key, int genID) {
@@ -405,4 +395,96 @@ void Ground::generateTerrain(const TerrainKey &key) {
         context._genID++;
     }
 }
+
+void Ground::generateMesh(const TerrainKey &key) {
+    // Find required terrains
+    Terrain *terrains[3][3];
+
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            TerrainKey jitteredKey = key;
+            jitteredKey.pos.x += i - 1;
+            jitteredKey.pos.y += j - 1;
+            terrains[i][j] = &provideTerrain(jitteredKey);
+        }
+    }
+
+    // Fill mesh
+    // Same as Terrain::createMesh, but may become different
+    // + here we compute normals a different way (for tiling to be acceptable).
+    auto &meshPtr = provide(key)._mesh;
+    meshPtr = std::make_unique<Mesh>();
+    Mesh &mesh = *meshPtr;
+
+    // TODO compute size from TileSystem
+    BoundingBox bbox = terrains[1][1]->getBoundingBox();
+    const double offsetX = 0, offsetY = 0, offsetZ = 0;
+    const double sizeX = bbox.getDimensions().x;
+    const double sizeY = bbox.getDimensions().y;
+    const double sizeZ = bbox.getDimensions().z;
+
+    const int size = terrains[1][1]->getResolution();
+    const int size_1 = size - 1;
+    const double inv_size_1 = 1. / size_1;
+
+    auto valueAt = [&terrains, size](int x, int y) -> double {
+        // xl = x_local, xg = x_global
+        int xl = mod(x, size);
+        int yl = mod(y, size);
+        int xg = 1 + (x - xl) / size;
+        int yg = 1 + (y - yl) / size;
+        return terrains[xg][yg]->operator()(xl + xg - 1, yl + yg - 1);
+    };
+
+    // Memory allocation
+    int vertCount = size * size;
+    mesh.reserveVertices(vertCount);
+
+    // Vertices
+    for (int y = 0; y < size; y++) {
+        const double yd = y * inv_size_1;
+        const double ypos = yd * sizeY + offsetY;
+
+        for (int x = 0; x < size; x++) {
+            const double xd = x * inv_size_1;
+            const double xpos = xd * sizeX + offsetX;
+
+            Vertex &vert = mesh.newVertex();
+
+            vert.setPosition(xpos, ypos, valueAt(x, y) * sizeZ + offsetZ);
+            vert.setTexture(xd, 1 - yd);
+            if (vert.getTexture().y > 1 || vert.getTexture().y < 0)
+                std::cout << vert.getTexture().y << std::endl;
+
+            // Compute normal
+            double xUnit = sizeX * inv_size_1;
+            double yUnit = sizeY * inv_size_1;
+            vec3d nx{(valueAt(x - 1, y) - valueAt(x + 1, y)) * sizeZ, 0, xUnit * 2};
+            vec3d ny{0, (valueAt(x, y - 1) - valueAt(x, y + 1)) * sizeZ, yUnit * 2};
+            vert.setNormal((nx + ny).normalize());
+        }
+    }
+
+    // Faces
+    auto indice = [size](int x, int y) -> int {
+        return y * size + x;
+    };
+    mesh.reserveFaces(size_1 * size_1 * 2);
+
+    for (int y = 0; y < size_1; y++) {
+        for (int x = 0; x < size_1; x++) {
+            Face &face1 = mesh.newFace();
+            Face &face2 = mesh.newFace();
+
+            face1.setID(0, indice(x, y));
+            face1.setID(1, indice(x + 1, y));
+            face1.setID(2, indice(x, y + 1));
+
+            face2.setID(0, indice(x + 1, y + 1));
+            face2.setID(1, indice(x, y + 1));
+            face2.setID(2, indice(x + 1, y));
+        }
+    }
+}
+
 } // namespace world

@@ -155,6 +155,13 @@ Mesh *Terrain::createMesh(double offsetX, double offsetY, double offsetZ,
 
             vert.setPosition(xpos, ypos, _array(x, y) * sizeZ + offsetZ);
             vert.setTexture(xd, 1 - yd);
+
+            // Compute normal
+            double xUnit = sizeX * inv_size_1;
+            double yUnit = sizeY * inv_size_1;
+            vec3d nx{(_array(max(x - 1, 0), y) - _array(min(x + 1, size_1), y)) * sizeZ, 0, xUnit * 2};
+            vec3d ny{0, (_array(x, max(y - 1, 0)) - _array(x, min(y + 1, size_1))) * sizeZ, yUnit * 2};
+            vert.setNormal((nx + ny).normalize());
         }
     }
 
@@ -178,8 +185,6 @@ Mesh *Terrain::createMesh(double offsetX, double offsetY, double offsetZ,
             face2.setID(2, indice(x + 1, y));
         }
     }
-
-    MeshOps::recalculateNormals(*mesh);
 
     return mesh;
 }
