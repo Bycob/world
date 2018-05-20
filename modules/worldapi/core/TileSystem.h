@@ -12,6 +12,9 @@ namespace world {
  * and a level of detail.
  */
 struct WORLDAPI_EXPORT TileCoordinates {
+    TileCoordinates() {}
+    TileCoordinates(const vec3i &pos, int lod) : _pos(pos), _lod(lod) {}
+
     vec3i _pos;
     int _lod = 0;
 };

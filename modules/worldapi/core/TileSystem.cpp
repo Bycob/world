@@ -41,7 +41,7 @@ TileCoordinates TileSystem::getTileCoordinates(const vec3d &globalCoordinates,
     vec3i posi{static_cast<int>(floor(tilePos.x)),
                static_cast<int>(floor(tilePos.y)),
                static_cast<int>(floor(tilePos.z))};
-    return {posi, lod};
+    return TileCoordinates{posi, lod};
 }
 
 vec3d TileSystem::getLocalCoordinates(const vec3d &globalCoordinates,
