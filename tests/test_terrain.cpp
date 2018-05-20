@@ -155,17 +155,19 @@ void testPerlin(int argc, char** argv) {
 	AltitudeTexturer texturer;
 
 	auto &colorMap = texturer.getColorMap();
-	colorMap.addPoint({ 0, 0}, Color4u(209, 207, 153));
-	colorMap.addPoint({ 0, 1}, Color4u(209, 207, 153));
-	colorMap.addPoint({ 0.37, 0 }, Color4u(133, 183, 144));
-	colorMap.addPoint({ 0.3, 1 }, Color4u(144, 183, 123));
-	colorMap.addPoint({ 0.48, 1 }, Color4u(96, 76, 40));
-	colorMap.addPoint({ 0.55, 0 }, Color4u(114, 90, 48));
-	colorMap.addPoint({ 0.65, 1 }, Color4u(160, 160, 160));
-	colorMap.addPoint({ 0.8, 0.5 }, Color4u(160, 160, 160));
-	colorMap.addPoint({ 1, 0 }, Color4u(244, 252, 250));
-	colorMap.addPoint({ 1, 1 }, Color4u(244, 252, 250));
+	colorMap.addPoint({0.15, 0.5}, Color4u(209, 207, 153)); // Sand
+	colorMap.addPoint({0.31, 0}, Color4u(209, 207, 153)); // Sand
+	colorMap.addPoint({0.31, 1}, Color4u(209, 207, 153)); // Sand
+	colorMap.addPoint({0.35, 0}, Color4u(72, 132, 85)); // Grass blueish
+	colorMap.addPoint({0.35, 1}, Color4u(144, 183, 123)); // Grass yellowish
+	colorMap.addPoint({0.5, 0}, Color4u(114, 90, 48)); // Light dirt
+	colorMap.addPoint({0.53, 1}, Color4u(96, 76, 40)); // Dark dirt
+	colorMap.addPoint({0.65, 0}, Color4u(160, 160, 160)); // Rock
+	colorMap.addPoint({0.8, 1}, Color4u(160, 160, 160)); // Rock
+	colorMap.addPoint({1, 0}, Color4u(244, 252, 250)); // Snow
+	colorMap.addPoint({1, 1}, Color4u(244, 252, 250)); // Snow
 
+	terrain.setTexture(Image(512, 512, ImageType::RGB));
     texturer.processTerrain(terrain);
 	const Image &texture = terrain.getTexture();
 

@@ -1,15 +1,12 @@
-//
-// Created by louis on 22/04/17.
-//
-
 #include "MainView.h"
 
 #include <iostream>
 
 #include "Application.h"
-#include "GroundManager.h"
+#include "TerrainManager.h"
 #include "ObjectsManager.h"
 #include "WorldIrrlicht.h"
+#include "SeaSceneNode.h"
 
 using namespace irr;
 using namespace irr::core;
@@ -94,8 +91,8 @@ void MainView::runInternal() {
     float cameraSpeed = _cameraFast ? 1.f : 0.005f;
     _camera = _scenemanager->addCameraSceneNodeFPS(0, 100.0f, cameraSpeed);
 	_camera->setFOV(1.57);
-    _camera->setNearValue(0.1f);
-    _camera->setFarValue(40000);
+    _camera->setNearValue(1.f);
+    _camera->setFarValue(20000);
     _camera->setPosition(toIrrlicht(_app.getUserPosition()));
     //_camera = _scenemanager->addCameraSceneNode(0, vector3df(200 + 64, 200 + 119, 200 + 64), vector3df(64, 119, 64));
 	
@@ -116,10 +113,12 @@ void MainView::runInternal() {
 
 	// Affichage de debug
 	_debug = new DebugScreenNode(_app, _device, _scenemanager->getRootSceneNode(), -1);
+	auto *seaNode = new SeaSceneNode(_app, _device, _scenemanager->getRootSceneNode(), 100000);
 
     while(_device->run()) {
         updateScene();
 		_debug->updateInfos();
+		seaNode->updateInfos();
 
         _driver->beginScene(true, true,
                             irr::video::SColor(255, 190, 199, 220));
@@ -138,7 +137,7 @@ void MainView::runInternal() {
 void MainView::recreateModules() {
     _modules.clear();
 
-    _modules.push_back(std::move(std::make_unique<GroundManager>(_app, _device)));
+    _modules.push_back(std::move(std::make_unique<TerrainManager>(_app, _device)));
     _modules.push_back(std::move(std::make_unique<ObjectsManager>(_app, _device)));
 }
 

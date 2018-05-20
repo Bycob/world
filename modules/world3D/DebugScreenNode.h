@@ -9,8 +9,7 @@ class Application;
 class DebugScreenNode : public irr::scene::ISceneNode {
 public:
 	DebugScreenNode(Application & app, irr::IrrlichtDevice * device, irr::scene::ISceneNode* parent, irr::s32 id);
-	virtual ~DebugScreenNode();
-	
+
 	void updateInfos();
 	void setVisible(bool visible);
 

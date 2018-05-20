@@ -120,16 +120,17 @@ void Ground::setDefaultWorkerSet() {
     auto &texturer = addWorker<AltitudeTexturer>(_textureRes);
     ColorMap &colorMap = texturer.getColorMap();
 
-    colorMap.addPoint({0, 0}, Color4u(209, 207, 153));
-    colorMap.addPoint({0, 1}, Color4u(209, 207, 153));
-    colorMap.addPoint({0.37, 0}, Color4u(133, 183, 144));
-    colorMap.addPoint({0.3, 1}, Color4u(144, 183, 123));
-    colorMap.addPoint({0.48, 1}, Color4u(96, 76, 40));
-    colorMap.addPoint({0.55, 0}, Color4u(114, 90, 48));
-    colorMap.addPoint({0.65, 1}, Color4u(160, 160, 160));
-    colorMap.addPoint({0.8, 0.5}, Color4u(160, 160, 160));
-    colorMap.addPoint({1, 0}, Color4u(244, 252, 250));
-    colorMap.addPoint({1, 1}, Color4u(244, 252, 250));
+    colorMap.addPoint({0.15, 0.5}, Color4u(209, 207, 153)); // Sand
+    colorMap.addPoint({0.31, 0}, Color4u(209, 207, 153)); // Sand
+    colorMap.addPoint({0.31, 1}, Color4u(209, 207, 153)); // Sand
+    colorMap.addPoint({0.35, 0}, Color4u(72, 132, 85)); // Grass blueish
+    colorMap.addPoint({0.35, 1}, Color4u(144, 183, 123)); // Grass yellowish
+    colorMap.addPoint({0.5, 0}, Color4u(114, 90, 48)); // Light dirt
+    colorMap.addPoint({0.53, 1}, Color4u(96, 76, 40)); // Dark dirt
+    colorMap.addPoint({0.65, 0}, Color4u(160, 160, 160)); // Rock
+    colorMap.addPoint({0.8, 1}, Color4u(160, 160, 160)); // Rock
+    colorMap.addPoint({1, 0}, Color4u(244, 252, 250)); // Snow
+    colorMap.addPoint({1, 1}, Color4u(244, 252, 250)); // Snow
 }
 
 double Ground::observeAltitudeAt(WorldZone zone, double x, double y) {
@@ -324,7 +325,8 @@ optional<Terrain &> Ground::getCachedTerrain(const TerrainKey &key, int genID) {
 }
 
 std::string Ground::getTerrainDataId(const TerrainKey &key) const {
-    u64 id = static_cast<u64>(key.pos.x & 0x0FFFFFFFu) + (static_cast<u64>(key.pos.y & 0x0FFFFFFFu) << 24u) +
+    u64 id = static_cast<u64>(key.pos.x & 0x0FFFFFFFu) +
+             (static_cast<u64>(key.pos.y & 0x0FFFFFFFu) << 24u) +
              (static_cast<u64>(key.lod & 0xFFu) << 48u);
     return std::to_string(id);
 }
@@ -459,16 +461,16 @@ void Ground::generateMesh(const TerrainKey &key) {
             // Compute normal
             double xUnit = sizeX * inv_size_1;
             double yUnit = sizeY * inv_size_1;
-            vec3d nx{(valueAt(x - 1, y) - valueAt(x + 1, y)) * sizeZ, 0, xUnit * 2};
-            vec3d ny{0, (valueAt(x, y - 1) - valueAt(x, y + 1)) * sizeZ, yUnit * 2};
+            vec3d nx{(valueAt(x - 1, y) - valueAt(x + 1, y)) * sizeZ, 0,
+                     xUnit * 2};
+            vec3d ny{0, (valueAt(x, y - 1) - valueAt(x, y + 1)) * sizeZ,
+                     yUnit * 2};
             vert.setNormal((nx + ny).normalize());
         }
     }
 
     // Faces
-    auto indice = [size](int x, int y) -> int {
-        return y * size + x;
-    };
+    auto indice = [size](int x, int y) -> int { return y * size + x; };
     mesh.reserveFaces(size_1 * size_1 * 2);
 
     for (int y = 0; y < size_1; y++) {

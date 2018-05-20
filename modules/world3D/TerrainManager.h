@@ -13,10 +13,10 @@
 
 #include "RenderingModule.h"
 
-class GroundManager : public RenderingModule {
+class TerrainManager : public RenderingModule {
 public:
-    GroundManager(Application & app, irr::IrrlichtDevice * device);
-	virtual ~GroundManager();
+    TerrainManager(Application & app, irr::IrrlichtDevice * device);
+	virtual ~TerrainManager();
 
     void initialize(world::FlatWorldCollector &collector) override;
 	void update(world::FlatWorldCollector &collector) override;

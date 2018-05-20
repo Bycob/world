@@ -18,10 +18,6 @@ DebugScreenNode::DebugScreenNode(Application & app, IrrlichtDevice *device, ISce
 	setAutomaticCulling(EAC_OFF);
 }
 
-DebugScreenNode::~DebugScreenNode() {
-
-}
-
 void DebugScreenNode::updateInfos() {
 	_userPos = _app.getUserPosition();
 }

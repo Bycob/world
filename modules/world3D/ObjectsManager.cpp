@@ -75,6 +75,9 @@ void ObjectNodeHandler::setMaterial(const Material &mat, const CollectorItem &pr
 	irrmat.SpecularColor = toIrrColor(mat.getKs());
 	irrmat.DiffuseColor = toIrrColor(mat.getKd());
 
+	irrmat.TextureLayer[0].BilinearFilter = false;
+	irrmat.TextureLayer[0].TrilinearFilter = false;
+
 	setTexture(0, mat.getMapKd(), provider);
 }
 
