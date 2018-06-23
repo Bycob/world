@@ -101,6 +101,7 @@ const double CustomWorldRMModifier::PIXEL_UNIT = 10;
 CustomWorldRMModifier::CustomWorldRMModifier(double biomeDensity,
                                              int limitBrightness)
         : _biomeDensity(biomeDensity), _limitBrightness(limitBrightness),
+          _offsetLaw(ReliefMapParams::CustomWorldElevation(2. / 3.)),
           _diffLaw(ReliefMapParams::CustomWorldDifferential(2. / 3.)) {}
 
 void CustomWorldRMModifier::setBiomeDensity(float biomeDensity) {
@@ -207,7 +208,7 @@ void CustomWorldRMModifier::generate(Terrain &height, Terrain &heightDiff) {
         double randY = rand(_rng);
 
         // TODO L'utilisateur n'a aucun contrôle sur le premier paramètre.
-        double elevation = rand(_rng);
+        double elevation = _offsetLaw();
         double diff = _diffLaw(elevation);
 
         pointsMap[x][y] = {

@@ -63,7 +63,8 @@ private:
      *le "p" dans l'algo de l'interpolation. */
     int _limitBrightness;
 
-
+    /** Probability law for altitude offset. */
+    ElevationParam _offsetLaw;
     /** Loi de probabilité du différentiel d'altitude en fonction
      *de l'altitude. */
     AltDiffParam _diffLaw;

@@ -56,6 +56,26 @@ void Terrain::setBounds(double xmin, double ymin, double zmin, double xmax,
 
 const BoundingBox &Terrain::getBoundingBox() const { return _bbox; }
 
+vec3d Terrain::getNormal(int x, int y) const {
+    int size_1 = getResolution() - 1;
+    const double xUnit = 1. / size_1;
+    const double yUnit = xUnit;
+
+    int xa = max(x - 1, 0), xb = min(x + 1, size_1), xm = xb - xa;
+    vec3d nx{(_array(xa, y) - _array(xb, y)), 0, xm * xUnit};
+
+    int ya = max(y - 1, 0), yb = min(y + 1, size_1), ym = yb - ya;
+    vec3d ny{0, (_array(x, ya) - _array(x, yb)), ym * yUnit};
+    return (nx * ym + ny * xm).normalize();
+}
+
+double Terrain::getSlope(int x, int y) const {
+    vec3d normal = getNormal(x, y);
+    const double nx = normal.x;
+    const double ny = normal.y;
+    return sqrt(nx * nx + ny * ny) / normal.z;
+}
+
 double Terrain::getRawHeight(double x, double y) const {
     int size = getResolution();
     int posX = clamp(static_cast<int>(round(x * (size - 1))), 0, size - 1);
@@ -118,6 +138,20 @@ double Terrain::getExactHeightAt(double x, double y) const {
     double ab = a * (1 - sumd) + b * sumd;
     double ac = a * (1 - sumd) + c * sumd;
     return ab * (xd / sumd) + ac * (yd / sumd);
+}
+
+double Terrain::getSlopeAt(double x, double y) const {
+    int size = getResolution() - 1;
+    int x0 = static_cast<int>(clamp(floor(x * size), 0, size - 1));
+    int y0 = static_cast<int>(clamp(floor(y * size), 0, size - 1));
+
+    double xd = x * size - x0;
+    double yd = y * size - y0;
+
+    double iy1 = (1 - xd) * getSlope(x0, y0) + xd * getSlope(x0 + 1, y0);
+    double iy2 =
+        (1 - xd) * getSlope(x0, y0 + 1) + xd * getSlope(x0 + 1, y0 + 1);
+    return (1 - yd) * iy1 + yd * iy2;
 }
 
 Mesh *Terrain::createMesh() const {
@@ -210,4 +244,48 @@ vec2i Terrain::getPixelPos(double x, double y) const {
     return {(int)min(x * _array.n_rows, _array.n_rows - 1),
             (int)min(y * _array.n_cols, _array.n_cols - 1)};
 }
+
+// -------
+
+/*
+ * I tried an interpolation based method, but it's not very efficient
+ * in that case. Though, I'll need to implement trilinear interp, and this
+ * a good example of what we can do.
+ *
+double Terrain::getSlopeAt(double x, double y) const {
+    int size = getResolution() - 1;
+    double unit = 1. / size;
+
+    int x0 = static_cast<int>(clamp(floor(x * size - 1), 0, size - 2));
+    int y0 = static_cast<int>(clamp(floor(y * size - 1), 0, size - 2));
+
+    double xd = x * size - x0;
+    double yd = y * size - y0;
+
+    auto interp = [](double a0, double a1, double a2, double a) {
+        return a0 + (a2 - a0) * a / 2;
+        //return a * (a - 1) * 0.5 * a0 + (1 - a * a) * a1 + a * (a + 1) * 0.5 *
+a2;
+    };
+
+    auto deriv = [](double a0, double a1, double a2, double a) {
+        return a2 - a0;
+        //return (a - 0.5) * a0 + (-2 * a) * a1 + (a + 0.5) * a2;
+    };
+
+    double iy[4];
+    for (int i = 0; i < 3; ++i) {
+        iy[i] = interp(_array(x0, y0 + i), _array(x0 + 1, y0 + i), _array(x0 +
+2, y0 + i), xd);
+    }
+    double ix[4];
+    for (int i = 0; i < 3; ++i) {
+        ix[i] = interp(_array(x0 + i, y0), _array(x0 + i, y0 + 1), _array(x0 +
+i, y0 + 2), yd);
+    }
+
+    double dx = deriv(iy[0], iy[1], iy[2], yd);
+    double dy = deriv(ix[0], ix[1], ix[2], xd);
+    return sqrt(dx * dx + dy * dy) * size;
+}*/
 } // namespace world

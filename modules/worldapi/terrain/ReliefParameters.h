@@ -4,17 +4,33 @@
 
 #include "core/Parameters.h"
 
+// DATA
+
+#include "data/repartition_elevation001"
+
 namespace world {
 
 typedef Parameter<double> ElevationParam;
 typedef Parameter<double, double> AltDiffParam;
 
-struct ReliefMapParams {
+struct ReliefMapParams : Params<double> {
 
     static ElevationParam CustomWorldElevation(double seaLevel = 0.5) {
-        // 3 peaks : underwater (-2000, 0), overwater (1900, 2400), montains (2400, 4000)
-        // <!> Take into account the fact that this parameter represents only half of
-        // the final altitude. ie 2000 elevation -> 0 avg altitude if diff == 0
+        // 3 peaks : underwater (-2000, 0), overwater (1900, 2400), montains
+        // (2400, 4000)
+        // <!> Take into account the fact that this parameter represents only
+        // half of the final altitude. ie 2000 elevation -> 0 avg altitude if
+        // diff == 0
+
+        static const double data[] = {__REPARTITION_ELEVATION001_DATA};
+
+        ElevationParam ret;
+        ret.setFunction([data]() {
+            auto distrib = std::uniform_real_distribution<double>(0, 1);
+            return data[static_cast<int>(distrib(rng()) *
+                                         (__REPARTITION_ELEVATION001_SIZE - 1))];
+        });
+        return ret;
     }
 
     /**
@@ -34,16 +50,16 @@ struct ReliefMapParams {
                 double d = (seaLevel - elevation) / seaLevel;
                 a = -4 + d * 0;
                 b = 0 - d * 2;
-            }
-            else {
+            } else {
                 // Over sea level : x {-3, -1} -> {1, 3}
                 double d = (elevation - seaLevel) / (1 - seaLevel);
                 a = -3 + d * 4;
                 b = -1 + d * 4;
             }
-            double x = std::uniform_real_distribution<double>(a, b)(Params<double>::rng());
+            double x = std::uniform_real_distribution<double>(a, b)(
+                Params<double>::rng());
 
-            return tanh(x) * 0.5 + 0.5 ;
+            return tanh(x) * 0.5 + 0.5;
         });
         return ret;
     }
