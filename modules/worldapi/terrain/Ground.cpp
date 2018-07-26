@@ -4,6 +4,7 @@
 #include <list>
 
 #include "core/WorldTypes.h"
+#include "core/ResolutionModelContextWrap.h"
 #include "math/MathsHelper.h"
 #include "flat/FlatWorldCollector.h"
 #include "ApplyParentTerrain.h"
@@ -14,13 +15,6 @@
 
 namespace world {
 
-struct Ground::TerrainKey {
-    vec2i pos;
-    int lod;
-
-    TerrainKey(int x, int y, int lod) : pos{x, y}, lod(lod) {}
-};
-
 struct Ground::Tile {
     std::vector<optional<Terrain>> _cache;
     std::unique_ptr<Terrain> _final;
@@ -28,25 +22,18 @@ struct Ground::Tile {
     u64 _lastAccess;
 };
 
-using TerrainKey = Ground::TerrainKey;
-
 using Tile = Ground::Tile;
-
-bool operator<(const TerrainKey &key1, const TerrainKey &key2) {
-    return key1.lod < key2.lod ? true
-                               : (key1.lod == key2.lod && key1.pos < key2.pos);
-}
 
 // Utility class
 class GroundContext : public ITileContext {
 public:
-    TerrainKey _key;
+    TileCoordinates _key;
     int _genID;
     Ground &_ground;
 
     bool _registerState = false;
 
-    GroundContext(Ground &ground, const TerrainKey &key, int genID)
+    GroundContext(Ground &ground, const TileCoordinates &key, int genID)
             : _key(key), _genID(genID), _ground(ground) {}
 
     Terrain &getTerrain() const override {
@@ -58,7 +45,7 @@ public:
     }
 
     optional<const Terrain &> getNeighbour(int x, int y) const override {
-        TerrainKey nKey{_key.pos.x + x, _key.pos.y + y, _key.lod};
+        TileCoordinates nKey{_key._pos.x + x, _key._pos.y + y, 0, _key._lod};
         auto ret = _ground.getCachedTerrain(nKey, _genID);
 
         if (ret) {
@@ -69,10 +56,10 @@ public:
     }
 
     optional<const Terrain &> getParent() const override {
-        if (_key.lod == 0)
+        if (_key._lod == 0)
             return nullopt;
 
-        auto parentId = _ground.getParentKey(_key);
+        auto parentId = _ground._tileSystem.getParentTileCoordinates(_key);
         auto ret = _ground.getCachedTerrain(parentId, _genID);
 
         if (ret) {
@@ -82,9 +69,9 @@ public:
         }
     }
 
-    int getParentCount() const override { return _key.lod; }
+    int getParentCount() const override { return _key._lod; }
 
-    vec2i getTileCoords() const override { return _key.pos; }
+    vec2i getTileCoords() const override { return static_cast<vec2i>(_key._pos); }
 
     void registerCurrentState() override { _registerState = true; }
 };
@@ -93,11 +80,11 @@ class PGround {
 public:
     PGround() : _terrains() {}
 
-    std::map<TerrainKey, Tile> _terrains;
+    std::map<TileCoordinates, Tile> _terrains;
     std::list<std::unique_ptr<ITerrainWorker>> _generators;
 
     u64 _accessCounter = 0;
-    std::map<u64, TerrainKey> _accesses;
+    std::map<u64, TileCoordinates> _accesses;
 };
 
 // Idees d'ameliorations :
@@ -107,8 +94,9 @@ public:
 // dans une classe avec des templates)
 
 Ground::Ground(double unitSize, double minAltitude, double maxAltitude)
-        : _internal(new PGround()), _unitSize(unitSize),
-          _minAltitude(minAltitude), _maxAltitude(maxAltitude) {}
+        : _internal(new PGround()),
+		_minAltitude(minAltitude), _maxAltitude(maxAltitude),
+		_tileSystem(5, vec3d(_terrainRes * _textureRes * 4, _terrainRes * _textureRes * 4, 0), vec3d(unitSize, unitSize, 0)) {}
 
 Ground::~Ground() { delete _internal; }
 
@@ -135,49 +123,36 @@ void Ground::setDefaultWorkerSet() {
 }
 
 double Ground::observeAltitudeAt(WorldZone zone, double x, double y) {
-    int lvl = getLevelForChunk(zone);
+	int lvl = _tileSystem.getLod(zone.getInfo().getMaxResolution());
     vec3d offset = zone->getAbsoluteOffset();
     return observeAltitudeAt(offset.x + x, offset.y + y, lvl);
 }
 
-void Ground::collectZone(const WorldZone &zone, ICollector &collector) {
+void Ground::collectZone(const WorldZone &zone, ICollector &collector, const IResolutionModel &resolutionModel) {
+	if (zone.getInfo().getParent().has_value())
+		return;
+
     vec3d offset = zone->getAbsoluteOffset();
     vec3d chunkSize = zone->getDimensions();
 
-    // skip if zone is not in altitude range
+    // Tune altitude for the resolution model
     double estimAltitude = observeAltitudeAt(offset.x + chunkSize.x / 2,
                                              offset.y + chunkSize.y / 2, 0);
 
-    if (abs(estimAltitude - offset.z) >= chunkSize.z / 2 &&
-        abs(estimAltitude - offset.z - chunkSize.z) >= chunkSize.z / 2) {
-
-        return;
-    }
+	ResolutionModelContextWrap wresModel(resolutionModel);
+	wresModel.setOffset({ 0, 0, estimAltitude });
 
     // Find terrains to generate
-    int lvl = getLevelForChunk(zone);
-    double terrainSize =
-        lvl == 0 ? getTerrainSize(lvl) : getTerrainSize(lvl - 1);
-    vec3d lower = offset / terrainSize;
-    vec3d upper = lower + chunkSize / terrainSize;
-
-    for (int x = (int)floor(lower.x); x < ceil(upper.x); x++) {
-        for (int y = (int)floor(lower.y); y < ceil(upper.y); y++) {
-
-            if (lvl == 0) {
-                addTerrain({x, y, lvl}, collector);
-            } else {
-                replaceTerrain({x, y, lvl - 1}, collector);
-            }
-        }
-    }
+	for (auto it = _tileSystem.iterate(wresModel, zone); !it.endReached(); ++it) {
+		addTerrain(*it, collector);
+	}
 
     updateCache();
 }
 
 void Ground::collectZone(const WorldZone &zone, FlatWorld &world,
-                         FlatWorldCollector &collector) {
-    collectZone(zone, collector);
+                         FlatWorldCollector &collector, const IResolutionModel &resolutionModel) {
+    collectZone(zone, collector, resolutionModel);
 }
 
 void Ground::addWorkerInternal(ITerrainWorker *worker) {
@@ -185,17 +160,13 @@ void Ground::addWorkerInternal(ITerrainWorker *worker) {
 }
 
 double Ground::observeAltitudeAt(double x, double y, int lvl) {
-    double size = getTerrainSize(lvl);
-    double xd = x / size;
-    double yd = y / size;
-    int xi = (int)floor(xd);
-    int yi = (int)floor(yd);
-    TerrainKey key(xi, yi, lvl);
+	TileCoordinates key = _tileSystem.getTileCoordinates({ x, y, 0 }, lvl);
+	vec3d inTile = _tileSystem.getLocalCoordinates({ x, y, 0 }, lvl);
 
     const Terrain &terrain = this->provideTerrain(key);
     updateCache();
     return _minAltitude +
-           getAltitudeRange() * terrain.getExactHeightAt(xd - xi, yd - yi);
+           getAltitudeRange() * terrain.getExactHeightAt(inTile.x, inTile.y);
 }
 
 inline ICollector::ItemKey terrainToItem(const std::string &key) {
@@ -203,20 +174,7 @@ inline ICollector::ItemKey terrainToItem(const std::string &key) {
                                          ObjectKeys::defaultKey(), 0);
 }
 
-// FIXME : Sometimes a level of details is skipped, and then problems happen
-void Ground::replaceTerrain(const TerrainKey &pKey, ICollector &collector) {
-    collector.disableItem(terrainToItem(getTerrainDataId(pKey)));
-    auto cp = pKey.pos;
-
-    for (int x = cp.x * _factor; x < cp.x * _factor + _factor; x++) {
-        for (int y = cp.y * _factor; y < cp.y * _factor + _factor; y++) {
-            TerrainKey cKey(x, y, pKey.lod + 1);
-            addTerrain(cKey, collector);
-        }
-    }
-}
-
-void Ground::addTerrain(const TerrainKey &key, ICollector &collector) {
+void Ground::addTerrain(const TileCoordinates &key, ICollector &collector) {
     ICollector::ItemKey itemKey = terrainToItem(getTerrainDataId(key));
     Terrain &terrain = this->provideTerrain(key);
 
@@ -233,8 +191,7 @@ void Ground::addTerrain(const TerrainKey &key, ICollector &collector) {
         // Create the material
         Material material("terrain");
         material.setKd(1, 1, 1);
-        // material.setKd(1, (double) lvl / _maxLOD, 1 - ((double) lvl /
-        // _maxLOD));
+        // material.setKd(1, (double) key._lod / _tileSystem._maxLod, 1 - (double)key._lod / _tileSystem._maxLod);
         material.setMapKd("texture01");
 
         // Retrieve the texture
@@ -269,7 +226,7 @@ void Ground::updateCache() {
     }
 }
 
-Tile &Ground::provide(const TerrainKey &key) {
+Tile &Ground::provide(const TileCoordinates &key) {
     auto it = _internal->_terrains.find(key);
 
     if (it == _internal->_terrains.end()) {
@@ -281,7 +238,7 @@ Tile &Ground::provide(const TerrainKey &key) {
     return it->second;
 }
 
-void Ground::registerAccess(const TerrainKey &key, Tile &tile) {
+void Ground::registerAccess(const TileCoordinates &key, Tile &tile) {
     _internal->_accessCounter++;
 
     // Remove last access entry for this tile
@@ -294,17 +251,17 @@ void Ground::registerAccess(const TerrainKey &key, Tile &tile) {
     _internal->_accesses.emplace(tile._lastAccess, key);
 
     // Update parent
-    if (key.lod != 0) {
-        auto parentKey = getParentKey(key);
+    if (key._lod != 0) {
+        auto parentKey = _tileSystem.getParentTileCoordinates(key);
         registerAccess(parentKey, provide(parentKey));
     }
 }
 
-Terrain &Ground::provideTerrain(const TerrainKey &key) {
+Terrain &Ground::provideTerrain(const TileCoordinates &key) {
     return *provide(key)._final;
 }
 
-Mesh &Ground::provideMesh(const TerrainKey &key) {
+Mesh &Ground::provideMesh(const TileCoordinates &key) {
     auto &meshPtr = provide(key)._mesh;
 
     if (!meshPtr) {
@@ -314,7 +271,7 @@ Mesh &Ground::provideMesh(const TerrainKey &key) {
     return *meshPtr;
 }
 
-optional<Terrain &> Ground::getCachedTerrain(const TerrainKey &key, int genID) {
+optional<Terrain &> Ground::getCachedTerrain(const TileCoordinates &key, int genID) {
     auto it = _internal->_terrains.find(key);
 
     if (it == _internal->_terrains.end()) {
@@ -325,44 +282,17 @@ optional<Terrain &> Ground::getCachedTerrain(const TerrainKey &key, int genID) {
     }
 }
 
-std::string Ground::getTerrainDataId(const TerrainKey &key) const {
-    u64 id = static_cast<u64>(key.pos.x & 0x0FFFFFFFu) +
-             (static_cast<u64>(key.pos.y & 0x0FFFFFFFu) << 24u) +
-             (static_cast<u64>(key.lod & 0xFFu) << 48u);
+std::string Ground::getTerrainDataId(const TileCoordinates &key) const {
+    u64 id = static_cast<u64>(key._pos.x & 0x0FFFFFFFu) +
+             (static_cast<u64>(key._pos.y & 0x0FFFFFFFu) << 24u) +
+             (static_cast<u64>(key._lod & 0xFFu) << 48u);
     return std::to_string(id);
 }
 
-double Ground::getTerrainSize(int lvl) const {
-    return _unitSize * powi((double)_factor, -lvl);
-}
-
-double Ground::getTerrainResolution(int lvl) const {
-    // * 2 -> we don't need to be pixel precise with terrains, the details will
-    // be added later
-    return _terrainRes * _textureRes * 2 / getTerrainSize(lvl);
-}
-
-int Ground::getLevelForChunk(const WorldZone &zone) const {
-    double chunkMaxRes = zone->getMaxResolution();
-
-    for (int lvl = 0; lvl < _maxLOD; lvl++) {
-        if (getTerrainResolution(lvl + 1) > chunkMaxRes)
-            return lvl;
-    }
-
-    return _maxLOD;
-}
-
-TerrainKey Ground::getParentKey(const TerrainKey &childId) const {
-    return {(childId.pos.x - mod(childId.pos.x, _factor)) / _factor,
-            (childId.pos.y - mod(childId.pos.y, _factor)) / _factor,
-            childId.lod - 1};
-}
-
-void Ground::generateTerrain(const TerrainKey &key) {
+void Ground::generateTerrain(const TileCoordinates &key) {
     // Ensure that parent was created
-    if (key.lod != 0) {
-        provide(getParentKey(key));
+    if (key._lod != 0) {
+        provide(_tileSystem.getParentTileCoordinates(key));
     }
 
     // Tile creation
@@ -377,10 +307,10 @@ void Ground::generateTerrain(const TerrainKey &key) {
     auto texSize = _terrainRes * _textureRes;
     terrain.setTexture(Image(texSize, texSize, ImageType::RGB));
 
-    double terrainSize = getTerrainSize(key.lod);
-    terrain.setBounds(terrainSize * key.pos.x, terrainSize * key.pos.y,
-                      _minAltitude, terrainSize * (key.pos.x + 1),
-                      terrainSize * (key.pos.y + 1), _maxAltitude);
+    double terrainSize = _tileSystem.getTileSize(key._lod).x;
+    terrain.setBounds(terrainSize * key._pos.x, terrainSize * key._pos.y,
+                      _minAltitude, terrainSize * (key._pos.x + 1),
+                      terrainSize * (key._pos.y + 1), _maxAltitude);
 
     // Generation
     GroundContext context(*this, key, 0);
@@ -399,15 +329,15 @@ void Ground::generateTerrain(const TerrainKey &key) {
     }
 }
 
-void Ground::generateMesh(const TerrainKey &key) {
+void Ground::generateMesh(const TileCoordinates &key) {
     // Find required terrains
     Terrain *terrains[3][3];
 
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
-            TerrainKey jitteredKey = key;
-            jitteredKey.pos.x += i - 1;
-            jitteredKey.pos.y += j - 1;
+            TileCoordinates jitteredKey = key;
+            jitteredKey._pos.x += i - 1;
+            jitteredKey._pos.y += j - 1;
             terrains[i][j] = &provideTerrain(jitteredKey);
         }
     }

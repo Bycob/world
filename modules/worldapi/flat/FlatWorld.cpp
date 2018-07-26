@@ -35,14 +35,14 @@ void FlatWorld::collect(const WorldZone &zone, ICollector &collector,
                         const IResolutionModel &resolutionModel) {
     World::collect(zone, collector, resolutionModel);
 
-    ground().collectZone(zone, collector);
+    ground().collectZone(zone, collector, resolutionModel);
 }
 
 void FlatWorld::collect(const WorldZone &zone, FlatWorldCollector &collector,
                         const IResolutionModel &resolutionModel) {
     World::collect(zone, collector, resolutionModel);
 
-    ground().collectZone(zone, *this, collector);
+    ground().collectZone(zone, *this, collector, resolutionModel);
 }
 
 void FlatWorld::onFirstExploration(const WorldZone &chunk) {

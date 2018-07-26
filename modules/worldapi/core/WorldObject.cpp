@@ -23,6 +23,10 @@ public:
                            const vec3d &coord) const override {
         return _resolution;
     }
+
+	double getMaxResolutionIn(const BoundingBox &bbox) const override {
+		return _resolution;
+	}
 };
 
 

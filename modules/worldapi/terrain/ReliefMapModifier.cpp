@@ -14,7 +14,7 @@ using namespace arma;
 namespace world {
 
 // -----
-ReliefMapModifier::ReliefMapModifier() : _rng(time(NULL)) {}
+ReliefMapModifier::ReliefMapModifier() : _rng(static_cast<u32>(time(NULL))) {}
 
 void ReliefMapModifier::setMapResolution(int mapres) {
     _mapResolution = mapres;

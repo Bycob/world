@@ -7,7 +7,7 @@
 #include "WorldZone.h"
 
 namespace world {
-class IChunkSystem {
+class WORLDAPI_EXPORT IChunkSystem {
 public:
     virtual ~IChunkSystem() = default;
 

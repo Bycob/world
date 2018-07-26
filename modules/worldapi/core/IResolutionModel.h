@@ -5,6 +5,7 @@
 
 #include "math/MathsHelper.h"
 #include "math/Vector.h"
+#include "math/BoundingBox.h"
 
 namespace world {
 
@@ -18,6 +19,8 @@ public:
 
     virtual double getResolutionAt(const WorldZone &zone,
                                    const vec3d &coord) const = 0;
+
+	virtual double getMaxResolutionIn(const BoundingBox &bbox) const = 0;
 
 private:
 };

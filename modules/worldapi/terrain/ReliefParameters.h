@@ -25,7 +25,7 @@ struct ReliefMapParams : Params<double> {
         static const double data[] = {__REPARTITION_ELEVATION001_DATA};
 
         ElevationParam ret;
-        ret.setFunction([data]() {
+        ret.setFunction([]() {
             auto distrib = std::uniform_real_distribution<double>(0, 1);
             return data[static_cast<int>(distrib(rng()) *
                                          (__REPARTITION_ELEVATION001_SIZE - 1))];
