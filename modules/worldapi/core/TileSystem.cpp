@@ -66,18 +66,20 @@ vec3d TileSystem::getGlobalCoordinates(const TileCoordinates &tileCoordinates,
     return (tileCoordinates._pos + localCoordinates) * tileSize;
 }
 
-TileCoordinates TileSystem::getParentTileCoordinates(const TileCoordinates &childCoordinates) const {
-	double f = _factor;
-	vec3d parentCoordinates = {
-		floor(static_cast<double>(childCoordinates._pos.x) / f),
-		floor(static_cast<double>(childCoordinates._pos.y) / f),
-		floor(static_cast<double>(childCoordinates._pos.z) / f)
-	};
-	return TileCoordinates(static_cast<vec3i>(parentCoordinates), childCoordinates._lod - 1);
+TileCoordinates TileSystem::getParentTileCoordinates(
+    const TileCoordinates &childCoordinates) const {
+    double f = _factor;
+    vec3d parentCoordinates = {
+        floor(static_cast<double>(childCoordinates._pos.x) / f),
+        floor(static_cast<double>(childCoordinates._pos.y) / f),
+        floor(static_cast<double>(childCoordinates._pos.z) / f)};
+    return TileCoordinates(static_cast<vec3i>(parentCoordinates),
+                           childCoordinates._lod - 1);
 }
 
-TileSystemIterator TileSystem::iterate(const IResolutionModel &resolutionModel, const WorldZone &zone) const {
-	return TileSystemIterator(*this, resolutionModel, zone);
+TileSystemIterator TileSystem::iterate(const IResolutionModel &resolutionModel,
+                                       const WorldZone &zone) const {
+    return TileSystemIterator(*this, resolutionModel, zone);
 }
 
 } // namespace world

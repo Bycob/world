@@ -35,7 +35,7 @@ public:
     double getResolutionAt(const WorldZone &zone,
                            const vec3d &pos) const override;
 
-	double getMaxResolutionIn(const BoundingBox &bbox) const override;
+    double getMaxResolutionIn(const BoundingBox &bbox) const override;
 
     // TODO std::enableif
     template <typename T, typename C>
@@ -49,11 +49,11 @@ private:
     double _punctumProximum;
     /** The maximum distance the explorer can see over. In real world,
      * we cannot see farther than a certain distance due to mist or Earth
-	 * curvature, for example. */
+     * curvature, for example. */
     double _farDistance;
     vec3d _position;
 
-	vec3d getNearestPointIn(const BoundingBox &bbox) const;
+    vec3d getNearestPointIn(const BoundingBox &bbox) const;
 
     vec3d getChunkNearestPoint(const WorldZone &zone) const;
 

@@ -1,5 +1,5 @@
 #define __REPARTITION_ELEVATION001_SIZE 501
-#define __REPARTITION_ELEVATION001_DATA                                    \
+#define __REPARTITION_ELEVATION001_DATA                                        \
     0.0, 1.96584831087e-05, 7.8630881512e-05, 0.000176908042442,               \
         0.000314474711287, 0.000491309531586, 0.000707385045039,               \
         0.000962667691495, 0.00125711780896, 0.0015906896336,                  \

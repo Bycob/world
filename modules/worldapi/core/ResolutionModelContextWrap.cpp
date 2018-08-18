@@ -20,9 +20,10 @@ double ResolutionModelContextWrap::getResolutionAt(
     return _wrapped.getResolutionAt(coord + _offset);
 }
 
-double ResolutionModelContextWrap::getMaxResolutionIn(const BoundingBox &bbox) const {
-	return _wrapped.getMaxResolutionIn(
-		{ bbox.getLowerBound() + _offset, bbox.getUpperBound() + _offset });
+double ResolutionModelContextWrap::getMaxResolutionIn(
+    const BoundingBox &bbox) const {
+    return _wrapped.getMaxResolutionIn(
+        {bbox.getLowerBound() + _offset, bbox.getUpperBound() + _offset});
 }
 
 } // namespace world

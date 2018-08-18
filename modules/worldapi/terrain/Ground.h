@@ -58,10 +58,12 @@ public:
     // EXPLORATION
     double observeAltitudeAt(WorldZone zone, double x, double y) override;
 
-    void collectZone(const WorldZone &zone, ICollector &collector, const IResolutionModel &resolutionModel);
+    void collectZone(const WorldZone &zone, ICollector &collector,
+                     const IResolutionModel &resolutionModel);
 
     void collectZone(const WorldZone &zone, FlatWorld &world,
-                     FlatWorldCollector &collector, const IResolutionModel &resolutionModel) override;
+                     FlatWorldCollector &collector,
+                     const IResolutionModel &resolutionModel) override;
 
 private:
     PGround *_internal;
@@ -72,11 +74,11 @@ private:
     /** L'altitude maximum du monde. Le niveau de la mer est fixé à 0. */
     double _maxAltitude;
 
-	int _terrainRes = 33;
-	/** Texture resolution, relatively to the terrain resolution */
-	int _textureRes = 8;
+    int _terrainRes = 33;
+    /** Texture resolution, relatively to the terrain resolution */
+    int _textureRes = 8;
 
-	TileSystem _tileSystem;
+    TileSystem _tileSystem;
 
     int _maxCacheSize = 2000;
 

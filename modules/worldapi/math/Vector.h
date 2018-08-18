@@ -19,11 +19,11 @@ template <typename T> struct vec3 {
     T z;
 
     vec3() : x(0), y(0), z(0) {}
-	vec3(T val) : x(val), y(val), z(val) {}
+    vec3(T val) : x(val), y(val), z(val) {}
     vec3(T x, T y, T z) : x(x), y(y), z(z) {}
 
     template <typename R> operator vec3<R>() const;
-	template <typename R> explicit operator vec2<R>() const;
+    template <typename R> explicit operator vec2<R>() const;
 
     template <typename R>
     auto operator*(R rhs) const -> vec3<decltype(x * rhs)>;
@@ -59,11 +59,11 @@ template <typename T> struct vec2 {
     T y;
 
     vec2() : x(0), y(0) {}
-	vec2(T val) : x(val), y(val) {}
+    vec2(T val) : x(val), y(val) {}
     vec2(T x, T y) : x(x), y(y) {}
 
-	template <typename R> operator vec2<R>() const;
-	template <typename R> explicit operator vec3<R>() const;
+    template <typename R> operator vec2<R>() const;
+    template <typename R> explicit operator vec3<R>() const;
 
     vec2<T> operator*(T rhs) const;
     vec2<T> operator/(T rhs) const;
@@ -91,13 +91,14 @@ template <typename T> struct vec2 {
 template <typename T>
 template <typename R>
 inline vec3<T>::operator vec3<R>() const {
-    return vec3<R>(static_cast<R>(this->x), static_cast<R>(this->y), static_cast<R>(this->z));
+    return vec3<R>(static_cast<R>(this->x), static_cast<R>(this->y),
+                   static_cast<R>(this->z));
 }
 
 template <typename T>
 template <typename R>
 inline vec3<T>::operator vec2<R>() const {
-	return vec2<R>(static_cast<R>(this->x), static_cast<R>(this->y));
+    return vec2<R>(static_cast<R>(this->x), static_cast<R>(this->y));
 }
 
 template <typename T>
@@ -226,13 +227,14 @@ std::ostream &operator<<(std::ostream &os, const vec3<T> &vec) {
 template <typename T>
 template <typename R>
 inline vec2<T>::operator vec2<R>() const {
-	return vec2<R>(static_cast<R>(this->x), static_cast<R>(this->y));
+    return vec2<R>(static_cast<R>(this->x), static_cast<R>(this->y));
 }
 
 template <typename T>
 template <typename R>
 inline vec2<T>::operator vec3<R>() const {
-	return vec3<R>(static_cast<R>(this->x), static_cast<R>(this->y), static_cast<R>(0));
+    return vec3<R>(static_cast<R>(this->x), static_cast<R>(this->y),
+                   static_cast<R>(0));
 }
 
 template <typename T>

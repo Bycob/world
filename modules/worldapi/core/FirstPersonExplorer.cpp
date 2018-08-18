@@ -32,12 +32,12 @@ vec3d FirstPersonExplorer::getChunkNearestPoint(const WorldZone &zone) const {
     vec3d lower = zone->getAbsoluteOffset();
     vec3d upper = lower + zone->getDimensions();
 
-	return getNearestPointIn({ lower, upper });
+    return getNearestPointIn({lower, upper});
 }
 
-vec3d FirstPersonExplorer::getNearestPointIn(const BoundingBox & bbox) const {
-	vec3d lower = bbox.getLowerBound();
-	vec3d upper = bbox.getUpperBound();
+vec3d FirstPersonExplorer::getNearestPointIn(const BoundingBox &bbox) const {
+    vec3d lower = bbox.getLowerBound();
+    vec3d upper = bbox.getUpperBound();
 
     return {clamp(_position.x, lower.x, upper.x),
             clamp(_position.y, lower.y, upper.y),
@@ -51,7 +51,7 @@ double FirstPersonExplorer::getResolutionAt(const vec3d &pos) const {
 }
 
 double FirstPersonExplorer::getMaxResolutionIn(const BoundingBox &bbox) const {
-	return getResolutionAt(getNearestPointIn(bbox));
+    return getResolutionAt(getNearestPointIn(bbox));
 }
 
 double FirstPersonExplorer::getResolutionAt(const WorldZone &zone,

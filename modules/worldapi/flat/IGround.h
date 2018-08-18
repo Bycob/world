@@ -18,11 +18,13 @@ public:
 
     virtual double observeAltitudeAt(WorldZone zone, double x, double y) = 0;
 
-    virtual void collectZone(const WorldZone &zone, ICollector &collector, const IResolutionModel &resolutionModel) = 0;
+    virtual void collectZone(const WorldZone &zone, ICollector &collector,
+                             const IResolutionModel &resolutionModel) = 0;
 
     // TODO change arguments order
     virtual void collectZone(const WorldZone &zone, FlatWorld &world,
-                             FlatWorldCollector &collector, const IResolutionModel &resolutionModel) = 0;
+                             FlatWorldCollector &collector,
+                             const IResolutionModel &resolutionModel) = 0;
 };
 } // namespace world
 

@@ -25,7 +25,7 @@ template <typename Out, typename... In> struct Params {
         static std::mt19937 _rng(static_cast<u32>(time(NULL)));
         return _rng;
     };
-	
+
     static Parameter<Out, In...> constant(Out value) {
         Parameter<Out, In...> ret;
         ret.setFunction([value](In... in) { return value; });

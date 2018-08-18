@@ -4,9 +4,7 @@
 
 namespace world {
 
-BoundingBox::BoundingBox() : _lower{ 0, 0,0 }, _upper{ 0, 0, 0 } {
-
-}
+BoundingBox::BoundingBox() : _lower{0, 0, 0}, _upper{0, 0, 0} {}
 
 BoundingBox::BoundingBox(const vec3d &b1, const vec3d &b2)
         : _lower(min(b1.x, b2.x), min(b1.y, b2.y), min(b1.z, b2.z)),
