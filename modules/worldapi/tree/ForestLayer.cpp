@@ -8,7 +8,7 @@ ForestLayer::ForestLayer() : _rng(static_cast<u64>(time(NULL))) {}
 
 void ForestLayer::decorate(FlatWorld &world, const WorldZone &zone) {
     // Check resolution
-    const double resolution = 5;
+    const double resolution = 1;
     const double minres = zone.getInfo().getMinResolution();
     const double maxres = zone.getInfo().getMaxResolution();
 
