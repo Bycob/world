@@ -44,50 +44,20 @@ void Tree::collect(ICollector &collector, const IResolutionModel &explorer) {
     }
 
     // Collection
-    if (explorer.getResolutionAt(vec3d{0, 0, 0}) < 10) {
-        // Collect a dummy mesh
-        Mesh mesh;
+    Object3D mainPart(_trunkMesh);
+    mainPart.setMaterialID("trunk");
+    collector.addItem(ItemKeys::inObject(1), mainPart);
 
-        vec3d vertices[8] = {{-0.2, -0.2, 0}, {-0.2, 0.2, 0},  {0.2, 0.2, 0},
-                             {0.2, -0.2, 0},  {-0.2, -0.2, 2}, {-0.2, 0.2, 2},
-                             {0.2, 0.2, 2},   {0.2, -0.2, 2}};
+    Object3D leaves(_leavesMesh);
+    leaves.setMaterialID("leaves");
+    collector.addItem(ItemKeys::inObject(2), leaves);
 
-        vec3d normals[8] = {{-0.2, -0.2, 0}, {-0.2, 0.2, 0},  {0.2, 0.2, 0},
-                            {0.2, -0.2, 0},  {-0.2, -0.2, 0}, {-0.2, 0.2, 0},
-                            {0.2, 0.2, 0},   {0.2, -0.2, 0}};
+    // Material
+    collector.addMaterial(ItemKeys::inObject(1), _trunkMaterial);
 
-        int indices[8][3] = {{0, 4, 5}, {0, 1, 5}, {1, 5, 6}, {1, 2, 6},
-                             {2, 6, 7}, {2, 3, 7}, {3, 7, 4}, {3, 0, 4}};
-
-        for (int i = 0; i < 8; ++i) {
-            mesh.newVertex(vertices[i], normals[i]);
-        }
-        for (int i = 0; i < 8; ++i) {
-            mesh.newFace(indices[i]);
-        }
-
-        Object3D dummy(mesh);
-        dummy.setMaterialID("trunk");
-        collector.addItem(ItemKeys::inObject(0), dummy);
-
-        // Material
-        collector.addMaterial(ItemKeys::inObject(0), _trunkMaterial);
-    } else {
-        Object3D mainPart(_trunkMesh);
-        mainPart.setMaterialID("trunk");
-        collector.addItem(ItemKeys::inObject(1), mainPart);
-
-        Object3D leaves(_leavesMesh);
-        leaves.setMaterialID("leaves");
-        collector.addItem(ItemKeys::inObject(2), leaves);
-
-        // Material
-        collector.addMaterial(ItemKeys::inObject(1), _trunkMaterial);
-
-        Material leavesMat("leaves");
-        leavesMat.setKd(0.4, 0.9, 0.4);
-        collector.addMaterial(ItemKeys::inObject(2), leavesMat);
-    }
+    Material leavesMat("leaves");
+    leavesMat.setKd(0.4, 0.9, 0.4);
+    collector.addMaterial(ItemKeys::inObject(2), leavesMat);
 }
 
 void Tree::generateBase() {

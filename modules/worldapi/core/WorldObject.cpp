@@ -6,6 +6,8 @@
 #include "LODGridChunkSystem.h"
 #include "Collector.h"
 #include "IResolutionModel.h"
+#include "core/CollectorContextWrap.h"
+#include "core/ResolutionModelContextWrap.h"
 
 namespace world {
 
@@ -38,5 +40,16 @@ void WorldObject::collectAll(ICollector &collector, double resolution) {
 
 void WorldObject::collect(ICollector &collector,
                           const IResolutionModel &resolutionModel) {}
+
+void WorldObject::collectChild(int keyOffset, WorldObject &childObject, ICollector &collector, const IResolutionModel &resolutionModel) {
+	CollectorContextWrap wcollector(collector);
+	wcollector.setKeyOffset(keyOffset);
+	wcollector.setOffset(childObject.getPosition3D());
+
+	ResolutionModelContextWrap wresolutionModel(resolutionModel);
+	wresolutionModel.setOffset(childObject.getPosition3D());
+
+	childObject.collect(wcollector, wresolutionModel);
+}
 
 } // namespace world

@@ -6,7 +6,7 @@ namespace world {
 
 CollectorContextWrap::CollectorContextWrap(ICollector &wrapped)
         : _collector(wrapped), _currentChunk(false, ChunkKeys::none()),
-          _currentObject(false, ObjectKeys::defaultKey()), _offset() {}
+          _currentObject(false, ObjectKeys::defaultKey()), _keyOffset(0), _offset() {}
 
 void CollectorContextWrap::setCurrentChunk(ChunkKey key) {
     _currentChunk = std::make_pair(true, key);
@@ -17,6 +17,10 @@ void CollectorContextWrap::setCurrentObject(ObjectKey key) {
 }
 
 void CollectorContextWrap::setOffset(const vec3d &offset) { _offset = offset; }
+
+void CollectorContextWrap::setKeyOffset(int keyOffset) {
+	_keyOffset = keyOffset;
+}
 
 void CollectorContextWrap::addItem(const ItemKey &key, const Object3D &object) {
     Object3D clone = object;
@@ -55,6 +59,6 @@ ICollector::ItemKey CollectorContextWrap::mutateKey(const ItemKey &key) const {
     return ItemKeys::inWorld(
         _currentChunk.first ? _currentChunk.second : std::get<0>(key),
         _currentObject.first ? _currentObject.second : std::get<1>(key),
-        std::get<2>(key));
+        std::get<2>(key) + _keyOffset);
 }
 } // namespace world

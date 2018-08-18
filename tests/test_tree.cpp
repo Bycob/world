@@ -7,10 +7,11 @@
 using namespace world;
 
 void testCircularSkeletton(int argc, char** argv);
+void testTreeGroup(int argc, char ** argv);
 void testTree(int argc, char **argv);
 
 int main(int argc, char** argv) {
-	testTree(argc, argv);
+	testTreeGroup(argc, argv);
 }
 
 void testCircularSkeletton(int argc, char** argv) {
@@ -27,6 +28,14 @@ void testCircularSkeletton(int argc, char** argv) {
 	delete skeletton;
 }
 
+void testTreeGroup(int argc, char ** argv) {
+	Collector collector;
+	TreeGroup treeGroup;
+	treeGroup.addTree(vec3d{ 1, 1, 1 });
+	treeGroup.addTree(vec3d{ 2, 5, 1 });
+
+	treeGroup.collectAll(collector, 1);
+}
 
 void testTree(int argc, char ** argv) {
 
@@ -84,3 +93,5 @@ void testTree(int argc, char ** argv) {
 	collector.fillScene(scene2);
 	file.write(scene2, "assets/tree/tree");
 }
+
+

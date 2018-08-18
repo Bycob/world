@@ -26,5 +26,7 @@ public:
 
 protected:
     vec3d _position;
+
+	void collectChild(int keyOffset, WorldObject &childObject, ICollector &collector, const IResolutionModel &resolutionModel);
 };
 } // namespace world

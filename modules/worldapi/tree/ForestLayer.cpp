@@ -1,9 +1,6 @@
 #include "ForestLayer.h"
 
-#include "Tree.h"
-#include "TreeSkelettonGenerator.h"
-#include "TrunkGenerator.h"
-#include "LeavesGenerator.h"
+#include "TreeGroup.h"
 
 namespace world {
 
@@ -48,6 +45,9 @@ void ForestLayer::decorate(FlatWorld &world, const WorldZone &zone) {
     }
 
     // Populate trees
+	TreeGroup &treeGroup = world.addObject<TreeGroup>(zone);
+	treeGroup.setPosition3D({ 0, 0, 0 });
+
     for (auto &pt : randomPoints) {
         const double altitude = ground.observeAltitudeAt(zone, pt.x, pt.y);
 
@@ -58,29 +58,9 @@ void ForestLayer::decorate(FlatWorld &world, const WorldZone &zone) {
 
         if (stddistrib(_rng) < getDensityAtAltitude(altitude)) {
             vec3d pos{pt.x, pt.y, altitude - zoneOffset.z};
-            addTree(world, zone, pos);
+			treeGroup.addTree(pos);
         }
     }
-}
-
-void ForestLayer::addTree(FlatWorld &world, const WorldZone &zone,
-                          const vec3d &position) {
-    Tree &tree = world.addObject<Tree>(zone);
-    tree.setPosition3D(position);
-
-    auto &skeletton = tree.addWorker<TreeSkelettonGenerator>();
-    skeletton.setRootWeight(TreeParamsd::gaussian(3, 0.2));
-    skeletton.setForkingCount(
-        TreeParamsi::WeightThreshold(0.15, TreeParamsi::uniform_int(3, 4)));
-    skeletton.setInclination(
-        TreeParamsd::PhiOffset(TreeParamsd::gaussian(0.2 * M_PI, 0.05 * M_PI)));
-    skeletton.setTheta(
-        TreeParamsd::UniformTheta(TreeParamsd::gaussian(0, 0.05 * M_PI)));
-    skeletton.setSize(
-        TreeParamsd::SizeFactor(TreeParamsd::uniform_real(0.5, 0.75)));
-
-    tree.addWorker<TrunkGenerator>(12);
-    tree.addWorker<LeavesGenerator>(0.2, 0.15);
 }
 
 double ForestLayer::getDensityAtAltitude(double altitude) {

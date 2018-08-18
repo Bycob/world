@@ -23,9 +23,6 @@ private:
     // 20000 is better, but needs to be optimized both in memory and mesh
     // complexity
 
-    void addTree(FlatWorld &world, const WorldZone &zone,
-                 const vec3d &position);
-
     double getDensityAtAltitude(double altitude);
 };
 
