@@ -19,25 +19,25 @@ class WORLDAPI_EXPORT TreeGroup : public WorldObject {
 public:
     TreeGroup();
 
-	~TreeGroup() override;
+    ~TreeGroup() override;
 
-	void addTree(const vec3d &pos);
+    void addTree(const vec3d &pos);
 
-	void collect(ICollector &collector,
-		const IResolutionModel &resolutionModel) override;
+    void collect(ICollector &collector,
+                 const IResolutionModel &resolutionModel) override;
 
 private:
-	PTreeGroup * _internal;
+    PTreeGroup *_internal;
 
-	std::vector<vec3d> _treesPositions;
+    std::vector<vec3d> _treesPositions;
 
-	Mesh _trunksMesh;
-	Mesh _leavesMesh;
+    Mesh _trunksMesh;
+    Mesh _leavesMesh;
 
 
-	void regenerateGroup();
+    void regenerateGroup();
 
-	void allocateTree(const vec3d &position);
+    void allocateTree(const vec3d &position);
 };
 
 } // namespace world

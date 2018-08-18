@@ -20,7 +20,7 @@ public:
 
     void setOffset(const vec3d &offset);
 
-	void setKeyOffset(int keyOffset);
+    void setKeyOffset(int keyOffset);
 
     void addItem(const ItemKey &key, const Object3D &object) override;
 
@@ -41,7 +41,7 @@ protected:
 private:
     std::pair<bool, ChunkKey> _currentChunk;
     std::pair<bool, ObjectKey> _currentObject;
-	int _keyOffset;
+    int _keyOffset;
 
     vec3d _offset;
 

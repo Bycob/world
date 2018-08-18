@@ -45,8 +45,8 @@ void ForestLayer::decorate(FlatWorld &world, const WorldZone &zone) {
     }
 
     // Populate trees
-	TreeGroup &treeGroup = world.addObject<TreeGroup>(zone);
-	treeGroup.setPosition3D({ 0, 0, 0 });
+    TreeGroup &treeGroup = world.addObject<TreeGroup>(zone);
+    treeGroup.setPosition3D({0, 0, 0});
 
     for (auto &pt : randomPoints) {
         const double altitude = ground.observeAltitudeAt(zone, pt.x, pt.y);
@@ -58,7 +58,7 @@ void ForestLayer::decorate(FlatWorld &world, const WorldZone &zone) {
 
         if (stddistrib(_rng) < getDensityAtAltitude(altitude)) {
             vec3d pos{pt.x, pt.y, altitude - zoneOffset.z};
-			treeGroup.addTree(pos);
+            treeGroup.addTree(pos);
         }
     }
 }

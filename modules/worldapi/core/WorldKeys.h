@@ -26,7 +26,7 @@ struct ObjectKeys {
 };
 
 struct AssetKeys {
-	constexpr static int defaultKey() { return 0; }
+    constexpr static int defaultKey() { return 0; }
 
     static std::string toString(const AssetKey &key) {
         return std::to_string(key);
