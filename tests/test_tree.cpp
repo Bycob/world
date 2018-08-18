@@ -7,10 +7,11 @@
 using namespace world;
 
 void testCircularSkeletton(int argc, char** argv);
+void testTreeGroup(int argc, char ** argv);
 void testTree(int argc, char **argv);
 
 int main(int argc, char** argv) {
-	testTree(argc, argv);
+	testTreeGroup(argc, argv);
 }
 
 void testCircularSkeletton(int argc, char** argv) {
@@ -18,9 +19,8 @@ void testCircularSkeletton(int argc, char** argv) {
 	auto *skeletton = new WeightedSkeletton<TreeInfo>();
 
 	Node<TreeInfo> * primaryNode = skeletton->getPrimaryNode();
-	primaryNode->setWeight(1);
-	Node<TreeInfo> * secondNode = primaryNode->createNeighbour(2);
-	Node<TreeInfo> * thirdNode = secondNode->createNeighbour(3);
+	Node<TreeInfo> * secondNode = primaryNode->createNeighbour(TreeInfo());
+	Node<TreeInfo> * thirdNode = secondNode->createNeighbour(TreeInfo());
 
 	//Circulaire
 	thirdNode->addNeighbour(primaryNode);
@@ -28,6 +28,14 @@ void testCircularSkeletton(int argc, char** argv) {
 	delete skeletton;
 }
 
+void testTreeGroup(int argc, char ** argv) {
+	Collector collector;
+	TreeGroup treeGroup;
+	treeGroup.addTree(vec3d{ 1, 1, 1 });
+	treeGroup.addTree(vec3d{ 2, 5, 1 });
+
+	treeGroup.collectAll(collector, 1);
+}
 
 void testTree(int argc, char ** argv) {
 
@@ -44,27 +52,32 @@ void testTree(int argc, char ** argv) {
 
 	std::cout << "Parametrage de l'arbre" << std::endl;
 	Tree tree;
-	// TODO resoudre le leak sur le generator
 	auto &skelGen = tree.addWorker<TreeSkelettonGenerator>();
 
-	/*skelGen.setInclination(SideBranch::phi(Params::gaussian(0.9, 0.2)));
-	skelGen.setRotationOffset(SideBranch::offsetTheta(gaussian(0, 0.5)));
-	skelGen.setForkingCount(uniform_i(4, 6));
-	skelGen.setSizeFactor(SideBranch::size(gaussian(4.0 / 5.0, 0.1)));
-	skelGen.setMaxForkingLevel(MaxLevelByWeight(0.02));
-	skelGen.setWeight(SideBranch::weight(Trees::DefaultWeight()));*/
-	skelGen.setInclination(TreeParamsd::gaussian(0.9, 0.1));
-	skelGen.setRotationOffset(TreeParamsd::gaussian(0, 0.5));
-	skelGen.setForkingCount(TreeParamsi::uniform_int(2, 6));
-	skelGen.setSizeFactor(TreeParamsd::gaussian(2.5 / 5.0, 0.05));
-	skelGen.setMaxForkingLevel(TreeParamsi::MaxLevelByWeight(0.02));
+//#define SIDE_BRANCH
+#ifdef SIDE_BRANCH
+	skelGen.setInclination(SideBranchd::Phi(TreeParamsd::gaussian(0.9, 0.2)));
+	skelGen.setTheta(SideBranchd::Theta(TreeParamsd::gaussian(0, 0.5)));
+	skelGen.setForkingCount(TreeParamsi::WeightThreshold(0.02, TreeParamsi::uniform_int(3, 5)));
+	skelGen.setSize(SideBranchd::Size(TreeParamsd::uniform_real(0.05, 0.5)));
+	skelGen.setWeight(SideBranchd::Weight(TreeParamsd::gaussian(0.5, 0.1)));
+#else // SIDE_BRANCH
+	skelGen.setInclination(TreeParamsd::PhiOffset(
+			TreeParamsd::gaussian(0.5, 0.1)));
+	skelGen.setTheta(TreeParamsd::UniformTheta(
+            TreeParamsd::gaussian(0, 0.3)));
+	skelGen.setForkingCount(TreeParamsi::WeightThreshold(
+			0.01, TreeParamsi::uniform_int(3, 6)));
+	skelGen.setSize(TreeParamsd::SizeByWeight(1));
 	skelGen.setWeight(TreeParamsd::DefaultWeight());
+#endif // SIDE_BRANCH
 
 	tree.addWorker<TrunkGenerator>();
+	tree.addWorker<LeavesGenerator>();
 
 	std::cout << "Generation" << std::endl;
 	Collector collector;
-	tree.collectAll(collector, 5);
+	tree.collectAll(collector, 15);
 
 	std::cout << "Converting skeletton into 3D model..." << std::endl;
 	std::shared_ptr<Mesh> mesh(tree.getSkeletton().convertToMesh());
@@ -80,3 +93,5 @@ void testTree(int argc, char ** argv) {
 	collector.fillScene(scene2);
 	file.write(scene2, "assets/tree/tree");
 }
+
+

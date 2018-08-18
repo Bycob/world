@@ -5,8 +5,7 @@
 #include <random>
 
 #include "flat/FlatWorld.h"
-#include "TrunkGenerator.h"
-#include "TreeSkelettonGenerator.h"
+#include "Tree.h"
 
 namespace world {
 

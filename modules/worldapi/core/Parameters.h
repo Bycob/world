@@ -14,7 +14,7 @@ template <typename Out, typename... In> class Parameter {
 public:
     void setFunction(std::function<Out(In...)> func) { _function = func; }
 
-    Out operator()(In... in) { return _function(in...); }
+    Out operator()(In... in) const { return _function(in...); }
 
 private:
     std::function<Out(In...)> _function;

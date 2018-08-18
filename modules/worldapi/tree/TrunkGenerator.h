@@ -9,21 +9,9 @@
 
 namespace world {
 
-#define DEFAULT_SEGMENT_COUNT 12
-#define DEFAULT_MERGE_SIZE 0.04
-#define DEFAULT_FACE_SIZE 0.1
-#define DEFAULT_MERGE_RES 6
-
 class WORLDAPI_EXPORT TrunkGenerator : public ITreeWorker {
 public:
-    /** @param segmentCount Nombre de segments.
-@param faceSize Taille d'une face sur la longueur d'une branche, en moyenne.
-@param mergeSize Longueur de la zone de fusion entre deux branches.
-@param mergeRes nombre de cercles dans une zone de fusion entre deux branches.*/
-    TrunkGenerator(int segmentCount = DEFAULT_SEGMENT_COUNT,
-                   double faceSize = DEFAULT_FACE_SIZE,
-                   double mergeSize = DEFAULT_MERGE_SIZE,
-                   int mergeRes = DEFAULT_MERGE_RES);
+    TrunkGenerator(int segmentCount = 12, double resolution = 20);
 
     ~TrunkGenerator();
 
@@ -32,16 +20,18 @@ public:
     void process(Tree &tree) override;
 
 private:
-    void fillBezier(Mesh &trunkMesh, const BezierCurve &bezier,
-                    int divisionCount, double startWeight, double endWeight,
-                    int mergePos) const;
-
-    void populateTrunkMesh(Mesh &trunkMesh, const Node<TreeInfo> *node,
-                           double mergeLen, double mergeWeight) const;
-
     int _segmentCount;
-    double _faceSize;
-    double _mergeSize;
-    int _mergeRes;
+    double _resolution;
+
+    void addNode(Mesh &mesh, Node<TreeInfo> *node, const vec3d &direction,
+                 int joinId, bool writeVertIds) const;
+
+    void addBezierTube(Mesh &mesh, const BezierCurve &curve, double startRadius,
+                       double endRadius, int joinId) const;
+
+    void addRing(Mesh &mesh, const vec3d &origin, const vec3d &xvec,
+                 const vec3d &yvec, double radius) const;
+
+    void addFaces(Mesh &mesh, int start1, int start2) const;
 };
-}
+} // namespace world
