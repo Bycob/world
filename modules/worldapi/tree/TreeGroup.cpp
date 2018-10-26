@@ -2,6 +2,7 @@
 
 #include "math/MathsHelper.h"
 #include "assets/MeshOps.h"
+#include "assets/Object3D.h"
 #include "TreeSkelettonGenerator.h"
 #include "TrunkGenerator.h"
 #include "LeavesGenerator.h"
@@ -21,8 +22,6 @@ void TreeGroup::addTree(const vec3d &pos) { _treesPositions.push_back(pos); }
 
 void TreeGroup::collect(ICollector &collector,
                         const IResolutionModel &resolutionModel) {
-
-    using ItemKeys = ICollector::ItemKeys;
 
     // we choose the render mode of the tree group : 0:none / 1:together / 2:per
     // tree
@@ -49,21 +48,29 @@ void TreeGroup::collect(ICollector &collector,
         }
 
         // Collecting
-        Material trunkMaterial("trunk");
-        trunkMaterial.setKd(0.5, 0.2, 0);
-        Material leafMaterial("leaf");
-        leafMaterial.setKd(0.4, 0.9, 0.4);
+		if (collector.hasChannel<Object3D>()) {
 
-        Object3D trunksObj(_trunksMesh);
-        trunksObj.setMaterialID("trunk");
+			Object3D trunksObj(_trunksMesh);
+			Object3D leavesObj(_leavesMesh);
 
-        Object3D leavesObj(_leavesMesh);
-        leavesObj.setMaterialID("leaf");
+			if (collector.hasChannel<Material>()) {
+				Material trunkMaterial("trunk");
+				trunkMaterial.setKd(0.5, 0.2, 0);
+				Material leafMaterial("leaf");
+				leafMaterial.setKd(0.4, 0.9, 0.4);
 
-        collector.addItem(ItemKeys::inObject(1), trunksObj);
-        collector.addItem(ItemKeys::inObject(2), leavesObj);
-        collector.addMaterial(ItemKeys::inObject(1), trunkMaterial);
-        collector.addMaterial(ItemKeys::inObject(2), leafMaterial);
+				auto &matChannel = collector.getChannel<Material>();
+				trunksObj.setMaterialID(matChannel.keyToString(ItemKeys::inObject(1)));
+				leavesObj.setMaterialID(matChannel.keyToString(ItemKeys::inObject(2)));
+
+				matChannel.put(ItemKeys::inObject(1), trunkMaterial);
+				matChannel.put(ItemKeys::inObject(2), leafMaterial);
+			}
+
+			auto &objChannel = collector.getChannel<Object3D>();
+			objChannel.put(ItemKeys::inObject(1), trunksObj);
+			objChannel.put(ItemKeys::inObject(2), leavesObj);
+		}
 
         break;
     }

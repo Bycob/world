@@ -14,8 +14,6 @@ using namespace video;
 
 using namespace world;
 
-using TerrainKey = FlatWorldCollector::TerrainKey;
-
 TerrainManager::TerrainManager(Application & application, IrrlichtDevice *device)
         : RenderingModule(application, device) {
 
@@ -25,20 +23,20 @@ TerrainManager::~TerrainManager() {
     clearAllNodes();
 }
 
-void TerrainManager::initialize(FlatWorldCollector &collector) {
+void TerrainManager::initialize(Collector &collector) {
     clearAllNodes();
 
     update(collector);
 }
 
-void TerrainManager::update(FlatWorldCollector &collector) {
+void TerrainManager::update(Collector &collector) {
 
     /*/ Test
     PerlinTerrainGenerator generator(0, 5, 1, 0.4);
     std::unique_ptr<Terrain> terrain(generator.generate());
 	addNode({ *terrain, 0, 0 }, ground);
     //*/
-    std::map<TerrainKey, bool> toKeep;
+    /*std::map<TerrainKey, bool> toKeep;
 
     // Add terrains if they're not already here
     auto terrainIt = collector.iterateTerrains();
@@ -64,7 +62,7 @@ void TerrainManager::update(FlatWorldCollector &collector) {
             ++iter;
         }
     }
-
+	*/
     _driver->removeAllHardwareBuffers();
 }
 

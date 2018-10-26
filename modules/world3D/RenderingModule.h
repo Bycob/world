@@ -12,8 +12,10 @@ public:
 	RenderingModule(Application & app, irr::IrrlichtDevice * device);
 	virtual ~RenderingModule();
 
-	virtual void initialize(world::FlatWorldCollector &collector) = 0;
-	virtual void update(world::FlatWorldCollector &collector) = 0;
+	/* This method is called to initialize or reinitialize the module with
+	 * the given collector. */
+	virtual void initialize(world::Collector &collector) = 0;
+	virtual void update(world::Collector &collector) = 0;
 
 	Application & _app;
 

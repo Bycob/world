@@ -25,8 +25,8 @@ public:
 	void setUserPosition(world::vec3d pos);
 	world::vec3d getUserPosition() const;
 
-	void refill(std::unique_ptr<world::FlatWorldCollector> && toRefill);
-	std::unique_ptr<world::FlatWorldCollector> popFull();
+	void refill(std::unique_ptr<world::Collector> && toRefill);
+	std::unique_ptr<world::Collector> popFull();
 private:
     std::atomic_bool _running;
 	mutable std::mutex _paramLock;
@@ -34,8 +34,8 @@ private:
 	std::unique_ptr<world::FlatWorld> _world;
 	std::unique_ptr<world::FirstPersonExplorer> _explorer;
 
-	std::list<std::unique_ptr<world::FlatWorldCollector>> _emptyCollectors;
-	std::list<std::unique_ptr<world::FlatWorldCollector>> _fullCollectors;
+	std::list<std::unique_ptr<world::Collector>> _emptyCollectors;
+	std::list<std::unique_ptr<world::Collector>> _fullCollectors;
 
 	world::vec3d _newUpdatePos;
 	world::vec3d _lastUpdatePos;

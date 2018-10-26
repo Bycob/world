@@ -32,9 +32,6 @@ public:
     void collect(const WorldZone &zone, ICollector &collector,
                  const IResolutionModel &resolutionModel) override;
 
-    void collect(const WorldZone &zone, FlatWorldCollector &collector,
-                 const IResolutionModel &resolutionModel);
-
 protected:
     void onFirstExploration(const WorldZone &chunk) override;
 

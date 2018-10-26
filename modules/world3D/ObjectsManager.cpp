@@ -14,16 +14,18 @@ using namespace world;
 
 //----- ObjectNodeHandler
 
-ObjectNodeHandler::ObjectNodeHandler(ObjectsManager &objectsManager, const CollectorItem &provider)
+ObjectNodeHandler::ObjectNodeHandler(ObjectsManager &objectsManager, const Object3D &object, Collector &collector)
 	: _objManager(objectsManager), _meshNode(NULL) {
 
-	const Object3D &object = provider.getObject3D();
 	updateObject3D(object);
 
 	// Material
-	auto material = provider.getMaterial(object.getMaterialID());
-	if (material) {
-		setMaterial(*material, provider);
+	auto &matChan = collector.getStorageChannel<Material>();
+
+	// TODO get right id
+	if (matChan.has(ItemKeys::fromString(object.getMaterialID()))) {
+		auto &material = matChan.get(ItemKeys::fromString(object.getMaterialID()));
+		setMaterial(material, collector);
 	}
 }
 
@@ -35,20 +37,17 @@ ObjectNodeHandler::~ObjectNodeHandler() {
 	}
 }
 
-void ObjectNodeHandler::setTexture(int id, const std::string &path, const world::CollectorItem &provider) {
-	auto texture = provider.getTexture(path);
+void ObjectNodeHandler::setTexture(int id, const std::string &path, Collector &collector) {
+	auto &texChan = collector.getStorageChannel<Image>();
 
-	if (!texture) {
+	if (!texChan.has(ItemKeys::fromString(path))) {
 		return;
 	}
 
 	auto driver = _objManager._driver;
-	SMaterial & irrmat = _meshNode->getMaterial(0);
 
-	std::string uid = texture->_uid;
-
-	if (!driver->findTexture(uid.c_str())) {
-		const Image &image = texture->_image;
+	if (!driver->findTexture(path.c_str())) {
+		const Image &image = texChan.get(ItemKeys::fromString(path));
 
 		ImageStream stream(image);
 		int dataSize = stream.remaining();
@@ -60,15 +59,16 @@ void ObjectNodeHandler::setTexture(int id, const std::string &path, const world:
 				{static_cast<irr::u32>(image.width()), static_cast<irr::u32>(image.height())},
 				data, true);
 
-		driver->addTexture(uid.c_str(), irrimg);
+		driver->addTexture(path.c_str(), irrimg);
 	}
 
-	irrmat.setTexture(id, driver->getTexture(uid.c_str()));
-	_usedTextures.emplace_back(uid);
-	_objManager.addTextureUser(uid);
+	SMaterial & irrmat = _meshNode->getMaterial(0);
+	irrmat.setTexture(id, driver->getTexture(path.c_str()));
+	_objManager.addTextureUser(path);
+	_usedTextures.emplace_back(path);
 }
 
-void ObjectNodeHandler::setMaterial(const Material &mat, const CollectorItem &provider) {
+void ObjectNodeHandler::setMaterial(const Material &mat, Collector &collector) {
 	SMaterial & irrmat = _meshNode->getMaterial(0);
 
 	irrmat.AmbientColor = toIrrColor(mat.getKa());
@@ -78,7 +78,7 @@ void ObjectNodeHandler::setMaterial(const Material &mat, const CollectorItem &pr
 	irrmat.TextureLayer[0].BilinearFilter = false;
 	irrmat.TextureLayer[0].TrilinearFilter = false;
 
-	setTexture(0, mat.getMapKd(), provider);
+	setTexture(0, mat.getMapKd(), collector);
 }
 
 void ObjectNodeHandler::updateObject3D(const Object3D & object) {
@@ -125,13 +125,13 @@ ObjectsManager::~ObjectsManager() {
 	_objects.clear();
 }
 
-void ObjectsManager::initialize(FlatWorldCollector &collector) {
+void ObjectsManager::initialize(Collector &collector) {
 	_objects.clear();
 
 	update(collector);
 }
 
-void ObjectsManager::update(FlatWorldCollector &collector) {
+void ObjectsManager::update(Collector &collector) {
 	auto start = std::chrono::steady_clock::now();
 
 	// Set remove tag to true
@@ -140,21 +140,21 @@ void ObjectsManager::update(FlatWorldCollector &collector) {
 	}
 
 	// Add new objects
-	auto it = collector.iterateItems();
+	auto objects = collector.getStorageChannel<Object3D>();
+	auto materials = collector.getStorageChannel<Material>();
+	auto textures = collector.getStorageChannel<Image>();
 
-	for (; it.hasNext(); ++it) {
-		auto pair = *it;
+	for (const auto &objectEntry : objects) {
+		if (_objects.find(objectEntry.first) == _objects.end()) {
+			Object3D &object = *objectEntry.second;
+			auto objNode = std::make_unique<ObjectNodeHandler>(*this, *objectEntry.second, collector);
 
-		if (_objects.find(pair.first) == _objects.end()) {
-			Object3D &object = pair.second->getObject3D();
-			auto objNode = std::make_unique<ObjectNodeHandler>(*this, *pair.second);
-
-			_objects[pair.first] = std::move(objNode);
+			_objects[objectEntry.first] = std::move(objNode);
 
 			_dbgAdded++;
 		}
 		else {
-			_objects[pair.first]->removeTag = false;
+			_objects[objectEntry.first]->removeTag = false;
 		}
 	}
 

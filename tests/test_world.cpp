@@ -6,6 +6,7 @@
 #include <worldcore.h>
 #include <worldflat.h>
 
+
 using namespace world;
 
 void generate_test_world(int argc, char** argv);
@@ -23,7 +24,11 @@ void generate_test_world(int argc, char** argv) {
     std::cout << "Creation de l'explorer et du collecteur" << std::endl;
     FirstPersonExplorer explorer;
     explorer.setPosition({0, 0, 0});
-    FlatWorldCollector collector;
+    
+	Collector collector;
+	collector.addStorageChannel<Object3D>();
+	collector.addStorageChannel<world::Material>();
+	collector.addStorageChannel<Image>();
 
     std::cout << "Exploration du monde..." << std::endl;
     Profiler profiler;

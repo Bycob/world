@@ -18,10 +18,10 @@ public:
     TerrainManager(Application & app, irr::IrrlichtDevice * device);
 	virtual ~TerrainManager();
 
-    void initialize(world::FlatWorldCollector &collector) override;
-	void update(world::FlatWorldCollector &collector) override;
+    void initialize(world::Collector &collector) override;
+	void update(world::Collector &collector) override;
 private:
-	std::map<world::FlatWorldCollector::TerrainKey, irr::scene::ITerrainSceneNode*> _terrainNodes;
+	std::map<world::ItemKey, irr::scene::ITerrainSceneNode*> _terrainNodes;
 
 	void clearAllNodes();
     irr::scene::ITerrainSceneNode* createNode(const world::Terrain& terrain);

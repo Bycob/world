@@ -12,10 +12,10 @@ namespace world {
 // Private classes : no WORLDAPI_EXPORT
 class PCollectorItem {
 public:
-    PCollectorItem(const ICollector::ItemKey &myKey, const Object3D &object3D)
+    PCollectorItem(const ItemKey &myKey, const Object3D &object3D)
             : _myKey(myKey), _object3D(object3D) {}
 
-    ICollector::ItemKey _myKey;
+    ItemKey _myKey;
     Object3D _object3D;
     std::map<std::string, Material> _materials;
     std::map<std::string, std::unique_ptr<Image>> _image;

@@ -5,8 +5,9 @@
 
 #include "core/WorldTypes.h"
 #include "core/ResolutionModelContextWrap.h"
+#include "assets/Object3D.h"
+#include "assets/Material.h"
 #include "math/MathsHelper.h"
-#include "flat/FlatWorldCollector.h"
 #include "ApplyParentTerrain.h"
 #include "PerlinTerrainGenerator.h"
 #include "ReliefMapModifier.h"
@@ -157,12 +158,6 @@ void Ground::collectZone(const WorldZone &zone, ICollector &collector,
     updateCache();
 }
 
-void Ground::collectZone(const WorldZone &zone, FlatWorld &world,
-                         FlatWorldCollector &collector,
-                         const IResolutionModel &resolutionModel) {
-    collectZone(zone, collector, resolutionModel);
-}
-
 void Ground::addWorkerInternal(ITerrainWorker *worker) {
     _internal->_generators.push_back(std::unique_ptr<ITerrainWorker>(worker));
 }
@@ -177,38 +172,53 @@ double Ground::observeAltitudeAt(double x, double y, int lvl) {
            getAltitudeRange() * terrain.getExactHeightAt(inTile.x, inTile.y);
 }
 
-inline ICollector::ItemKey terrainToItem(const std::string &key) {
-    return ICollector::ItemKeys::inWorld(std::string("_") + key,
+inline ItemKey terrainToItem(const std::string &key) {
+    return ItemKeys::inWorld(std::string("_") + key,
                                          ObjectKeys::defaultKey(), 0);
 }
 
 void Ground::addTerrain(const TileCoordinates &key, ICollector &collector) {
-    ICollector::ItemKey itemKey = terrainToItem(getTerrainDataId(key));
+    ItemKey itemKey = terrainToItem(getTerrainDataId(key));
     Terrain &terrain = this->provideTerrain(key);
 
-    if (!collector.hasItem(itemKey)) {
-        // Relocate the terrain
-        auto &bbox = terrain.getBoundingBox();
-        vec3d offset = bbox.getLowerBound();
+	if (collector.hasChannel<Object3D>()) {
 
-        // Create the mesh
-        Object3D object(provideMesh(key));
-        object.setPosition(offset);
-        object.setMaterialID("terrain");
+		auto &objChannel = collector.getChannel<Object3D>();
 
-        // Create the material
-        Material material("terrain");
-        material.setKd(1, 1, 1);
-        // material.setKd(1, (double) key._lod / _tileSystem._maxLod, 1 -
-        // (double)key._lod / _tileSystem._maxLod);
-        material.setMapKd("texture01");
+		if (!objChannel.has(itemKey)) {
+			// Relocate the terrain
+			auto &bbox = terrain.getBoundingBox();
+			vec3d offset = bbox.getLowerBound();
 
-        // Retrieve the texture
-        auto &texture = terrain.getTexture();
+			// Create the mesh
+			Object3D object(provideMesh(key));
+			object.setPosition(offset);
 
-        collector.addItem(itemKey, object);
-        collector.addMaterial(itemKey, material);
-        collector.addTexture(itemKey, "texture01", texture);
+			// Create the material
+			Material material("terrain");
+			material.setKd(1, 1, 1);
+			// material.setKd(1, (double) key._lod / _tileSystem._maxLod, 1 -
+			// (double)key._lod / _tileSystem._maxLod);
+			material.setMapKd("texture01");
+
+			// Retrieve the texture
+			auto &texture = terrain.getTexture();
+
+			if (collector.hasChannel<Material>()) {
+				auto &matChan = collector.getChannel<Material>();
+				object.setMaterialID(matChan.keyToString(itemKey));
+
+				if (collector.hasChannel<Image>()) {
+					auto &imageChan = collector.getChannel<Image>();
+					material.setMapKd(imageChan.keyToString(itemKey));
+					imageChan.put(itemKey, texture);
+				}
+
+				matChan.put(itemKey, material);
+			}
+
+			objChannel.put(itemKey, object);
+		}
     }
 }
 

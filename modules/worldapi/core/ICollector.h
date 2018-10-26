@@ -6,71 +6,81 @@
 #include <tuple>
 
 #include "WorldKeys.h"
-#include "assets/Image.h"
-#include "assets/Material.h"
-#include "assets/Object3D.h"
 
 namespace world {
 
-class WORLDAPI_EXPORT ICollector {
+class ICollectorChannelBase;
+template <typename T> class ICollectorChannel;
+
+/***/
+class ICollector {
 public:
-    typedef std::tuple<ChunkKey, ObjectKey, AssetKey> ItemKey;
+    template <typename T> ICollectorChannel<T> &getChannel();
 
-    struct ItemKeys {
-        /** Generates a key from the world's perspective : we need to
-         * identify the chunk, the object and the part of the object.*/
-        static ItemKey inWorld(const ChunkKey &chunkKey,
-                               const ObjectKey &objKey,
-                               const AssetKey &assetKey) {
-            return std::make_tuple(chunkKey, objKey, assetKey);
-        }
-
-        /** Generates a key from inside a chunk. We just need to
-         * specify which object and which part of it we want a key for. */
-        static ItemKey inChunk(const ObjectKey &objKey,
-                               const AssetKey &assetKey) {
-            return inWorld(ChunkKeys::none(), objKey, assetKey);
-        }
-
-        /** Generates a key from inside an object. We just need to
-         * specify which part of the object we want a key for. */
-        static ItemKey inObject(const AssetKey &assetKey) {
-            return inWorld(ChunkKeys::none(), ObjectKeys::defaultKey(),
-                           assetKey);
-        }
-
-        /** Gets an unique string representation for this key. The
-         * string is printable and usable in a file system. */
-        static std::string toString(const ItemKey &key) {
-            return ChunkKeys::toString(std::get<0>(key)) + "/" +
-                   ObjectKeys::toString(std::get<1>(key)) + "/" +
-                   AssetKeys::toString(std::get<2>(key));
-        }
-    };
-
-    virtual void addItem(const ItemKey &key, const Object3D &object) = 0;
-
-    virtual bool hasItem(const ItemKey &key) const = 0;
-
-    virtual void removeItem(const ItemKey &key) = 0;
-
-    virtual void disableItem(const ItemKey &key) = 0;
-
-    virtual void addMaterial(const ItemKey &key, const Material &material) = 0;
-
-    virtual void addTexture(const ItemKey &key, const std::string &texName,
-                            const Image &texture) = 0;
+    template <typename T> bool hasChannel() const;
 
 protected:
-    void passItemTo(ICollector &collector, const ItemKey &key,
+    virtual ICollectorChannelBase &getChannelByType(size_t type) = 0;
+
+    virtual bool hasChannelByType(size_t type) const = 0;
+
+    /*void passItemTo(ICollector &collector, const ItemKey &key,
                     Object3D &object) {
         collector.addItemUnsafe(key, object);
     }
 
     virtual void addItemUnsafe(const ItemKey &key, Object3D &object) {
         addItem(key, object);
-    }
-};
-} // namespace world
+    }*/
 
+
+    // TODO find another solution
+    friend class CollectorContextWrap;
+};
+
+
+class ICollectorContext;
+
+
+class ICollectorChannelBase {
+public:
+	virtual ~ICollectorChannelBase() = default;
+
+	virtual ICollectorChannelBase *wrap(ICollectorContext &context) = 0;
+};
+
+
+template <typename T> class ICollectorChannel : public ICollectorChannelBase {
+public:
+	ICollectorChannelBase *wrap(ICollectorContext &context) override;
+
+	virtual void put(const ItemKey &key, const T &item) = 0;
+
+	virtual bool has(const ItemKey &key) const = 0;
+
+	virtual void remove(const ItemKey &key) = 0;
+
+	virtual const T &get(const ItemKey &key) const = 0;
+
+	/** Converts a key to a string that can be used as texture name /
+	* material name / other to reference the object having this key
+	* in this channel. */
+	virtual std::string keyToString(const ItemKey &key) const = 0;
+};
+
+
+
+template <typename T> inline ICollectorChannel<T> &ICollector::getChannel() {
+    size_t type = typeid(ICollectorChannel<T>).hash_code();
+    return dynamic_cast<ICollectorChannel<T> &>(getChannelByType(type));
+}
+
+template <typename T> inline bool ICollector::hasChannel() const {
+    size_t type = typeid(ICollectorChannel<T>).hash_code();
+    return hasChannelByType(type);
+}
+
+}; // namespace world
+
+#include "CollectorContextWrap.h"
 #endif // WORLD_ICOLLECTOR_H

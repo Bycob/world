@@ -1,7 +1,9 @@
 #include "Tree.h"
 
 #include <vector>
-#include <core/IResolutionModel.h>
+
+#include "core/IResolutionModel.h"
+#include "assets/Object3D.h"
 
 namespace world {
 class PTree {
@@ -36,7 +38,6 @@ const Mesh &Tree::getLeavesMesh() const { return _leavesMesh; }
 Mesh &Tree::leavesMesh() { return _leavesMesh; }
 
 void Tree::collect(ICollector &collector, const IResolutionModel &explorer) {
-    using ItemKeys = ICollector::ItemKeys;
 
     // Generation
     if (!_generated) {
@@ -45,19 +46,29 @@ void Tree::collect(ICollector &collector, const IResolutionModel &explorer) {
 
     // Collection
     Object3D mainPart(_trunkMesh);
-    mainPart.setMaterialID("trunk");
-    collector.addItem(ItemKeys::inObject(1), mainPart);
 
     Object3D leaves(_leavesMesh);
-    leaves.setMaterialID("leaves");
-    collector.addItem(ItemKeys::inObject(2), leaves);
 
     // Material
-    collector.addMaterial(ItemKeys::inObject(1), _trunkMaterial);
-
     Material leavesMat("leaves");
     leavesMat.setKd(0.4, 0.9, 0.4);
-    collector.addMaterial(ItemKeys::inObject(2), leavesMat);
+
+	if (collector.hasChannel<Object3D>()) {
+		auto &objectsChannel = collector.getChannel<Object3D>();
+
+		if (collector.hasChannel<Material>()) {
+			auto &materialsChannel = collector.getChannel<Material>();
+
+			mainPart.setMaterialID(materialsChannel.keyToString(ItemKeys::inObject(1)));
+			leaves.setMaterialID(materialsChannel.keyToString(ItemKeys::inObject(2)));
+
+			materialsChannel.put(ItemKeys::inObject(1), _trunkMaterial);
+			materialsChannel.put(ItemKeys::inObject(2), leavesMat);
+		}
+
+		objectsChannel.put(ItemKeys::inObject(1), mainPart);
+		objectsChannel.put(ItemKeys::inObject(2), leaves);
+	}
 }
 
 void Tree::generateBase() {

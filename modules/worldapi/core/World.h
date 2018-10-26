@@ -1,4 +1,5 @@
-#pragma once
+#ifndef WORLD_WORLD_H
+#define WORLD_WORLD_H
 
 #include "core/WorldConfig.h"
 
@@ -68,3 +69,5 @@ private:
 } // namespace world
 
 #include "World.inl"
+
+#endif // WORLD_WORLD_H

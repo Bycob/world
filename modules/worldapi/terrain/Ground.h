@@ -61,10 +61,6 @@ public:
     void collectZone(const WorldZone &zone, ICollector &collector,
                      const IResolutionModel &resolutionModel);
 
-    void collectZone(const WorldZone &zone, FlatWorld &world,
-                     FlatWorldCollector &collector,
-                     const IResolutionModel &resolutionModel) override;
-
 private:
     PGround *_internal;
 

@@ -18,7 +18,12 @@ Application::Application()
 
 	// Collectors
 	for (int i = 0; i < 2; i++) {
-		_emptyCollectors.emplace_back(std::make_unique<FlatWorldCollector>());
+		auto collector = std::make_unique<Collector>();
+		collector->addStorageChannel<Object3D>();
+		collector->addStorageChannel<Material>();
+		collector->addStorageChannel<Image>();
+
+		_emptyCollectors.emplace_back(std::make_unique<Collector>());
 	}
 }
 
@@ -45,7 +50,7 @@ void Application::run(int argc, char **argv) {
 			if ((newUpdatePos - _lastUpdatePos).norm() > 0.01 && !_emptyCollectors.empty()) {
 			    // get collector
 			    _paramLock.lock();
-			    std::unique_ptr<FlatWorldCollector> collector = std::move(_emptyCollectors.front());
+			    std::unique_ptr<Collector> collector = std::move(_emptyCollectors.front());
 			    _emptyCollectors.pop_front();
 			    _paramLock.unlock();
 
@@ -91,12 +96,12 @@ vec3d Application::getUserPosition() const {
 	return pos;
 }
 
-void Application::refill(std::unique_ptr<world::FlatWorldCollector> &&toRefill) {
+void Application::refill(std::unique_ptr<world::Collector> &&toRefill) {
     std::lock_guard<std::mutex> lock(_paramLock);
 	_emptyCollectors.emplace_back(std::move(toRefill));
 }
 
-std::unique_ptr<world::FlatWorldCollector> Application::popFull() {
+std::unique_ptr<world::Collector> Application::popFull() {
 	std::lock_guard<std::mutex> lock(_paramLock);
 	if (_fullCollectors.empty())
 		return nullptr;
