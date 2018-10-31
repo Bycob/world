@@ -22,9 +22,8 @@ ObjectNodeHandler::ObjectNodeHandler(ObjectsManager &objectsManager, const Objec
 	// Material
 	auto &matChan = collector.getStorageChannel<Material>();
 
-	// TODO get right id
-	if (matChan.has(ItemKeys::fromString(object.getMaterialID()))) {
-		auto &material = matChan.get(ItemKeys::fromString(object.getMaterialID()));
+	if (matChan.has(key(object.getMaterialID()))) {
+		auto &material = matChan.get(key(object.getMaterialID()));
 		setMaterial(material, collector);
 	}
 }
@@ -40,14 +39,14 @@ ObjectNodeHandler::~ObjectNodeHandler() {
 void ObjectNodeHandler::setTexture(int id, const std::string &path, Collector &collector) {
 	auto &texChan = collector.getStorageChannel<Image>();
 
-	if (!texChan.has(ItemKeys::fromString(path))) {
+	if (!texChan.has(key(path))) {
 		return;
 	}
 
 	auto driver = _objManager._driver;
 
 	if (!driver->findTexture(path.c_str())) {
-		const Image &image = texChan.get(ItemKeys::fromString(path));
+		const Image &image = texChan.get(key(path));
 
 		ImageStream stream(image);
 		int dataSize = stream.remaining();
@@ -140,21 +139,20 @@ void ObjectsManager::update(Collector &collector) {
 	}
 
 	// Add new objects
-	auto objects = collector.getStorageChannel<Object3D>();
-	auto materials = collector.getStorageChannel<Material>();
-	auto textures = collector.getStorageChannel<Image>();
+	auto &objects = collector.getStorageChannel<Object3D>();
+	auto &materials = collector.getStorageChannel<Material>();
+	auto &textures = collector.getStorageChannel<Image>();
 
 	for (const auto &objectEntry : objects) {
-		if (_objects.find(objectEntry.first) == _objects.end()) {
-			Object3D &object = *objectEntry.second;
-			auto objNode = std::make_unique<ObjectNodeHandler>(*this, *objectEntry.second, collector);
+		if (_objects.find(objectEntry._key) == _objects.end()) {
+			auto objNode = std::make_unique<ObjectNodeHandler>(*this, objectEntry._value, collector);
 
-			_objects[objectEntry.first] = std::move(objNode);
+			_objects[objectEntry._key] = std::move(objNode);
 
 			_dbgAdded++;
 		}
 		else {
-			_objects[objectEntry.first]->removeTag = false;
+			_objects[objectEntry._key]->removeTag = false;
 		}
 	}
 

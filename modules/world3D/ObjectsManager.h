@@ -2,6 +2,7 @@
 
 #include <map>
 #include <chrono>
+#include <memory>
 
 #include <irrlicht.h>
 

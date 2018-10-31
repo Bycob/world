@@ -1,6 +1,7 @@
 #include "CollectorContextWrap.h"
 
 #include "assets/Object3D.h"
+#include "assets/Material.h"
 
 namespace world {
 
@@ -81,8 +82,18 @@ template <>
 inline void CollectorChannelContextWrap<Object3D>::put(const ItemKey &key,
 	const Object3D &item) {
 	Object3D newItem(item);
+	newItem.setMaterialID(mutateKeyString(newItem.getMaterialID()));
 	newItem.setPosition(item.getPosition() + _context.getOffset());
-	_wrapped.put(_context.mutateKey(key), item);
+	_wrapped.put(_context.mutateKey(key), newItem);
+}
+
+template <>
+inline void CollectorChannelContextWrap<Material>::put(const ItemKey &key,
+    const Material &item) {
+
+    Material newMaterial(item);
+    newMaterial.setMapKd(mutateKeyString(item.getMapKd()));
+    _wrapped.put(_context.mutateKey(key), newMaterial);
 }
 
 template <typename T>
@@ -102,9 +113,13 @@ inline const T &CollectorChannelContextWrap<T>::get(const ItemKey &key) const {
 }
 
 template <typename T>
-inline std::string CollectorChannelContextWrap<T>::keyToString(
-	const ItemKey &key) const {
-	return ItemKeys::toString(_context.mutateKey(key));
+inline std::string CollectorChannelContextWrap<T>::mutateKeyString(const std::string &keystr) {
+    try {
+        return str(_context.mutateKey(key(keystr)));
+    }
+    catch (std::invalid_argument &e) {
+        return keystr;
+    }
 }
 
 } // namespace world

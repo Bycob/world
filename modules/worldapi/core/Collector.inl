@@ -7,7 +7,7 @@ inline CollectorChannel<T> &Collector::addStorageChannel() {
 
 template <typename T, typename CustomChannel, typename... Args>
 inline CustomChannel &Collector::addCustomChannel(Args... args) {
-    int type = typeid(ICollectorChannel<T>).hash_code();
+    size_t type = typeid(T).hash_code();
 #ifdef _MSC_VER
     auto ptr = std::make_shared<CustomChannel>(args...);
 #else
@@ -19,16 +19,22 @@ inline CustomChannel &Collector::addCustomChannel(Args... args) {
 }
 
 template <typename T> inline bool Collector::hasStorageChannel() const {
-    auto it = _channels.find(typeid(ICollectorChannel<T>).hash_code());
+    auto it = _channels.find(typeid(T).hash_code());
     return it != _channels.end() &&
-           dynamic_cast<CollectorChannel<T> *>(it->second) != nullptr;
+           dynamic_cast<CollectorChannel<T> *>(it->second.get()) != nullptr;
 }
 
 template <typename T>
 inline CollectorChannel<T> &Collector::getStorageChannel() {
-    // TODO throw right exception if not present
-    auto &channel = *_channels[typeid(ICollectorChannel<T>).hash_code()];
-    return dynamic_cast<CollectorChannel<T> &>(channel);
+	auto it = _channels.find(typeid(T).hash_code());
+
+	if (it == _channels.end())
+		throw std::runtime_error(std::string("Channel not found : ") + typeid(T).name());
+
+	auto *channelPtr = dynamic_cast<CollectorChannel<T> *>(it->second.get());
+	if (channelPtr == nullptr)
+		throw std::runtime_error("Channel is not a Storage Channel");
+    return *channelPtr;
 }
 
 // ====== CollectorChannel
@@ -57,11 +63,6 @@ inline void CollectorChannel<T>::remove(const ItemKey &key) {
 template <typename T>
 inline const T &CollectorChannel<T>::get(const ItemKey &key) const {
 	return *_items.at(key);
-}
-
-template <typename T>
-inline std::string CollectorChannel<T>::keyToString(const ItemKey &key) const {
-	return ItemKeys::toString(key);
 }
 
 template <typename T> inline void CollectorChannel<T>::reset() {
@@ -99,8 +100,8 @@ inline CollectorChannelIterator<T> &CollectorChannelIterator<T>::operator++() {
 }
 
 template <typename T>
-inline std::pair<ItemKey, T *> CollectorChannelIterator<T>::operator*() const {
-	return std::make_pair(_it->first, _it->second.get());
+inline CollectorEntry<T> CollectorChannelIterator<T>::operator*() const {
+	return CollectorEntry<T>(_it->first, *_it->second);
 }
 
 template <typename T>

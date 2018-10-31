@@ -47,6 +47,8 @@ public:
 	virtual ~ICollectorChannelBase() = default;
 
 	virtual ICollectorChannelBase *wrap(ICollectorContext &context) = 0;
+
+	virtual void reset() {}
 };
 
 
@@ -61,22 +63,17 @@ public:
 	virtual void remove(const ItemKey &key) = 0;
 
 	virtual const T &get(const ItemKey &key) const = 0;
-
-	/** Converts a key to a string that can be used as texture name /
-	* material name / other to reference the object having this key
-	* in this channel. */
-	virtual std::string keyToString(const ItemKey &key) const = 0;
 };
 
 
 
 template <typename T> inline ICollectorChannel<T> &ICollector::getChannel() {
-    size_t type = typeid(ICollectorChannel<T>).hash_code();
+    size_t type = typeid(T).hash_code();
     return dynamic_cast<ICollectorChannel<T> &>(getChannelByType(type));
 }
 
 template <typename T> inline bool ICollector::hasChannel() const {
-    size_t type = typeid(ICollectorChannel<T>).hash_code();
+    size_t type = typeid(T).hash_code();
     return hasChannelByType(type);
 }
 

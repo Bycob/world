@@ -4,40 +4,39 @@ namespace world {
 
 Collector::Collector() {}
 
-void Collector::reset() {}
+void Collector::reset() {
+    for (auto & entry : _channels) {
+        entry.second->reset();
+    }
+}
 
 void Collector::fillScene(Scene &scene) {
-    /*for (auto it = iterateItems(); it.hasNext(); ++it) {
-    const auto &item = (*it).second;
+    if (hasStorageChannel<Object3D>()) {
+        auto &objectChannel = getStorageChannel<Object3D>();
 
-    auto object = item->getObject3D();
+        if (hasStorageChannel<Material>()) {
+            auto &materialChannel = getStorageChannel<Material>();
 
-    // Material
-    std::string materialID = object.getMaterialID();
-    auto material = item->getMaterial(materialID);
+            if (hasStorageChannel<Image>()) {
+                auto &textureChannel = getStorageChannel<Image>();
 
-    if (material) {
-    Material addedMat = *material;
+                for (auto texture : textureChannel) {
+                    scene.addTexture(str(texture._key) + ".png", texture._value);
+                }
+            }
 
-    // Change the name to have distinct materials
-    // TODO we should not have to do that
-    materialID = ItemKeys::toString((*it).first) + materialID;
-    addedMat.setName(materialID);
-    object.setMaterialID(materialID);
+            for (auto material : materialChannel) {
+                Material addedMat(material._value);
+                addedMat.setMapKd(addedMat.getMapKd() + ".png");
 
-    // Textures
-    auto texture = item->getTexture(material->getMapKd());
-    if (texture) {
-    scene.addTexture(texture->_uid, texture->_image);
-    // TODO we should not have to change the uid.
-    addedMat.setMapKd(texture->_uid);
+                scene.addMaterial(addedMat);
+            }
+        }
+
+        for (auto object : objectChannel) {
+            scene.addObject(object._value);
+        }
     }
-
-    scene.addMaterial(addedMat);
-    }
-
-    scene.addObject(object);
-    }*/
 }
 
 ICollectorChannelBase &Collector::getChannelByType(size_t type) {

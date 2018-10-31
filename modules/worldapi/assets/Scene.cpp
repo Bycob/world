@@ -61,11 +61,11 @@ std::vector<std::shared_ptr<Material>> Scene::getMaterials() const {
     return output;
 }
 
-void world::Scene::addTexture(const std::string &id, const Image &image) {
+void Scene::addTexture(const std::string &id, const Image &image) {
     _internal->_images.emplace(id, image);
 }
 
-optional<const Image &> world::Scene::getTexture(const std::string &id) const {
+optional<const Image &> Scene::getTexture(const std::string &id) const {
     auto it = _internal->_images.find(id);
 
     if (it != _internal->_images.end()) {

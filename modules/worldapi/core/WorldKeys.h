@@ -3,6 +3,7 @@
 
 #include "core/WorldConfig.h"
 
+#include <iostream>
 #include <string>
 #include <tuple>
 
@@ -39,6 +40,8 @@ struct WORLDAPI_EXPORT AssetKeys {
 
 typedef std::tuple<ChunkKey, ObjectKey, AssetKey> ItemKey;
 
+
+
 struct WORLDAPI_EXPORT ItemKeys {
     /** Generates a key from the world's perspective : we need to
      * identify the chunk, the object and the part of the object.*/
@@ -59,24 +62,53 @@ struct WORLDAPI_EXPORT ItemKeys {
         return inWorld(ChunkKeys::none(), ObjectKeys::defaultKey(), assetKey);
     }
 
-    /** Gets an unique string representation for this key. The
-     * string is printable and usable in a file system. */
-    static std::string toString(const ItemKey &key) {
-        return ChunkKeys::toString(std::get<0>(key)) + "/" +
-               ObjectKeys::toString(std::get<1>(key)) + "/" +
-               AssetKeys::toString(std::get<2>(key));
+    static ItemKey defaultKey() {
+        return inWorld(ChunkKeys::none(), ObjectKeys::defaultKey(), AssetKeys::defaultKey());
     }
 
     static ItemKey fromString(const std::string &str) {
         size_t sep1 = str.find_first_of('/');
-        size_t sep2 = str.find_first_of('/', sep1);
+        size_t sep2 = str.find_first_of('/', sep1 + 1);
 
-        return std::make_tuple(
-            ChunkKeys::fromString(str.substr(0, sep1)),
-            ObjectKeys::fromString(str.substr(sep1 + 1, sep2 - sep1 - 1)),
-            AssetKeys::fromString(str.substr(sep2 + 1)));
+        if (sep1 == std::string::npos && sep2 == std::string::npos) {
+            throw std::invalid_argument("not a ItemKey");
+        }
+
+        try {
+            return std::make_tuple(
+                    ChunkKeys::fromString(str.substr(0, sep1)),
+                    ObjectKeys::fromString(str.substr(sep1 + 1, sep2 - sep1 - 1)),
+                    AssetKeys::fromString(str.substr(sep2 + 1)));
+        }
+        catch (std::invalid_argument &e) {
+            throw e;
+        }
+    }
+
+    /** Gets an unique string representation for this key. The
+    * string is printable and usable in a file system. */
+    static std::string toString(const ItemKey &key) {
+        return world::ChunkKeys::toString(std::get<0>(key)) + "/" +
+               world::ObjectKeys::toString(std::get<1>(key)) + "/" +
+               world::AssetKeys::toString(std::get<2>(key));
     }
 };
+
+
+/** Gets an unique string representation for this key. The
+ * string is printable and usable in a file system. */
+inline std::string str(const ItemKey &key) {
+    return ItemKeys::toString(key);
+}
+
+inline ItemKey key(const std::string &str) {
+    try {
+        return ItemKeys::fromString(str);
+    }
+    catch (std::invalid_argument &e) {
+        return ItemKeys::defaultKey();
+    }
+}
 
 } // namespace world
 

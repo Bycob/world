@@ -38,6 +38,8 @@ public:
 
     std::vector<std::shared_ptr<Material>> getMaterials() const;
 
+    /** Add a texture to the scene. The given image is copied into
+     * the scene. */
     void addTexture(const std::string &id, const Image &image);
 
     optional<const Image &> getTexture(const std::string &id) const;

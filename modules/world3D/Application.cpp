@@ -23,7 +23,7 @@ Application::Application()
 		collector->addStorageChannel<Material>();
 		collector->addStorageChannel<Image>();
 
-		_emptyCollectors.emplace_back(std::make_unique<Collector>());
+		_emptyCollectors.emplace_back(std::move(collector));
 	}
 }
 

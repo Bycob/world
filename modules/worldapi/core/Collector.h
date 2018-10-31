@@ -55,13 +55,21 @@ private:
     CollectorChannel<T> &getStorageChannel();*/
 };
 
+
 template <typename T> class CollectorChannelIterator;
 
+
+/**
+ *
+ * @tparam T
+ */
 template <typename T> class CollectorChannel : public ICollectorChannel<T> {
 public:
 	~CollectorChannel() override = default;
 
 	CollectorChannel();
+
+	CollectorChannel(const CollectorChannel<T> &other) = delete;
 
 	void put(const ItemKey &key, const T &item) override;
 
@@ -71,12 +79,10 @@ public:
 
 	const T &get(const ItemKey &key) const override;
 
-	std::string keyToString(const ItemKey &key) const override;
-
 
 	/** Delete all the resources harvested from the previous
 	* "collect" calls */
-	virtual void reset();
+	void reset() override;
 
 	CollectorChannelIterator<T> begin();
 
@@ -90,8 +96,18 @@ protected:
 #endif
 };
 
+template <typename T>
+struct CollectorEntry {
+	ItemKey _key;
+	const T &_value;
+
+	CollectorEntry(const ItemKey &key, const T &value) : _key(key), _value(value) {}
+	CollectorEntry(const CollectorEntry<T> &other) : _key(other._key), _value(other._value) {}
+};
+
 template <typename T> class CollectorChannelIterator {
 public:
+
 #ifdef _MSC_VER
 	CollectorChannelIterator(
 		typename std::map<ItemKey, std::shared_ptr<T>>::iterator it);
@@ -102,7 +118,7 @@ public:
 
 	CollectorChannelIterator<T> &operator++();
 
-	std::pair<ItemKey, T *> operator*() const;
+	CollectorEntry<T> operator*() const;
 
 	bool operator==(const CollectorChannelIterator<T> &other) const;
 

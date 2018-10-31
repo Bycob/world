@@ -57,6 +57,7 @@ private:
     int _keyOffset;
 
     vec3d _offset;
+
 };
 
 template <typename T>
@@ -73,11 +74,14 @@ public:
 
 	const T &get(const ItemKey &key) const override;
 
-	std::string keyToString(const ItemKey &key) const override;
-
 private:
 	ICollectorContext &_context;
 	ICollectorChannel<T> &_wrapped;
+
+
+	/** Agressively mutates everything that looks like a key.
+	 * If it doesn't, it's left unchanged. */
+	std::string mutateKeyString(const std::string &keystr);
 };
 
 } // namespace world

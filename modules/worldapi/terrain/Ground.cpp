@@ -206,11 +206,11 @@ void Ground::addTerrain(const TileCoordinates &key, ICollector &collector) {
 
 			if (collector.hasChannel<Material>()) {
 				auto &matChan = collector.getChannel<Material>();
-				object.setMaterialID(matChan.keyToString(itemKey));
+				object.setMaterialID(str(itemKey));
 
 				if (collector.hasChannel<Image>()) {
 					auto &imageChan = collector.getChannel<Image>();
-					material.setMapKd(imageChan.keyToString(itemKey));
+					material.setMapKd(str(itemKey));
 					imageChan.put(itemKey, texture);
 				}
 
