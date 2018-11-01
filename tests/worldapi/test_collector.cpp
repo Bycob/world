@@ -44,10 +44,6 @@ public:
 		_lastRemoved = key;
 	}
 
-	const T &get(const ItemKey &key) const override {
-		throw new std::runtime_error("Not supported");
-	};
-
     ItemKey _lastAdded;
     vec3d _lastAddedPosition;
     std::string _lastAddedMatId;

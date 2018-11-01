@@ -17,6 +17,10 @@ namespace world {
 
 template <typename T> class CollectorChannel;
 
+/** Default implementation of the ICollector interface.
+ * A Collector can store multiple channels and give access
+ * to them. This implementation has specific methods to
+ * manipulate channels of type CollectorChannel<T>. */
 class WORLDAPI_EXPORT Collector : public ICollector {
 public:
     Collector();
@@ -49,20 +53,17 @@ protected:
     ICollectorChannelBase &getChannelByType(size_t type) override;
 
     bool hasChannelByType(size_t type) const override;
-
-private:
-    /*template <typename T>
-    CollectorChannel<T> &getStorageChannel();*/
 };
 
 
 template <typename T> class CollectorChannelIterator;
 
 
-/**
- *
- * @tparam T
- */
+/** This class is an implementation of ICollectorChannel<T>
+ * that allows the user to store objects into a channel, and
+ * to retrieve these objects with the help of an iterator.
+ * @tparam T - is the type of the objects that this channel
+ * can store. */
 template <typename T> class CollectorChannel : public ICollectorChannel<T> {
 public:
     ~CollectorChannel() override = default;
@@ -77,7 +78,7 @@ public:
 
     void remove(const ItemKey &key) override;
 
-    const T &get(const ItemKey &key) const override;
+    const T &get(const ItemKey &key) const;
 
 
     /** Delete all the resources harvested from the previous
@@ -106,8 +107,18 @@ template <typename T> struct CollectorEntry {
             : _key(other._key), _value(other._value) {}
 };
 
+/** An iterator to iterate over a CollectorChannel<T>.
+ * @tparam T  */
 template <typename T> class CollectorChannelIterator {
 public:
+    // TODO The iterator does not work well with std methods yet.
+    /*using iterator_category = std::forward_iterator_tag;
+    using value_type = CollectorEntry<T>;
+    using difference_type = std::ptrdiff_t;
+    using pointer = CollectorEntry<T>*;
+    using reference = CollectorEntry<T>&;*/
+
+
 #ifdef _MSC_VER
     CollectorChannelIterator(
         typename std::map<ItemKey, std::shared_ptr<T>>::iterator it);

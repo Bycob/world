@@ -21,6 +21,9 @@ public:
     virtual vec3d getOffset() const = 0;
 };
 
+/** A CollectorContextWrap is used to wrap a collector and
+ * apply some modifications to the provided data in order to
+ * match a specific context. */
 class CollectorContextWrap : public ICollector, ICollectorContext {
 public:
     ICollector &_collector;
@@ -71,15 +74,17 @@ public:
 
     void remove(const ItemKey &key) override;
 
-    const T &get(const ItemKey &key) const override;
+    const T &get(const ItemKey &key) const;
 
 private:
     ICollectorContext &_context;
     ICollectorChannel<T> &_wrapped;
 
 
-    /** Agressively mutates everything that looks like a key.
-     * If it doesn't, it's left unchanged. */
+    /** Changes a string to a key, then mutates it and
+     * returns the string version of this key in the end.
+     * If it wasn't a key at beginning, well, we don't care
+     * and mutate it anyway. */
     std::string mutateKeyString(const std::string &keystr);
 };
 
