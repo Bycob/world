@@ -57,31 +57,30 @@ private:
     int _keyOffset;
 
     vec3d _offset;
-
 };
 
 template <typename T>
 class CollectorChannelContextWrap : public ICollectorChannel<T> {
 public:
-	CollectorChannelContextWrap(ICollectorContext &context,
-		ICollectorChannel<T> &wrapped);
+    CollectorChannelContextWrap(ICollectorContext &context,
+                                ICollectorChannel<T> &wrapped);
 
-	void put(const ItemKey &key, const T &item) override;
+    void put(const ItemKey &key, const T &item) override;
 
-	bool has(const ItemKey &key) const override;
+    bool has(const ItemKey &key) const override;
 
-	void remove(const ItemKey &key) override;
+    void remove(const ItemKey &key) override;
 
-	const T &get(const ItemKey &key) const override;
+    const T &get(const ItemKey &key) const override;
 
 private:
-	ICollectorContext &_context;
-	ICollectorChannel<T> &_wrapped;
+    ICollectorContext &_context;
+    ICollectorChannel<T> &_wrapped;
 
 
-	/** Agressively mutates everything that looks like a key.
-	 * If it doesn't, it's left unchanged. */
-	std::string mutateKeyString(const std::string &keystr);
+    /** Agressively mutates everything that looks like a key.
+     * If it doesn't, it's left unchanged. */
+    std::string mutateKeyString(const std::string &keystr);
 };
 
 } // namespace world

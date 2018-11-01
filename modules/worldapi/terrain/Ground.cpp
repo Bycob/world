@@ -173,52 +173,52 @@ double Ground::observeAltitudeAt(double x, double y, int lvl) {
 }
 
 inline ItemKey terrainToItem(const std::string &key) {
-    return ItemKeys::inWorld(std::string("_") + key,
-                                         ObjectKeys::defaultKey(), 0);
+    return ItemKeys::inWorld(std::string("_") + key, ObjectKeys::defaultKey(),
+                             0);
 }
 
 void Ground::addTerrain(const TileCoordinates &key, ICollector &collector) {
     ItemKey itemKey = terrainToItem(getTerrainDataId(key));
     Terrain &terrain = this->provideTerrain(key);
 
-	if (collector.hasChannel<Object3D>()) {
+    if (collector.hasChannel<Object3D>()) {
 
-		auto &objChannel = collector.getChannel<Object3D>();
+        auto &objChannel = collector.getChannel<Object3D>();
 
-		if (!objChannel.has(itemKey)) {
-			// Relocate the terrain
-			auto &bbox = terrain.getBoundingBox();
-			vec3d offset = bbox.getLowerBound();
+        if (!objChannel.has(itemKey)) {
+            // Relocate the terrain
+            auto &bbox = terrain.getBoundingBox();
+            vec3d offset = bbox.getLowerBound();
 
-			// Create the mesh
-			Object3D object(provideMesh(key));
-			object.setPosition(offset);
+            // Create the mesh
+            Object3D object(provideMesh(key));
+            object.setPosition(offset);
 
-			// Create the material
-			Material material("terrain");
-			material.setKd(1, 1, 1);
-			// material.setKd(1, (double) key._lod / _tileSystem._maxLod, 1 -
-			// (double)key._lod / _tileSystem._maxLod);
-			material.setMapKd("texture01");
+            // Create the material
+            Material material("terrain");
+            material.setKd(1, 1, 1);
+            // material.setKd(1, (double) key._lod / _tileSystem._maxLod, 1 -
+            // (double)key._lod / _tileSystem._maxLod);
+            material.setMapKd("texture01");
 
-			// Retrieve the texture
-			auto &texture = terrain.getTexture();
+            // Retrieve the texture
+            auto &texture = terrain.getTexture();
 
-			if (collector.hasChannel<Material>()) {
-				auto &matChan = collector.getChannel<Material>();
-				object.setMaterialID(str(itemKey));
+            if (collector.hasChannel<Material>()) {
+                auto &matChan = collector.getChannel<Material>();
+                object.setMaterialID(str(itemKey));
 
-				if (collector.hasChannel<Image>()) {
-					auto &imageChan = collector.getChannel<Image>();
-					material.setMapKd(str(itemKey));
-					imageChan.put(itemKey, texture);
-				}
+                if (collector.hasChannel<Image>()) {
+                    auto &imageChan = collector.getChannel<Image>();
+                    material.setMapKd(str(itemKey));
+                    imageChan.put(itemKey, texture);
+                }
 
-				matChan.put(itemKey, material);
-			}
+                matChan.put(itemKey, material);
+            }
 
-			objChannel.put(itemKey, object);
-		}
+            objChannel.put(itemKey, object);
+        }
     }
 }
 

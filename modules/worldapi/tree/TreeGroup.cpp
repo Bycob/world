@@ -48,29 +48,29 @@ void TreeGroup::collect(ICollector &collector,
         }
 
         // Collecting
-		if (collector.hasChannel<Object3D>()) {
+        if (collector.hasChannel<Object3D>()) {
 
-			Object3D trunksObj(_trunksMesh);
-			Object3D leavesObj(_leavesMesh);
+            Object3D trunksObj(_trunksMesh);
+            Object3D leavesObj(_leavesMesh);
 
-			if (collector.hasChannel<Material>()) {
-				Material trunkMaterial("trunk");
-				trunkMaterial.setKd(0.5, 0.2, 0);
-				Material leafMaterial("leaf");
-				leafMaterial.setKd(0.4, 0.9, 0.4);
+            if (collector.hasChannel<Material>()) {
+                Material trunkMaterial("trunk");
+                trunkMaterial.setKd(0.5, 0.2, 0);
+                Material leafMaterial("leaf");
+                leafMaterial.setKd(0.4, 0.9, 0.4);
 
-				auto &matChannel = collector.getChannel<Material>();
-				trunksObj.setMaterialID(str(ItemKeys::inObject(1)));
-				leavesObj.setMaterialID(str(ItemKeys::inObject(2)));
+                auto &matChannel = collector.getChannel<Material>();
+                trunksObj.setMaterialID(str(ItemKeys::inObject(1)));
+                leavesObj.setMaterialID(str(ItemKeys::inObject(2)));
 
-				matChannel.put(ItemKeys::inObject(1), trunkMaterial);
-				matChannel.put(ItemKeys::inObject(2), leafMaterial);
-			}
+                matChannel.put(ItemKeys::inObject(1), trunkMaterial);
+                matChannel.put(ItemKeys::inObject(2), leafMaterial);
+            }
 
-			auto &objChannel = collector.getChannel<Object3D>();
-			objChannel.put(ItemKeys::inObject(1), trunksObj);
-			objChannel.put(ItemKeys::inObject(2), leavesObj);
-		}
+            auto &objChannel = collector.getChannel<Object3D>();
+            objChannel.put(ItemKeys::inObject(1), trunksObj);
+            objChannel.put(ItemKeys::inObject(2), leavesObj);
+        }
 
         break;
     }

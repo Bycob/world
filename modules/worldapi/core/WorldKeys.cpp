@@ -23,7 +23,7 @@ ChunkKey ChunkKeys::fromString(const std::string &str) {
     for (size_t i = 0; i < result.length(); ++i) {
         try {
             result[i] =
-                    static_cast<char>(std::stoi(str.substr(i * 2, 2), nullptr, 16));
+                static_cast<char>(std::stoi(str.substr(i * 2, 2), nullptr, 16));
         } catch (std::invalid_argument &e) {
             throw e;
         }

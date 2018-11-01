@@ -44,27 +44,26 @@ class ICollectorContext;
 
 class ICollectorChannelBase {
 public:
-	virtual ~ICollectorChannelBase() = default;
+    virtual ~ICollectorChannelBase() = default;
 
-	virtual ICollectorChannelBase *wrap(ICollectorContext &context) = 0;
+    virtual ICollectorChannelBase *wrap(ICollectorContext &context) = 0;
 
-	virtual void reset() {}
+    virtual void reset() {}
 };
 
 
 template <typename T> class ICollectorChannel : public ICollectorChannelBase {
 public:
-	ICollectorChannelBase *wrap(ICollectorContext &context) override;
+    ICollectorChannelBase *wrap(ICollectorContext &context) override;
 
-	virtual void put(const ItemKey &key, const T &item) = 0;
+    virtual void put(const ItemKey &key, const T &item) = 0;
 
-	virtual bool has(const ItemKey &key) const = 0;
+    virtual bool has(const ItemKey &key) const = 0;
 
-	virtual void remove(const ItemKey &key) = 0;
+    virtual void remove(const ItemKey &key) = 0;
 
-	virtual const T &get(const ItemKey &key) const = 0;
+    virtual const T &get(const ItemKey &key) const = 0;
 };
-
 
 
 template <typename T> inline ICollectorChannel<T> &ICollector::getChannel() {

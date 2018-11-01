@@ -5,7 +5,7 @@ namespace world {
 Collector::Collector() {}
 
 void Collector::reset() {
-    for (auto & entry : _channels) {
+    for (auto &entry : _channels) {
         entry.second->reset();
     }
 }
@@ -21,7 +21,8 @@ void Collector::fillScene(Scene &scene) {
                 auto &textureChannel = getStorageChannel<Image>();
 
                 for (auto texture : textureChannel) {
-                    scene.addTexture(str(texture._key) + ".png", texture._value);
+                    scene.addTexture(str(texture._key) + ".png",
+                                     texture._value);
                 }
             }
 

@@ -52,22 +52,22 @@ void Tree::collect(ICollector &collector, const IResolutionModel &explorer) {
     Material leavesMat("leaves");
     leavesMat.setKd(0.4, 0.9, 0.4);
 
-	if (collector.hasChannel<Object3D>()) {
-		auto &objectsChannel = collector.getChannel<Object3D>();
+    if (collector.hasChannel<Object3D>()) {
+        auto &objectsChannel = collector.getChannel<Object3D>();
 
-		if (collector.hasChannel<Material>()) {
-			auto &materialsChannel = collector.getChannel<Material>();
+        if (collector.hasChannel<Material>()) {
+            auto &materialsChannel = collector.getChannel<Material>();
 
-			mainPart.setMaterialID(str(ItemKeys::inObject(1)));
-			leaves.setMaterialID(str(ItemKeys::inObject(2)));
+            mainPart.setMaterialID(str(ItemKeys::inObject(1)));
+            leaves.setMaterialID(str(ItemKeys::inObject(2)));
 
-			materialsChannel.put(ItemKeys::inObject(1), _trunkMaterial);
-			materialsChannel.put(ItemKeys::inObject(2), leavesMat);
-		}
+            materialsChannel.put(ItemKeys::inObject(1), _trunkMaterial);
+            materialsChannel.put(ItemKeys::inObject(2), leavesMat);
+        }
 
-		objectsChannel.put(ItemKeys::inObject(1), mainPart);
-		objectsChannel.put(ItemKeys::inObject(2), leaves);
-	}
+        objectsChannel.put(ItemKeys::inObject(1), mainPart);
+        objectsChannel.put(ItemKeys::inObject(2), leaves);
+    }
 }
 
 void Tree::generateBase() {

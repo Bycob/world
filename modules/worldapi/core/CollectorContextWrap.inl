@@ -69,27 +69,27 @@ inline vec3d CollectorContextWrap::getOffset() const { return _offset; }
 
 template <typename T>
 inline CollectorChannelContextWrap<T>::CollectorChannelContextWrap(
-	ICollectorContext &context, ICollectorChannel<T> &wrapped)
-	: _context(context), _wrapped(wrapped) {}
+    ICollectorContext &context, ICollectorChannel<T> &wrapped)
+        : _context(context), _wrapped(wrapped) {}
 
 template <typename T>
 inline void CollectorChannelContextWrap<T>::put(const ItemKey &key,
-	const T &item) {
-	_wrapped.put(_context.mutateKey(key), item);
+                                                const T &item) {
+    _wrapped.put(_context.mutateKey(key), item);
 }
 
 template <>
 inline void CollectorChannelContextWrap<Object3D>::put(const ItemKey &key,
-	const Object3D &item) {
-	Object3D newItem(item);
-	newItem.setMaterialID(mutateKeyString(newItem.getMaterialID()));
-	newItem.setPosition(item.getPosition() + _context.getOffset());
-	_wrapped.put(_context.mutateKey(key), newItem);
+                                                       const Object3D &item) {
+    Object3D newItem(item);
+    newItem.setMaterialID(mutateKeyString(newItem.getMaterialID()));
+    newItem.setPosition(item.getPosition() + _context.getOffset());
+    _wrapped.put(_context.mutateKey(key), newItem);
 }
 
 template <>
 inline void CollectorChannelContextWrap<Material>::put(const ItemKey &key,
-    const Material &item) {
+                                                       const Material &item) {
 
     Material newMaterial(item);
     newMaterial.setMapKd(mutateKeyString(item.getMapKd()));
@@ -98,26 +98,26 @@ inline void CollectorChannelContextWrap<Material>::put(const ItemKey &key,
 
 template <typename T>
 inline bool world::CollectorChannelContextWrap<T>::has(
-	const ItemKey &key) const {
-	return _wrapped.has(_context.mutateKey(key));
+    const ItemKey &key) const {
+    return _wrapped.has(_context.mutateKey(key));
 }
 
 template <typename T>
 inline void CollectorChannelContextWrap<T>::remove(const ItemKey &key) {
-	_wrapped.remove(_context.mutateKey(key));
+    _wrapped.remove(_context.mutateKey(key));
 }
 
 template <typename T>
 inline const T &CollectorChannelContextWrap<T>::get(const ItemKey &key) const {
-	return _wrapped.get(_context.mutateKey(key));
+    return _wrapped.get(_context.mutateKey(key));
 }
 
 template <typename T>
-inline std::string CollectorChannelContextWrap<T>::mutateKeyString(const std::string &keystr) {
+inline std::string CollectorChannelContextWrap<T>::mutateKeyString(
+    const std::string &keystr) {
     try {
         return str(_context.mutateKey(key(keystr)));
-    }
-    catch (std::invalid_argument &e) {
+    } catch (std::invalid_argument &e) {
         return keystr;
     }
 }
