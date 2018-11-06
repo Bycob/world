@@ -1,8 +1,3 @@
 #include "TreeSkeletton.h"
 
-namespace world {
-
-TreeSkeletton::TreeSkeletton() {}
-
-TreeSkeletton::~TreeSkeletton() = default;
-} // namespace world
+namespace world {} // namespace world

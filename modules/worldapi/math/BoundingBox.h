@@ -8,6 +8,7 @@
 namespace world {
 class WORLDAPI_EXPORT BoundingBox {
 public:
+    BoundingBox();
     BoundingBox(const vec3d &b1, const vec3d &b2);
     void reset(const vec3d &b1, const vec3d &b2);
 

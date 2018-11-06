@@ -14,13 +14,13 @@ using namespace arma;
 namespace world {
 
 // -----
-ReliefMapModifier::ReliefMapModifier() : _rng(time(NULL)) {}
+ReliefMapModifier::ReliefMapModifier() : _rng(static_cast<u32>(time(NULL))) {}
 
 void ReliefMapModifier::setMapResolution(int mapres) {
     _mapResolution = mapres;
 }
 
-void ReliefMapModifier::process(world::Terrain &terrain) {
+void ReliefMapModifier::processTerrain(Terrain &terrain) {
     // Terrain
     int size = terrain.getResolution();
 
@@ -77,9 +77,8 @@ void ReliefMapModifier::process(world::Terrain &terrain) {
     // TerrainOps::multiply(terrain, bufferDiff);
 }
 
-void ReliefMapModifier::process(Terrain &terrain,
-                                ITerrainWorkerContext &context) {
-    process(terrain);
+void ReliefMapModifier::processTile(ITileContext &context) {
+    processTerrain(context.getTerrain());
 }
 
 const std::pair<Terrain, Terrain> &ReliefMapModifier::obtainMap(int x, int y) {
@@ -102,7 +101,8 @@ const double CustomWorldRMModifier::PIXEL_UNIT = 10;
 CustomWorldRMModifier::CustomWorldRMModifier(double biomeDensity,
                                              int limitBrightness)
         : _biomeDensity(biomeDensity), _limitBrightness(limitBrightness),
-          _diffLaw(CustomWorldDifferential()) {}
+          _offsetLaw(ReliefMapParams::CustomWorldElevation(2. / 3.)),
+          _diffLaw(ReliefMapParams::CustomWorldDifferential(2. / 3.)) {}
 
 void CustomWorldRMModifier::setBiomeDensity(float biomeDensity) {
     _biomeDensity = biomeDensity;
@@ -110,7 +110,7 @@ void CustomWorldRMModifier::setBiomeDensity(float biomeDensity) {
 
 void CustomWorldRMModifier::setLimitBrightness(int p) { _limitBrightness = p; }
 
-void CustomWorldRMModifier::setDifferentialLaw(const diff_law &law) {
+void CustomWorldRMModifier::setDifferentialLaw(const AltDiffParam &law) {
     _diffLaw = law;
 }
 
@@ -208,14 +208,13 @@ void CustomWorldRMModifier::generate(Terrain &height, Terrain &heightDiff) {
         double randY = rand(_rng);
 
         // TODO L'utilisateur n'a aucun contrôle sur le premier paramètre.
-        double elevation = rand(_rng);
-        double diff =
-            _diffLaw(std::pair<double, double>(elevation, rand(_rng)));
+        double elevation = _offsetLaw();
+        double diff = _diffLaw(elevation);
 
-        pointsMap[x][y] = std::make_pair<vec2d, vec2d>(
+        pointsMap[x][y] = {
             vec2d(randX * (limPosX - limNegX) + limNegX + x * sliceSize,
                   randY * (limPosY - limNegY) + limNegY + y * caseSize),
-            vec2d(elevation, diff));
+            vec2d(elevation, diff)};
     }
 
 

@@ -26,9 +26,9 @@ public:
 
     void setMapResolution(int mapres);
 
-    void process(Terrain &terrain) override;
+    void processTerrain(Terrain &terrain) override;
 
-    void process(Terrain &terrain, ITerrainWorkerContext &context) override;
+    void processTile(ITileContext &context) override;
 
     const std::pair<Terrain, Terrain> &obtainMap(int x, int y);
 
@@ -49,7 +49,7 @@ public:
 
     void setLimitBrightness(int);
 
-    void setDifferentialLaw(const diff_law &law);
+    void setDifferentialLaw(const AltDiffParam &law);
 
 protected:
     void generate(Terrain &height, Terrain &heightDiff) override;
@@ -63,8 +63,10 @@ private:
      *le "p" dans l'algo de l'interpolation. */
     int _limitBrightness;
 
+    /** Probability law for altitude offset. */
+    ElevationParam _offsetLaw;
     /** Loi de probabilité du différentiel d'altitude en fonction
      *de l'altitude. */
-    diff_law _diffLaw;
+    AltDiffParam _diffLaw;
 };
 } // namespace world

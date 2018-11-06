@@ -15,25 +15,25 @@ namespace world {
 
 class WORLDAPI_EXPORT PerlinTerrainGenerator : public ITerrainWorker {
 public:
-    PerlinTerrainGenerator(int offset = 0, int octaveCount = 5,
-                           double frequency = 8, double persistence = 0.5);
+    PerlinTerrainGenerator(int octaveCount = 5, double frequency = 8,
+                           double persistence = 0.5);
 
-    void setFrequency(float frequency) { _frequency = frequency; }
+    void setFrequency(double frequency);
 
-    void process(Terrain &terrain) override;
+    void setPersistence(double persistence);
 
-    void process(Terrain &terrain, ITerrainWorkerContext &context) override;
+    void setOctaveCount(int octaveCount);
 
-    void join(Terrain &terrain1, Terrain &terrain2, bool axisX,
-              bool joinableSides);
+    void processTerrain(Terrain &terrain) override;
+
+    void processTile(ITileContext &context) override;
 
 private:
+    PerlinInfo _perlinInfo;
     Perlin _perlin;
 
-    int _offset;
-    int _octaveCount;
-    double _frequency;
-    double _persistence;
-    double _subdivNoiseRatio = 0.1;
+    void processByNeighbours(Terrain &terrain, ITileContext &context);
+
+    void processByTileCoords(Terrain &terrain, ITileContext &context);
 };
 } // namespace world

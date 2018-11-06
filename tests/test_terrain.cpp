@@ -52,14 +52,14 @@ void testRepeatable(int argc, char** argv) {
 
     int size = 257;
     int octaves = 4;
-    int freq = 4;
+    double freq = 4;
     double persistence = 0.4;
 
 	Perlin perlin;
 
     // CREATION D'UN PERLIN REPETABLE
     std::cout << "Génération de bruit de perlin répétable..." << std::endl;
-    Mat<double> repeatable = perlin.generatePerlinNoise2D(size, 0, octaves, freq, persistence, true);
+    Mat<double> repeatable = perlin.generatePerlinNoise2D(size, {octaves, persistence, true, 0, freq, 0, 0});
     Image repeat(repeatable);
     repeat.write("assets/terrain/repeat.png");
 
@@ -79,7 +79,7 @@ void testPerlin(int argc, char** argv) {
 
 	int size = 129;
 	int octaves = 4;
-	int freq = 4;
+	double freq = 4;
 	double persistence = 0.3;
 
 	for (int i = 1; i < argc; i++) {
@@ -106,42 +106,15 @@ void testPerlin(int argc, char** argv) {
 	std::cout << "Création du dossier de tests..." << std::endl;
 	createDirectories("assets/terrain");
 
-	Perlin perlin;
-
-	// @Deprecated
-    // CREATION DE DEUX PERLIN ET JOIN
-    try {
-        std::cout << "Génération de deux bruits de perlin..." << std::endl;
-        auto perlin1 = perlin.generatePerlinNoise2D(size, 0, octaves, freq, persistence);
-        auto perlin2 = perlin.generatePerlinNoise2D(size, 0, octaves, freq, persistence);
-        std::cout << "Join des deux bruits de perlin..." << std::endl;
-        perlin.join(perlin1, perlin2, perlin::Direction::AXIS_Y, octaves, freq, persistence, true);
-        Image perlin1img(perlin1);
-        Image perlin2img(perlin2);
-        perlin1img.write("assets/terrain/perlin1.png");
-        perlin2img.write("assets/terrain/perlin2.png");
-
-		/*Terrain t1(perlin1);
-		Terrain t2(perlin2);
-
-		ObjLoader files;
-		files.addMesh(std::shared_ptr<Mesh>(t1.createMesh()));
-		files.addMesh(std::shared_ptr<Mesh>(t2.createMesh(0, 1, 0, 1.0, 1.0, 0.4)));
-		files.write("assets/terrain/join.obj");*/
-    }
-    catch (std::exception &e) {
-        std::cerr << "Le test de join a levé une exception : " << e.what() << std::endl;
-    }
-    
 	//CREATION DU GENERATEUR
 
-	PerlinTerrainGenerator generator(0, octaves, freq, persistence);
+	PerlinTerrainGenerator generator(octaves, freq, persistence);
 
 	//GENERATION DE L'IMAGE DU TERRAIN
 
 	std::cout << "Génération du terrain..." << std::endl;
     Terrain terrain(size);
-    generator.process(terrain);
+    generator.processTerrain(terrain);
 
 	std::cout << "ecriture de l'image du terrain..." <<std::endl;
 	Image image = terrain.createImage();
@@ -182,19 +155,22 @@ void testPerlin(int argc, char** argv) {
 	AltitudeTexturer texturer;
 
 	auto &colorMap = texturer.getColorMap();
-	colorMap.addPoint({ 0, 0}, Color4u(209, 207, 153));
-	colorMap.addPoint({ 0, 1}, Color4u(209, 207, 153));
-	colorMap.addPoint({ 0.37, 0 }, Color4u(133, 183, 144));
-	colorMap.addPoint({ 0.3, 1 }, Color4u(144, 183, 123));
-	colorMap.addPoint({ 0.48, 1 }, Color4u(96, 76, 40));
-	colorMap.addPoint({ 0.55, 0 }, Color4u(114, 90, 48));
-	colorMap.addPoint({ 0.65, 1 }, Color4u(160, 160, 160));
-	colorMap.addPoint({ 0.8, 0.5 }, Color4u(160, 160, 160));
-	colorMap.addPoint({ 1, 0 }, Color4u(244, 252, 250));
-	colorMap.addPoint({ 1, 1 }, Color4u(244, 252, 250));
+    colorMap.addPoint({0.15, 0.5}, Color4u(209, 207, 153)); // Sand
+    colorMap.addPoint({0.31, 0}, Color4u(209, 207, 153));   // Sand
+    colorMap.addPoint({0.31, 1}, Color4u(209, 207, 153));   // Sand
+    colorMap.addPoint({0.35, 0}, Color4u(144, 183, 92));    // Light grass
+    colorMap.addPoint({0.35, 1}, Color4u(72, 132, 65));     // Dark grass
+    colorMap.addPoint({0.5, 0}, Color4u(144, 183, 100));    // Light grass
+    colorMap.addPoint({0.5, 1}, Color4u(96, 76, 40));       // Dark dirt
+    colorMap.addPoint({0.75, 0}, Color4u(96, 76, 40));      // Dark dirt
+    colorMap.addPoint({0.75, 1}, Color4u(160, 160, 160));   // Rock
+    colorMap.addPoint({1, 0}, Color4u(244, 252, 250));      // Snow
+    colorMap.addPoint({1, 1}, Color4u(160, 160, 160));      // Rock
+    colorMap.setOrder(2);
 
-	texturer.process(terrain);
-	const Image &texture = *terrain.getTexture();
+	terrain.setTexture(Image(512, 512, ImageType::RGB));
+    texturer.processTerrain(terrain);
+	const Image &texture = terrain.getTexture();
 
 	std::cout << "ecriture de la texture..." << std::endl;
 	try {
@@ -218,7 +194,7 @@ void testSubdivisions(int argc, char** argv) {
 	ObjLoader meshIO;
 	Terrain terrain(129);
 	PerlinTerrainGenerator generator;
-	generator.process(terrain);
+    generator.processTerrain(terrain);
 
 	TerrainSubdivisionGenerator subdiv;
 

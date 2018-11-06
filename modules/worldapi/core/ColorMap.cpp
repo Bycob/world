@@ -5,6 +5,8 @@ namespace world {
 ColorMap::ColorMap(const vec2i &res)
         : _cache(res.x, res.y, 3), _shouldRebuild(true) {}
 
+void ColorMap::setOrder(int order) { _order = order; }
+
 void ColorMap::addPoint(const vec2d &pos, const Color4d &color) {
     _points.emplace_back(pos, toInternalColor(color));
 
@@ -17,7 +19,7 @@ void ColorMap::rebuild() {
     auto h = _cache.n_cols;
     double scale = (double)h / w;
 
-    IDWInterpolator<position, color> interp(3);
+    IDWInterpolator<position, color> interp(_order);
 
     for (auto &point : _points) {
         position scaled{point.first.x, point.first.y * scale};

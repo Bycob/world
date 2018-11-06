@@ -3,12 +3,28 @@
 
 #include "core/WorldConfig.h"
 
+#include <map>
+#include <utility>
+#include <memory>
+
 #include "math/Vector.h"
 #include "ICollector.h"
 
 namespace world {
 
-class WORLDAPI_EXPORT CollectorContextWrap : public ICollector {
+class ICollectorContext {
+public:
+    virtual ~ICollectorContext() = default;
+
+    virtual ItemKey mutateKey(const ItemKey &key) const = 0;
+
+    virtual vec3d getOffset() const = 0;
+};
+
+/** A CollectorContextWrap is used to wrap a collector and
+ * apply some modifications to the provided data in order to
+ * match a specific context. */
+class CollectorContextWrap : public ICollector, ICollectorContext {
 public:
     ICollector &_collector;
 
@@ -20,30 +36,60 @@ public:
 
     void setOffset(const vec3d &offset);
 
-    void addItem(const ItemKey &key, const Object3D &object) override;
+    void setKeyOffset(int keyOffset);
 
-    void removeItem(const ItemKey &key) override;
 
-    void disableItem(const ItemKey &key) override;
+    ItemKey mutateKey(const ItemKey &key) const override;
 
-    bool hasItem(const ItemKey &key) const override;
-
-    void addMaterial(const ItemKey &key, const Material &material) override;
-
-    void addTexture(const ItemKey &key, const std::string &texName,
-                    const Image &texture) override;
+    vec3d getOffset() const override;
 
 protected:
-    void addItemUnsafe(const ItemKey &key, Object3D &object) override;
+    ICollectorChannelBase &getChannelByType(size_t type) override;
+
+    bool hasChannelByType(size_t type) const override;
 
 private:
+#ifdef _MSC_VER
+    std::map<size_t, std::shared_ptr<ICollectorChannelBase>> _wrappers;
+#else
+    std::map<size_t, std::unique_ptr<ICollectorChannelBase>> _wrappers;
+#endif
+
     std::pair<bool, ChunkKey> _currentChunk;
     std::pair<bool, ObjectKey> _currentObject;
+    int _keyOffset;
 
     vec3d _offset;
-
-    ItemKey mutateKey(const ItemKey &key) const;
 };
+
+template <typename T>
+class CollectorChannelContextWrap : public ICollectorChannel<T> {
+public:
+    CollectorChannelContextWrap(ICollectorContext &context,
+                                ICollectorChannel<T> &wrapped);
+
+    void put(const ItemKey &key, const T &item) override;
+
+    bool has(const ItemKey &key) const override;
+
+    void remove(const ItemKey &key) override;
+
+    const T &get(const ItemKey &key) const;
+
+private:
+    ICollectorContext &_context;
+    ICollectorChannel<T> &_wrapped;
+
+
+    /** Changes a string to a key, then mutates it and
+     * returns the string version of this key in the end.
+     * If it wasn't a key at beginning, well, we don't care
+     * and mutate it anyway. */
+    std::string mutateKeyString(const std::string &keystr);
+};
+
 } // namespace world
+
+#include "CollectorContextWrap.inl"
 
 #endif // WORLD_COLLECTORCONTEXTWRAP_H

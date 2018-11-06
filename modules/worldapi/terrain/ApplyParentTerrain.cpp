@@ -7,15 +7,13 @@ namespace world {
 ApplyParentTerrain::ApplyParentTerrain()
         : _childRate(0.1), _parentOverflow(0.01) {}
 
-void ApplyParentTerrain::process(world::Terrain &terrain) {
+void ApplyParentTerrain::processTerrain(world::Terrain &terrain) {
     // Does nothing
 }
 
-void ApplyParentTerrain::process(world::Terrain &child,
-                                 world::ITerrainWorkerContext &context) {
-    context.registerCurrentState();
-
+void ApplyParentTerrain::processTile(ITileContext &context) {
     // Get parent. Generate it if needed
+    Terrain &child = context.getTerrain();
     auto optParent = context.getParent();
 
     if (!optParent) {
@@ -61,6 +59,7 @@ void ApplyParentTerrain::process(world::Terrain &child,
     // to unapply
     // TerrainOps::applyOffset(child, bufferParent);
     // TerrainOps::multiply(child, 1. / childProp);
+    context.registerCurrentState();
 }
 
 double ApplyParentTerrain::getContribution(int parentCount, double ratio) {

@@ -1,8 +1,8 @@
 #include "FlatWorld.h"
 
 #include "terrain/Ground.h"
+#include "tree/ForestLayer.h"
 #include "tree/SimpleTreeDecorator.h"
-#include "FlatWorldCollector.h"
 
 namespace world {
 
@@ -16,7 +16,7 @@ public:
 FlatWorld *FlatWorld::createDemoFlatWorld() {
     FlatWorld *world = new FlatWorld();
 
-    world->addFlatWorldDecorator<SimpleTreeDecorator>(3);
+    world->addFlatWorldDecorator<ForestLayer>();
 
     return world;
 }
@@ -31,19 +31,14 @@ FlatWorld::~FlatWorld() { delete _internal; }
 
 IGround &FlatWorld::ground() { return *_ground; }
 
-void world::FlatWorld::collect(const WorldZone &zone, ICollector &collector) {
-    World::collect(zone, collector);
+void FlatWorld::collect(const WorldZone &zone, ICollector &collector,
+                        const IResolutionModel &resolutionModel) {
+    World::collect(zone, collector, resolutionModel);
 
-    ground().collectZone(zone, collector);
+    ground().collectZone(zone, collector, resolutionModel);
 }
 
-void FlatWorld::collect(const WorldZone &zone, FlatWorldCollector &collector) {
-    World::collect(zone, collector);
-
-    ground().collectZone(zone, *this, collector);
-}
-
-void FlatWorld::onFirstExploration(WorldZone &chunk) {
+void FlatWorld::onFirstExploration(const WorldZone &chunk) {
     World::onFirstExploration(chunk);
 
     for (auto &decorator : _internal->_chunkDecorators) {

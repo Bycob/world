@@ -23,13 +23,11 @@ public:
 
     void setInclination(const TreeParamd &param);
 
-    void setRotationOffset(const TreeParamd &param);
+    void setTheta(const TreeParamd &param);
 
     void setForkingCount(const TreeParami &param);
 
-    void setSizeFactor(const TreeParamd &sizeFactor);
-
-    void setMaxForkingLevel(const TreeParami &param);
+    void setSize(const TreeParamd &size);
 
     void setWeight(const TreeParamd &weight);
 
@@ -47,14 +45,12 @@ private:
     TreeParamd _rootWeight;
 
     TreeParamd _phi;
-    TreeParamd _offsetTheta;
-    TreeParamd _sizeFactor;
+    TreeParamd _theta;
+    TreeParamd _size;
 
     TreeParamd _weight;
     // Nombre de branches à chaque division
     TreeParami _count;
-    // Nombre maximum de divisions.
-    TreeParami _maxLevel;
 };
 } // namespace world
 

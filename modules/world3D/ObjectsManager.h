@@ -2,6 +2,7 @@
 
 #include <map>
 #include <chrono>
+#include <memory>
 
 #include <irrlicht.h>
 
@@ -14,18 +15,20 @@ class ObjectsManager;
 
 class ObjectNodeHandler {
 public:
-	ObjectNodeHandler(ObjectsManager& objectsManager, const world::CollectorItem &provider);
+	bool removeTag = false;
+
+
+	ObjectNodeHandler(ObjectsManager& objectsManager, const world::Object3D &obj, world::Collector &collector);
 	virtual ~ObjectNodeHandler();
 
-	bool removeTag = false;
+	void setTexture(int id, const std::string &path, world::Collector &collector);
+	void setMaterial(const world::Material &material, world::Collector &collector);
 private:
 	ObjectsManager& _objManager;
 
 	irr::scene::IMeshSceneNode * _meshNode;
 	std::vector<std::string> _usedTextures;
 
-	void setTexture(int id, const std::string &path, const world::CollectorItem &provider);
-	void setMaterial(const world::Material &material, const world::CollectorItem &provider);
 	void updateObject3D(const world::Object3D & object);
 };
 
@@ -34,15 +37,15 @@ public:
 	ObjectsManager(Application & app, irr::IrrlichtDevice * device);
 	~ObjectsManager() override;
 
-	void initialize(world::FlatWorldCollector &collector) override;
-	void update(world::FlatWorldCollector &collector) override;
+	void initialize(world::Collector &collector) override;
+	void update(world::Collector &collector) override;
 
 	void addTextureUser(const std::string &texId);
 	void removeTextureUser(const std::string &texId);
 
 	static irr::scene::SMesh * convertToIrrlichtMesh(const world::Mesh & mesh, irr::video::IVideoDriver * driver);
 private:
-	std::map<world::Collector::ItemKey, std::unique_ptr<ObjectNodeHandler>> _objects;
+	std::map<world::ItemKey, std::unique_ptr<ObjectNodeHandler>> _objects;
 	std::map<std::string, int> _loadedTextures;
 
 	// Debug variables

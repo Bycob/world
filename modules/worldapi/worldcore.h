@@ -35,13 +35,18 @@
 #include "core/ICollector.h"
 #include "core/Collector.h"
 #include "core/CollectorContextWrap.h"
+
+#include "core/IResolutionModel.h"
+#include "core/ResolutionModelContextWrap.h"
 #include "core/FirstPersonExplorer.h"
 
 #include "core/ICloneable.h"
 #include "core/Memory.h"
 #include "core/IOUtil.h"
 #include "core/LODData.h"
+#include "core/TileSystem.h"
 #include "core/StringOps.h"
+#include "core/Profiler.h"
 #include "core/WeightedSkeletton.h"
 #include "core/ColorMap.h"
 #include "core/Parameters.h"

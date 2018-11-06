@@ -14,6 +14,10 @@ void TerrainOps::applyOffset(Terrain &terrain, const arma::mat &offset) {
     terrain._array += offset;
 }
 
+void TerrainOps::applyOffset(world::Terrain &terrain, double offset) {
+    terrain._array += offset;
+}
+
 void TerrainOps::multiply(Terrain &terrain, const arma::mat &factor) {
     if (factor.n_rows != terrain._array.n_rows ||
         factor.n_cols != terrain._array.n_cols) {

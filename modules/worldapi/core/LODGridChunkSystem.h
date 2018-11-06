@@ -38,12 +38,16 @@ public:
     virtual int getLODForResolution(double mrd) const;
 
     // NAVIGATION
-    QueryResult getChunk(const vec3d &position) override;
+    WorldZone getZone(const vec3d &position) override;
 
-    QueryResult getNeighbourChunk(const WorldZone &zone,
-                                  const vec3i &direction) override;
+    std::vector<WorldZone> getNeighbourZones(const WorldZone &zone) override;
 
-    std::vector<QueryResult> getChildren(const WorldZone &zone) override;
+    std::vector<WorldZone> getChildrenZones(const WorldZone &zone) override;
+
+    Chunk &getChunk(const WorldZone &zone) override;
+
+    void collectZone(const WorldZone &zone, ICollector &collector,
+                     IResolutionModel &resolutionModel) override;
 
 private:
     PLODGridChunkSystem *_internal;
@@ -51,21 +55,27 @@ private:
     /** If an object has a greater resolution than this value,
      * we can't put it in the minimum LOD. */
     double _subdivResolutionThreshold = 0.5;
-    int _factor = 4;
-    int _maxLOD = 4;
+
+    u32 _factor = 2;
+
+    u32 _maxLOD = 6;
+
 
     friend class LODGridChunkHandler;
 
     ChunkKey getChunkKey(const ChunkKey &parent,
                          const LODGridCoordinates &coords) const;
 
+    LODGridCoordinates dropLastPart(const ChunkKey &key) const;
+
+    ChunkKey getParentKey(const ChunkKey &chunkKey) const;
+
     Chunk &getChunk(const ChunkKey &id);
 
-    optional<WorldZone> getZone(const ChunkKey &id);
+    WorldZone getZone(const ChunkKey &id);
 
     /** @returns true if the chunk wasn't created yet */
-    std::pair<ChunkKey, bool> createChunk(const ChunkKey &parent,
-                                          const LODGridCoordinates &coords);
+    bool createChunk(const ChunkKey &key);
 };
 
 
@@ -73,31 +83,28 @@ private:
  * chunk system */
 class WORLDAPI_EXPORT LODGridChunkHandler : public IWorldZoneHandler {
 public:
-    LODGridChunkHandler(LODGridChunkSystem &system, const ChunkKey &id,
-                        Chunk &chunk);
+    LODGridChunkHandler(LODGridChunkSystem &system, const ChunkKey &id);
 
     LODGridChunkHandler(const LODGridChunkHandler &other);
 
-    IWorldZoneHandler *clone() const override;
-
-    Chunk &chunk() override;
-
-    const Chunk &getChunk() const override;
-
-    const ChunkKey &getID() const override;
-
-    bool operator<(const LODGridChunkHandler &other) const;
-
-    bool operator==(const LODGridChunkHandler &other) const;
-
-    bool hasParent() const override;
+    ChunkKey getID() const override;
 
     optional<WorldZone> getParent() const override;
 
+    vec3d getParentOffset() const override;
+
+    double getMinResolution() const override;
+
+    double getMaxResolution() const override;
+
+    vec3d getDimensions() const override;
+
 private:
     ChunkKey _id;
-    Chunk &_chunk;
     LODGridChunkSystem &_system;
+
+    // PRE-CALCULATED DATA
+    LODGridCoordinates _coordinates;
 
     friend class LODGridChunkSystem;
 };

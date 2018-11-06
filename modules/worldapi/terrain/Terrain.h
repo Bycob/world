@@ -50,6 +50,10 @@ public:
 
     const double &operator()(int x, int y) const { return _array(x, y); }
 
+    vec3d getNormal(int x, int y) const;
+
+    double getSlope(int x, int y) const;
+
     /** Gets the height from the height map case which is the
      * nearest to (x, y).  */
     double getRawHeight(double x, double y) const;
@@ -69,6 +73,8 @@ public:
      * 0 to 1.
      * @param y see above */
     double getExactHeightAt(double x, double y) const;
+
+    double getSlopeAt(double x, double y) const;
 
     // ------ IO
 
@@ -94,12 +100,14 @@ public:
 
     void setTexture(Image &&image);
 
-    optional<const Image &> getTexture() const;
+    Image &getTexture();
+
+    const Image &getTexture() const;
 
 private:
     BoundingBox _bbox;
     arma::Mat<double> _array;
-    std::unique_ptr<Image> _texture;
+    Image _texture;
 
     // ------
 

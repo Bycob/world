@@ -4,6 +4,7 @@
 
 #include "WorldObject.h"
 #include "CollectorContextWrap.h"
+#include "ResolutionModelContextWrap.h"
 
 namespace world {
 
@@ -25,14 +26,17 @@ void Chunk::setResolutionLimits(double min, double max) {
     _maxResolution = max;
 }
 
-void Chunk::collectWholeChunk(ICollector &collector) {
+void Chunk::collect(ICollector &collector, const IResolutionModel &explorer) {
     CollectorContextWrap wcollector(collector);
+    ResolutionModelContextWrap wexplorer(explorer);
 
     for (auto &object : _internal->_objects) {
         wcollector.setCurrentObject(object.first);
         wcollector.setOffset(object.second->getPosition3D());
 
-        object.second->collectWholeObject(wcollector);
+        wexplorer.setOffset(object.second->getPosition3D());
+
+        object.second->collect(wcollector, wexplorer);
     }
 }
 

@@ -5,8 +5,7 @@
 #include <random>
 
 #include "flat/FlatWorld.h"
-#include "TrunkGenerator.h"
-#include "TreeSkelettonGenerator.h"
+#include "Tree.h"
 
 namespace world {
 
@@ -16,7 +15,7 @@ public:
 
     void setModel(const Tree &model);
 
-    void decorate(FlatWorld &world, WorldZone &zone) override;
+    void decorate(FlatWorld &world, const WorldZone &zone) override;
 
 private:
     int _maxTreesPerChunk;

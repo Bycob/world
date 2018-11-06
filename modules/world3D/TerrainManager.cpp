@@ -2,7 +2,7 @@
 // Created by louis on 30/04/17.
 //
 
-#include "GroundManager.h"
+#include "TerrainManager.h"
 
 #include "Application.h"
 
@@ -14,31 +14,29 @@ using namespace video;
 
 using namespace world;
 
-using TerrainKey = FlatWorldCollector::TerrainKey;
-
-GroundManager::GroundManager(Application & application, IrrlichtDevice *device)
+TerrainManager::TerrainManager(Application & application, IrrlichtDevice *device)
         : RenderingModule(application, device) {
 
 }
 
-GroundManager::~GroundManager() {
+TerrainManager::~TerrainManager() {
     clearAllNodes();
 }
 
-void GroundManager::initialize(FlatWorldCollector &collector) {
+void TerrainManager::initialize(Collector &collector) {
     clearAllNodes();
 
     update(collector);
 }
 
-void GroundManager::update(FlatWorldCollector &collector) {
+void TerrainManager::update(Collector &collector) {
 
     /*/ Test
     PerlinTerrainGenerator generator(0, 5, 1, 0.4);
     std::unique_ptr<Terrain> terrain(generator.generate());
 	addNode({ *terrain, 0, 0 }, ground);
     //*/
-    std::map<TerrainKey, bool> toKeep;
+    /*std::map<TerrainKey, bool> toKeep;
 
     // Add terrains if they're not already here
     auto terrainIt = collector.iterateTerrains();
@@ -64,11 +62,11 @@ void GroundManager::update(FlatWorldCollector &collector) {
             ++iter;
         }
     }
-
+	*/
     _driver->removeAllHardwareBuffers();
 }
 
-void GroundManager::clearAllNodes() {
+void TerrainManager::clearAllNodes() {
     for (auto & pair : _terrainNodes) {
         pair.second->remove();
     }
@@ -76,7 +74,7 @@ void GroundManager::clearAllNodes() {
     _terrainNodes.clear();
 }
 
-ITerrainSceneNode* GroundManager::createNode(const Terrain &terrain) {
+ITerrainSceneNode* TerrainManager::createNode(const Terrain &terrain) {
 
 	// Données concernant la position et les dimensions du terrain
 	int terrainRes = (terrain.getResolution() - 1);

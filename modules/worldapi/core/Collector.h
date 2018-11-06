@@ -15,92 +15,136 @@
 
 namespace world {
 
-class CollectorIterator;
+template <typename T> class CollectorChannel;
 
-class PCollector;
-
+/** Default implementation of the ICollector interface.
+ * A Collector can store multiple channels and give access
+ * to them. This implementation has specific methods to
+ * manipulate channels of type CollectorChannel<T>. */
 class WORLDAPI_EXPORT Collector : public ICollector {
 public:
     Collector();
-
-    virtual ~Collector();
 
     /** Delete all the resources harvested from the previous
      * "collect" calls */
     virtual void reset();
 
-    void addItem(const ItemKey &key, const Object3D &item) override;
+    template <typename T> CollectorChannel<T> &addStorageChannel();
 
-    bool hasItem(const ItemKey &key) const override;
+    // TODO simplify method call (only one required template argument instead of
+    // 2)
+    template <typename T, typename CustomChannel, typename... Args>
+    CustomChannel &addCustomChannel(Args... args);
 
-    void removeItem(const ItemKey &key) override;
+    template <typename T> bool hasStorageChannel() const;
 
-    void disableItem(const ItemKey &key) override;
-
-    void addMaterial(const ItemKey &key, const Material &material) override;
-
-    void addTexture(const ItemKey &key, const std::string &texName,
-                    const Image &texture) override;
-
-    CollectorIterator iterateItems();
+    template <typename T> CollectorChannel<T> &getStorageChannel();
 
     void fillScene(Scene &scene);
 
 protected:
-    PCollector *_internal;
+#ifdef _MSC_VER
+    std::map<size_t, std::shared_ptr<ICollectorChannelBase>> _channels;
+#else
+    std::map<size_t, std::unique_ptr<ICollectorChannelBase>> _channels;
+#endif
 
-    friend class CollectorIterator;
+
+    ICollectorChannelBase &getChannelByType(size_t type) override;
+
+    bool hasChannelByType(size_t type) const override;
 };
 
-class PCollectorItem;
 
-class WORLDAPI_EXPORT CollectorItem {
+template <typename T> class CollectorChannelIterator;
+
+
+/** This class is an implementation of ICollectorChannel<T>
+ * that allows the user to store objects into a channel, and
+ * to retrieve these objects with the help of an iterator.
+ * @tparam T - is the type of the objects that this channel
+ * can store. */
+template <typename T> class CollectorChannel : public ICollectorChannel<T> {
 public:
-    CollectorItem(const ICollector::ItemKey &key, const Object3D &object3D);
+    ~CollectorChannel() override = default;
 
-    ~CollectorItem();
+    CollectorChannel();
 
-    const Object3D &getObject3D() const;
+    CollectorChannel(const CollectorChannel<T> &other) = delete;
 
-    Object3D &getObject3D();
+    void put(const ItemKey &key, const T &item) override;
 
-    /** */
-    optional<const Material &> getMaterial(const std::string &key) const;
+    bool has(const ItemKey &key) const override;
 
-    typedef struct {
-        std::string _uid;
-        const Image &_image;
-    } texture;
-    optional<texture> getTexture(const std::string &key) const;
+    void remove(const ItemKey &key) override;
+
+    const T &get(const ItemKey &key) const;
+
+
+    /** Delete all the resources harvested from the previous
+     * "collect" calls */
+    void reset() override;
+
+    CollectorChannelIterator<T> begin();
+
+    CollectorChannelIterator<T> end();
+
+protected:
+#ifdef _MSC_VER
+    std::map<ItemKey, std::shared_ptr<T>> _items;
+#else
+    std::map<ItemKey, std::unique_ptr<T>> _items;
+#endif
+};
+
+template <typename T> struct CollectorEntry {
+    ItemKey _key;
+    const T &_value;
+
+    CollectorEntry(const ItemKey &key, const T &value)
+            : _key(key), _value(value) {}
+    CollectorEntry(const CollectorEntry<T> &other)
+            : _key(other._key), _value(other._value) {}
+};
+
+/** An iterator to iterate over a CollectorChannel<T>.
+ * @tparam T  */
+template <typename T> class CollectorChannelIterator {
+public:
+    // TODO The iterator does not work well with std methods yet.
+    /*using iterator_category = std::forward_iterator_tag;
+    using value_type = CollectorEntry<T>;
+    using difference_type = std::ptrdiff_t;
+    using pointer = CollectorEntry<T>*;
+    using reference = CollectorEntry<T>&;*/
+
+
+#ifdef _MSC_VER
+    CollectorChannelIterator(
+        typename std::map<ItemKey, std::shared_ptr<T>>::iterator it);
+#else
+    CollectorChannelIterator(
+        typename std::map<ItemKey, std::unique_ptr<T>>::iterator it);
+#endif
+
+    CollectorChannelIterator<T> &operator++();
+
+    CollectorEntry<T> operator*() const;
+
+    bool operator==(const CollectorChannelIterator<T> &other) const;
+
+    bool operator!=(const CollectorChannelIterator<T> &other) const;
 
 private:
-    PCollectorItem *_internal;
-
-    friend class Collector;
+#ifdef _MSC_VER
+    typename std::map<ItemKey, std::shared_ptr<T>>::iterator _it;
+#else
+    typename std::map<ItemKey, std::unique_ptr<T>>::iterator _it;
+#endif
 };
 
-class PCollectorIterator;
-
-class WORLDAPI_EXPORT CollectorIterator
-        : public std::iterator<std::forward_iterator_tag, Collector> {
-public:
-    CollectorIterator(Collector &collector);
-
-    CollectorIterator(const CollectorIterator &other);
-
-    ~CollectorIterator();
-
-    void operator++();
-
-    std::pair<Collector::ItemKey, CollectorItem *> operator*();
-
-    bool hasNext() const;
-
-private:
-    PCollectorIterator *_internal;
-
-    Collector &_collector;
-};
 } // namespace world
+
+#include "Collector.inl"
 
 #endif // WORLD_WORLDCOLLECTOR_H

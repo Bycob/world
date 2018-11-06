@@ -18,7 +18,12 @@ Application::Application()
 
 	// Collectors
 	for (int i = 0; i < 2; i++) {
-		_emptyCollectors.emplace_back(std::make_unique<FlatWorldCollector>());
+		auto collector = std::make_unique<Collector>();
+		collector->addStorageChannel<Object3D>();
+		collector->addStorageChannel<Material>();
+		collector->addStorageChannel<Image>();
+
+		_emptyCollectors.emplace_back(std::move(collector));
 	}
 }
 
@@ -27,8 +32,6 @@ void Application::run(int argc, char **argv) {
 
     _running = true;
     _mainView->show();
-
-	bool firstExpand = true;
 
     while(_running) {
         if (!_mainView->running()) {
@@ -44,10 +47,10 @@ void Application::run(int argc, char **argv) {
 			}
 			_paramLock.unlock();
 
-			if (((newUpdatePos - _lastUpdatePos).norm() > 50 || firstExpand) && !_emptyCollectors.empty()) {
+			if ((newUpdatePos - _lastUpdatePos).norm() > 0.01 && !_emptyCollectors.empty()) {
 			    // get collector
 			    _paramLock.lock();
-			    std::unique_ptr<FlatWorldCollector> collector = std::move(_emptyCollectors.front());
+			    std::unique_ptr<Collector> collector = std::move(_emptyCollectors.front());
 			    _emptyCollectors.pop_front();
 			    _paramLock.unlock();
 
@@ -56,7 +59,7 @@ void Application::run(int argc, char **argv) {
 				_explorer->setPosition(newUpdatePos);
 
 				auto start = std::chrono::steady_clock::now();
-				_explorer->explore<FlatWorld>(*_world, *collector);
+                _explorer->exploreAndCollect<FlatWorld>(*_world, *collector);
 				
 				if (_dbgOn) {
 					std::cout << "Temps d'exploration : " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count() << " ms " << std::endl;
@@ -69,8 +72,6 @@ void Application::run(int argc, char **argv) {
 				// Mise à jour de la vue
 				_mainView->onWorldChange();
 				_lastUpdatePos = newUpdatePos;
-
-				firstExpand = false;
 			}
 		}
 
@@ -95,12 +96,12 @@ vec3d Application::getUserPosition() const {
 	return pos;
 }
 
-void Application::refill(std::unique_ptr<world::FlatWorldCollector> &&toRefill) {
+void Application::refill(std::unique_ptr<world::Collector> &&toRefill) {
     std::lock_guard<std::mutex> lock(_paramLock);
 	_emptyCollectors.emplace_back(std::move(toRefill));
 }
 
-std::unique_ptr<world::FlatWorldCollector> Application::popFull() {
+std::unique_ptr<world::Collector> Application::popFull() {
 	std::lock_guard<std::mutex> lock(_paramLock);
 	if (_fullCollectors.empty())
 		return nullptr;

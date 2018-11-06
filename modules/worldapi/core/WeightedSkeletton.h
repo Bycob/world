@@ -15,29 +15,28 @@ namespace world {
 
 class Mesh;
 
+class NodeInfo {
+public:
+    vec3d _position;
+
+    double _weight;
+};
+
 template <class T> class Node {
 public:
     ~Node();
 
-    void setWeight(double weight);
+    const T &getInfo() const { return _info; }
 
-    double getWeight() const { return _weight; }
-
-    void setPosition(double x, double y, double z);
-
-    vec3d getPosition() const;
-
-    T &getInfo() const { return *_info.get(); }
+    T &getInfo() { return _info; }
 
     void addChild(Node<T> *child);
 
-    Node<T> *createChild(double weight = DEFAULT_WEIGHT, double x = 0,
-                         double y = 0, double z = 0);
+    Node<T> *createChild(const T &info);
 
     void addNeighbour(Node<T> *neighbour);
 
-    Node<T> *createNeighbour(double weight = DEFAULT_WEIGHT, double x = 0,
-                             double y = 0, double z = 0);
+    Node<T> *createNeighbour(const T &info);
 
     Node<T> *getParent() const;
 
@@ -54,20 +53,16 @@ public:
 private:
     template <class S> friend class WeightedSkeletton;
 
-    Node(double weight = DEFAULT_WEIGHT, double x = 0, double y = 0,
-         double z = 0);
+    Node(const T &info);
 
     // DONNEES SUR LE NOEUD
-
-    double _weight;
-    double _x, _y, _z;
-    std::unique_ptr<T> _info;
+    T _info;
 
     // RELATIONS DU NOEUD
 
     Node<T> *_parent;
     /**Peut contenir la liste des noeuds enfants, ou la liste des
-noeuds adjacents, selon le modèle adopté. */
+     * noeuds adjacents, selon le modèle adopté. */
     std::vector<Node<T> *> _children_or_neighbour;
 
     // TRAITEMENT DES GRAPHES

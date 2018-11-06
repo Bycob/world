@@ -10,6 +10,8 @@ class WORLDAPI_EXPORT LODGridCoordinates {
 public:
     static LODGridCoordinates NONE;
 
+    static LODGridCoordinates fromUID(const std::string &uid);
+
     LODGridCoordinates(int x, int y, int z, int lod = 0);
 
     LODGridCoordinates(const vec3i &pos, int lod = 0);

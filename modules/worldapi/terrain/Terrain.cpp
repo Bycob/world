@@ -16,25 +16,25 @@ using namespace arma;
 namespace world {
 
 Terrain::Terrain(int size)
-        : _array(size, size), _texture(nullptr),
-          _bbox({-0.5, -0.5, -0.0}, {0.5, 0.5, 0.4}) {}
+        : _array(size, size), _texture(1, 1, ImageType::RGB),
+          _bbox({-0.5, -0.5, -0.0}, {0.5, 0.5, 0.4}) {
+
+    _texture.rgb(0, 0).set(255, 255, 255);
+}
 
 Terrain::Terrain(const Mat<double> &data)
-        : _array(data), _texture(nullptr),
+        : _array(data), _texture(1, 1, ImageType::RGB),
           _bbox({-0.5, -0.5, -0.0}, {0.5, 0.5, 0.4}) {
 
     if (data.n_rows != data.n_cols) {
         throw std::runtime_error("Terrain must be squared !");
     }
+    _texture.rgb(0, 0).set(255, 255, 255);
 }
 
 Terrain::Terrain(const Terrain &terrain)
-        : _array(terrain._array), _bbox(terrain._bbox) {
-
-    if (terrain._texture != nullptr) {
-        _texture = std::make_unique<Image>(*terrain._texture);
-    }
-}
+        : _array(terrain._array), _bbox(terrain._bbox),
+          _texture(terrain._texture) {}
 
 Terrain::Terrain(Terrain &&terrain)
         : _array(std::move(terrain._array)),
@@ -44,12 +44,8 @@ Terrain::~Terrain() = default;
 
 Terrain &Terrain::operator=(const Terrain &terrain) {
     _array = terrain._array;
+    _texture = terrain._texture;
     _bbox = terrain._bbox;
-
-    if (terrain._texture != nullptr) {
-        _texture = std::make_unique<Image>(*terrain._texture);
-    }
-
     return *this;
 }
 
@@ -59,6 +55,26 @@ void Terrain::setBounds(double xmin, double ymin, double zmin, double xmax,
 }
 
 const BoundingBox &Terrain::getBoundingBox() const { return _bbox; }
+
+vec3d Terrain::getNormal(int x, int y) const {
+    int size_1 = getResolution() - 1;
+    const double xUnit = 1. / size_1;
+    const double yUnit = xUnit;
+
+    int xa = max(x - 1, 0), xb = min(x + 1, size_1), xm = xb - xa;
+    vec3d nx{(_array(xa, y) - _array(xb, y)), 0, xm * xUnit};
+
+    int ya = max(y - 1, 0), yb = min(y + 1, size_1), ym = yb - ya;
+    vec3d ny{0, (_array(x, ya) - _array(x, yb)), ym * yUnit};
+    return (nx * ym + ny * xm).normalize();
+}
+
+double Terrain::getSlope(int x, int y) const {
+    vec3d normal = getNormal(x, y);
+    const double nx = normal.x;
+    const double ny = normal.y;
+    return sqrt(nx * nx + ny * ny) / normal.z;
+}
 
 double Terrain::getRawHeight(double x, double y) const {
     int size = getResolution();
@@ -124,6 +140,20 @@ double Terrain::getExactHeightAt(double x, double y) const {
     return ab * (xd / sumd) + ac * (yd / sumd);
 }
 
+double Terrain::getSlopeAt(double x, double y) const {
+    int size = getResolution() - 1;
+    int x0 = static_cast<int>(clamp(floor(x * size), 0, size - 1));
+    int y0 = static_cast<int>(clamp(floor(y * size), 0, size - 1));
+
+    double xd = x * size - x0;
+    double yd = y * size - y0;
+
+    double iy1 = (1 - xd) * getSlope(x0, y0) + xd * getSlope(x0 + 1, y0);
+    double iy2 =
+        (1 - xd) * getSlope(x0, y0 + 1) + xd * getSlope(x0 + 1, y0 + 1);
+    return (1 - yd) * iy1 + yd * iy2;
+}
+
 Mesh *Terrain::createMesh() const {
     auto lower = _bbox.getLowerBound();
     auto size = _bbox.getUpperBound() - lower;
@@ -159,6 +189,20 @@ Mesh *Terrain::createMesh(double offsetX, double offsetY, double offsetZ,
 
             vert.setPosition(xpos, ypos, _array(x, y) * sizeZ + offsetZ);
             vert.setTexture(xd, 1 - yd);
+
+            // Compute normal
+            double xUnit = sizeX * inv_size_1;
+            double yUnit = sizeY * inv_size_1;
+            vec3d nx{
+                (_array(max(x - 1, 0), y) - _array(min(x + 1, size_1), y)) *
+                    sizeZ,
+                0, xUnit * 2};
+            vec3d ny{
+                0,
+                (_array(x, max(y - 1, 0)) - _array(x, min(y + 1, size_1))) *
+                    sizeZ,
+                yUnit * 2};
+            vert.setNormal((nx + ny).normalize());
         }
     }
 
@@ -183,30 +227,65 @@ Mesh *Terrain::createMesh(double offsetX, double offsetY, double offsetZ,
         }
     }
 
-    MeshOps::recalculateNormals(*mesh);
-
     return mesh;
 }
 
 Image Terrain::createImage() const { return Image(this->_array); }
 
-void Terrain::setTexture(const Image &image) {
-    _texture = std::make_unique<Image>(image);
-}
+void Terrain::setTexture(const Image &image) { _texture = image; }
 
-void Terrain::setTexture(Image &&image) {
-    _texture = std::make_unique<Image>(image);
-}
+void Terrain::setTexture(Image &&image) { _texture = image; }
 
-optional<const Image &> Terrain::getTexture() const {
-    if (_texture == nullptr) {
-        return nullopt;
-    }
-    return *_texture;
-}
+Image &Terrain::getTexture() { return _texture; }
+
+const Image &Terrain::getTexture() const { return _texture; }
 
 vec2i Terrain::getPixelPos(double x, double y) const {
     return {(int)min(x * _array.n_rows, _array.n_rows - 1),
             (int)min(y * _array.n_cols, _array.n_cols - 1)};
 }
+
+// -------
+
+/*
+ * I tried an interpolation based method, but it's not very efficient
+ * in that case. Though, I'll need to implement trilinear interp, and this
+ * a good example of what we can do.
+ *
+double Terrain::getSlopeAt(double x, double y) const {
+    int size = getResolution() - 1;
+    double unit = 1. / size;
+
+    int x0 = static_cast<int>(clamp(floor(x * size - 1), 0, size - 2));
+    int y0 = static_cast<int>(clamp(floor(y * size - 1), 0, size - 2));
+
+    double xd = x * size - x0;
+    double yd = y * size - y0;
+
+    auto interp = [](double a0, double a1, double a2, double a) {
+        return a0 + (a2 - a0) * a / 2;
+        //return a * (a - 1) * 0.5 * a0 + (1 - a * a) * a1 + a * (a + 1) * 0.5 *
+a2;
+    };
+
+    auto deriv = [](double a0, double a1, double a2, double a) {
+        return a2 - a0;
+        //return (a - 0.5) * a0 + (-2 * a) * a1 + (a + 0.5) * a2;
+    };
+
+    double iy[4];
+    for (int i = 0; i < 3; ++i) {
+        iy[i] = interp(_array(x0, y0 + i), _array(x0 + 1, y0 + i), _array(x0 +
+2, y0 + i), xd);
+    }
+    double ix[4];
+    for (int i = 0; i < 3; ++i) {
+        ix[i] = interp(_array(x0 + i, y0), _array(x0 + i, y0 + 1), _array(x0 +
+i, y0 + 2), yd);
+    }
+
+    double dx = deriv(iy[0], iy[1], iy[2], yd);
+    double dy = deriv(ix[0], ix[1], ix[2], xd);
+    return sqrt(dx * dx + dy * dy) * size;
+}*/
 } // namespace world

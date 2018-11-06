@@ -1,4 +1,5 @@
-#pragma once
+#ifndef WORLD_WORLD_H
+#define WORLD_WORLD_H
 
 #include "core/WorldConfig.h"
 
@@ -36,28 +37,37 @@ public:
 
     template <typename T, typename... Args> T &addDecorator(Args... args);
 
+    template <typename T, typename... Args>
+    T &addObject(const WorldZone &zone, Args... args);
+
     // NAVIGATION
-    WorldZone exploreNeighbour(const WorldZone &zone, const vec3d &direction);
+    std::vector<WorldZone> exploreNeighbours(const WorldZone &zone);
 
     WorldZone exploreLocation(const vec3d &location);
 
     std::vector<WorldZone> exploreInside(const WorldZone &zone);
 
     // ASSETS
-    virtual void collect(const WorldZone &zone, ICollector &collector);
+    virtual void collect(const WorldZone &zone, ICollector &collector,
+                         const IResolutionModel &explorer);
 
 protected:
-    virtual void onFirstExploration(WorldZone &chunk);
+    virtual void onFirstExploration(const WorldZone &chunk);
 
 private:
     PWorld *_internal;
 
     std::unique_ptr<IChunkSystem> _chunkSystem;
-    WorldFolder _directory; // TODO remplacer ça par un ICache, qui peut être un
-                            // dossier, une interface réseau, rien...
+    // TODO remplacer ça par un ICache, qui peut être un
+    // dossier, une interface réseau, rien...
+    WorldFolder _directory;
 
     void addDecoratorInternal(WorldDecorator *decorator);
+
+    Chunk &getChunk(const WorldZone &zone);
 };
 } // namespace world
 
 #include "World.inl"
+
+#endif // WORLD_WORLD_H

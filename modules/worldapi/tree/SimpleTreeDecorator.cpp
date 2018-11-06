@@ -3,6 +3,9 @@
 #include <vector>
 
 #include "math/MathsHelper.h"
+#include "TrunkGenerator.h"
+#include "TreeSkelettonGenerator.h"
+#include "LeavesGenerator.h"
 
 namespace world {
 
@@ -10,28 +13,29 @@ SimpleTreeDecorator::SimpleTreeDecorator(int maxTreesPerChunk)
         : _rng(time(NULL)), _maxTreesPerChunk(maxTreesPerChunk) {
 
     auto &skeletton = _model.addWorker<TreeSkelettonGenerator>();
-    skeletton.setMaxForkingLevel(TreeParamsi::constant(2));
-    skeletton.setForkingCount(TreeParamsi::constant(3));
-    skeletton.setInclination(TreeParamsd::gaussian(0.25 * M_PI, 0.05 * M_PI));
-    skeletton.setRotationOffset(TreeParamsd::gaussian(0, 0.05 * M_PI));
-    skeletton.setSizeFactor(TreeParamsd::uniform_real(0.5, 0.75));
+    skeletton.setRootWeight(TreeParamsd::gaussian(3, 0.2));
+    skeletton.setForkingCount(
+        TreeParamsi::WeightThreshold(0.15, TreeParamsi::uniform_int(3, 4)));
+    skeletton.setInclination(
+        TreeParamsd::PhiOffset(TreeParamsd::gaussian(0.2 * M_PI, 0.05 * M_PI)));
+    skeletton.setTheta(
+        TreeParamsd::UniformTheta(TreeParamsd::gaussian(0, 0.05 * M_PI)));
+    skeletton.setSize(
+        TreeParamsd::SizeFactor(TreeParamsd::uniform_real(0.5, 0.75)));
 
-    _model.addWorker<TrunkGenerator>(12, 0.25, 0.2, 4);
+    _model.addWorker<TrunkGenerator>(12);
+    _model.addWorker<LeavesGenerator>(0.2, 0.15);
 }
 
-void SimpleTreeDecorator::setModel(const world::Tree &model) {
-    _model.setup(model);
-}
+void SimpleTreeDecorator::setModel(const Tree &model) { _model.setup(model); }
 
-void SimpleTreeDecorator::decorate(FlatWorld &world, WorldZone &zone) {
-    Chunk &chunk = zone->chunk();
-
+void SimpleTreeDecorator::decorate(FlatWorld &world, const WorldZone &zone) {
     const double treeResolution = 5;
-    if (chunk.getMaxResolution() < treeResolution ||
-        treeResolution <= chunk.getMinResolution())
+    if (zone->getMaxResolution() < treeResolution ||
+        treeResolution <= zone->getMinResolution())
         return;
 
-    vec3d chunkSize = chunk.getSize();
+    vec3d chunkSize = zone->getDimensions();
     vec3d offset = zone->getAbsoluteOffset();
 
     std::vector<vec2d> positions;
@@ -71,7 +75,7 @@ void SimpleTreeDecorator::decorate(FlatWorld &world, WorldZone &zone) {
         // std::cout << pos3D << std::endl;
 
         // Création de l'arbre
-        Tree &tree = chunk.addObject<Tree>();
+        Tree &tree = world.addObject<Tree>(zone);
         tree.setup(_model);
         tree.setPosition3D(pos3D);
 

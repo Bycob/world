@@ -3,6 +3,7 @@
 #include "core/WorldConfig.h"
 
 #include <memory>
+#include <core/IResolutionModel.h>
 
 #include "core/WorldObject.h"
 #include "assets/Mesh.h"
@@ -32,13 +33,19 @@ public:
 
     Mesh &getTrunkMesh();
 
-    void collectWholeObject(ICollector &collector) override;
+    const Mesh &getLeavesMesh() const;
+
+    Mesh &leavesMesh();
+
+    void collect(ICollector &collector,
+                 const IResolutionModel &explorer) override;
 
 private:
     PTree *_internal;
 
     TreeSkeletton _skeletton;
     Mesh _trunkMesh;
+    Mesh _leavesMesh;
     Material _trunkMaterial;
 
     bool _generated = false;
