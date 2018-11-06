@@ -116,7 +116,7 @@ template <typename T>
 inline std::string CollectorChannelContextWrap<T>::mutateKeyString(
     const std::string &keystr) {
     try {
-        return str(_context.mutateKey(key(keystr)));
+        return ItemKeys::toString(_context.mutateKey(key(keystr)));
     } catch (std::invalid_argument &e) {
         return keystr;
     }

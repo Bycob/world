@@ -93,11 +93,6 @@ struct WORLDAPI_EXPORT ItemKeys {
     }
 };
 
-
-/** Gets an unique string representation for this key. The
- * string is printable and usable in a file system. */
-inline std::string str(const ItemKey &key) { return ItemKeys::toString(key); }
-
 inline ItemKey key(const std::string &str) {
     try {
         return ItemKeys::fromString(str);

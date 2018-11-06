@@ -16,14 +16,14 @@ TEST_CASE("ItemKeys", "[collector]") {
 
     SECTION("toString / fromString") {
         ItemKey key1 = ItemKeys::inWorld("0001", 18, 27);
-        ItemKey key2 = key(str(key1));
+        ItemKey key2 = key(ItemKeys::toString(key1));
         CHECK(key1 == key2);
-        CHECK(str(key1) == str(key2));
+        CHECK(ItemKeys::toString(key1) == ItemKeys::toString(key2));
 
         std::string str1 = "fffffffefffffffffffffffffffffffffffffffeffffffffffffffffffffffff"
                           "0100000000000000000000000100000000000000010000000100000000000000"
                           "0000000002000000/0/3202";
-        CHECK(str1 == str(key(str1)));
+        CHECK(str1 == ItemKeys::toString(key(str1)));
     }
 }
 
@@ -113,9 +113,9 @@ TEST_CASE("CollectorContextWrap", "[collector]") {
 
     SECTION("put mutates material id") {
         Object3D obj;
-        obj.setMaterialID(str(ItemKeys::inObject(1)));
+        obj.setMaterialID(ItemKeys::toString(ItemKeys::inObject(1)));
         wobjChan.put(ItemKeys::inObject(1), obj);
         ItemKey afterMutation = ItemKeys::inWorld(chunkKey, objKey, 2);
-        CHECK(objChan._lastAddedMatId == str(afterMutation));
+        CHECK(objChan._lastAddedMatId == ItemKeys::toString(afterMutation));
     }
 }

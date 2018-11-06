@@ -60,8 +60,8 @@ void TreeGroup::collect(ICollector &collector,
                 leafMaterial.setKd(0.4, 0.9, 0.4);
 
                 auto &matChannel = collector.getChannel<Material>();
-                trunksObj.setMaterialID(str(ItemKeys::inObject(1)));
-                leavesObj.setMaterialID(str(ItemKeys::inObject(2)));
+                trunksObj.setMaterialID(ItemKeys::toString(ItemKeys::inObject(1)));
+                leavesObj.setMaterialID(ItemKeys::toString(ItemKeys::inObject(2)));
 
                 matChannel.put(ItemKeys::inObject(1), trunkMaterial);
                 matChannel.put(ItemKeys::inObject(2), leafMaterial);
