@@ -26,5 +26,5 @@ if (WORLD_BUILD_VULKAN_MODULES AND WORLD_HAS_VULKAN)
 	endforeach()
 
 	add_custom_target(shaders DEPENDS ${WORLD_SHADERS_BIN})
-	add_dependencies(worldapi shaders)
+	add_dependencies(vkworld shaders)
 endif()

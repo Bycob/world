@@ -1,4 +1,3 @@
-#ifdef WORLD_BUILD_VULKAN_MODULES
 #include "Vulkan.h"
 #include "PVulkan.h"
 
@@ -557,5 +556,3 @@ VulkanContext &Vulkan::context() {
 	return context;
 }
 }
-
-#endif

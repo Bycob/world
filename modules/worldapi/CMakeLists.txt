@@ -31,19 +31,6 @@ if (${WORLD_BUILD_OPENCV_MODULES})
 	endif()
 endif()
 
-if (${WORLD_BUILD_VULKAN_MODULES})
-	if (${WORLD_HAS_VULKAN})
-		message("-- Build Vulkan modules")
-		target_link_libraries(worldapi ${Vulkan_LIBRARIES})
-		target_compile_definitions(worldapi PRIVATE WORLD_BUILD_VULKAN_MODULES=1)
-	else()
-		message("-- Cannot build Vulkan modules : Missign dependencies (Vulkan)")
-	endif()
-endif()
-
-
 # Register target
 target_link_libraries(worldapi ${THIRD_PARTY_LIBRARIES})
 target_include_directories(worldapi PUBLIC ${THIRD_PARTY_INCLUDES})
-
-add_subdirectory(shaders/)

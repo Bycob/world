@@ -67,8 +67,10 @@ include_directories(
 
 # Ajout de World API
 add_subdirectory(modules/worldapi/)
+# Ajout de VkWorld
+add_subdirectory(modules/vkworld/)
 # Ajout de World 3D
-add_subdirectory(modules/world3D)
+add_subdirectory(modules/world3D/)
 # Ajout du répertoire de tests
 add_subdirectory(tests/)
 

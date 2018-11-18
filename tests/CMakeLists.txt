@@ -18,7 +18,7 @@ if (${WORLD_BUILD_TESTS})
     
     if (WORLD_BUILD_VULKAN_MODULES AND WORLD_HAS_VULKAN)
         add_executable(test_vulkan test_vulkan.cpp)
-        target_link_libraries(test_vulkan worldapi)
+        target_link_libraries(test_vulkan worldapi vkworld)
     endif()
 endif()
 
