@@ -1,10 +1,11 @@
 #ifndef WORLDAPI_BUFFERVK_H
 #define WORLDAPI_BUFFERVK_H
 
-#include "core/WorldConfig.h"
-#include "core/WorldTypes.h"
+#include "VkWorldConfig.h"
 
 #include <memory>
+
+#include <core/WorldTypes.h>
 
 #include "Vulkan.h"
 
@@ -17,7 +18,7 @@ enum class DescriptorType {
 
 class PBufferVk;
 
-class WORLDAPI_EXPORT BufferVk {
+class VKWORLD_EXPORT BufferVk {
 public:
 	BufferVk(VulkanContext &context, DescriptorType descriptorType, u32 size);
 

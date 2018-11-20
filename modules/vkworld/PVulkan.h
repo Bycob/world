@@ -4,8 +4,9 @@
 #include <vulkan.h>
 #include <vector>
 
+#include <core/WorldTypes.h>
+
 #include "Vulkan.h"
-#include "core/WorldTypes.h"
 
 namespace world {
 

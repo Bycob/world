@@ -4,9 +4,9 @@
 #include <algorithm>
 #include <iterator>
 
-#include <vulkan/Vulkan.h>
-#include <vulkan/ProgramVk.h>
-#include <vulkan/BufferVk.h>
+#include <vkworld/Vulkan.h>
+#include <vkworld/ProgramVk.h>
+#include <vkworld/BufferVk.h>
 #include <worldcore.h>
 
 using namespace world;

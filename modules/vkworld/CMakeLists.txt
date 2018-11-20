@@ -5,7 +5,7 @@ if (${WORLD_BUILD_VULKAN_MODULES})
                 VKWORLD_SOURCES
                 ./*)
 
-        add_library(vkworld ${VKWORLD_SOURCES})
+        add_library(vkworld ${WORLD_BUILD_MODE} ${VKWORLD_SOURCES})
 
         target_link_libraries(vkworld worldapi ${Vulkan_LIBRARIES} ${THIRD_PARTY_LIBRARIES})
 

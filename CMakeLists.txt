@@ -9,16 +9,24 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 include(cmake/WorldUtils.cmake)
 
 # Options de l'utilisateur
-option(WORLD_STATIC_BUILD "Build le projet sous formes de librairies statiques" OFF)
+option(WORLD_STATIC_BUILD "Build all libraries as static libraries" OFF)
 
-option(WORLD_BUILD_TESTS "Build les target de tests" ON)
-option(WORLD_BUILD_WORLD3D "Build la visualisation en 3D" ON)
-option(WORLD_BUILD_OPENCV_MODULES "Compile les modules utilisant opencv" OFF)
-option(WORLD_BUILD_VULKAN_MODULES "Compile modules based on Vulkan" ON)
+option(WORLD_BUILD_TESTS "Build test targets" ON)
+option(WORLD_BUILD_WORLD3D "Build the graphical demo" ON)
+option(WORLD_BUILD_OPENCV_MODULES "Build the modules based on OpenCV" OFF)
+option(WORLD_BUILD_VULKAN_MODULES "Build the modules based on Vulkan" ON)
 
-# Setup de certaines variables
+# Setup variables for build configuration
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
+endif()
+
+if(${WORLD_STATIC_BUILD})
+    set(WORLD_BUILD_MODE "STATIC")
+    message("-- Build libraries as static")
+else()
+    set(WORLD_BUILD_MODE "SHARED")
+    message("-- Build libraries as dynamic")
 endif()
 
 message("-- Build type : ${CMAKE_BUILD_TYPE}")
@@ -63,7 +71,8 @@ add_subdirectory(3rdparty/)
 
 include_directories(
         3rdparty/
-		modules/worldapi/)
+		modules/worldapi/
+		modules/)
 
 # Ajout de World API
 add_subdirectory(modules/worldapi/)

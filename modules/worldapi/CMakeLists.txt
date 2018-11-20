@@ -8,14 +8,6 @@ file(GLOB_RECURSE
 assign_source_group(${WORLD_API_SOURCES})
 
 # Register target
-if(${WORLD_STATIC_BUILD})
-	set(WORLD_BUILD_MODE "STATIC")
-	message("-- Build WorldAPI as a static library")
-else()
-	set(WORLD_BUILD_MODE "SHARED")
-	message("-- Build WorldAPI as a dynamic library")
-endif()
-
 add_library(worldapi ${WORLD_BUILD_MODE} ${WORLD_API_SOURCES})
 
 # External libraries

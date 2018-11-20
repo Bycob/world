@@ -1,11 +1,12 @@
 #ifndef WORLDAPI_PROGRAMVK_H
 #define WORLDAPI_PROGRAMVK_H
 
-#include "core/WorldConfig.h"
-#include "core/WorldTypes.h"
+#include "VkWorldConfig.h"
 
 #include <memory>
 #include <string>
+
+#include <core/WorldTypes.h>
 
 #include "Vulkan.h"
 #include "BufferVk.h"
@@ -14,7 +15,7 @@ namespace world {
 
 class PProgramVk;
 
-class WORLDAPI_EXPORT ProgramVk {
+class VKWORLD_EXPORT ProgramVk {
 public:
 	ProgramVk(VulkanContext &context);
 

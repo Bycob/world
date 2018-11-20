@@ -1,12 +1,12 @@
 #ifndef WORLDAPI_VULKAN_H
 #define WORLDAPI_VULKAN_H
 
-#include "core/WorldConfig.h"
+#include "VkWorldConfig.h"
 
 namespace world {
 class PVulkanContext;
 
-class WORLDAPI_EXPORT VulkanContext {
+class VKWORLD_EXPORT VulkanContext {
 public:
 	VulkanContext();
 
@@ -21,7 +21,7 @@ private:
 	PVulkanContext *_internal;
 };
 
-struct WORLDAPI_EXPORT Vulkan {
+struct VKWORLD_EXPORT Vulkan {
 	static VulkanContext &context();
 };
 
