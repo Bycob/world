@@ -19,11 +19,16 @@ enum class WORLDAPI_EXPORT Direction {
 namespace world {
 
 struct WORLDAPI_EXPORT PerlinInfo {
+    // general perlin algorithm parameters
     int octaves;
     double persistence;
     bool repeatable;
 
     // Position information
+    /** When the noise is generated at different level of details,
+     * reference indicates on which octave the frequency and offset
+     * should be based. */
+    // TODO enhance documentation
     int reference;
     double frequency;
     int offsetX;

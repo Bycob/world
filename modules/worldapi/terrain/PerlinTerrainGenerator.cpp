@@ -20,6 +20,9 @@ PerlinTerrainGenerator::PerlinTerrainGenerator(int octaveCount,
     _perlinInfo.repeatable = false;
 
     _perlinInfo.frequency = frequency;
+    _perlinInfo.reference = 0;
+    _perlinInfo.offsetX = 0;
+    _perlinInfo.offsetY = 0;
 }
 
 void PerlinTerrainGenerator::setFrequency(double frequency) {
@@ -36,6 +39,9 @@ void PerlinTerrainGenerator::setOctaveCount(int octaveCount) {
 
 void PerlinTerrainGenerator::processTerrain(Terrain &terrain) {
     _perlin.generatePerlinNoise2D(terrain._array, _perlinInfo);
+
+    // Normalize relatively to the first lod level
+    TerrainOps::multiply(terrain, 1 / _perlin.getMaxPossibleValue(_perlinInfo));
 }
 
 void PerlinTerrainGenerator::processTile(ITileContext &context) {

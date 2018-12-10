@@ -103,7 +103,7 @@ void testPerlin(int argc, char** argv) {
 	}
 
 	//CREATION DU DOSSIER DE TESTS
-	std::cout << "Création du dossier de tests..." << std::endl;
+	std::cout << "Creation du dossier de tests..." << std::endl;
 	createDirectories("assets/terrain");
 
 	//CREATION DU GENERATEUR
@@ -112,7 +112,7 @@ void testPerlin(int argc, char** argv) {
 
 	//GENERATION DE L'IMAGE DU TERRAIN
 
-	std::cout << "Génération du terrain..." << std::endl;
+	std::cout << "Generation du terrain..." << std::endl;
     Terrain terrain(size);
     generator.processTerrain(terrain);
 
