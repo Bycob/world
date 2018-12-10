@@ -7,7 +7,7 @@
 #include <vkworld/Vulkan.h>
 #include <vkworld/ProgramVk.h>
 #include <vkworld/BufferVk.h>
-#include <worldcore.h>
+#include <world/core.h>
 
 using namespace world;
 

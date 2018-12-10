@@ -3,8 +3,8 @@
 
 #include <armadillo/armadillo>
 
-#include <worldcore.h>
-#include <worldterrain.h>
+#include <world/core.h>
+#include <world/terrain.h>
 
 using namespace arma;
 using namespace world;

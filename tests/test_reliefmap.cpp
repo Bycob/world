@@ -1,8 +1,8 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <worldcore.h>
-#include <worldterrain.h>
+#include <world/core.h>
+#include <world/terrain.h>
 
 #include "testutil.h"
 

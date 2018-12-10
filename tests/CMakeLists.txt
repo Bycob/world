@@ -5,21 +5,21 @@ if (${WORLD_BUILD_TESTS})
     Message("-- Build tests")
 
     add_executable(test_terrain test_terrain.cpp)
-    target_link_libraries(test_terrain worldapi)
+    target_link_libraries(test_terrain world)
 
     add_executable(test_tree test_tree.cpp)
-    target_link_libraries(test_tree worldapi)
+    target_link_libraries(test_tree world)
 
     add_executable(test_reliefmap test_reliefmap.cpp)
-    target_link_libraries(test_reliefmap worldapi)
+    target_link_libraries(test_reliefmap world)
 
     add_executable(test_world test_world.cpp)
-    target_link_libraries(test_world worldapi)
+    target_link_libraries(test_world world)
     
     if (WORLD_BUILD_VULKAN_MODULES AND WORLD_HAS_VULKAN)
         add_executable(test_vulkan test_vulkan.cpp)
-        target_link_libraries(test_vulkan worldapi vkworld)
+        target_link_libraries(test_vulkan world vkworld)
     endif()
 endif()
 
-add_subdirectory(worldapi)
+add_subdirectory(world)

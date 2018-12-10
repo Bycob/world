@@ -1,8 +1,8 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <worldcore.h>
-#include <worldtree.h>
+#include <world/core.h>
+#include <world/tree.h>
 
 using namespace world;
 
@@ -11,7 +11,7 @@ void testTreeGroup(int argc, char ** argv);
 void testTree(int argc, char **argv);
 
 int main(int argc, char** argv) {
-	testTreeGroup(argc, argv);
+	testTree(argc, argv);
 }
 
 void testCircularSkeletton(int argc, char** argv) {

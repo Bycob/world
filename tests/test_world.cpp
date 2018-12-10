@@ -3,8 +3,8 @@
 #include <memory>
 #include <chrono>
 
-#include <worldcore.h>
-#include <worldflat.h>
+#include <world/core.h>
+#include <world/flat.h>
 
 
 using namespace world;
