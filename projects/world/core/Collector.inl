@@ -80,7 +80,7 @@ inline CollectorChannelIterator<T> CollectorChannel<T>::end() {
     return CollectorChannelIterator<T>(_items.end());
 }
 
-    // ====== CollectorChannelIterator
+// ====== CollectorChannelIterator
 
 #ifdef _MSC_VER
 template <typename T>

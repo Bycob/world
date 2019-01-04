@@ -39,6 +39,11 @@ template <typename T> struct vec3 {
     template <typename R>
     auto operator/(const vec3<R> &rhs) const -> vec3<decltype(x / rhs.x)>;
 
+    template <typename R> vec3<T> &operator+=(const vec3<R> &rhs);
+    template <typename R> vec3<T> &operator-=(const vec3<R> &rhs);
+    template <typename R> vec3<T> &operator*=(const vec3<R> &rhs);
+    template <typename R> vec3<T> &operator/=(const vec3<R> &rhs);
+
     template <typename R> bool operator==(const vec3<R> &rhs) const;
     template <typename R> bool operator<(const vec3<R> &rhs) const;
 
@@ -143,6 +148,42 @@ inline auto vec3<T>::operator/(const vec3<R> &rhs) const
     -> vec3<decltype(x / rhs.x)> {
     return vec3<decltype(x / rhs.x)>(this->x / rhs.x, this->y / rhs.y,
                                      this->z / rhs.z);
+}
+
+template <typename T>
+template <typename R>
+inline vec3<T> &vec3<T>::operator+=(const vec3<R> &rhs) {
+    x += rhs.x;
+    y += rhs.y;
+    z += rhs.z;
+    return *this;
+}
+
+template <typename T>
+template <typename R>
+inline vec3<T> &vec3<T>::operator-=(const vec3<R> &rhs) {
+    x -= rhs.x;
+    y -= rhs.y;
+    z -= rhs.z;
+    return *this;
+}
+
+template <typename T>
+template <typename R>
+inline vec3<T> &vec3<T>::operator*=(const vec3<R> &rhs) {
+    x *= rhs.x;
+    y *= rhs.y;
+    z *= rhs.z;
+    return *this;
+}
+
+template <typename T>
+template <typename R>
+inline vec3<T> &vec3<T>::operator/=(const vec3<R> &rhs) {
+    x /= rhs.x;
+    y /= rhs.y;
+    z /= rhs.z;
+    return *this;
 }
 
 template <typename T>

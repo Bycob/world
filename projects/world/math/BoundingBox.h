@@ -17,6 +17,8 @@ public:
 
     vec3d getDimensions() const;
 
+    void translate(const vec3d &vec);
+
 private:
     vec3d _lower;
     vec3d _upper;

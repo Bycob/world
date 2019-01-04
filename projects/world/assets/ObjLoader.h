@@ -33,4 +33,4 @@ private:
     bool _triangulate;
     std::shared_ptr<Material> _defaultMaterial;
 };
-}
+} // namespace world

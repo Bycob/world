@@ -158,8 +158,8 @@ void CustomWorldRMModifier::generate(Terrain &height, Terrain &heightDiff) {
     // Génération des points
     std::uniform_real_distribution<double> rand(0.0, 1.0);
 
-    for (int i = 0; i < biomeCount;
-         i++) { // TODO dans les cas limites la grille peut se vider totalement
+    for (int i = 0; i < biomeCount; i++) { // TODO dans les cas limites la
+                                           // grille peut se vider totalement
         // Génération des coordonnées des points
         int randIndex = (int)(rand(_rng) * grid.size());
         std::pair<int, int> randPoint = grid.at(randIndex);

@@ -82,4 +82,9 @@ TileSystemIterator TileSystem::iterate(const IResolutionModel &resolutionModel,
     return TileSystemIterator(*this, resolutionModel, zone);
 }
 
+TileSystemIterator TileSystem::iterate(const IResolutionModel &resolutionModel,
+                                       const BoundingBox &bounds) const {
+    return TileSystemIterator(*this, resolutionModel, bounds);
+}
+
 } // namespace world

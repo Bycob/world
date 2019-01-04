@@ -17,6 +17,19 @@ TileSystemIterator::TileSystemIterator(const TileSystem &tileSystem,
         step();
 }
 
+TileSystemIterator::TileSystemIterator(const TileSystem &tileSystem,
+                                       const IResolutionModel &resolutionModel,
+                                       const BoundingBox &bounds)
+        : _tileSystem(tileSystem), _resolutionModel(resolutionModel),
+          _bounds(bounds) {
+
+    // Start at lod 0
+    startLod(0);
+
+    while (!isTileRequired(_current) && !_endReached)
+        step();
+}
+
 void TileSystemIterator::operator++() {
     BoundingBox tileBbox;
 
