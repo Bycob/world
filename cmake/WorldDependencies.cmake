@@ -52,9 +52,9 @@ if (${WORLD_BUILD_VULKAN_MODULES})
     find_path(Vulkan_INCLUDE_DIRS
         NAMES
             vulkan.hpp
+            vulkan/vulkan.hpp
         PATH_SUFFIXES
-            Include
-            Include/vulkan
+            Include/
             include/
     )
 

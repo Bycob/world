@@ -4,27 +4,37 @@
 #include "VkWorldConfig.h"
 
 namespace world {
-class PVulkanContext;
+
+class VulkanContextPrivate;
 
 class VKWORLD_EXPORT VulkanContext {
 public:
-	VulkanContext();
+    VulkanContext();
 
-	~VulkanContext();
+    ~VulkanContext();
 
-	void configTest();
+    void configTest();
 
-	void displayAvailableExtensions();
+    void displayAvailableExtensions();
 
-	PVulkanContext &internal();
+    VulkanContextPrivate &internal();
+
 private:
-	PVulkanContext *_internal;
+    VulkanContextPrivate *_internal;
 };
 
 struct VKWORLD_EXPORT Vulkan {
-	static VulkanContext &context();
+    static VulkanContext &context();
 };
 
-}
+} // namespace world
+
+/* REFACTOR
+ *
+ * - Changer le nom des classes : DescriptorType, MemoryType
+ * - Passer le VulkanContext en paramètres partout ou nulle part
+ * - Destroy resources
+ * - register commands on worker a bit less ugly
+ */
 
 #endif // WORLDAPI_VULKAN_H

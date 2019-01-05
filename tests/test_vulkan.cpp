@@ -4,14 +4,17 @@
 #include <algorithm>
 #include <iterator>
 
+#include <world/core.h>
+
 #include <vkworld/Vulkan.h>
 #include <vkworld/ProgramVk.h>
 #include <vkworld/BufferVk.h>
-#include <world/core.h>
+#include <vkworld/ProxyGround.h>
 
 using namespace world;
 
 void testVulkanVersion(int argc, char **argv);
+void testProxyGround(int argc, char **argv);
 
 int main(int argc, char** argv) {
 	testVulkanVersion(argc, argv);
@@ -21,7 +24,7 @@ void testVulkanVersion(int argc, char ** argv) {
 	auto &context = Vulkan::context();
 
 	ProgramVk program(context);
-	program.setEmbeddedShader("perlin");
+	program.setEmbeddedShader("noise-perlin");
 
 	// Initialize p
 	u32 p[512];
@@ -94,7 +97,25 @@ void testVulkanVersion(int argc, char ** argv) {
 		}
 	}
 
-	img.write("perlinsh.png");
+	createDirectories("assets/vulkan/");
+	img.write("assets/vulkan/perlinsh.png");
 
 	delete[] result;
+}
+
+void testProxyGround(int argc, char **argv) {
+	auto &context = Vulkan::context();
+
+	// Create a proxyground 16 meters large, with at least one point per centimeter
+	ProxyGround proxyGround(16, 1600);
+
+	Collector collector;
+	auto &imgChan = collector.addStorageChannel<Image>();
+
+	proxyGround.collectAll(collector, 100);
+
+	world::createDirectories("assets/vulkan/proxyground/");
+	for (auto &entry : imgChan) {
+		entry._value.write(std::string("assets/vulkan/proxyground/") + ItemKeys::toString(entry._key) + ".png");
+	}
 }

@@ -27,7 +27,7 @@ layout(binding = 2) uniform PerlinData {
 };
 
 layout(std140, binding = 3) buffer Output0 {
-   vec4 outputBuffer[];
+    vec4 outputBuffer[];
 };
 
 
@@ -67,6 +67,7 @@ float calcOffsetRemaining(uint octave, int baseOffset) {
 	return (baseOffset - reversed) / float(1 << -diff);
 }
 
+/* x, y, z - compris entre 0 et 1, en proportion de la largeur totale. */
 float perlin(uint octave, float x, float y, float z) {
 	float freq = calcFreq(octave, frequency);
 

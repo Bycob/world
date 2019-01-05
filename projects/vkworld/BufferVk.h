@@ -7,32 +7,39 @@
 
 #include <world/core/WorldTypes.h>
 
+#include "VkEnums.h"
 #include "Vulkan.h"
 
 namespace world {
 
-enum class DescriptorType {
-	STORAGE_BUFFER = 0,
-	UNIFORM_BUFFER = 1
-};
-
-class PBufferVk;
+class BufferVkPrivate;
 
 class VKWORLD_EXPORT BufferVk {
 public:
-	BufferVk(VulkanContext &context, DescriptorType descriptorType, u32 size);
+    BufferVk(VulkanContext &context, DescriptorType descriptorType, u32 size);
 
-	/** Copy "count" bytes from "data" to the buffer. */
-	void setData(void* data, u32 count);
+    /** Creates a new BufferVk that points to the same buffer as this one.
+     * Modifying the copied buffer will affect this one. */
+    BufferVk(const BufferVk &other);
 
-	/** Copy "count" bytes from the buffer to the given data array. */
-	void getData(void* data, u32 count);
+    BufferVk(BufferVk &&other);
 
-	PBufferVk &internal();
+    BufferVk &operator=(const BufferVk &other);
+
+    BufferVk &operator=(BufferVk &&other);
+
+    /** Copy "count" bytes from "data" to the buffer. */
+    void setData(void *data, u32 count);
+
+    /** Copy "count" bytes from the buffer to the given data array. */
+    void getData(void *data, u32 count);
+
+    BufferVkPrivate &internal();
+
 private:
-	std::shared_ptr<PBufferVk> _internal;
+    std::shared_ptr<BufferVkPrivate> _internal;
 };
 
-}
+} // namespace world
 
 #endif // WORLDAPI_BUFFERVK_H
