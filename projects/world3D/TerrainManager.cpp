@@ -115,7 +115,7 @@ ITerrainSceneNode* TerrainManager::createNode(const Terrain &terrain) {
     material.AmbientColor.set(255, 0, 0, 0);
     material.SpecularColor.set(255, 255, 255, 255);
 
-    irr::u32 lin_ts = (irr::u32)(log(size.x / 250) / log(2) * 50);
+    //irr::u32 lin_ts = (irr::u32)(log(size.x / 250) / log(2) * 50);
     //material.DiffuseColor.set(255, 255 - lin_ts, 178, lin_ts);
     material.DiffuseColor.set(255, 200, 178, 126);
 

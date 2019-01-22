@@ -77,7 +77,7 @@ void TreeGroup::collect(ICollector &collector,
         break;
     }
     case 2: // Tree by tree
-        for (int i = 0; i < _treesPositions.size(); ++i) {
+        for (u32 i = 0; i < _treesPositions.size(); ++i) {
             if (_internal->_trees.size() <= i) {
                 allocateTree(_treesPositions[i]);
             }

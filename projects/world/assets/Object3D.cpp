@@ -5,8 +5,8 @@ namespace world {
 Object3D::Object3D() : Object3D(Mesh()) {}
 
 Object3D::Object3D(const Mesh &mesh)
-        : _position(0, 0, 0), _scale(1, 1, 1),
-          _mesh(std::make_shared<Mesh>(mesh)) {}
+        : _mesh(std::make_shared<Mesh>(mesh)), _position(0, 0, 0),
+          _scale(1, 1, 1) {}
 
 Object3D::~Object3D() {}
 

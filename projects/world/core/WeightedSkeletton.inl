@@ -8,13 +8,13 @@
 namespace world {
 
 template <class T>
-Node<T>::Node(const T &info) : _parent(nullptr), _info(info) {}
+Node<T>::Node(const T &info) : _info(info), _parent(nullptr) {}
 
 template <class T> Node<T>::~Node() {
     // Passage en suppression
     _deleting = true;
 
-    for (int i = 0; i < _children_or_neighbour.size(); i++) {
+    for (u32 i = 0; i < _children_or_neighbour.size(); i++) {
         Node<T> *node = _children_or_neighbour.at(i);
 
         if (node != nullptr) {

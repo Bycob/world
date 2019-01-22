@@ -100,8 +100,8 @@ void Perlin::fillBuffer(int octave, const PerlinInfo &info,
     int offY = getOffset(info.offsetY, octave, info);
 
     // Fill buffer
-    for (int x = 0; x <= fi; x++) {
-        for (int y = 0; y <= fi; y++) {
+    for (u32 x = 0; x <= fi; x++) {
+        for (u32 y = 0; y <= fi; y++) {
             u32 px = static_cast<u32>(x + offX) & 0xFFu;
             u32 py = static_cast<u32>(y + offY) & 0xFFu;
             double val = _hash[px + _hash[py + _hash[octave]]] / 255.;
@@ -130,8 +130,8 @@ void Perlin::generatePerlinOctave(arma::Mat<double> &output, int octave,
     const double offYf = getOffsetf(info.offsetY, octave, info);
 
     // Build octave
-    for (int x = 0; x < output.n_rows; x++) {
-        for (int y = 0; y < output.n_cols; y++) {
+    for (u32 x = 0; x < output.n_rows; x++) {
+        for (u32 y = 0; y < output.n_cols; y++) {
             double xd = f * x / (output.n_rows - 1) + offXf;
             double yd = f * y / (output.n_cols - 1) + offYf;
 

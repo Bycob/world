@@ -58,7 +58,7 @@ private:
 
     u32 _factor = 2;
 
-    u32 _maxLOD = 6;
+    int _maxLOD = 6;
 
 
     friend class LODGridChunkHandler;
@@ -100,8 +100,8 @@ public:
     vec3d getDimensions() const override;
 
 private:
-    ChunkKey _id;
     LODGridChunkSystem &_system;
+    ChunkKey _id;
 
     // PRE-CALCULATED DATA
     LODGridCoordinates _coordinates;

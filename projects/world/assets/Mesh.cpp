@@ -36,13 +36,13 @@ void Mesh::reserveFaces(int count) {
 
 u32 Mesh::getFaceCount() const { return _faceCount; }
 
-Face &Mesh::getFace(int id) {
+Face &Mesh::getFace(u32 id) {
     if (id >= _faceCount)
         throw std::runtime_error("Mesh::getFace bad index");
     return _faces.at(id);
 }
 
-const Face &Mesh::getFace(int id) const {
+const Face &Mesh::getFace(u32 id) const {
     if (id >= _faceCount)
         throw std::runtime_error("Mesh::getFace bad index");
     return _faces.at(id);
@@ -65,7 +65,7 @@ Face &Mesh::newFace(int *ids) {
     return _faces.back();
 }
 
-void Mesh::reserveVertices(int count) {
+void Mesh::reserveVertices(u32 count) {
     const auto maxCapacity = _vertices.max_size();
     const auto newCapacity = min(count + _verticesCount, maxCapacity);
     _vertices.reserve(newCapacity);
@@ -73,13 +73,13 @@ void Mesh::reserveVertices(int count) {
 
 u32 Mesh::getVerticesCount() const { return _verticesCount; }
 
-const Vertex &Mesh::getVertex(int id) const {
+const Vertex &Mesh::getVertex(u32 id) const {
     if (id >= _verticesCount)
         throw std::runtime_error("Mesh::getVertex bad index");
     return _vertices.at(id);
 }
 
-Vertex &Mesh::getVertex(int id) {
+Vertex &Mesh::getVertex(u32 id) {
     if (id >= _verticesCount)
         throw std::runtime_error("Mesh::getVertex bad index");
     return _vertices.at(id);

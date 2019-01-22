@@ -10,7 +10,7 @@
 namespace world {
 
 SimpleTreeDecorator::SimpleTreeDecorator(int maxTreesPerChunk)
-        : _rng(time(NULL)), _maxTreesPerChunk(maxTreesPerChunk) {
+        : _maxTreesPerChunk(maxTreesPerChunk), _rng(time(NULL)) {
 
     auto &skeletton = _model.addWorker<TreeSkelettonGenerator>();
     skeletton.setRootWeight(TreeParamsd::gaussian(3, 0.2));

@@ -78,9 +78,9 @@ public:
 
     u32 getFaceCount() const;
 
-    Face &getFace(int id);
+    Face &getFace(u32 id);
 
-    const Face &getFace(int id) const;
+    const Face &getFace(u32 id) const;
 
     void addFace(const Face &face);
 
@@ -92,13 +92,13 @@ public:
      * of vertices. This method enables the mesh to adapt its buffer
      * for the desired amount, and thus to improve performances.
      * @param capacity The amount of vertices we want to add. */
-    void reserveVertices(int capacity);
+    void reserveVertices(u32 capacity);
 
     u32 getVerticesCount() const;
 
-    Vertex &getVertex(int id);
+    Vertex &getVertex(u32 id);
 
-    const Vertex &getVertex(int id) const;
+    const Vertex &getVertex(u32 id) const;
 
     void addVertex(const Vertex &vert);
 

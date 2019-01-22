@@ -8,10 +8,10 @@ using namespace world;
 
 Application::Application()
         : _running(false),
-	      _mainView(std::make_unique<MainView>(*this)),
+		  _explorer(std::make_unique<FirstPersonExplorer>(1000)),
 		  _newUpdatePos(0, 0, 5000),
 		  _lastUpdatePos(_newUpdatePos),
-		  _explorer(std::make_unique<FirstPersonExplorer>(1000)){
+		  _mainView(std::make_unique<MainView>(*this)) {
 
 	_explorer->setPosition(_lastUpdatePos);
 	_explorer->setFarDistance(10000);

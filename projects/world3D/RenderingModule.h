@@ -19,8 +19,8 @@ public:
 
 	Application & _app;
 
-	irr::scene::ISceneManager * _sceneManager;
 	irr::video::IVideoDriver *_driver;
+	irr::scene::ISceneManager * _sceneManager;
 	irr::io::IFileSystem * _fileSystem;
 };
 
