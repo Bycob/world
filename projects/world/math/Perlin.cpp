@@ -69,6 +69,10 @@ Perlin::Perlin(long seed) : _rng(seed) {
 
 void Perlin::setNormalize(bool normalize) { _normalize = normalize; }
 
+std::vector<u8> Perlin::getHash() const {
+    return std::vector<u8>(_hash, _hash + 512);
+}
+
 double Perlin::getMaxPossibleValue(const PerlinInfo &info) {
     if (_normalize)
         return 1;

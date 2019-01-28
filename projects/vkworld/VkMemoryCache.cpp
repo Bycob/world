@@ -44,8 +44,7 @@ public:
                                      vk::MemoryPropertyFlagBits::eHostCoherent;
                 break;
             case MemoryType::CPU_WRITES:
-                requiredProperties = vk::MemoryPropertyFlagBits::eHostVisible |
-                                     vk::MemoryPropertyFlagBits::eDeviceLocal;
+                requiredProperties = vk::MemoryPropertyFlagBits::eHostVisible;
                 break;
             case MemoryType::GPU_ONLY:
                 requiredProperties = vk::MemoryPropertyFlagBits::eDeviceLocal;
@@ -58,6 +57,10 @@ public:
             memoryInfo.allocationSize = memRequirements.size;
             memoryInfo.memoryTypeIndex = ctx.findMemoryType(
                 size, requiredProperties, unwantedProperties);
+
+            _memory = ctx._device.allocateMemory(memoryInfo);
+
+            ctx._device.bindBufferMemory(_buffer, _memory, 0);
         }
 
         std::unique_ptr<char[]> _data;

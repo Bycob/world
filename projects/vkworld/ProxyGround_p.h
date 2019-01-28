@@ -7,6 +7,7 @@
 #include <world/core/TileSystem.h>
 
 #include "VkSubBuffer.h"
+#include "VkWorker.h"
 
 namespace world {
 
@@ -15,6 +16,7 @@ public:
     struct VkData {
         VkSubBuffer _height;
         VkSubBuffer _dheight;
+        VkWorker _worker;
     };
 
     std::unique_ptr<VkData> _vkData;

@@ -25,8 +25,15 @@ public:
     u32 getSize() const;
     u32 getOffset() const;
 
+    /** Adds this buffer as binding to the given descriptorSet. */
     void registerTo(vk::DescriptorSet &descriptorSet,
                     vk::DescriptorType descriptorType, u32 id) override;
+
+    void getData(void *data);
+    void getData(void *data, u32 count, u32 offset = 0);
+
+    void setData(void *data);
+    void setData(void *data, u32 count, u32 offset = 0);
 
 private:
     std::shared_ptr<VkSubBufferPrivate> _internal;

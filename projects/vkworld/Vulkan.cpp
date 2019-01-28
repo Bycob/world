@@ -96,6 +96,9 @@ void VulkanContextPrivate::pickPhysicalDevice() {
         // best
 
         _physicalDevice = device;
+        std::cout << "picked device "
+                  << _physicalDevice.getProperties().deviceName << std::endl;
+        break;
     }
 }
 
@@ -142,13 +145,13 @@ void VulkanContextPrivate::createComputeResources() {
     vk::DescriptorPoolSize descriptorPoolSizes[2];
 
     descriptorPoolSizes[0].type = vk::DescriptorType::eStorageBuffer;
-    descriptorPoolSizes[0].descriptorCount = 10;
+    descriptorPoolSizes[0].descriptorCount = 1000;
 
     descriptorPoolSizes[1].type = vk::DescriptorType::eUniformBuffer;
-    descriptorPoolSizes[1].descriptorCount = 10;
+    descriptorPoolSizes[1].descriptorCount = 1000;
 
     vk::DescriptorPoolCreateInfo descriptorPoolInfo = {};
-    descriptorPoolInfo.maxSets = 10;
+    descriptorPoolInfo.maxSets = 1000;
     descriptorPoolInfo.poolSizeCount = 2;
     descriptorPoolInfo.pPoolSizes = descriptorPoolSizes;
 

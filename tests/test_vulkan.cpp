@@ -17,7 +17,8 @@ void testVulkanVersion(int argc, char **argv);
 void testProxyGround(int argc, char **argv);
 
 int main(int argc, char** argv) {
-	testVulkanVersion(argc, argv);
+	//testVulkanVersion(argc, argv);
+	testProxyGround(argc, argv);
 }
 
 void testVulkanVersion(int argc, char ** argv) {
@@ -116,6 +117,12 @@ void testProxyGround(int argc, char **argv) {
 
 	world::createDirectories("assets/vulkan/proxyground/");
 	for (auto &entry : imgChan) {
-		entry._value.write(std::string("assets/vulkan/proxyground/") + ItemKeys::toString(entry._key) + ".png");
+		std::string id =ItemKeys::toString(entry._key);
+		std::transform(id.begin(), id.end(), id.begin(), [](char a) {
+			return a == '/' ? '_' : a;
+		});
+		id = std::string("assets/vulkan/proxyground/") + id + ".png";
+		std::cout << id << std::endl;
+		entry._value.write(id);
 	}
 }

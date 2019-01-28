@@ -66,6 +66,8 @@ public:
 
     arma::Mat<double> generatePerlinNoise2D(int size, const PerlinInfo &info);
 
+    std::vector<u8> getHash() const;
+
 private:
     // Parameters
     bool _normalize = true;

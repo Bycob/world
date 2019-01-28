@@ -24,6 +24,19 @@ u32 VkSubBuffer::getSize() const { return _internal->_size; }
 
 u32 VkSubBuffer::getOffset() const { return _internal->_offset; }
 
+
+void VkSubBuffer::getData(void *data) { getData(data, _internal->_size); }
+
+void VkSubBuffer::getData(void *data, u32 count, u32 offset) {
+    _internal->_memAccess.getData(data, count, _internal->_offset + offset);
+}
+
+void VkSubBuffer::setData(void *data) { setData(data, _internal->_size); }
+
+void VkSubBuffer::setData(void *data, u32 count, u32 offset) {
+    _internal->_memAccess.setData(data, count, _internal->_offset + offset);
+}
+
 void VkSubBuffer::registerTo(vk::DescriptorSet &descriptorSet,
                              vk::DescriptorType descriptorType, u32 id) {
     vk::DescriptorBufferInfo descriptorBufferInfo(
