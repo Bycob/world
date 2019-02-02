@@ -37,7 +37,7 @@ ObjectKey ObjectKeys::fromString(const std::string &str) {
         return std::stoi(str);
     } catch (std::invalid_argument &e) {
         throw e;
-    } catch (std::out_of_range &e) {
+    } catch (std::out_of_range &) {
         throw std::invalid_argument("out of range");
     }
 }
@@ -47,7 +47,7 @@ AssetKey AssetKeys::fromString(const std::string &str) {
         return std::stoi(str);
     } catch (std::invalid_argument &e) {
         throw e;
-    } catch (std::out_of_range &e) {
+    } catch (std::out_of_range &) {
         throw std::invalid_argument("out of range");
     }
 }

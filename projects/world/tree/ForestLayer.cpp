@@ -4,7 +4,7 @@
 
 namespace world {
 
-ForestLayer::ForestLayer() : _rng(static_cast<u64>(time(NULL))) {}
+ForestLayer::ForestLayer() : _rng(static_cast<u32>(time(NULL))) {}
 
 void ForestLayer::decorate(FlatWorld &world, const WorldZone &zone) {
     // Check resolution

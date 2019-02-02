@@ -210,7 +210,7 @@ SMesh * ObjectsManager::convertToIrrlichtMesh(const Mesh & mesh, IVideoDriver * 
 	int bufID = -1;
 	SMeshBuffer * buffer = nullptr;
 
-	for (u32 fid = 0; fid < mesh.getFaceCount(); fid++) {
+	for (world::u32 fid = 0; fid < mesh.getFaceCount(); fid++) {
 		const Face &face = mesh.getFace(fid);
 
 		if (face.vertexCount() != 3)

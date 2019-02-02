@@ -5,8 +5,8 @@
 namespace world {
 
 LeavesGenerator::LeavesGenerator(double leafDensity, double weightThreshold)
-        : _rng(time(NULL)), _distrib(0, 1), _leafDensity(leafDensity),
-          _weightThreshold(weightThreshold) {}
+        : _rng(static_cast<u32>(time(NULL))), _distrib(0, 1),
+          _leafDensity(leafDensity), _weightThreshold(weightThreshold) {}
 
 void LeavesGenerator::setLeafDensity(double density) { _leafDensity = density; }
 

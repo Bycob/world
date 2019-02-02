@@ -117,7 +117,7 @@ inline std::string CollectorChannelContextWrap<T>::mutateKeyString(
     const std::string &keystr) {
     try {
         return ItemKeys::toString(_context.mutateKey(key(keystr)));
-    } catch (std::invalid_argument &e) {
+    } catch (std::invalid_argument &) {
         return keystr;
     }
 }
