@@ -34,17 +34,21 @@ void ProxyGround::collect(ICollector &collector,
 
     DescriptorSetLayoutVk layout1;
     layout1.addBinding(DescriptorType::UNIFORM_BUFFER, 0);
-    layout1.addBinding(DescriptorType::STORAGE_BUFFER, 1);
+    layout1.addBinding(DescriptorType::UNIFORM_BUFFER, 1);
+    layout1.addBinding(DescriptorType::STORAGE_BUFFER, 2);
+    layout1.addBinding(DescriptorType::STORAGE_BUFFER, 3);
 
-    ComputePipeline pipeline1(layout1, "noise-random");
+    ComputePipeline pipeline1(layout1, "noise-perlin");
 
     const u32 workgroupSize = 32;
 
 
     // Get coordinates of processed tiles
     auto &tileSystem = _internal->_tileSystem;
-    u32 bufferCount = tileSystem._bufferRes.x * tileSystem._bufferRes.y;
-    u32 bufferSize = bufferCount * sizeof(float);
+    const u32 bufferWidth = tileSystem._bufferRes.x;
+    const u32 bufferHeight = tileSystem._bufferRes.y;
+    const u32 bufferCount = bufferWidth * bufferHeight;
+    const u32 bufferSize = bufferCount * sizeof(float);
 
     BoundingBox &bbox = _internal->_bbox;
     std::set<TileCoordinates> coords;
@@ -60,91 +64,104 @@ void ProxyGround::collect(ICollector &collector,
 
     // Perlin parameters (TEMP)
     Perlin perlin;
-    auto hash = perlin.getHash();
+    std::vector<u32> hash;
 
-    const u32 img_width = tileSystem._bufferRes.x;
-    const u32 img_height = tileSystem._bufferRes.y;
+    for (auto i : perlin.getHash()) {
+        hash.push_back(static_cast<u32>(i));
+    }
 
     struct {
         u32 width;
         u32 height;
-        u32 depth = 1;
+        u32 depth;
     } s_outputData;
 
-    s_outputData.width = img_width;
-    s_outputData.height = img_height;
+    s_outputData.width = bufferWidth;
+    s_outputData.height = bufferHeight;
+    s_outputData.depth = 1;
 
     struct {
         u32 octaves = 12;
-        u32 octaveRef = 0;
-        s32 offsetX = 1;
+        u32 octaveRef = 2;
+        s32 offsetX = 0;
         s32 offsetY = 0;
         s32 offsetZ = 0;
         float frequence = 8;
         float persistence = 0.4;
     } s_perlinData;
 
-    VkSubBuffer hashBuf = vkctx.allocate(
-        hash.size(), DescriptorType::UNIFORM_BUFFER, MemoryType::CPU_WRITES);
-    // VkSubBuffer outputDataBuf = vkctx.allocate(sizeof(s_outputData),
-    // DescriptorType::UNIFORM_BUFFER, MemoryType::CPU_WRITES); VkSubBuffer
-    // perlinDataBuf = vkctx.allocate(sizeof(s_perlinData),
-    // DescriptorType::UNIFORM_BUFFER, MemoryType::CPU_WRITES);
+
+    VkSubBuffer outputDataBuf =
+        vkctx.allocate(sizeof(s_outputData), DescriptorType::UNIFORM_BUFFER,
+                       MemoryType::CPU_WRITES);
+    VkSubBuffer hashBuf =
+        vkctx.allocate(hash.size() * sizeof(u32),
+                       DescriptorType::STORAGE_BUFFER, MemoryType::CPU_WRITES);
+
+    outputDataBuf.setData(&s_outputData);
+    hashBuf.setData(&hash[0]);
+
+    // create the global buffer before profiler start recording,
+    // so that the allocation time is not taken into account
+    VkSubBuffer dummy = vkctx.allocate(1, DescriptorType::STORAGE_BUFFER,
+                                       MemoryType::CPU_READS);
 
     Profiler profiler;
-    std::cout << "starting" << std::endl;
-    profiler.endStartSection("calculus");
+    profiler.endStartSection("setup");
     // Process tiles
     for (const TileCoordinates &tc : coords) {
         auto &tileData = getData(tc);
 
         tileData._vkData = std::make_unique<ProxyGroundDataPrivate::VkData>(
             ProxyGroundDataPrivate::VkData{
-                vkctx.allocate(bufferSize * 4, DescriptorType::STORAGE_BUFFER,
-                               MemoryType::CPU_READS),
+                vkctx.allocate(sizeof(s_perlinData),
+                               DescriptorType::UNIFORM_BUFFER,
+                               MemoryType::CPU_WRITES),
                 vkctx.allocate(bufferSize, DescriptorType::STORAGE_BUFFER,
                                MemoryType::CPU_READS),
                 VkWorker()});
 
+        s_perlinData.offsetX = tc._pos.x * 8;
+        s_perlinData.offsetY = tc._pos.y * 8;
+        tileData._vkData->_heightData.setData(&s_perlinData);
+
         DescriptorSetVk dset(layout1);
-        dset.addDescriptor(0, DescriptorType::UNIFORM_BUFFER, hashBuf);
-        // dset.addDescriptor(1, DescriptorType::UNIFORM_BUFFER, outputDataBuf);
-        // dset.addDescriptor(2, DescriptorType::UNIFORM_BUFFER, perlinDataBuf);
-        dset.addDescriptor(1, DescriptorType::STORAGE_BUFFER,
+        dset.addDescriptor(0, DescriptorType::UNIFORM_BUFFER, outputDataBuf);
+        dset.addDescriptor(1, DescriptorType::UNIFORM_BUFFER,
+                           tileData._vkData->_heightData);
+        dset.addDescriptor(2, DescriptorType::STORAGE_BUFFER, hashBuf);
+        dset.addDescriptor(3, DescriptorType::STORAGE_BUFFER,
                            tileData._vkData->_height);
 
         VkWorker &worker = tileData._vkData->_worker;
         worker.bindCommand(pipeline1, dset);
-        worker.dispatchCommand(bufferCount / workgroupSize,
-                               bufferCount / workgroupSize, 1);
+        worker.dispatchCommand(bufferWidth / workgroupSize,
+                               bufferHeight / workgroupSize, 1);
         worker.endCommandRecording();
 
         worker.run();
     }
-    std::cout << "calculating" << std::endl;
+    profiler.endStartSection("waitFences");
 
     // Collecting images
     for (const TileCoordinates &tc : coords) {
         auto &tileData = getData(tc);
         tileData._vkData->_worker.waitForCompletion();
-        std::cout << tc._pos << " completed !" << std::endl;
     }
     profiler.endStartSection("collect");
-    profiler.dump();
 
     for (const TileCoordinates &tc : coords) {
         auto &tileData = getData(tc);
 
-        float *buffer = new float[bufferCount * 4];
+        float *buffer = new float[bufferCount];
         tileData._vkData->_height.getData(buffer);
         Image img(tileSystem._bufferRes.x, tileSystem._bufferRes.y,
-                  ImageType::RGBA);
+                  ImageType::GREYSCALE);
 
         for (u32 y = 0; y < img.height(); ++y) {
             for (u32 x = 0; x < img.width(); ++x) {
-                u32 pos = (y * img.width() + x) * 4;
-                img.rgba(x, y).setf(buffer[pos], buffer[pos + 1],
-                                    buffer[pos + 2], buffer[pos + 3]);
+                u32 pos = (y * img.width() + x);
+                img.grey(x, y).setLevelf(buffer[pos]);
             }
         }
 
@@ -152,7 +169,6 @@ void ProxyGround::collect(ICollector &collector,
             tc._pos.x + 0xFFFF * tc._pos.y); // TODO better id ?
                                              // _tileSystem.getId() ?
         imageChan.put(key, img);
-        std::cout << "saved image at " << tc._pos << std::endl;
     }
 
     profiler.endSection();

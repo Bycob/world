@@ -17,5 +17,8 @@ layout(std140, binding = 1) buffer Output0 {
 
 void main() {
 	uint id = width * gl_GlobalInvocationID.y + gl_GlobalInvocationID.x;
-	outputBuffer[id] = vec4(1.0, 0.5, 0.0, 1.0);
+	float r = float(gl_LocalInvocationID.x) / 32.0 ;
+	float g = 1 - float(gl_LocalInvocationID.y) / 32.0;
+	float b = float(gl_LocalInvocationID.y) / 32.0;
+	outputBuffer[id] = vec4(r, g, b, 1.0);
 }

@@ -6,17 +6,14 @@
 layout (local_size_x = WORKGROUP_SIZE, local_size_y = WORKGROUP_SIZE, local_size_z = 1) in;
 
 // Random values for hash function
-layout(std140, binding = 0) uniform PerlinTable {
-    uvec4 p[128];
-};
 
-layout(binding = 1) uniform OutputData {
+layout(binding = 0) uniform OutputData {
     uint width;
     uint height;
 	uint depth;
 };
 
-layout(binding = 2) uniform PerlinData {
+layout(binding = 1) uniform PerlinData {
     uint octaves;
 	uint octaveRef;
     int offsetX;
@@ -26,8 +23,12 @@ layout(binding = 2) uniform PerlinData {
     float persistence;
 };
 
-layout(std140, binding = 3) buffer Output0 {
-    vec4 outputBuffer[];
+layout(binding = 2) buffer PerlinTable {
+    uint p[512];
+};
+
+layout(std430, binding = 3) buffer Output0 {
+    float outputBuffer[];
 };
 
 
@@ -35,10 +36,10 @@ uint rand(uint octave, int x, int y, int z) {
 	uint ux = uint(x) & 255;
 	uint uy = uint(y) & 255;
 	uint uz = uint(z) & 255;
-	uint a = p[uz / 4][uz % 4] + uy;
-	uint b = p[a / 4][a % 4] + ux;
-	uint c = p[b / 4][b % 4] + octave;
-	return p[c / 4][c % 4];
+	uint a = p[uz] + uy;
+	uint b = p[a] + ux;
+	uint c = p[b] + octave;
+	return p[c];
 }
 
 float g(uint hash, float x, float y, float z) {
@@ -123,5 +124,5 @@ void main() {
   }
 
   uint id = height * width * gl_GlobalInvocationID.z + width * gl_GlobalInvocationID.y + gl_GlobalInvocationID.x;
-  outputBuffer[id / 4][id % 4] = val / persum;
+  outputBuffer[id] = val / persum;
 }

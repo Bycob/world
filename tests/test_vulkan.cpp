@@ -17,7 +17,7 @@ void testVulkanVersion(int argc, char **argv);
 void testProxyGround(int argc, char **argv);
 
 int main(int argc, char** argv) {
-	//testVulkanVersion(argc, argv);
+	// testVulkanVersion(argc, argv);
 	testProxyGround(argc, argv);
 }
 
@@ -42,7 +42,7 @@ void testVulkanVersion(int argc, char ** argv) {
 	}
 
 	// Create p buffer
-	BufferVk pbuf(context, DescriptorType::UNIFORM_BUFFER, sizeof(p));
+	BufferVk pbuf(context, DescriptorType::STORAGE_BUFFER, sizeof(p));
 	pbuf.setData(p, sizeof(p));
 	
 	// Create output data uniform
@@ -75,10 +75,10 @@ void testVulkanVersion(int argc, char ** argv) {
 	BufferVk output(context, DescriptorType::STORAGE_BUFFER, outputSize * sizeof(float));
 
 	// set uniforms
-	program.setUniform(0, pbuf);
-	program.setUniform(1, outputData);
-	program.setUniform(2, perlinData);
+	program.setUniform(0, outputData);
+	program.setUniform(1, perlinData);
 
+	program.setBuffer(2, pbuf);
 	program.setBuffer(3, output);
 
 	program.setDispatch(img_width / 32, img_height / 32, 1);
@@ -122,7 +122,7 @@ void testProxyGround(int argc, char **argv) {
 			return a == '/' ? '_' : a;
 		});
 		id = std::string("assets/vulkan/proxyground/") + id + ".png";
-		std::cout << id << std::endl;
+		// std::cout << id << std::endl;
 		entry._value.write(id);
 	}
 }

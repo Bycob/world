@@ -13,6 +13,7 @@ public:
                 : _data(new char[size]), _totalSize(size), _sizeAllocated(0),
                   _updated(false) {
             VulkanContextPrivate &ctx = Vulkan::context().internal();
+            auto properties = ctx._physicalDevice.getProperties();
 
             vk::BufferCreateInfo bufferInfo;
             bufferInfo.size = size;
@@ -20,9 +21,11 @@ public:
             switch (descriptorType) {
             case DescriptorType::STORAGE_BUFFER:
                 bufferInfo.usage = vk::BufferUsageFlagBits::eStorageBuffer;
+                _alignment = properties.limits.minStorageBufferOffsetAlignment;
                 break;
             case DescriptorType::UNIFORM_BUFFER:
                 bufferInfo.usage = vk::BufferUsageFlagBits::eUniformBuffer;
+                _alignment = properties.limits.minUniformBufferOffsetAlignment;
                 break;
             }
 
@@ -69,6 +72,7 @@ public:
 
         u32 _totalSize;
         u32 _sizeAllocated;
+        u32 _alignment;
         /** Indicates if ... uh I don't know yet */
         bool _updated;
     };
@@ -93,6 +97,9 @@ VkMemoryCache::VkMemoryCache(u32 segmentSize, DescriptorType usage,
 
 VkMemoryCache::~VkMemoryCache() = default;
 
+// https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html
+// #VUID-VkWriteDescriptorSet-descriptorType-00327
+// TODO Check for buffer max size and alignment according to specs above
 VkSubBuffer VkMemoryCache::allocateBuffer(u32 size) {
     const u32 segmentSize = _internal->_segmentSize;
 
@@ -111,6 +118,16 @@ VkSubBuffer VkMemoryCache::allocateBuffer(u32 size) {
     const u32 offset =
         static_cast<u32>(_internal->_segments.size() - 1) * segmentSize +
         lastSegment._sizeAllocated;
+
+    lastSegment._sizeAllocated += size;
+
+    // Complete to respect alignment required by standard
+    u32 rem = lastSegment._sizeAllocated % lastSegment._alignment;
+
+    if (rem != 0) {
+        lastSegment._sizeAllocated += lastSegment._alignment - rem;
+    }
+
     return VkSubBuffer{*this, size, offset};
 }
 
