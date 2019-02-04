@@ -28,20 +28,19 @@ target_link_libraries(world ${THIRD_PARTY_LIBRARIES})
 target_include_directories(world PUBLIC ${THIRD_PARTY_INCLUDES})
 
 # Install target
-install(TARGETS world DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/world)
-
-function(world_install_headers directory)
-	file(GLOB
-			INCLUDES
-			${directory}/*.h)
-	list(REMOVE_ITEM INCLUDES *_p.h)
-	install(FILES ${INCLUDES} DESTINATION ${CMAKE_INSTALL_PREFIX}/include/world/world/${directory}/)
-endfunction()
-
-world_install_headers(".")
-world_install_headers("assets")
-world_install_headers("core")
-world_install_headers("flat")
-world_install_headers("math")
-world_install_headers("terrain")
-world_install_headers("tree")
+if(WIN32)
+	install(TARGETS world
+		LIBRARY DESTINATION lib
+		RUNTIME DESTINATION bin
+		ARCHIVE DESTINATION staticlib)
+	install(DIRECTORY .
+		DESTINATION include/world/${directory}/
+		FILES_MATCHING REGEX "\\.(h|inl)$"
+		PATTERN "*_p.h" EXCLUDE)
+else()
+	install(TARGETS world DESTINATION lib/world)
+	install(DIRECTORY .
+		DESTINATION include/world/world/${directory}/
+		FILES_MATCHING REGEX "\\.(h|inl)$"
+		PATTERN "*_p.h" EXCLUDE)
+endif()

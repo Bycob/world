@@ -62,6 +62,12 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "^MSVC$")
 endif()
 
 
+# Systeme dependant stuff
+if(WIN32)
+    set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
+endif()
+
+
 # Dependances externes
 message("--")
 include(cmake/WorldDependencies.cmake)
