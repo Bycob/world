@@ -85,6 +85,8 @@ add_subdirectory(projects/world/)
 add_subdirectory(projects/vkworld/)
 # Ajout de World 3D
 add_subdirectory(projects/world3D/)
+# Ajout de Peace
+add_subdirectory(projects/peace/)
 # Ajout du répertoire de tests
 add_subdirectory(tests/)
 
