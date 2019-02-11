@@ -7,8 +7,7 @@
 
 #include <worldcore.h>
 
-class Resource
-{
+class Resource {
 public:
     Resource(QString name);
 
@@ -22,21 +21,22 @@ protected:
 
 class MeshResource : public Resource {
 public:
-    MeshResource(QString name, world::Scene * scene);
+    MeshResource(QString name, world::Scene *scene);
 
     virtual void save(QString path);
 
 private:
-    world::Scene* _scene;
+    world::Scene *_scene;
 };
 
 class ImageResource : public Resource {
 public:
-    ImageResource(QString name, world::Image * image);
+    ImageResource(QString name, world::Image *image);
 
     virtual void save(QString path);
+
 private:
-    world::Image * _image;
+    world::Image *_image;
 };
 
 #endif // RESOURCE_H

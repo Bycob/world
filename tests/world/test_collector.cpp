@@ -20,29 +20,22 @@ TEST_CASE("ItemKeys", "[collector]") {
         CHECK(key1 == key2);
         CHECK(ItemKeys::toString(key1) == ItemKeys::toString(key2));
 
-        std::string str1 = "fffffffefffffffffffffffffffffffffffffffeffffffffffffffffffffffff"
-                          "0100000000000000000000000100000000000000010000000100000000000000"
-                          "0000000002000000/0/3202";
+        std::string str1 =
+            "fffffffefffffffffffffffffffffffffffffffeffffffffffffffffffffffff"
+            "0100000000000000000000000100000000000000010000000100000000000000"
+            "0000000002000000/0/3202";
         CHECK(str1 == ItemKeys::toString(key(str1)));
     }
 }
 
 
-template <typename T> 
-class TestCollectorChannel : public ICollectorChannel<T> {
+template <typename T> class TestCollectorChannel : public ICollectorChannel<T> {
 public:
-    
-	void put(const ItemKey &key, const T &item) override {
-		_lastAdded = key;
-	}
+    void put(const ItemKey &key, const T &item) override { _lastAdded = key; }
 
-	bool has(const ItemKey &key) const override {
-		return _lastAdded == key;
-	}
+    bool has(const ItemKey &key) const override { return _lastAdded == key; }
 
-	void remove(const ItemKey &key) override {
-		_lastRemoved = key;
-	}
+    void remove(const ItemKey &key) override { _lastRemoved = key; }
 
     ItemKey _lastAdded;
     vec3d _lastAddedPosition;
@@ -51,7 +44,8 @@ public:
 };
 
 template <>
-inline void TestCollectorChannel<Object3D>::put(const ItemKey &key, const Object3D &item) {
+inline void TestCollectorChannel<Object3D>::put(const ItemKey &key,
+                                                const Object3D &item) {
     _lastAdded = key;
     _lastAddedPosition = item.getPosition();
     _lastAddedMatId = item.getMaterialID();
@@ -67,9 +61,10 @@ TEST_CASE("Collector", "[collector]") {
 
 TEST_CASE("CollectorContextWrap", "[collector]") {
     Collector collector;
-	auto &objChan = collector.addCustomChannel<Object3D, TestCollectorChannel<Object3D>>();
+    auto &objChan =
+        collector.addCustomChannel<Object3D, TestCollectorChannel<Object3D>>();
     CollectorContextWrap wcollector(collector);
-	auto &wobjChan = wcollector.getChannel<Object3D>();
+    auto &wobjChan = wcollector.getChannel<Object3D>();
 
     ChunkKey chunkKey("001122");
     ObjectKey objKey(2);
@@ -99,7 +94,8 @@ TEST_CASE("CollectorContextWrap", "[collector]") {
         obj.setPosition(position);
         wobjChan.put(ItemKeys::inObject(0), obj);
         CAPTURE(objChan._lastAddedPosition);
-        REQUIRE((offset + position - objChan._lastAddedPosition).norm() == Approx(0));
+        REQUIRE((offset + position - objChan._lastAddedPosition).norm() ==
+                Approx(0));
     }
 
     wcollector.setKeyOffset(1);

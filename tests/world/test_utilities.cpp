@@ -55,7 +55,8 @@ TEST_CASE("TileSystem", "[utilities]") {
     }
 
     SECTION("tile -> global") {
-        vec3d gc = ts.getGlobalCoordinates({{-3, 1, 0}, 2}, {0.0525, 0.0325, 0});
+        vec3d gc =
+            ts.getGlobalCoordinates({{-3, 1, 0}, 2}, {0.0525, 0.0325, 0});
         CHECK(gc.x == Approx(-1179));
         CHECK(gc.y == Approx(413));
         CHECK(gc.z == Approx(0));
@@ -66,8 +67,11 @@ TEST_CASE("Test StringOps.h", "[utilities]") {
 
     SECTION("split") {
         std::string fullstr("I,,am,splitted,by,comas,");
-        REQUIRE(split(fullstr, ',') == std::vector<std::string>{"I", "", "am", "splitted", "by", "comas", ""});
-        REQUIRE(split(fullstr, ',', true) == std::vector<std::string>{"I", "am", "splitted", "by", "comas"});
+        REQUIRE(split(fullstr, ',') ==
+                std::vector<std::string>{"I", "", "am", "splitted", "by",
+                                         "comas", ""});
+        REQUIRE(split(fullstr, ',', true) ==
+                std::vector<std::string>{"I", "am", "splitted", "by", "comas"});
         REQUIRE(split("a,,b", ',') == std::vector<std::string>{"a", "", "b"});
     }
 

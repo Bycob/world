@@ -6,18 +6,18 @@
 
 #include <worldcore.h>
 
-class PreviewPanel3D
-{
+class PreviewPanel3D {
 public:
-    PreviewPanel3D(QWidget * parent = Q_NULLPTR);
-    QWidget * getWidget() const;
+    PreviewPanel3D(QWidget *parent = Q_NULLPTR);
+    QWidget *getWidget() const;
 
 public slots:
 
-    void setScene(const world::Scene * scene);
+    void setScene(const world::Scene *scene);
+
 private:
-    QWidget * _widget = nullptr;
-    Qt3DCore::QEntity * _rootEntity = nullptr;
+    QWidget *_widget = nullptr;
+    Qt3DCore::QEntity *_rootEntity = nullptr;
 };
 
 #endif // PREVIEWPANEL3D_H

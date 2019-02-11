@@ -6,21 +6,22 @@
 
 class IniFile {
 public:
-    static IniFile read(const std::string & filename);
+    static IniFile read(const std::string &filename);
 
     IniFile();
-    IniFile(const std::string & content);
+    IniFile(const std::string &content);
 
-    bool hasKey(const std::string & key) const;
+    bool hasKey(const std::string &key) const;
     int getKeyCount() const;
-    std::string getValue(const std::string & key) const;
-    std::string getOrSetValue(const std::string & key, const std::string & defaultValue);
+    std::string getValue(const std::string &key) const;
+    std::string getOrSetValue(const std::string &key,
+                              const std::string &defaultValue);
 
 private:
     std::map<std::string, std::string> _values;
 
-    void parse(const std::string & content);
+    void parse(const std::string &content);
 };
 
 
-#endif //WORLD_INITFILE_H
+#endif // WORLD_INITFILE_H

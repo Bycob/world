@@ -8,17 +8,12 @@
 
 using namespace world;
 
-PanelWorldMap::PanelWorldMap(QWidget *parent) :
-    GeneratePanel(parent),
-    ui(new Ui::PanelWorldMap)
-{
+PanelWorldMap::PanelWorldMap(QWidget *parent)
+        : GeneratePanel(parent), ui(new Ui::PanelWorldMap) {
     ui->setupUi(this);
 }
 
-PanelWorldMap::~PanelWorldMap()
-{
-    delete ui;
-}
+PanelWorldMap::~PanelWorldMap() { delete ui; }
 
 void PanelWorldMap::generate() {
 
