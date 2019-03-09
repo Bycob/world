@@ -4,7 +4,7 @@
 #include <QMainWindow>
 #include <Qt3DCore/QEntity>
 
-#include <worldcore.h>
+#include <world/core.h>
 
 #include "generatepanel.h"
 #include "previewpanel3d.h"

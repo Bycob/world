@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <memory>
 
-#include <worldcore.h>
+#include <world/core.h>
 
 #include "resource.h"
 

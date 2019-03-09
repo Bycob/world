@@ -36,9 +36,9 @@ void PanelTerrain::generate() {
     double persistence = this->ui->persistence_field->value();
     bool texture = ui->textureCheckBox->isChecked();
 
-    PerlinTerrainGenerator generator(0, octaves, frequency, persistence);
+    PerlinTerrainGenerator generator(octaves, frequency, persistence);
     _generated = std::make_shared<Terrain>(size);
-    generator.process(*_generated);
+    generator.processTerrain(*_generated);
 
     if (texture) {
         /*emit imageChanged(QtWorld::getQImage(_texture));*/

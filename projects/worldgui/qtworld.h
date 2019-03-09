@@ -4,7 +4,7 @@
 #include <Qt3DCore/QEntity>
 #include <qimage.h>
 
-#include <worldcore.h>
+#include <world/core.h>
 
 class QtWorld {
 public:

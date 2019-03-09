@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <Qt3DCore/QEntity>
 
-#include <worldcore.h>
+#include <world/core.h>
 
 class PreviewPanel3D {
 public:

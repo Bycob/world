@@ -5,7 +5,7 @@
 
 #include <QObject>
 
-#include <worldcore.h>
+#include <world/core.h>
 
 class Resource {
 public:

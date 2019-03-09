@@ -1,8 +1,8 @@
 #include "panelworldmap.h"
 #include "ui_panelworldmap.h"
 
-#include <worldcore.h>
-#include <worldterrain.h>
+#include <world/core.h>
+#include <world/terrain.h>
 
 #include "qtworld.h"
 

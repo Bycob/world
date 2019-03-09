@@ -5,8 +5,8 @@
 
 #include <memory>
 
-#include <worldcore.h>
-#include <worldterrain.h>
+#include <world/core.h>
+#include <world/terrain.h>
 
 #include "generatepanel.h"
 
