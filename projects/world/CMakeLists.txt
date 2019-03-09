@@ -34,13 +34,13 @@ if(WIN32)
 		RUNTIME DESTINATION bin
 		ARCHIVE DESTINATION staticlib)
 	install(DIRECTORY .
-		DESTINATION include/world/${directory}/
+		DESTINATION include/world
 		FILES_MATCHING REGEX "\\.(h|inl)$"
 		PATTERN "*_p.h" EXCLUDE)
 else()
 	install(TARGETS world DESTINATION lib/world)
 	install(DIRECTORY .
-		DESTINATION include/world/world/${directory}/
+		DESTINATION include/world/world
 		FILES_MATCHING REGEX "\\.(h|inl)$"
 		PATTERN "*_p.h" EXCLUDE)
 endif()
