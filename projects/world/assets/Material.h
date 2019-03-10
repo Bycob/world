@@ -3,7 +3,6 @@
 #include "world/core/WorldConfig.h"
 
 #include <string>
-#include <armadillo/armadillo>
 
 #include "Color.h"
 

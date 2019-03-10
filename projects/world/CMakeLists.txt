@@ -28,19 +28,11 @@ target_link_libraries(world ${THIRD_PARTY_LIBRARIES})
 target_include_directories(world PUBLIC ${THIRD_PARTY_INCLUDES})
 
 # Install target
-if(WIN32)
-	install(TARGETS world
-		LIBRARY DESTINATION lib
-		RUNTIME DESTINATION bin
-		ARCHIVE DESTINATION staticlib)
-	install(DIRECTORY .
-		DESTINATION include/world
-		FILES_MATCHING REGEX "\\.(h|inl)$"
-		PATTERN "*_p.h" EXCLUDE)
-else()
-	install(TARGETS world DESTINATION lib/world)
-	install(DIRECTORY .
-		DESTINATION include/world/world
-		FILES_MATCHING REGEX "\\.(h|inl)$"
-		PATTERN "*_p.h" EXCLUDE)
-endif()
+install(TARGETS world
+	LIBRARY DESTINATION lib
+	RUNTIME DESTINATION bin
+	ARCHIVE DESTINATION staticlib)
+install(DIRECTORY .
+	DESTINATION include/world
+	FILES_MATCHING REGEX "\\.(h|inl)$"
+	PATTERN "*_p.h" EXCLUDE)
