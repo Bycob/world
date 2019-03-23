@@ -13,8 +13,8 @@ TreeSkelettonGenerator::TreeSkelettonGenerator()
           _rootWeight(TreeParamsd::constant(2)),
 
           _phi(TreeParamsd::PhiOffset(TreeParamsd::constant(M_PI / 6.0))),
-          _size(TreeParamsd::SizeFactor(TreeParamsd::constant(3.0 / 5.0))),
           _theta(TreeParamsd::UniformTheta(TreeParamsd::constant(0))),
+          _size(TreeParamsd::SizeFactor(TreeParamsd::constant(3.0 / 5.0))),
 
           _weight(TreeParamsd::DefaultWeight()),
           _count(TreeParamsi::WeightThreshold(0.02, TreeParamsi::constant(4))) {

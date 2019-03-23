@@ -3,8 +3,8 @@
 
 #include <memory>
 
-#include <worldcore.h>
-#include <worldtree.h>
+#include <world/core.h>
+#include <world/tree.h>
 
 using namespace world;
 

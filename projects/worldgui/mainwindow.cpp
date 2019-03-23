@@ -14,32 +14,32 @@
 #include "panelterrain.h"
 #include "panelworldmap.h"
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
-{
+MainWindow::MainWindow(QWidget *parent)
+        : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
     swapGeneratePanel(new PanelWorldMap());
     ui->_3DTab->layout()->replaceWidget(ui->_3DPanel, _3DPanel.getWidget());
 
-    QObject::connect(ui->terrainButton, SIGNAL(clicked(bool)), this, SLOT(changeGeneratePanel()));
-    QObject::connect(ui->mapButton, SIGNAL(clicked(bool)), this, SLOT(changeGeneratePanel()));
+    QObject::connect(ui->terrainButton, SIGNAL(clicked(bool)), this,
+                     SLOT(changeGeneratePanel()));
+    QObject::connect(ui->mapButton, SIGNAL(clicked(bool)), this,
+                     SLOT(changeGeneratePanel()));
     // Géneration d'objets
-    QObject::connect(ui->generateButton, SIGNAL(clicked(bool)), this, SLOT(generate()));
+    QObject::connect(ui->generateButton, SIGNAL(clicked(bool)), this,
+                     SLOT(generate()));
 }
 
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow() {
     delete generatePanel;
     delete ui;
 }
 
-void MainWindow::setScene(const world::Scene *objects)
-{
+void MainWindow::setScene(const world::Scene *objects) {
     _3DPanel.setScene(objects);
 }
 
-void MainWindow::setImage(const QImage *image) { // TODO check s'il y a pas memory leak sur cette QImage
+void MainWindow::setImage(const QImage *image) { // TODO check s'il y a pas
+                                                 // memory leak sur cette QImage
     if (this->ui->imagePanel->scene() == nullptr) {
         this->ui->imagePanel->setScene(new QGraphicsScene(this));
     }
@@ -50,38 +50,31 @@ void MainWindow::setImage(const QImage *image) { // TODO check s'il y a pas memo
     scene->setSceneRect(image->rect());
 }
 
-void MainWindow::generate()
-{
-    generatePanel->generate();
-}
+void MainWindow::generate() { generatePanel->generate(); }
 
-void MainWindow::changeGeneratePanel()
-{
+void MainWindow::changeGeneratePanel() {
     auto sender = QObject::sender();
 
     if (sender == this->ui->terrainButton) {
         swapGeneratePanel(new PanelTerrain());
-    }
-    else if (sender == this->ui->mapButton) {
+    } else if (sender == this->ui->mapButton) {
         swapGeneratePanel(new PanelWorldMap());
     }
 }
 
-void MainWindow::swapGeneratePanel(GeneratePanel *newPanel)
-{
+void MainWindow::swapGeneratePanel(GeneratePanel *newPanel) {
     // Remplacement
     if (generatePanel != nullptr) {
         if (newPanel != nullptr) {
             ui->generateTab->layout()->replaceWidget(generatePanel, newPanel);
-        }
-        else {
-            ui->generateTab->layout()->replaceWidget(generatePanel, ui->generatePanel);
+        } else {
+            ui->generateTab->layout()->replaceWidget(generatePanel,
+                                                     ui->generatePanel);
         }
 
         generatePanel->disconnect();
         delete generatePanel;
-    }
-    else if (newPanel != nullptr) {
+    } else if (newPanel != nullptr) {
         ui->generateTab->layout()->replaceWidget(ui->generatePanel, newPanel);
     }
 
@@ -90,8 +83,10 @@ void MainWindow::swapGeneratePanel(GeneratePanel *newPanel)
     if (newPanel != nullptr) {
         // Connexion signal / slot
         // Changement d'objets 3D
-        QObject::connect(newPanel, SIGNAL(meshesChanged(const world::Scene*)), this, SLOT(setScene(const world::Scene*)));
+        QObject::connect(newPanel, SIGNAL(meshesChanged(const world::Scene *)),
+                         this, SLOT(setScene(const world::Scene *)));
         // Changement d'image
-        QObject::connect(newPanel, SIGNAL(imageChanged(const QImage*)), this, SLOT(setImage(const QImage*)));
+        QObject::connect(newPanel, SIGNAL(imageChanged(const QImage *)), this,
+                         SLOT(setImage(const QImage *)));
     }
 }

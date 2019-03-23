@@ -14,14 +14,10 @@ using namespace video;
 
 using namespace world;
 
-TerrainManager::TerrainManager(Application & application, IrrlichtDevice *device)
-        : RenderingModule(application, device) {
+TerrainManager::TerrainManager(Application &application, IrrlichtDevice *device)
+        : RenderingModule(application, device) {}
 
-}
-
-TerrainManager::~TerrainManager() {
-    clearAllNodes();
-}
+TerrainManager::~TerrainManager() { clearAllNodes(); }
 
 void TerrainManager::initialize(Collector &collector) {
     clearAllNodes();
@@ -34,7 +30,7 @@ void TerrainManager::update(Collector &collector) {
     /*/ Test
     PerlinTerrainGenerator generator(0, 5, 1, 0.4);
     std::unique_ptr<Terrain> terrain(generator.generate());
-	addNode({ *terrain, 0, 0 }, ground);
+        addNode({ *terrain, 0, 0 }, ground);
     //*/
     /*std::map<TerrainKey, bool> toKeep;
 
@@ -62,45 +58,47 @@ void TerrainManager::update(Collector &collector) {
             ++iter;
         }
     }
-	*/
+        */
     _driver->removeAllHardwareBuffers();
 }
 
 void TerrainManager::clearAllNodes() {
-    for (auto & pair : _terrainNodes) {
+    for (auto &pair : _terrainNodes) {
         pair.second->remove();
     }
 
     _terrainNodes.clear();
 }
 
-ITerrainSceneNode* TerrainManager::createNode(const Terrain &terrain) {
+ITerrainSceneNode *TerrainManager::createNode(const Terrain &terrain) {
 
-	// Données concernant la position et les dimensions du terrain
-	int terrainRes = (terrain.getResolution() - 1);
-	vec3d offset = terrain.getBoundingBox().getLowerBound();
-	vec3d size = terrain.getBoundingBox().getUpperBound() - offset;
+    // Données concernant la position et les dimensions du terrain
+    int terrainRes = (terrain.getResolution() - 1);
+    vec3d offset = terrain.getBoundingBox().getLowerBound();
+    vec3d size = terrain.getBoundingBox().getUpperBound() - offset;
     size = size / terrainRes;
 
-	// Construction du noeud irrlicht
-    HeightMapInputStream input(terrain, 0, (float) (terrainRes * size.z / size.x));
+    // Construction du noeud irrlicht
+    HeightMapInputStream input(terrain, 0,
+                               (float)(terrainRes * size.z / size.x));
     int dataSize = input.remaining();
-    char* data = new char[dataSize];
+    char *data = new char[dataSize];
     input.read(data, dataSize);
 
-    IReadFile * memoryFile = _fileSystem->createMemoryReadFile((void*)data, dataSize, "", false);
+    IReadFile *memoryFile =
+        _fileSystem->createMemoryReadFile((void *)data, dataSize, "", false);
 
-    ITerrainSceneNode * result =
-            _sceneManager->addTerrainSceneNode(nullptr, nullptr, -1,
-                                               vector3df((float) offset.x, (float) offset.z, (float) offset.y),
-                                               vector3df(0.0f, 0.0f, 0.0f),
-                                               vector3df((float) size.x, (float) size.x, (float) size.x),
-                                               SColor(255, 255, 255, 255),
-                                               2, ETPS_17, 4, true);
-    result->loadHeightMapRAW(memoryFile, 32, true, true, 0, SColor(255,255,255,255), 4);
+    ITerrainSceneNode *result = _sceneManager->addTerrainSceneNode(
+        nullptr, nullptr, -1,
+        vector3df((float)offset.x, (float)offset.z, (float)offset.y),
+        vector3df(0.0f, 0.0f, 0.0f),
+        vector3df((float)size.x, (float)size.x, (float)size.x),
+        SColor(255, 255, 255, 255), 2, ETPS_17, 4, true);
+    result->loadHeightMapRAW(memoryFile, 32, true, true, 0,
+                             SColor(255, 255, 255, 255), 4);
 
-	memoryFile->drop();
-	delete[] data;
+    memoryFile->drop();
+    delete[] data;
 
     // Paramètres d'affichage
     result->setMaterialFlag(video::EMF_LIGHTING, true);
@@ -111,12 +109,12 @@ ITerrainSceneNode* TerrainManager::createNode(const Terrain &terrain) {
     material.BackfaceCulling = false;
     material.ColorMaterial = ECM_NONE;
 
-	// Couleurs du terrain
+    // Couleurs du terrain
     material.AmbientColor.set(255, 0, 0, 0);
     material.SpecularColor.set(255, 255, 255, 255);
 
-    irr::u32 lin_ts = (irr::u32)(log(size.x / 250) / log(2) * 50);
-    //material.DiffuseColor.set(255, 255 - lin_ts, 178, lin_ts);
+    // irr::u32 lin_ts = (irr::u32)(log(size.x / 250) / log(2) * 50);
+    // material.DiffuseColor.set(255, 255 - lin_ts, 178, lin_ts);
     material.DiffuseColor.set(255, 200, 178, 126);
 
     /*/ Collision pour la camera
@@ -125,14 +123,15 @@ ITerrainSceneNode* TerrainManager::createNode(const Terrain &terrain) {
     result->setTriangleSelector(selector);
 
     // create collision response animator and attach it to the camera
-    scene::ISceneNodeAnimatorCollisionResponse* anim = _sceneManager->createCollisionResponseAnimator(
-            selector, _sceneManager->getActiveCamera(), core::vector3df(1,2,1),
+    scene::ISceneNodeAnimatorCollisionResponse* anim =
+    _sceneManager->createCollisionResponseAnimator( selector,
+    _sceneManager->getActiveCamera(), core::vector3df(1,2,1),
             core::vector3df(0,-0,0),
             core::vector3df(0,0.5,0));
     selector->drop();
     _sceneManager->getActiveCamera()->addAnimator(anim);
     anim->drop();
-	//*/
+        //*/
 
-	return result;
+    return result;
 }

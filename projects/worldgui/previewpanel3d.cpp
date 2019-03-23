@@ -13,9 +13,8 @@
 
 using namespace world;
 
-PreviewPanel3D::PreviewPanel3D(QWidget * parent) :
-    _rootEntity(new Qt3DCore::QEntity())
-{
+PreviewPanel3D::PreviewPanel3D(QWidget *parent)
+        : _rootEntity(new Qt3DCore::QEntity()) {
 
     Qt3DExtras::Qt3DWindow *window = new Qt3DExtras::Qt3DWindow();
     _widget = QWidget::createWindowContainer(window, parent);
@@ -27,26 +26,30 @@ PreviewPanel3D::PreviewPanel3D(QWidget * parent) :
     QSize windowSize = window->size();
     Qt3DRender::QCamera *camera = window->camera();
 
-    camera->lens()->setPerspectiveProjection(70, (float) windowSize.width() / (float) windowSize.height(), 0.1, 100);
+    camera->lens()->setPerspectiveProjection(
+        70, (float)windowSize.width() / (float)windowSize.height(), 0.1, 100);
     camera->setPosition(QVector3D(5, 5, 5));
     camera->setViewCenter(QVector3D(0, 0, 0));
     camera->setUpVector(QVector3D(0, 0, 1));
 
-    Qt3DExtras::QOrbitCameraController *controller = new Qt3DExtras::QOrbitCameraController(_rootEntity);
+    Qt3DExtras::QOrbitCameraController *controller =
+        new Qt3DExtras::QOrbitCameraController(_rootEntity);
     controller->setCamera(camera);
 
     // Lumière...
 }
 
-void PreviewPanel3D::setScene(const world::Scene * objects) {
-    for (Qt3DCore::QNode * child : _rootEntity->childNodes()) {
-        //child->deleteLater();
+void PreviewPanel3D::setScene(const world::Scene *objects) {
+    for (Qt3DCore::QNode *child : _rootEntity->childNodes()) {
+        // child->deleteLater();
     }
 
     for (auto object : objects->getObjects()) {
         Qt3DRender::QMesh *qmesh = new Qt3DRender::QMesh(_rootEntity);
-        qmesh->setSource(QUrl::fromLocalFile(QStringLiteral("d:/Utilisateurs/Louis/Documents/Louis JEAN/programmation/Python/world/build/build_worldgui/mesh.obj")));
-        //std::cout << qmesh->geometry()->attributes().size();
+        qmesh->setSource(QUrl::fromLocalFile(QStringLiteral(
+            "d:/Utilisateurs/Louis/Documents/Louis "
+            "JEAN/programmation/Python/world/build/build_worldgui/mesh.obj")));
+        // std::cout << qmesh->geometry()->attributes().size();
 
         Qt3DExtras::QPhongMaterial *material = new Qt3DExtras::QPhongMaterial();
         material->setDiffuse(QColor(QRgb(0xff0000)));
@@ -67,6 +70,4 @@ void PreviewPanel3D::setScene(const world::Scene * objects) {
     }
 }
 
-QWidget * PreviewPanel3D::getWidget() const {
-    return _widget;
-}
+QWidget *PreviewPanel3D::getWidget() const { return _widget; }

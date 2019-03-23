@@ -19,33 +19,34 @@ class Application {
 public:
     Application();
 
-    void run(int argc, char** argv);
+    void run(int argc, char **argv);
     void requestStop();
 
-	void setUserPosition(world::vec3d pos);
-	world::vec3d getUserPosition() const;
+    void setUserPosition(world::vec3d pos);
+    world::vec3d getUserPosition() const;
 
-	void refill(std::unique_ptr<world::Collector> && toRefill);
-	std::unique_ptr<world::Collector> popFull();
+    void refill(std::unique_ptr<world::Collector> &&toRefill);
+    std::unique_ptr<world::Collector> popFull();
+
 private:
     std::atomic_bool _running;
-	mutable std::mutex _paramLock;
+    mutable std::mutex _paramLock;
 
-	std::unique_ptr<world::FlatWorld> _world;
-	std::unique_ptr<world::FirstPersonExplorer> _explorer;
+    std::unique_ptr<world::FlatWorld> _world;
+    std::unique_ptr<world::FirstPersonExplorer> _explorer;
 
-	std::list<std::unique_ptr<world::Collector>> _emptyCollectors;
-	std::list<std::unique_ptr<world::Collector>> _fullCollectors;
+    std::list<std::unique_ptr<world::Collector>> _emptyCollectors;
+    std::list<std::unique_ptr<world::Collector>> _fullCollectors;
 
-	world::vec3d _newUpdatePos;
-	world::vec3d _lastUpdatePos;
+    world::vec3d _newUpdatePos;
+    world::vec3d _lastUpdatePos;
 
     std::unique_ptr<MainView> _mainView;
 
-	bool _dbgOn = true;
+    bool _dbgOn = true;
 
-    void loadWorld(int argc, char** argv);
+    void loadWorld(int argc, char **argv);
 };
 
 
-#endif //WORLD_APPLICATION_H
+#endif // WORLD_APPLICATION_H

@@ -96,7 +96,7 @@ struct WORLDAPI_EXPORT ItemKeys {
 inline ItemKey key(const std::string &str) {
     try {
         return ItemKeys::fromString(str);
-    } catch (std::invalid_argument &e) {
+    } catch (std::invalid_argument &) {
         return ItemKeys::defaultKey();
     }
 }

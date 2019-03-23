@@ -4,22 +4,21 @@
 #include <QWidget>
 #include <memory>
 
-#include <worldcore.h>
+#include <world/core.h>
 
 #include "resource.h"
 
-class GeneratePanel : public QWidget
-{
+class GeneratePanel : public QWidget {
     Q_OBJECT
 public:
     explicit GeneratePanel(QWidget *parent = 0);
 
-    virtual const world::Scene * getMeshes();
+    virtual const world::Scene *getMeshes();
 
     virtual std::vector<std::unique_ptr<Resource>> getResources();
 signals:
-    void meshesChanged(const world::Scene * objects);
-    void imageChanged(const QImage * image);
+    void meshesChanged(const world::Scene *objects);
+    void imageChanged(const QImage *image);
 
 public slots:
     virtual void generate() = 0;

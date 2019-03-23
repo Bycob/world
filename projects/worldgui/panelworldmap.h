@@ -9,8 +9,7 @@ namespace Ui {
 class PanelWorldMap;
 }
 
-class PanelWorldMap : public GeneratePanel
-{
+class PanelWorldMap : public GeneratePanel {
     Q_OBJECT
 
 public:
@@ -19,6 +18,7 @@ public:
 
 public slots:
     void generate() override;
+
 private:
     Ui::PanelWorldMap *ui;
 };

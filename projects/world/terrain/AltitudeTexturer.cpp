@@ -3,8 +3,8 @@
 namespace world {
 
 AltitudeTexturer::AltitudeTexturer(int pixelPerVertex)
-        : _pixelPerVertex(pixelPerVertex), _colorMap({513, 65}),
-          _rng(time(NULL)) {}
+        : _pixelPerVertex(pixelPerVertex), _rng(static_cast<u32>(time(NULL))),
+          _colorMap({513, 65}) {}
 
 ColorMap &AltitudeTexturer::getColorMap() { return _colorMap; }
 

@@ -11,7 +11,7 @@ public:
     template <typename... Args>
     ChunkEntry(const ChunkKey &parent, const LODGridCoordinates &coords,
                Args... args)
-            : _parentID(parent), _coords(coords), _chunk(args...) {}
+            : _coords(coords), _chunk(args...), _parentID(parent) {}
 
     LODGridCoordinates _coords;
     Chunk _chunk;
@@ -136,9 +136,9 @@ std::vector<WorldZone> LODGridChunkSystem::getChildrenZones(
 
         // Actuellement, a chaque fois qu'on monte d'un lod, on divise la taille
         // du chunk par 2
-        for (int x = 0; x < _factor; x++) {
-            for (int y = 0; y < _factor; y++) {
-                for (int z = 0; z < _factor; z++) {
+        for (u32 x = 0; x < _factor; x++) {
+            for (u32 y = 0; y < _factor; y++) {
+                for (u32 z = 0; z < _factor; z++) {
                     LODGridCoordinates ncoords(x, y, z, lod);
                     auto id = getChunkKey(key, ncoords);
                     vector.emplace_back(getZone(id));

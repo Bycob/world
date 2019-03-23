@@ -8,7 +8,7 @@ void MeshOps::recalculateNormals(Mesh &mesh) {
     std::vector<vec3d> normalSum(mesh.getVerticesCount(), vec3d());
     std::vector<int> normalCount(mesh.getVerticesCount(), 0);
 
-    for (int i = 0; i < mesh.getFaceCount(); i++) {
+    for (u32 i = 0; i < mesh.getFaceCount(); i++) {
         const Face &face = mesh.getFace(i);
         const int count = face.vertexCount();
 
@@ -35,7 +35,7 @@ void MeshOps::recalculateNormals(Mesh &mesh) {
     }
 
     // On set les normales
-    for (int i = 0; i < normalSum.size(); i++) {
+    for (u32 i = 0; i < normalSum.size(); i++) {
         int count = normalCount.at(i);
         vec3d normal;
 

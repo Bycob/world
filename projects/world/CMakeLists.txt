@@ -26,3 +26,13 @@ endif()
 # Register target
 target_link_libraries(world ${THIRD_PARTY_LIBRARIES})
 target_include_directories(world PUBLIC ${THIRD_PARTY_INCLUDES})
+
+# Install target
+install(TARGETS world
+	LIBRARY DESTINATION lib
+	RUNTIME DESTINATION bin
+	ARCHIVE DESTINATION staticlib)
+install(DIRECTORY .
+	DESTINATION include/world
+	FILES_MATCHING REGEX "\\.(h|inl)$"
+	PATTERN "*_p.h" EXCLUDE)

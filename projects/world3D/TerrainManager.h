@@ -15,17 +15,18 @@
 
 class TerrainManager : public RenderingModule {
 public:
-    TerrainManager(Application & app, irr::IrrlichtDevice * device);
-	virtual ~TerrainManager();
+    TerrainManager(Application &app, irr::IrrlichtDevice *device);
+    virtual ~TerrainManager();
 
     void initialize(world::Collector &collector) override;
-	void update(world::Collector &collector) override;
-private:
-	std::map<world::ItemKey, irr::scene::ITerrainSceneNode*> _terrainNodes;
+    void update(world::Collector &collector) override;
 
-	void clearAllNodes();
-    irr::scene::ITerrainSceneNode* createNode(const world::Terrain& terrain);
+private:
+    std::map<world::ItemKey, irr::scene::ITerrainSceneNode *> _terrainNodes;
+
+    void clearAllNodes();
+    irr::scene::ITerrainSceneNode *createNode(const world::Terrain &terrain);
 };
 
 
-#endif //WORLD_TERRAINSCENENODE_H
+#endif // WORLD_TERRAINSCENENODE_H

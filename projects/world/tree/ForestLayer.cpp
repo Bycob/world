@@ -4,7 +4,7 @@
 
 namespace world {
 
-ForestLayer::ForestLayer() : _rng(static_cast<u64>(time(NULL))) {}
+ForestLayer::ForestLayer() : _rng(static_cast<u32>(time(NULL))) {}
 
 void ForestLayer::decorate(FlatWorld &world, const WorldZone &zone) {
     // Check resolution
@@ -40,7 +40,7 @@ void ForestLayer::decorate(FlatWorld &world, const WorldZone &zone) {
     std::uniform_real_distribution<double> xdistrib(0, zoneSize.x);
     std::uniform_real_distribution<double> ydistrib(0, zoneSize.y);
 
-    for (int i = 0; i < maxTreeCount; ++i) {
+    for (u32 i = 0; i < maxTreeCount; ++i) {
         randomPoints.emplace_back(xdistrib(_rng), ydistrib(_rng));
     }
 

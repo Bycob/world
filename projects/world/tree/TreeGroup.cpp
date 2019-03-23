@@ -77,7 +77,7 @@ void TreeGroup::collect(ICollector &collector,
         break;
     }
     case 2: // Tree by tree
-        for (int i = 0; i < _treesPositions.size(); ++i) {
+        for (u32 i = 0; i < _treesPositions.size(); ++i) {
             if (_internal->_trees.size() <= i) {
                 allocateTree(_treesPositions[i]);
             }
@@ -119,8 +119,8 @@ void TreeGroup::regenerateGroup() {
         // TODO utiliser l'algorithme "QuickHull" pour générer des enveloppes
         // convexes
         vec3d leavesCenter = trunkTop;
-        float radius[] = {0.8, 1.5, 1.2, 0.4};
-        float height[] = {-0.35, -0.05, 0.5, 0.9};
+        float radius[] = {0.8f, 1.5f, 1.2f, 0.4f};
+        float height[] = {-0.35f, -0.05f, 0.5f, 0.9f};
         startIndex = _leavesMesh.getVerticesCount();
 
         const int ringCount = 4;

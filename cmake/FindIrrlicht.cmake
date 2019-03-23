@@ -7,6 +7,7 @@
 #  IRRLICHT_DEFINITIONS - Compiler switches required for using Irrlicht
 #
 #  Copyright (c) 2006 Andreas Schneider <mail@cynapses.org>
+#  Modified by Louis Jean for the World library
 #
 #  Redistribution and use is allowed according to the terms of the New
 #  BSD license.

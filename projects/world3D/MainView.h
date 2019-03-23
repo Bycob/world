@@ -20,7 +20,7 @@ class RenderingModule;
 
 class MainView : public irr::IEventReceiver {
 public:
-    MainView(Application & app);
+    MainView(Application &app);
     ~MainView();
 
     void show();
@@ -28,36 +28,37 @@ public:
     bool running();
     void waitClose();
 
-	void resetScene();
-	void onWorldChange();
+    void resetScene();
+    void onWorldChange();
 
-	bool OnEvent(const irr::SEvent& event) override;
+    bool OnEvent(const irr::SEvent &event) override;
+
 private:
-    Application & _app;
+    Application &_app;
 
     std::atomic_bool _running;
     std::unique_ptr<std::thread> _graphicThread;
 
-    irr::video::IVideoDriver *_driver ;
-    irr::IrrlichtDevice *_device ;
-    irr::scene::ISceneManager *_scenemanager ;
+    irr::video::IVideoDriver *_driver;
+    irr::IrrlichtDevice *_device;
+    irr::scene::ISceneManager *_scenemanager;
 
     std::atomic_bool _resetScene;
-	std::atomic_bool _worldChanged;
+    std::atomic_bool _worldChanged;
 
-	// Irrlicht nodes
+    // Irrlicht nodes
     irr::scene::ICameraSceneNode *_camera;
-	DebugScreenNode * _debug;
+    DebugScreenNode *_debug;
 
-	std::vector<std::unique_ptr<RenderingModule>> _modules;
+    std::vector<std::unique_ptr<RenderingModule>> _modules;
 
-	bool _fpsModeActive = true;
-	bool _cameraFast = true;
+    bool _fpsModeActive = true;
+    bool _cameraFast = true;
 
     void runInternal();
-	void recreateModules();
+    void recreateModules();
     void updateScene();
 };
 
 
-#endif //WORLD_MAINVIEW_H
+#endif // WORLD_MAINVIEW_H

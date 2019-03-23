@@ -44,7 +44,7 @@ void ObjLoader::read(Scene &scene, const std::string &filename) const {
         std::vector<float> &positions = shape.mesh.positions;
         assert(positions.size() % 3 == 0);
 
-        for (int i = 0; i < positions.size() / 3; i++) {
+        for (u32 i = 0; i < positions.size() / 3; i++) {
             Vertex vert;
             vert.setPosition(positions.at(i * 3), positions.at(i * 3 + 1),
                              positions.at(i * 3 + 2));
@@ -55,7 +55,7 @@ void ObjLoader::read(Scene &scene, const std::string &filename) const {
         std::vector<float> &normals = shape.mesh.normals;
         assert(normals.size() % 3 == 0);
 
-        for (int i = 0; i < normals.size() / 3; i++) {
+        for (u32 i = 0; i < normals.size() / 3; i++) {
             mesh.getVertex(i).setNormal(normals.at(i * 3),
                                         normals.at(i * 3 + 1),
                                         normals.at(i * 3 + 2));
@@ -65,7 +65,7 @@ void ObjLoader::read(Scene &scene, const std::string &filename) const {
         std::vector<float> &textures = shape.mesh.texcoords;
         assert(textures.size() % 2 == 0);
 
-        for (int i = 0; i < textures.size() / 2; i++) {
+        for (u32 i = 0; i < textures.size() / 2; i++) {
             mesh.getVertex(i).setTexture(textures.at(i * 2),
                                          textures.at(i * 2 + 1));
         }

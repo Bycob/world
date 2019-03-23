@@ -49,8 +49,10 @@ TEST_CASE("LODGridChunkSystem", "[chunksystem]") {
     auto zone = chunkSystem.getZone(vec3d{-2500, -2500, -2500});
 
     SECTION("Test level 0 zone info") {
-        REQUIRE(zone.getInfo().getDimensions().length({1000, 1000, 1000}) < 0.001);
-        REQUIRE(zone.getInfo().getParentOffset().length({-3000, -3000, -3000}) < 0.001);
+        REQUIRE(zone.getInfo().getDimensions().length({1000, 1000, 1000}) <
+                0.001);
+        REQUIRE(zone.getInfo().getParentOffset().length({-3000, -3000, -3000}) <
+                0.001);
         REQUIRE(zone.getInfo().getMinResolution() == 0);
     }
 
@@ -58,10 +60,13 @@ TEST_CASE("LODGridChunkSystem", "[chunksystem]") {
 
     SECTION("Test level 1 zone info") {
         CAPTURE(childZone.getInfo().getDimensions());
-        REQUIRE(childZone.getInfo().getDimensions().length({250, 250, 250}) < 0.001);
-        REQUIRE(childZone.getInfo().getParentOffset().length({0, 0, 0}) < 0.001);
+        REQUIRE(childZone.getInfo().getDimensions().length({250, 250, 250}) <
+                0.001);
+        REQUIRE(childZone.getInfo().getParentOffset().length({0, 0, 0}) <
+                0.001);
         REQUIRE(childZone.getInfo().getParent());
         CAPTURE(childZone.getInfo().getAbsoluteOffset());
-        REQUIRE(childZone.getInfo().getAbsoluteOffset().length({-3000, -3000, -3000}) < 0.001);
+        REQUIRE(childZone.getInfo().getAbsoluteOffset().length(
+                    {-3000, -3000, -3000}) < 0.001);
     }
 }

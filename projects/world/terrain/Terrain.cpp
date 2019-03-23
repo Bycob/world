@@ -15,15 +15,15 @@ using namespace arma;
 namespace world {
 
 Terrain::Terrain(int size)
-        : _array(size, size), _texture(1, 1, ImageType::RGB),
-          _bbox({-0.5, -0.5, -0.0}, {0.5, 0.5, 0.4}) {
+        : _bbox({-0.5, -0.5, -0.0}, {0.5, 0.5, 0.4}), _array(size, size),
+          _texture(1, 1, ImageType::RGB) {
 
     _texture.rgb(0, 0).set(255, 255, 255);
 }
 
 Terrain::Terrain(const Mat<double> &data)
-        : _array(data), _texture(1, 1, ImageType::RGB),
-          _bbox({-0.5, -0.5, -0.0}, {0.5, 0.5, 0.4}) {
+        : _bbox({-0.5, -0.5, -0.0}, {0.5, 0.5, 0.4}), _array(data),
+          _texture(1, 1, ImageType::RGB) {
 
     if (data.n_rows != data.n_cols) {
         throw std::runtime_error("Terrain must be squared !");
@@ -32,19 +32,19 @@ Terrain::Terrain(const Mat<double> &data)
 }
 
 Terrain::Terrain(const Terrain &terrain)
-        : _array(terrain._array), _bbox(terrain._bbox),
+        : _bbox(terrain._bbox), _array(terrain._array),
           _texture(terrain._texture) {}
 
 Terrain::Terrain(Terrain &&terrain)
-        : _array(std::move(terrain._array)),
-          _texture(std::move(terrain._texture)), _bbox(terrain._bbox) {}
+        : _bbox(terrain._bbox), _array(std::move(terrain._array)),
+          _texture(std::move(terrain._texture)) {}
 
 Terrain::~Terrain() = default;
 
 Terrain &Terrain::operator=(const Terrain &terrain) {
+    _bbox = terrain._bbox;
     _array = terrain._array;
     _texture = terrain._texture;
-    _bbox = terrain._bbox;
     return *this;
 }
 
