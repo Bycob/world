@@ -32,13 +32,21 @@ void ProxyGround::collect(ICollector &collector,
     // Create pipeline for vulkan processing
     auto &vkctx = Vulkan::context().internal();
 
-    DescriptorSetLayoutVk layout1;
-    layout1.addBinding(DescriptorType::UNIFORM_BUFFER, 0);
-    layout1.addBinding(DescriptorType::UNIFORM_BUFFER, 1);
-    layout1.addBinding(DescriptorType::STORAGE_BUFFER, 2);
-    layout1.addBinding(DescriptorType::STORAGE_BUFFER, 3);
+    DescriptorSetLayoutVk layoutPerlin;
+    layoutPerlin.addBinding(DescriptorType::UNIFORM_BUFFER, 0);
+    layoutPerlin.addBinding(DescriptorType::UNIFORM_BUFFER, 1);
+    layoutPerlin.addBinding(DescriptorType::STORAGE_BUFFER, 2);
+    layoutPerlin.addBinding(DescriptorType::STORAGE_BUFFER, 3);
 
-    ComputePipeline pipeline1(layout1, "noise-perlin");
+    ComputePipeline pipelinePerlin(layoutPerlin, "noise-perlin");
+
+    DescriptorSetLayoutVk layoutUpscale;
+    layoutUpscale.addBinding(DescriptorType::UNIFORM_BUFFER, 0);
+    layoutUpscale.addBinding(DescriptorType::UNIFORM_BUFFER, 1);
+    layoutUpscale.addBinding(DescriptorType::STORAGE_BUFFER, 2);
+    layoutUpscale.addBinding(DescriptorType::STORAGE_BUFFER, 3);
+
+    ComputePipeline pipelineUpscale(layoutUpscale, "upscale");
 
     const u32 workgroupSize = 32;
 
@@ -62,7 +70,7 @@ void ProxyGround::collect(ICollector &collector,
     std::set<TileCoordinates> toAdd;
     // ...
 
-    // Perlin parameters (TEMP)
+    // Perlin generation (TEMP)
     Perlin perlin;
     std::vector<u32> hash;
 
@@ -81,8 +89,8 @@ void ProxyGround::collect(ICollector &collector,
     s_outputData.depth = 1;
 
     struct {
-        u32 octaves = 12;
-        u32 octaveRef = 2;
+        u32 octaves = 9;
+        u32 octaveRef = 0;
         s32 offsetX = 0;
         s32 offsetY = 0;
         s32 offsetZ = 0;
@@ -94,17 +102,36 @@ void ProxyGround::collect(ICollector &collector,
     VkSubBuffer outputDataBuf =
         vkctx.allocate(sizeof(s_outputData), DescriptorType::UNIFORM_BUFFER,
                        MemoryType::CPU_WRITES);
+
+    VkSubBuffer perlinDataBuf =
+        vkctx.allocate(sizeof(s_perlinData), DescriptorType::UNIFORM_BUFFER,
+                       MemoryType::CPU_WRITES);
+
     VkSubBuffer hashBuf =
         vkctx.allocate(hash.size() * sizeof(u32),
                        DescriptorType::STORAGE_BUFFER, MemoryType::CPU_WRITES);
 
+    VkSubBuffer perlinBuf = vkctx.allocate(
+        bufferSize, DescriptorType::STORAGE_BUFFER, MemoryType::GPU_ONLY);
+
     outputDataBuf.setData(&s_outputData);
+    perlinDataBuf.setData(&s_perlinData);
     hashBuf.setData(&hash[0]);
 
-    // create the global buffer before profiler start recording,
-    // so that the allocation time is not taken into account
-    VkSubBuffer dummy = vkctx.allocate(1, DescriptorType::STORAGE_BUFFER,
-                                       MemoryType::CPU_READS);
+    DescriptorSetVk dsetPerlin(layoutPerlin);
+    dsetPerlin.addDescriptor(0, DescriptorType::UNIFORM_BUFFER, outputDataBuf);
+    dsetPerlin.addDescriptor(1, DescriptorType::UNIFORM_BUFFER, perlinDataBuf);
+    dsetPerlin.addDescriptor(2, DescriptorType::STORAGE_BUFFER, hashBuf);
+    dsetPerlin.addDescriptor(3, DescriptorType::STORAGE_BUFFER, perlinBuf);
+
+    VkWorker worker;
+    worker.bindCommand(pipelinePerlin, dsetPerlin);
+    worker.dispatchCommand(bufferWidth / workgroupSize,
+                           bufferHeight / workgroupSize, 1);
+    worker.endCommandRecording();
+
+    worker.run();
+    worker.waitForCompletion();
 
     Profiler profiler;
     profiler.endStartSection("setup");
@@ -112,29 +139,56 @@ void ProxyGround::collect(ICollector &collector,
     for (const TileCoordinates &tc : coords) {
         auto &tileData = getData(tc);
 
+        struct {
+            u32 srcWidth;
+            u32 srcHeight;
+            u32 srcDepth = 1;
+            u32 padding0;
+
+            u32 offsetX;
+            u32 offsetY;
+            u32 offsetZ = 0;
+            u32 padding1;
+
+            u32 sizeX;
+            u32 sizeY;
+            u32 sizeZ = 0;
+        } s_upscaleData;
+
+        // vec3d bboxDims = bbox.getDimensions();
+        // TODO find this variables with a good method
+        vec2i tileCount(13, 13);
+        vec2i tileOrigin(-6, -6);
+        vec2i tileSize(bufferWidth / tileCount.x, bufferHeight / tileCount.y);
+
+        s_upscaleData.srcWidth = bufferWidth;
+        s_upscaleData.srcHeight = bufferHeight;
+        s_upscaleData.offsetX = (tc._pos.x - tileOrigin.x) * tileSize.x;
+        s_upscaleData.offsetY = (tc._pos.y - tileOrigin.y) * tileSize.y;
+        s_upscaleData.sizeX = tileSize.x;
+        s_upscaleData.sizeY = tileSize.y;
+
         tileData._vkData = std::make_unique<ProxyGroundDataPrivate::VkData>(
             ProxyGroundDataPrivate::VkData{
-                vkctx.allocate(sizeof(s_perlinData),
+                vkctx.allocate(sizeof(s_upscaleData),
                                DescriptorType::UNIFORM_BUFFER,
                                MemoryType::CPU_WRITES),
                 vkctx.allocate(bufferSize, DescriptorType::STORAGE_BUFFER,
                                MemoryType::CPU_READS),
                 VkWorker()});
 
-        s_perlinData.offsetX = tc._pos.x * 8;
-        s_perlinData.offsetY = tc._pos.y * 8;
-        tileData._vkData->_heightData.setData(&s_perlinData);
+        tileData._vkData->_upscaleData.setData(&s_upscaleData);
 
-        DescriptorSetVk dset(layout1);
+        DescriptorSetVk dset(layoutUpscale);
         dset.addDescriptor(0, DescriptorType::UNIFORM_BUFFER, outputDataBuf);
         dset.addDescriptor(1, DescriptorType::UNIFORM_BUFFER,
-                           tileData._vkData->_heightData);
-        dset.addDescriptor(2, DescriptorType::STORAGE_BUFFER, hashBuf);
+                           tileData._vkData->_upscaleData);
+        dset.addDescriptor(2, DescriptorType::STORAGE_BUFFER, perlinBuf);
         dset.addDescriptor(3, DescriptorType::STORAGE_BUFFER,
                            tileData._vkData->_height);
 
         VkWorker &worker = tileData._vkData->_worker;
-        worker.bindCommand(pipeline1, dset);
+        worker.bindCommand(pipelineUpscale, dset);
         worker.dispatchCommand(bufferWidth / workgroupSize,
                                bufferHeight / workgroupSize, 1);
         worker.endCommandRecording();

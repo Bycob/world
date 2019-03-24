@@ -5,7 +5,6 @@
 #define M_PI 3.1415926535897932384626433832795
 layout (local_size_x = WORKGROUP_SIZE, local_size_y = WORKGROUP_SIZE, local_size_z = 1) in;
 
-// Random values for hash function
 
 layout(binding = 0) uniform OutputData {
     uint width;
@@ -23,6 +22,7 @@ layout(binding = 1) uniform PerlinData {
     float persistence;
 };
 
+// Random values for hash function
 layout(binding = 2) buffer PerlinTable {
     uint p[512];
 };

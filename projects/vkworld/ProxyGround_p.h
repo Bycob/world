@@ -14,7 +14,7 @@ namespace world {
 class ProxyGroundDataPrivate {
 public:
     struct VkData {
-        VkSubBuffer _heightData;
+        VkSubBuffer _upscaleData;
         VkSubBuffer _height;
         VkWorker _worker;
     };

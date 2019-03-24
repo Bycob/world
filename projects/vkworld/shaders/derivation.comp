@@ -10,12 +10,12 @@ layout(binding = 0) uniform SizeData {
 	uint depth;
 };
 
-layout(std140, binding = 1) buffer InputBuffers {
-	vec4 inputBuffers[][9];
+layout(std430, binding = 1) buffer InputBuffers {
+	float inputBuffers[][9];
 };
 
-layout(std140, binding = 3) buffer OutputBuffer {
-    vec4 outputBuffer[];
+layout(std430, binding = 3) buffer OutputBuffer {
+    float outputBuffer[];
 };
 
 float get(int x, int y) {
@@ -30,7 +30,7 @@ float get(int x, int y) {
 
 	uint id = dataX + width * dataY;
 	//TODO check indices order
-	return inputBuffers[bufX + 3 * bufY][id / 4][id % 4];
+	return inputBuffers[bufX + 3 * bufY][id];
 }
 
 void set(int x, int y, float val) {
@@ -45,7 +45,7 @@ void set(int x, int y, float val) {
 	
 	uint id = dataX + width * dataY;
 	//TODO check indices order
-	inputBuffers[bufX + 3 * bufY][id / 4][id % 4] = val;
+	inputBuffers[bufX + 3 * bufY][id] = val;
 }
 
 void main() {

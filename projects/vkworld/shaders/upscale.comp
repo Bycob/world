@@ -1,0 +1,57 @@
+#version 450
+#extension GL_ARB_separate_shader_objects : enable
+
+#define WORKGROUP_SIZE 32
+
+layout (local_size_x = WORKGROUP_SIZE, local_size_y = WORKGROUP_SIZE, local_size_z = 1 ) in;
+
+
+layout(binding = 0) uniform OutputData {
+    uvec3 dims;
+};
+
+layout(binding = 1) uniform UpscaleData {
+	uvec3 srcDims;
+	uvec3 srcOffset;
+	uvec3 srcSize;
+};
+
+layout(std430, binding = 2) buffer Input0 {
+	float inputBuffer[];
+};
+
+layout(std430, binding = 3) buffer Output0 {
+    float outputBuffer[];
+};
+
+uint id(uvec3 pos) {
+	return dims.y * dims.x * pos.z + dims.x * pos.y + pos.x;
+}
+
+float lerp3D(uvec3 origin, vec3 l) {
+	float u000 = inputBuffer[id(origin + uvec3(0, 0, 0))];
+	float u100 = inputBuffer[id(origin + uvec3(1, 0, 0))];
+	float u010 = inputBuffer[id(origin + uvec3(0, 1, 0))];
+	float u110 = inputBuffer[id(origin + uvec3(1, 1, 0))];
+	float u011 = inputBuffer[id(origin + uvec3(0, 1, 1))];
+	float u111 = inputBuffer[id(origin + uvec3(1, 1, 1))];
+	float u001 = inputBuffer[id(origin + uvec3(0, 0, 1))];
+	float u101 = inputBuffer[id(origin + uvec3(1, 0, 1))];
+
+	float ux00 = mix(u000, u100, l.x);
+	float ux10 = mix(u010, u110, l.x);
+	float ux11 = mix(u011, u111, l.x);
+	float ux01 = mix(u001, u101, l.x);
+	float uy0 = mix(ux00, ux10, l.y);
+	float uy1 = mix(ux01, ux11, l.y);
+	return mix(uy0, uy1, l.z);
+}
+
+void main() {
+	vec3 xyz = vec3(gl_GlobalInvocationID.xyz) / vec3(dims);
+	vec3 srcPos = srcOffset + xyz * srcSize;
+	uvec3 origin = uvec3(srcPos);
+	vec3 ratio = srcPos - origin;
+	outputBuffer[id(gl_GlobalInvocationID.xyz)] = lerp3D(origin, ratio);
+	// outputBuffer[id(gl_GlobalInvocationID.xyz)] = inputBuffer[id(origin)];
+}
