@@ -17,66 +17,35 @@ ProxyGround::ProxyGround(f64 width, u32 resolution) {
     const u32 tileSize = 128;
     const u32 tileCount = resolution / tileSize;
     _internal = new ProxyGroundPrivate(width / tileCount, tileSize, tileCount);
+
+    _internal->_layers.emplace_back(ProxyGroundPrivate::LayerInfo{
+        "proxyground-layer-distribution", "proxyground-layer-fill"});
 }
 
 ProxyGround::~ProxyGround() { delete _internal; }
 
-void ProxyGround::collect(ICollector &collector,
-                          const IResolutionModel &resolutionModel) {
-    // Init collector
-    if (!collector.hasChannel<Image>())
-        return;
-
-    auto &imageChan = collector.getChannel<Image>();
-
-    // Create pipeline for vulkan processing
+VkSubBuffer createTestPerlinBuffer() {
     auto &vkctx = Vulkan::context().internal();
 
-    DescriptorSetLayoutVk layoutPerlin;
-    layoutPerlin.addBinding(DescriptorType::UNIFORM_BUFFER, 0);
-    layoutPerlin.addBinding(DescriptorType::UNIFORM_BUFFER, 1);
-    layoutPerlin.addBinding(DescriptorType::STORAGE_BUFFER, 2);
-    layoutPerlin.addBinding(DescriptorType::STORAGE_BUFFER, 3);
+    DescriptorSetLayoutVk layout22; // 2 uniforms 2 storage
+    layout22.addBinding(DescriptorType::UNIFORM_BUFFER, 0);
+    layout22.addBinding(DescriptorType::UNIFORM_BUFFER, 1);
+    layout22.addBinding(DescriptorType::STORAGE_BUFFER, 2);
+    layout22.addBinding(DescriptorType::STORAGE_BUFFER, 3);
 
-    ComputePipeline pipelinePerlin(layoutPerlin, "noise-perlin");
+    ComputePipeline perlinPipeline(layout22, "noise-perlin");
 
-    DescriptorSetLayoutVk layoutUpscale;
-    layoutUpscale.addBinding(DescriptorType::UNIFORM_BUFFER, 0);
-    layoutUpscale.addBinding(DescriptorType::UNIFORM_BUFFER, 1);
-    layoutUpscale.addBinding(DescriptorType::STORAGE_BUFFER, 2);
-    layoutUpscale.addBinding(DescriptorType::STORAGE_BUFFER, 3);
-
-    ComputePipeline pipelineUpscale(layoutUpscale, "upscale");
-
-    const u32 workgroupSize = 32;
-
-
-    // Get coordinates of processed tiles
-    auto &tileSystem = _internal->_tileSystem;
-    const u32 bufferWidth = tileSystem._bufferRes.x;
-    const u32 bufferHeight = tileSystem._bufferRes.y;
-    const u32 bufferCount = bufferWidth * bufferHeight;
-    const u32 bufferSize = bufferCount * sizeof(float);
-
-    BoundingBox &bbox = _internal->_bbox;
-    std::set<TileCoordinates> coords;
-
-    for (auto it = _internal->_tileSystem.iterate(resolutionModel, bbox);
-         !it.endReached(); ++it) {
-        auto &tileCoords = *it;
-        coords.insert(tileCoords);
-    }
-
-    std::set<TileCoordinates> toAdd;
-    // ...
-
-    // Perlin generation (TEMP)
     Perlin perlin;
     std::vector<u32> hash;
 
     for (auto i : perlin.getHash()) {
         hash.push_back(static_cast<u32>(i));
     }
+
+    const u32 bufferWidth = 128;
+    const u32 bufferHeight = 128;
+    const u32 bufferCount = bufferWidth * bufferHeight;
+    const u32 bufferSize = bufferCount * sizeof(float);
 
     struct {
         u32 width;
@@ -118,26 +87,116 @@ void ProxyGround::collect(ICollector &collector,
     perlinDataBuf.setData(&s_perlinData);
     hashBuf.setData(&hash[0]);
 
-    DescriptorSetVk dsetPerlin(layoutPerlin);
-    dsetPerlin.addDescriptor(0, DescriptorType::UNIFORM_BUFFER, outputDataBuf);
-    dsetPerlin.addDescriptor(1, DescriptorType::UNIFORM_BUFFER, perlinDataBuf);
-    dsetPerlin.addDescriptor(2, DescriptorType::STORAGE_BUFFER, hashBuf);
-    dsetPerlin.addDescriptor(3, DescriptorType::STORAGE_BUFFER, perlinBuf);
+    DescriptorSetVk perlinDset(layout22);
+    perlinDset.addDescriptor(0, DescriptorType::UNIFORM_BUFFER, outputDataBuf);
+    perlinDset.addDescriptor(1, DescriptorType::UNIFORM_BUFFER, perlinDataBuf);
+    perlinDset.addDescriptor(2, DescriptorType::STORAGE_BUFFER, hashBuf);
+    perlinDset.addDescriptor(3, DescriptorType::STORAGE_BUFFER, perlinBuf);
 
-    VkWorker worker;
-    worker.bindCommand(pipelinePerlin, dsetPerlin);
-    worker.dispatchCommand(bufferWidth / workgroupSize,
-                           bufferHeight / workgroupSize, 1);
-    worker.endCommandRecording();
+    VkWorker perlinWorker;
+    perlinWorker.bindCommand(perlinPipeline, perlinDset);
+    perlinWorker.dispatchCommand(bufferWidth / 32, bufferHeight / 32, 1);
+    perlinWorker.endCommandRecording();
 
-    worker.run();
-    worker.waitForCompletion();
+    perlinWorker.run();
+    perlinWorker.waitForCompletion();
 
+    return perlinBuf;
+}
+
+void ProxyGround::collect(ICollector &collector,
+                          const IResolutionModel &resolutionModel) {
+    // Init collector
+    if (!collector.hasChannel<Image>())
+        return;
+
+    auto &imageChan = collector.getChannel<Image>();
+
+    // Get parent (for testing purpose it's only a buffer filled with perlin
+    // noise)
     Profiler profiler;
+    profiler.endStartSection("perlin generation");
+
+    VkSubBuffer perlinBuf = createTestPerlinBuffer();
+    const u32 parentWidth = 128;
+    const u32 parentHeight = 128;
+
+    // Create pipelines for vulkan processing
+    auto &vkctx = Vulkan::context().internal();
+
     profiler.endStartSection("setup");
+
+    DescriptorSetLayoutVk layout22; // 2 uniforms 2 storage
+    layout22.addBinding(DescriptorType::UNIFORM_BUFFER, 0);
+    layout22.addBinding(DescriptorType::UNIFORM_BUFFER, 1);
+    layout22.addBinding(DescriptorType::STORAGE_BUFFER, 2);
+    layout22.addBinding(DescriptorType::STORAGE_BUFFER, 3);
+
+    ComputePipeline upscalePipeline(layout22, "upscale");
+
+    std::vector<ComputePipeline> repartitionPipelines;
+    std::vector<ComputePipeline> texturePipelines;
+
+    for (auto &layerInfo : _internal->_layers) {
+        repartitionPipelines.emplace_back(layout22,
+                                          layerInfo._repartitionShader);
+        texturePipelines.emplace_back(layout22, layerInfo._textureShader);
+    }
+
+    // Get coordinates of processed tiles
+    auto &tileSystem = _internal->_tileSystem;
+    const u32 bufferWidth = tileSystem._bufferRes.x;
+    const u32 bufferHeight = tileSystem._bufferRes.y;
+    const u32 bufferCount = bufferWidth * bufferHeight;
+    const u32 bufferSize = bufferCount * sizeof(float);
+
+    BoundingBox &bbox = _internal->_bbox;
+    std::set<TileCoordinates> coords;
+
+    for (auto it = _internal->_tileSystem.iterate(resolutionModel, bbox);
+         !it.endReached(); ++it) {
+        auto &tileCoords = *it;
+        coords.insert(tileCoords);
+    }
+
+    std::set<TileCoordinates> toAdd;
+    // ...
+
+    // Setup vulkan buffers and variables
+    const u32 workgroupSize = 32;
+    const u32 dispatchX = bufferWidth / workgroupSize;
+    const u32 dispatchY = bufferHeight / workgroupSize;
+    const u32 dispatchZ = 1;
+
+    // Output parameters struct
+    struct {
+        u32 width;
+        u32 height;
+        u32 depth;
+    } s_outputData;
+
+    s_outputData.width = bufferWidth;
+    s_outputData.height = bufferHeight;
+    s_outputData.depth = 1;
+
+    VkSubBuffer outputDataBuf =
+        vkctx.allocate(sizeof(s_outputData), DescriptorType::UNIFORM_BUFFER,
+                       MemoryType::CPU_WRITES);
+
+    outputDataBuf.setData(&s_outputData);
+
     // Process tiles
     for (const TileCoordinates &tc : coords) {
         auto &tileData = getData(tc);
+
+        VkWorker &worker = *(tileData._worker = std::make_unique<VkWorker>());
+
+        // --- UPSCALE
+        // vec3d bboxDims = bbox.getDimensions();
+        // TODO find this variables with a good method
+        vec2i tileCount(13, 13);
+        vec2i tileOrigin(-6, -6);
+        vec2i tileSize(parentWidth / tileCount.x, parentHeight / tileCount.y);
 
         struct {
             u32 srcWidth;
@@ -155,44 +214,103 @@ void ProxyGround::collect(ICollector &collector,
             u32 sizeZ = 0;
         } s_upscaleData;
 
-        // vec3d bboxDims = bbox.getDimensions();
-        // TODO find this variables with a good method
-        vec2i tileCount(13, 13);
-        vec2i tileOrigin(-6, -6);
-        vec2i tileSize(bufferWidth / tileCount.x, bufferHeight / tileCount.y);
-
-        s_upscaleData.srcWidth = bufferWidth;
-        s_upscaleData.srcHeight = bufferHeight;
+        s_upscaleData.srcWidth = parentWidth;
+        s_upscaleData.srcHeight = parentHeight;
         s_upscaleData.offsetX = (tc._pos.x - tileOrigin.x) * tileSize.x;
         s_upscaleData.offsetY = (tc._pos.y - tileOrigin.y) * tileSize.y;
         s_upscaleData.sizeX = tileSize.x;
         s_upscaleData.sizeY = tileSize.y;
 
-        tileData._vkData = std::make_unique<ProxyGroundDataPrivate::VkData>(
-            ProxyGroundDataPrivate::VkData{
-                vkctx.allocate(sizeof(s_upscaleData),
-                               DescriptorType::UNIFORM_BUFFER,
-                               MemoryType::CPU_WRITES),
+        tileData._upscaleData = std::make_unique<VkSubBuffer>(vkctx.allocate(
+            sizeof(s_upscaleData), DescriptorType::UNIFORM_BUFFER,
+            MemoryType::CPU_WRITES)),
+        tileData._height = std::make_unique<VkSubBuffer>(vkctx.allocate(
+            bufferSize, DescriptorType::STORAGE_BUFFER, MemoryType::CPU_READS));
+
+        tileData._upscaleData->setData(&s_upscaleData);
+
+        DescriptorSetVk upscaleDset(layout22);
+        upscaleDset.addDescriptor(0, DescriptorType::UNIFORM_BUFFER,
+                                  outputDataBuf);
+        upscaleDset.addDescriptor(1, DescriptorType::UNIFORM_BUFFER,
+                                  *tileData._upscaleData);
+        upscaleDset.addDescriptor(2, DescriptorType::STORAGE_BUFFER, perlinBuf);
+        upscaleDset.addDescriptor(3, DescriptorType::STORAGE_BUFFER,
+                                  *tileData._height);
+
+        worker.bindCommand(upscalePipeline, upscaleDset);
+        worker.dispatchCommand(dispatchX, dispatchY, dispatchZ);
+
+        // Prealloc final texture buffer
+        tileData._texture = std::make_unique<VkSubBuffer>(
+            vkctx.allocate(bufferSize * 4, DescriptorType::STORAGE_BUFFER,
+                           MemoryType::CPU_READS));
+
+        int i = 0;
+
+        for (auto &layerInfo : _internal->_layers) {
+            tileData._layers.emplace_back();
+            auto &layerData = tileData._layers.back();
+
+            // --- REPARTITION
+            struct {
+
+            } s_repartitionData;
+
+            layerData._repartitionData =
+                std::make_unique<VkSubBuffer>(vkctx.allocate(
+                    sizeof(s_repartitionData), DescriptorType::UNIFORM_BUFFER,
+                    MemoryType::CPU_WRITES)),
+            layerData._repartition = std::make_unique<VkSubBuffer>(
                 vkctx.allocate(bufferSize, DescriptorType::STORAGE_BUFFER,
-                               MemoryType::CPU_READS),
-                VkWorker()});
+                               MemoryType::CPU_READS));
 
-        tileData._vkData->_upscaleData.setData(&s_upscaleData);
+            layerData._repartitionData->setData(&s_repartitionData);
 
-        DescriptorSetVk dset(layoutUpscale);
-        dset.addDescriptor(0, DescriptorType::UNIFORM_BUFFER, outputDataBuf);
-        dset.addDescriptor(1, DescriptorType::UNIFORM_BUFFER,
-                           tileData._vkData->_upscaleData);
-        dset.addDescriptor(2, DescriptorType::STORAGE_BUFFER, perlinBuf);
-        dset.addDescriptor(3, DescriptorType::STORAGE_BUFFER,
-                           tileData._vkData->_height);
+            DescriptorSetVk repartitionDset(layout22);
+            repartitionDset.addDescriptor(0, DescriptorType::UNIFORM_BUFFER,
+                                          outputDataBuf);
+            repartitionDset.addDescriptor(1, DescriptorType::UNIFORM_BUFFER,
+                                          *layerData._repartitionData);
+            repartitionDset.addDescriptor(2, DescriptorType::STORAGE_BUFFER,
+                                          *tileData._height);
+            repartitionDset.addDescriptor(3, DescriptorType::STORAGE_BUFFER,
+                                          *layerData._repartition);
 
-        VkWorker &worker = tileData._vkData->_worker;
-        worker.bindCommand(pipelineUpscale, dset);
-        worker.dispatchCommand(bufferWidth / workgroupSize,
-                               bufferHeight / workgroupSize, 1);
+            worker.bindCommand(repartitionPipelines[i], repartitionDset);
+            worker.dispatchCommand(dispatchX, dispatchY, dispatchZ);
+
+            // --- TEXTURE
+            struct {
+
+            } s_textureData;
+
+
+            layerData._textureData =
+                std::make_unique<VkSubBuffer>(vkctx.allocate(
+                    sizeof(s_textureData), DescriptorType::UNIFORM_BUFFER,
+                    MemoryType::CPU_WRITES));
+
+            layerData._textureData->setData(&s_textureData);
+
+
+            DescriptorSetVk textureDset(layout22);
+            textureDset.addDescriptor(0, DescriptorType::UNIFORM_BUFFER,
+                                      outputDataBuf);
+            textureDset.addDescriptor(1, DescriptorType::UNIFORM_BUFFER,
+                                      *layerData._textureData);
+            textureDset.addDescriptor(2, DescriptorType::STORAGE_BUFFER,
+                                      *layerData._repartition);
+            textureDset.addDescriptor(3, DescriptorType::STORAGE_BUFFER,
+                                      *tileData._texture);
+
+            worker.bindCommand(texturePipelines[i], textureDset);
+            worker.dispatchCommand(dispatchX, dispatchY, dispatchZ);
+
+            ++i;
+        }
+
         worker.endCommandRecording();
-
         worker.run();
     }
     profiler.endStartSection("waitFences");
@@ -200,22 +318,22 @@ void ProxyGround::collect(ICollector &collector,
     // Collecting images
     for (const TileCoordinates &tc : coords) {
         auto &tileData = getData(tc);
-        tileData._vkData->_worker.waitForCompletion();
+        tileData._worker->waitForCompletion();
     }
     profiler.endStartSection("collect");
 
     for (const TileCoordinates &tc : coords) {
         auto &tileData = getData(tc);
 
-        float *buffer = new float[bufferCount];
-        tileData._vkData->_height.getData(buffer);
-        Image img(tileSystem._bufferRes.x, tileSystem._bufferRes.y,
-                  ImageType::GREYSCALE);
+        float *buffer = new float[bufferCount * 4];
+        tileData._texture->getData(buffer);
+        Image img(bufferWidth, bufferHeight, ImageType::RGBA);
 
         for (u32 y = 0; y < img.height(); ++y) {
             for (u32 x = 0; x < img.width(); ++x) {
-                u32 pos = (y * img.width() + x);
-                img.grey(x, y).setLevelf(buffer[pos]);
+                u32 pos = (y * img.width() + x) * 4;
+                img.rgba(x, y).setf(buffer[pos], buffer[pos + 1],
+                                    buffer[pos + 2], buffer[pos + 3]);
             }
         }
 

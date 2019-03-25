@@ -13,19 +13,31 @@ namespace world {
 
 class ProxyGroundDataPrivate {
 public:
-    struct VkData {
-        VkSubBuffer _upscaleData;
-        VkSubBuffer _height;
-        VkWorker _worker;
+    struct Layer {
+        std::unique_ptr<VkSubBuffer> _repartitionData;
+        std::unique_ptr<VkSubBuffer> _repartition;
+        std::unique_ptr<VkSubBuffer> _textureData;
     };
 
-    std::unique_ptr<VkData> _vkData;
+    std::unique_ptr<VkSubBuffer> _upscaleData;
+    std::unique_ptr<VkSubBuffer> _height;
+    std::unique_ptr<VkSubBuffer> _texture;
+
+    std::vector<Layer> _layers;
+
+    std::unique_ptr<VkWorker> _worker;
 };
 
 class ProxyGroundPrivate {
 public:
+    struct LayerInfo {
+        std::string _repartitionShader;
+        std::string _textureShader;
+    };
+
     u32 _tileCount;
     BoundingBox _bbox;
+    std::vector<LayerInfo> _layers;
 
     TileSystem _tileSystem;
 

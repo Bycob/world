@@ -24,19 +24,19 @@ layout(std430, binding = 3) buffer Output0 {
     float outputBuffer[];
 };
 
-uint id(uvec3 pos) {
+uint id(uvec3 pos, uvec3 dims) {
 	return dims.y * dims.x * pos.z + dims.x * pos.y + pos.x;
 }
 
-float lerp3D(uvec3 origin, vec3 l) {
-	float u000 = inputBuffer[id(origin + uvec3(0, 0, 0))];
-	float u100 = inputBuffer[id(origin + uvec3(1, 0, 0))];
-	float u010 = inputBuffer[id(origin + uvec3(0, 1, 0))];
-	float u110 = inputBuffer[id(origin + uvec3(1, 1, 0))];
-	float u011 = inputBuffer[id(origin + uvec3(0, 1, 1))];
-	float u111 = inputBuffer[id(origin + uvec3(1, 1, 1))];
-	float u001 = inputBuffer[id(origin + uvec3(0, 0, 1))];
-	float u101 = inputBuffer[id(origin + uvec3(1, 0, 1))];
+float lerp3D(uvec3 origin, vec3 l, uvec3 dims) {
+	float u000 = inputBuffer[id(origin + uvec3(0, 0, 0), dims)];
+	float u100 = inputBuffer[id(origin + uvec3(1, 0, 0), dims)];
+	float u010 = inputBuffer[id(origin + uvec3(0, 1, 0), dims)];
+	float u110 = inputBuffer[id(origin + uvec3(1, 1, 0), dims)];
+	float u011 = inputBuffer[id(origin + uvec3(0, 1, 1), dims)];
+	float u111 = inputBuffer[id(origin + uvec3(1, 1, 1), dims)];
+	float u001 = inputBuffer[id(origin + uvec3(0, 0, 1), dims)];
+	float u101 = inputBuffer[id(origin + uvec3(1, 0, 1), dims)];
 
 	float ux00 = mix(u000, u100, l.x);
 	float ux10 = mix(u010, u110, l.x);
@@ -52,6 +52,5 @@ void main() {
 	vec3 srcPos = srcOffset + xyz * srcSize;
 	uvec3 origin = uvec3(srcPos);
 	vec3 ratio = srcPos - origin;
-	outputBuffer[id(gl_GlobalInvocationID.xyz)] = lerp3D(origin, ratio);
-	// outputBuffer[id(gl_GlobalInvocationID.xyz)] = inputBuffer[id(origin)];
+	outputBuffer[id(gl_GlobalInvocationID.xyz, dims)] = lerp3D(origin, ratio, srcDims);
 }
