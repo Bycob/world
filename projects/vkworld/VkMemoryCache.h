@@ -36,6 +36,8 @@ public:
 
     vk::Buffer getBufferHandle(u32 offset) override;
 
+    u32 getBufferOffset(u32 offset) override;
+
 private:
     std::shared_ptr<VkMemoryCachePrivate> _internal;
 

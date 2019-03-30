@@ -18,8 +18,10 @@ ProxyGround::ProxyGround(f64 width, u32 resolution) {
     const u32 tileCount = resolution / tileSize;
     _internal = new ProxyGroundPrivate(width / tileCount, tileSize, tileCount);
 
-    _internal->_layers.emplace_back(ProxyGroundPrivate::LayerInfo{
-        "proxyground-layer-distribution", "proxyground-layer-fill"});
+    _internal->_layers.emplace_back(
+        ProxyGroundPrivate::LayerInfo{"distribution-default", "texture-soil"});
+    _internal->_layers.emplace_back(
+        ProxyGroundPrivate::LayerInfo{"distribution-default", "texture-grass"});
 }
 
 ProxyGround::~ProxyGround() { delete _internal; }
@@ -282,9 +284,16 @@ void ProxyGround::collect(ICollector &collector,
 
             // --- TEXTURE
             struct {
-
+                float offsetX;
+                float offsetY;
+                float sizeX;
+                float sizeY;
             } s_textureData;
 
+            s_textureData.sizeX = 1.f / tileCount.x;
+            s_textureData.sizeY = 1.f / tileCount.y;
+            s_textureData.offsetX = s_textureData.sizeX * tc._pos.x;
+            s_textureData.offsetY = s_textureData.sizeY * tc._pos.y;
 
             layerData._textureData =
                 std::make_unique<VkSubBuffer>(vkctx.allocate(

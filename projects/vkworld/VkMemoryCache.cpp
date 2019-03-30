@@ -171,6 +171,10 @@ vk::Buffer VkMemoryCache::getBufferHandle(u32 offset) {
     return segment._buffer;
 }
 
+u32 VkMemoryCache::getBufferOffset(u32 offset) {
+    return offset - (offset % _internal->_segmentSize);
+}
+
 u32 VkMemoryCache::sizeRemaining() const {
     if (_internal->_segments.size() == 0) {
         return 0;

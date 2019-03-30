@@ -42,7 +42,9 @@ void VkSubBuffer::registerTo(vk::DescriptorSet &descriptorSet,
                              vk::DescriptorType descriptorType, u32 id) {
     vk::DescriptorBufferInfo descriptorBufferInfo(
         _internal->_memAccess.getBufferHandle(_internal->_offset),
-        _internal->_offset, _internal->_size);
+        _internal->_offset -
+            _internal->_memAccess.getBufferOffset(_internal->_offset),
+        _internal->_size);
     vk::WriteDescriptorSet writeDescriptorSet(descriptorSet, id, 0, 1,
                                               descriptorType, nullptr,
                                               &descriptorBufferInfo);
