@@ -10,11 +10,6 @@ void ResolutionModelContextWrap::setOffset(const vec3d &offset) {
     _offset = offset;
 }
 
-double ResolutionModelContextWrap::getResolutionAt(const WorldZone &zone,
-                                                   const vec3d &coord) const {
-    return _wrapped.getResolutionAt(zone, coord + _offset);
-}
-
 double ResolutionModelContextWrap::getResolutionAt(
     const world::vec3d &coord) const {
     return _wrapped.getResolutionAt(coord + _offset);
@@ -22,8 +17,15 @@ double ResolutionModelContextWrap::getResolutionAt(
 
 double ResolutionModelContextWrap::getMaxResolutionIn(
     const BoundingBox &bbox) const {
-    return _wrapped.getMaxResolutionIn(
-        {bbox.getLowerBound() + _offset, bbox.getUpperBound() + _offset});
+    BoundingBox bbox2 = bbox;
+    bbox2.translate(_offset);
+    return _wrapped.getMaxResolutionIn(bbox2);
+}
+
+BoundingBox ResolutionModelContextWrap::getBounds() const {
+    BoundingBox bbox = _wrapped.getBounds();
+    bbox.translate(_offset);
+    return bbox;
 }
 
 } // namespace world

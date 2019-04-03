@@ -61,17 +61,17 @@ void TreeGroup::collect(ICollector &collector,
 
                 auto &matChannel = collector.getChannel<Material>();
                 trunksObj.setMaterialID(
-                    ItemKeys::toString(ItemKeys::inObject(1)));
+                    ItemKeys::toString(ItemKeys::root("1")));
                 leavesObj.setMaterialID(
-                    ItemKeys::toString(ItemKeys::inObject(2)));
+                    ItemKeys::toString(ItemKeys::root("2")));
 
-                matChannel.put(ItemKeys::inObject(1), trunkMaterial);
-                matChannel.put(ItemKeys::inObject(2), leafMaterial);
+                matChannel.put(ItemKeys::root("1"), trunkMaterial);
+                matChannel.put(ItemKeys::root("2"), leafMaterial);
             }
 
             auto &objChannel = collector.getChannel<Object3D>();
-            objChannel.put(ItemKeys::inObject(1), trunksObj);
-            objChannel.put(ItemKeys::inObject(2), leavesObj);
+            objChannel.put(ItemKeys::root("1"), trunksObj);
+            objChannel.put(ItemKeys::root("2"), leavesObj);
         }
 
         break;
@@ -83,7 +83,7 @@ void TreeGroup::collect(ICollector &collector,
             }
 
             Tree &tree = *_internal->_trees.at(i);
-            collectChild((i + 1) * 100, tree, collector, resolutionModel);
+            collectChild(NodeKeys::fromUint(i), tree, collector, resolutionModel);
         }
 
         break;

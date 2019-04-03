@@ -8,12 +8,12 @@ using namespace world;
 
 Application::Application()
         : _running(false),
-          _explorer(std::make_unique<FirstPersonExplorer>(1000)),
+          _resModel(std::make_unique<FirstPersonView>(1000)),
           _newUpdatePos(0, 0, 5000), _lastUpdatePos(_newUpdatePos),
           _mainView(std::make_unique<MainView>(*this)) {
 
-    _explorer->setPosition(_lastUpdatePos);
-    _explorer->setFarDistance(10000);
+    _resModel->setPosition(_lastUpdatePos);
+    _resModel->setFarDistance(10000);
 
     // Collectors
     for (int i = 0; i < 2; i++) {
@@ -56,10 +56,10 @@ void Application::run(int argc, char **argv) {
 
                 // Mise à jour du monde
                 collector->reset();
-                _explorer->setPosition(newUpdatePos);
+                _resModel->setPosition(newUpdatePos);
 
                 auto start = std::chrono::steady_clock::now();
-                _explorer->exploreAndCollect<FlatWorld>(*_world, *collector);
+                _world->collect(*collector, *_resModel);
 
                 if (_dbgOn) {
                     std::cout << "Temps d'exploration : "

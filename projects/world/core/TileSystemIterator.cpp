@@ -4,21 +4,6 @@ namespace world {
 
 TileSystemIterator::TileSystemIterator(const TileSystem &tileSystem,
                                        const IResolutionModel &resolutionModel,
-                                       const WorldZone &zone)
-        : _tileSystem(tileSystem), _resolutionModel(resolutionModel) {
-
-    vec3d lower = zone.getInfo().getAbsoluteOffset();
-    _bounds = {lower, lower + zone.getInfo().getDimensions()};
-
-    // Start at lod 0
-    startLod(0);
-
-    while (!isTileRequired(_current) && !_endReached)
-        step();
-}
-
-TileSystemIterator::TileSystemIterator(const TileSystem &tileSystem,
-                                       const IResolutionModel &resolutionModel,
                                        const BoundingBox &bounds)
         : _tileSystem(tileSystem), _resolutionModel(resolutionModel),
           _bounds(bounds) {

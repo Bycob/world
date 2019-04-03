@@ -30,13 +30,9 @@ public:
 
     CollectorContextWrap(ICollector &wrapped);
 
-    void setCurrentChunk(ChunkKey key);
-
-    void setCurrentObject(ObjectKey key);
+    void setKeyPrefix(const ItemKey &key);
 
     void setOffset(const vec3d &offset);
-
-    void setKeyOffset(int keyOffset);
 
 
     ItemKey mutateKey(const ItemKey &key) const override;
@@ -54,10 +50,7 @@ private:
 #else
     std::map<size_t, std::unique_ptr<ICollectorChannelBase>> _wrappers;
 #endif
-
-    std::pair<bool, ChunkKey> _currentChunk;
-    std::pair<bool, ObjectKey> _currentObject;
-    int _keyOffset;
+    ItemKey _keyPrefix;
 
     vec3d _offset;
 };

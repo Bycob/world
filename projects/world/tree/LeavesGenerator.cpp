@@ -22,7 +22,7 @@ LeavesGenerator *LeavesGenerator::clone() const {
     return new LeavesGenerator(*this);
 }
 
-void LeavesGenerator::processNode(Node<TreeInfo> &node, Mesh &leavesMesh,
+void LeavesGenerator::processNode(SkelettonNode<TreeInfo> &node, Mesh &leavesMesh,
                                   Mesh &trunkMesh) {
     auto &nodeInfo = node.getInfo();
 

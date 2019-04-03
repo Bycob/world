@@ -17,10 +17,9 @@ public:
 
     double getResolutionAt(const vec3d &coord) const override;
 
-    double getResolutionAt(const WorldZone &zone,
-                           const vec3d &coord) const override;
-
     double getMaxResolutionIn(const BoundingBox &bbox) const override;
+
+    BoundingBox getBounds() const override;
 
 private:
     const IResolutionModel &_wrapped;

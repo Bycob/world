@@ -78,11 +78,6 @@ TileCoordinates TileSystem::getParentTileCoordinates(
 }
 
 TileSystemIterator TileSystem::iterate(const IResolutionModel &resolutionModel,
-                                       const WorldZone &zone) const {
-    return TileSystemIterator(*this, resolutionModel, zone);
-}
-
-TileSystemIterator TileSystem::iterate(const IResolutionModel &resolutionModel,
                                        const BoundingBox &bounds) const {
     return TileSystemIterator(*this, resolutionModel, bounds);
 }

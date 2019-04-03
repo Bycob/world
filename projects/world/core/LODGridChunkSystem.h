@@ -3,17 +3,18 @@
 
 #include "world/core/WorldConfig.h"
 
+#include "WorldNode.h"
 #include "IChunkSystem.h"
 #include "Chunk.h"
 #include "LODGridCoordinates.h"
 #include "LODData.h"
+#include "IChunkDecorator.h"
 
 namespace world {
-class LODGridChunkHandler;
 
-class PLODGridChunkSystem;
+class LODGridChunkSystemPrivate;
 
-class WORLDAPI_EXPORT LODGridChunkSystem : public IChunkSystem {
+class WORLDAPI_EXPORT LODGridChunkSystem : public WorldNode, IChunkSystem {
 public:
     LODGridChunkSystem(double baseChunkSize = 1000);
 
@@ -35,22 +36,23 @@ public:
      * whose faces are 20 cm large has a resolution of 5-6. */
     double getMinResolution(int lod) const;
 
-    virtual int getLODForResolution(double mrd) const;
+    int getLODForResolution(double mrd) const;
 
-    // NAVIGATION
-    WorldZone getZone(const vec3d &position) override;
+    Chunk &getChunk(const vec3d &position, double resolution) override;
 
-    std::vector<WorldZone> getNeighbourZones(const WorldZone &zone) override;
+    void collect(ICollector &collector,
+                 const IResolutionModel &resolutionModel) override;
 
-    std::vector<WorldZone> getChildrenZones(const WorldZone &zone) override;
+    template <typename T, typename... Args> T &addDecorator(Args... args);
 
-    Chunk &getChunk(const WorldZone &zone) override;
-
-    void collectZone(const WorldZone &zone, ICollector &collector,
-                     IResolutionModel &resolutionModel) override;
+protected:
+    /** Test if the given chunk should be collected. If it is the case,
+     * then the chunk is collected and collectChunk is called on each
+     * of its children. */
+    void collectChunk(const NodeKey &chunkKey, ICollector &collector, const IResolutionModel &resolutionModel);
 
 private:
-    PLODGridChunkSystem *_internal;
+    LODGridChunkSystemPrivate *_internal;
 
     /** If an object has a greater resolution than this value,
      * we can't put it in the minimum LOD. */
@@ -61,53 +63,34 @@ private:
     int _maxLOD = 6;
 
 
-    friend class LODGridChunkHandler;
-
-    ChunkKey getChunkKey(const ChunkKey &parent,
+    NodeKey getChunkKey(const NodeKey &parent,
                          const LODGridCoordinates &coords) const;
 
-    LODGridCoordinates dropLastPart(const ChunkKey &key) const;
+    LODGridCoordinates dropLastPart(const NodeKey &key) const;
 
-    ChunkKey getParentKey(const ChunkKey &chunkKey) const;
+    NodeKey getParentKey(const NodeKey &key) const;
 
-    Chunk &getChunk(const ChunkKey &id);
+    /** Compute the offset of the chunk corresponding to this key, in
+     * world unit (meters). */
+    vec3d getOffset(const NodeKey &key) const;
 
-    WorldZone getZone(const ChunkKey &id);
+    /** This method returns the chunk corresponding to this key. If the
+     * chunk does not exist it is created. */
+    Chunk &getChunkByKey(const NodeKey &key);
 
     /** @returns true if the chunk wasn't created yet */
-    bool createChunk(const ChunkKey &key);
+    bool createChunk(const NodeKey &key);
+
+    void addDecoratorInternal(IChunkDecorator *decorator);
 };
 
 
-/** Contains a reference to a chunk, and metadata from the
- * chunk system */
-class WORLDAPI_EXPORT LODGridChunkHandler : public IWorldZoneHandler {
-public:
-    LODGridChunkHandler(LODGridChunkSystem &system, const ChunkKey &id);
+template <typename T, typename... Args> T &LODGridChunkSystem::addDecorator(Args... args) {
+    T *decorator = new T(args...);
+    addDecoratorInternal(decorator);
+    return *decorator;
+}
 
-    LODGridChunkHandler(const LODGridChunkHandler &other);
-
-    ChunkKey getID() const override;
-
-    optional<WorldZone> getParent() const override;
-
-    vec3d getParentOffset() const override;
-
-    double getMinResolution() const override;
-
-    double getMaxResolution() const override;
-
-    vec3d getDimensions() const override;
-
-private:
-    LODGridChunkSystem &_system;
-    ChunkKey _id;
-
-    // PRE-CALCULATED DATA
-    LODGridCoordinates _coordinates;
-
-    friend class LODGridChunkSystem;
-};
 } // namespace world
 
 #endif // WORLD_CHUNKSYSTEM_H

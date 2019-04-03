@@ -1,6 +1,7 @@
 #include "FlatWorld.h"
 
-#include "world/terrain/Ground.h"
+#include "world/core/LODGridChunkSystem.h"
+#include "world/terrain/HeightmapGround.h"
 #include "world/tree/ForestLayer.h"
 #include "world/tree/SimpleTreeDecorator.h"
 
@@ -8,50 +9,37 @@ namespace world {
 
 class PFlatWorld {
 public:
-    PFlatWorld() {}
+    std::unique_ptr<GroundNode> _ground;
 
-    std::vector<std::unique_ptr<FlatWorldDecorator>> _chunkDecorators;
+    PFlatWorld() {}
 };
 
 FlatWorld *FlatWorld::createDemoFlatWorld() {
     FlatWorld *world = new FlatWorld();
 
-    world->addFlatWorldDecorator<ForestLayer>();
+    auto &chunkSystem = world->addPrimaryNode<LODGridChunkSystem>({0, 0, 0});
+    chunkSystem.addDecorator<ForestLayer>(world);
 
     return world;
 }
 
-FlatWorld::FlatWorld() : _internal(new PFlatWorld()) {
 
-    Ground &ground = setGround<Ground>();
+FlatWorld::FlatWorld() : _internal(new PFlatWorld()) {
+    auto &ground = setGround<HeightmapGround>();
     ground.setDefaultWorkerSet();
 }
 
 FlatWorld::~FlatWorld() { delete _internal; }
 
-IGround &FlatWorld::ground() { return *_ground; }
+IGround &FlatWorld::ground() { return *_internal->_ground; }
 
-void FlatWorld::collect(const WorldZone &zone, ICollector &collector,
+void FlatWorld::collect(ICollector &collector,
                         const IResolutionModel &resolutionModel) {
-    World::collect(zone, collector, resolutionModel);
-
-    ground().collectZone(zone, collector, resolutionModel);
+    World::collect(collector, resolutionModel);
 }
 
-void FlatWorld::onFirstExploration(const WorldZone &chunk) {
-    World::onFirstExploration(chunk);
-
-    for (auto &decorator : _internal->_chunkDecorators) {
-        decorator->decorate(*this, chunk);
-    }
+void FlatWorld::setGroundInternal(GroundNode *ground) {
+    _internal->_ground = std::unique_ptr<GroundNode>(ground);
 }
 
-void FlatWorld::setGroundInternal(IGround *ground) {
-    _ground = std::unique_ptr<IGround>(ground);
-}
-
-void FlatWorld::addFlatWorldDecoratorInternal(
-    world::FlatWorldDecorator *decorator) {
-    _internal->_chunkDecorators.emplace_back(decorator);
-}
 } // namespace world

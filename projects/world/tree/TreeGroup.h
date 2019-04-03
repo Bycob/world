@@ -3,7 +3,7 @@
 
 #include "world/core/WorldConfig.h"
 #include "world/core/World.h"
-#include "world/core/WorldObject.h"
+#include "world/core/WorldNode.h"
 #include "world/assets/Mesh.h"
 #include "Tree.h"
 
@@ -15,7 +15,7 @@ class PTreeGroup;
  * a single mesh. This is useful when the trees are really
  * far (ie a very low LOD) and you want to limit the number
  * of different objects in the scene. */
-class WORLDAPI_EXPORT TreeGroup : public WorldObject {
+class WORLDAPI_EXPORT TreeGroup : public WorldNode {
 public:
     TreeGroup();
 

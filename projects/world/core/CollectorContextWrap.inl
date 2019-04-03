@@ -12,24 +12,14 @@ inline ICollectorChannelBase *ICollectorChannel<T>::wrap(
 }
 
 inline CollectorContextWrap::CollectorContextWrap(ICollector &wrapped)
-        : _collector(wrapped), _currentChunk(false, ChunkKeys::none()),
-          _currentObject(false, ObjectKeys::defaultKey()), _keyOffset(0),
-          _offset() {}
-
-inline void CollectorContextWrap::setCurrentChunk(ChunkKey key) {
-    _currentChunk = std::make_pair(true, key);
-}
-
-inline void CollectorContextWrap::setCurrentObject(ObjectKey key) {
-    _currentObject = std::make_pair(true, key);
-}
+        : _collector(wrapped), _offset() {}
 
 inline void CollectorContextWrap::setOffset(const vec3d &offset) {
     _offset = offset;
 }
 
-inline void CollectorContextWrap::setKeyOffset(int keyOffset) {
-    _keyOffset = keyOffset;
+inline void CollectorContextWrap::setKeyPrefix(const ItemKey &key) {
+    _keyPrefix = key;
 }
 
 inline ICollectorChannelBase &CollectorContextWrap::getChannelByType(
@@ -57,10 +47,7 @@ inline bool CollectorContextWrap::hasChannelByType(size_t type) const {
 }
 
 inline ItemKey CollectorContextWrap::mutateKey(const ItemKey &key) const {
-    return ItemKeys::inWorld(
-        _currentChunk.first ? _currentChunk.second : std::get<0>(key),
-        _currentObject.first ? _currentObject.second : std::get<1>(key),
-        std::get<2>(key) + _keyOffset);
+    return ItemKeys::child(_keyPrefix, key.back());
 }
 
 inline vec3d CollectorContextWrap::getOffset() const { return _offset; }

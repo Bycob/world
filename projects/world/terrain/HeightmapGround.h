@@ -7,7 +7,6 @@
 #include <utility>
 #include <functional>
 
-#include "world/core/WorldZone.h"
 #include "world/core/TileSystem.h"
 #include "world/flat/IGround.h"
 #include "Terrain.h"
@@ -22,14 +21,14 @@ class PGround;
  * used on the WorldObjects : you can collect parts of the ground
  * by specifying which part of the world you're wanting to get
  * content from. */
-class WORLDAPI_EXPORT Ground : public IGround {
+class WORLDAPI_EXPORT HeightmapGround : public GroundNode {
 public:
     struct Tile;
 
-    Ground(double unitSize = 6000, double minAltitude = -2000,
+    HeightmapGround(double unitSize = 6000, double minAltitude = -2000,
            double maxAltitude = 4000);
 
-    ~Ground() override;
+    ~HeightmapGround() override;
 
     // PARAMETERS
     // TODO constraints
@@ -56,10 +55,10 @@ public:
     template <typename T, typename... Args> T &addWorker(Args &&... args);
 
     // EXPLORATION
-    double observeAltitudeAt(WorldZone zone, double x, double y) override;
+    double observeAltitudeAt(double x, double y, double resolution) override;
 
-    void collectZone(const WorldZone &zone, ICollector &collector,
-                     const IResolutionModel &resolutionModel);
+    void collect(ICollector &collector,
+                     const IResolutionModel &resolutionModel) override;
 
 private:
     PGround *_internal;
@@ -94,7 +93,7 @@ private:
 
 
     // ACCESS
-    Ground::Tile &provide(const TileCoordinates &key);
+    HeightmapGround::Tile &provide(const TileCoordinates &key);
 
     void registerAccess(const TileCoordinates &key, Tile &tile);
 
@@ -123,7 +122,7 @@ private:
     friend class GroundContext;
 };
 
-template <typename T, typename... Args> T &Ground::addWorker(Args &&... args) {
+template <typename T, typename... Args> T &HeightmapGround::addWorker(Args &&... args) {
     T *worker = new T(args...);
     addWorkerInternal(worker);
     return *worker;

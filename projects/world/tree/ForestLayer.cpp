@@ -1,27 +1,28 @@
 #include "ForestLayer.h"
 
+#include "world/core/Chunk.h"
 #include "TreeGroup.h"
 
 namespace world {
 
-ForestLayer::ForestLayer() : _rng(static_cast<u32>(time(NULL))) {}
+ForestLayer::ForestLayer(FlatWorld *flatWorld) : _rng(static_cast<u32>(time(NULL))), _flatWorld(flatWorld) {}
 
-void ForestLayer::decorate(FlatWorld &world, const WorldZone &zone) {
+void ForestLayer::decorate(Chunk &chunk) {
     // Check resolution
     const double resolution = 1;
-    const double minres = zone.getInfo().getMinResolution();
-    const double maxres = zone.getInfo().getMaxResolution();
+    const double minres = chunk.getMinResolution();
+    const double maxres = chunk.getMaxResolution();
 
     if (!(resolution >= minres && resolution < maxres)) {
         return;
     }
 
-    IGround &ground = world.ground();
+    IGround &ground = _flatWorld->ground();
 
     // Compute area
-    vec3d zoneSize = zone.getInfo().getDimensions();
-    vec3d zoneOffset = zone.getInfo().getAbsoluteOffset();
-    const double area = zoneSize.x * zoneSize.y;
+    vec3d chunkSize = chunk.getSize();
+    vec3d chunkOffset = chunk.getOffset();
+    const double area = chunkSize.x * chunkSize.y;
 
     // Max tree count
     std::uniform_real_distribution<double> stddistrib(0, 1);
@@ -37,27 +38,27 @@ void ForestLayer::decorate(FlatWorld &world, const WorldZone &zone) {
     randomPoints.reserve(maxTreeCount);
 
     // TODO use a method that includes a minimal distance between points
-    std::uniform_real_distribution<double> xdistrib(0, zoneSize.x);
-    std::uniform_real_distribution<double> ydistrib(0, zoneSize.y);
+    std::uniform_real_distribution<double> xdistrib(0, chunkSize.x);
+    std::uniform_real_distribution<double> ydistrib(0, chunkSize.y);
 
     for (u32 i = 0; i < maxTreeCount; ++i) {
         randomPoints.emplace_back(xdistrib(_rng), ydistrib(_rng));
     }
 
     // Populate trees
-    TreeGroup &treeGroup = world.addObject<TreeGroup>(zone);
+    TreeGroup &treeGroup = chunk.addChild<TreeGroup>();
     treeGroup.setPosition3D({0, 0, 0});
 
     for (auto &pt : randomPoints) {
-        const double altitude = ground.observeAltitudeAt(zone, pt.x, pt.y);
+        const double altitude = ground.observeAltitudeAt(pt.x, pt.y, resolution);
 
         // skip if altitude is not in this chunk
-        if (altitude < zoneOffset.z || altitude > zoneOffset.z + zoneSize.z) {
+        if (altitude < chunkOffset.z || altitude > chunkOffset.z + chunkSize.z) {
             continue;
         }
 
         if (stddistrib(_rng) < getDensityAtAltitude(altitude)) {
-            vec3d pos{pt.x, pt.y, altitude - zoneOffset.z};
+            vec3d pos{pt.x, pt.y, altitude - chunkOffset.z};
             treeGroup.addTree(pos);
         }
     }

@@ -6,18 +6,17 @@
 #include "IResolutionModel.h"
 #include "World.h"
 #include "ICollector.h"
-#include "ExplorationResult.h"
 
 namespace world {
 
-class WORLDAPI_EXPORT FirstPersonExplorer : public IResolutionModel {
+class WORLDAPI_EXPORT FirstPersonView : public IResolutionModel {
 public:
-    /** Build a FirstPersonExplorer with the given parameters.
+    /** Build a FirstPersonView with the given parameters.
      * @param eyeResolution the resolution of our eye
      * @param fov the field of view
      * @param punctumProximum The minimum distance under which we
      * cannot see. */
-    FirstPersonExplorer(double eyeResolution = 1000, double fov = 90,
+    FirstPersonView(double eyeResolution = 1000, double fov = 90,
                         double punctumProximum = 1);
 
     void setPosition(const vec3d &position);
@@ -30,18 +29,13 @@ public:
 
     void setFarDistance(double maxDistance);
 
-    double getResolutionAt(const vec3d &pos) const override;
+    vec3d getNearestPointIn(const BoundingBox &bbox) const;
 
-    double getResolutionAt(const WorldZone &zone,
-                           const vec3d &pos) const override;
+    double getResolutionAt(const vec3d &pos) const override;
 
     double getMaxResolutionIn(const BoundingBox &bbox) const override;
 
-    // TODO std::enableif
-    template <typename T, typename C>
-    void exploreAndCollect(T &world, C &collector);
-
-    void explore(World &world, ExplorationResult &result);
+    BoundingBox getBounds() const override;
 
 private:
     double _eyeResolution;
@@ -52,16 +46,7 @@ private:
      * curvature, for example. */
     double _farDistance;
     vec3d _position;
-
-    vec3d getNearestPointIn(const BoundingBox &bbox) const;
-
-    vec3d getChunkNearestPoint(const WorldZone &zone) const;
-
-    void exploreVertical(World &world, const WorldZone &zone,
-                         ExplorationResult &result);
 };
 } // namespace world
-
-#include "FirstPersonExplorer.inl"
 
 #endif // WORLD_FIRSTPERSONWORLDEXPLORER_H

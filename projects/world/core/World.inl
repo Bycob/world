@@ -3,14 +3,11 @@
 
 namespace world {
 
-template <typename T, typename... Args> T &World::addDecorator(Args... args) {
-    T *decorator = new T(args...);
-    addDecoratorInternal(decorator);
-    return *decorator;
-}
-
 template <typename T, typename... Args>
-T &World::addObject(const world::WorldZone &zone, Args... args) {
-    return getChunk(zone).addObject<T>(args...);
+T &World::addPrimaryNode(const vec3d &position, Args... args) {
+    T *node = new T(args...);
+    node->setPosition3D(position);
+    addPrimaryNodeInternal(node);
+    return *node;
 }
 } // namespace world

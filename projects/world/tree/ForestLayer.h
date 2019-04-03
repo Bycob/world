@@ -5,18 +5,21 @@
 
 #include <random>
 
+#include "world/core/IChunkDecorator.h"
 #include "world/flat/FlatWorld.h"
 
 namespace world {
 
-class WORLDAPI_EXPORT ForestLayer : public FlatWorldDecorator {
+class WORLDAPI_EXPORT ForestLayer : public IChunkDecorator {
 public:
-    ForestLayer();
+    ForestLayer(FlatWorld *world);
 
-    void decorate(FlatWorld &world, const WorldZone &zone) override;
+    void decorate(Chunk &chunk) override;
 
 private:
     std::mt19937 _rng;
+
+    FlatWorld *_flatWorld;
 
     /// Maximum possible density of trees, in tree.km^-2
     double _maxDensity = 5000;

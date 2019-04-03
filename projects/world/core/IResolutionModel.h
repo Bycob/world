@@ -17,10 +17,11 @@ public:
 
     virtual double getResolutionAt(const vec3d &coord) const = 0;
 
-    virtual double getResolutionAt(const WorldZone &zone,
-                                   const vec3d &coord) const = 0;
-
     virtual double getMaxResolutionIn(const BoundingBox &bbox) const = 0;
+
+    /** Bounds of the non-zero resolution zone. Everything outside of
+     * this box has a resolution of 0. */
+    virtual BoundingBox getBounds() const = 0;
 
 private:
 };

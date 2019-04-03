@@ -53,7 +53,7 @@ void TreeSkelettonGenerator::setWeight(const TreeParamd &weight) {
 }
 
 void TreeSkelettonGenerator::process(Tree &tree) {
-    Node<TreeInfo> *primaryNode = tree.getSkeletton().getPrimaryNode();
+    SkelettonNode<TreeInfo> *primaryNode = tree.getSkeletton().getPrimaryNode();
     TreeInfo &info = primaryNode->getInfo();
     info._weight = _rootWeight(TreeInfo(), info);
     info._size = info._weight;
@@ -70,7 +70,7 @@ void TreeSkelettonGenerator::process(Tree &tree) {
     forkNode(primaryNode->createChild(secondInfo));
 }
 
-void TreeSkelettonGenerator::forkNode(Node<TreeInfo> *node) {
+void TreeSkelettonGenerator::forkNode(SkelettonNode<TreeInfo> *node) {
     TreeInfo &parentInfo = node->getInfo();
     vec3d pos = parentInfo._position;
 
@@ -100,7 +100,7 @@ void TreeSkelettonGenerator::forkNode(Node<TreeInfo> *node) {
                 sin(childInfo._theta) * sin(childInfo._phi) * childInfo._size,
             pos.z + cos(childInfo._phi) * childInfo._size};
         // Ajout du noeud
-        Node<TreeInfo> *childNode = node->createChild(childInfo);
+        SkelettonNode<TreeInfo> *childNode = node->createChild(childInfo);
 
         forkNode(childNode);
     }

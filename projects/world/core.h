@@ -20,15 +20,14 @@
 #include "assets/ObjLoader.h"
 #include "assets/Scene.h"
 
-#include "core/IWorldDecorator.h"
+#include "world/core/IChunkDecorator.h"
 #include "core/WorldKeys.h"
 #include "core/World.h"
-#include "core/WorldObject.h"
+#include "world/core/WorldNode.h"
 #include "core/WorldFolder.h"
 
 #include "core/Chunk.h"
 #include "core/IChunkSystem.h"
-#include "core/WorldZone.h"
 #include "core/LODGridChunkSystem.h"
 #include "core/LODGridCoordinates.h"
 
@@ -38,7 +37,7 @@
 
 #include "core/IResolutionModel.h"
 #include "core/ResolutionModelContextWrap.h"
-#include "core/FirstPersonExplorer.h"
+#include "core/FirstPersonView.h"
 
 #include "core/ICloneable.h"
 #include "core/Memory.h"

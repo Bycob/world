@@ -1,4 +1,4 @@
-#include "Ground.h"
+#include "HeightmapGround.h"
 
 #include <memory>
 #include <list>
@@ -16,25 +16,25 @@
 
 namespace world {
 
-struct Ground::Tile {
+struct HeightmapGround::Tile {
     std::vector<optional<Terrain>> _cache;
     std::unique_ptr<Terrain> _final;
     std::unique_ptr<Mesh> _mesh;
     u64 _lastAccess;
 };
 
-using Tile = Ground::Tile;
+using Tile = HeightmapGround::Tile;
 
 // Utility class
 class GroundContext : public ITileContext {
 public:
     TileCoordinates _key;
     int _genID;
-    Ground &_ground;
+    HeightmapGround &_ground;
 
     bool _registerState = false;
 
-    GroundContext(Ground &ground, const TileCoordinates &key, int genID)
+    GroundContext(HeightmapGround &ground, const TileCoordinates &key, int genID)
             : _key(key), _genID(genID), _ground(ground) {}
 
     Terrain &getTerrain() const override {
@@ -96,7 +96,7 @@ public:
 // (Pour ce point, on generalisera peut-etre le system de chunk emboite
 // dans une classe avec des templates)
 
-Ground::Ground(double unitSize, double minAltitude, double maxAltitude)
+HeightmapGround::HeightmapGround(double unitSize, double minAltitude, double maxAltitude)
         : _internal(new PGround()), _minAltitude(minAltitude),
           _maxAltitude(maxAltitude),
           _tileSystem(5,
@@ -104,9 +104,9 @@ Ground::Ground(double unitSize, double minAltitude, double maxAltitude)
                             _terrainRes * _textureRes * 4, 0),
                       vec3d(unitSize, unitSize, 0)) {}
 
-Ground::~Ground() { delete _internal; }
+HeightmapGround::~HeightmapGround() { delete _internal; }
 
-void Ground::setDefaultWorkerSet() {
+void HeightmapGround::setDefaultWorkerSet() {
     addWorker<PerlinTerrainGenerator>(3, 4., 0.35);
     addWorker<CustomWorldRMModifier>();
 
@@ -128,41 +128,39 @@ void Ground::setDefaultWorkerSet() {
     colorMap.setOrder(3);
 }
 
-double Ground::observeAltitudeAt(WorldZone zone, double x, double y) {
-    int lvl = _tileSystem.getLod(zone.getInfo().getMaxResolution());
-    vec3d offset = zone->getAbsoluteOffset();
-    return observeAltitudeAt(offset.x + x, offset.y + y, lvl);
+double HeightmapGround::observeAltitudeAt(double x, double y, double resolution) {
+    int lvl = _tileSystem.getLod(resolution);
+    return observeAltitudeAt(x, y, lvl);
 }
 
-void Ground::collectZone(const WorldZone &zone, ICollector &collector,
+void HeightmapGround::collect(ICollector &collector,
                          const IResolutionModel &resolutionModel) {
-    if (zone.getInfo().getParent().has_value())
-        return;
 
-    vec3d offset = zone->getAbsoluteOffset();
-    vec3d chunkSize = zone->getDimensions();
+
+    BoundingBox bbox = resolutionModel.getBounds();
 
     // Tune altitude for the resolution model
-    double estimAltitude = observeAltitudeAt(offset.x + chunkSize.x / 2,
+    /*double estimAltitude = observeAltitudeAt(offset.x + chunkSize.x / 2,
                                              offset.y + chunkSize.y / 2, 0);
 
     ResolutionModelContextWrap wresModel(resolutionModel);
-    wresModel.setOffset({0, 0, estimAltitude});
+    wresModel.setOffset({0, 0, estimAltitude});*/
 
     // Find terrains to generate
-    for (auto it = _tileSystem.iterate(wresModel, zone); !it.endReached();
+    for (auto it = _tileSystem.iterate(resolutionModel, bbox); !it.endReached();
          ++it) {
+
         addTerrain(*it, collector);
     }
 
     updateCache();
 }
 
-void Ground::addWorkerInternal(ITerrainWorker *worker) {
+void HeightmapGround::addWorkerInternal(ITerrainWorker *worker) {
     _internal->_generators.push_back(std::unique_ptr<ITerrainWorker>(worker));
 }
 
-double Ground::observeAltitudeAt(double x, double y, int lvl) {
+double HeightmapGround::observeAltitudeAt(double x, double y, int lvl) {
     TileCoordinates key = _tileSystem.getTileCoordinates({x, y, 0}, lvl);
     vec3d inTile = _tileSystem.getLocalCoordinates({x, y, 0}, lvl);
 
@@ -173,11 +171,10 @@ double Ground::observeAltitudeAt(double x, double y, int lvl) {
 }
 
 inline ItemKey terrainToItem(const std::string &key) {
-    return ItemKeys::inWorld(std::string("_") + key, ObjectKeys::defaultKey(),
-                             0);
+    return ItemKeys::root(std::string("_") + key);
 }
 
-void Ground::addTerrain(const TileCoordinates &key, ICollector &collector) {
+void HeightmapGround::addTerrain(const TileCoordinates &key, ICollector &collector) {
     ItemKey itemKey = terrainToItem(getTerrainDataId(key));
     Terrain &terrain = this->provideTerrain(key);
 
@@ -222,7 +219,7 @@ void Ground::addTerrain(const TileCoordinates &key, ICollector &collector) {
     }
 }
 
-void Ground::updateCache() {
+void HeightmapGround::updateCache() {
     if (_internal->_terrains.size() > _maxCacheSize) {
 
         // We shrink one third of the memory
@@ -245,7 +242,7 @@ void Ground::updateCache() {
     }
 }
 
-Tile &Ground::provide(const TileCoordinates &key) {
+Tile &HeightmapGround::provide(const TileCoordinates &key) {
     auto it = _internal->_terrains.find(key);
 
     if (it == _internal->_terrains.end()) {
@@ -257,7 +254,7 @@ Tile &Ground::provide(const TileCoordinates &key) {
     return it->second;
 }
 
-void Ground::registerAccess(const TileCoordinates &key, Tile &tile) {
+void HeightmapGround::registerAccess(const TileCoordinates &key, Tile &tile) {
     _internal->_accessCounter++;
 
     // Remove last access entry for this tile
@@ -276,11 +273,11 @@ void Ground::registerAccess(const TileCoordinates &key, Tile &tile) {
     }
 }
 
-Terrain &Ground::provideTerrain(const TileCoordinates &key) {
+Terrain &HeightmapGround::provideTerrain(const TileCoordinates &key) {
     return *provide(key)._final;
 }
 
-Mesh &Ground::provideMesh(const TileCoordinates &key) {
+Mesh &HeightmapGround::provideMesh(const TileCoordinates &key) {
     auto &meshPtr = provide(key)._mesh;
 
     if (!meshPtr) {
@@ -290,7 +287,7 @@ Mesh &Ground::provideMesh(const TileCoordinates &key) {
     return *meshPtr;
 }
 
-optional<Terrain &> Ground::getCachedTerrain(const TileCoordinates &key,
+optional<Terrain &> HeightmapGround::getCachedTerrain(const TileCoordinates &key,
                                              int genID) {
     auto it = _internal->_terrains.find(key);
 
@@ -302,14 +299,14 @@ optional<Terrain &> Ground::getCachedTerrain(const TileCoordinates &key,
     }
 }
 
-std::string Ground::getTerrainDataId(const TileCoordinates &key) const {
+std::string HeightmapGround::getTerrainDataId(const TileCoordinates &key) const {
     u64 id = static_cast<u64>(key._pos.x & 0x0FFFFFFFu) +
              (static_cast<u64>(key._pos.y & 0x0FFFFFFFu) << 24u) +
              (static_cast<u64>(key._lod & 0xFFu) << 48u);
     return std::to_string(id);
 }
 
-void Ground::generateTerrain(const TileCoordinates &key) {
+void HeightmapGround::generateTerrain(const TileCoordinates &key) {
     // Ensure that parent was created
     if (key._lod != 0) {
         provide(_tileSystem.getParentTileCoordinates(key));
@@ -349,7 +346,7 @@ void Ground::generateTerrain(const TileCoordinates &key) {
     }
 }
 
-void Ground::generateMesh(const TileCoordinates &key) {
+void HeightmapGround::generateMesh(const TileCoordinates &key) {
     // Find required terrains
     Terrain *terrains[3][3];
 

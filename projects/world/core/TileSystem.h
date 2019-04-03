@@ -5,7 +5,6 @@
 
 #include "world/math/Vector.h"
 #include "IResolutionModel.h"
-#include "WorldZone.h"
 
 namespace world {
 
@@ -89,13 +88,8 @@ public:
         const TileCoordinates &childCoordinates) const;
 
     /** Iterates over all the visible tiles in the given resolution model,
-     * inside of the given zone. Iterated tiles are sorted as if operator< was
-     * used. */
-    TileSystemIterator iterate(const IResolutionModel &resolutionModel,
-                               const WorldZone &zone) const;
-
-    /** Iterates over all the visible tiles in the given resolution model,
-     * inside of the zone delimited by the given bounds. */
+     * inside of the zone delimited by the given bounds. Iterated tiles
+     * are sorted as if operator< was used. */
     TileSystemIterator iterate(const IResolutionModel &resolutionModel,
                                const BoundingBox &bounds) const;
 
@@ -120,10 +114,6 @@ class WORLDAPI_EXPORT TileSystemIterator {
 public:
     TileSystemIterator(const TileSystem &tileSystem,
                        const IResolutionModel &resolutionModel,
-                       const WorldZone &bounds);
-
-    TileSystemIterator(const TileSystem &tileSystem,
-                       const IResolutionModel &resolutionModel,
                        const BoundingBox &bounds);
 
     void operator++();
@@ -142,6 +132,7 @@ private:
     TileCoordinates _min;
     TileCoordinates _max;
     bool _endReached = false;
+
 
     // Increments current tile coordinates without taking the resolution model
     // into account.
