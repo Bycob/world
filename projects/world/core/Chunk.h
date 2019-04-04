@@ -34,8 +34,6 @@ public:
 
     const vec3d &getOffset() const { return _offset; }
 
-    void collect(ICollector &collector, const IResolutionModel &explorer) override;
-
 private:
     double _minResolution = 0;
     double _maxResolution = 1e100;

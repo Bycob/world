@@ -37,7 +37,7 @@ const Mesh &Tree::getLeavesMesh() const { return _leavesMesh; }
 
 Mesh &Tree::leavesMesh() { return _leavesMesh; }
 
-void Tree::collect(ICollector &collector, const IResolutionModel &explorer) {
+void Tree::collect(ICollector &collector, const IResolutionModel &explorer, const ExplorationContext &ctx) {
 
     // Generation
     if (!_generated) {
@@ -61,12 +61,12 @@ void Tree::collect(ICollector &collector, const IResolutionModel &explorer) {
             mainPart.setMaterialID(ItemKeys::toString(ItemKeys::root("1")));
             leaves.setMaterialID(ItemKeys::toString(ItemKeys::root("2")));
 
-            materialsChannel.put(ItemKeys::root("1"), _trunkMaterial);
-            materialsChannel.put(ItemKeys::root("2"), leavesMat);
+            materialsChannel.put(ItemKeys::root("1"), _trunkMaterial, ctx);
+            materialsChannel.put(ItemKeys::root("2"), leavesMat, ctx);
         }
 
-        objectsChannel.put(ItemKeys::root("1"), mainPart);
-        objectsChannel.put(ItemKeys::root("2"), leaves);
+        objectsChannel.put(ItemKeys::root("1"), mainPart, ctx);
+        objectsChannel.put(ItemKeys::root("2"), leaves, ctx);
     }
 }
 

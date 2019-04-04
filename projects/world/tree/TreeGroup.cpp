@@ -21,7 +21,7 @@ TreeGroup::~TreeGroup() {}
 void TreeGroup::addTree(const vec3d &pos) { _treesPositions.push_back(pos); }
 
 void TreeGroup::collect(ICollector &collector,
-                        const IResolutionModel &resolutionModel) {
+                        const IResolutionModel &resolutionModel, const ExplorationContext &ctx) {
 
     // we choose the render mode of the tree group : 0:none / 1:together / 2:per
     // tree
@@ -65,13 +65,13 @@ void TreeGroup::collect(ICollector &collector,
                 leavesObj.setMaterialID(
                     ItemKeys::toString(ItemKeys::root("2")));
 
-                matChannel.put(ItemKeys::root("1"), trunkMaterial);
-                matChannel.put(ItemKeys::root("2"), leafMaterial);
+                matChannel.put(ItemKeys::root("1"), trunkMaterial, ctx);
+                matChannel.put(ItemKeys::root("2"), leafMaterial, ctx);
             }
 
             auto &objChannel = collector.getChannel<Object3D>();
-            objChannel.put(ItemKeys::root("1"), trunksObj);
-            objChannel.put(ItemKeys::root("2"), leavesObj);
+            objChannel.put(ItemKeys::root("1"), trunksObj, ctx);
+            objChannel.put(ItemKeys::root("2"), leavesObj, ctx);
         }
 
         break;
@@ -83,7 +83,7 @@ void TreeGroup::collect(ICollector &collector,
             }
 
             Tree &tree = *_internal->_trees.at(i);
-            collectChild(NodeKeys::fromUint(i), tree, collector, resolutionModel);
+            collectChild(NodeKeys::fromUint(i), tree, collector, resolutionModel, ctx);
         }
 
         break;

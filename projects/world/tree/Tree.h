@@ -38,7 +38,7 @@ public:
     Mesh &leavesMesh();
 
     void collect(ICollector &collector,
-                 const IResolutionModel &explorer) override;
+                 const IResolutionModel &explorer, const ExplorationContext &ctx) override;
 
 private:
     PTree *_internal;

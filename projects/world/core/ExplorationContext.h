@@ -11,9 +11,18 @@ namespace world {
 
 class WORLDAPI_EXPORT ExplorationContext {
 public:
+    static ExplorationContext &getDefault();
+
+
     ExplorationContext();
 
+    void addOffset(const vec3d &offset);
 
+    void appendPrefix(const NodeKey &prefix);
+
+    ItemKey mutateKey(const ItemKey &key) const;
+
+    vec3d getOffset() const;
 private:
     ItemKey _keyPrefix;
     vec3d _offset;

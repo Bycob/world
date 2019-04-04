@@ -4,7 +4,6 @@
 #include <list>
 
 #include "world/core/WorldTypes.h"
-#include "world/core/ResolutionModelContextWrap.h"
 #include "world/assets/Object3D.h"
 #include "world/assets/Material.h"
 #include "world/math/MathsHelper.h"

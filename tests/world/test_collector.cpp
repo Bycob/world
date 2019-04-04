@@ -28,7 +28,7 @@ TEST_CASE("ItemKeys", "[collector]") {
     }*/
 }
 
-
+/*
 template <typename T> class TestCollectorChannel : public ICollectorChannel<T> {
 public:
     void put(const ItemKey &key, const T &item) override { _lastAdded = key; }
@@ -50,7 +50,7 @@ inline void TestCollectorChannel<Object3D>::put(const ItemKey &key,
     _lastAddedPosition = item.getPosition();
     _lastAddedMatId = item.getMaterialID();
 }
-
+*/
 TEST_CASE("Collector", "[collector]") {
     Collector collector;
     collector.addStorageChannel<Object3D>();
@@ -60,13 +60,13 @@ TEST_CASE("Collector", "[collector]") {
 }
 
 TEST_CASE("CollectorContextWrap", "[collector]") {
-    Collector collector;
+    /*Collector collector;
     auto &objChan =
         collector.addCustomChannel<Object3D, TestCollectorChannel<Object3D>>();
     CollectorContextWrap wcollector(collector);
     auto &wobjChan = wcollector.getChannel<Object3D>();
 
-    /*NodeKey chunkKey("001122");
+    NodeKey chunkKey("001122");
     ObjectKey objKey(2);
     vec3d offset{1, 1, 1};
 

@@ -2,10 +2,8 @@
 
 #include <map>
 
-#include "CollectorContextWrap.h"
 #include "world/flat/FlatWorld.h"
 #include "LODGridChunkSystem.h"
-#include "ResolutionModelContextWrap.h"
 
 namespace world {
 
@@ -34,10 +32,11 @@ void World::collect(ICollector &collector,
                     const IResolutionModel &resolutionModel) {
 
     for (auto &entry : _internal->_primaryNodes) {
-        CollectorContextWrap wcollector(collector);
-        wcollector.setKeyPrefix(ItemKeys::root(entry.first));
+        ExplorationContext ctx;
+        ctx.appendPrefix(entry.first);
+        ctx.addOffset(entry.second->getPosition3D());
 
-        entry.second->collect(collector, resolutionModel);
+        entry.second->collect(collector, resolutionModel, ctx);
     }
 }
 

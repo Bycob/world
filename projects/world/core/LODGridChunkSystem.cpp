@@ -134,7 +134,7 @@ void LODGridChunkSystem::collect(ICollector &collector, const IResolutionModel &
 }
 
 void LODGridChunkSystem::collectChunk(const NodeKey &chunkKey, world::ICollector &collector,
-                                      const world::IResolutionModel &resolutionModel) {
+                                      const IResolutionModel &resolutionModel) {
 
     LODGridCoordinates coords = dropLastPart(chunkKey);
     LODData &lodData = getLODData(coords.getLOD());
@@ -147,13 +147,12 @@ void LODGridChunkSystem::collectChunk(const NodeKey &chunkKey, world::ICollector
         Chunk &chunk = getChunkByKey(chunkKey);
 
         // Collect current chunk
-        CollectorContextWrap wcollector(collector);
-        wcollector.setKeyPrefix(ItemKeys::root(chunkKey));
+        ExplorationContext ctx;
+        ctx.appendPrefix(chunkKey);
 
-        chunk.collect(wcollector, resolutionModel);
+        chunk.collect(collector, resolutionModel, ctx);
 
         // Collect the children if they exist
-
         if (coords.getLOD() < _maxLOD) {
             int lod = coords.getLOD() + 1;
 

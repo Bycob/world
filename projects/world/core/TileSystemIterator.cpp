@@ -57,13 +57,36 @@ void TileSystemIterator::startLod(int lod) {
     _current = _min;
 }
 
-inline void expandDimension(BoundingBox &bbox) {}
+inline void expandDimension(BoundingBox &bbox) {
+    auto lower = bbox.getLowerBound();
+    auto upper = bbox.getUpperBound();
+    auto size = bbox.getDimensions();
+
+    if (abs(size.x) < std::numeric_limits<double>::epsilon()) {
+        lower.x = -std::numeric_limits<double>::max();
+        upper.x = std::numeric_limits<double>::max();
+    }
+
+    if (abs(size.y) < std::numeric_limits<double>::epsilon()) {
+        lower.y = -std::numeric_limits<double>::max();
+        upper.y = std::numeric_limits<double>::max();
+    }
+
+    if (abs(size.z) < std::numeric_limits<double>::epsilon()) {
+        lower.z = -std::numeric_limits<double>::max();
+        upper.z = std::numeric_limits<double>::max();
+    }
+
+    bbox.reset(lower, upper);
+}
 
 bool TileSystemIterator::isTileRequired(TileCoordinates coordinates) {
     vec3d lower = _tileSystem.getTileOffset(coordinates);
     vec3d upper = lower + _tileSystem.getTileSize(coordinates._lod);
+    BoundingBox bbox {lower, upper};
+    expandDimension(bbox);
     double resolutionInTile =
-        _resolutionModel.getMaxResolutionIn({lower, upper});
+        _resolutionModel.getMaxResolutionIn(bbox);
     int refLod = _tileSystem.getLod(resolutionInTile);
 
     if (coordinates._lod >= refLod) {

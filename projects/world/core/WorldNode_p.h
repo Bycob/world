@@ -1,6 +1,9 @@
 #ifndef WORLD_WORLDNODE_P_H
 #define WORLD_WORLDNODE_P_H
 
+#include <map>
+#include <memory>
+
 namespace world{
 
         class WorldNodePrivate {

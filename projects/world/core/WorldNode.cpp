@@ -7,8 +7,6 @@
 #include "LODGridChunkSystem.h"
 #include "Collector.h"
 #include "IResolutionModel.h"
-#include "world/core/CollectorContextWrap.h"
-#include "world/core/ResolutionModelContextWrap.h"
 
 namespace world {
 
@@ -44,25 +42,21 @@ void WorldNode::collectAll(ICollector &collector, double resolution) {
 }
 
 void WorldNode::collect(ICollector &collector,
-                          const IResolutionModel &resolutionModel) {
+                          const IResolutionModel &resolutionModel, const ExplorationContext &ctx) {
 
     for (auto &entry : _internal->_children) {
-        collectChild(entry.first, *entry.second, collector, resolutionModel);
+        collectChild(entry.first, *entry.second, collector, resolutionModel, ctx);
     }
 }
 
 void WorldNode::collectChild(const NodeKey &key, WorldNode &childObject,
                                ICollector &collector,
-                               const IResolutionModel &resolutionModel) {
+                               const IResolutionModel &resolutionModel, const ExplorationContext &ctx) {
+    ExplorationContext newCtx = ctx;
+    newCtx.appendPrefix(key);
+    newCtx.addOffset(childObject.getPosition3D());
 
-    CollectorContextWrap wcollector(collector);
-    wcollector.setKeyPrefix(ItemKeys::root(key));
-    wcollector.setOffset(childObject.getPosition3D());
-
-    ResolutionModelContextWrap wresolutionModel(resolutionModel);
-    wresolutionModel.setOffset(childObject.getPosition3D());
-
-    childObject.collect(wcollector, wresolutionModel);
+    childObject.collect(collector, resolutionModel, newCtx);
 }
 
 void WorldNode::addChildInternal(WorldNode *node) {

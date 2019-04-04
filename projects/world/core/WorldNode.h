@@ -23,8 +23,12 @@ public:
 
     void collectAll(ICollector &collector, double resolution);
 
+    virtual void collect(ICollector &collector, const IResolutionModel &resolutionModel) {
+        collect(collector, resolutionModel, ExplorationContext::getDefault());
+    }
+
     virtual void collect(ICollector &collector,
-                         const IResolutionModel &resolutionModel);
+                         const IResolutionModel &resolutionModel, const ExplorationContext &ctx);
 
 
     template <typename T, typename... Args> T &addChild(Args... args);
@@ -33,7 +37,7 @@ protected:
 
     vec3d _position;
 
-    void collectChild(const NodeKey &key, WorldNode &child, ICollector &collector, const IResolutionModel &resolutionModel);
+    void collectChild(const NodeKey &key, WorldNode &child, ICollector &collector, const IResolutionModel &resolutionModel, const ExplorationContext &ctx);
 
 private:
     void addChildInternal(WorldNode *child);

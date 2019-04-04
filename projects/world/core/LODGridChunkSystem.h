@@ -3,6 +3,7 @@
 
 #include "world/core/WorldConfig.h"
 
+#include "WorldTypes.h"
 #include "WorldNode.h"
 #include "IChunkSystem.h"
 #include "Chunk.h"
