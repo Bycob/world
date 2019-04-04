@@ -61,19 +61,25 @@ public:
      * @param key a key referencing the provided item in the library.
      * #has, #remove and #get use the same key to reference this object.
      * @param item */
-    virtual void put(const ItemKey &key, const T &item, const ExplorationContext &ctx = ExplorationContext::getDefault()) = 0;
+    virtual void put(
+        const ItemKey &key, const T &item,
+        const ExplorationContext &ctx = ExplorationContext::getDefault()) = 0;
 
     /** Returns true when the channel already has an item
      * associated to the given key.
      * @param key same key as in #put method.
      * @return  */
-    virtual bool has(const ItemKey &key, const ExplorationContext &ctx = ExplorationContext::getDefault()) const = 0;
+    virtual bool has(const ItemKey &key,
+                     const ExplorationContext &ctx =
+                         ExplorationContext::getDefault()) const = 0;
 
     /** Notices the channel that the item at the given key does
      * not belong to the collected assets anymore and should be
      * removed.
      * @param key same key as in #put. */
-    virtual void remove(const ItemKey &key, const ExplorationContext &ctx = ExplorationContext::getDefault()) = 0;
+    virtual void remove(
+        const ItemKey &key,
+        const ExplorationContext &ctx = ExplorationContext::getDefault()) = 0;
 };
 
 

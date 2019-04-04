@@ -4,8 +4,8 @@
 
 namespace world {
 
-    class World;
-    class Chunk;
+class World;
+class Chunk;
 
 /** This object is used to populate newly created chunks. */
 class IChunkDecorator {

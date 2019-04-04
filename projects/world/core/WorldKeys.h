@@ -39,9 +39,7 @@ struct WORLDAPI_EXPORT ItemKeys {
         return childKey;
     }
 
-    static ItemKey defaultKey() {
-        return {};
-    }
+    static ItemKey defaultKey() { return {}; }
 
     static ItemKey fromString(const std::string &str) {
         ItemKey result;
@@ -54,16 +52,14 @@ struct WORLDAPI_EXPORT ItemKeys {
 
             if (sep == std::string::npos) {
                 keystr = str.substr(sep);
-            }
-            else {
+            } else {
                 keystr = str.substr(start, sep - start);
                 start = sep + 1;
             }
 
             try {
                 result.push_back(NodeKeys::fromString(keystr));
-            }
-            catch (std::invalid_argument &e) {
+            } catch (std::invalid_argument &e) {
                 throw e;
             }
         }

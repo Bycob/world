@@ -10,9 +10,9 @@
 
 namespace world {
 
-SimpleTreeDecorator::SimpleTreeDecorator(FlatWorld *flatWorld, int maxTreesPerChunk)
-        : _flatWorld(flatWorld),
-        _maxTreesPerChunk(maxTreesPerChunk),
+SimpleTreeDecorator::SimpleTreeDecorator(FlatWorld *flatWorld,
+                                         int maxTreesPerChunk)
+        : _flatWorld(flatWorld), _maxTreesPerChunk(maxTreesPerChunk),
           _rng(static_cast<u32>(time(NULL))) {
 
     auto &skeletton = _model.addWorker<TreeSkelettonGenerator>();

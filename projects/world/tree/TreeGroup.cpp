@@ -21,7 +21,8 @@ TreeGroup::~TreeGroup() {}
 void TreeGroup::addTree(const vec3d &pos) { _treesPositions.push_back(pos); }
 
 void TreeGroup::collect(ICollector &collector,
-                        const IResolutionModel &resolutionModel, const ExplorationContext &ctx) {
+                        const IResolutionModel &resolutionModel,
+                        const ExplorationContext &ctx) {
 
     // we choose the render mode of the tree group : 0:none / 1:together / 2:per
     // tree
@@ -83,7 +84,8 @@ void TreeGroup::collect(ICollector &collector,
             }
 
             Tree &tree = *_internal->_trees.at(i);
-            collectChild(NodeKeys::fromUint(i), tree, collector, resolutionModel, ctx);
+            collectChild(NodeKeys::fromUint(i), tree, collector,
+                         resolutionModel, ctx);
         }
 
         break;

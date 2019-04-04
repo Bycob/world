@@ -5,7 +5,8 @@
 
 namespace world {
 
-ForestLayer::ForestLayer(FlatWorld *flatWorld) : _rng(static_cast<u32>(time(NULL))), _flatWorld(flatWorld) {}
+ForestLayer::ForestLayer(FlatWorld *flatWorld)
+        : _rng(static_cast<u32>(time(NULL))), _flatWorld(flatWorld) {}
 
 void ForestLayer::decorate(Chunk &chunk) {
     // Check resolution
@@ -50,10 +51,12 @@ void ForestLayer::decorate(Chunk &chunk) {
     treeGroup.setPosition3D({0, 0, 0});
 
     for (auto &pt : randomPoints) {
-        const double altitude = ground.observeAltitudeAt(pt.x, pt.y, resolution);
+        const double altitude =
+            ground.observeAltitudeAt(pt.x, pt.y, resolution);
 
         // skip if altitude is not in this chunk
-        if (altitude < chunkOffset.z || altitude > chunkOffset.z + chunkSize.z) {
+        if (altitude < chunkOffset.z ||
+            altitude > chunkOffset.z + chunkSize.z) {
             continue;
         }
 

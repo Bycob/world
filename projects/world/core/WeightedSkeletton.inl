@@ -8,7 +8,8 @@
 namespace world {
 
 template <class T>
-SkelettonNode<T>::SkelettonNode(const T &info) : _info(info), _parent(nullptr) {}
+SkelettonNode<T>::SkelettonNode(const T &info)
+        : _info(info), _parent(nullptr) {}
 
 template <class T> SkelettonNode<T>::~SkelettonNode() {
     // Passage en suppression
@@ -43,27 +44,33 @@ template <class T> void SkelettonNode<T>::addChild(SkelettonNode<T> *child) {
     child->_parent = this;
 }
 
-template <class T> SkelettonNode<T> *SkelettonNode<T>::createChild(const T &info) {
+template <class T>
+SkelettonNode<T> *SkelettonNode<T>::createChild(const T &info) {
     SkelettonNode<T> *node = new SkelettonNode<T>(info);
     addChild(node);
     return node;
 }
 
-template <class T> void SkelettonNode<T>::addNeighbour(SkelettonNode<T> *neighbour) {
+template <class T>
+void SkelettonNode<T>::addNeighbour(SkelettonNode<T> *neighbour) {
     _children_or_neighbour.push_back(neighbour);
     neighbour->_children_or_neighbour.push_back(this);
 }
 
-template <class T> SkelettonNode<T> *SkelettonNode<T>::createNeighbour(const T &info) {
+template <class T>
+SkelettonNode<T> *SkelettonNode<T>::createNeighbour(const T &info) {
     SkelettonNode<T> *node = new SkelettonNode<T>(info);
     addNeighbour(node);
     return node;
 }
 
-template <class T> SkelettonNode<T> *SkelettonNode<T>::getParent() const { return _parent; }
+template <class T> SkelettonNode<T> *SkelettonNode<T>::getParent() const {
+    return _parent;
+}
 
 template <class T>
-std::vector<SkelettonNode<T> *> SkelettonNode<T>::getChildrenOrNeighboursList() const {
+std::vector<SkelettonNode<T> *> SkelettonNode<T>::getChildrenOrNeighboursList()
+    const {
     std::vector<SkelettonNode<T> *> result;
 
     for (auto value : _children_or_neighbour) {
@@ -74,11 +81,13 @@ std::vector<SkelettonNode<T> *> SkelettonNode<T>::getChildrenOrNeighboursList() 
 }
 
 template <class T>
-WeightedSkeletton<T>::WeightedSkeletton() : _primaryNode(new SkelettonNode<T>(T())) {}
+WeightedSkeletton<T>::WeightedSkeletton()
+        : _primaryNode(new SkelettonNode<T>(T())) {}
 
 template <class T> WeightedSkeletton<T>::~WeightedSkeletton() {}
 
-template <class T> std::vector<SkelettonNode<T> *> WeightedSkeletton<T>::getNodeList() {
+template <class T>
+std::vector<SkelettonNode<T> *> WeightedSkeletton<T>::getNodeList() {
     std::vector<SkelettonNode<T> *> result;
 
     SkelettonNode<T> *workingNode = _primaryNode.get();
@@ -101,7 +110,8 @@ template <class T> Mesh *WeightedSkeletton<T>::convertToMesh() {
     return mesh;
 }
 
-template <class T> void WeightedSkeletton<T>::resetNode(SkelettonNode<T> *node) {
+template <class T>
+void WeightedSkeletton<T>::resetNode(SkelettonNode<T> *node) {
     node->_mark = false;
     node->_id = 0;
 
@@ -151,8 +161,8 @@ void WeightedSkeletton<T>::populateMesh(Mesh *mesh, SkelettonNode<T> *node) {
 }
 
 template <class T>
-void WeightedSkeletton<T>::populateVector(std::vector<SkelettonNode<T> *> &vector,
-                                          SkelettonNode<T> *node) {
+void WeightedSkeletton<T>::populateVector(
+    std::vector<SkelettonNode<T> *> &vector, SkelettonNode<T> *node) {
     vector.push_back(node);
     node->_mark = true;
 

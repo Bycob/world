@@ -83,10 +83,9 @@ inline void expandDimension(BoundingBox &bbox) {
 bool TileSystemIterator::isTileRequired(TileCoordinates coordinates) {
     vec3d lower = _tileSystem.getTileOffset(coordinates);
     vec3d upper = lower + _tileSystem.getTileSize(coordinates._lod);
-    BoundingBox bbox {lower, upper};
+    BoundingBox bbox{lower, upper};
     expandDimension(bbox);
-    double resolutionInTile =
-        _resolutionModel.getMaxResolutionIn(bbox);
+    double resolutionInTile = _resolutionModel.getMaxResolutionIn(bbox);
     int refLod = _tileSystem.getLod(resolutionInTile);
 
     if (coordinates._lod >= refLod) {

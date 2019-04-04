@@ -23,8 +23,8 @@ public:
 
     void addTree(const vec3d &pos);
 
-    void collect(ICollector &collector,
-                 const IResolutionModel &resolutionModel, const ExplorationContext &ctx) override;
+    void collect(ICollector &collector, const IResolutionModel &resolutionModel,
+                 const ExplorationContext &ctx) override;
 
 private:
     PTreeGroup *_internal;

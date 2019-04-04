@@ -33,7 +33,8 @@ public:
 
     bool _registerState = false;
 
-    GroundContext(HeightmapGround &ground, const TileCoordinates &key, int genID)
+    GroundContext(HeightmapGround &ground, const TileCoordinates &key,
+                  int genID)
             : _key(key), _genID(genID), _ground(ground) {}
 
     Terrain &getTerrain() const override {
@@ -95,7 +96,8 @@ public:
 // (Pour ce point, on generalisera peut-etre le system de chunk emboite
 // dans une classe avec des templates)
 
-HeightmapGround::HeightmapGround(double unitSize, double minAltitude, double maxAltitude)
+HeightmapGround::HeightmapGround(double unitSize, double minAltitude,
+                                 double maxAltitude)
         : _internal(new PGround()), _minAltitude(minAltitude),
           _maxAltitude(maxAltitude),
           _tileSystem(5,
@@ -127,13 +129,14 @@ void HeightmapGround::setDefaultWorkerSet() {
     colorMap.setOrder(3);
 }
 
-double HeightmapGround::observeAltitudeAt(double x, double y, double resolution) {
+double HeightmapGround::observeAltitudeAt(double x, double y,
+                                          double resolution) {
     int lvl = _tileSystem.getLod(resolution);
     return observeAltitudeAt(x, y, lvl);
 }
 
 void HeightmapGround::collect(ICollector &collector,
-                         const IResolutionModel &resolutionModel) {
+                              const IResolutionModel &resolutionModel) {
 
 
     BoundingBox bbox = resolutionModel.getBounds();
@@ -173,7 +176,8 @@ inline ItemKey terrainToItem(const std::string &key) {
     return ItemKeys::root(std::string("_") + key);
 }
 
-void HeightmapGround::addTerrain(const TileCoordinates &key, ICollector &collector) {
+void HeightmapGround::addTerrain(const TileCoordinates &key,
+                                 ICollector &collector) {
     ItemKey itemKey = terrainToItem(getTerrainDataId(key));
     Terrain &terrain = this->provideTerrain(key);
 
@@ -286,8 +290,8 @@ Mesh &HeightmapGround::provideMesh(const TileCoordinates &key) {
     return *meshPtr;
 }
 
-optional<Terrain &> HeightmapGround::getCachedTerrain(const TileCoordinates &key,
-                                             int genID) {
+optional<Terrain &> HeightmapGround::getCachedTerrain(
+    const TileCoordinates &key, int genID) {
     auto it = _internal->_terrains.find(key);
 
     if (it == _internal->_terrains.end()) {
@@ -298,7 +302,8 @@ optional<Terrain &> HeightmapGround::getCachedTerrain(const TileCoordinates &key
     }
 }
 
-std::string HeightmapGround::getTerrainDataId(const TileCoordinates &key) const {
+std::string HeightmapGround::getTerrainDataId(
+    const TileCoordinates &key) const {
     u64 id = static_cast<u64>(key._pos.x & 0x0FFFFFFFu) +
              (static_cast<u64>(key._pos.y & 0x0FFFFFFFu) << 24u) +
              (static_cast<u64>(key._lod & 0xFFu) << 48u);

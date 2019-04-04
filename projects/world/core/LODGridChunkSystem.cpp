@@ -94,7 +94,7 @@ int LODGridChunkSystem::getLODForResolution(double mrd) const {
     return lod;
 }
 
-Chunk& LODGridChunkSystem::getChunk(const vec3d &position, double resolution) {
+Chunk &LODGridChunkSystem::getChunk(const vec3d &position, double resolution) {
     int lod = getLODForResolution(resolution);
     vec3d pos = position;
     NodeKey key = NodeKeys::none();
@@ -114,7 +114,8 @@ Chunk& LODGridChunkSystem::getChunk(const vec3d &position, double resolution) {
     return getChunkByKey(key);
 }
 
-void LODGridChunkSystem::collect(ICollector &collector, const IResolutionModel &resolutionModel) {
+void LODGridChunkSystem::collect(ICollector &collector,
+                                 const IResolutionModel &resolutionModel) {
     // Explore every toplevel chunk
     auto &lodData = getLODData(0);
     vec3d chunkSize = lodData.getChunkSize();
@@ -122,9 +123,12 @@ void LODGridChunkSystem::collect(ICollector &collector, const IResolutionModel &
     vec3d lower = bounds.getLowerBound() / chunkSize;
     vec3d upper = bounds.getUpperBound() / chunkSize;
 
-    for (s32 z = static_cast<s32>(floor(lower.z)); z <= static_cast<s32>(floor(upper.z)); ++z) {
-        for (s32 y = static_cast<s32>(floor(lower.y)); y <= static_cast<s32>(floor(upper.y)); ++y) {
-            for (s32 x = static_cast<s32>(floor(lower.x)); x <= static_cast<s32>(floor(upper.x)); ++x) {
+    for (s32 z = static_cast<s32>(floor(lower.z));
+         z <= static_cast<s32>(floor(upper.z)); ++z) {
+        for (s32 y = static_cast<s32>(floor(lower.y));
+             y <= static_cast<s32>(floor(upper.y)); ++y) {
+            for (s32 x = static_cast<s32>(floor(lower.x));
+                 x <= static_cast<s32>(floor(upper.x)); ++x) {
                 LODGridCoordinates coords{x, y, z, 0};
                 NodeKey chunkKey = getChunkKey(NodeKeys::none(), coords);
                 collectChunk(chunkKey, collector, resolutionModel);
@@ -133,14 +137,17 @@ void LODGridChunkSystem::collect(ICollector &collector, const IResolutionModel &
     }
 }
 
-void LODGridChunkSystem::collectChunk(const NodeKey &chunkKey, world::ICollector &collector,
+void LODGridChunkSystem::collectChunk(const NodeKey &chunkKey,
+                                      world::ICollector &collector,
                                       const IResolutionModel &resolutionModel) {
 
     LODGridCoordinates coords = dropLastPart(chunkKey);
     LODData &lodData = getLODData(coords.getLOD());
     vec3d chunkSize = lodData.getChunkSize();
     vec3d parentOffset = getOffset(getParentKey(chunkKey));
-    BoundingBox bbox{parentOffset + coords.getPosition3D() * chunkSize, parentOffset + (coords.getPosition3D() + vec3i{1, 1, 1}) * chunkSize};
+    BoundingBox bbox{parentOffset + coords.getPosition3D() * chunkSize,
+                     parentOffset +
+                         (coords.getPosition3D() + vec3i{1, 1, 1}) * chunkSize};
     double resolution = resolutionModel.getMaxResolutionIn(bbox);
 
     if (resolution > getMinResolution(coords.getLOD())) {
@@ -191,11 +198,11 @@ NodeKey LODGridChunkSystem::getParentKey(const NodeKey &key) const {
 vec3d LODGridChunkSystem::getOffset(const NodeKey &key) const {
     if (key == NodeKeys::none()) {
         return {};
-    }
-    else {
+    } else {
         LODGridCoordinates coords = dropLastPart(key);
         vec3d chunkSize = getLODData(coords.getLOD()).getChunkSize();
-        return coords.getPosition3D() * chunkSize + getOffset(getParentKey(key));
+        return coords.getPosition3D() * chunkSize +
+               getOffset(getParentKey(key));
     }
 }
 
@@ -224,7 +231,8 @@ bool LODGridChunkSystem::createChunk(const NodeKey &id) {
 
         // Create the chunk
         auto &entry = (_internal->_chunks[id] = std::make_unique<ChunkEntry>(
-            parentKey, coords, coords.getPosition3D() * chunkSize, chunkSize));
+                           parentKey, coords,
+                           coords.getPosition3D() * chunkSize, chunkSize));
         entry->_chunk.setResolutionLimits(getMinResolution(lod),
                                           getMaxResolution(lod));
 

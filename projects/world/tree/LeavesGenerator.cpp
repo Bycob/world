@@ -22,8 +22,8 @@ LeavesGenerator *LeavesGenerator::clone() const {
     return new LeavesGenerator(*this);
 }
 
-void LeavesGenerator::processNode(SkelettonNode<TreeInfo> &node, Mesh &leavesMesh,
-                                  Mesh &trunkMesh) {
+void LeavesGenerator::processNode(SkelettonNode<TreeInfo> &node,
+                                  Mesh &leavesMesh, Mesh &trunkMesh) {
     auto &nodeInfo = node.getInfo();
 
     if (nodeInfo._weight < _weightThreshold) {

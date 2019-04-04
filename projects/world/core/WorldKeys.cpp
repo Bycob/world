@@ -8,13 +8,9 @@
 
 namespace world {
 
-    NodeKey NodeKeys::fromUint(unsigned int id) {
-        return std::to_string(id);
-    }
+NodeKey NodeKeys::fromUint(unsigned int id) { return std::to_string(id); }
 
-    NodeKey NodeKeys::fromInt(int id) {
-        return std::to_string(id);
-    }
+NodeKey NodeKeys::fromInt(int id) { return std::to_string(id); }
 
 std::string NodeKeys::toString(const world::NodeKey &key) {
     std::stringstream stream;

@@ -23,11 +23,12 @@ public:
     ItemKey mutateKey(const ItemKey &key) const;
 
     vec3d getOffset() const;
+
 private:
     ItemKey _keyPrefix;
     vec3d _offset;
 };
 
-}
+} // namespace world
 
-#endif //EXPLORATION_CONTEXT_H
+#endif // EXPLORATION_CONTEXT_H

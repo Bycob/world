@@ -37,7 +37,8 @@ const Mesh &Tree::getLeavesMesh() const { return _leavesMesh; }
 
 Mesh &Tree::leavesMesh() { return _leavesMesh; }
 
-void Tree::collect(ICollector &collector, const IResolutionModel &explorer, const ExplorationContext &ctx) {
+void Tree::collect(ICollector &collector, const IResolutionModel &explorer,
+                   const ExplorationContext &ctx) {
 
     // Generation
     if (!_generated) {

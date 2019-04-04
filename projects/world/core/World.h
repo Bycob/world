@@ -45,10 +45,11 @@ public:
     T &addPrimaryNode(const vec3d &position, Args... args);
 
     // ASSETS
-    virtual void collect(ICollector &collector, const IResolutionModel &resolutionModel);
+    virtual void collect(ICollector &collector,
+                         const IResolutionModel &resolutionModel);
 
 protected:
-    void addPrimaryNodeInternal(WorldNode * node);
+    void addPrimaryNodeInternal(WorldNode *node);
 
 private:
     WorldPrivate *_internal;

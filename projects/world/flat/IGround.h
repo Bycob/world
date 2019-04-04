@@ -16,7 +16,7 @@ public:
     virtual double observeAltitudeAt(double x, double y, double resolution) = 0;
 };
 
-class WORLDAPI_EXPORT GroundNode : public WorldNode, public IGround { };
+class WORLDAPI_EXPORT GroundNode : public WorldNode, public IGround {};
 
 } // namespace world
 

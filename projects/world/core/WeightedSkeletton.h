@@ -42,7 +42,8 @@ public:
 
     std::vector<SkelettonNode<T> *> getChildrenOrNeighboursList() const;
 
-    const std::vector<SkelettonNode<T> *> getChildrenOrNeighboursAccess() const {
+    const std::vector<SkelettonNode<T> *> getChildrenOrNeighboursAccess()
+        const {
         return _children_or_neighbour;
     }
 
@@ -106,7 +107,8 @@ private:
 
     void populateMesh(Mesh *mesh, SkelettonNode<T> *node);
 
-    void populateVector(std::vector<SkelettonNode<T> *> &vector, SkelettonNode<T> *node);
+    void populateVector(std::vector<SkelettonNode<T> *> &vector,
+                        SkelettonNode<T> *node);
 
     std::unique_ptr<SkelettonNode<T>> _primaryNode;
 };

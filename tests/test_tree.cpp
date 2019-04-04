@@ -18,8 +18,10 @@ void testCircularSkeletton(int argc, char **argv) {
     auto *skeletton = new WeightedSkeletton<TreeInfo>();
 
     SkelettonNode<TreeInfo> *primaryNode = skeletton->getPrimaryNode();
-    SkelettonNode<TreeInfo> *secondNode = primaryNode->createNeighbour(TreeInfo());
-    SkelettonNode<TreeInfo> *thirdNode = secondNode->createNeighbour(TreeInfo());
+    SkelettonNode<TreeInfo> *secondNode =
+        primaryNode->createNeighbour(TreeInfo());
+    SkelettonNode<TreeInfo> *thirdNode =
+        secondNode->createNeighbour(TreeInfo());
 
     // Circulaire
     thirdNode->addNeighbour(primaryNode);

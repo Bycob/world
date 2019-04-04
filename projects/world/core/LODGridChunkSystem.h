@@ -50,7 +50,8 @@ protected:
     /** Test if the given chunk should be collected. If it is the case,
      * then the chunk is collected and collectChunk is called on each
      * of its children. */
-    void collectChunk(const NodeKey &chunkKey, ICollector &collector, const IResolutionModel &resolutionModel);
+    void collectChunk(const NodeKey &chunkKey, ICollector &collector,
+                      const IResolutionModel &resolutionModel);
 
 private:
     LODGridChunkSystemPrivate *_internal;
@@ -65,7 +66,7 @@ private:
 
 
     NodeKey getChunkKey(const NodeKey &parent,
-                         const LODGridCoordinates &coords) const;
+                        const LODGridCoordinates &coords) const;
 
     LODGridCoordinates dropLastPart(const NodeKey &key) const;
 
@@ -86,7 +87,8 @@ private:
 };
 
 
-template <typename T, typename... Args> T &LODGridChunkSystem::addDecorator(Args... args) {
+template <typename T, typename... Args>
+T &LODGridChunkSystem::addDecorator(Args... args) {
     T *decorator = new T(args...);
     addDecoratorInternal(decorator);
     return *decorator;

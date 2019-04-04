@@ -21,10 +21,7 @@ public:
 World *World::createDemoWorld() { return FlatWorld::createDemoFlatWorld(); }
 
 
-World::World()
-        : _internal(new WorldPrivate()), _directory() {
-
-}
+World::World() : _internal(new WorldPrivate()), _directory() {}
 
 World::~World() { delete _internal; }
 
@@ -42,10 +39,13 @@ void World::collect(ICollector &collector,
 
 void World::addPrimaryNodeInternal(WorldNode *node) {
     if (_internal->_counter > MAX_PRIMARY_NODES) {
-        throw std::runtime_error("World is not meant to have so many primary nodes! Consider using a chunksystem instead.");
+        throw std::runtime_error(
+            "World is not meant to have so many primary nodes! Consider using "
+            "a chunksystem instead.");
     }
 
-    _internal->_primaryNodes.emplace(std::to_string(++_internal->_counter), std::unique_ptr<WorldNode>(node));
+    _internal->_primaryNodes.emplace(std::to_string(++_internal->_counter),
+                                     std::unique_ptr<WorldNode>(node));
 }
 
 } // namespace world

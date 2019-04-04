@@ -9,7 +9,7 @@
 
 namespace world {
 
-    class WorldNodePrivate;
+class WorldNodePrivate;
 
 class WORLDAPI_EXPORT WorldNode {
 public:
@@ -23,21 +23,27 @@ public:
 
     void collectAll(ICollector &collector, double resolution);
 
-    virtual void collect(ICollector &collector, const IResolutionModel &resolutionModel) {
+    virtual void collect(ICollector &collector,
+                         const IResolutionModel &resolutionModel) {
         collect(collector, resolutionModel, ExplorationContext::getDefault());
     }
 
     virtual void collect(ICollector &collector,
-                         const IResolutionModel &resolutionModel, const ExplorationContext &ctx);
+                         const IResolutionModel &resolutionModel,
+                         const ExplorationContext &ctx);
 
 
     template <typename T, typename... Args> T &addChild(Args... args);
+
 protected:
-    WorldNodePrivate* _internal;
+    WorldNodePrivate *_internal;
 
     vec3d _position;
 
-    void collectChild(const NodeKey &key, WorldNode &child, ICollector &collector, const IResolutionModel &resolutionModel, const ExplorationContext &ctx);
+    void collectChild(const NodeKey &key, WorldNode &child,
+                      ICollector &collector,
+                      const IResolutionModel &resolutionModel,
+                      const ExplorationContext &ctx);
 
 private:
     void addChildInternal(WorldNode *child);

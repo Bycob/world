@@ -7,8 +7,7 @@
 using namespace world;
 
 Application::Application()
-        : _running(false),
-          _resModel(std::make_unique<FirstPersonView>(1000)),
+        : _running(false), _resModel(std::make_unique<FirstPersonView>(1000)),
           _newUpdatePos(0, 0, 5000), _lastUpdatePos(_newUpdatePos),
           _mainView(std::make_unique<MainView>(*this)) {
 

@@ -26,7 +26,7 @@ public:
     struct Tile;
 
     HeightmapGround(double unitSize = 6000, double minAltitude = -2000,
-           double maxAltitude = 4000);
+                    double maxAltitude = 4000);
 
     ~HeightmapGround() override;
 
@@ -58,7 +58,7 @@ public:
     double observeAltitudeAt(double x, double y, double resolution) override;
 
     void collect(ICollector &collector,
-                     const IResolutionModel &resolutionModel) override;
+                 const IResolutionModel &resolutionModel) override;
 
 private:
     PGround *_internal;
@@ -122,7 +122,8 @@ private:
     friend class GroundContext;
 };
 
-template <typename T, typename... Args> T &HeightmapGround::addWorker(Args &&... args) {
+template <typename T, typename... Args>
+T &HeightmapGround::addWorker(Args &&... args) {
     T *worker = new T(args...);
     addWorkerInternal(worker);
     return *worker;

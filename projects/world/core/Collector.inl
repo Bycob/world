@@ -43,7 +43,8 @@ inline CollectorChannel<T> &Collector::getStorageChannel() {
 template <typename T> inline CollectorChannel<T>::CollectorChannel() = default;
 
 template <typename T>
-inline void CollectorChannel<T>::put(const ItemKey &key, const T &item, const ExplorationContext &ctx) {
+inline void CollectorChannel<T>::put(const ItemKey &key, const T &item,
+                                     const ExplorationContext &ctx) {
 #ifdef _MSC_VER
     _items[key] = std::make_shared<T>(item);
 #else
@@ -52,12 +53,14 @@ inline void CollectorChannel<T>::put(const ItemKey &key, const T &item, const Ex
 }
 
 template <typename T>
-inline bool CollectorChannel<T>::has(const ItemKey &key, const ExplorationContext &ctx) const {
+inline bool CollectorChannel<T>::has(const ItemKey &key,
+                                     const ExplorationContext &ctx) const {
     return _items.find(ctx.mutateKey(key)) != _items.end();
 }
 
 template <typename T>
-inline void CollectorChannel<T>::remove(const ItemKey &key, const ExplorationContext &ctx) {
+inline void CollectorChannel<T>::remove(const ItemKey &key,
+                                        const ExplorationContext &ctx) {
     _items.erase(ctx.mutateKey(key));
 }
 

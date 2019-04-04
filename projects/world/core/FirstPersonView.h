@@ -17,7 +17,7 @@ public:
      * @param punctumProximum The minimum distance under which we
      * cannot see. */
     FirstPersonView(double eyeResolution = 1000, double fov = 90,
-                        double punctumProximum = 1);
+                    double punctumProximum = 1);
 
     void setPosition(const vec3d &position);
 

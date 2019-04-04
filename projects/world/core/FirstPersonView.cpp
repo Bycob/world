@@ -5,7 +5,7 @@
 namespace world {
 
 FirstPersonView::FirstPersonView(double eyeResolution, double fov,
-                                         double punctumProximum)
+                                 double punctumProximum)
         : _eyeResolution(eyeResolution), _fov(fov),
           _punctumProximum(punctumProximum), _farDistance(5000),
           _position({0, 0, 0}) {}
@@ -40,7 +40,9 @@ vec3d FirstPersonView::getNearestPointIn(const BoundingBox &bbox) const {
 double FirstPersonView::getResolutionAt(const vec3d &pos) const {
     double length = max(_punctumProximum, _position.length(pos));
     // _fov * length can be seen as the "image size"
-    return length <= _farDistance ? _eyeResolution / (_fov * M_PI / 180 * length) : 0.;
+    return length <= _farDistance
+               ? _eyeResolution / (_fov * M_PI / 180 * length)
+               : 0.;
 }
 
 double FirstPersonView::getMaxResolutionIn(const BoundingBox &bbox) const {

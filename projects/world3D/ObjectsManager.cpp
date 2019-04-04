@@ -57,9 +57,9 @@ void ObjectNodeHandler::setTexture(int id, const std::string &path,
         stream.read(data, dataSize);
 
         IImage *irrimg = driver->createImageFromData(
-            image.type() == ImageType::RGBA
-                ? ECF_A8R8G8B8
-                : ECF_R8G8B8, // TODO support greyscale
+            image.type() == ImageType::RGBA ? ECF_A8R8G8B8
+                                            : ECF_R8G8B8, // TODO support
+                                                          // greyscale
             {static_cast<irr::u32>(image.width()),
              static_cast<irr::u32>(image.height())},
             data, true);

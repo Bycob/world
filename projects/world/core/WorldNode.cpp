@@ -42,16 +42,19 @@ void WorldNode::collectAll(ICollector &collector, double resolution) {
 }
 
 void WorldNode::collect(ICollector &collector,
-                          const IResolutionModel &resolutionModel, const ExplorationContext &ctx) {
+                        const IResolutionModel &resolutionModel,
+                        const ExplorationContext &ctx) {
 
     for (auto &entry : _internal->_children) {
-        collectChild(entry.first, *entry.second, collector, resolutionModel, ctx);
+        collectChild(entry.first, *entry.second, collector, resolutionModel,
+                     ctx);
     }
 }
 
 void WorldNode::collectChild(const NodeKey &key, WorldNode &childObject,
-                               ICollector &collector,
-                               const IResolutionModel &resolutionModel, const ExplorationContext &ctx) {
+                             ICollector &collector,
+                             const IResolutionModel &resolutionModel,
+                             const ExplorationContext &ctx) {
     ExplorationContext newCtx = ctx;
     newCtx.appendPrefix(key);
     newCtx.addOffset(childObject.getPosition3D());
@@ -61,7 +64,7 @@ void WorldNode::collectChild(const NodeKey &key, WorldNode &childObject,
 
 void WorldNode::addChildInternal(WorldNode *node) {
     _internal->_children.emplace(NodeKeys::fromInt(_internal->_counter),
-                                std::unique_ptr<WorldNode>(node));
+                                 std::unique_ptr<WorldNode>(node));
     _internal->_counter++;
 }
 } // namespace world

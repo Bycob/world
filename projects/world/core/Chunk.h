@@ -16,7 +16,7 @@
 namespace world {
 
 /**  */
-class WORLDAPI_EXPORT Chunk: public WorldNode {
+class WORLDAPI_EXPORT Chunk : public WorldNode {
 public:
     Chunk(const vec3d &offset, const vec3d &size);
 

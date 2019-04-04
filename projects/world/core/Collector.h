@@ -72,11 +72,17 @@ public:
 
     CollectorChannel(const CollectorChannel<T> &other) = delete;
 
-    void put(const ItemKey &key, const T &item, const ExplorationContext &ctx = ExplorationContext::getDefault()) override;
+    void put(const ItemKey &key, const T &item,
+             const ExplorationContext &ctx =
+                 ExplorationContext::getDefault()) override;
 
-    bool has(const ItemKey &key, const ExplorationContext &ctx = ExplorationContext::getDefault()) const override;
+    bool has(const ItemKey &key,
+             const ExplorationContext &ctx =
+                 ExplorationContext::getDefault()) const override;
 
-    void remove(const ItemKey &key, const ExplorationContext &ctx = ExplorationContext::getDefault()) override;
+    void remove(const ItemKey &key,
+                const ExplorationContext &ctx =
+                    ExplorationContext::getDefault()) override;
 
     const T &get(const ItemKey &key) const;
 
