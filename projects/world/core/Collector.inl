@@ -46,7 +46,7 @@ template <typename T>
 inline void CollectorChannel<T>::put(const ItemKey &key, const T &item,
                                      const ExplorationContext &ctx) {
 #ifdef _MSC_VER
-    _items[key] = std::make_shared<T>(item);
+    _items[ctx.mutateKey(key)] = std::make_shared<T>(item);
 #else
     _items[ctx.mutateKey(key)] = std::make_unique<T>(item);
 #endif
@@ -82,6 +82,20 @@ template <typename T>
 inline CollectorChannelIterator<T> CollectorChannel<T>::end() {
     return CollectorChannelIterator<T>(_items.end());
 }
+
+
+template<>
+inline void CollectorChannel<Object3D>::put(const ItemKey &key, const Object3D &item,
+        const ExplorationContext &ctx) {
+
+#ifdef _MSC_VER
+    auto &newItem = _items[ctx.mutateKey(key)] = std::make_shared<Object3D>(item);
+#else
+    auto &newItem = _items[ctx.mutateKey(key)] = std::make_unique<Object3D>(item);
+#endif
+    newItem->setPosition(newItem->getPosition() + ctx.getOffset());
+}
+
 
 // ====== CollectorChannelIterator
 

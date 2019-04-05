@@ -4,10 +4,8 @@
 
 using namespace world;
 
-TEST_CASE("WorldKeys", "[chunksystem]") {
-
+TEST_CASE("NodeKeys", "[chunksystem]") {
     NodeKey key{0, 0, 0, 0};
-
     REQUIRE(NodeKeys::toString(key) == "00000000");
 }
 

@@ -31,9 +31,9 @@ public:
 };
 
 
-WorldNode::WorldNode() {}
+WorldNode::WorldNode() : _internal(new WorldNodePrivate()) {}
 
-WorldNode::~WorldNode() {}
+WorldNode::~WorldNode() { delete _internal; }
 
 void WorldNode::setPosition3D(const vec3d &pos) { _position = pos; }
 

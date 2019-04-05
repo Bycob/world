@@ -5,113 +5,121 @@
 using namespace world;
 
 TEST_CASE("ItemKeys", "[collector]") {
+    ItemKey key1 = ItemKeys::root("0");
+    ItemKey key2 = ItemKeys::root("0");
+    ItemKey key3 = ItemKeys::root("1");
 
-    /*SECTION("Part keys comparison") {
-        ItemKey key1 = ItemKeys::inObject(0);
-        ItemKey key2 = ItemKeys::inObject(0);
-        REQUIRE(key1 == key2);
-        REQUIRE_FALSE(key1 < key2);
-        REQUIRE_FALSE(key2 < key1);
+    ItemKey keyc1 = ItemKeys::child(key1, "51");
+    ItemKey keyc2 = ItemKeys::child(key2, "51");
+    ItemKey keyc3 = ItemKeys::child(key3, "51");
+    ItemKey keyc4 = ItemKeys::child(key1, "52");
+
+    SECTION("Keys comparison") {
+        CHECK(key1 == key2);
+        CHECK_FALSE(key1 < key2);
+        CHECK_FALSE(key2 < key1);
+
+        CHECK_FALSE(key3 == key1);
+        CHECK((key1 < key3) != (key3 < key1));
+
+        CHECK(keyc1 == keyc2);
+        CHECK_FALSE(keyc1 < keyc2);
+        CHECK_FALSE(keyc2 < keyc1);
+
+        CHECK_FALSE(keyc3 == keyc1);
+        CHECK((keyc1 < keyc3) != (keyc3 < keyc1));
+        CHECK_FALSE(keyc4 == keyc1);
+        CHECK((keyc1 < keyc4) != (keyc4 < keyc1));
+    }
+
+    SECTION("Concat") {
+        ItemKey test = ItemKeys::child(ItemKeys::child(keyc1, "1"), "51");
+        CHECK(test == ItemKeys::concat(keyc1, keyc3));
     }
 
     SECTION("toString / fromString") {
-        ItemKey key1 = ItemKeys::inWorld("0001", 18, 27);
-        ItemKey key2 = key(ItemKeys::toString(key1));
-        CHECK(key1 == key2);
-        CHECK(ItemKeys::toString(key1) == ItemKeys::toString(key2));
+        ItemKey keystr = key(ItemKeys::toString(key1));
+        CHECK(key1 == keystr);
+        CHECK(ItemKeys::toString(key1) == ItemKeys::toString(keystr));
 
-        std::string str1 =
-            "fffffffefffffffffffffffffffffffffffffffeffffffffffffffffffffffff"
-            "0100000000000000000000000100000000000000010000000100000000000000"
-            "0000000002000000/0/3202";
-        CHECK(str1 == ItemKeys::toString(key(str1)));
-    }*/
+        CHECK(keyc1 == key(ItemKeys::toString(keyc1)));
+
+        CHECK_FALSE(ItemKeys::toString(key1) == ItemKeys::toString(key3));
+        CHECK_FALSE(ItemKeys::toString(keyc1) == ItemKeys::toString(keyc3));
+    }
 }
 
-/*
-template <typename T> class TestCollectorChannel : public ICollectorChannel<T> {
-public:
-    void put(const ItemKey &key, const T &item) override { _lastAdded = key; }
+TEST_CASE("ExplorationContext", "[collector]") {
+    ExplorationContext ctx = ExplorationContext::getDefault();
 
-    bool has(const ItemKey &key) const override { return _lastAdded == key; }
+    SECTION("default context") {
+        CHECK(ctx.mutateKey(ItemKeys::root("a")) == ItemKeys::root("a"));
+        CHECK((ctx.getOffset() - vec3d{0, 0, 0}).norm() == Approx(0));
+    }
 
-    void remove(const ItemKey &key) override { _lastRemoved = key; }
+    SECTION("context with parameters") {
+        ctx.appendPrefix("a");
+        ctx.appendPrefix("b");
+        ctx.addOffset({1, 1, 1});
+        ctx.addOffset({4, 5, 6});
 
-    ItemKey _lastAdded;
-    vec3d _lastAddedPosition;
-    std::string _lastAddedMatId;
-    ItemKey _lastRemoved;
-};
-
-template <>
-inline void TestCollectorChannel<Object3D>::put(const ItemKey &key,
-                                                const Object3D &item) {
-    _lastAdded = key;
-    _lastAddedPosition = item.getPosition();
-    _lastAddedMatId = item.getMaterialID();
+        CHECK((ctx.getOffset() - vec3d{5, 6, 7}).norm() == Approx(0));
+        auto key = ctx.mutateKey(ItemKeys::root("c"));
+        CHECK(key == ItemKeys::child(ItemKeys::child(ItemKeys::root("a"), "b"), "c"));
+    }
 }
-*/
+
 TEST_CASE("Collector", "[collector]") {
     Collector collector;
-    collector.addStorageChannel<Object3D>();
 
-    REQUIRE(collector.hasChannel<Object3D>());
-    REQUIRE(collector.hasStorageChannel<Object3D>());
-}
+    SECTION("adding channels") {
+        CHECK_FALSE(collector.hasChannel<Object3D>());
+        CHECK_FALSE(collector.hasStorageChannel<Object3D>());
 
-TEST_CASE("CollectorContextWrap", "[collector]") {
-    /*Collector collector;
-    auto &objChan =
-        collector.addCustomChannel<Object3D, TestCollectorChannel<Object3D>>();
-    CollectorContextWrap wcollector(collector);
-    auto &wobjChan = wcollector.getChannel<Object3D>();
+        collector.addStorageChannel<Object3D>();
 
-    NodeKey chunkKey("001122");
-    ObjectKey objKey(2);
-    vec3d offset{1, 1, 1};
-
-    SECTION("default context wrap just pass arguments") {
-        Object3D obj;
-        obj.setPosition(offset);
-        wobjChan.put(ItemKeys::inWorld(chunkKey, objKey, 1), obj);
-        REQUIRE(objChan._lastAdded == ItemKeys::inWorld(chunkKey, objKey, 1));
-        REQUIRE((objChan._lastAddedPosition - offset).norm() == Approx(0));
+        CHECK(collector.hasChannel<Object3D>());
+        CHECK(collector.hasStorageChannel<Object3D>());
     }
 
-    wcollector.setCurrentChunk(chunkKey);
-    wcollector.setCurrentObject(objKey);
-    wcollector.setOffset(offset);
+    auto &objChan = collector.addStorageChannel<Object3D>();
+    auto &matChan = collector.addStorageChannel<Material>();
 
-    SECTION("put mutates the key") {
-        wobjChan.put(ItemKeys::inObject(1), Object3D());
-        REQUIRE(objChan._lastAdded == ItemKeys::inWorld(chunkKey, objKey, 1));
+    SECTION("adding object") {
+        auto key = ItemKeys::root("a");
+        Material mat01("mat01");
+
+        CHECK_FALSE(matChan.has(key));
+        CHECK_THROWS(matChan.get(key));
+
+        matChan.put(key, mat01);
+        CHECK(matChan.has(key));
+        CHECK_NOTHROW(matChan.get(key));
+        CHECK(matChan.get(key).getName() == "mat01");
+
+        matChan.remove(key);
+        CHECK_FALSE(matChan.has(key));
+        CHECK_THROWS(matChan.get(key));
     }
 
-    vec3d position{5, 6, 7};
+    SECTION("using Context") {
+        ExplorationContext context;
+        context.appendPrefix("a");
+        context.addOffset({5, 6, 7.3});
 
-    SECTION("put mutates object position") {
-        Object3D obj;
-        obj.setPosition(position);
-        wobjChan.put(ItemKeys::inObject(0), obj);
-        CAPTURE(objChan._lastAddedPosition);
-        REQUIRE((offset + position - objChan._lastAddedPosition).norm() ==
-                Approx(0));
+        ItemKey key = ItemKeys::root("b");
+        ItemKey ctxKey = ItemKeys::concat(ItemKeys::root("a"), key);
+        Object3D object;
+
+        SECTION("key modification") {
+            objChan.put(key, object, context);
+            CHECK(objChan.has(key, context));
+            CHECK(objChan.has(ctxKey));
+        }
+
+        SECTION("position modification") {
+            objChan.put(key, object, context);
+            CHECK((objChan.get(ctxKey).getPosition() - (object.getPosition() + vec3d{5, 6, 7.3})).norm() == Approx(0));
+        }
     }
-
-    wcollector.setKeyOffset(1);
-
-    SECTION("key is mutated according to the keyoffset") {
-        wcollector.setKeyOffset(1);
-        Object3D obj;
-        wobjChan.put(ItemKeys::inObject(5), obj);
-        CHECK(objChan._lastAdded == ItemKeys::inWorld(chunkKey, objKey, 6));
-    }
-
-    SECTION("put mutates material id") {
-        Object3D obj;
-        obj.setMaterialID(ItemKeys::toString(ItemKeys::inObject(1)));
-        wobjChan.put(ItemKeys::inObject(1), obj);
-        ItemKey afterMutation = ItemKeys::inWorld(chunkKey, objKey, 2);
-        CHECK(objChan._lastAddedMatId == ItemKeys::toString(afterMutation));
-    }*/
 }

@@ -62,9 +62,9 @@ void TreeGroup::collect(ICollector &collector,
 
                 auto &matChannel = collector.getChannel<Material>();
                 trunksObj.setMaterialID(
-                    ItemKeys::toString(ItemKeys::root("1")));
+                    ItemKeys::toString(ctx.mutateKey(ItemKeys::root("1"))));
                 leavesObj.setMaterialID(
-                    ItemKeys::toString(ItemKeys::root("2")));
+                    ItemKeys::toString(ctx.mutateKey(ItemKeys::root("2"))));
 
                 matChannel.put(ItemKeys::root("1"), trunkMaterial, ctx);
                 matChannel.put(ItemKeys::root("2"), leafMaterial, ctx);

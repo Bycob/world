@@ -35,6 +35,7 @@ IGround &FlatWorld::ground() { return *_internal->_ground; }
 
 void FlatWorld::collect(ICollector &collector,
                         const IResolutionModel &resolutionModel) {
+    _internal->_ground->collect(collector, resolutionModel);
     World::collect(collector, resolutionModel);
 }
 

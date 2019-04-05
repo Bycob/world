@@ -39,6 +39,13 @@ struct WORLDAPI_EXPORT ItemKeys {
         return childKey;
     }
 
+    /** Return a key beggining with "prefix" and ending with "suffix". */
+    static ItemKey concat(const ItemKey &prefix, const ItemKey &suffix) {
+        ItemKey result = prefix;
+        result.insert(result.end(), suffix.begin(), suffix.end());
+        return result;
+    }
+
     static ItemKey defaultKey() { return {}; }
 
     static ItemKey fromString(const std::string &str) {
@@ -46,12 +53,12 @@ struct WORLDAPI_EXPORT ItemKeys {
         size_t sep;
         size_t start = 0;
 
-        while (sep != std::string::npos) {
-            sep = str.find_first_of('/');
+        do {
+            sep = str.find_first_of('/', start);
             std::string keystr;
 
             if (sep == std::string::npos) {
-                keystr = str.substr(sep);
+                keystr = str.substr(start);
             } else {
                 keystr = str.substr(start, sep - start);
                 start = sep + 1;
@@ -62,7 +69,8 @@ struct WORLDAPI_EXPORT ItemKeys {
             } catch (std::invalid_argument &e) {
                 throw e;
             }
-        }
+        } while (sep != std::string::npos);
+
         return result;
     }
 

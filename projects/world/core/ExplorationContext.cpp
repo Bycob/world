@@ -2,7 +2,7 @@
 
 namespace world {
 
-ExplorationContext &ExplorationContext::getDefault() {
+const ExplorationContext &ExplorationContext::getDefault() {
     static ExplorationContext defaultCtx;
     return defaultCtx;
 }
@@ -17,9 +17,7 @@ void ExplorationContext::appendPrefix(const NodeKey &prefix) {
 }
 
 ItemKey ExplorationContext::mutateKey(const ItemKey &key) const {
-    ItemKey result = _keyPrefix;
-
-    return result;
+    return ItemKeys::concat(_keyPrefix, key);
 }
 
 vec3d ExplorationContext::getOffset() const { return _offset; }

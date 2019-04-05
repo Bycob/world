@@ -11,7 +11,7 @@ namespace world {
 
 class WORLDAPI_EXPORT ExplorationContext {
 public:
-    static ExplorationContext &getDefault();
+    static const ExplorationContext &getDefault();
 
 
     ExplorationContext();

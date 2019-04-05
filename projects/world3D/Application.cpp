@@ -13,6 +13,7 @@ Application::Application()
 
     _resModel->setPosition(_lastUpdatePos);
     _resModel->setFarDistance(10000);
+    _lastUpdatePos = {0, 0, 0};
 
     // Collectors
     for (int i = 0; i < 2; i++) {
