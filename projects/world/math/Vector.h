@@ -25,6 +25,8 @@ template <typename T> struct vec3 {
     template <typename R> operator vec3<R>() const;
     template <typename R> explicit operator vec2<R>() const;
 
+    vec3<T> operator-() const;
+
     template <typename R>
     auto operator*(R rhs) const -> vec3<decltype(x * rhs)>;
     template <typename R>
@@ -104,6 +106,10 @@ template <typename T>
 template <typename R>
 inline vec3<T>::operator vec2<R>() const {
     return vec2<R>(static_cast<R>(this->x), static_cast<R>(this->y));
+}
+
+template <typename T> inline vec3<T> vec3<T>::operator-() const {
+    return vec3<T>{-this->x, -this->y, -this->z};
 }
 
 template <typename T>

@@ -51,8 +51,8 @@ void ForestLayer::decorate(Chunk &chunk) {
     treeGroup.setPosition3D({0, 0, 0});
 
     for (auto &pt : randomPoints) {
-        const double altitude =
-            ground.observeAltitudeAt(pt.x, pt.y, resolution);
+        const double altitude = ground.observeAltitudeAt(
+            chunkOffset.x + pt.x, chunkOffset.y + pt.y, resolution);
 
         // skip if altitude is not in this chunk
         if (altitude < chunkOffset.z ||

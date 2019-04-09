@@ -29,7 +29,7 @@ void TreeGroup::collect(ICollector &collector,
     int renderMode = 0;
 
     for (vec3d &pos : _treesPositions) {
-        double resolution = resolutionModel.getResolutionAt(pos);
+        double resolution = resolutionModel.getResolutionAt(pos, ctx);
 
         if (resolution > 15) {
             renderMode = 2;

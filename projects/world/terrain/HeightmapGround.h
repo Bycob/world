@@ -72,7 +72,7 @@ private:
 
     int _terrainRes = 33;
     /** Texture resolution, relatively to the terrain resolution */
-    int _textureRes = 8;
+    int _textureRes = 4;
 
     TileSystem _tileSystem;
 
