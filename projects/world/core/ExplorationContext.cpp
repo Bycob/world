@@ -13,11 +13,11 @@ ExplorationContext::ExplorationContext()
 void ExplorationContext::addOffset(const vec3d &offset) { _offset += offset; }
 
 void ExplorationContext::appendPrefix(const NodeKey &prefix) {
-    _keyPrefix = ItemKeys::child(_keyPrefix, prefix);
+    _keyPrefix = {_keyPrefix, prefix};
 }
 
 ItemKey ExplorationContext::mutateKey(const ItemKey &key) const {
-    return ItemKeys::concat(_keyPrefix, key);
+    return {_keyPrefix, key};
 }
 
 vec3d ExplorationContext::getOffset() const { return _offset; }

@@ -22,38 +22,88 @@ struct WORLDAPI_EXPORT NodeKeys {
 };
 
 
-typedef std::vector<std::string> ItemKey;
+class WORLDAPI_EXPORT ItemKey {
+public:
+    std::vector<NodeKey> _components;
+
+
+    ItemKey() = default;
+
+    explicit ItemKey(const std::vector<NodeKey> &components)
+        : _components(components) {}
+
+    ItemKey(const NodeKey &key) {
+        _components.push_back(key);
+    }
+    ItemKey(const ItemKey &parent, const NodeKey &key)
+        : _components(parent._components){
+
+        _components.push_back(key);
+    }
+
+    ItemKey(const ItemKey &key1, const ItemKey &key2)
+        : _components(key1._components) {
+
+        _components.insert(_components.end(), key2._components.begin(), key2._components.end());
+    }
+
+    std::string str() const {
+        std::string result;
+        for (size_t i = 0; i < _components.size(); ++i) {
+            result += (i == 0 ? "" : "/") + NodeKeys::toString(_components[i]);
+        }
+        return result;
+    }
+
+    ItemKey parent() const {
+        if (_components.empty()) {
+            throw std::runtime_error("no parent");
+        }
+
+        ItemKey result = *this;
+        result._components.pop_back();
+        return result;
+    }
+
+    NodeKey last() const {
+        return _components.back();
+    }
+
+    bool operator==(const ItemKey &other) const {
+        return _components == other._components;
+    }
+
+    bool operator !=(const ItemKey &other) const {
+        return _components != other._components;
+    }
+
+    bool operator<(const ItemKey &other) const {
+        return _components < other._components;
+    }
+};
 
 struct WORLDAPI_EXPORT ItemKeys {
     /** Returns a key refering to a root world node (ie which has no parent)*/
     static ItemKey root(const NodeKey &nodeKey) {
-        ItemKey key{nodeKey};
-        key.reserve(5);
-        return key;
+        return {nodeKey};
     }
 
     /** Returns a key refering to a world node which has a parent. */
     static ItemKey child(const ItemKey &parentKey, const NodeKey &nodeKey) {
-        auto childKey = parentKey;
-        childKey.push_back(nodeKey);
-        return childKey;
+        return {parentKey, nodeKey};
     }
 
     /** Return a key beggining with "prefix" and ending with "suffix". */
     static ItemKey concat(const ItemKey &prefix, const ItemKey &suffix) {
-        ItemKey result = prefix;
-        result.insert(result.end(), suffix.begin(), suffix.end());
-        return result;
+        return {prefix, suffix};
     }
 
     static ItemKey getParent(const ItemKey &key) {
-        ItemKey result = key;
-        result.pop_back();
-        return result;
+        return key.parent();
     }
 
     static NodeKey getLastNode(const ItemKey &key) {
-        return key.back();
+        return key.last();
     }
 
     static ItemKey defaultKey() { return {}; }
@@ -75,7 +125,7 @@ struct WORLDAPI_EXPORT ItemKeys {
             }
 
             try {
-                result.push_back(NodeKeys::fromString(keystr));
+                result._components.push_back(NodeKeys::fromString(keystr));
             } catch (std::invalid_argument &e) {
                 throw e;
             }
@@ -87,11 +137,7 @@ struct WORLDAPI_EXPORT ItemKeys {
     /** Gets an unique string representation for this key. The
      * string is printable and usable in a file system. */
     static std::string toString(const ItemKey &key) {
-        std::string result;
-        for (size_t i = 0; i < key.size(); ++i) {
-            result += (i == 0 ? "" : "/") + NodeKeys::toString(key[i]);
-        }
-        return result;
+        return key.str();
     }
 };
 

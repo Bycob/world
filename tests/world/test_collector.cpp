@@ -44,8 +44,8 @@ TEST_CASE("ItemKeys", "[collector]") {
 
         CHECK(keyc1 == key(ItemKeys::toString(keyc1)));
 
-        CHECK_FALSE(ItemKeys::toString(key1) == ItemKeys::toString(key3));
-        CHECK_FALSE(ItemKeys::toString(keyc1) == ItemKeys::toString(keyc3));
+        CHECK_FALSE(key1.str() == key3.str());
+        CHECK_FALSE(keyc1.str() == keyc3.str());
     }
 }
 

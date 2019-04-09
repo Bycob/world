@@ -61,18 +61,16 @@ void TreeGroup::collect(ICollector &collector,
                 leafMaterial.setKd(0.4, 0.9, 0.4);
 
                 auto &matChannel = collector.getChannel<Material>();
-                trunksObj.setMaterialID(
-                    ItemKeys::toString(ctx.mutateKey(ItemKeys::root("1"))));
-                leavesObj.setMaterialID(
-                    ItemKeys::toString(ctx.mutateKey(ItemKeys::root("2"))));
+                trunksObj.setMaterialID(ctx.mutateKey({"1"}).str());
+                leavesObj.setMaterialID(ctx.mutateKey({"2"}).str());
 
-                matChannel.put(ItemKeys::root("1"), trunkMaterial, ctx);
-                matChannel.put(ItemKeys::root("2"), leafMaterial, ctx);
+                matChannel.put({"1"}, trunkMaterial, ctx);
+                matChannel.put({"2"}, leafMaterial, ctx);
             }
 
             auto &objChannel = collector.getChannel<Object3D>();
-            objChannel.put(ItemKeys::root("1"), trunksObj, ctx);
-            objChannel.put(ItemKeys::root("2"), leavesObj, ctx);
+            objChannel.put({"1"}, trunksObj, ctx);
+            objChannel.put({"2"}, leavesObj, ctx);
         }
 
         break;
