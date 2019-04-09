@@ -12,6 +12,7 @@
 #include "ReliefMapModifier.h"
 #include "AltitudeTexturer.h"
 #include "TerrainOps.h"
+#include "world/core/Profiler.h"
 
 namespace world {
 
@@ -136,8 +137,8 @@ double HeightmapGround::observeAltitudeAt(double x, double y,
 }
 
 void HeightmapGround::collect(ICollector &collector,
-                              const IResolutionModel &resolutionModel) {
-
+                              const IResolutionModel &resolutionModel,
+                              const ExplorationContext &ctx) {
 
     BoundingBox bbox = resolutionModel.getBounds();
 

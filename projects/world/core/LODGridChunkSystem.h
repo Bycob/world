@@ -14,6 +14,7 @@
 namespace world {
 
 class LODGridChunkSystemPrivate;
+class ChunkEntry;
 
 class WORLDAPI_EXPORT LODGridChunkSystem : public WorldNode, IChunkSystem {
 public:
@@ -22,6 +23,10 @@ public:
     ~LODGridChunkSystem();
 
     LODData &getLODData(int lod) const;
+
+    /** Compute the offset of the chunk corresponding to this key, in
+     * world unit (meters). */
+    vec3d getOffset(const NodeKey &key) const;
 
     /** Gives the maximum resolution the given LOD can hold. All
      * objects with a better resolution should be stored in a
@@ -42,9 +47,10 @@ public:
     Chunk &getChunk(const vec3d &position, double resolution) override;
 
     void collect(ICollector &collector,
-                 const IResolutionModel &resolutionModel) override;
+                 const IResolutionModel &resolutionModel,
+                 const ExplorationContext &ctx = ExplorationContext::getDefault()) override;
 
-    template <typename T, typename... Args> T &addDecorator(Args... args);
+    template <typename T, typename... Args> T &addDecorator(Args&... args);
 
 protected:
     /** Test if the given chunk should be collected. If it is the case,
@@ -64,31 +70,17 @@ private:
 
     int _maxLOD = 6;
 
-
-    NodeKey getChunkKey(const NodeKey &parent,
-                        const LODGridCoordinates &coords) const;
-
-    LODGridCoordinates dropLastPart(const NodeKey &key) const;
-
-    NodeKey getParentKey(const NodeKey &key) const;
-
-    /** Compute the offset of the chunk corresponding to this key, in
-     * world unit (meters). */
-    vec3d getOffset(const NodeKey &key) const;
-
-    /** This method returns the chunk corresponding to this key. If the
+    
+    /** This method returns the chunk entry corresponding to this key. If the
      * chunk does not exist it is created. */
-    Chunk &getChunkByKey(const NodeKey &key);
-
-    /** @returns true if the chunk wasn't created yet */
-    bool createChunk(const NodeKey &key);
+    ChunkEntry &getOrCreateEntry(const NodeKey &key);
 
     void addDecoratorInternal(IChunkDecorator *decorator);
 };
 
 
 template <typename T, typename... Args>
-T &LODGridChunkSystem::addDecorator(Args... args) {
+T &LODGridChunkSystem::addDecorator(Args&... args) {
     T *decorator = new T(args...);
     addDecoratorInternal(decorator);
     return *decorator;

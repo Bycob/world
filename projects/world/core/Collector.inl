@@ -6,7 +6,7 @@ inline CollectorChannel<T> &Collector::addStorageChannel() {
 }
 
 template <typename T, typename CustomChannel, typename... Args>
-inline CustomChannel &Collector::addCustomChannel(Args... args) {
+inline CustomChannel &Collector::addCustomChannel(Args&&... args) {
     size_t type = typeid(T).hash_code();
 #ifdef _MSC_VER
     auto ptr = std::make_shared<CustomChannel>(args...);

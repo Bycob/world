@@ -4,6 +4,7 @@
 #include "world/terrain/HeightmapGround.h"
 #include "world/tree/ForestLayer.h"
 #include "world/tree/SimpleTreeDecorator.h"
+#include "world/core/Profiler.h"
 
 namespace world {
 

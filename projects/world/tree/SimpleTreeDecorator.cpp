@@ -39,7 +39,7 @@ void SimpleTreeDecorator::decorate(Chunk &chunk) {
         return;
 
     vec3d chunkSize = chunk.getSize();
-    vec3d offset = chunk.getOffset(); // TODO ensure good offset
+    vec3d offset = chunk.getPosition3D();
 
     std::vector<vec2d> positions;
     std::uniform_real_distribution<double> distribX(0, chunkSize.x);

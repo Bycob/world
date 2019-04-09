@@ -42,7 +42,7 @@ public:
      * if there are many. If you want to add a lot of nodes to the world,
      * consider use a ChunkSystem or an other Node container. */
     template <typename T, typename... Args>
-    T &addPrimaryNode(const vec3d &position, Args... args);
+    T &addPrimaryNode(const vec3d &position, Args&... args);
 
     // ASSETS
     virtual void collect(ICollector &collector,

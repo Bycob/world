@@ -22,7 +22,7 @@ void ForestLayer::decorate(Chunk &chunk) {
 
     // Compute area
     vec3d chunkSize = chunk.getSize();
-    vec3d chunkOffset = chunk.getOffset();
+    vec3d chunkOffset = chunk.getPosition3D();
     const double area = chunkSize.x * chunkSize.y;
 
     // Max tree count

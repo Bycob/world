@@ -46,6 +46,16 @@ struct WORLDAPI_EXPORT ItemKeys {
         return result;
     }
 
+    static ItemKey getParent(const ItemKey &key) {
+        ItemKey result = key;
+        result.pop_back();
+        return result;
+    }
+
+    static NodeKey getLastNode(const ItemKey &key) {
+        return key.back();
+    }
+
     static ItemKey defaultKey() { return {}; }
 
     static ItemKey fromString(const std::string &str) {

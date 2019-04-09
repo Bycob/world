@@ -9,6 +9,7 @@ if (${WORLD_BUILD_TESTS})
             test_math.cpp
             test_memory.cpp
             test_mesh.cpp
+            test_nodes.cpp
             test_perlin.cpp
             test_types.cpp
             test_terrain.cpp
