@@ -17,9 +17,8 @@ public:
     ItemKey _keyPrefix;
 
 
-    void collect(ICollector &collector,
-                         const IResolutionModel &resolutionModel,
-                         const ExplorationContext &ctx) override {
+    void collect(ICollector &collector, const IResolutionModel &resolutionModel,
+                 const ExplorationContext &ctx) override {
         _collected = true;
         _keyPrefix = ctx.mutateKey(ItemKeys::defaultKey());
         _offset = ctx.getOffset();

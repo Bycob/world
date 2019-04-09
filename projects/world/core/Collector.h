@@ -34,7 +34,7 @@ public:
     // TODO simplify method call (only one required template argument instead of
     // 2)
     template <typename T, typename CustomChannel, typename... Args>
-    CustomChannel &addCustomChannel(Args&&... args);
+    CustomChannel &addCustomChannel(Args &&... args);
 
     template <typename T> bool hasStorageChannel() const;
 

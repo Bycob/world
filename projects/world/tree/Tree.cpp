@@ -58,7 +58,7 @@ void Tree::collect(ICollector &collector, const IResolutionModel &explorer,
 
         if (collector.hasChannel<Material>()) {
             auto &materialsChannel = collector.getChannel<Material>();
-        
+
             mainPart.setMaterialID(ctx.mutateKey({"1"}).str());
             leaves.setMaterialID(ctx.mutateKey({"2"}).str());
 

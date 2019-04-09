@@ -36,12 +36,12 @@ public:
      *
      * The default implementation of this method calls #collectSelf to collect
      * this node, then calls #collectChild on every child. */
-    virtual void collect(ICollector &collector,
-                         const IResolutionModel &resolutionModel,
-                         const ExplorationContext &ctx = ExplorationContext::getDefault());
+    virtual void collect(
+        ICollector &collector, const IResolutionModel &resolutionModel,
+        const ExplorationContext &ctx = ExplorationContext::getDefault());
 
 
-    template <typename T, typename... Args> T &addChild(Args&&... args);
+    template <typename T, typename... Args> T &addChild(Args &&... args);
 
 protected:
     WorldNodePrivate *_internal;
@@ -49,12 +49,12 @@ protected:
     vec3d _position;
 
     virtual void collectSelf(ICollector &collector,
-                         const IResolutionModel &resolutionModel,
-                         const ExplorationContext &ctx);
+                             const IResolutionModel &resolutionModel,
+                             const ExplorationContext &ctx);
 
     void collectChildren(ICollector &collector,
-                                 const IResolutionModel &resolutionModel,
-                                 const ExplorationContext &ctx);
+                         const IResolutionModel &resolutionModel,
+                         const ExplorationContext &ctx);
 
     void collectChild(const NodeKey &key, WorldNode &child,
                       ICollector &collector,
@@ -65,7 +65,8 @@ private:
     void addChildInternal(WorldNode *child);
 };
 
-template <typename T, typename... Args> T &WorldNode::addChild(Args&&... args) {
+template <typename T, typename... Args>
+T &WorldNode::addChild(Args &&... args) {
     T *node = new T(args...);
     addChildInternal(node);
     return *node;

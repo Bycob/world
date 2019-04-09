@@ -19,7 +19,7 @@ public:
 
     ~FlatWorld() override;
 
-    template <typename T, typename... Args> T &setGround(Args&&... args);
+    template <typename T, typename... Args> T &setGround(Args &&... args);
 
     IGround &ground();
 
@@ -32,7 +32,8 @@ private:
     void setGroundInternal(GroundNode *ground);
 };
 
-template <typename T, typename... Args> T &FlatWorld::setGround(Args&&... args) {
+template <typename T, typename... Args>
+T &FlatWorld::setGround(Args &&... args) {
     T *ground = new T(args...);
     setGroundInternal(ground);
     return *ground;

@@ -65,7 +65,8 @@ TEST_CASE("ExplorationContext", "[collector]") {
 
         CHECK((ctx.getOffset() - vec3d{5, 6, 7}).norm() == Approx(0));
         auto key = ctx.mutateKey(ItemKeys::root("c"));
-        CHECK(key == ItemKeys::child(ItemKeys::child(ItemKeys::root("a"), "b"), "c"));
+        CHECK(key ==
+              ItemKeys::child(ItemKeys::child(ItemKeys::root("a"), "b"), "c"));
     }
 }
 
@@ -119,7 +120,9 @@ TEST_CASE("Collector", "[collector]") {
 
         SECTION("position modification") {
             objChan.put(key, object, context);
-            CHECK((objChan.get(ctxKey).getPosition() - (object.getPosition() + vec3d{5, 6, 7.3})).norm() == Approx(0));
+            CHECK((objChan.get(ctxKey).getPosition() -
+                   (object.getPosition() + vec3d{5, 6, 7.3}))
+                      .norm() == Approx(0));
         }
     }
 }

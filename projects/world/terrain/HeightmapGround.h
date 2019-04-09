@@ -57,9 +57,9 @@ public:
     // EXPLORATION
     double observeAltitudeAt(double x, double y, double resolution) override;
 
-    void collect(ICollector &collector,
-                 const IResolutionModel &resolutionModel,
-                 const ExplorationContext &ctx = ExplorationContext::getDefault()) override;
+    void collect(ICollector &collector, const IResolutionModel &resolutionModel,
+                 const ExplorationContext &ctx =
+                     ExplorationContext::getDefault()) override;
 
 private:
     PGround *_internal;

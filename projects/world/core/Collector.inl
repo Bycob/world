@@ -6,7 +6,7 @@ inline CollectorChannel<T> &Collector::addStorageChannel() {
 }
 
 template <typename T, typename CustomChannel, typename... Args>
-inline CustomChannel &Collector::addCustomChannel(Args&&... args) {
+inline CustomChannel &Collector::addCustomChannel(Args &&... args) {
     size_t type = typeid(T).hash_code();
 #ifdef _MSC_VER
     auto ptr = std::make_shared<CustomChannel>(args...);
@@ -84,14 +84,17 @@ inline CollectorChannelIterator<T> CollectorChannel<T>::end() {
 }
 
 
-template<>
-inline void CollectorChannel<Object3D>::put(const ItemKey &key, const Object3D &item,
-        const ExplorationContext &ctx) {
+template <>
+inline void CollectorChannel<Object3D>::put(const ItemKey &key,
+                                            const Object3D &item,
+                                            const ExplorationContext &ctx) {
 
 #ifdef _MSC_VER
-    auto &newItem = _items[ctx.mutateKey(key)] = std::make_shared<Object3D>(item);
+    auto &newItem = _items[ctx.mutateKey(key)] =
+        std::make_shared<Object3D>(item);
 #else
-    auto &newItem = _items[ctx.mutateKey(key)] = std::make_unique<Object3D>(item);
+    auto &newItem = _items[ctx.mutateKey(key)] =
+        std::make_unique<Object3D>(item);
 #endif
     newItem->setPosition(newItem->getPosition() + ctx.getOffset());
 }

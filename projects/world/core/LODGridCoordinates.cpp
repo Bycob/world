@@ -16,7 +16,8 @@ LODGridCoordinates LODGridCoordinates::getLastOfKey(const NodeKey &key) {
     if (key.empty())
         return NONE;
 
-    const int *features = reinterpret_cast<const int *>(key.c_str() + key.length() - keySize);
+    const int *features =
+        reinterpret_cast<const int *>(key.c_str() + key.length() - keySize);
     return LODGridCoordinates(features[0], features[1], features[2],
                               features[3]);
 }
@@ -43,7 +44,8 @@ const vec3i &LODGridCoordinates::getPosition3D() const { return _pos; }
 
 std::string LODGridCoordinates::toKey(const NodeKey &parent) const {
     int features[] = {_pos.x, _pos.y, _pos.z, _lod};
-    return parent + std::string(reinterpret_cast<char *>(features), sizeof(features));
+    return parent +
+           std::string(reinterpret_cast<char *>(features), sizeof(features));
 }
 
 bool LODGridCoordinates::operator<(const LODGridCoordinates &other) const {

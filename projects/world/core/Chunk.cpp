@@ -7,8 +7,7 @@
 
 namespace world {
 
-Chunk::Chunk(const vec3d &size)
-        : _size(size) {}
+Chunk::Chunk(const vec3d &size) : _size(size) {}
 
 void Chunk::setResolutionLimits(double min, double max) {
     _minResolution = min;

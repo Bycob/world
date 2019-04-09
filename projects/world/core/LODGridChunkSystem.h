@@ -46,11 +46,11 @@ public:
 
     Chunk &getChunk(const vec3d &position, double resolution) override;
 
-    void collect(ICollector &collector,
-                 const IResolutionModel &resolutionModel,
-                 const ExplorationContext &ctx = ExplorationContext::getDefault()) override;
+    void collect(ICollector &collector, const IResolutionModel &resolutionModel,
+                 const ExplorationContext &ctx =
+                     ExplorationContext::getDefault()) override;
 
-    template <typename T, typename... Args> T &addDecorator(Args&... args);
+    template <typename T, typename... Args> T &addDecorator(Args &... args);
 
 protected:
     /** Test if the given chunk should be collected. If it is the case,
@@ -70,7 +70,7 @@ private:
 
     int _maxLOD = 6;
 
-    
+
     /** This method returns the chunk entry corresponding to this key. If the
      * chunk does not exist it is created. */
     ChunkEntry &getOrCreateEntry(const NodeKey &key);
@@ -80,7 +80,7 @@ private:
 
 
 template <typename T, typename... Args>
-T &LODGridChunkSystem::addDecorator(Args&... args) {
+T &LODGridChunkSystem::addDecorator(Args &... args) {
     T *decorator = new T(args...);
     addDecoratorInternal(decorator);
     return *decorator;

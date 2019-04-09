@@ -39,8 +39,8 @@ LODGridChunkSystem::LODGridChunkSystem(double baseChunkSize)
                 _subdivResolutionThreshold);
 
     for (int i = 1; i <= _maxLOD; i++) {
-        auto dimensions = _internal->_lodData[0].getChunkSize() *
-                          powi((double)_factor, -i);
+        auto dimensions =
+            _internal->_lodData[0].getChunkSize() * powi((double)_factor, -i);
         auto maxResolution = _internal->_lodData[0].getMaxResolution() *
                              powi((double)_factor, i);
         _internal->_lodData[i] = LODData(dimensions, maxResolution);
@@ -152,7 +152,8 @@ void LODGridChunkSystem::collectChunk(const NodeKey &chunkKey,
         Chunk &chunk = getOrCreateEntry(chunkKey)._chunk;
 
         // Collect current chunk
-        collectChild(chunkKey, chunk, collector, resolutionModel, ExplorationContext::getDefault());
+        collectChild(chunkKey, chunk, collector, resolutionModel,
+                     ExplorationContext::getDefault());
 
         // Collect the children if they exist
         if (coords.getLOD() < _maxLOD) {
@@ -214,8 +215,7 @@ ChunkEntry &LODGridChunkSystem::getOrCreateEntry(const NodeKey &key) {
         }
 
         return *entry;
-    }
-    else {
+    } else {
         return *it->second;
     }
 }

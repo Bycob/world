@@ -49,10 +49,12 @@ void WorldNode::collect(ICollector &collector,
     collectChildren(collector, resolutionModel, ctx);
 }
 
-void WorldNode::collectSelf(ICollector &collector, const IResolutionModel &resolutionModel,
+void WorldNode::collectSelf(ICollector &collector,
+                            const IResolutionModel &resolutionModel,
                             const ExplorationContext &ctx) {}
 
-void WorldNode::collectChildren(ICollector &collector, const IResolutionModel &resolutionModel,
+void WorldNode::collectChildren(ICollector &collector,
+                                const IResolutionModel &resolutionModel,
                                 const ExplorationContext &ctx) {
 
     for (auto &entry : _internal->_children) {

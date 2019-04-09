@@ -68,7 +68,8 @@ public:
 
     SnitchNode(ExplorationSpy &spy) : _spy(spy) {}
 
-    void collect(ICollector &collector, const IResolutionModel &model, const ExplorationContext &ctx) override;
+    void collect(ICollector &collector, const IResolutionModel &model,
+                 const ExplorationContext &ctx) override;
 };
 
 class ExplorationSpy : public IChunkDecorator {
@@ -79,9 +80,12 @@ public:
 
     void decorate(Chunk &chunk) override {
         if (_verbose) {
-            std::cout << "Exploration of chunk n°" << _chunkCounter << std::endl;
-            std::cout << "\tDimensions: " << chunk.getSize() << ", position: " << chunk.getPosition3D() << std::endl;
-            std::cout << "\tResolution: min " << chunk.getMinResolution() << ", max " << chunk.getMaxResolution() << std::endl;
+            std::cout << "Exploration of chunk n°" << _chunkCounter
+                      << std::endl;
+            std::cout << "\tDimensions: " << chunk.getSize()
+                      << ", position: " << chunk.getPosition3D() << std::endl;
+            std::cout << "\tResolution: min " << chunk.getMinResolution()
+                      << ", max " << chunk.getMaxResolution() << std::endl;
         }
 
         SnitchNode &node = chunk.addChild<SnitchNode>(*this);
@@ -91,7 +95,8 @@ public:
     }
 };
 
-void SnitchNode::collect(ICollector &collector, const IResolutionModel &model, const ExplorationContext &ctx) {
+void SnitchNode::collect(ICollector &collector, const IResolutionModel &model,
+                         const ExplorationContext &ctx) {
     vec3d offset = ctx.getOffset();
     ItemKey itemKey = ctx.mutateKey(ItemKeys::defaultKey());
     NodeKey nodeKey = ItemKeys::getLastNode(ItemKeys::getParent(itemKey));
@@ -109,12 +114,13 @@ TEST_CASE("LODGridChunkSystem", "[chunksystem]") {
         vec3i pos1{-4, -5, 8};
         vec3i pos2{1, 1, 0};
 
-        LODGridCoordinates c1 {pos1, 0};
-        LODGridCoordinates c2 {pos2, 1};
+        LODGridCoordinates c1{pos1, 0};
+        LODGridCoordinates c2{pos2, 1};
 
         NodeKey key = c2.toKey(c1.toKey());
         vec3d offset = chunkSystem.getOffset(key);
-        vec3d correctOffset = lod0.getChunkSize() * pos1 + lod1.getChunkSize() * pos2;
+        vec3d correctOffset =
+            lod0.getChunkSize() * pos1 + lod1.getChunkSize() * pos2;
         CHECK(offset.length(correctOffset) == Approx(0));
     }
 
@@ -133,7 +139,8 @@ TEST_CASE("LODGridChunkSystem", "[chunksystem]") {
 
             if (goodOffset.length(realOffset) != Approx(0)) {
                 success = false;
-                errors << realOffset << " should be " << goodOffset << std::endl;
+                errors << realOffset << " should be " << goodOffset
+                       << std::endl;
             }
         }
 
