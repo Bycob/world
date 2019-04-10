@@ -78,6 +78,7 @@ template <typename T> struct vec2 {
     vec2<T> operator+(const vec2<T> &rhs) const;
     vec2<T> operator-(const vec2<T> &rhs) const;
     vec2<T> operator*(const vec2<T> &rhs) const;
+    vec2<T> operator/(const vec2<T> &rhs) const;
 
     template <typename R> bool operator<(const vec2<R> &rhs) const;
 
@@ -297,6 +298,11 @@ inline vec2<T> vec2<T>::operator-(const vec2<T> &rhs) const {
 template <typename T>
 inline vec2<T> vec2<T>::operator*(const vec2<T> &rhs) const {
     return vec2(this->x * rhs.x, this->y * rhs.y);
+}
+
+template <typename T>
+inline vec2<T> vec2<T>::operator/(const vec2<T> &rhs) const {
+    return vec2(this->x / rhs.x, this->y / rhs.y);
 }
 
 template <typename T> inline vec2<T> vec2<T>::operator*(T rhs) const {

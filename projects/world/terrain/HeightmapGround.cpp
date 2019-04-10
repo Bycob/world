@@ -6,6 +6,7 @@
 #include "world/core/WorldTypes.h"
 #include "world/assets/Object3D.h"
 #include "world/assets/Material.h"
+#include "world/assets/ImageUtils.h"
 #include "world/math/MathsHelper.h"
 #include "ApplyParentTerrain.h"
 #include "PerlinTerrainGenerator.h"
@@ -157,6 +158,38 @@ void HeightmapGround::collect(ICollector &collector,
     }
 
     updateCache();
+}
+
+void HeightmapGround::paintTexture(const vec2d &origin, const vec2d &size,
+                                   const vec2d &resolutionRange,
+                                   const Image &img) {
+    const int minLod = _tileSystem.getLod(resolutionRange.x);
+    const int maxLod = _tileSystem.getLod(resolutionRange.y);
+
+    const vec3d min{origin.x, origin.y, 0};
+    const vec3d max{origin.x + size.x, origin.y + size.y, 0};
+
+    for (int lod = minLod; lod <= maxLod; ++lod) {
+        TileCoordinates tileMin = _tileSystem.getTileCoordinates(min, lod);
+        TileCoordinates tileMax = _tileSystem.getTileCoordinates(max, lod);
+        vec3d localMin = _tileSystem.getLocalCoordinates(min, lod);
+        vec3d localMax = _tileSystem.getLocalCoordinates(max, lod);
+        vec3d tileSize = _tileSystem.getTileSize(lod);
+        vec3i tileDist = tileMax._pos - tileMin._pos;
+
+        vec3d imgSize = tileSize * tileDist + localMax - localMin;
+
+        for (int x = tileMin._pos.x; x <= tileMax._pos.x; ++x) {
+            for (int y = tileMin._pos.y; y <= tileMax._pos.y; ++y) {
+                TileCoordinates current{x, y, 0, lod};
+                vec3d imgCoords =
+                    (tileMin._pos - current._pos) * tileSize + localMin;
+                ImageUtils::paintTexturef(provideTerrain(current).getTexture(),
+                                          img, {imgCoords.x, imgCoords.y},
+                                          {imgSize.x, imgSize.y});
+            }
+        }
+    }
 }
 
 void HeightmapGround::addWorkerInternal(ITerrainWorker *worker) {

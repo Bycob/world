@@ -61,6 +61,9 @@ public:
                  const ExplorationContext &ctx =
                      ExplorationContext::getDefault()) override;
 
+    void paintTexture(const vec2d &origin, const vec2d &size,
+                      const vec2d &resolutionRange, const Image &img) override;
+
 private:
     PGround *_internal;
 
@@ -82,9 +85,6 @@ private:
     void addWorkerInternal(ITerrainWorker *worker);
 
     double observeAltitudeAt(double x, double y, int lvl);
-
-    /** Replace a parent terrain by its children in the collector */
-    void replaceTerrain(const TileCoordinates &key, ICollector &collector);
 
     void addTerrain(const TileCoordinates &key, ICollector &collector);
 

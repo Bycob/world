@@ -6,7 +6,15 @@
 namespace world {
 
 ForestLayer::ForestLayer(FlatWorld *flatWorld)
-        : _rng(static_cast<u32>(time(NULL))), _flatWorld(flatWorld) {}
+        : _rng(static_cast<u32>(time(NULL))), _flatWorld(flatWorld),
+          _treeSprite(3, 3, ImageType::RGB) {
+
+    for (int x = 0; x < 3; ++x) {
+        for (int y = 0; y < 3; ++y) {
+            _treeSprite.rgb(x, y).setf(0.2, 0.5, 0.0);
+        }
+    }
+}
 
 void ForestLayer::decorate(Chunk &chunk) {
     // Check resolution
@@ -63,6 +71,10 @@ void ForestLayer::decorate(Chunk &chunk) {
         if (stddistrib(_rng) < getDensityAtAltitude(altitude)) {
             vec3d pos{pt.x, pt.y, altitude - chunkOffset.z};
             treeGroup.addTree(pos);
+
+            ground.paintTexture(
+                {chunkOffset.x + pt.x - 2, chunkOffset.y + pt.y - 2}, {4, 4},
+                {0, 1}, _treeSprite);
         }
     }
 }
