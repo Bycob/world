@@ -129,7 +129,7 @@ void LODGridChunkSystem::collect(ICollector &collector,
                  x <= static_cast<s32>(floor(upper.x)); ++x) {
                 LODGridCoordinates coords{x, y, z, 0};
                 NodeKey chunkKey = coords.toKey();
-                collectChunk(chunkKey, collector, resolutionModel);
+                collectChunk(chunkKey, collector, resolutionModel, ctx);
             }
         }
     }
@@ -137,7 +137,8 @@ void LODGridChunkSystem::collect(ICollector &collector,
 
 void LODGridChunkSystem::collectChunk(const NodeKey &chunkKey,
                                       world::ICollector &collector,
-                                      const IResolutionModel &resolutionModel) {
+                                      const IResolutionModel &resolutionModel,
+                                      const ExplorationContext &ctx) {
 
     LODGridCoordinates coords = LODGridCoordinates::getLastOfKey(chunkKey);
     LODData &lodData = getLODData(coords.getLOD());
@@ -152,8 +153,7 @@ void LODGridChunkSystem::collectChunk(const NodeKey &chunkKey,
         Chunk &chunk = getOrCreateEntry(chunkKey)._chunk;
 
         // Collect current chunk
-        collectChild(chunkKey, chunk, collector, resolutionModel,
-                     ExplorationContext::getDefault());
+        collectChild(chunkKey, chunk, collector, resolutionModel, ctx);
 
         // Collect the children if they exist
         if (coords.getLOD() < _maxLOD) {
@@ -165,7 +165,7 @@ void LODGridChunkSystem::collectChunk(const NodeKey &chunkKey,
                     for (u32 z = 0; z < _factor; z++) {
                         LODGridCoordinates ncoords(x, y, z, lod);
                         auto id = ncoords.toKey(chunkKey);
-                        collectChunk(id, collector, resolutionModel);
+                        collectChunk(id, collector, resolutionModel, ctx);
                     }
                 }
             }

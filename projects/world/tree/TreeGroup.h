@@ -33,7 +33,7 @@ private:
     Mesh _leavesMesh;
 
 
-    void regenerateGroup();
+    void regenerateGroup(const ExplorationContext &ctx);
 
     void configTree(Tree &tree);
 };

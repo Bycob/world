@@ -57,7 +57,8 @@ protected:
      * then the chunk is collected and collectChunk is called on each
      * of its children. */
     void collectChunk(const NodeKey &chunkKey, ICollector &collector,
-                      const IResolutionModel &resolutionModel);
+                      const IResolutionModel &resolutionModel,
+                      const ExplorationContext &ctx);
 
 private:
     LODGridChunkSystemPrivate *_internal;

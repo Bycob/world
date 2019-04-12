@@ -39,9 +39,13 @@ void TreeGroup::collect(ICollector &collector,
                         const IResolutionModel &resolutionModel,
                         const ExplorationContext &ctx) {
 
+    if (resolutionModel.getResolutionAt({}, ctx) < 0.5) {
+        return;
+    }
+
     if (_trunksMesh.getVerticesCount() == 0 &&
         _leavesMesh.getVerticesCount() == 0) {
-        regenerateGroup();
+        regenerateGroup(ctx);
     }
 
     _trunksMesh.clearFaces();
@@ -55,7 +59,14 @@ void TreeGroup::collect(ICollector &collector,
             // Generate tree
             if (treeData._tree == nullptr) {
                 treeData._tree = std::make_unique<Tree>();
-                treeData._tree->setPosition3D(treeData._position);
+
+                if (ctx.hasEnvironment()) {
+                    treeData._tree->setPosition3D(
+                        ctx.getEnvironment().findNearestFreePoint(
+                            treeData._position, {0, 0, 1}, 5, ctx));
+                } else {
+                    treeData._tree->setPosition3D(treeData._position);
+                }
                 configTree(*treeData._tree);
             }
 
@@ -109,12 +120,15 @@ void TreeGroup::collect(ICollector &collector,
     }
 }
 
-void TreeGroup::regenerateGroup() {
+void TreeGroup::regenerateGroup(const ExplorationContext &ctx) {
     for (TreeData &treeData : _internal->_trees) {
         // trunk
         // TODO utiliser le générateur d'arbres pour générer une version low
         // poly du tronc avec peu de branches.
-        vec3d trunkBottom = treeData._position;
+        vec3d trunkBottom = ctx.hasEnvironment()
+                                ? ctx.getEnvironment().findNearestFreePoint(
+                                      treeData._position, {0, 0, 1}, 1, ctx)
+                                : treeData._position;
         vec3d trunkTop = trunkBottom + vec3d{0, 0.3, 2};
         double trunkRadius = 0.2;
         int startIndex = _trunksMesh.getVerticesCount();

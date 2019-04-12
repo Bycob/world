@@ -11,14 +11,14 @@ ForestLayer::ForestLayer(FlatWorld *flatWorld)
 
     for (int x = 0; x < 3; ++x) {
         for (int y = 0; y < 3; ++y) {
-            _treeSprite.rgb(x, y).setf(0.2, 0.5, 0.0);
+            _treeSprite.rgb(x, y).setf(0.05, 0.35, 0.0);
         }
     }
 }
 
 void ForestLayer::decorate(Chunk &chunk) {
     // Check resolution
-    const double resolution = 1;
+    const double resolution = 0.01;
     const double minres = chunk.getMinResolution();
     const double maxres = chunk.getMaxResolution();
 
@@ -71,17 +71,17 @@ void ForestLayer::decorate(Chunk &chunk) {
         if (stddistrib(_rng) < getDensityAtAltitude(altitude)) {
             if (remainingTrees <= 0) {
                 treeGroup = &chunk.addChild<TreeGroup>();
-                treeGroup->setPosition3D({0, 0, 0});
+                treeGroup->setPosition3D(chunkSize / 2.0);
                 remainingTrees = 50; // treeGroup->maxTreeCount();
             }
 
             vec3d pos{pt.x, pt.y, altitude - chunkOffset.z};
-            treeGroup->addTree(pos);
+            treeGroup->addTree(pos - chunkSize / 2.0);
             --remainingTrees;
 
-            ground.paintTexture(
+            /*ground.paintTexture(
                 {chunkOffset.x + pt.x - 2, chunkOffset.y + pt.y - 2}, {4, 4},
-                {0, 1}, _treeSprite);
+                {0, 1}, _treeSprite);*/
         }
     }
 }

@@ -40,6 +40,17 @@ void FlatWorld::collect(ICollector &collector,
     World::collect(collector, resolutionModel);
 }
 
+vec3d FlatWorld::findNearestFreePoint(const vec3d &origin,
+                                      const vec3d &direction, double resolution,
+                                      const ExplorationContext &ctx) const {
+    auto pos = origin + ctx.getOffset();
+    double z = _internal->_ground->observeAltitudeAt(pos.x, pos.y, resolution);
+    // std::cout << z - ctx.getOffset().z << " <> " << origin.z << std::endl;
+    return {origin.x, origin.y, z - ctx.getOffset().z};
+}
+
+IEnvironment *FlatWorld::getInitialEnvironment() { return this; }
+
 void FlatWorld::setGroundInternal(GroundNode *ground) {
     _internal->_ground = std::unique_ptr<GroundNode>(ground);
 }

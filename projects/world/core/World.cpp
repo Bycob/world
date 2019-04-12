@@ -30,6 +30,7 @@ void World::collect(ICollector &collector,
 
     for (auto &entry : _internal->_primaryNodes) {
         ExplorationContext ctx;
+        ctx.setEnvironment(getInitialEnvironment());
         ctx.appendPrefix(entry.first);
         ctx.addOffset(entry.second->getPosition3D());
 
@@ -47,5 +48,7 @@ void World::addPrimaryNodeInternal(WorldNode *node) {
     _internal->_primaryNodes.emplace(std::to_string(++_internal->_counter),
                                      std::unique_ptr<WorldNode>(node));
 }
+
+IEnvironment *World::getInitialEnvironment() { return nullptr; }
 
 } // namespace world

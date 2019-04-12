@@ -51,6 +51,9 @@ public:
 protected:
     void addPrimaryNodeInternal(WorldNode *node);
 
+    /** Gets initial environment to initialize the base context */
+    virtual IEnvironment *getInitialEnvironment();
+
 private:
     WorldPrivate *_internal;
 

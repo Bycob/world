@@ -8,7 +8,7 @@
 namespace world {
 class PFlatWorld;
 
-class WORLDAPI_EXPORT FlatWorld : public World {
+class WORLDAPI_EXPORT FlatWorld : public World, public IEnvironment {
 public:
     /** Create a complete and rich world that can be used
      * as a demonstration of the API power ! */
@@ -25,6 +25,14 @@ public:
 
     void collect(ICollector &collector,
                  const IResolutionModel &resolutionModel) override;
+
+    // Environment part
+    vec3d findNearestFreePoint(const vec3d &origin, const vec3d &direction,
+                               double resolution,
+                               const ExplorationContext &ctx) const override;
+
+protected:
+    IEnvironment *getInitialEnvironment() override;
 
 private:
     PFlatWorld *_internal;

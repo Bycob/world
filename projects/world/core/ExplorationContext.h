@@ -6,6 +6,7 @@
 
 #include "WorldKeys.h"
 #include "world/math/Vector.h"
+#include "IEnvironment.h"
 
 namespace world {
 
@@ -20,13 +21,21 @@ public:
 
     void appendPrefix(const NodeKey &prefix);
 
+    void setEnvironment(IEnvironment *environment);
+
     ItemKey mutateKey(const ItemKey &key) const;
 
     vec3d getOffset() const;
 
+    bool hasEnvironment() const;
+
+    const IEnvironment &getEnvironment() const;
+
 private:
     ItemKey _keyPrefix;
     vec3d _offset;
+
+    IEnvironment *_environment;
 };
 
 } // namespace world
