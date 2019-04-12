@@ -24,6 +24,7 @@ private:
 
     Image _treeSprite;
 
+
     /// Maximum possible density of trees, in tree.km^-2
     double _maxDensity = 5000;
     // 20000 is better, but needs to be optimized both in memory and mesh

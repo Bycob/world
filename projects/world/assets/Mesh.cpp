@@ -65,6 +65,11 @@ Face &Mesh::newFace(int *ids) {
     return _faces.back();
 }
 
+void Mesh::clearFaces() {
+    _faces.clear();
+    _faceCount = 0;
+}
+
 void Mesh::reserveVertices(u32 count) {
     const auto maxCapacity = _vertices.max_size();
     const auto newCapacity = min(count + _verticesCount, maxCapacity);
@@ -103,4 +108,10 @@ Vertex &Mesh::newVertex(const world::vec3d &position,
     _verticesCount++;
     return _vertices.back();
 }
+
+void Mesh::clearVertices() {
+    _vertices.clear();
+    _verticesCount = 0;
+}
+
 } // namespace world

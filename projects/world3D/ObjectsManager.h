@@ -54,6 +54,10 @@ private:
     std::map<world::ItemKey, std::unique_ptr<ObjectNodeHandler>> _objects;
     std::map<std::string, int> _loadedTextures;
 
+    /** If true, on each update, objects that were already present
+     * on the last update are not updated to save time and avoid lags.*/
+    bool _partialUpdate = true;
+
     // Debug variables
     bool _dbgOn = false;
     int _dbgAdded = 0;

@@ -55,8 +55,8 @@ void ForestLayer::decorate(Chunk &chunk) {
     }
 
     // Populate trees
-    TreeGroup &treeGroup = chunk.addChild<TreeGroup>();
-    treeGroup.setPosition3D({0, 0, 0});
+    int remainingTrees = 0;
+    TreeGroup *treeGroup = nullptr;
 
     for (auto &pt : randomPoints) {
         const double altitude = ground.observeAltitudeAt(
@@ -69,8 +69,15 @@ void ForestLayer::decorate(Chunk &chunk) {
         }
 
         if (stddistrib(_rng) < getDensityAtAltitude(altitude)) {
+            if (remainingTrees <= 0) {
+                treeGroup = &chunk.addChild<TreeGroup>();
+                treeGroup->setPosition3D({0, 0, 0});
+                remainingTrees = 50; // treeGroup->maxTreeCount();
+            }
+
             vec3d pos{pt.x, pt.y, altitude - chunkOffset.z};
-            treeGroup.addTree(pos);
+            treeGroup->addTree(pos);
+            --remainingTrees;
 
             ground.paintTexture(
                 {chunkOffset.x + pt.x - 2, chunkOffset.y + pt.y - 2}, {4, 4},

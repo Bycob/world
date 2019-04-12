@@ -9,46 +9,77 @@
 
 namespace world {
 
+struct TreeData {
+    u32 _id;
+    vec3d _position;
+    std::vector<Face> _trunkFaces;
+    std::vector<Face> _leavesFaces;
+    std::unique_ptr<Tree> _tree;
+
+
+    TreeData(u32 id, const vec3d &position) : _id(id), _position(position) {}
+};
+
+
 class PTreeGroup {
 public:
-    std::vector<std::unique_ptr<Tree>> _trees;
+    bool _updateParity = false;
+    std::vector<TreeData> _trees;
 };
 
 TreeGroup::TreeGroup() : _internal(new PTreeGroup()) {}
 
 TreeGroup::~TreeGroup() {}
 
-void TreeGroup::addTree(const vec3d &pos) { _treesPositions.push_back(pos); }
+void TreeGroup::addTree(const vec3d &pos) {
+    _internal->_trees.emplace_back(_internal->_trees.size(), pos);
+}
 
 void TreeGroup::collect(ICollector &collector,
                         const IResolutionModel &resolutionModel,
                         const ExplorationContext &ctx) {
 
-    // we choose the render mode of the tree group : 0:none / 1:together / 2:per
-    // tree
-    int renderMode = 0;
+    if (_trunksMesh.getVerticesCount() == 0 &&
+        _leavesMesh.getVerticesCount() == 0) {
+        regenerateGroup();
+    }
 
-    for (vec3d &pos : _treesPositions) {
-        double resolution = resolutionModel.getResolutionAt(pos, ctx);
+    _trunksMesh.clearFaces();
+    _leavesMesh.clearFaces();
 
-        if (resolution > 15) {
-            renderMode = 2;
-            break;
+    for (TreeData &treeData : _internal->_trees) {
+        double resolution =
+            resolutionModel.getResolutionAt(treeData._position, ctx);
+
+        if (resolution > 5) {
+            // Generate tree
+            if (treeData._tree == nullptr) {
+                treeData._tree = std::make_unique<Tree>();
+                treeData._tree->setPosition3D(treeData._position);
+                configTree(*treeData._tree);
+            }
+
+            collectChild(NodeKeys::fromUint(treeData._id), *treeData._tree,
+                         collector, resolutionModel, ctx);
+
         } else if (resolution > 1) {
-            renderMode = 1;
+            // Add simplified version to group mesh
+            for (auto &face : treeData._trunkFaces) {
+                _trunksMesh.addFace(face);
+            }
+
+            for (auto &face : treeData._leavesFaces) {
+                _leavesMesh.addFace(face);
+            }
         }
     }
 
-    switch (renderMode) {
-    case 1: // Together
-    {
-        // Generating if needed
-        if (_trunksMesh.getFaceCount() == 0 &&
-            _leavesMesh.getFaceCount() == 0) {
-            regenerateGroup();
-        }
+    // Collect group meshes
+    if (_trunksMesh.getFaceCount() != 0 || _leavesMesh.getFaceCount() != 0) {
 
-        // Collecting
+        MeshOps::recalculateNormals(_trunksMesh);
+        MeshOps::recalculateNormals(_leavesMesh);
+
         if (collector.hasChannel<Object3D>()) {
 
             Object3D trunksObj(_trunksMesh);
@@ -69,34 +100,22 @@ void TreeGroup::collect(ICollector &collector,
             }
 
             auto &objChannel = collector.getChannel<Object3D>();
-            objChannel.put({"1"}, trunksObj, ctx);
-            objChannel.put({"2"}, leavesObj, ctx);
+            std::string prefix{
+                (_internal->_updateParity = !_internal->_updateParity) ? "u"
+                                                                       : ""};
+            objChannel.put({prefix + "1"}, trunksObj, ctx);
+            objChannel.put({prefix + "2"}, leavesObj, ctx);
         }
-
-        break;
-    }
-    case 2: // Tree by tree
-        for (u32 i = 0; i < _treesPositions.size(); ++i) {
-            if (_internal->_trees.size() <= i) {
-                allocateTree(_treesPositions[i]);
-            }
-
-            Tree &tree = *_internal->_trees.at(i);
-            collectChild(NodeKeys::fromUint(i), tree, collector,
-                         resolutionModel, ctx);
-        }
-
-        break;
     }
 }
 
 void TreeGroup::regenerateGroup() {
-    for (vec3d &pos : _treesPositions) {
+    for (TreeData &treeData : _internal->_trees) {
         // trunk
         // TODO utiliser le générateur d'arbres pour générer une version low
         // poly du tronc avec peu de branches.
-        vec3d trunkBottom = pos;
-        vec3d trunkTop = pos + vec3d{0, 0.3, 2};
+        vec3d trunkBottom = treeData._position;
+        vec3d trunkTop = trunkBottom + vec3d{0, 0.3, 2};
         double trunkRadius = 0.2;
         int startIndex = _trunksMesh.getVerticesCount();
 
@@ -110,8 +129,8 @@ void TreeGroup::regenerateGroup() {
                             {startIndex + (2 * i + 2) % 6,
                              startIndex + (2 * i + 2) % 6 + 1,
                              startIndex + 2 * i + 1}};
-            _trunksMesh.newFace(ids[0]);
-            _trunksMesh.newFace(ids[1]);
+            treeData._trunkFaces.emplace_back(ids[0]);
+            treeData._trunkFaces.emplace_back(ids[1]);
         }
 
 
@@ -142,22 +161,15 @@ void TreeGroup::regenerateGroup() {
                                     {totalOffset + (j + 1) % 7,
                                      totalOffset + segmentCount + (j + 1) % 7,
                                      totalOffset + segmentCount + j}};
-                    _leavesMesh.newFace(ids[0]);
-                    _leavesMesh.newFace(ids[1]);
+                    treeData._leavesFaces.emplace_back(ids[0]);
+                    treeData._leavesFaces.emplace_back(ids[1]);
                 }
             }
         }
     }
-
-    MeshOps::recalculateNormals(_trunksMesh);
-    MeshOps::recalculateNormals(_leavesMesh);
 }
 
-void TreeGroup::allocateTree(const vec3d &position) {
-    _internal->_trees.emplace_back(std::make_unique<Tree>());
-    Tree &tree = *_internal->_trees.back();
-    tree.setPosition3D(position);
-
+void TreeGroup::configTree(Tree &tree) {
     auto &skeletton = tree.addWorker<TreeSkelettonGenerator>();
     skeletton.setRootWeight(TreeParamsd::gaussian(3, 0.2));
     skeletton.setForkingCount(

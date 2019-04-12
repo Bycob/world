@@ -29,15 +29,13 @@ public:
 private:
     PTreeGroup *_internal;
 
-    std::vector<vec3d> _treesPositions;
-
     Mesh _trunksMesh;
     Mesh _leavesMesh;
 
 
     void regenerateGroup();
 
-    void allocateTree(const vec3d &position);
+    void configTree(Tree &tree);
 };
 
 } // namespace world
