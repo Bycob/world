@@ -3,8 +3,11 @@
 
 #include "world/core/WorldConfig.h"
 
-#include "world/math/Vector.h"
+#include <functional>
+
+#include "WorldTypes.h"
 #include "IResolutionModel.h"
+#include "world/math/Vector.h"
 
 namespace world {
 
@@ -29,6 +32,11 @@ inline bool operator<(const TileCoordinates &coord1,
     return coord1._lod < coord2._lod
                ? true
                : (coord1._lod == coord2._lod && coord1._pos < coord2._pos);
+}
+
+inline bool operator==(const TileCoordinates &coord1,
+                       const TileCoordinates &coord2) {
+    return coord1._lod == coord2._lod && coord1._pos == coord2._pos;
 }
 
 /** This class performs conversion between the world coordinates
@@ -148,5 +156,18 @@ private:
 };
 
 } // namespace world
+
+namespace std {
+template <> class hash<world::TileCoordinates> {
+public:
+    size_t operator()(const world::TileCoordinates &c) const {
+        world::s64 hash = (c._pos.x << 8) + 31;
+        hash *= (c._pos.y << 8) + 31;
+        hash *= (c._pos.z << 8) + 31;
+        hash *= (c._lod << 8) + 31;
+        return static_cast<size_t>(hash);
+    }
+};
+} // namespace std
 
 #endif // WORLD_TILE_SYSTEM_H
