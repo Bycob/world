@@ -3,7 +3,6 @@
 
 #include "world/core/WorldConfig.h"
 
-#include <map>
 #include <utility>
 #include <functional>
 
@@ -79,6 +78,7 @@ private:
 
     TileSystem _tileSystem;
 
+    bool _manageCache = false;
     u32 _maxCacheSize = 20000;
 
     // WORKER

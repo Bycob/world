@@ -102,7 +102,8 @@ public:
                                const BoundingBox &bounds) const;
 
 private:
-    int computeLod(double resolution, double baseSize, int bufferRes) const;
+    int computeLod(double resolution, double baseSize, int bufferRes,
+                   int maxLod) const;
 
     vec3d getTileFloatingCoordinates(const vec3d &globalCoordinates,
                                      int lod) const;

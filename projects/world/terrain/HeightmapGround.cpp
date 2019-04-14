@@ -1,5 +1,7 @@
 #include "HeightmapGround.h"
 
+#include <map>
+#include <unordered_map>
 #include <memory>
 #include <list>
 
@@ -83,13 +85,13 @@ public:
 
 class PGround {
 public:
-    PGround() : _terrains() {}
+    PGround() : _terrains(65536), _accesses(65536) {}
 
-    std::map<TileCoordinates, Tile> _terrains;
+    std::unordered_map<TileCoordinates, Tile> _terrains;
     std::list<std::unique_ptr<ITerrainWorker>> _generators;
 
     u64 _accessCounter = 0;
-    std::map<u64, TileCoordinates> _accesses;
+    std::unordered_map<u64, TileCoordinates> _accesses;
 };
 
 // Idees d'ameliorations :
@@ -257,7 +259,7 @@ void HeightmapGround::addTerrain(const TileCoordinates &key,
 }
 
 void HeightmapGround::updateCache() {
-    if (_internal->_terrains.size() > _maxCacheSize) {
+    if (_manageCache && _internal->_terrains.size() > _maxCacheSize) {
 
         // We shrink one third of the memory
         auto count = _internal->_terrains.size() / 3;
@@ -292,6 +294,9 @@ Tile &HeightmapGround::provide(const TileCoordinates &key) {
 }
 
 void HeightmapGround::registerAccess(const TileCoordinates &key, Tile &tile) {
+    if (!_manageCache)
+        return;
+
     _internal->_accessCounter++;
 
     // Remove last access entry for this tile
