@@ -68,6 +68,16 @@ if (${WORLD_BUILD_VULKAN_MODULES})
             bin/
     )
 
+    find_file(Vulkan_GLSL_COMPILER
+        NAMES
+            glslc.exe
+            glslc
+        PATH_SUFFIXES
+            Bin/
+            Bin32/
+            bin/
+    )
+
     set(Vulkan_FOUND OFF)
     if (Vulkan_LIBRARIES AND NOT (Vulkan_INCLUDE_DIRS STREQUAL "Vulkan_INCLUDE_DIRS-NOTFOUND"))
         set(Vulkan_FOUND ON)

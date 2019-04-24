@@ -32,7 +32,7 @@ VkSubBuffer createTestPerlinBuffer() {
     DescriptorSetLayoutVk layout22; // 2 uniforms 2 storage
     layout22.addBinding(DescriptorType::UNIFORM_BUFFER, 0);
     layout22.addBinding(DescriptorType::UNIFORM_BUFFER, 1);
-    layout22.addBinding(DescriptorType::STORAGE_BUFFER, 2);
+    layout22.addBinding(DescriptorType::STORAGE_BUFFER, 256);
     layout22.addBinding(DescriptorType::STORAGE_BUFFER, 3);
 
     ComputePipeline perlinPipeline(layout22, "noise-perlin");
@@ -92,7 +92,7 @@ VkSubBuffer createTestPerlinBuffer() {
     DescriptorSetVk perlinDset(layout22);
     perlinDset.addDescriptor(0, DescriptorType::UNIFORM_BUFFER, outputDataBuf);
     perlinDset.addDescriptor(1, DescriptorType::UNIFORM_BUFFER, perlinDataBuf);
-    perlinDset.addDescriptor(2, DescriptorType::STORAGE_BUFFER, hashBuf);
+    perlinDset.addDescriptor(256, DescriptorType::STORAGE_BUFFER, hashBuf);
     perlinDset.addDescriptor(3, DescriptorType::STORAGE_BUFFER, perlinBuf);
 
     VkWorker perlinWorker;

@@ -1,128 +1,30 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
+#extension GL_GOOGLE_include_directive : enable
+
+#include "worldlib"
 
 #define WORKGROUP_SIZE 32
-#define M_PI 3.1415926535897932384626433832795
 layout (local_size_x = WORKGROUP_SIZE, local_size_y = WORKGROUP_SIZE, local_size_z = 1) in;
 
-
 layout(binding = 0) uniform OutputData {
-    uint width;
-    uint height;
-	uint depth;
+    uvec3 dims;
 };
 
 layout(binding = 1) uniform PerlinData {
-    uint octaves;
-	uint octaveRef;
-    int offsetX;
-    int offsetY;
-	int offsetZ;
-    float frequency;
-    float persistence;
-};
-
-// Random values for hash function
-layout(binding = 2) buffer PerlinTable {
-    uint p[512];
+	NoiseParameters uParams;
 };
 
 layout(std430, binding = 3) buffer Output0 {
     float outputBuffer[];
 };
 
-
-uint rand(uint octave, int x, int y, int z) {
-	uint ux = uint(x) & 255;
-	uint uy = uint(y) & 255;
-	uint uz = uint(z) & 255;
-	uint a = p[uz] + uy;
-	uint b = p[a] + ux;
-	uint c = p[b] + octave;
-	return p[c];
-}
-
-float g(uint hash, float x, float y, float z) {
-    uint h = hash & 15;
-	float u = hash < 8 ? x : y;
-	float v = h < 4 ? y : h == 12 || h == 14 ? x : z;
-	return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
-}
-
-int calcOffset(uint octave, int baseOffset) {
-	int diff = int(octave) - int(octaveRef);
-	int scaled = diff > 0 ? baseOffset << diff : baseOffset >> - diff;
-	return scaled;
-}
-
-float calcFreq(uint octave, float baseFreq) {
-	int diff = int(octave) - int(octaveRef);
-	return diff > 0 ? baseFreq * (1 << diff) : baseFreq / (1 << -diff);
-}
-
-float calcOffsetRemaining(uint octave, int baseOffset) {
-	int diff = int(octave) - int(octaveRef);
-	if (diff >= 0) return 0;
-
-	int reversed = calcOffset(octave, baseOffset) << - diff;
-	return (baseOffset - reversed) / float(1 << -diff);
-}
-
-/* x, y, z - compris entre 0 et 1, en proportion de la largeur totale. */
-float perlin(uint octave, float x, float y, float z) {
-	float freq = calcFreq(octave, frequency);
-
-	float xf = x * freq + calcOffsetRemaining(octave, offsetX);
-	float yf = y * freq + calcOffsetRemaining(octave, offsetY);
-	float zf = z * freq + calcOffsetRemaining(octave, offsetZ);
-
-	int ox = calcOffset(octave, offsetX);
-	int oy = calcOffset(octave, offsetY);
-	int oz = calcOffset(octave, offsetZ);
-
-	int x0 = int(floor(xf));
-	int x1 = int(ceil(xf));
-	int y0 = int(floor(yf));
-	int y1 = int(ceil(yf));
-	int z0 = int(floor(zf));
-	int z1 = int(ceil(zf));
-
-	float g000 = g(rand(octave, x0 + ox, y0 + oy, z0 + oz), xf - x0, yf - y0, zf - z0);
-	float g010 = g(rand(octave, x0 + ox, y1 + oy, z0 + oz), xf - x0, yf - y1, zf - z0);
-	float g100 = g(rand(octave, x1 + ox, y0 + oy, z0 + oz), xf - x1, yf - y0, zf - z0);
-	float g110 = g(rand(octave, x1 + ox, y1 + oy, z0 + oz), xf - x1, yf - y1, zf - z0);
-	float g001 = g(rand(octave, x0 + ox, y0 + oy, z1 + oz), xf - x0, yf - y0, zf - z1);
-	float g011 = g(rand(octave, x0 + ox, y1 + oy, z1 + oz), xf - x0, yf - y1, zf - z1);
-	float g101 = g(rand(octave, x1 + ox, y0 + oy, z1 + oz), xf - x1, yf - y0, zf - z1);
-	float g111 = g(rand(octave, x1 + ox, y1 + oy, z1 + oz), xf - x1, yf - y1, zf - z1);
-	
-	float ix = 0.5 - 0.5 * cos((xf - x0) * M_PI);
-	float iy = 0.5 - 0.5 * cos((yf - y0) * M_PI);
-	float iz = 0.5 - 0.5 * cos((zf - z0) * M_PI);
-
-	float l0 = mix(mix(g000, g001, iz), mix(g010, g011, iz), iy);
-	float l1 = mix(mix(g100, g101, iz), mix(g110, g111, iz), iy);
-	return 0.5 + 0.5 * mix(l0, l1, ix);
-}
-
 void main() {
-  if(gl_GlobalInvocationID.x >= width || gl_GlobalInvocationID.y >= height || gl_GlobalInvocationID.z >= depth)
-    return;
+	if(gl_GlobalInvocationID.x >= dims.x || gl_GlobalInvocationID.y >= dims.y || gl_GlobalInvocationID.z >= dims.z)
+		return;
 
-  float x = float(gl_GlobalInvocationID.x) / float(width);
-  float y = float(gl_GlobalInvocationID.y) / float(height);
-  float z = float(gl_GlobalInvocationID.z) / float(depth);
-  
-  float per = persistence;
-  float persum = 0;
-  float val = 0;
+	vec3 pos = gl_GlobalInvocationID.xyz / vec3(dims);
 
-  for (int i = 0; i < octaves; ++i) {
-    val += perlin(i, x, y, z) * per;
-	persum += per;
-	per *= persistence;
-  }
-
-  uint id = height * width * gl_GlobalInvocationID.z + width * gl_GlobalInvocationID.y + gl_GlobalInvocationID.x;
-  outputBuffer[id] = val / persum;
+	NoiseParameters params = uParams;
+	outputBuffer[id3(gl_GlobalInvocationID.xyz, dims)] = perlin(params, pos.x, pos.y, pos.z);
 }

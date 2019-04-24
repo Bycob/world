@@ -1,8 +1,10 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
+#extension GL_GOOGLE_include_directive : enable
+
+#include "worldlib"
 
 #define WORKGROUP_SIZE 32
-
 layout (local_size_x = WORKGROUP_SIZE, local_size_y = WORKGROUP_SIZE, local_size_z = 1 ) in;
 
 layout(binding = 0) uniform OutputData {
@@ -21,12 +23,8 @@ layout(std430, binding = 3) buffer Output0 {
     float outputDistribution[];
 };
 
-uint id(uvec3 pos, uvec3 dims) {
-	return dims.y * dims.x * pos.z + dims.x * pos.y + pos.x;
-}
-
 void main() {
-	float height = inputHeight[id(gl_GlobalInvocationID.xyz, dims)];
+	float height = inputHeight[id3(gl_GlobalInvocationID.xyz, dims)];
 	float i = height > 0.5 ? 0 : 1;
-	outputDistribution[id(gl_GlobalInvocationID.xyz, dims)] = i;
+	outputDistribution[id3(gl_GlobalInvocationID.xyz, dims)] = i;
 }

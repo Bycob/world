@@ -1,0 +1,46 @@
+#version 450
+#extension GL_ARB_separate_shader_objects : enable
+#extension GL_GOOGLE_include_directive : enable
+
+#include "worldlib"
+
+#define WORKGROUP_SIZE 32
+layout (local_size_x = WORKGROUP_SIZE, local_size_y = WORKGROUP_SIZE, local_size_z = 1 ) in;
+
+layout(binding = 0) uniform OutputData {
+    uvec3 dims;
+};
+
+layout(binding = 1) uniform DistributionParameters {
+    vec4 height;
+	vec4 dheight;
+	float max;
+	float min;
+	float threshold;
+};
+
+layout(std430, binding = 3) buffer Input0 {
+	float inputHeight[];
+};
+
+layout(std430, binding = 4) buffer Input1 {
+	float inputDheight[];
+};
+
+layout(std430, binding = 5) buffer Output0 {
+    float outputDistribution[];
+};
+
+void main() {
+	uvec3 loc = gl_GlobalInvocationID.xyz;
+	uint i = id3(loc, dims);
+	float h = inputHeight[i];
+	float dh = inputDheight[i];
+	
+	// float r1 = ramp(height.x, height.y, height.z, height.w, min, max, h);
+	// float r2 = ramp(dheight.x, dheight.y, dheight.z, dheight.w, min, max, dh);
+	// float r = r1 * r2;
+	// float x = perlin(loc, ...);
+	
+	// outputDistribution[i] = smoothstep(..., r - threshold, r + threshold);
+}

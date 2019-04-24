@@ -78,7 +78,7 @@ void testVulkanVersion(int argc, char ** argv) {
 	program.setUniform(0, outputData);
 	program.setUniform(1, perlinData);
 
-	program.setBuffer(2, pbuf);
+	program.setBuffer(256, pbuf);
 	program.setBuffer(3, output);
 
 	program.setDispatch(img_width / 32, img_height / 32, 1);
