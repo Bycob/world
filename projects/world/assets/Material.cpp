@@ -2,6 +2,8 @@
 
 namespace world {
 
+Material::Material() : _name("") {}
+
 Material::Material(const std::string &name) : _name(name) {
     setKd(1, 1, 1);
     setKa(0.2, 0.2, 0.2);

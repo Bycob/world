@@ -21,7 +21,7 @@ void Collector::fillScene(Scene &scene) {
                 auto &textureChannel = getStorageChannel<Image>();
 
                 for (auto texture : textureChannel) {
-                    scene.addTexture(ItemKeys::toString(texture._key) + ".png",
+                    scene.addTexture(texture._key.str() + ".png",
                                      texture._value);
                 }
             }

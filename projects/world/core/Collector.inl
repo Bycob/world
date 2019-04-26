@@ -99,6 +99,19 @@ inline void CollectorChannel<Object3D>::put(const ItemKey &key,
     newItem->setPosition(newItem->getPosition() + ctx.getOffset());
 }
 
+template <>
+inline void CollectorChannel<Material>::put(const ItemKey &key,
+                                            const Material &item,
+                                            const ExplorationContext &ctx) {
+
+    ItemKey mutkey = ctx.mutateKey(key);
+#ifdef _MSC_VER
+    auto &newItem = _items[mutkey] = std::make_shared<Material>(item);
+#else
+    auto &newItem = _items[mutkey] = std::make_unique<Material>(item);
+#endif
+    newItem->setName(mutkey.str());
+}
 
 // ====== CollectorChannelIterator
 

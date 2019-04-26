@@ -96,7 +96,7 @@ TEST_CASE("Collector", "[collector]") {
         matChan.put(key, mat01);
         CHECK(matChan.has(key));
         CHECK_NOTHROW(matChan.get(key));
-        CHECK(matChan.get(key).getName() == "mat01");
+        CHECK(matChan.get(key).getName() == key.str());
 
         matChan.remove(key);
         CHECK_FALSE(matChan.has(key));
@@ -124,5 +124,50 @@ TEST_CASE("Collector", "[collector]") {
                    (object.getPosition() + vec3d{5, 6, 7.3}))
                       .norm() == Approx(0));
         }
+    }
+
+    SECTION("Scene conversion") {
+        ItemKey blueKey{"blue"};
+
+        // Setup
+        Mesh m;
+        m.newVertex({0, 0, 0});
+        m.newVertex({0, 1, 0});
+        m.newVertex({0, 0, 1});
+        int face[] = {0, 1, 2};
+        m.newFace(face);
+
+        Image img(1, 1, ImageType::RGBA);
+
+        Material material("blue1");
+        material.setMapKd(blueKey.str());
+
+        Object3D object(m);
+        object.setPosition({1, 2, 3});
+        object.setMaterialID(blueKey.str());
+
+        // Collector
+        auto &imgChan = collector.addStorageChannel<Image>();
+
+        objChan.put(blueKey, object);
+        matChan.put(blueKey, material);
+        imgChan.put(blueKey, img);
+
+        // Scene conversion and tests
+        Scene scene;
+        collector.fillScene(scene);
+
+        CHECK(scene.getObjects().size() == 1);
+        Object3D *sceneObj = scene.getObjects().at(0);
+        CHECK(sceneObj->getPosition().length({1, 2, 3}) == Approx(0));
+        CHECK(sceneObj->getMaterialID() == blueKey.str());
+
+        CHECK(scene.getMaterials().size() == 1);
+        auto sceneMat = scene.getMaterials()[0];
+        CHECK(sceneMat->getMapKd() == blueKey.str() + ".png");
+
+        // Check links
+        REQUIRE(sceneMat->getName() == sceneObj->getMaterialID());
+        REQUIRE(scene.getTexture(sceneMat->getMapKd()).has_value());
     }
 }
