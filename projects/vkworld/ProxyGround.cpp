@@ -107,7 +107,7 @@ VkSubBuffer createTestPerlinBuffer() {
 }
 
 void ProxyGround::collect(ICollector &collector,
-                          const IResolutionModel &resolutionModel) {
+                          const IResolutionModel &resolutionModel, const ExplorationContext &ctx) {
     // Init collector
     if (!collector.hasChannel<Image>())
         return;
@@ -346,9 +346,7 @@ void ProxyGround::collect(ICollector &collector,
             }
         }
 
-        ItemKey key = ItemKeys::inObject(
-            tc._pos.x + 0xFFFF * tc._pos.y); // TODO better id ?
-                                             // _tileSystem.getId() ?
+        ItemKey key{NodeKeys::fromInt(tc._pos.x + 0xFFFF * tc._pos.y)};
         imageChan.put(key, img);
     }
 

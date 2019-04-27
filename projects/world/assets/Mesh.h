@@ -88,6 +88,8 @@ public:
 
     Face &newFace(int ids[3]);
 
+    void clearFaces();
+
     /** Tells the mesh that we are going to add a certain amount
      * of vertices. This method enables the mesh to adapt its buffer
      * for the desired amount, and thus to improve performances.
@@ -106,6 +108,8 @@ public:
 
     Vertex &newVertex(const vec3d &position, const vec3d &normal = {0, 0, 1},
                       const vec2d &texture = {0, 0});
+
+    void clearVertices();
 
 private:
     u32 _verticesCount = 0;

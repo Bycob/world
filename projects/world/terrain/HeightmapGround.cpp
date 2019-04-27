@@ -1,40 +1,44 @@
-#include "Ground.h"
+#include "HeightmapGround.h"
 
+#include <map>
+#include <unordered_map>
 #include <memory>
 #include <list>
 
 #include "world/core/WorldTypes.h"
-#include "world/core/ResolutionModelContextWrap.h"
 #include "world/assets/Object3D.h"
 #include "world/assets/Material.h"
+#include "world/assets/ImageUtils.h"
 #include "world/math/MathsHelper.h"
 #include "ApplyParentTerrain.h"
 #include "PerlinTerrainGenerator.h"
 #include "ReliefMapModifier.h"
 #include "AltitudeTexturer.h"
 #include "TerrainOps.h"
+#include "world/core/Profiler.h"
 
 namespace world {
 
-struct Ground::Tile {
+struct HeightmapGround::Tile {
     std::vector<optional<Terrain>> _cache;
     std::unique_ptr<Terrain> _final;
     std::unique_ptr<Mesh> _mesh;
     u64 _lastAccess;
 };
 
-using Tile = Ground::Tile;
+using Tile = HeightmapGround::Tile;
 
 // Utility class
 class GroundContext : public ITileContext {
 public:
     TileCoordinates _key;
     int _genID;
-    Ground &_ground;
+    HeightmapGround &_ground;
 
     bool _registerState = false;
 
-    GroundContext(Ground &ground, const TileCoordinates &key, int genID)
+    GroundContext(HeightmapGround &ground, const TileCoordinates &key,
+                  int genID)
             : _key(key), _genID(genID), _ground(ground) {}
 
     Terrain &getTerrain() const override {
@@ -81,13 +85,13 @@ public:
 
 class PGround {
 public:
-    PGround() : _terrains() {}
+    PGround() : _terrains(65536), _accesses(65536) {}
 
-    std::map<TileCoordinates, Tile> _terrains;
+    std::unordered_map<TileCoordinates, Tile> _terrains;
     std::list<std::unique_ptr<ITerrainWorker>> _generators;
 
     u64 _accessCounter = 0;
-    std::map<u64, TileCoordinates> _accesses;
+    std::unordered_map<u64, TileCoordinates> _accesses;
 };
 
 // Idees d'ameliorations :
@@ -96,7 +100,8 @@ public:
 // (Pour ce point, on generalisera peut-etre le system de chunk emboite
 // dans une classe avec des templates)
 
-Ground::Ground(double unitSize, double minAltitude, double maxAltitude)
+HeightmapGround::HeightmapGround(double unitSize, double minAltitude,
+                                 double maxAltitude)
         : _internal(new PGround()), _minAltitude(minAltitude),
           _maxAltitude(maxAltitude),
           _tileSystem(5,
@@ -104,9 +109,9 @@ Ground::Ground(double unitSize, double minAltitude, double maxAltitude)
                             _terrainRes * _textureRes * 4, 0),
                       vec3d(unitSize, unitSize, 0)) {}
 
-Ground::~Ground() { delete _internal; }
+HeightmapGround::~HeightmapGround() { delete _internal; }
 
-void Ground::setDefaultWorkerSet() {
+void HeightmapGround::setDefaultWorkerSet() {
     addWorker<PerlinTerrainGenerator>(3, 4., 0.35);
     addWorker<CustomWorldRMModifier>();
 
@@ -128,41 +133,72 @@ void Ground::setDefaultWorkerSet() {
     colorMap.setOrder(3);
 }
 
-double Ground::observeAltitudeAt(WorldZone zone, double x, double y) {
-    int lvl = _tileSystem.getLod(zone.getInfo().getMaxResolution());
-    vec3d offset = zone->getAbsoluteOffset();
-    return observeAltitudeAt(offset.x + x, offset.y + y, lvl);
+double HeightmapGround::observeAltitudeAt(double x, double y,
+                                          double resolution) {
+    int lvl = _tileSystem.getLod(resolution);
+    return observeAltitudeAt(x, y, lvl);
 }
 
-void Ground::collectZone(const WorldZone &zone, ICollector &collector,
-                         const IResolutionModel &resolutionModel) {
-    if (zone.getInfo().getParent().has_value())
-        return;
+void HeightmapGround::collect(ICollector &collector,
+                              const IResolutionModel &resolutionModel,
+                              const ExplorationContext &ctx) {
 
-    vec3d offset = zone->getAbsoluteOffset();
-    vec3d chunkSize = zone->getDimensions();
+    BoundingBox bbox = resolutionModel.getBounds();
 
     // Tune altitude for the resolution model
-    double estimAltitude = observeAltitudeAt(offset.x + chunkSize.x / 2,
+    /*double estimAltitude = observeAltitudeAt(offset.x + chunkSize.x / 2,
                                              offset.y + chunkSize.y / 2, 0);
 
     ResolutionModelContextWrap wresModel(resolutionModel);
-    wresModel.setOffset({0, 0, estimAltitude});
+    wresModel.setOffset({0, 0, estimAltitude});*/
 
     // Find terrains to generate
-    for (auto it = _tileSystem.iterate(wresModel, zone); !it.endReached();
+    for (auto it = _tileSystem.iterate(resolutionModel, bbox); !it.endReached();
          ++it) {
+
         addTerrain(*it, collector);
     }
 
     updateCache();
 }
 
-void Ground::addWorkerInternal(ITerrainWorker *worker) {
+void HeightmapGround::paintTexture(const vec2d &origin, const vec2d &size,
+                                   const vec2d &resolutionRange,
+                                   const Image &img) {
+    const int minLod = _tileSystem.getLod(resolutionRange.x);
+    const int maxLod = _tileSystem.getLod(resolutionRange.y);
+
+    const vec3d min{origin.x, origin.y, 0};
+    const vec3d max{origin.x + size.x, origin.y + size.y, 0};
+
+    for (int lod = minLod; lod <= maxLod; ++lod) {
+        TileCoordinates tileMin = _tileSystem.getTileCoordinates(min, lod);
+        TileCoordinates tileMax = _tileSystem.getTileCoordinates(max, lod);
+        vec3d localMin = _tileSystem.getLocalCoordinates(min, lod);
+        vec3d localMax = _tileSystem.getLocalCoordinates(max, lod);
+        vec3d tileSize = _tileSystem.getTileSize(lod);
+        vec3i tileDist = tileMax._pos - tileMin._pos;
+
+        vec3d imgSize = tileSize * tileDist + localMax - localMin;
+
+        for (int x = tileMin._pos.x; x <= tileMax._pos.x; ++x) {
+            for (int y = tileMin._pos.y; y <= tileMax._pos.y; ++y) {
+                TileCoordinates current{x, y, 0, lod};
+                vec3d imgCoords =
+                    (tileMin._pos - current._pos) * tileSize + localMin;
+                ImageUtils::paintTexturef(provideTerrain(current).getTexture(),
+                                          img, {imgCoords.x, imgCoords.y},
+                                          {imgSize.x, imgSize.y});
+            }
+        }
+    }
+}
+
+void HeightmapGround::addWorkerInternal(ITerrainWorker *worker) {
     _internal->_generators.push_back(std::unique_ptr<ITerrainWorker>(worker));
 }
 
-double Ground::observeAltitudeAt(double x, double y, int lvl) {
+double HeightmapGround::observeAltitudeAt(double x, double y, int lvl) {
     TileCoordinates key = _tileSystem.getTileCoordinates({x, y, 0}, lvl);
     vec3d inTile = _tileSystem.getLocalCoordinates({x, y, 0}, lvl);
 
@@ -173,11 +209,11 @@ double Ground::observeAltitudeAt(double x, double y, int lvl) {
 }
 
 inline ItemKey terrainToItem(const std::string &key) {
-    return ItemKeys::inWorld(std::string("_") + key, ObjectKeys::defaultKey(),
-                             0);
+    return ItemKeys::root(std::string("_") + key);
 }
 
-void Ground::addTerrain(const TileCoordinates &key, ICollector &collector) {
+void HeightmapGround::addTerrain(const TileCoordinates &key,
+                                 ICollector &collector) {
     ItemKey itemKey = terrainToItem(getTerrainDataId(key));
     Terrain &terrain = this->provideTerrain(key);
 
@@ -222,8 +258,8 @@ void Ground::addTerrain(const TileCoordinates &key, ICollector &collector) {
     }
 }
 
-void Ground::updateCache() {
-    if (_internal->_terrains.size() > _maxCacheSize) {
+void HeightmapGround::updateCache() {
+    if (_manageCache && _internal->_terrains.size() > _maxCacheSize) {
 
         // We shrink one third of the memory
         auto count = _internal->_terrains.size() / 3;
@@ -245,7 +281,7 @@ void Ground::updateCache() {
     }
 }
 
-Tile &Ground::provide(const TileCoordinates &key) {
+Tile &HeightmapGround::provide(const TileCoordinates &key) {
     auto it = _internal->_terrains.find(key);
 
     if (it == _internal->_terrains.end()) {
@@ -257,7 +293,10 @@ Tile &Ground::provide(const TileCoordinates &key) {
     return it->second;
 }
 
-void Ground::registerAccess(const TileCoordinates &key, Tile &tile) {
+void HeightmapGround::registerAccess(const TileCoordinates &key, Tile &tile) {
+    if (!_manageCache)
+        return;
+
     _internal->_accessCounter++;
 
     // Remove last access entry for this tile
@@ -276,11 +315,11 @@ void Ground::registerAccess(const TileCoordinates &key, Tile &tile) {
     }
 }
 
-Terrain &Ground::provideTerrain(const TileCoordinates &key) {
+Terrain &HeightmapGround::provideTerrain(const TileCoordinates &key) {
     return *provide(key)._final;
 }
 
-Mesh &Ground::provideMesh(const TileCoordinates &key) {
+Mesh &HeightmapGround::provideMesh(const TileCoordinates &key) {
     auto &meshPtr = provide(key)._mesh;
 
     if (!meshPtr) {
@@ -290,8 +329,8 @@ Mesh &Ground::provideMesh(const TileCoordinates &key) {
     return *meshPtr;
 }
 
-optional<Terrain &> Ground::getCachedTerrain(const TileCoordinates &key,
-                                             int genID) {
+optional<Terrain &> HeightmapGround::getCachedTerrain(
+    const TileCoordinates &key, int genID) {
     auto it = _internal->_terrains.find(key);
 
     if (it == _internal->_terrains.end()) {
@@ -302,14 +341,15 @@ optional<Terrain &> Ground::getCachedTerrain(const TileCoordinates &key,
     }
 }
 
-std::string Ground::getTerrainDataId(const TileCoordinates &key) const {
+std::string HeightmapGround::getTerrainDataId(
+    const TileCoordinates &key) const {
     u64 id = static_cast<u64>(key._pos.x & 0x0FFFFFFFu) +
              (static_cast<u64>(key._pos.y & 0x0FFFFFFFu) << 24u) +
              (static_cast<u64>(key._lod & 0xFFu) << 48u);
     return std::to_string(id);
 }
 
-void Ground::generateTerrain(const TileCoordinates &key) {
+void HeightmapGround::generateTerrain(const TileCoordinates &key) {
     // Ensure that parent was created
     if (key._lod != 0) {
         provide(_tileSystem.getParentTileCoordinates(key));
@@ -349,7 +389,7 @@ void Ground::generateTerrain(const TileCoordinates &key) {
     }
 }
 
-void Ground::generateMesh(const TileCoordinates &key) {
+void HeightmapGround::generateMesh(const TileCoordinates &key) {
     // Find required terrains
     Terrain *terrains[3][3];
 

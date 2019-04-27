@@ -6,24 +6,23 @@ TileSystem::TileSystem(int maxLod, const vec3i &bufferRes,
                        const vec3d &baseSize)
         : _maxLod(maxLod), _bufferRes(bufferRes), _baseSize(baseSize) {}
 
-int TileSystem::computeLod(double resolution, double baseSize,
-                           int bufferRes) const {
-    if (bufferRes == 0) {
-        return _maxLod;
+int TileSystem::computeLod(double resolution, double baseSize, int bufferRes,
+                           int maxLod) const {
+
+    for (int lod = 0; bufferRes != 0 && lod < maxLod; ++lod) {
+        if (resolution <= bufferRes * powi(_factor, lod) / baseSize)
+            return lod;
     }
 
-    // resolution = _bufferRes * powi(_factor, lod) / _baseSize;
-    return clamp(static_cast<int>(ceil(log(baseSize * resolution / bufferRes) /
-                                       log(_factor))),
-                 0, _maxLod);
+    return maxLod;
 }
 
 int TileSystem::getLod(double resolution) const {
-    int lodX = computeLod(resolution, _baseSize.x, _bufferRes.x);
-    int lodY = computeLod(resolution, _baseSize.y, _bufferRes.y);
-    int lodZ = computeLod(resolution, _baseSize.z, _bufferRes.z);
+    int lodX = computeLod(resolution, _baseSize.x, _bufferRes.x, _maxLod);
+    int lodY = computeLod(resolution, _baseSize.y, _bufferRes.y, lodX);
+    int lodZ = computeLod(resolution, _baseSize.z, _bufferRes.z, lodY);
 
-    return min(lodX, min(lodY, lodZ));
+    return lodZ;
 }
 
 vec3d TileSystem::getTileFloatingCoordinates(const vec3d &globalCoordinates,
@@ -75,11 +74,6 @@ TileCoordinates TileSystem::getParentTileCoordinates(
         floor(static_cast<double>(childCoordinates._pos.z) / f)};
     return TileCoordinates(static_cast<vec3i>(parentCoordinates),
                            childCoordinates._lod - 1);
-}
-
-TileSystemIterator TileSystem::iterate(const IResolutionModel &resolutionModel,
-                                       const WorldZone &zone) const {
-    return TileSystemIterator(*this, resolutionModel, zone);
 }
 
 TileSystemIterator TileSystem::iterate(const IResolutionModel &resolutionModel,

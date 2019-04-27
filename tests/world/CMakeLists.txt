@@ -5,10 +5,12 @@ if (${WORLD_BUILD_TESTS})
             run_test.cpp
             test_chunksystem.cpp
             test_collector.cpp
+            test_heightmap_ground.cpp
             test_image.cpp
             test_math.cpp
             test_memory.cpp
             test_mesh.cpp
+            test_nodes.cpp
             test_perlin.cpp
             test_types.cpp
             test_terrain.cpp

@@ -10,24 +10,23 @@
 #include <functional>
 
 #include "IChunkSystem.h"
-#include "WorldObject.h"
+#include "WorldNode.h"
 #include "WorldFolder.h"
-#include "IWorldDecorator.h"
+#include "IChunkDecorator.h"
 #include "ICollector.h"
+
+#define MAX_PRIMARY_NODES 1024
 
 namespace world {
 
-class World;
-
-typedef IWorldDecorator<World> WorldDecorator;
-
-class PWorld;
+class WorldPrivate;
 
 class WORLDAPI_EXPORT World {
 public:
     /** Create a complete and rich world that can be used
-     * as a demonstration of the API power ! */
+     * as a demonstration of the API capabilities. */
     static World *createDemoWorld();
+
 
     World();
 
@@ -35,36 +34,32 @@ public:
 
     virtual ~World();
 
-    template <typename T, typename... Args> T &addDecorator(Args... args);
-
+    /** Adds a node to the world. The node will be explored after all
+     * the primary nodes added previously.
+     *
+     * The world is (arbitrarily) limited in the number of primary nodes
+     * you can have, because exploration of primary nodes is not efficient
+     * if there are many. If you want to add a lot of nodes to the world,
+     * consider use a ChunkSystem or an other Node container. */
     template <typename T, typename... Args>
-    T &addObject(const WorldZone &zone, Args... args);
-
-    // NAVIGATION
-    std::vector<WorldZone> exploreNeighbours(const WorldZone &zone);
-
-    WorldZone exploreLocation(const vec3d &location);
-
-    std::vector<WorldZone> exploreInside(const WorldZone &zone);
+    T &addPrimaryNode(const vec3d &position, Args &... args);
 
     // ASSETS
-    virtual void collect(const WorldZone &zone, ICollector &collector,
-                         const IResolutionModel &explorer);
+    virtual void collect(ICollector &collector,
+                         const IResolutionModel &resolutionModel);
 
 protected:
-    virtual void onFirstExploration(const WorldZone &chunk);
+    void addPrimaryNodeInternal(WorldNode *node);
+
+    /** Gets initial environment to initialize the base context */
+    virtual IEnvironment *getInitialEnvironment();
 
 private:
-    PWorld *_internal;
+    WorldPrivate *_internal;
 
-    std::unique_ptr<IChunkSystem> _chunkSystem;
     // TODO remplacer ça par un ICache, qui peut être un
     // dossier, une interface réseau, rien...
     WorldFolder _directory;
-
-    void addDecoratorInternal(WorldDecorator *decorator);
-
-    Chunk &getChunk(const WorldZone &zone);
 };
 } // namespace world
 

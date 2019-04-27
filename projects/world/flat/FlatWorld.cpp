@@ -1,57 +1,58 @@
 #include "FlatWorld.h"
 
-#include "world/terrain/Ground.h"
+#include "world/core/LODGridChunkSystem.h"
+#include "world/terrain/HeightmapGround.h"
 #include "world/tree/ForestLayer.h"
 #include "world/tree/SimpleTreeDecorator.h"
+#include "world/core/Profiler.h"
 
 namespace world {
 
 class PFlatWorld {
 public:
-    PFlatWorld() {}
+    std::unique_ptr<GroundNode> _ground;
 
-    std::vector<std::unique_ptr<FlatWorldDecorator>> _chunkDecorators;
+    PFlatWorld() {}
 };
 
 FlatWorld *FlatWorld::createDemoFlatWorld() {
     FlatWorld *world = new FlatWorld();
 
-    world->addFlatWorldDecorator<ForestLayer>();
+    auto &chunkSystem = world->addPrimaryNode<LODGridChunkSystem>({0, 0, 0});
+    chunkSystem.addDecorator<ForestLayer>(world);
 
     return world;
 }
 
-FlatWorld::FlatWorld() : _internal(new PFlatWorld()) {
 
-    Ground &ground = setGround<Ground>();
+FlatWorld::FlatWorld() : _internal(new PFlatWorld()) {
+    auto &ground = setGround<HeightmapGround>();
     ground.setDefaultWorkerSet();
 }
 
 FlatWorld::~FlatWorld() { delete _internal; }
 
-IGround &FlatWorld::ground() { return *_ground; }
+IGround &FlatWorld::ground() { return *_internal->_ground; }
 
-void FlatWorld::collect(const WorldZone &zone, ICollector &collector,
+void FlatWorld::collect(ICollector &collector,
                         const IResolutionModel &resolutionModel) {
-    World::collect(zone, collector, resolutionModel);
-
-    ground().collectZone(zone, collector, resolutionModel);
+    _internal->_ground->collect(collector, resolutionModel);
+    World::collect(collector, resolutionModel);
 }
 
-void FlatWorld::onFirstExploration(const WorldZone &chunk) {
-    World::onFirstExploration(chunk);
-
-    for (auto &decorator : _internal->_chunkDecorators) {
-        decorator->decorate(*this, chunk);
-    }
+vec3d FlatWorld::findNearestFreePoint(const vec3d &origin,
+                                      const vec3d &direction, double resolution,
+                                      const ExplorationContext &ctx) const {
+    auto pos = origin + ctx.getOffset();
+    double z = _internal->_ground->observeAltitudeAt(pos.x, pos.y, resolution);
+    // std::cout << z - ctx.getOffset().z << " <> " << origin.z << std::endl;
+    return {origin.x, origin.y, z - ctx.getOffset().z};
 }
 
-void FlatWorld::setGroundInternal(IGround *ground) {
-    _ground = std::unique_ptr<IGround>(ground);
+IEnvironment *FlatWorld::getInitialEnvironment() { return this; }
+
+void FlatWorld::setGroundInternal(GroundNode *ground) {
+    _internal->_ground = std::unique_ptr<GroundNode>(ground);
 }
 
-void FlatWorld::addFlatWorldDecoratorInternal(
-    world::FlatWorldDecorator *decorator) {
-    _internal->_chunkDecorators.emplace_back(decorator);
-}
 } // namespace world

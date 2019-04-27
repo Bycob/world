@@ -34,7 +34,7 @@ public:
     void process(Tree &tree) override;
 
 private:
-    void forkNode(Node<TreeInfo> *node);
+    void forkNode(SkelettonNode<TreeInfo> *node);
 
     // Génération de nombres alétoires uniforme entre 0 et 1.
     Parameter<double> _rng;

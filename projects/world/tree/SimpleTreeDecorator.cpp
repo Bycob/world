@@ -3,14 +3,16 @@
 #include <vector>
 
 #include "world/math/MathsHelper.h"
+#include "world/core/Chunk.h"
 #include "TrunkGenerator.h"
 #include "TreeSkelettonGenerator.h"
 #include "LeavesGenerator.h"
 
 namespace world {
 
-SimpleTreeDecorator::SimpleTreeDecorator(int maxTreesPerChunk)
-        : _maxTreesPerChunk(maxTreesPerChunk),
+SimpleTreeDecorator::SimpleTreeDecorator(FlatWorld *flatWorld,
+                                         int maxTreesPerChunk)
+        : _flatWorld(flatWorld), _maxTreesPerChunk(maxTreesPerChunk),
           _rng(static_cast<u32>(time(NULL))) {
 
     auto &skeletton = _model.addWorker<TreeSkelettonGenerator>();
@@ -30,20 +32,20 @@ SimpleTreeDecorator::SimpleTreeDecorator(int maxTreesPerChunk)
 
 void SimpleTreeDecorator::setModel(const Tree &model) { _model.setup(model); }
 
-void SimpleTreeDecorator::decorate(FlatWorld &world, const WorldZone &zone) {
+void SimpleTreeDecorator::decorate(Chunk &chunk) {
     const double treeResolution = 5;
-    if (zone->getMaxResolution() < treeResolution ||
-        treeResolution <= zone->getMinResolution())
+    if (chunk.getMaxResolution() < treeResolution ||
+        treeResolution <= chunk.getMinResolution())
         return;
 
-    vec3d chunkSize = zone->getDimensions();
-    vec3d offset = zone->getAbsoluteOffset();
+    vec3d chunkSize = chunk.getSize();
+    vec3d offset = chunk.getPosition3D();
 
     std::vector<vec2d> positions;
     std::uniform_real_distribution<double> distribX(0, chunkSize.x);
     std::uniform_real_distribution<double> distribY(0, chunkSize.y);
 
-    IGround &ground = world.ground();
+    IGround &ground = _flatWorld->ground();
 
     for (int i = 0; i < _maxTreesPerChunk; i++) {
         // On génère une position pour l'arbre
@@ -65,7 +67,7 @@ void SimpleTreeDecorator::decorate(FlatWorld &world, const WorldZone &zone) {
 
         // Détermination de l'altitude de l'arbre
         double altitude =
-            ground.observeAltitudeAt(zone, position.x, position.y);
+            ground.observeAltitudeAt(position.x, position.y, treeResolution);
         vec3d pos3D(position.x, position.y, altitude - offset.z);
 
         // We don't generate the tree if the ground level is not in the chunk at
@@ -76,7 +78,7 @@ void SimpleTreeDecorator::decorate(FlatWorld &world, const WorldZone &zone) {
         // std::cout << pos3D << std::endl;
 
         // Création de l'arbre
-        Tree &tree = world.addObject<Tree>(zone);
+        Tree &tree = chunk.addChild<Tree>();
         tree.setup(_model);
         tree.setPosition3D(pos3D);
 

@@ -1,7 +1,7 @@
 #ifndef WORLD_WORLDTERRAIN_H
 #define WORLD_WORLDTERRAIN_H
 
-#include "terrain/Ground.h"
+#include "world/terrain/HeightmapGround.h"
 #include "terrain/ITerrainWorker.h"
 #include "terrain/PerlinTerrainGenerator.h"
 #include "terrain/ReliefMapModifier.h"

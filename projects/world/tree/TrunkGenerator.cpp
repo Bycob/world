@@ -31,7 +31,7 @@ void TrunkGenerator::process(Tree &tree) {
     addNode(trunkMesh, primary, {0, 0, 1}, 0, true);
 }
 
-void TrunkGenerator::addNode(Mesh &mesh, Node<TreeInfo> *node,
+void TrunkGenerator::addNode(Mesh &mesh, SkelettonNode<TreeInfo> *node,
                              const vec3d &direction, int joinId,
                              bool writeVertIds) const {
     auto &nodeInfo = node->getInfo();

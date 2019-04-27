@@ -6,6 +6,7 @@
 #include <tuple>
 
 #include "WorldKeys.h"
+#include "ExplorationContext.h"
 
 namespace world {
 
@@ -31,19 +32,6 @@ protected:
     virtual ICollectorChannelBase &getChannelByType(size_t type) = 0;
 
     virtual bool hasChannelByType(size_t type) const = 0;
-
-    /*void passItemTo(ICollector &collector, const ItemKey &key,
-                    Object3D &object) {
-        collector.addItemUnsafe(key, object);
-    }
-
-    virtual void addItemUnsafe(const ItemKey &key, Object3D &object) {
-        addItem(key, object);
-    }*/
-
-
-    // TODO find another solution
-    friend class CollectorContextWrap;
 };
 
 
@@ -54,8 +42,6 @@ class ICollectorContext;
 class ICollectorChannelBase {
 public:
     virtual ~ICollectorChannelBase() = default;
-
-    virtual ICollectorChannelBase *wrap(ICollectorContext &context) = 0;
 
     virtual void reset() {}
 };
@@ -70,26 +56,30 @@ public:
  * An asset must have a copy constructor. */
 template <typename T> class ICollectorChannel : public ICollectorChannelBase {
 public:
-    ICollectorChannelBase *wrap(ICollectorContext &context) override;
-
     /** This method is called by World to provide the generated
      * assets to this channel.
      * @param key a key referencing the provided item in the library.
      * #has, #remove and #get use the same key to reference this object.
      * @param item */
-    virtual void put(const ItemKey &key, const T &item) = 0;
+    virtual void put(
+        const ItemKey &key, const T &item,
+        const ExplorationContext &ctx = ExplorationContext::getDefault()) = 0;
 
     /** Returns true when the channel already has an item
      * associated to the given key.
      * @param key same key as in #put method.
      * @return  */
-    virtual bool has(const ItemKey &key) const = 0;
+    virtual bool has(const ItemKey &key,
+                     const ExplorationContext &ctx =
+                         ExplorationContext::getDefault()) const = 0;
 
     /** Notices the channel that the item at the given key does
      * not belong to the collected assets anymore and should be
      * removed.
      * @param key same key as in #put. */
-    virtual void remove(const ItemKey &key) = 0;
+    virtual void remove(
+        const ItemKey &key,
+        const ExplorationContext &ctx = ExplorationContext::getDefault()) = 0;
 };
 
 
@@ -105,5 +95,4 @@ template <typename T> inline bool ICollector::hasChannel() const {
 
 }; // namespace world
 
-#include "CollectorContextWrap.h"
 #endif // WORLD_ICOLLECTOR_H

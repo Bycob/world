@@ -9,41 +9,41 @@ namespace world {
 class ChunkEntry {
 public:
     template <typename... Args>
-    ChunkEntry(const ChunkKey &parent, const LODGridCoordinates &coords,
+    ChunkEntry(const NodeKey &parent, const LODGridCoordinates &coords,
                Args... args)
             : _coords(coords), _chunk(args...), _parentID(parent) {}
 
     LODGridCoordinates _coords;
     Chunk _chunk;
-    ChunkKey _parentID;
-    std::vector<ChunkKey> _children;
+    NodeKey _parentID;
+    std::vector<NodeKey> _children;
 };
 
 #define MAX_LOD 20
 
-class PLODGridChunkSystem {
+class LODGridChunkSystemPrivate {
 public:
     LODData _lodData[MAX_LOD];
-    std::map<ChunkKey, std::unique_ptr<ChunkEntry>> _chunks;
+    std::map<NodeKey, std::unique_ptr<ChunkEntry>> _chunks;
+    std::vector<std::unique_ptr<IChunkDecorator>> _chunkDecorators;
+
+    // TODO utiliser un tilesystem
 };
 
 LODGridChunkSystem::LODGridChunkSystem(double baseChunkSize)
-        : _internal(new PLODGridChunkSystem()) {
+        : _internal(new LODGridChunkSystemPrivate()) {
 
     // Initialize LODData
     _internal->_lodData[0] =
         LODData({baseChunkSize, baseChunkSize, baseChunkSize},
                 _subdivResolutionThreshold);
 
-    for (int i = 0; i <= _maxLOD; i++) {
-        if (i != 0) {
-            auto dimensions = _internal->_lodData[0].getChunkSize() *
-                              powi((double)_factor, -i);
-            auto maxResolution = _internal->_lodData[0].getMaxResolution() *
-                                 powi((double)_factor, i);
-            _internal->_lodData[i] = LODData(dimensions, maxResolution);
-        }
-        std::cout << getLODData(i).getMaxResolution() << std::endl;
+    for (int i = 1; i <= _maxLOD; i++) {
+        auto dimensions =
+            _internal->_lodData[0].getChunkSize() * powi((double)_factor, -i);
+        auto maxResolution = _internal->_lodData[0].getMaxResolution() *
+                             powi((double)_factor, i);
+        _internal->_lodData[i] = LODData(dimensions, maxResolution);
     }
 }
 
@@ -67,7 +67,7 @@ double LODGridChunkSystem::getMaxResolution(int lod) const {
 
 double LODGridChunkSystem::getMinResolution(int lod) const {
     if (lod == 0) {
-        return 0;
+        return std::numeric_limits<double>::epsilon();
     }
 
     auto &data = getLODData(lod - 1);
@@ -91,119 +91,111 @@ int LODGridChunkSystem::getLODForResolution(double mrd) const {
     return lod;
 }
 
-WorldZone LODGridChunkSystem::getZone(const vec3d &position) {
-    LODData &data = _internal->_lodData[0];
-    vec3d intPos = position / data.getChunkSize();
+Chunk &LODGridChunkSystem::getChunk(const vec3d &position, double resolution) {
+    int lod = getLODForResolution(resolution);
+    vec3d pos = position;
+    NodeKey key = NodeKeys::none();
 
-    LODGridCoordinates coords = LODGridCoordinates(
-        (int)floor(intPos.x), (int)floor(intPos.y), (int)floor(intPos.z), 0);
+    for (int i = 0; i <= lod; ++i) {
+        LODData lodData = getLODData(i);
+        vec3d chunkSize = lodData.getChunkSize();
+        vec3d tilePos = pos / chunkSize;
+        LODGridCoordinates coords{static_cast<s32>(floor(tilePos.x)),
+                                  static_cast<s32>(floor(tilePos.y)),
+                                  static_cast<s32>(floor(tilePos.z)), i};
 
-    return getZone(getChunkKey(ChunkKeys::none(), coords));
-}
-
-std::vector<WorldZone> LODGridChunkSystem::getNeighbourZones(
-    const WorldZone &chunk) {
-    auto key = chunk->getID();
-    LODGridCoordinates coords = dropLastPart(key);
-    ChunkKey parentKey = getParentKey(key);
-
-    vec3i directions[] = {{1, 0, 0},  {-1, 0, 0}, {0, 1, 0},
-                          {0, -1, 0}, {0, 0, 1},  {0, 0, -1}};
-
-    std::vector<WorldZone> result;
-
-    for (vec3i &direction : directions) {
-        LODGridCoordinates ncoords = LODGridCoordinates(
-            coords.getPosition3D() + direction, coords.getLOD());
-
-        auto id = getChunkKey(parentKey, ncoords);
-        result.emplace_back(getZone(id));
+        pos -= coords.getPosition3D() * chunkSize;
+        key = coords.toKey(key);
     }
-    return result;
+
+    return getOrCreateEntry(key)._chunk;
 }
 
-std::vector<WorldZone> LODGridChunkSystem::getChildrenZones(
-    const WorldZone &zone) {
-    std::vector<WorldZone> vector;
-    vector.reserve(_factor * _factor * _factor);
+void LODGridChunkSystem::collect(ICollector &collector,
+                                 const IResolutionModel &resolutionModel,
+                                 const ExplorationContext &ctx) {
+    // Explore every toplevel chunk
+    auto &lodData = getLODData(0);
+    vec3d chunkSize = lodData.getChunkSize();
+    BoundingBox bounds = resolutionModel.getBounds();
+    vec3d lower = bounds.getLowerBound() / chunkSize;
+    vec3d upper = bounds.getUpperBound() / chunkSize;
 
-    auto key = zone->getID();
-    LODGridCoordinates coords = dropLastPart(key);
+    for (s32 z = static_cast<s32>(floor(lower.z));
+         z <= static_cast<s32>(floor(upper.z)); ++z) {
+        for (s32 y = static_cast<s32>(floor(lower.y));
+             y <= static_cast<s32>(floor(upper.y)); ++y) {
+            for (s32 x = static_cast<s32>(floor(lower.x));
+                 x <= static_cast<s32>(floor(upper.x)); ++x) {
+                LODGridCoordinates coords{x, y, z, 0};
+                NodeKey chunkKey = coords.toKey();
+                collectChunk(chunkKey, collector, resolutionModel, ctx);
+            }
+        }
+    }
+}
 
-    // Create children
-    if (coords.getLOD() < _maxLOD) {
-        int lod = coords.getLOD() + 1;
+void LODGridChunkSystem::collectChunk(const NodeKey &chunkKey,
+                                      world::ICollector &collector,
+                                      const IResolutionModel &resolutionModel,
+                                      const ExplorationContext &ctx) {
 
-        // Actuellement, a chaque fois qu'on monte d'un lod, on divise la taille
-        // du chunk par 2
-        for (u32 x = 0; x < _factor; x++) {
-            for (u32 y = 0; y < _factor; y++) {
-                for (u32 z = 0; z < _factor; z++) {
-                    LODGridCoordinates ncoords(x, y, z, lod);
-                    auto id = getChunkKey(key, ncoords);
-                    vector.emplace_back(getZone(id));
+    LODGridCoordinates coords = LODGridCoordinates::getLastOfKey(chunkKey);
+    LODData &lodData = getLODData(coords.getLOD());
+    vec3d chunkSize = lodData.getChunkSize();
+    vec3d parentOffset = getOffset(LODGridCoordinates::getParent(chunkKey));
+    BoundingBox bbox{parentOffset + coords.getPosition3D() * chunkSize,
+                     parentOffset +
+                         (coords.getPosition3D() + vec3i{1, 1, 1}) * chunkSize};
+    double resolution = resolutionModel.getMaxResolutionIn(bbox);
+
+    if (resolution > getMinResolution(coords.getLOD())) {
+        Chunk &chunk = getOrCreateEntry(chunkKey)._chunk;
+
+        // Collect current chunk
+        collectChild(chunkKey, chunk, collector, resolutionModel, ctx);
+
+        // Collect the children if they exist
+        if (coords.getLOD() < _maxLOD) {
+            int lod = coords.getLOD() + 1;
+
+            // Chunk size is divided by _factor every time lod is incremented
+            for (u32 x = 0; x < _factor; x++) {
+                for (u32 y = 0; y < _factor; y++) {
+                    for (u32 z = 0; z < _factor; z++) {
+                        LODGridCoordinates ncoords(x, y, z, lod);
+                        auto id = ncoords.toKey(chunkKey);
+                        collectChunk(id, collector, resolutionModel, ctx);
+                    }
                 }
             }
         }
     }
-
-    return vector;
 }
 
-Chunk &LODGridChunkSystem::getChunk(const WorldZone &zone) {
-    return getChunk(zone->getID());
-}
-
-void LODGridChunkSystem::collectZone(const WorldZone &zone,
-                                     ICollector &collector,
-                                     IResolutionModel &resolutionModel) {
-    auto entry = _internal->_chunks.find(zone.getInfo().getID());
-
-    if (entry != _internal->_chunks.end()) {
-        entry->second->_chunk.collect(collector, resolutionModel);
+vec3d LODGridChunkSystem::getOffset(const NodeKey &key) const {
+    if (key == NodeKeys::none()) {
+        return {};
+    } else {
+        LODGridCoordinates coords = LODGridCoordinates::getLastOfKey(key);
+        vec3d chunkSize = getLODData(coords.getLOD()).getChunkSize();
+        return coords.getPosition3D() * chunkSize +
+               getOffset(LODGridCoordinates::getParent(key));
     }
 }
 
-ChunkKey LODGridChunkSystem::getChunkKey(
-    const ChunkKey &parent, const LODGridCoordinates &coords) const {
-    std::stringstream stream;
-    stream << parent;
-    stream << coords.uid();
-    return stream.str();
-}
+ChunkEntry &LODGridChunkSystem::getOrCreateEntry(const NodeKey &key) {
+    auto it = _internal->_chunks.find(key);
 
-LODGridCoordinates LODGridChunkSystem::dropLastPart(const ChunkKey &key) const {
-    static const auto uidLength = LODGridCoordinates::NONE.uid().length();
-    return LODGridCoordinates::fromUID(key.substr(key.length() - uidLength));
-}
-
-ChunkKey LODGridChunkSystem::getParentKey(const ChunkKey &key) const {
-    static const auto uidLength = LODGridCoordinates::NONE.uid().length();
-    return key.substr(0, key.length() - uidLength);
-}
-
-Chunk &LODGridChunkSystem::getChunk(const ChunkKey &id) {
-    createChunk(id);
-    return _internal->_chunks[id]->_chunk;
-}
-
-WorldZone LODGridChunkSystem::getZone(const ChunkKey &id) {
-    return WorldZone(id, new LODGridChunkHandler(*this, id));
-}
-
-bool LODGridChunkSystem::createChunk(const ChunkKey &id) {
-
-    auto chunk = _internal->_chunks.find(id);
-
-    if (chunk == _internal->_chunks.end()) {
+    if (it == _internal->_chunks.end()) {
         // Get parent properties
-        ChunkKey parentKey = getParentKey(id);
+        NodeKey parentKey = LODGridCoordinates::getParent(key);
 
         if (!parentKey.empty()) {
-            createChunk(parentKey);
+            getOrCreateEntry(parentKey);
         }
 
-        auto coords = dropLastPart(id);
+        auto coords = LODGridCoordinates::getLastOfKey(key);
 
         // Get the size of the newly created chunk
         int lod = coords.getLOD();
@@ -211,53 +203,26 @@ bool LODGridChunkSystem::createChunk(const ChunkKey &id) {
         auto &chunkSize = lodData.getChunkSize();
 
         // Create the chunk
-        auto entry = std::make_unique<ChunkEntry>(
-            parentKey, coords, coords.getPosition3D() * chunkSize, chunkSize);
+        auto &entry = (_internal->_chunks[key] = std::make_unique<ChunkEntry>(
+                           parentKey, coords, chunkSize));
         entry->_chunk.setResolutionLimits(getMinResolution(lod),
                                           getMaxResolution(lod));
+        entry->_chunk.setPosition3D(getOffset(key));
 
-        // Add it to the map
-        _internal->_chunks[id] = std::move(entry);
-        return true;
+        // Decorate the chunk
+        for (auto &chunkDecorator : _internal->_chunkDecorators) {
+            chunkDecorator->decorate(entry->_chunk);
+        }
+
+        return *entry;
     } else {
-        return false;
+        return *it->second;
     }
 }
 
 
-LODGridChunkHandler::LODGridChunkHandler(LODGridChunkSystem &system,
-                                         const std::string &id)
-        : _system(system), _id(id), _coordinates(system.dropLastPart(id)) {}
-
-LODGridChunkHandler::LODGridChunkHandler(const LODGridChunkHandler &other)
-        : _system(other._system), _id(other._id),
-          _coordinates(other._coordinates) {}
-
-ChunkKey LODGridChunkHandler::getID() const { return _id; }
-
-optional<WorldZone> LODGridChunkHandler::getParent() const {
-    auto parentKey = _system.getParentKey(_id);
-    if (parentKey.empty()) {
-        return nullopt;
-    } else {
-        return _system.getZone(parentKey);
-    }
+void LODGridChunkSystem::addDecoratorInternal(IChunkDecorator *decorator) {
+    _internal->_chunkDecorators.emplace_back(decorator);
 }
 
-vec3d LODGridChunkHandler::getParentOffset() const {
-    LODData lodData = _system.getLODData(_coordinates.getLOD());
-    return _coordinates.getPosition3D() * getDimensions();
-}
-
-double LODGridChunkHandler::getMaxResolution() const {
-    return _system.getMaxResolution(_coordinates.getLOD());
-}
-
-double LODGridChunkHandler::getMinResolution() const {
-    return _system.getMinResolution(_coordinates.getLOD());
-}
-
-vec3d LODGridChunkHandler::getDimensions() const {
-    return _system.getLODData(_coordinates.getLOD()).getChunkSize();
-}
 } // namespace world

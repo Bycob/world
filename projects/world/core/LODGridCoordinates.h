@@ -3,6 +3,7 @@
 
 #include "world/core/WorldConfig.h"
 
+#include "WorldKeys.h"
 #include "world/math/Vector.h"
 
 namespace world {
@@ -10,25 +11,27 @@ class WORLDAPI_EXPORT LODGridCoordinates {
 public:
     static LODGridCoordinates NONE;
 
-    static LODGridCoordinates fromUID(const std::string &uid);
 
     LODGridCoordinates(int x, int y, int z, int lod = 0);
 
     LODGridCoordinates(const vec3i &pos, int lod = 0);
 
-    LODGridCoordinates(const LODGridCoordinates &other);
-
-    ~LODGridCoordinates();
-
     const vec3i &getPosition3D() const;
 
     int getLOD() const { return _lod; }
 
-    std::string uid() const;
-
     bool operator<(const LODGridCoordinates &other) const;
 
     bool operator==(const LODGridCoordinates &other) const;
+
+
+    // Conversion to NodeKey
+
+    static LODGridCoordinates getLastOfKey(const NodeKey &key);
+
+    static NodeKey getParent(const NodeKey &key);
+
+    NodeKey toKey(const NodeKey &parent = NodeKeys::none()) const;
 
 private:
     vec3i _pos;

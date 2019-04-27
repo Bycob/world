@@ -79,7 +79,7 @@ void MainView::runInternal() {
     _camera->setFarValue(20000);
     _camera->setPosition(toIrrlicht(_app.getUserPosition()));
     //_camera = _scenemanager->addCameraSceneNode(0, vector3df(200 + 64, 200 +
-    //119, 200 + 64), vector3df(64, 119, 64));
+    // 119, 200 + 64), vector3df(64, 119, 64));
 
     /*/ ----- Tests (temporaire)
     auto cube = _scenemanager->addSphereSceneNode();

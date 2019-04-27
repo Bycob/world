@@ -5,6 +5,6 @@ GroundDecorator::GroundDecorator() {}
 
 GroundDecorator::~GroundDecorator() {}
 
-void GroundDecorator::decorate(FlatWorld &world, const WorldZone &zone) {}
+void GroundDecorator::decorate(Chunk &chunk) {}
 
 } // namespace world

@@ -57,9 +57,9 @@ void ObjectNodeHandler::setTexture(int id, const std::string &path,
         stream.read(data, dataSize);
 
         IImage *irrimg = driver->createImageFromData(
-            image.type() == ImageType::RGBA
-                ? ECF_A8R8G8B8
-                : ECF_R8G8B8, // TODO support greyscale
+            image.type() == ImageType::RGBA ? ECF_A8R8G8B8
+                                            : ECF_R8G8B8, // TODO support
+                                                          // greyscale
             {static_cast<irr::u32>(image.width()),
              static_cast<irr::u32>(image.height())},
             data, true);
@@ -137,6 +137,10 @@ void ObjectsManager::initialize(Collector &collector) {
 void ObjectsManager::update(Collector &collector) {
     auto start = std::chrono::steady_clock::now();
 
+    if (!_partialUpdate) {
+        _objects.clear();
+    }
+
     // Set remove tag to true
     for (auto &pair : _objects) {
         pair.second->removeTag = true;
@@ -148,7 +152,8 @@ void ObjectsManager::update(Collector &collector) {
     auto &textures = collector.getStorageChannel<Image>();
 
     for (const auto &objectEntry : objects) {
-        if (_objects.find(objectEntry._key) == _objects.end()) {
+        if (_objects.find(objectEntry._key) == _objects.end() ||
+            !_partialUpdate) {
             auto objNode = std::make_unique<ObjectNodeHandler>(
                 *this, objectEntry._value, collector);
 

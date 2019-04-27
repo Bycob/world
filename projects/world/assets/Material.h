@@ -10,6 +10,8 @@ namespace world {
 
 class WORLDAPI_EXPORT Material {
 public:
+    Material();
+
     Material(const std::string &name);
 
     virtual ~Material();

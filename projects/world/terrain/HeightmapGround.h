@@ -3,11 +3,9 @@
 
 #include "world/core/WorldConfig.h"
 
-#include <map>
 #include <utility>
 #include <functional>
 
-#include "world/core/WorldZone.h"
 #include "world/core/TileSystem.h"
 #include "world/flat/IGround.h"
 #include "Terrain.h"
@@ -22,14 +20,14 @@ class PGround;
  * used on the WorldObjects : you can collect parts of the ground
  * by specifying which part of the world you're wanting to get
  * content from. */
-class WORLDAPI_EXPORT Ground : public IGround {
+class WORLDAPI_EXPORT HeightmapGround : public GroundNode {
 public:
     struct Tile;
 
-    Ground(double unitSize = 6000, double minAltitude = -2000,
-           double maxAltitude = 4000);
+    HeightmapGround(double unitSize = 6000, double minAltitude = -2000,
+                    double maxAltitude = 4000);
 
-    ~Ground() override;
+    ~HeightmapGround() override;
 
     // PARAMETERS
     // TODO constraints
@@ -56,10 +54,14 @@ public:
     template <typename T, typename... Args> T &addWorker(Args &&... args);
 
     // EXPLORATION
-    double observeAltitudeAt(WorldZone zone, double x, double y) override;
+    double observeAltitudeAt(double x, double y, double resolution) override;
 
-    void collectZone(const WorldZone &zone, ICollector &collector,
-                     const IResolutionModel &resolutionModel);
+    void collect(ICollector &collector, const IResolutionModel &resolutionModel,
+                 const ExplorationContext &ctx =
+                     ExplorationContext::getDefault()) override;
+
+    void paintTexture(const vec2d &origin, const vec2d &size,
+                      const vec2d &resolutionRange, const Image &img) override;
 
 private:
     PGround *_internal;
@@ -72,19 +74,17 @@ private:
 
     int _terrainRes = 33;
     /** Texture resolution, relatively to the terrain resolution */
-    int _textureRes = 8;
+    int _textureRes = 4;
 
     TileSystem _tileSystem;
 
-    u32 _maxCacheSize = 2000;
+    bool _manageCache = false;
+    u32 _maxCacheSize = 20000;
 
     // WORKER
     void addWorkerInternal(ITerrainWorker *worker);
 
     double observeAltitudeAt(double x, double y, int lvl);
-
-    /** Replace a parent terrain by its children in the collector */
-    void replaceTerrain(const TileCoordinates &key, ICollector &collector);
 
     void addTerrain(const TileCoordinates &key, ICollector &collector);
 
@@ -94,7 +94,7 @@ private:
 
 
     // ACCESS
-    Ground::Tile &provide(const TileCoordinates &key);
+    HeightmapGround::Tile &provide(const TileCoordinates &key);
 
     void registerAccess(const TileCoordinates &key, Tile &tile);
 
@@ -123,7 +123,8 @@ private:
     friend class GroundContext;
 };
 
-template <typename T, typename... Args> T &Ground::addWorker(Args &&... args) {
+template <typename T, typename... Args>
+T &HeightmapGround::addWorker(Args &&... args) {
     T *worker = new T(args...);
     addWorkerInternal(worker);
     return *worker;

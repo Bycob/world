@@ -3,7 +3,7 @@
 
 #include "VkWorldConfig.h"
 
-#include <world/core/WorldObject.h>
+#include <world/core/WorldNode.h>
 #include <world/core/TileSystem.h>
 
 namespace world {
@@ -11,13 +11,13 @@ namespace world {
 class ProxyGroundPrivate;
 class ProxyGroundDataPrivate;
 
-class VKWORLD_EXPORT ProxyGround : public WorldObject {
+class VKWORLD_EXPORT ProxyGround : public WorldNode {
 public:
     ProxyGround(f64 width, u32 resolution);
     ~ProxyGround();
 
-    void collect(ICollector &collector,
-                 const IResolutionModel &resolutionModel) override;
+    void collect(ICollector &collector, const IResolutionModel &resolutionModel,
+        const ExplorationContext &ctx = ExplorationContext::getDefault()) override;
 
 private:
     ProxyGroundPrivate *_internal;

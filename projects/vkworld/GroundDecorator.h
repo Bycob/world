@@ -3,17 +3,17 @@
 
 #include "VkWorldConfig.h"
 
-#include <world/core/IWorldDecorator.h>
+#include <world/core/IChunkDecorator.h>
 #include <world/flat/FlatWorld.h>
 
 namespace world {
 
-class VKWORLD_EXPORT GroundDecorator : public FlatWorldDecorator {
+class VKWORLD_EXPORT GroundDecorator : public IChunkDecorator {
 public:
     GroundDecorator();
     ~GroundDecorator() override;
 
-    void decorate(FlatWorld &world, const WorldZone &zone) override;
+    void decorate(Chunk &chunk) override;
 };
 } // namespace world
 

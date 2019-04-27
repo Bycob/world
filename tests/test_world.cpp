@@ -20,7 +20,7 @@ void generate_test_world(int argc, char **argv) {
     std::unique_ptr<FlatWorld> world(FlatWorld::createDemoFlatWorld());
 
     std::cout << "Creation de l'explorer et du collecteur" << std::endl;
-    FirstPersonExplorer explorer;
+    FirstPersonView explorer;
     explorer.setPosition({0, 0, 0});
 
     Collector collector;
@@ -31,7 +31,7 @@ void generate_test_world(int argc, char **argv) {
     std::cout << "Exploration du monde..." << std::endl;
     Profiler profiler;
     profiler.endStartSection("First exploration");
-    explorer.exploreAndCollect<FlatWorld>(*world, collector);
+    world->collect(collector, explorer);
     profiler.endSection();
 
     std::cout << "Collecte des resultats et ecriture de la scene..."
@@ -46,7 +46,7 @@ void generate_test_world(int argc, char **argv) {
                  "comparison..."
               << std::endl;
     profiler.endStartSection("Second exploration");
-    explorer.exploreAndCollect<FlatWorld>(*world, collector);
+    world->collect(collector, explorer);
     profiler.endSection();
 
     profiler.dump();

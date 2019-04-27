@@ -33,7 +33,7 @@ private:
     mutable std::mutex _paramLock;
 
     std::unique_ptr<world::FlatWorld> _world;
-    std::unique_ptr<world::FirstPersonExplorer> _explorer;
+    std::unique_ptr<world::FirstPersonView> _resModel;
 
     std::list<std::unique_ptr<world::Collector>> _emptyCollectors;
     std::list<std::unique_ptr<world::Collector>> _fullCollectors;

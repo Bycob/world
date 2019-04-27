@@ -15,34 +15,35 @@ namespace world {
 
 class Mesh;
 
-class NodeInfo {
+class SkelettonNodeInfo {
 public:
     vec3d _position;
 
     double _weight;
 };
 
-template <class T> class Node {
+template <class T> class SkelettonNode {
 public:
-    ~Node();
+    ~SkelettonNode();
 
     const T &getInfo() const { return _info; }
 
     T &getInfo() { return _info; }
 
-    void addChild(Node<T> *child);
+    void addChild(SkelettonNode<T> *child);
 
-    Node<T> *createChild(const T &info);
+    SkelettonNode<T> *createChild(const T &info);
 
-    void addNeighbour(Node<T> *neighbour);
+    void addNeighbour(SkelettonNode<T> *neighbour);
 
-    Node<T> *createNeighbour(const T &info);
+    SkelettonNode<T> *createNeighbour(const T &info);
 
-    Node<T> *getParent() const;
+    SkelettonNode<T> *getParent() const;
 
-    std::vector<Node<T> *> getChildrenOrNeighboursList() const;
+    std::vector<SkelettonNode<T> *> getChildrenOrNeighboursList() const;
 
-    const std::vector<Node<T> *> getChildrenOrNeighboursAccess() const {
+    const std::vector<SkelettonNode<T> *> getChildrenOrNeighboursAccess()
+        const {
         return _children_or_neighbour;
     }
 
@@ -53,17 +54,17 @@ public:
 private:
     template <class S> friend class WeightedSkeletton;
 
-    Node(const T &info);
+    SkelettonNode(const T &info);
 
     // DONNEES SUR LE NOEUD
     T _info;
 
     // RELATIONS DU NOEUD
 
-    Node<T> *_parent;
+    SkelettonNode<T> *_parent;
     /**Peut contenir la liste des noeuds enfants, ou la liste des
      * noeuds adjacents, selon le modèle adopté. */
-    std::vector<Node<T> *> _children_or_neighbour;
+    std::vector<SkelettonNode<T> *> _children_or_neighbour;
 
     // TRAITEMENT DES GRAPHES
 
@@ -95,20 +96,21 @@ public:
 
     virtual ~WeightedSkeletton();
 
-    std::vector<Node<T> *> getNodeList();
+    std::vector<SkelettonNode<T> *> getNodeList();
 
-    Node<T> *getPrimaryNode() const { return _primaryNode.get(); }
+    SkelettonNode<T> *getPrimaryNode() const { return _primaryNode.get(); }
 
     Mesh *convertToMesh();
 
 private:
-    void resetNode(Node<T> *node);
+    void resetNode(SkelettonNode<T> *node);
 
-    void populateMesh(Mesh *mesh, Node<T> *node);
+    void populateMesh(Mesh *mesh, SkelettonNode<T> *node);
 
-    void populateVector(std::vector<Node<T> *> &vector, Node<T> *node);
+    void populateVector(std::vector<SkelettonNode<T> *> &vector,
+                        SkelettonNode<T> *node);
 
-    std::unique_ptr<Node<T>> _primaryNode;
+    std::unique_ptr<SkelettonNode<T>> _primaryNode;
 };
 } // namespace world
 // TODO tester les liens multiples et la mixité parentage/voisinage

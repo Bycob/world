@@ -6,7 +6,7 @@
 
 namespace world {
 
-class WORLDAPI_EXPORT TreeInfo : public NodeInfo {
+class WORLDAPI_EXPORT TreeInfo : public SkelettonNodeInfo {
 public:
     /// Size of the branch terminated by this node.
     double _size = 0;
@@ -31,6 +31,6 @@ public:
 };
 
 using TreeSkeletton = WeightedSkeletton<TreeInfo>;
-using TreeNode = Node<TreeInfo>;
+using TreeNode = SkelettonNode<TreeInfo>;
 
 } // namespace world

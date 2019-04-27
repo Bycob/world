@@ -117,10 +117,7 @@ void testProxyGround(int argc, char **argv) {
 
 	world::createDirectories("assets/vulkan/proxyground/");
 	for (auto &entry : imgChan) {
-		std::string id =ItemKeys::toString(entry._key);
-		std::transform(id.begin(), id.end(), id.begin(), [](char a) {
-			return a == '/' ? '_' : a;
-		});
+		std::string id = entry._key.str();
 		id = std::string("assets/vulkan/proxyground/") + id + ".png";
 		// std::cout << id << std::endl;
 		entry._value.write(id);

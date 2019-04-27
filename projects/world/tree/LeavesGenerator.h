@@ -28,7 +28,8 @@ private:
     double _leafDensity;
     double _weightThreshold;
 
-    void processNode(Node<TreeInfo> &node, Mesh &leavesMesh, Mesh &trunkMesh);
+    void processNode(SkelettonNode<TreeInfo> &node, Mesh &leavesMesh,
+                     Mesh &trunkMesh);
 
     void addLeaf(Mesh &mesh, const vec3d &position, const vec3d &normal);
 };
