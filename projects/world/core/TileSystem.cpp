@@ -9,7 +9,7 @@ TileSystem::TileSystem(int maxLod, const vec3i &bufferRes,
 int TileSystem::computeLod(double resolution, double baseSize, int bufferRes,
                            int maxLod) const {
 
-    for (u32 lod = 0; bufferRes != 0 && lod < maxLod; ++lod) {
+    for (int lod = 0; bufferRes != 0 && lod < maxLod; ++lod) {
         if (resolution <= bufferRes * powi(_factor, lod) / baseSize)
             return lod;
     }

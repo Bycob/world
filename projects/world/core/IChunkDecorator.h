@@ -8,7 +8,7 @@ class World;
 class Chunk;
 
 /** This object is used to populate newly created chunks. */
-class IChunkDecorator {
+class WORLDAPI_EXPORT IChunkDecorator {
 public:
     virtual ~IChunkDecorator() = default;
 

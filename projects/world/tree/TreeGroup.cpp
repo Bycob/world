@@ -32,7 +32,7 @@ TreeGroup::TreeGroup() : _internal(new PTreeGroup()) {}
 TreeGroup::~TreeGroup() {}
 
 void TreeGroup::addTree(const vec3d &pos) {
-    _internal->_trees.emplace_back(_internal->_trees.size(), pos);
+    _internal->_trees.emplace_back((u32)_internal->_trees.size(), pos);
 }
 
 void TreeGroup::collect(ICollector &collector,
