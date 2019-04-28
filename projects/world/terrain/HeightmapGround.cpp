@@ -51,10 +51,16 @@ public:
 
     optional<const Terrain &> getNeighbour(int x, int y) const override {
         TileCoordinates nKey{_key._pos.x + x, _key._pos.y + y, 0, _key._lod};
-        auto ret = _ground.getCachedTerrain(nKey, _genID);
+        auto ret = _ground.lookUpTile(nKey);
 
         if (ret) {
-            return *ret;
+            auto &terrain = ret->_cache[_genID];
+
+            if (terrain) {
+                return *terrain;
+            } else {
+                return nullopt;
+            }
         } else {
             return nullopt;
         }
@@ -65,10 +71,11 @@ public:
             return nullopt;
 
         auto parentId = _ground._tileSystem.getParentTileCoordinates(_key);
-        auto ret = _ground.getCachedTerrain(parentId, _genID);
+        auto &tile = _ground.provide(parentId);
+        auto &terrain = tile._cache[_genID];
 
-        if (ret) {
-            return *ret;
+        if (terrain) {
+            return *terrain;
         } else {
             return nullopt;
         }
@@ -153,10 +160,18 @@ void HeightmapGround::collect(ICollector &collector,
     wresModel.setOffset({0, 0, estimAltitude});*/
 
     // Find terrains to generate
+    std::vector<TileCoordinates> coordinates;
+
     for (auto it = _tileSystem.iterate(resolutionModel, bbox); !it.endReached();
          ++it) {
 
-        addTerrain(*it, collector);
+        coordinates.push_back(*it);
+    }
+
+    generateTerrains(coordinates);
+
+    for (auto &coord : coordinates) {
+        addTerrain(coord, collector);
     }
 
     updateCache();
@@ -208,9 +223,7 @@ double HeightmapGround::observeAltitudeAt(double x, double y, int lvl) {
            getAltitudeRange() * terrain.getExactHeightAt(inTile.x, inTile.y);
 }
 
-inline ItemKey terrainToItem(const std::string &key) {
-    return ItemKeys::root(std::string("_") + key);
-}
+inline ItemKey terrainToItem(const std::string &key) { return {"_" + key}; }
 
 void HeightmapGround::addTerrain(const TileCoordinates &key,
                                  ICollector &collector) {
@@ -281,18 +294,6 @@ void HeightmapGround::updateCache() {
     }
 }
 
-Tile &HeightmapGround::provide(const TileCoordinates &key) {
-    auto it = _internal->_terrains.find(key);
-
-    if (it == _internal->_terrains.end()) {
-        generateTerrain(key);
-        it = _internal->_terrains.find(key);
-    }
-
-    registerAccess(key, it->second);
-    return it->second;
-}
-
 void HeightmapGround::registerAccess(const TileCoordinates &key, Tile &tile) {
     if (!_manageCache)
         return;
@@ -315,6 +316,13 @@ void HeightmapGround::registerAccess(const TileCoordinates &key, Tile &tile) {
     }
 }
 
+Tile &HeightmapGround::provide(const TileCoordinates &key) {
+    generateTerrains({key});
+    auto &tile = _internal->_terrains[key];
+    registerAccess(key, tile);
+    return tile;
+}
+
 Terrain &HeightmapGround::provideTerrain(const TileCoordinates &key) {
     return *provide(key)._final;
 }
@@ -329,15 +337,15 @@ Mesh &HeightmapGround::provideMesh(const TileCoordinates &key) {
     return *meshPtr;
 }
 
-optional<Terrain &> HeightmapGround::getCachedTerrain(
-    const TileCoordinates &key, int genID) {
+optional<HeightmapGround::Tile &> HeightmapGround::lookUpTile(
+    const TileCoordinates &key) {
     auto it = _internal->_terrains.find(key);
 
     if (it == _internal->_terrains.end()) {
         return nullopt;
     } else {
         registerAccess(key, it->second);
-        return *it->second._cache[genID];
+        return it->second;
     }
 }
 
@@ -349,42 +357,58 @@ std::string HeightmapGround::getTerrainDataId(
     return std::to_string(id);
 }
 
-void HeightmapGround::generateTerrain(const TileCoordinates &key) {
-    // Ensure that parent was created
-    if (key._lod != 0) {
-        provide(_tileSystem.getParentTileCoordinates(key));
+void HeightmapGround::generateTerrains(
+    const std::vector<TileCoordinates> &keys) {
+    std::vector<std::pair<TileCoordinates, Tile &>> generatedTiles;
+    generatedTiles.reserve(keys.size());
+
+    for (const TileCoordinates &key : keys) {
+        // Create a new tile only if it was not generated yet
+        if (_internal->_terrains.find(key) == _internal->_terrains.end()) {
+            generatedTiles.emplace_back(
+                key, _internal->_terrains[key] =
+                         Tile{std::vector<optional<Terrain>>(),
+                              std::make_unique<Terrain>(_terrainRes),
+                              std::unique_ptr<Mesh>(), 0});
+        }
     }
 
-    // Tile creation
-    Tile &tile = _internal->_terrains[key] = Tile{
-        std::vector<optional<Terrain>>(),
-        std::make_unique<Terrain>(_terrainRes), std::unique_ptr<Mesh>(), 0};
-
-    Terrain &terrain = *tile._final;
-    std::vector<optional<Terrain>> &cache = _internal->_terrains[key]._cache;
-
-    // Parameters
+    // Creation of terrain and textures
     auto texSize = _terrainRes * _textureRes;
-    terrain.setTexture(Image(texSize, texSize, ImageType::RGB));
 
-    double terrainSize = _tileSystem.getTileSize(key._lod).x;
-    terrain.setBounds(terrainSize * key._pos.x, terrainSize * key._pos.y,
-                      _minAltitude, terrainSize * (key._pos.x + 1),
-                      terrainSize * (key._pos.y + 1), _maxAltitude);
+    for (auto &keyval : generatedTiles) {
+        const auto &key = keyval.first;
+        Terrain &terrain = *keyval.second._final;
+
+        terrain.setTexture(Image(texSize, texSize, ImageType::RGB));
+
+        double terrainSize = _tileSystem.getTileSize(key._lod).x;
+        terrain.setBounds(terrainSize * key._pos.x, terrainSize * key._pos.y,
+                          _minAltitude, terrainSize * (key._pos.x + 1),
+                          terrainSize * (key._pos.y + 1), _maxAltitude);
+    }
 
     // Generation
-    GroundContext context(*this, key, 0);
+    GroundContext context(*this, {}, 0);
 
     for (auto &generator : _internal->_generators) {
-        generator->processTile(context);
+        for (auto &keyval : generatedTiles) {
+            Tile &tile = keyval.second;
+            Terrain &terrain = *tile._final;
+            std::vector<optional<Terrain>> &cache = tile._cache;
 
-        if (context._registerState) {
-            cache.emplace_back(terrain);
-            context._registerState = false;
-        } else {
-            cache.emplace_back(nullopt);
+            context._key = keyval.first;
+            generator->processTile(context);
+
+            if (context._registerState) {
+                cache.emplace_back(terrain);
+                context._registerState = false;
+            } else {
+                cache.emplace_back(nullopt);
+            }
         }
 
+        generator->flush();
         context._genID++;
     }
 }

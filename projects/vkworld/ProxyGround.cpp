@@ -107,7 +107,8 @@ VkSubBuffer createTestPerlinBuffer() {
 }
 
 void ProxyGround::collect(ICollector &collector,
-                          const IResolutionModel &resolutionModel, const ExplorationContext &ctx) {
+                          const IResolutionModel &resolutionModel,
+                          const ExplorationContext &ctx) {
     // Init collector
     if (!collector.hasChannel<Image>())
         return;

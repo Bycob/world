@@ -17,7 +17,8 @@ public:
     ~ProxyGround();
 
     void collect(ICollector &collector, const IResolutionModel &resolutionModel,
-        const ExplorationContext &ctx = ExplorationContext::getDefault()) override;
+                 const ExplorationContext &ctx =
+                     ExplorationContext::getDefault()) override;
 
 private:
     ProxyGroundPrivate *_internal;

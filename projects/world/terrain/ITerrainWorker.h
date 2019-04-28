@@ -38,6 +38,11 @@ public:
     virtual void processTerrain(Terrain &terrain) = 0;
 
     virtual void processTile(ITileContext &context) = 0;
+
+    /** This method apply all modifications to the terrains before the next
+     * worker starts processing. This may be useful if this ITerrainWorker can
+     * run several jobs concurrently. */
+    virtual void flush(){};
 };
 } // namespace world
 
