@@ -86,8 +86,8 @@ public:
     std::vector<Segment> _segments;
 };
 
-VkMemoryCache::VkMemoryCache(u32 segmentSize, DescriptorType usage,
-                             MemoryType memType)
+VkwMemoryCache::VkwMemoryCache(u32 segmentSize, DescriptorType usage,
+                               MemoryType memType)
         : _internal(std::make_shared<VkMemoryCachePrivate>()) {
 
     _internal->_segmentSize = segmentSize;
@@ -95,12 +95,12 @@ VkMemoryCache::VkMemoryCache(u32 segmentSize, DescriptorType usage,
     _internal->_memType = memType;
 }
 
-VkMemoryCache::~VkMemoryCache() = default;
+VkwMemoryCache::~VkwMemoryCache() = default;
 
 // https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html
 // #VUID-VkWriteDescriptorSet-descriptorType-00327
 // TODO Check for buffer max size and alignment according to specs above
-VkSubBuffer VkMemoryCache::allocateBuffer(u32 size) {
+VkwSubBuffer VkwMemoryCache::allocateBuffer(u32 size) {
     const u32 segmentSize = _internal->_segmentSize;
 
     if (size > segmentSize) {
@@ -128,14 +128,14 @@ VkSubBuffer VkMemoryCache::allocateBuffer(u32 size) {
         lastSegment._sizeAllocated += lastSegment._alignment - rem;
     }
 
-    return VkSubBuffer{*this, size, offset};
+    return VkwSubBuffer{*this, size, offset};
 }
 
-void VkMemoryCache::flush() {
+void VkwMemoryCache::flush() {
     // Nothing yet
 }
 
-void VkMemoryCache::setData(void *data, u32 count, u32 offset) {
+void VkwMemoryCache::setData(void *data, u32 count, u32 offset) {
     const u32 segmentSize = _internal->_segmentSize;
     const u32 inSegmentOffset = offset % segmentSize;
     const u32 segmentId = offset / segmentSize;
@@ -149,7 +149,7 @@ void VkMemoryCache::setData(void *data, u32 count, u32 offset) {
     ctx._device.unmapMemory(segment._memory);
 }
 
-void VkMemoryCache::getData(void *data, u32 count, u32 offset) {
+void VkwMemoryCache::getData(void *data, u32 count, u32 offset) {
     const u32 segmentSize = _internal->_segmentSize;
     const u32 inSegmentOffset = offset % segmentSize;
     const u32 segmentId = offset / segmentSize;
@@ -163,7 +163,7 @@ void VkMemoryCache::getData(void *data, u32 count, u32 offset) {
     ctx._device.unmapMemory(segment._memory);
 }
 
-vk::Buffer VkMemoryCache::getBufferHandle(u32 offset) {
+vk::Buffer VkwMemoryCache::getBufferHandle(u32 offset) {
     const u32 segmentSize = _internal->_segmentSize;
     const u32 segmentId = offset / segmentSize;
     auto &segment = _internal->_segments[segmentId];
@@ -171,11 +171,11 @@ vk::Buffer VkMemoryCache::getBufferHandle(u32 offset) {
     return segment._buffer;
 }
 
-u32 VkMemoryCache::getBufferOffset(u32 offset) {
+u32 VkwMemoryCache::getBufferOffset(u32 offset) {
     return offset - (offset % _internal->_segmentSize);
 }
 
-u32 VkMemoryCache::sizeRemaining() const {
+u32 VkwMemoryCache::sizeRemaining() const {
     if (_internal->_segments.size() == 0) {
         return 0;
     }

@@ -17,18 +17,18 @@ class DescriptorSet;
 
 namespace world {
 
-class DescriptorSetVkPrivate;
+class VkwDescriptorSetPrivate;
 
-class VKWORLD_EXPORT DescriptorSetVk {
+class VKWORLD_EXPORT VkwDescriptorSet {
 public:
-    DescriptorSetVk(DescriptorSetLayoutVk &layout);
+    VkwDescriptorSet(VkwDescriptorSetLayout &layout);
 
-    void addDescriptor(u32 id, DescriptorType usage, IVkBindable &bindable);
+    void addDescriptor(u32 id, DescriptorType usage, IVkwBindable &bindable);
 
     vk::DescriptorSet &handle();
 
 private:
-    std::shared_ptr<DescriptorSetVkPrivate> _internal;
+    std::shared_ptr<VkwDescriptorSetPrivate> _internal;
 };
 } // namespace world
 

@@ -5,41 +5,41 @@
 
 namespace world {
 
-class VkSubBufferPrivate {
+class VkwSubBufferPrivate {
 public:
-    IVkMemoryAccess &_memAccess;
+    IVkwMemoryAccess &_memAccess;
 
     u32 _size;
     u32 _offset;
 };
 
-VkSubBuffer::VkSubBuffer(IVkMemoryAccess &memAccess, u32 size, u32 offset)
-        : _internal(std::make_shared<VkSubBufferPrivate>(
-              VkSubBufferPrivate{memAccess, size, offset})) {}
+const VkwSubBuffer VkwSubBuffer::NONE = VkwSubBuffer();
 
-VkSubBuffer::VkSubBuffer(const VkSubBuffer &other) = default;
+VkwSubBuffer::VkwSubBuffer() : _internal(nullptr) {}
 
-VkSubBuffer &VkSubBuffer::operator=(const VkSubBuffer &other) = default;
+VkwSubBuffer::VkwSubBuffer(IVkwMemoryAccess &memAccess, u32 size, u32 offset)
+        : _internal(std::make_shared<VkwSubBufferPrivate>(
+              VkwSubBufferPrivate{memAccess, size, offset})) {}
 
-u32 VkSubBuffer::getSize() const { return _internal->_size; }
+u32 VkwSubBuffer::getSize() const { return _internal->_size; }
 
-u32 VkSubBuffer::getOffset() const { return _internal->_offset; }
+u32 VkwSubBuffer::getOffset() const { return _internal->_offset; }
 
 
-void VkSubBuffer::getData(void *data) { getData(data, _internal->_size); }
+void VkwSubBuffer::getData(void *data) { getData(data, _internal->_size); }
 
-void VkSubBuffer::getData(void *data, u32 count, u32 offset) {
+void VkwSubBuffer::getData(void *data, u32 count, u32 offset) {
     _internal->_memAccess.getData(data, count, _internal->_offset + offset);
 }
 
-void VkSubBuffer::setData(void *data) { setData(data, _internal->_size); }
+void VkwSubBuffer::setData(void *data) { setData(data, _internal->_size); }
 
-void VkSubBuffer::setData(void *data, u32 count, u32 offset) {
+void VkwSubBuffer::setData(void *data, u32 count, u32 offset) {
     _internal->_memAccess.setData(data, count, _internal->_offset + offset);
 }
 
-void VkSubBuffer::registerTo(vk::DescriptorSet &descriptorSet,
-                             vk::DescriptorType descriptorType, u32 id) {
+void VkwSubBuffer::registerTo(vk::DescriptorSet &descriptorSet,
+                              vk::DescriptorType descriptorType, u32 id) {
     vk::DescriptorBufferInfo descriptorBufferInfo(
         _internal->_memAccess.getBufferHandle(_internal->_offset),
         _internal->_offset -

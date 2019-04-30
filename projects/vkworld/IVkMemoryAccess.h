@@ -12,9 +12,9 @@ class Buffer;
 namespace world {
 
 /** Any class which gives access to a memory space on the GPU. */
-class VKWORLD_EXPORT IVkMemoryAccess {
+class VKWORLD_EXPORT IVkwMemoryAccess {
 public:
-    virtual ~IVkMemoryAccess() = default;
+    virtual ~IVkwMemoryAccess() = default;
 
     virtual void setData(void *data, u32 count, u32 offset) = 0;
 

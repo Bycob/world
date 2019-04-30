@@ -15,20 +15,20 @@ namespace world {
 
 class VkMemoryCachePrivate;
 
-class VKWORLD_EXPORT VkMemoryCache : public IVkMemoryAccess {
+class VKWORLD_EXPORT VkwMemoryCache : public IVkwMemoryAccess {
 public:
-    VkMemoryCache(u32 segmentSize, DescriptorType usage, MemoryType memType);
-    ~VkMemoryCache() override;
+    VkwMemoryCache(u32 segmentSize, DescriptorType usage, MemoryType memType);
+    ~VkwMemoryCache() override;
 
     /** Creates a buffer of given size and binds it with one of the memory
      * segments. */
-    VkSubBuffer allocateBuffer(u32 size);
+    VkwSubBuffer allocateBuffer(u32 size);
 
     /** Upload memory to vulkan. This method should always be called before
      * using the memory on the GPU. */
     void flush();
 
-    // ===== IVkMemoryAccess
+    // ===== IVkwMemoryAccess
 
     void setData(void *data, u32 count, u32 offset) override;
 

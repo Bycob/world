@@ -4,7 +4,7 @@
 
 namespace world {
 
-class DescriptorSetLayoutVkPrivate {
+class VkwDescriptorSetLayoutPrivate {
 public:
     std::vector<vk::DescriptorSetLayoutBinding> _bindings;
 
@@ -22,17 +22,17 @@ public:
     }
 };
 
-DescriptorSetLayoutVk::DescriptorSetLayoutVk()
-        : _internal(std::make_shared<DescriptorSetLayoutVkPrivate>()) {}
+VkwDescriptorSetLayout::VkwDescriptorSetLayout()
+        : _internal(std::make_shared<VkwDescriptorSetLayoutPrivate>()) {}
 
-void DescriptorSetLayoutVk::addBinding(DescriptorType usage, u32 binding) {
+void VkwDescriptorSetLayout::addBinding(DescriptorType usage, u32 binding) {
     vk::DescriptorType descriptorType =
         Vulkan::context().internal().getDescriptorType(usage);
     _internal->_bindings.emplace_back(binding, descriptorType, 1,
                                       vk::ShaderStageFlagBits::eCompute);
 }
 
-vk::DescriptorSetLayout &DescriptorSetLayoutVk::getLayout() {
+vk::DescriptorSetLayout &VkwDescriptorSetLayout::getLayout() {
     if (!_internal->_initialized) {
         _internal->createDescriptorSetLayout();
     }

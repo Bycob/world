@@ -26,16 +26,16 @@ ProxyGround::ProxyGround(f64 width, u32 resolution) {
 
 ProxyGround::~ProxyGround() { delete _internal; }
 
-VkSubBuffer createTestPerlinBuffer() {
+VkwSubBuffer createTestPerlinBuffer() {
     auto &vkctx = Vulkan::context().internal();
 
-    DescriptorSetLayoutVk layout22; // 2 uniforms 2 storage
+    VkwDescriptorSetLayout layout22; // 2 uniforms 2 storage
     layout22.addBinding(DescriptorType::UNIFORM_BUFFER, 0);
     layout22.addBinding(DescriptorType::UNIFORM_BUFFER, 1);
     layout22.addBinding(DescriptorType::STORAGE_BUFFER, 256);
     layout22.addBinding(DescriptorType::STORAGE_BUFFER, 3);
 
-    ComputePipeline perlinPipeline(layout22, "noise-perlin");
+    VkwComputePipeline perlinPipeline(layout22, "noise-perlin");
 
     Perlin perlin;
     std::vector<u32> hash;
@@ -70,32 +70,32 @@ VkSubBuffer createTestPerlinBuffer() {
     } s_perlinData;
 
 
-    VkSubBuffer outputDataBuf =
+    VkwSubBuffer outputDataBuf =
         vkctx.allocate(sizeof(s_outputData), DescriptorType::UNIFORM_BUFFER,
                        MemoryType::CPU_WRITES);
 
-    VkSubBuffer perlinDataBuf =
+    VkwSubBuffer perlinDataBuf =
         vkctx.allocate(sizeof(s_perlinData), DescriptorType::UNIFORM_BUFFER,
                        MemoryType::CPU_WRITES);
 
-    VkSubBuffer hashBuf =
+    VkwSubBuffer hashBuf =
         vkctx.allocate(hash.size() * sizeof(u32),
                        DescriptorType::STORAGE_BUFFER, MemoryType::CPU_WRITES);
 
-    VkSubBuffer perlinBuf = vkctx.allocate(
+    VkwSubBuffer perlinBuf = vkctx.allocate(
         bufferSize, DescriptorType::STORAGE_BUFFER, MemoryType::GPU_ONLY);
 
     outputDataBuf.setData(&s_outputData);
     perlinDataBuf.setData(&s_perlinData);
     hashBuf.setData(&hash[0]);
 
-    DescriptorSetVk perlinDset(layout22);
+    VkwDescriptorSet perlinDset(layout22);
     perlinDset.addDescriptor(0, DescriptorType::UNIFORM_BUFFER, outputDataBuf);
     perlinDset.addDescriptor(1, DescriptorType::UNIFORM_BUFFER, perlinDataBuf);
     perlinDset.addDescriptor(256, DescriptorType::STORAGE_BUFFER, hashBuf);
     perlinDset.addDescriptor(3, DescriptorType::STORAGE_BUFFER, perlinBuf);
 
-    VkWorker perlinWorker;
+    VkwWorker perlinWorker;
     perlinWorker.bindCommand(perlinPipeline, perlinDset);
     perlinWorker.dispatchCommand(bufferWidth / 32, bufferHeight / 32, 1);
     perlinWorker.endCommandRecording();
@@ -120,7 +120,7 @@ void ProxyGround::collect(ICollector &collector,
     Profiler profiler;
     profiler.endStartSection("perlin generation");
 
-    VkSubBuffer perlinBuf = createTestPerlinBuffer();
+    VkwSubBuffer perlinBuf = createTestPerlinBuffer();
     const u32 parentWidth = 128;
     const u32 parentHeight = 128;
 
@@ -129,16 +129,16 @@ void ProxyGround::collect(ICollector &collector,
 
     profiler.endStartSection("setup");
 
-    DescriptorSetLayoutVk layout22; // 2 uniforms 2 storage
+    VkwDescriptorSetLayout layout22; // 2 uniforms 2 storage
     layout22.addBinding(DescriptorType::UNIFORM_BUFFER, 0);
     layout22.addBinding(DescriptorType::UNIFORM_BUFFER, 1);
     layout22.addBinding(DescriptorType::STORAGE_BUFFER, 2);
     layout22.addBinding(DescriptorType::STORAGE_BUFFER, 3);
 
-    ComputePipeline upscalePipeline(layout22, "upscale");
+    VkwComputePipeline upscalePipeline(layout22, "upscale");
 
-    std::vector<ComputePipeline> repartitionPipelines;
-    std::vector<ComputePipeline> texturePipelines;
+    std::vector<VkwComputePipeline> repartitionPipelines;
+    std::vector<VkwComputePipeline> texturePipelines;
 
     for (auto &layerInfo : _internal->_layers) {
         repartitionPipelines.emplace_back(layout22,
@@ -182,7 +182,7 @@ void ProxyGround::collect(ICollector &collector,
     s_outputData.height = bufferHeight;
     s_outputData.depth = 1;
 
-    VkSubBuffer outputDataBuf =
+    VkwSubBuffer outputDataBuf =
         vkctx.allocate(sizeof(s_outputData), DescriptorType::UNIFORM_BUFFER,
                        MemoryType::CPU_WRITES);
 
@@ -192,7 +192,7 @@ void ProxyGround::collect(ICollector &collector,
     for (const TileCoordinates &tc : coords) {
         auto &tileData = getData(tc);
 
-        VkWorker &worker = *(tileData._worker = std::make_unique<VkWorker>());
+        VkwWorker &worker = *(tileData._worker = std::make_unique<VkwWorker>());
 
         // --- UPSCALE
         // vec3d bboxDims = bbox.getDimensions();
@@ -224,15 +224,15 @@ void ProxyGround::collect(ICollector &collector,
         s_upscaleData.sizeX = tileSize.x;
         s_upscaleData.sizeY = tileSize.y;
 
-        tileData._upscaleData = std::make_unique<VkSubBuffer>(vkctx.allocate(
+        tileData._upscaleData = std::make_unique<VkwSubBuffer>(vkctx.allocate(
             sizeof(s_upscaleData), DescriptorType::UNIFORM_BUFFER,
             MemoryType::CPU_WRITES)),
-        tileData._height = std::make_unique<VkSubBuffer>(vkctx.allocate(
+        tileData._height = std::make_unique<VkwSubBuffer>(vkctx.allocate(
             bufferSize, DescriptorType::STORAGE_BUFFER, MemoryType::CPU_READS));
 
         tileData._upscaleData->setData(&s_upscaleData);
 
-        DescriptorSetVk upscaleDset(layout22);
+        VkwDescriptorSet upscaleDset(layout22);
         upscaleDset.addDescriptor(0, DescriptorType::UNIFORM_BUFFER,
                                   outputDataBuf);
         upscaleDset.addDescriptor(1, DescriptorType::UNIFORM_BUFFER,
@@ -245,7 +245,7 @@ void ProxyGround::collect(ICollector &collector,
         worker.dispatchCommand(dispatchX, dispatchY, dispatchZ);
 
         // Prealloc final texture buffer
-        tileData._texture = std::make_unique<VkSubBuffer>(
+        tileData._texture = std::make_unique<VkwSubBuffer>(
             vkctx.allocate(bufferSize * 4, DescriptorType::STORAGE_BUFFER,
                            MemoryType::CPU_READS));
 
@@ -261,16 +261,16 @@ void ProxyGround::collect(ICollector &collector,
             } s_repartitionData;
 
             layerData._repartitionData =
-                std::make_unique<VkSubBuffer>(vkctx.allocate(
+                std::make_unique<VkwSubBuffer>(vkctx.allocate(
                     sizeof(s_repartitionData), DescriptorType::UNIFORM_BUFFER,
                     MemoryType::CPU_WRITES)),
-            layerData._repartition = std::make_unique<VkSubBuffer>(
+            layerData._repartition = std::make_unique<VkwSubBuffer>(
                 vkctx.allocate(bufferSize, DescriptorType::STORAGE_BUFFER,
                                MemoryType::CPU_READS));
 
             layerData._repartitionData->setData(&s_repartitionData);
 
-            DescriptorSetVk repartitionDset(layout22);
+            VkwDescriptorSet repartitionDset(layout22);
             repartitionDset.addDescriptor(0, DescriptorType::UNIFORM_BUFFER,
                                           outputDataBuf);
             repartitionDset.addDescriptor(1, DescriptorType::UNIFORM_BUFFER,
@@ -297,14 +297,14 @@ void ProxyGround::collect(ICollector &collector,
             s_textureData.offsetY = s_textureData.sizeY * tc._pos.y;
 
             layerData._textureData =
-                std::make_unique<VkSubBuffer>(vkctx.allocate(
+                std::make_unique<VkwSubBuffer>(vkctx.allocate(
                     sizeof(s_textureData), DescriptorType::UNIFORM_BUFFER,
                     MemoryType::CPU_WRITES));
 
             layerData._textureData->setData(&s_textureData);
 
 
-            DescriptorSetVk textureDset(layout22);
+            VkwDescriptorSet textureDset(layout22);
             textureDset.addDescriptor(0, DescriptorType::UNIFORM_BUFFER,
                                       outputDataBuf);
             textureDset.addDescriptor(1, DescriptorType::UNIFORM_BUFFER,

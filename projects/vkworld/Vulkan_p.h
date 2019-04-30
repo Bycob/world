@@ -44,7 +44,7 @@ public:
     // RESOURCES MANAGEMENT
     vk::ShaderModule createShader(const std::vector<char> &shaderCode);
 
-    VkSubBuffer allocate(u32 size, DescriptorType usage, MemoryType memType);
+    VkwSubBuffer allocate(u32 size, DescriptorType usage, MemoryType memType);
 
     // MISC
     /** Simple method to get a queue for computation. */
@@ -63,7 +63,7 @@ private:
 
     VkDebugReportCallbackEXT _debugCallback;
 
-    std::map<std::pair<DescriptorType, MemoryType>, VkMemoryCache> _memory;
+    std::map<std::pair<DescriptorType, MemoryType>, VkwMemoryCache> _memory;
 
 
     friend class VulkanContext;

@@ -247,8 +247,8 @@ int VulkanContextPrivate::findMemoryType(
     return memoryTypeIndex;
 }
 
-VkSubBuffer VulkanContextPrivate::allocate(u32 size, DescriptorType usage,
-                                           MemoryType memType) {
+VkwSubBuffer VulkanContextPrivate::allocate(u32 size, DescriptorType usage,
+                                            MemoryType memType) {
     auto key = std::make_pair(usage, memType);
     auto it = _memory.find(key);
 
@@ -256,7 +256,7 @@ VkSubBuffer VulkanContextPrivate::allocate(u32 size, DescriptorType usage,
         // segment size = 64 Mo
         it = _memory
                  .insert(std::make_pair(
-                     key, VkMemoryCache(64 * 1024 * 1024, usage, memType)))
+                     key, VkwMemoryCache(64 * 1024 * 1024, usage, memType)))
                  .first;
     }
 

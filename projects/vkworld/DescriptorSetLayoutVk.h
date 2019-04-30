@@ -15,11 +15,11 @@ class DescriptorSetLayout;
 
 namespace world {
 
-class DescriptorSetLayoutVkPrivate;
+class VkwDescriptorSetLayoutPrivate;
 
-class VKWORLD_EXPORT DescriptorSetLayoutVk {
+class VKWORLD_EXPORT VkwDescriptorSetLayout {
 public:
-    DescriptorSetLayoutVk();
+    VkwDescriptorSetLayout();
 
     void addBinding(DescriptorType type, u32 binding);
 
@@ -27,7 +27,7 @@ public:
     vk::DescriptorSetLayout &getLayout();
 
 private:
-    std::shared_ptr<DescriptorSetLayoutVkPrivate> _internal;
+    std::shared_ptr<VkwDescriptorSetLayoutPrivate> _internal;
 };
 } // namespace world
 

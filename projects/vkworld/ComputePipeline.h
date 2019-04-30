@@ -17,14 +17,14 @@ class PipelineLayout;
 
 namespace world {
 
-class ComputePipelinePrivate;
+class VkwComputePipelinePrivate;
 
-class VKWORLD_EXPORT ComputePipeline {
+class VKWORLD_EXPORT VkwComputePipeline {
 public:
-    ComputePipeline(DescriptorSetLayoutVk &descriptorSetLayout);
+    VkwComputePipeline(VkwDescriptorSetLayout &descriptorSetLayout);
 
-    ComputePipeline(DescriptorSetLayoutVk &descriptorSetLayout,
-                    const std::string &shaderName);
+    VkwComputePipeline(VkwDescriptorSetLayout &descriptorSetLayout,
+                       const std::string &shaderName);
 
     void setBuiltinShader(const std::string &shaderName);
 
@@ -35,7 +35,7 @@ public:
     vk::PipelineLayout &getLayout();
 
 private:
-    std::shared_ptr<ComputePipelinePrivate> _internal;
+    std::shared_ptr<VkwComputePipelinePrivate> _internal;
 };
 } // namespace world
 

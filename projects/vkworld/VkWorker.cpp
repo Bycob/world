@@ -7,14 +7,14 @@
 
 namespace world {
 
-class VkWorkerPrivate {
+class VkwWorkerPrivate {
 public:
     vk::CommandBuffer _commandBuffer;
 
     vk::Fence _fence;
 };
 
-VkWorker::VkWorker() : _internal(std::make_shared<VkWorkerPrivate>()) {
+VkwWorker::VkwWorker() : _internal(std::make_shared<VkwWorkerPrivate>()) {
 
     auto &vkctx = Vulkan::context().internal();
 
@@ -28,7 +28,8 @@ VkWorker::VkWorker() : _internal(std::make_shared<VkWorkerPrivate>()) {
     _internal->_commandBuffer.begin(beginInfo);
 }
 
-void VkWorker::bindCommand(ComputePipeline &pipeline, DescriptorSetVk &dset) {
+void VkwWorker::bindCommand(VkwComputePipeline &pipeline,
+                            VkwDescriptorSet &dset) {
     _internal->_commandBuffer.bindPipeline(vk::PipelineBindPoint::eCompute,
                                            pipeline.getPipeline());
     _internal->_commandBuffer.bindDescriptorSets(
@@ -36,13 +37,13 @@ void VkWorker::bindCommand(ComputePipeline &pipeline, DescriptorSetVk &dset) {
         std::vector<u32>());
 }
 
-void VkWorker::dispatchCommand(u32 x, u32 y, u32 z) {
+void VkwWorker::dispatchCommand(u32 x, u32 y, u32 z) {
     _internal->_commandBuffer.dispatch(x, y, z);
 }
 
-void VkWorker::endCommandRecording() { _internal->_commandBuffer.end(); }
+void VkwWorker::endCommandRecording() { _internal->_commandBuffer.end(); }
 
-void VkWorker::run() {
+void VkwWorker::run() {
     auto &vkctx = Vulkan::context().internal();
 
     _internal->_fence = vkctx._device.createFence(vk::FenceCreateInfo());
@@ -52,7 +53,7 @@ void VkWorker::run() {
     vkctx._computeQueue.submit(submitInfo, _internal->_fence);
 }
 
-void VkWorker::waitForCompletion() {
+void VkwWorker::waitForCompletion() {
     auto &vkctx = Vulkan::context().internal();
     vkctx._device.waitForFences(_internal->_fence, true, 100000000000);
 }

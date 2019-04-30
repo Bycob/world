@@ -11,9 +11,9 @@ enum class DescriptorType;
 namespace world {
 
 /** Any class which gives access to a memory space on the GPU. */
-class VKWORLD_EXPORT IVkBindable {
+class VKWORLD_EXPORT IVkwBindable {
 public:
-    virtual ~IVkBindable() = default;
+    virtual ~IVkwBindable() = default;
 
     virtual void registerTo(vk::DescriptorSet &descriptorSet,
                             vk::DescriptorType descriptorType, u32 id) = 0;

@@ -7,7 +7,7 @@
 
 namespace world {
 
-class ComputePipelinePrivate {
+class VkwComputePipelinePrivate {
 public:
     vk::ShaderModule _shader;
 
@@ -47,31 +47,32 @@ public:
 };
 
 
-ComputePipeline::ComputePipeline(DescriptorSetLayoutVk &descriptorSetLayout)
-        : _internal(std::make_shared<ComputePipelinePrivate>()) {
+VkwComputePipeline::VkwComputePipeline(
+    VkwDescriptorSetLayout &descriptorSetLayout)
+        : _internal(std::make_shared<VkwComputePipelinePrivate>()) {
 
     _internal->_descriptorSetLayout = descriptorSetLayout.getLayout();
 }
 
-ComputePipeline::ComputePipeline(DescriptorSetLayoutVk &descriptorSetLayout,
-                                 const std::string &shaderName)
-        : ComputePipeline(descriptorSetLayout) {
+VkwComputePipeline::VkwComputePipeline(
+    VkwDescriptorSetLayout &descriptorSetLayout, const std::string &shaderName)
+        : VkwComputePipeline(descriptorSetLayout) {
     setBuiltinShader(shaderName);
 }
 
-void ComputePipeline::setBuiltinShader(const std::string &shaderName) {
+void VkwComputePipeline::setBuiltinShader(const std::string &shaderName) {
     auto &internalCtx = Vulkan::context().internal();
     _internal->_shader =
         internalCtx.createShader(internalCtx.readFile(shaderName + ".spv"));
 }
 
-vk::Pipeline &ComputePipeline::getPipeline() {
+vk::Pipeline &VkwComputePipeline::getPipeline() {
     if (!_internal->_initialized)
         _internal->initialize();
     return _internal->_pipeline;
 }
 
-vk::PipelineLayout &ComputePipeline::getLayout() {
+vk::PipelineLayout &VkwComputePipeline::getLayout() {
     if (!_internal->_initialized)
         _internal->initialize();
     return _internal->_pipelineLayout;

@@ -7,13 +7,13 @@
 
 namespace world {
 
-class DescriptorSetVkPrivate {
+class VkwDescriptorSetPrivate {
 public:
     vk::DescriptorSet _descriptorSet;
 };
 
-DescriptorSetVk::DescriptorSetVk(DescriptorSetLayoutVk &layout)
-        : _internal(std::make_shared<DescriptorSetVkPrivate>()) {
+VkwDescriptorSet::VkwDescriptorSet(VkwDescriptorSetLayout &layout)
+        : _internal(std::make_shared<VkwDescriptorSetPrivate>()) {
 
     auto &vkctx = Vulkan::context().internal();
 
@@ -24,14 +24,14 @@ DescriptorSetVk::DescriptorSetVk(DescriptorSetLayoutVk &layout)
         vkctx._device.allocateDescriptorSets(descriptorSetInfo)[0];
 }
 
-void DescriptorSetVk::addDescriptor(u32 id, DescriptorType usage,
-                                    IVkBindable &bindable) {
+void VkwDescriptorSet::addDescriptor(u32 id, DescriptorType usage,
+                                     IVkwBindable &bindable) {
     bindable.registerTo(_internal->_descriptorSet,
                         Vulkan::context().internal().getDescriptorType(usage),
                         id);
 }
 
-vk::DescriptorSet &DescriptorSetVk::handle() {
+vk::DescriptorSet &VkwDescriptorSet::handle() {
     return _internal->_descriptorSet;
 }
 } // namespace world

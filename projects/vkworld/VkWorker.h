@@ -10,13 +10,13 @@
 
 namespace world {
 
-class VkWorkerPrivate;
+class VkwWorkerPrivate;
 
-class VKWORLD_EXPORT VkWorker {
+class VKWORLD_EXPORT VkwWorker {
 public:
-    VkWorker();
+    VkwWorker();
 
-    void bindCommand(ComputePipeline &pipeline, DescriptorSetVk &dset);
+    void bindCommand(VkwComputePipeline &pipeline, VkwDescriptorSet &dset);
 
     void dispatchCommand(u32 x, u32 y, u32 z);
 
@@ -27,7 +27,7 @@ public:
     void waitForCompletion();
 
 private:
-    std::shared_ptr<VkWorkerPrivate> _internal;
+    std::shared_ptr<VkwWorkerPrivate> _internal;
 };
 } // namespace world
 

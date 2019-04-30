@@ -12,15 +12,14 @@
 
 namespace world {
 
-class VkSubBufferPrivate;
+class VkwSubBufferPrivate;
 
-class VKWORLD_EXPORT VkSubBuffer : public IVkBindable {
+class VKWORLD_EXPORT VkwSubBuffer : public IVkwBindable {
 public:
-    VkSubBuffer(IVkMemoryAccess &memAccess, u32 size, u32 offset);
+    static const VkwSubBuffer NONE;
 
-    VkSubBuffer(const VkSubBuffer &other);
-
-    VkSubBuffer &operator=(const VkSubBuffer &other);
+    VkwSubBuffer();
+    VkwSubBuffer(IVkwMemoryAccess &memAccess, u32 size, u32 offset);
 
     u32 getSize() const;
     u32 getOffset() const;
@@ -36,7 +35,7 @@ public:
     void setData(void *data, u32 count, u32 offset = 0);
 
 private:
-    std::shared_ptr<VkSubBufferPrivate> _internal;
+    std::shared_ptr<VkwSubBufferPrivate> _internal;
 };
 } // namespace world
 
