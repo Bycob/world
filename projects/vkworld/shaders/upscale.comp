@@ -7,20 +7,17 @@ layout (local_size_x = WORKGROUP_SIZE, local_size_y = WORKGROUP_SIZE, local_size
 
 
 layout(binding = 0) uniform OutputData {
-    uvec3 dims;
-};
-
-layout(binding = 1) uniform UpscaleData {
+    uvec3 dstDims;
 	uvec3 srcDims;
 	uvec3 srcOffset;
 	uvec3 srcSize;
 };
 
-layout(std430, binding = 2) buffer Input0 {
+layout(std430, binding = 1) buffer Input0 {
 	float inputBuffer[];
 };
 
-layout(std430, binding = 3) buffer Output0 {
+layout(std430, binding = 2) buffer Output0 {
     float outputBuffer[];
 };
 
@@ -48,9 +45,9 @@ float lerp3D(uvec3 origin, vec3 l, uvec3 dims) {
 }
 
 void main() {
-	vec3 xyz = vec3(gl_GlobalInvocationID.xyz) / vec3(dims);
+	vec3 xyz = vec3(gl_GlobalInvocationID.xyz) / vec3(dstDims);
 	vec3 srcPos = srcOffset + xyz * srcSize;
 	uvec3 origin = uvec3(srcPos);
 	vec3 ratio = srcPos - origin;
-	outputBuffer[id(gl_GlobalInvocationID.xyz, dims)] = lerp3D(origin, ratio, srcDims);
+	outputBuffer[id(gl_GlobalInvocationID.xyz, dstDims)] = lerp3D(origin, ratio, srcDims);
 }

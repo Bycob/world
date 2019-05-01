@@ -14,9 +14,15 @@ layout(binding = 0) uniform OutputData {
 layout(binding = 1) uniform DistributionParameters {
     vec4 height;
 	vec4 dheight;
-	float max;
-	float min;
+	float hmin;
+	float hmax;
+	float dhmin;
+	float dhmax;
 	float threshold;
+};
+
+layout(binding = 2) uniform PerlinParams {
+	NoiseParameters uNoiseParams;
 };
 
 layout(std430, binding = 3) buffer Input0 {
@@ -33,14 +39,16 @@ layout(std430, binding = 5) buffer Output0 {
 
 void main() {
 	uvec3 loc = gl_GlobalInvocationID.xyz;
+	vec3 locf = vec3(loc) / vec3(dims);
 	uint i = id3(loc, dims);
 	float h = inputHeight[i];
 	float dh = inputDheight[i];
 	
-	// float r1 = ramp(height.x, height.y, height.z, height.w, min, max, h);
-	// float r2 = ramp(dheight.x, dheight.y, dheight.z, dheight.w, min, max, dh);
-	// float r = r1 * r2;
-	// float x = perlin(loc, ...);
+	float r1 = ramp(height.x, height.y, height.z, height.w, hmin, hmax, h);
+	float r2 = ramp(dheight.x, dheight.y, dheight.z, dheight.w, dhmin, dhmax, dh);
+	float r = r1 * r2;
+	NoiseParameters noiseParams = uNoiseParams;
+	float x = perlin(noiseParams, locf.x, locf.y, locf.z);
 	
-	// outputDistribution[i] = smoothstep(..., r - threshold, r + threshold);
+	outputDistribution[i] = smoothstep(x, r - threshold, r + threshold);
 }

@@ -4,6 +4,7 @@
 #include "VkWorldConfig.h"
 
 #include <memory>
+#include <initializer_list>
 
 #include <world/core/WorldTypes.h>
 
@@ -20,6 +21,7 @@ class VkwDescriptorSetLayoutPrivate;
 class VKWORLD_EXPORT VkwDescriptorSetLayout {
 public:
     VkwDescriptorSetLayout();
+    VkwDescriptorSetLayout(std::initializer_list<u32> uniformIds, std::initializer_list<u32> storageIds);
 
     void addBinding(DescriptorType type, u32 binding);
 

@@ -25,6 +25,15 @@ public:
 VkwDescriptorSetLayout::VkwDescriptorSetLayout()
         : _internal(std::make_shared<VkwDescriptorSetLayoutPrivate>()) {}
 
+VkwDescriptorSetLayout::VkwDescriptorSetLayout(std::initializer_list<u32> uniformIds, std::initializer_list<u32> storageIds) {
+    for (u32 id : uniformIds) {
+        addBinding(DescriptorType::UNIFORM_BUFFER, id);
+    }
+    for (u32 id : storageIds) {
+        addBinding(DescriptorType::STORAGE_BUFFER, id);
+    }
+}
+
 void VkwDescriptorSetLayout::addBinding(DescriptorType usage, u32 binding) {
     vk::DescriptorType descriptorType =
         Vulkan::context().internal().getDescriptorType(usage);
