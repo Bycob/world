@@ -53,8 +53,8 @@ void testLightning(int argc, char **argv) {
     // ImageUtils::drawLine(img, {54, -56}, {873, 452}, 3, Color4d(0.9, 0.95,
     // 0.97));
 
-    Lightning lightning;
-    lightning.generateLightning(img, {500, 200});
+    JitterLightning lightning;
+    lightning.generateLightning(img, {500, 200}, {500, 800});
 
     img.write("assets/lightning.png");
 }

@@ -26,4 +26,19 @@ private:
     int _maxSubdivisions = 10;
 };
 
+class WORLDAPI_EXPORT JitterLightning {
+public:
+    JitterLightning();
+
+    void generateLightning(Image &img, const vec2d &from, const vec2d &to);
+
+private:
+    std::mt19937_64 _rng;
+
+    double _jitterMax = 0.25;
+    u32 _stepCount = 6;
+    double _startIntensity = 5;
+    double _subdivideChance = 0.2;
+};
+
 } // namespace world
