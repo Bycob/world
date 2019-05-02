@@ -25,7 +25,8 @@ public:
 
     /** Draw a line at the given coordinates (in pixels) */
     static void drawLine(Image &img, const vec2d &from, const vec2d &to,
-                         double width, const Color4d &color);
+                         double width, const Color4d &color,
+                         bool softEnds = false);
 
 private:
 };

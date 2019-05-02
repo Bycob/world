@@ -38,7 +38,10 @@ private:
     double _jitterMax = 0.25;
     u32 _stepCount = 6;
     double _startIntensity = 5;
-    double _subdivideChance = 0.2;
+    double _minSubdivJitter = 0.0;
+    double _subdivideChance = 0.9;
 };
+
+// TODO RRTLightning (http://msl.cs.uiuc.edu/rrt/about.html)
 
 } // namespace world

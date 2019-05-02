@@ -66,33 +66,25 @@ void JitterLightning::generateLightning(Image &img, const vec2d &from,
 
     for (int i = 0; i < _stepCount; ++i) {
         for (auto it = segments.begin(); it != segments.end(); ++it) {
-            std::cout << "start: " << std::distance(segments.begin(), it) << "-"
-                      << std::distance(it, segments.end()) << std::endl;
             Segment s = *it;
             vec2d dirVec = s.to - s.from;
             vec2d normVec(dirVec.y, -dirVec.x);
-            vec2d newPoint = s.from + dirVec * 0.5 + normVec * jitter(_rng);
+            double jitterVal = jitter(_rng);
+            vec2d newPoint = s.from + dirVec * 0.5 + normVec * jitterVal;
             *it = Segment{s.from, newPoint, s.intensity};
             segments.insert(it, Segment{newPoint, s.to, s.intensity});
-            std::cout << "after insert #2: "
-                      << std::distance(segments.begin(), it) << "-"
-                      << std::distance(it, segments.end()) << std::endl;
 
-            if (subdivide(_rng) < _subdivideChance) {
+            if (subdivide(_rng) < _subdivideChance &&
+                jitterVal > _minSubdivJitter) {
                 segments.insert(it, Segment{newPoint, newPoint + dirVec * 0.35,
                                             s.intensity / 2});
-                std::cout << "after insert #3: "
-                          << std::distance(segments.begin(), it) << "-"
-                          << std::distance(it, segments.end()) << std::endl;
             }
-            std::cout << std::endl;
         }
-        std::cout << "======" << std::endl;
     }
 
     for (Segment &segment : segments) {
         ImageUtils::drawLine(img, segment.from, segment.to, segment.intensity,
-                             Color4d(1, 1, 1));
+                             Color4d(1, 1, 1), true);
     }
 }
 

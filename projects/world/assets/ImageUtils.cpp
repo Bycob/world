@@ -37,7 +37,7 @@ void ImageUtils::fill(Image &img, const Color4d &color) {
 }
 
 void ImageUtils::drawLine(Image &img, const vec2d &from, const vec2d &to,
-                          double width, const Color4d &color) {
+                          double width, const Color4d &color, bool softEnds) {
     vec2d dir = to - from;
     bool xbased = abs(dir.x) > abs(dir.y);
     double xmin, xmax, a, b;
@@ -79,10 +79,12 @@ void ImageUtils::drawLine(Image &img, const vec2d &from, const vec2d &to,
     }
 
     const double hwidth = width / 2.0;
+    const double endsWidth = softEnds ? hwidth : 0;
     const double lineLength = dir.norm();
     vec2d unit = dir.normalize();
 
-    for (int i = int(floor(xmin)); i <= int(ceil(xmax)); ++i) {
+    for (int i = int(floor(xmin - endsWidth)); i <= int(ceil(xmax + endsWidth));
+         ++i) {
         if (i < 0 || i > imax)
             continue;
 
@@ -104,15 +106,23 @@ void ImageUtils::drawLine(Image &img, const vec2d &from, const vec2d &to,
             const double dp = unit.dotProduct(vec);
             const double t = dp / lineLength;
 
-            if (t >= 0 && t <= 1) {
-                double d = (vec - unit * dp).norm();
+            if ((t >= 0 && t <= 1) || softEnds) {
+                double d;
+
+                if (t < 0) {
+                    d = lower.length(uv);
+                } else if (t > 1) {
+                    d = higher.length(uv);
+                } else {
+                    d = (vec - unit * dp).norm();
+                }
                 double f = clamp(d - hwidth, 0, 1);
                 double f_1 = 1 - f;
 
                 auto &initRgb = img.rgb(uv.x, uv.y);
-                initRgb.setf(initRgb.getRed() * f + color._r * f_1,
-                             initRgb.getGreen() * f + color._g * f_1,
-                             initRgb.getBlue() * f + color._b * f_1);
+                initRgb.setf(initRgb.getRedf() * f + color._r * f_1,
+                             initRgb.getGreenf() * f + color._g * f_1,
+                             initRgb.getBluef() * f + color._b * f_1);
             }
         }
     }
