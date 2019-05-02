@@ -13,6 +13,7 @@
 
 #include "assets/Color.h"
 #include "assets/Image.h"
+#include "assets/ImageUtils.h"
 #include "assets/Material.h"
 #include "assets/Mesh.h"
 #include "assets/MeshOps.h"
@@ -41,6 +42,7 @@
 #include "core/Memory.h"
 #include "core/IOUtil.h"
 #include "core/LODData.h"
+#include "core/Lightning.h"
 #include "core/TileSystem.h"
 #include "core/StringOps.h"
 #include "core/Profiler.h"
