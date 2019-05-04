@@ -41,6 +41,9 @@ template <typename T> struct vec3 {
     template <typename R>
     auto operator/(const vec3<R> &rhs) const -> vec3<decltype(x / rhs.x)>;
 
+    vec3<T> &operator*=(T rhs);
+    vec3<T> &operator/=(T rhs);
+
     template <typename R> vec3<T> &operator+=(const vec3<R> &rhs);
     template <typename R> vec3<T> &operator-=(const vec3<R> &rhs);
     template <typename R> vec3<T> &operator*=(const vec3<R> &rhs);
@@ -155,6 +158,20 @@ inline auto vec3<T>::operator/(const vec3<R> &rhs) const
     -> vec3<decltype(x / rhs.x)> {
     return vec3<decltype(x / rhs.x)>(this->x / rhs.x, this->y / rhs.y,
                                      this->z / rhs.z);
+}
+
+template <typename T> inline vec3<T> &vec3<T>::operator*=(T rhs) {
+    x *= rhs;
+    y *= rhs;
+    z *= rhs;
+    return *this;
+}
+
+template <typename T> inline vec3<T> &vec3<T>::operator/=(T rhs) {
+    x /= rhs;
+    y /= rhs;
+    z /= rhs;
+    return *this;
 }
 
 template <typename T>

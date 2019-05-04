@@ -9,8 +9,12 @@ using namespace world;
 void testCircularSkeletton(int argc, char **argv);
 void testTreeGroup(int argc, char **argv);
 void testTree(int argc, char **argv);
+void testGrass();
 
-int main(int argc, char **argv) { testTree(argc, argv); }
+int main(int argc, char **argv) {
+    // testTree(argc, argv);
+    testGrass();
+}
 
 void testCircularSkeletton(int argc, char **argv) {
     std::cout << "Test des WeightedSkeletton avec des références circulaires"
@@ -93,4 +97,27 @@ void testTree(int argc, char **argv) {
     Scene scene2;
     collector.fillScene(scene2);
     file.write(scene2, "assets/tree/tree");
+}
+
+
+void testGrass() {
+    Collector collector;
+    collector.addStorageChannel<Object3D>();
+    collector.addStorageChannel<Material>();
+    collector.addStorageChannel<Image>();
+
+    Grass grass;
+    grass.addBush({0.5, 0.5, 0});
+    grass.addBush({0, 0, 0});
+    grass.addBush({0.4, 0.1, 0});
+
+    grass.collectAll(collector, 15);
+
+    Scene scene;
+    collector.fillScene(scene);
+
+    ObjLoader writer;
+    createDirectories("assets/grass");
+    writer.write(scene, "assets/grass/bush");
+    std::cout << "Wrote files to assets/grass" << std::endl;
 }

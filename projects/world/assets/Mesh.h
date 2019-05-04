@@ -88,6 +88,8 @@ public:
 
     Face &newFace(int ids[3]);
 
+    Face &newFace(int id1, int id2, int id3);
+
     void clearFaces();
 
     /** Tells the mesh that we are going to add a certain amount
