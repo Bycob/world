@@ -60,6 +60,7 @@ public:
             memoryInfo.allocationSize = memRequirements.size;
             memoryInfo.memoryTypeIndex = ctx.findMemoryType(
                 size, requiredProperties, unwantedProperties);
+            // TODO check if GPU_ONLY memory is supported
 
             _memory = ctx._device.allocateMemory(memoryInfo);
 

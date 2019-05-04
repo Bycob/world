@@ -120,7 +120,7 @@ void testProxyGround(int argc, char **argv) {
     proxyGround.collectAll(collector, 100);
 
     world::createDirectories("assets/vulkan/proxyground/");
-    for (auto &entry : imgChan) {
+    for (const auto &entry : imgChan) {
         std::string id = entry._key.str();
         id = std::string("assets/vulkan/proxyground/") + id + ".png";
         // std::cout << id << std::endl;

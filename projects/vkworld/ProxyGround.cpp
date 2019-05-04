@@ -158,7 +158,7 @@ void ProxyGround::collect(ICollector &collector,
 
     for (auto it = _internal->_tileSystem.iterate(resolutionModel, bbox);
          !it.endReached(); ++it) {
-        auto &tileCoords = *it;
+        auto tileCoords = *it;
         coords.insert(tileCoords);
     }
 
@@ -357,7 +357,7 @@ void ProxyGround::collect(ICollector &collector,
 
 ProxyGroundDataPrivate &ProxyGround::getData(
     const TileCoordinates &tileCoords) {
-    auto &found = _internal->_data.find(tileCoords);
+    auto found = _internal->_data.find(tileCoords);
     if (found == _internal->_data.end()) {
         return *(_internal->_data[tileCoords] =
                      std::make_unique<ProxyGroundDataPrivate>());

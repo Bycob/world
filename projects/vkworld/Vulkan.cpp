@@ -218,7 +218,7 @@ vk::DescriptorType VulkanContextPrivate::getDescriptorType(
     }
 }
 
-int VulkanContextPrivate::findMemoryType(
+u32 VulkanContextPrivate::findMemoryType(
     u32 memorySize, vk::MemoryPropertyFlags requiredFlags,
     vk::MemoryPropertyFlags unwantedFlags) {
     vk::PhysicalDeviceMemoryProperties properties =

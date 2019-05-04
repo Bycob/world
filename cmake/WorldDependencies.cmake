@@ -43,6 +43,7 @@ if (${WORLD_BUILD_VULKAN_MODULES})
     find_library(Vulkan_LIBRARIES
         NAMES
             vulkan-1
+            vulkan
         PATH_SUFFIXES
             Lib/
             Lib32/

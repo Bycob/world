@@ -53,7 +53,7 @@ public:
     vk::DescriptorType getDescriptorType(DescriptorType type);
 
     /** Simple method to find a suitable memory type. */
-    int findMemoryType(u32 memorySize, vk::MemoryPropertyFlags requiredFlags,
+    u32 findMemoryType(u32 memorySize, vk::MemoryPropertyFlags requiredFlags,
                        vk::MemoryPropertyFlags unwantedFlags = {});
 
     std::vector<char> readFile(const std::string &filename);
