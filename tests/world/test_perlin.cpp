@@ -30,14 +30,14 @@ TEST_CASE("Perlin - Random values modifier") {
     SECTION("sides must be 0") {
         const double eps = std::numeric_limits<double>::epsilon();
         perlin.generatePerlinNoise2D(noise, {1, 0.5, false, 0, 4., 0, 0},
-            [&](double x, double y, double val) {
-            if (x < eps || 1 - x < eps ||
-                y < eps || 1 - y < eps) {
-                return .0;
-            }
+                                     [&](double x, double y, double val) {
+                                         if (x < eps || 1 - x < eps ||
+                                             y < eps || 1 - y < eps) {
+                                             return .0;
+                                         }
 
-            return val;
-        });
+                                         return val;
+                                     });
 
         // Sum all the sides : must be ~0
         bool success = true;
@@ -62,22 +62,20 @@ TEST_CASE("Perlin - Random values modifier") {
 }
 
 TEST_CASE("Perlin - Benchmarks", "[!benchmark]") {
-	arma::mat noise(1024, 1024);
+    arma::mat noise(1024, 1024);
 
-	Perlin perlin;
-	PerlinInfo info{
-		12, 0.4, false, 0, 4, 0, 0
-	};
+    Perlin perlin;
+    PerlinInfo info{12, 0.4, false, 0, 4, 0, 0};
 
-	BENCHMARK("1024*1024 perlin with 4 frequency at octave 0, and 13 octaves") {
-		perlin.generatePerlinNoise2D(noise, info);
-	}
+    BENCHMARK("1024*1024 perlin with 4 frequency at octave 0, and 13 octaves") {
+        perlin.generatePerlinNoise2D(noise, info);
+    }
 
-	arma::mat noise2(4096, 4096);
-	info.octaves = 3;
-	info.frequency *= 4;
+    arma::mat noise2(4096, 4096);
+    info.octaves = 3;
+    info.frequency *= 4;
 
-	BENCHMARK("4096*4096 perlin with 16 frequency at octave 0, and 4 octaves") {
-		perlin.generatePerlinNoise2D(noise2, info);
-	}
+    BENCHMARK("4096*4096 perlin with 16 frequency at octave 0, and 4 octaves") {
+        perlin.generatePerlinNoise2D(noise2, info);
+    }
 }
