@@ -317,8 +317,14 @@ void HeightmapGround::registerAccess(const TileCoordinates &key, Tile &tile) {
 }
 
 Tile &HeightmapGround::provide(const TileCoordinates &key) {
-    generateTerrains({key});
-    auto &tile = _internal->_terrains[key];
+    auto it = _internal->_terrains.find(key);
+
+    if (it == _internal->_terrains.end()) {
+        generateTerrains({key});
+        it = _internal->_terrains.find(key);
+    }
+
+    auto &tile = it->second;
     registerAccess(key, tile);
     return tile;
 }
