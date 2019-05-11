@@ -23,6 +23,7 @@ public:
     virtual vk::Buffer getBufferHandle(u32 offset) = 0;
 
     /** Get the offset of the buffer containing data at the specified offset. */
+    // TODO change to translateOffset(u32 offset)
     virtual u32 getBufferOffset(u32 offset) = 0;
 };
 

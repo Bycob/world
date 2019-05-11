@@ -53,4 +53,12 @@ void VkwSubBuffer::registerTo(vk::DescriptorSet &descriptorSet,
     vkctx._device.updateDescriptorSets(1, &writeDescriptorSet, 0, nullptr);
 }
 
+vk::Buffer VkwSubBuffer::getBufferHandle(u32 offset) {
+    return _internal->_memAccess.getBufferHandle(_internal->_offset);
+}
+
+u32 VkwSubBuffer::getBufferOffset(u32 offset) {
+    return _internal->_memAccess.getBufferOffset(_internal->_offset);
+}
+
 } // namespace world

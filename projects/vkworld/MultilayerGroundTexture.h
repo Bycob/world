@@ -40,8 +40,10 @@ public:
 private:
     MultilayerGroundTexturePrivate *_internal;
 
+    std::mt19937_64 _rng;
 
-    void process(Terrain &terrain, Image &image);
+
+    void process(Terrain &terrain, Image &image, vec2i tileCoords, int parentGap);
 };
 
 } // namespace world

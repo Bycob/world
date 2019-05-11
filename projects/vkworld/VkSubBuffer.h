@@ -14,7 +14,7 @@ namespace world {
 
 class VkwSubBufferPrivate;
 
-class VKWORLD_EXPORT VkwSubBuffer : public IVkwBindable {
+class VKWORLD_EXPORT VkwSubBuffer : public IVkwBindable, public IVkwMemoryAccess {
 public:
     static const VkwSubBuffer NONE;
 
@@ -29,10 +29,16 @@ public:
                     vk::DescriptorType descriptorType, u32 id) override;
 
     void getData(void *data);
-    void getData(void *data, u32 count, u32 offset = 0);
+    void getData(void *data, u32 count, u32 offset = 0) override;
 
     void setData(void *data);
-    void setData(void *data, u32 count, u32 offset = 0);
+    void setData(void *data, u32 count, u32 offset = 0) override;
+
+
+    vk::Buffer getBufferHandle(u32 offset) override;
+
+    /** Get the offset of the buffer containing data at the specified offset. */
+    u32 getBufferOffset(u32 offset) override;
 
 private:
     std::shared_ptr<VkwSubBufferPrivate> _internal;
