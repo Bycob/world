@@ -59,8 +59,30 @@ MultilayerGroundTexture::MultilayerGroundTexture()
 
 MultilayerGroundTexture::~MultilayerGroundTexture() { delete _internal; }
 
+void MultilayerGroundTexture::addDefaultLayers() {
+    // Rock
+
+    // Sand
+
+    // Soil
+    addLayer(DistributionParams{-1, 0, 1, 2, // h
+                                -1, 0, 1, 2, // dh
+                                0.25, 0.75, 0, 1, 0.5},
+             "texture-soil");
+
+    // Grass
+
+    // Snow
+}
+
+void MultilayerGroundTexture::addLayer(const DistributionParams &distribution,
+                                       const std::string &textureShader) {
+    _internal->_layers.push_back({distribution, textureShader});
+}
+
 void MultilayerGroundTexture::processTerrain(Terrain &terrain) {
     process(terrain, terrain.getTexture(), {0, 0}, 0);
+    flush();
 }
 
 void MultilayerGroundTexture::processTile(ITileContext &context) {
@@ -69,8 +91,8 @@ void MultilayerGroundTexture::processTile(ITileContext &context) {
     process(terrain, img, context.getTileCoords(), context.getParentCount());
 }
 
-void MultilayerGroundTexture::process(Terrain & terrain, Image & img, vec2i tileCoords, int parentGap)
-{
+void MultilayerGroundTexture::process(Terrain &terrain, Image &img,
+                                      vec2i tileCoords, int parentGap) {
     // Assume that terrains and images are squared
     const u32 groupSize = 32;
 

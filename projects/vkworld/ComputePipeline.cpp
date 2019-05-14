@@ -18,7 +18,6 @@ public:
     vk::Pipeline _pipeline;
 
     bool _initialized = false;
-    ;
 
 
     void createPipeline() {

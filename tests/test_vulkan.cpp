@@ -5,20 +5,24 @@
 #include <iterator>
 
 #include <world/core.h>
+#include <world/terrain.h>
 
 #include <vkworld/Vulkan.h>
 #include <vkworld/ProgramVk.h>
 #include <vkworld/BufferVk.h>
 #include <vkworld/ProxyGround.h>
+#include <vkworld/MultilayerGroundTexture.h>
 
 using namespace world;
 
 void testVulkanVersion(int argc, char **argv);
 void testProxyGround(int argc, char **argv);
+void testMultilayerTerrainTexture(int argc, char **argv);
 
 int main(int argc, char **argv) {
     // testVulkanVersion(argc, argv);
-    testProxyGround(argc, argv);
+    // testProxyGround(argc, argv);
+    testMultilayerTerrainTexture(argc, argv);
 }
 
 void testVulkanVersion(int argc, char **argv) {
@@ -126,4 +130,35 @@ void testProxyGround(int argc, char **argv) {
         // std::cout << id << std::endl;
         entry._value.write(id);
     }
+}
+
+void testMultilayerTerrainTexture(int argc, char **argv) {
+    Terrain terrain(128);
+    terrain.setTexture(Image(128 * 16, 128 * 16, ImageType::RGB));
+
+    PerlinTerrainGenerator terrainGen;
+    terrainGen.processTerrain(terrain);
+
+    MultilayerGroundTexture textureGen;
+    textureGen.addDefaultLayers();
+    textureGen.processTerrain(terrain);
+
+    Mesh *mesh = terrain.createMesh();
+    Object3D object(*mesh);
+    object.setMaterialID("multilayer");
+
+    Material mat("multilayer");
+    mat.setMapKd("multilayer_texture.png");
+
+    Scene scene;
+    scene.addObject(object);
+    scene.addMaterial(mat);
+    scene.addTexture("multilayer_texture.png", terrain.getTexture());
+
+
+    world::createDirectories("assets/vulkan/multilayer/");
+    ObjLoader obj;
+    obj.write(scene, "assets/vulkan/multilayer/multilayer.obj");
+
+    delete mesh;
 }

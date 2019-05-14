@@ -31,6 +31,12 @@ public:
 
     ~MultilayerGroundTexture() override;
 
+    /** Add layers corresponding to a world similar to the Earth. */
+    void addDefaultLayers();
+
+    void addLayer(const DistributionParams &distribution,
+                  const std::string &textureShader);
+
     void processTerrain(Terrain &terrain) override;
 
     void processTile(ITileContext &context) override;
@@ -43,7 +49,8 @@ private:
     std::mt19937_64 _rng;
 
 
-    void process(Terrain &terrain, Image &image, vec2i tileCoords, int parentGap);
+    void process(Terrain &terrain, Image &image, vec2i tileCoords,
+                 int parentGap);
 };
 
 } // namespace world
