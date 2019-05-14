@@ -9,7 +9,7 @@ namespace world {
 class VkMemoryCachePrivate {
 public:
     struct Segment {
-        Segment(u32 size, DescriptorType descriptorType, MemoryType memType)
+        Segment(u32 size, DescriptorType descriptorType, u32 memTypeIndex)
                 : _data(new char[size]), _totalSize(size), _sizeAllocated(0),
                   _updated(false) {
             VulkanContextPrivate &ctx = Vulkan::context().internal();
@@ -38,28 +38,11 @@ public:
             vk::MemoryRequirements memRequirements =
                 ctx._device.getBufferMemoryRequirements(_buffer);
 
-            vk::MemoryPropertyFlags requiredProperties;
-            vk::MemoryPropertyFlags unwantedProperties;
-
-            switch (memType) {
-            case MemoryType::CPU_READS:
-                requiredProperties = vk::MemoryPropertyFlagBits::eHostVisible |
-                                     vk::MemoryPropertyFlagBits::eHostCoherent;
-                break;
-            case MemoryType::CPU_WRITES:
-                requiredProperties = vk::MemoryPropertyFlagBits::eHostVisible;
-                break;
-            case MemoryType::GPU_ONLY:
-                requiredProperties = vk::MemoryPropertyFlagBits::eDeviceLocal;
-                unwantedProperties = vk::MemoryPropertyFlagBits::eHostVisible;
-                break;
-            }
 
             vk::MemoryAllocateInfo memoryInfo = {};
             memoryInfo.pNext = nullptr;
             memoryInfo.allocationSize = memRequirements.size;
-            memoryInfo.memoryTypeIndex = ctx.findMemoryType(
-                size, requiredProperties, unwantedProperties);
+            memoryInfo.memoryTypeIndex = memTypeIndex;
             // TODO check if GPU_ONLY memory is supported
 
             _memory = ctx._device.allocateMemory(memoryInfo);
@@ -84,6 +67,8 @@ public:
     DescriptorType _usage;
     MemoryType _memType;
 
+    u32 _memTypeIndex;
+
     std::vector<Segment> _segments;
 };
 
@@ -94,6 +79,33 @@ VkwMemoryCache::VkwMemoryCache(u32 segmentSize, DescriptorType usage,
     _internal->_segmentSize = segmentSize;
     _internal->_usage = usage;
     _internal->_memType = memType;
+
+    VulkanContextPrivate &ctx = Vulkan::context().internal();
+
+    vk::MemoryPropertyFlags requiredProperties;
+    vk::MemoryPropertyFlags unwantedProperties;
+
+    switch (memType) {
+    case MemoryType::CPU_READS:
+        requiredProperties = vk::MemoryPropertyFlagBits::eHostVisible |
+                             vk::MemoryPropertyFlagBits::eHostCoherent;
+        break;
+    case MemoryType::CPU_WRITES:
+        requiredProperties = vk::MemoryPropertyFlagBits::eHostVisible;
+        break;
+    case MemoryType::GPU_ONLY:
+        requiredProperties = vk::MemoryPropertyFlagBits::eDeviceLocal;
+        unwantedProperties = vk::MemoryPropertyFlagBits::eHostVisible;
+        break;
+    }
+
+    try {
+        _internal->_memTypeIndex = ctx.findMemoryType(
+            segmentSize, requiredProperties, unwantedProperties);
+    } catch (std::runtime_error &e) {
+        _internal->_memTypeIndex = ctx.findMemoryType(
+            segmentSize, requiredProperties, vk::MemoryPropertyFlags{});
+    }
 }
 
 VkwMemoryCache::~VkwMemoryCache() = default;
@@ -112,7 +124,7 @@ VkwSubBuffer VkwMemoryCache::allocateBuffer(u32 size) {
 
     if (sizeRemaining() < size) {
         _internal->_segments.emplace_back(segmentSize, _internal->_usage,
-                                          _internal->_memType);
+                                          _internal->_memTypeIndex);
     }
 
     auto &lastSegment = _internal->_segments.back();
