@@ -25,7 +25,10 @@ public:
 VkwDescriptorSetLayout::VkwDescriptorSetLayout()
         : _internal(std::make_shared<VkwDescriptorSetLayoutPrivate>()) {}
 
-VkwDescriptorSetLayout::VkwDescriptorSetLayout(std::initializer_list<u32> uniformIds, std::initializer_list<u32> storageIds) {
+VkwDescriptorSetLayout::VkwDescriptorSetLayout(
+    std::initializer_list<u32> uniformIds,
+    std::initializer_list<u32> storageIds)
+        : VkwDescriptorSetLayout() {
     for (u32 id : uniformIds) {
         addBinding(DescriptorType::UNIFORM_BUFFER, id);
     }

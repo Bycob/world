@@ -21,7 +21,8 @@ class VkwDescriptorSetLayoutPrivate;
 class VKWORLD_EXPORT VkwDescriptorSetLayout {
 public:
     VkwDescriptorSetLayout();
-    VkwDescriptorSetLayout(std::initializer_list<u32> uniformIds, std::initializer_list<u32> storageIds);
+    VkwDescriptorSetLayout(std::initializer_list<u32> uniformIds,
+                           std::initializer_list<u32> storageIds);
 
     void addBinding(DescriptorType type, u32 binding);
 

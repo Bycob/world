@@ -135,7 +135,9 @@ void ProxyGround::collect(ICollector &collector,
     layout22.addBinding(DescriptorType::STORAGE_BUFFER, 2);
     layout22.addBinding(DescriptorType::STORAGE_BUFFER, 3);
 
-    VkwComputePipeline upscalePipeline(layout22, "upscale");
+    VkwDescriptorSetLayout layoutUpscale({0}, {1, 2});
+
+    VkwComputePipeline upscalePipeline(layoutUpscale, "upscale");
 
     std::vector<VkwComputePipeline> repartitionPipelines;
     std::vector<VkwComputePipeline> texturePipelines;
@@ -202,6 +204,10 @@ void ProxyGround::collect(ICollector &collector,
         vec2i tileSize(parentWidth / tileCount.x, parentHeight / tileCount.y);
 
         struct {
+            u32 width;
+            u32 height;
+            u32 depth = 1;
+
             u32 srcWidth;
             u32 srcHeight;
             u32 srcDepth = 1;
@@ -217,6 +223,8 @@ void ProxyGround::collect(ICollector &collector,
             u32 sizeZ = 0;
         } s_upscaleData;
 
+        s_upscaleData.width = bufferWidth;
+        s_upscaleData.height = bufferHeight;
         s_upscaleData.srcWidth = parentWidth;
         s_upscaleData.srcHeight = parentHeight;
         s_upscaleData.offsetX = (tc._pos.x - tileOrigin.x) * tileSize.x;
@@ -232,13 +240,11 @@ void ProxyGround::collect(ICollector &collector,
 
         tileData._upscaleData->setData(&s_upscaleData);
 
-        VkwDescriptorSet upscaleDset(layout22);
+        VkwDescriptorSet upscaleDset(layoutUpscale);
         upscaleDset.addDescriptor(0, DescriptorType::UNIFORM_BUFFER,
-                                  outputDataBuf);
-        upscaleDset.addDescriptor(1, DescriptorType::UNIFORM_BUFFER,
                                   *tileData._upscaleData);
-        upscaleDset.addDescriptor(2, DescriptorType::STORAGE_BUFFER, perlinBuf);
-        upscaleDset.addDescriptor(3, DescriptorType::STORAGE_BUFFER,
+        upscaleDset.addDescriptor(1, DescriptorType::STORAGE_BUFFER, perlinBuf);
+        upscaleDset.addDescriptor(2, DescriptorType::STORAGE_BUFFER,
                                   *tileData._height);
 
         worker.bindCommand(upscalePipeline, upscaleDset);

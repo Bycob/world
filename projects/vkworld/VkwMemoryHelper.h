@@ -29,6 +29,6 @@ public:
     */
 };
 
-}
+} // namespace world
 
-#endif //VKWORLD_VK_MEMORY_HELPER_H
+#endif // VKWORLD_VK_MEMORY_HELPER_H

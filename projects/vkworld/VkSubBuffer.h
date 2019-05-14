@@ -14,7 +14,8 @@ namespace world {
 
 class VkwSubBufferPrivate;
 
-class VKWORLD_EXPORT VkwSubBuffer : public IVkwBindable, public IVkwMemoryAccess {
+class VKWORLD_EXPORT VkwSubBuffer : public IVkwBindable,
+                                    public IVkwMemoryAccess {
 public:
     static const VkwSubBuffer NONE;
 
