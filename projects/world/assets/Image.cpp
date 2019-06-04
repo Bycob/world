@@ -461,6 +461,7 @@ Image &Image::operator=(const Image &img) {
 
 Image &Image::operator=(Image &&img) {
     _internal = img._internal;
+    _type = img._type;
     img._internal = nullptr;
     return *this;
 }

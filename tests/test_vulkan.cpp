@@ -134,7 +134,7 @@ void testProxyGround(int argc, char **argv) {
 
 void testMultilayerTerrainTexture(int argc, char **argv) {
     Terrain terrain(128);
-    terrain.setTexture(Image(128 * 16, 128 * 16, ImageType::RGB));
+    terrain.setTexture(Image(128 * 16, 128 * 16, ImageType::RGBA));
 
     PerlinTerrainGenerator terrainGen;
     terrainGen.processTerrain(terrain);

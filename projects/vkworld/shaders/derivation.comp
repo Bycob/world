@@ -15,7 +15,7 @@ layout(std430, binding = 1) buffer InputBuffer {
 	float inputBuffer[];
 };
 
-layout(std430, binding = 3) buffer OutputBuffer {
+layout(std430, binding = 2) buffer OutputBuffer {
     float outputBuffer[];
 };
 

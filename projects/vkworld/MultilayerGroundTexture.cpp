@@ -55,7 +55,7 @@ public:
 };
 
 MultilayerGroundTexture::MultilayerGroundTexture()
-        : _internal(new MultilayerGroundTexturePrivate()) {}
+        : _internal(new MultilayerGroundTexturePrivate()), _rng(time(NULL)) {}
 
 MultilayerGroundTexture::~MultilayerGroundTexture() { delete _internal; }
 
@@ -104,13 +104,14 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &img,
     const u32 derivRes = terrainRes - 1;
     const u32 derivCount = derivRes * derivRes;
     const u32 derivSize = derivCount * sizeof(float);
-    const u32 derivGroupCount = (derivCount - 1) / groupSize + 1;
+    const u32 derivGroupCount = (derivRes - 1) / groupSize + 1;
 
-    const u32 imgPixCount = img.width() * img.height();
+    const u32 imgSideCount = img.width();
+    const u32 imgPixCount = imgSideCount * imgSideCount;
     const u32 imgPixSize = imgPixCount * sizeof(float);
-    const u32 imgCount = imgPixCount * 3;
+    const u32 imgCount = imgPixCount * 4;
     const u32 imgSize = imgCount * sizeof(float);
-    const u32 imgGroupCount = (imgPixCount - 1) / groupSize + 1;
+    const u32 imgGroupCount = (imgSideCount - 1) / groupSize + 1;
 
     _internal->_units.emplace_back(img);
     ProcessUnit &unit = _internal->_units.back();
@@ -151,6 +152,8 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &img,
         distributionPipelines.emplace_back(layoutDistrib,
                                            "distribution-height");
         texturePipelines.emplace_back(layoutTexture, layerInfo._textureShader);
+
+        unit._layers.emplace_back();
     }
 
     // Buffers
@@ -159,7 +162,7 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &img,
     unit._terrainHeightUp = vkctx.allocate(imgPixSize, DescriptorType::STORAGE_BUFFER, MemoryType::GPU_ONLY);
     unit._terrainSlopeUp = vkctx.allocate(imgPixSize, DescriptorType::STORAGE_BUFFER, MemoryType::GPU_ONLY);
     unit._texture = vkctx.allocate(imgSize, DescriptorType::STORAGE_BUFFER, MemoryType::CPU_READS);
-    unit._random = vkctx.allocate(static_cast<u32>(random.size()), DescriptorType::STORAGE_BUFFER, MemoryType::CPU_WRITES);
+    unit._random = vkctx.allocate(static_cast<u32>(random.size()) * sizeof(u32), DescriptorType::STORAGE_BUFFER, MemoryType::CPU_WRITES);
 
     VkwMemoryHelper::terrainToGPU(terrain, unit._terrainHeight);
     unit._random.setData(random.data());
@@ -242,19 +245,21 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &img,
         auto &layer = unit._layers[i];
 
         // Buffers
+        layer._distribution = vkctx.allocate(imgPixSize, DescriptorType::STORAGE_BUFFER, MemoryType::GPU_ONLY);
+
         layer._distributionParams = vkctx.allocate(sizeof(DistributionParams), DescriptorType::UNIFORM_BUFFER, MemoryType::CPU_WRITES);
         layer._distributionParams.setData(&layerInfo._distributionParams);
 
         struct {
             u32 octaves;
             u32 octaveRef;
-            int offsetX;
-            int offsetY;
-            int offsetZ = 0;
+            s32 offsetX;
+            s32 offsetY;
+            s32 offsetZ = 0;
             float frequency;
-            float persistence = 1.2;
+            float persistence = 1.2f;
         } distributionPerlinStruct;
-        const int frequency = 4;
+        const int frequency = 8;
         distributionPerlinStruct.octaves = u32(parentGap + 4);
         distributionPerlinStruct.octaveRef = u32(parentGap);
         distributionPerlinStruct.offsetX = tileCoords.x * frequency;
@@ -283,7 +288,7 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &img,
         } textureStruct;
         const float tileSize = 100 * powi(2.f, -parentGap);
         textureStruct.sizeX = tileSize;
-        textureStruct.sizeX = tileSize;
+        textureStruct.sizeY = tileSize;
         textureStruct.offsetX = tileCoords.x * textureStruct.sizeX;
         textureStruct.offsetY = tileCoords.y * textureStruct.sizeY;
         layer._textureParams = vkctx.allocate(sizeof(textureStruct), DescriptorType::UNIFORM_BUFFER, MemoryType::CPU_WRITES);

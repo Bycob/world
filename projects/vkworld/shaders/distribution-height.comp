@@ -50,5 +50,5 @@ void main() {
 	NoiseParameters noiseParams = uNoiseParams;
 	float x = perlin(noiseParams, locf.x, locf.y, locf.z);
 	
-	outputDistribution[i] = smoothstep(x, r - threshold, r + threshold);
+	outputDistribution[i] = smoothstep(r + threshold, r - threshold, x);
 }
