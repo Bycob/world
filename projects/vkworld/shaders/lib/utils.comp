@@ -25,4 +25,13 @@ float smoothramp(float a, float b, float c, float d, float lowb, float highb, fl
     return clamp(yr, lowb, highb);
 }
 
+/**
+ * Draw the foreground color on the background color and return
+ * the result.
+ */
+vec4 applyAlpha(vec4 bg, vec4 fg) {
+    float a = bg.a + (1 - bg.a) * fg.a;
+    return vec4(mix(bg.rgb, fg.rgb, fg.a), a);
+}
+
 #endif

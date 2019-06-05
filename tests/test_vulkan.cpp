@@ -136,7 +136,7 @@ void testMultilayerTerrainTexture(int argc, char **argv) {
     Terrain terrain(128);
     terrain.setTexture(Image(128 * 16, 128 * 16, ImageType::RGBA));
 
-    PerlinTerrainGenerator terrainGen;
+    PerlinTerrainGenerator terrainGen(5, 4, 0.4);
     terrainGen.processTerrain(terrain);
 
     MultilayerGroundTexture textureGen;

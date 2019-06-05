@@ -23,6 +23,7 @@ struct VKWORLD_EXPORT DistributionParams {
     float dhmin;
     float dhmax;
     float threshold;
+    float slopeFactor;
 };
 
 class VKWORLD_EXPORT MultilayerGroundTexture : public ITerrainWorker {

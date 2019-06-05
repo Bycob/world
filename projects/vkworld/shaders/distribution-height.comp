@@ -19,6 +19,7 @@ layout(binding = 1) uniform DistributionParameters {
 	float dhmin;
 	float dhmax;
 	float threshold;
+	float slopeFactor;
 };
 
 layout(binding = 2) uniform PerlinParams {
@@ -37,12 +38,14 @@ layout(std430, binding = 5) buffer Output0 {
     float outputDistribution[];
 };
 
+#define PI 3.14
+
 void main() {
 	uvec3 loc = gl_GlobalInvocationID.xyz;
 	vec3 locf = vec3(loc) / vec3(dims);
 	uint i = id3(loc, dims);
 	float h = inputHeight[i];
-	float dh = inputDheight[i];
+	float dh = atan(inputDheight[i]) * slopeFactor * 2. / PI;
 	
 	float r1 = ramp(height.x, height.y, height.z, height.w, hmin, hmax, h);
 	float r2 = ramp(dheight.x, dheight.y, dheight.z, dheight.w, dhmin, dhmax, dh);

@@ -1,5 +1,8 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
+#extension GL_GOOGLE_include_directive : enable
+
+#include "worldlib"
 
 #define WORKGROUP_SIZE 32
 
@@ -21,10 +24,6 @@ layout(std430, binding = 2) buffer Input0 {
 layout(std430, binding = 3) buffer Output0 {
     vec4 outputTexture[];
 };
-
-uint id(uvec3 pos, uvec3 dims) {
-	return dims.y * dims.x * pos.z + dims.x * pos.y + pos.x;
-}
 
 #define PI 3.14
 
@@ -88,8 +87,9 @@ vec4 getSoilAt(vec2 uv) {
 }
 
 void main() {
-    vec2 uv = gl_GlobalInvocationID.xy / vec2(dims.xy);
-	uv = uv * size + offset;
-	uint id = id(gl_GlobalInvocationID.xyz, dims);
-	outputTexture[id] = getSoilAt(uv);
+    vec2 uv = gl_GlobalInvocationID.xy / vec2(dims.xy) * size + offset;
+	uint id = id3(gl_GlobalInvocationID.xyz, dims);
+
+    vec4 newColor = getSoilAt(uv) * vec4(1, 1, 1, inputDistribution[id]);
+	outputTexture[id] = applyAlpha(outputTexture[id], newColor);
 }

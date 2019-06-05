@@ -61,18 +61,34 @@ MultilayerGroundTexture::~MultilayerGroundTexture() { delete _internal; }
 
 void MultilayerGroundTexture::addDefaultLayers() {
     // Rock
-
-    // Sand
-
-    // Soil
     addLayer(DistributionParams{-1, 0, 1, 2, // h
                                 -1, 0, 1, 2, // dh
-                                0.25, 0.75, 0, 1, 0.5},
+                                0, 1, 0, 1, 0.2},
+             "texture-rock");
+
+    // Sand
+    addLayer(DistributionParams{-1, 0, 0.4, 0.45, // h
+                                -1, 0, 0.7, 0.8,  // dh
+                                0, 1, 0, 1, 0.2},
+             "texture-sand");
+
+    // Soil
+    addLayer(DistributionParams{0.33, 0.4, 0.6, 0.75, // h
+                                -1, 0, 0.4, 0.9,      // dh
+                                0, 0.85, 0.25, 0.85, 0.2},
              "texture-soil");
 
     // Grass
+    addLayer(DistributionParams{0.33, 0.4, 0.6, 0.7, // h
+                                -1, 0, 0.2, 0.6,     // dh
+                                0., 1., 0.25, 0.6, 0.2},
+             "texture-grass");
 
     // Snow
+    addLayer(DistributionParams{0.65, 0.8, 1, 2, // h
+                                -1, 0, 0.5, 0.7, // dh
+                                0.0, 1.0, 0, 1., 0.2},
+             "texture-snow");
 }
 
 void MultilayerGroundTexture::addLayer(const DistributionParams &distribution,
@@ -248,6 +264,8 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &img,
         layer._distribution = vkctx.allocate(imgPixSize, DescriptorType::STORAGE_BUFFER, MemoryType::GPU_ONLY);
 
         layer._distributionParams = vkctx.allocate(sizeof(DistributionParams), DescriptorType::UNIFORM_BUFFER, MemoryType::CPU_WRITES);
+        // TODO Calculate slopeFactor according to tile size
+        layerInfo._distributionParams.slopeFactor = 15;
         layer._distributionParams.setData(&layerInfo._distributionParams);
 
         struct {
@@ -286,6 +304,8 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &img,
             float sizeX;
             float sizeY;
         } textureStruct;
+
+        // TODO replace with real tile size
         const float tileSize = 100 * powi(2.f, -parentGap);
         textureStruct.sizeX = tileSize;
         textureStruct.sizeY = tileSize;
@@ -317,6 +337,7 @@ void MultilayerGroundTexture::flush() {
     for (auto &unit : _internal->_units) {
         unit._worker->waitForCompletion();
         VkwMemoryHelper::GPUToImage(unit._texture, unit._textureImg);
+        // VkwMemoryHelper::GPUToImage(unit._terrainHeightUp, unit._textureImg);
     }
 
     _internal->_units.clear();
