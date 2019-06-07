@@ -46,12 +46,13 @@ float lerp3D(uvec3 origin, vec3 l, uvec3 dims) {
 
 void main() {
 	uvec3 loc = gl_GlobalInvocationID.xyz;
+
 	if (loc.x >= dstDims.x || loc.y >= dstDims.y || loc.z >= dstDims.z) {
 		return;
 	}
 
 	vec3 xyz = vec3(loc) / vec3(dstDims);
-	vec3 srcPos = srcOffset + xyz * srcSize;
+	vec3 srcPos = srcOffset + xyz * (srcSize - vec3(1, 1, 0));
 	uvec3 origin = uvec3(srcPos);
 	vec3 ratio = srcPos - origin;
 	outputBuffer[id(gl_GlobalInvocationID.xyz, dstDims)] = lerp3D(origin, ratio, srcDims);

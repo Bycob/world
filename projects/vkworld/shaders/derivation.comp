@@ -21,11 +21,11 @@ layout(std430, binding = 2) buffer OutputBuffer {
 
 void main() {
 	uvec3 loc = gl_GlobalInvocationID.xyz;
-	if (loc.x >= dims.x || loc.y >= dims.y || loc.z >= dims.z) {
+	uvec3 outDims = dims - uvec3(1, 1, 0);
+
+	if (loc.x >= outDims.x || loc.y >= outDims.y || loc.z >= outDims.z) {
 		return;
 	}
-
-	uvec3 outDims = dims - uvec3(1, 1, 0);
 
 	float a = inputBuffer[id3(loc, dims)];
 	float b = inputBuffer[id3(loc + uvec3(1, 0, 0), dims)];
@@ -35,5 +35,5 @@ void main() {
 	float dx = abs(a - b) + abs(c - d);
 	float dy = abs(a - c) + abs(b - d);
 
-	outputBuffer[id3(loc, outDims)] = (dx + dy) / 4.;
+	outputBuffer[id3(loc, outDims)] = length(vec2(dx, dy)) / 2.;
 }
