@@ -45,7 +45,12 @@ float lerp3D(uvec3 origin, vec3 l, uvec3 dims) {
 }
 
 void main() {
-	vec3 xyz = vec3(gl_GlobalInvocationID.xyz) / vec3(dstDims);
+	uvec3 loc = gl_GlobalInvocationID.xyz;
+	if (loc.x >= dstDims.x || loc.y >= dstDims.y || loc.z >= dstDims.z) {
+		return;
+	}
+
+	vec3 xyz = vec3(loc) / vec3(dstDims);
 	vec3 srcPos = srcOffset + xyz * srcSize;
 	uvec3 origin = uvec3(srcPos);
 	vec3 ratio = srcPos - origin;

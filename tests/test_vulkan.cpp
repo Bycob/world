@@ -134,6 +134,7 @@ void testProxyGround(int argc, char **argv) {
 
 void testMultilayerTerrainTexture(int argc, char **argv) {
     Terrain terrain(128);
+    terrain.setBounds(-500, -500, 0, 500, 500, 400);
     terrain.setTexture(Image(128 * 16, 128 * 16, ImageType::RGBA));
 
     PerlinTerrainGenerator terrainGen(5, 4, 0.4);
@@ -142,6 +143,7 @@ void testMultilayerTerrainTexture(int argc, char **argv) {
     MultilayerGroundTexture textureGen;
     textureGen.addDefaultLayers();
     textureGen.processTerrain(terrain);
+    terrain.setBounds(-0.5, -0.5, 0, 0.5, 0.5, 0.4);
 
     Mesh *mesh = terrain.createMesh();
     Object3D object(*mesh);

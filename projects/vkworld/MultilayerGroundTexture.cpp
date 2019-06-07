@@ -68,7 +68,7 @@ void MultilayerGroundTexture::addDefaultLayers() {
 
     // Sand
     addLayer(DistributionParams{-1, 0, 0.4, 0.45, // h
-                                -1, 0, 0.7, 0.8,  // dh
+                                -1, 0, 0.4, 0.6,  // dh
                                 0, 1, 0, 1, 0.2},
              "texture-sand");
 
@@ -116,6 +116,7 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &img,
     const u32 terrainRes = terrain.getResolution();
     const u32 terrainCount = terrainRes * terrainRes;
     const u32 terrainSize = terrainCount * sizeof(float);
+    vec3d terrainDims = terrain.getBoundingBox().getDimensions();
 
     const u32 derivRes = terrainRes - 1;
     const u32 derivCount = derivRes * derivRes;
@@ -188,8 +189,8 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &img,
         u32 height;
         u32 depth = 1;
     } derivParamsStruct;
-    derivParamsStruct.width = derivRes;
-    derivParamsStruct.height = derivRes;
+    derivParamsStruct.width = terrainRes;
+    derivParamsStruct.height = terrainRes;
 
     unit._derivParams = vkctx.allocate(sizeof(derivParamsStruct), DescriptorType::UNIFORM_BUFFER, MemoryType::CPU_WRITES);
     unit._derivParams.setData(&derivParamsStruct);
@@ -264,8 +265,7 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &img,
         layer._distribution = vkctx.allocate(imgPixSize, DescriptorType::STORAGE_BUFFER, MemoryType::GPU_ONLY);
 
         layer._distributionParams = vkctx.allocate(sizeof(DistributionParams), DescriptorType::UNIFORM_BUFFER, MemoryType::CPU_WRITES);
-        // TODO Calculate slopeFactor according to tile size
-        layerInfo._distributionParams.slopeFactor = 15;
+        layerInfo._distributionParams.slopeFactor = terrainRes * terrainDims.x / terrainDims.z / 4;
         layer._distributionParams.setData(&layerInfo._distributionParams);
 
         struct {
@@ -305,8 +305,7 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &img,
             float sizeY;
         } textureStruct;
 
-        // TODO replace with real tile size
-        const float tileSize = 100 * powi(2.f, -parentGap);
+        const float tileSize = terrainDims.x;
         textureStruct.sizeX = tileSize;
         textureStruct.sizeY = tileSize;
         textureStruct.offsetX = tileCoords.x * textureStruct.sizeX;

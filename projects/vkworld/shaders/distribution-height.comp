@@ -45,7 +45,7 @@ void main() {
 	vec3 locf = vec3(loc) / vec3(dims);
 	uint i = id3(loc, dims);
 	float h = inputHeight[i];
-	float dh = atan(inputDheight[i]) * slopeFactor * 2. / PI;
+	float dh = atan(inputDheight[i] * slopeFactor) * 2. / PI;
 	
 	float r1 = ramp(height.x, height.y, height.z, height.w, hmin, hmax, h);
 	float r2 = ramp(dheight.x, dheight.y, dheight.z, dheight.w, dhmin, dhmax, dh);
