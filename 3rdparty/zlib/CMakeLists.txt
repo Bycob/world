@@ -1,4 +1,4 @@
-message("-- Build ZLib")
+message(STATUS "Build ZLib")
 
 file(GLOB ZLIB_SRCS *.c)
 

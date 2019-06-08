@@ -2,7 +2,7 @@
 # TODO these are not tests, but more play-around with the API -> move elsewhere ?
 
 if (${WORLD_BUILD_TESTS})
-    Message("-- Build tests")
+    Message(STATUS "Build tests")
 
     add_executable(test_terrain test_terrain.cpp)
     target_link_libraries(test_terrain world)

@@ -1,6 +1,6 @@
 if (${WORLD_BUILD_VULKAN_MODULES})
     if (${WORLD_HAS_VULKAN})
-        message("-- Build Vulkan modules")
+        message(STATUS "Build Vulkan modules")
         file(GLOB_RECURSE
                 VKWORLD_SOURCES
                 ./*)
@@ -11,6 +11,6 @@ if (${WORLD_BUILD_VULKAN_MODULES})
 
         add_subdirectory(shaders/)
     else()
-        message("-- Cannot build Vulkan modules : Missign dependencies (Vulkan)")
+        message(STATUS "Cannot build Vulkan modules : Missign dependencies (Vulkan)")
     endif()
 endif()
