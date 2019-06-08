@@ -9,5 +9,6 @@
 #include "tree/TreeSkelettonParameters.h"
 #include "tree/TrunkGenerator.h"
 #include "tree/SimpleTreeDecorator.h"
+#include "tree/ForestLayer.h"
 
 #endif //WORLD_WORLDTREE_H

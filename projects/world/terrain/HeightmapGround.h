@@ -41,6 +41,20 @@ public:
 
     double getAltitudeRange() const { return _maxAltitude - _minAltitude; }
 
+    void setTerrainResolution(int terrainRes) {
+        _terrainRes = terrainRes;
+        _tileSystem._bufferRes.x = _tileSystem._bufferRes.y =
+            _terrainRes * _textureRes;
+    }
+
+    void setTextureRes(int textureRes) {
+        _textureRes = textureRes;
+        _tileSystem._bufferRes.x = _tileSystem._bufferRes.y =
+            _terrainRes * _textureRes;
+    }
+
+    void setMaxLOD(int lod) { _tileSystem._maxLod = lod; }
+
     // TERRAIN WORKERS
     /** Adds a default worker set to generate heightmaps in the
      * ground. This method is for quick-setup purpose. */
