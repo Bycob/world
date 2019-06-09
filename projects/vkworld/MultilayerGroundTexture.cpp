@@ -265,7 +265,7 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &img,
         layer._distribution = vkctx.allocate(imgPixSize, DescriptorType::STORAGE_BUFFER, MemoryType::GPU_ONLY);
 
         layer._distributionParams = vkctx.allocate(sizeof(DistributionParams), DescriptorType::UNIFORM_BUFFER, MemoryType::CPU_WRITES);
-        layerInfo._distributionParams.slopeFactor = terrainRes * terrainDims.x / terrainDims.z / 4;
+        layerInfo._distributionParams.slopeFactor = terrainDims.z * terrainRes / terrainDims.x;
         layer._distributionParams.setData(&layerInfo._distributionParams);
 
         struct {
@@ -335,7 +335,7 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &img,
 void MultilayerGroundTexture::flush() {
     for (auto &unit : _internal->_units) {
         unit._worker->waitForCompletion();
-        VkwMemoryHelper::GPUToImage(unit._texture, unit._textureImg);
+        VkwMemoryHelper::GPUToImage(unit._texture, unit._textureImg, 4);
         // VkwMemoryHelper::GPUToImage(unit._terrainHeightUp, unit._textureImg);
     }
 

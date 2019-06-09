@@ -3,10 +3,15 @@
 namespace world {
 
 void VkwMemoryHelper::GPUToImage(IVkwMemoryAccess &memory, Image &img) {
-    const int w = img.width(), h = img.height(), e = img.elemSize();
+    GPUToImage(memory, img, img.elemSize());
+}
 
-    float *buffer = new float[img.size()];
-    memory.getData(buffer, img.size() * sizeof(float), 0);
+void VkwMemoryHelper::GPUToImage(IVkwMemoryAccess &memory, Image &img, u32 e) {
+    const int w = img.width(), h = img.height();
+    const int size = w * h * e;
+
+    float *buffer = new float[size];
+    memory.getData(buffer, size * sizeof(float), 0);
 
     for (u32 y = 0; y < h; ++y) {
         for (u32 x = 0; x < w; ++x) {
