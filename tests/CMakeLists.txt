@@ -19,6 +19,9 @@ if (${WORLD_BUILD_TESTS})
     if (WORLD_BUILD_VULKAN_MODULES AND WORLD_HAS_VULKAN)
         add_executable(test_vulkan test_vulkan.cpp)
         target_link_libraries(test_vulkan world vkworld)
+
+        target_link_libraries(test_world vkworld)
+        target_compile_definitions(test_world PRIVATE USE_VKWORLD=1)
     endif()
 endif()
 
