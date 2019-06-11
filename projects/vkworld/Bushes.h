@@ -47,7 +47,7 @@ private:
 
     void prepare();
 
-    void run();
+    void updateData();
 
     void flush(ICollector &collector);
 };
