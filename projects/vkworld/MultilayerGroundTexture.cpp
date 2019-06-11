@@ -2,7 +2,7 @@
 
 #include <list>
 
-#include "Vulkan_p.h"
+#include "Vulkan.h"
 #include "VkwMemoryHelper.h"
 #include "VkSubBuffer.h"
 #include "VkWorker.h"
@@ -140,7 +140,7 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &img,
     random.insert(random.end(), random.begin(), random.end());
 
     // Vulkan setup
-    auto &vkctx = Vulkan::context().internal();
+    auto &vkctx = Vulkan::context();
 
     // Needed shaders:
     // - derivation * 1

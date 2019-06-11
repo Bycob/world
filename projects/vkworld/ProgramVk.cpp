@@ -2,7 +2,7 @@
 
 #include <map>
 
-#include "Vulkan_p.h"
+#include "Vulkan.h"
 #include "BufferVk_p.h"
 
 namespace world {
@@ -80,7 +80,7 @@ void ProgramVkPrivate::createDescriptorSetLayout() {
     descriptorSetLayoutCreateInfo.bindingCount = bindingCount;
     descriptorSetLayoutCreateInfo.pBindings = bindings.get();
 
-    if (vkCreateDescriptorSetLayout(_context.internal()._device,
+    if (vkCreateDescriptorSetLayout(_context._device,
                                     &descriptorSetLayoutCreateInfo, NULL,
                                     &_descriptorSetLayout) != VK_SUCCESS) {
         throw std::runtime_error("[Vulkan] [PProgramVk::prepare] failed create "
@@ -101,12 +101,11 @@ void ProgramVkPrivate::createDescriptorSet() {
     // Allocate descriptor set in the pool
     VkDescriptorSetAllocateInfo descriptorSetInfo = {};
     descriptorSetInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    descriptorSetInfo.descriptorPool = _context.internal()._descriptorPool;
+    descriptorSetInfo.descriptorPool = _context._descriptorPool;
     descriptorSetInfo.descriptorSetCount = 1;
     descriptorSetInfo.pSetLayouts = &_descriptorSetLayout;
 
-    if (vkAllocateDescriptorSets(_context.internal()._device,
-                                 &descriptorSetInfo,
+    if (vkAllocateDescriptorSets(_context._device, &descriptorSetInfo,
                                  &_descriptorSet) != VK_SUCCESS) {
         throw std::runtime_error("[Vulkan] [PProgramVk::createDescriptorSet] "
                                  "failed allocate descriptor set");
@@ -139,8 +138,8 @@ void world::ProgramVkPrivate::writeDescriptorSet(
     writeDescriptorSet.descriptorType = descriptorType;
     writeDescriptorSet.pBufferInfo = &descriptorBufferInfo;
 
-    vkUpdateDescriptorSets(_context.internal()._device, 1, &writeDescriptorSet,
-                           0, nullptr);
+    vkUpdateDescriptorSets(_context._device, 1, &writeDescriptorSet, 0,
+                           nullptr);
 }
 
 void ProgramVkPrivate::createPipelineLayout() {
@@ -150,8 +149,8 @@ void ProgramVkPrivate::createPipelineLayout() {
     pipelineLayoutInfo.setLayoutCount = 1;
     pipelineLayoutInfo.pSetLayouts = &_descriptorSetLayout;
 
-    if (vkCreatePipelineLayout(_context.internal()._device, &pipelineLayoutInfo,
-                               nullptr, &_pipelineLayout) != VK_SUCCESS) {
+    if (vkCreatePipelineLayout(_context._device, &pipelineLayoutInfo, nullptr,
+                               &_pipelineLayout) != VK_SUCCESS) {
         throw std::runtime_error("[Vulkan] [PProgramVk::createPipeline] failed "
                                  "create pipeline layout");
     }
@@ -172,7 +171,7 @@ void ProgramVkPrivate::createPipeline() {
     pipelineCreateInfo.stage = pipelineStageInfo;
     pipelineCreateInfo.layout = _pipelineLayout;
 
-    if (vkCreateComputePipelines(_context.internal()._device, VK_NULL_HANDLE, 1,
+    if (vkCreateComputePipelines(_context._device, VK_NULL_HANDLE, 1,
                                  &pipelineCreateInfo, nullptr,
                                  &_pipeline) != VK_SUCCESS) {
         throw std::runtime_error(
@@ -185,14 +184,13 @@ void ProgramVkPrivate::createCommandBuffer() {
     VkCommandBufferAllocateInfo commandBufferAllocateInfo = {};
     commandBufferAllocateInfo.sType =
         VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    commandBufferAllocateInfo.commandPool =
-        _context.internal()._computeCommandPool;
+    commandBufferAllocateInfo.commandPool = _context._computeCommandPool;
     commandBufferAllocateInfo.commandBufferCount = 1;
     commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 
     // TODO Test VK_SUCCESS
-    vkAllocateCommandBuffers(_context.internal()._device,
-                             &commandBufferAllocateInfo, &_commandBuffer);
+    vkAllocateCommandBuffers(_context._device, &commandBufferAllocateInfo,
+                             &_commandBuffer);
 
 
     // Writing the commands
@@ -228,7 +226,7 @@ void ProgramVk::setUniform(u32 id, BufferVk buffer) {
 }
 
 void ProgramVk::setEmbeddedShader(const std::string &name) {
-    auto &internalCtx = _internal->_context.internal();
+    auto &internalCtx = _internal->_context;
     _internal->_shader =
         internalCtx.createShader(internalCtx.readFile(name + ".spv"));
 }
@@ -249,7 +247,7 @@ void ProgramVk::run() {
         _internal->_generated = true;
     }
 
-    auto &internalCtx = _internal->_context.internal();
+    auto &internalCtx = _internal->_context;
 
     VkSubmitInfo submitInfo = {};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;

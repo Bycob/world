@@ -2,7 +2,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-#include "Vulkan_p.h"
+#include "Vulkan.h"
 
 namespace world {
 
@@ -12,7 +12,7 @@ public:
         Segment(u32 size, DescriptorType descriptorType, u32 memTypeIndex)
                 : _data(new char[size]), _totalSize(size), _sizeAllocated(0),
                   _updated(false) {
-            VulkanContextPrivate &ctx = Vulkan::context().internal();
+            VulkanContext &ctx = Vulkan::context();
             auto properties = ctx._physicalDevice.getProperties();
 
             vk::BufferCreateInfo bufferInfo;
@@ -80,7 +80,7 @@ VkwMemoryCache::VkwMemoryCache(u32 segmentSize, DescriptorType usage,
     _internal->_usage = usage;
     _internal->_memType = memType;
 
-    VulkanContextPrivate &ctx = Vulkan::context().internal();
+    VulkanContext &ctx = Vulkan::context();
 
     vk::MemoryPropertyFlags requiredProperties;
     vk::MemoryPropertyFlags unwantedProperties;
@@ -154,7 +154,7 @@ void VkwMemoryCache::setData(void *data, u32 count, u32 offset) {
     const u32 segmentId = offset / segmentSize;
     auto &segment = _internal->_segments[segmentId];
 
-    VulkanContextPrivate &ctx = Vulkan::context().internal();
+    VulkanContext &ctx = Vulkan::context();
 
     void *mapped =
         ctx._device.mapMemory(segment._memory, inSegmentOffset, count);
@@ -168,7 +168,7 @@ void VkwMemoryCache::getData(void *data, u32 count, u32 offset) {
     const u32 segmentId = offset / segmentSize;
     auto &segment = _internal->_segments[segmentId];
 
-    VulkanContextPrivate &ctx = Vulkan::context().internal();
+    VulkanContext &ctx = Vulkan::context();
 
     void *mapped =
         ctx._device.mapMemory(segment._memory, inSegmentOffset, count);

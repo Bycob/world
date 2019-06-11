@@ -1,6 +1,6 @@
 #include "Bushes.h"
 
-#include "Vulkan_p.h"
+#include "Vulkan.h"
 #include "DescriptorSetLayoutVk.h"
 #include "ComputePipeline.h"
 #include "DescriptorSetVk.h"
@@ -39,7 +39,7 @@ void Bushes::collect(ICollector &collector,
 }
 
 void Bushes::prepare() {
-    auto &vkctx = Vulkan::context().internal();
+    auto &vkctx = Vulkan::context();
     VkwDescriptorSetLayout layout({0}, {1, 2, 3, 255});
     VkwComputePipeline pipeline(layout, "bushes");
 

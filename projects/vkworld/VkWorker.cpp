@@ -3,7 +3,6 @@
 #include <vulkan/vulkan.hpp>
 
 #include "Vulkan.h"
-#include "Vulkan_p.h"
 
 namespace world {
 
@@ -16,12 +15,12 @@ public:
 
 VkwWorker::VkwWorker() : _internal(std::make_shared<VkwWorkerPrivate>()) {
 
-    auto &vkctx = Vulkan::context().internal();
+    auto &ctx = Vulkan::context();
 
     vk::CommandBufferAllocateInfo commandBufferAllocateInfo(
-        vkctx._computeCommandPool, vk::CommandBufferLevel::ePrimary, 1);
+        ctx._computeCommandPool, vk::CommandBufferLevel::ePrimary, 1);
     _internal->_commandBuffer =
-        vkctx._device.allocateCommandBuffers(commandBufferAllocateInfo)[0];
+        ctx._device.allocateCommandBuffers(commandBufferAllocateInfo)[0];
 
     vk::CommandBufferBeginInfo beginInfo(
         vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
@@ -44,17 +43,17 @@ void VkwWorker::dispatchCommand(u32 x, u32 y, u32 z) {
 void VkwWorker::endCommandRecording() { _internal->_commandBuffer.end(); }
 
 void VkwWorker::run() {
-    auto &vkctx = Vulkan::context().internal();
+    auto &ctx = Vulkan::context();
 
-    _internal->_fence = vkctx._device.createFence(vk::FenceCreateInfo());
+    _internal->_fence = ctx._device.createFence(vk::FenceCreateInfo());
 
     vk::SubmitInfo submitInfo(0, nullptr, nullptr, 1,
                               &_internal->_commandBuffer);
-    vkctx._computeQueue.submit(submitInfo, _internal->_fence);
+    ctx._computeQueue.submit(submitInfo, _internal->_fence);
 }
 
 void VkwWorker::waitForCompletion() {
-    auto &vkctx = Vulkan::context().internal();
-    vkctx._device.waitForFences(_internal->_fence, true, 100000000000);
+    auto &ctx = Vulkan::context();
+    ctx._device.waitForFences(_internal->_fence, true, 100000000000);
 }
 } // namespace world

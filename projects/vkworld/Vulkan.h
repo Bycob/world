@@ -3,24 +3,90 @@
 
 #include "VkWorldConfig.h"
 
+#include <vector>
+#include <map>
+#include <vulkan/vulkan.hpp>
+
+#include <world/core/WorldTypes.h>
+
+#include "VkEnums.h"
+#include "VkMemoryCache.h"
+#include "VkSubBuffer.h"
+
 namespace world {
 
-class VulkanContextPrivate;
+/* Naming convention:
+ *
+ * Call context ctx in all Vulkan helper class
+ * vkctx in all World-related class */
+
 
 class VKWORLD_EXPORT VulkanContext {
 public:
+    vk::Device _device;
+
+    vk::PhysicalDevice _physicalDevice;
+
+    vk::Queue _computeQueue;
+
+    vk::CommandPool _computeCommandPool;
+
+    vk::DescriptorPool _descriptorPool;
+
+
     VulkanContext();
 
     ~VulkanContext();
 
+
+    // RESOURCES MANAGEMENT
+    vk::ShaderModule createShader(const std::vector<char> &shaderCode);
+
+    VkwSubBuffer allocate(u32 size, DescriptorType usage, MemoryType memType);
+
+
+    // MISC
+    /** Simple method to get a queue for computation. */
+    int findComputeQueueFamily();
+
+    vk::DescriptorType getDescriptorType(DescriptorType type);
+
+    /** Simple method to find a suitable memory type. */
+    u32 findMemoryType(u32 memorySize, vk::MemoryPropertyFlags requiredFlags,
+                       vk::MemoryPropertyFlags unwantedFlags = {});
+
+    std::vector<char> readFile(const std::string &filename);
+
+
+    // TEST
     void configTest();
 
     void displayAvailableExtensions();
 
-    VulkanContextPrivate &internal();
-
 private:
-    VulkanContextPrivate *_internal;
+    vk::Instance _instance;
+
+    bool _enableValidationLayers;
+
+    VkDebugReportCallbackEXT _debugCallback;
+
+    std::map<std::pair<DescriptorType, MemoryType>, VkwMemoryCache> _memory;
+
+
+    // INITIALIZATION
+    bool checkValidationLayerSupport();
+
+    void setupDebugCallback();
+
+    void pickPhysicalDevice();
+
+    void createLogicalDevice();
+
+    void createComputeResources();
+
+    // TODO Remove dat
+    friend class ProgramVk;
+    friend class BufferVk;
 };
 
 struct VKWORLD_EXPORT Vulkan {

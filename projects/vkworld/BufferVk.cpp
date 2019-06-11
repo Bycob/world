@@ -1,15 +1,13 @@
 #include "BufferVk.h"
 #include "BufferVk_p.h"
 
-#include "Vulkan_p.h"
-
 namespace world {
 
 BufferVk::BufferVk(VulkanContext &context, DescriptorType descriptorType,
                    u32 size)
         : _internal(std::make_shared<BufferVkPrivate>(context)) {
 
-    auto &pcontext = context.internal();
+    auto &pcontext = context;
 
     _internal->_descriptorType = descriptorType;
     _internal->_memorySize = size;
@@ -62,7 +60,7 @@ BufferVk &BufferVk::operator=(BufferVk &&other) = default;
 BufferVkPrivate &BufferVk::internal() { return *_internal; }
 
 void BufferVk::setData(void *data, u32 count) {
-    auto &internalCtx = _internal->_context.internal();
+    auto &internalCtx = _internal->_context;
 
     // TODO if (count > _internal->_memorySize)
 
@@ -73,7 +71,7 @@ void BufferVk::setData(void *data, u32 count) {
 }
 
 void BufferVk::getData(void *data, u32 count) {
-    auto &internalCtx = _internal->_context.internal();
+    auto &internalCtx = _internal->_context;
 
     // TODO if (count > _internal->_memorySize) throw whatever at user's face.
 

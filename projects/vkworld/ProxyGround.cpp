@@ -7,7 +7,7 @@
 #include <world/math/Perlin.h>
 #include <world/core/Profiler.h>
 
-#include "Vulkan_p.h"
+#include "Vulkan.h"
 #include "DescriptorSetVk.h"
 #include "ComputePipeline.h"
 
@@ -27,7 +27,7 @@ ProxyGround::ProxyGround(f64 width, u32 resolution) {
 ProxyGround::~ProxyGround() { delete _internal; }
 
 VkwSubBuffer createTestPerlinBuffer() {
-    auto &vkctx = Vulkan::context().internal();
+    auto &vkctx = Vulkan::context();
 
     VkwDescriptorSetLayout layout22; // 2 uniforms 2 storage
     layout22.addBinding(DescriptorType::UNIFORM_BUFFER, 0);
@@ -125,7 +125,7 @@ void ProxyGround::collect(ICollector &collector,
     const u32 parentHeight = 128;
 
     // Create pipelines for vulkan processing
-    auto &vkctx = Vulkan::context().internal();
+    auto &vkctx = Vulkan::context();
 
     profiler.endStartSection("setup");
 

@@ -3,7 +3,6 @@
 #include <vulkan/vulkan.hpp>
 
 #include "Vulkan.h"
-#include "Vulkan_p.h"
 
 namespace world {
 
@@ -21,12 +20,11 @@ public:
 
 
     void createPipeline() {
-        auto &vkctx = Vulkan::context().internal();
+        auto &ctx = Vulkan::context();
 
         vk::PipelineLayoutCreateInfo pipelineLayoutInfo({}, 1,
                                                         &_descriptorSetLayout);
-        _pipelineLayout =
-            vkctx._device.createPipelineLayout(pipelineLayoutInfo);
+        _pipelineLayout = ctx._device.createPipelineLayout(pipelineLayoutInfo);
 
         // Create pipeline stage info (one stage)
         vk::PipelineShaderStageCreateInfo pipelineStageInfo(
@@ -35,8 +33,8 @@ public:
         // Create pipeline from layout and stage info
         vk::ComputePipelineCreateInfo pipelineCreateInfo({}, pipelineStageInfo,
                                                          _pipelineLayout);
-        _pipeline = vkctx._device.createComputePipeline(vk::PipelineCache(),
-                                                        pipelineCreateInfo);
+        _pipeline = ctx._device.createComputePipeline(vk::PipelineCache(),
+                                                      pipelineCreateInfo);
     }
 
     void initialize() {
@@ -60,9 +58,8 @@ VkwComputePipeline::VkwComputePipeline(
 }
 
 void VkwComputePipeline::setBuiltinShader(const std::string &shaderName) {
-    auto &internalCtx = Vulkan::context().internal();
-    _internal->_shader =
-        internalCtx.createShader(internalCtx.readFile(shaderName + ".spv"));
+    auto &ctx = Vulkan::context();
+    _internal->_shader = ctx.createShader(ctx.readFile(shaderName + ".spv"));
 }
 
 vk::Pipeline &VkwComputePipeline::getPipeline() {

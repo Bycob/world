@@ -1,5 +1,4 @@
 #include "Vulkan.h"
-#include "Vulkan_p.h"
 
 #include <iostream>
 #include <fstream>
@@ -56,15 +55,98 @@ debugCallback(VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT objType,
     return VK_FALSE;
 }
 
+VulkanContext::VulkanContext() {
+
+    // Create instance
+    vk::ApplicationInfo appInfo("World", VK_MAKE_VERSION(1, 0, 0), "No Engine",
+                                VK_MAKE_VERSION(1, 0, 0), VK_API_VERSION_1_0);
+
+    vk::InstanceCreateInfo createInfo;
+    createInfo.pApplicationInfo = &appInfo;
+
+    std::vector<const char *> extensions;
+
+    // Validation layers
+#ifdef _DEBUG
+    _enableValidationLayers = true;
+#else
+    _enableValidationLayers = true; // TODO set it to false when
+                                    // debug compilation mode will be
+                                    // decently useable
+#endif
+
+    if (!checkValidationLayerSupport() && _enableValidationLayers) {
+        std::cerr << "[Warning] [Vulkan] Validation layers are not supported"
+                  << std::endl;
+        _enableValidationLayers = false;
+    }
+
+    if (_enableValidationLayers) {
+        // Set layer
+        createInfo.enabledLayerCount =
+            static_cast<u32>(validationLayers.size());
+        createInfo.ppEnabledLayerNames = validationLayers.data();
+
+        // Activating suitable extension
+        extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+    } else {
+        createInfo.enabledLayerCount = 0;
+    }
+
+    // Setup extensions
+    createInfo.enabledExtensionCount = static_cast<u32>(extensions.size());
+    createInfo.ppEnabledExtensionNames = extensions.data();
+
+    _instance = vk::createInstance(createInfo);
+
+    // Setup debug callback
+    setupDebugCallback();
+
+    // Initialization
+    pickPhysicalDevice();
+    createLogicalDevice();
+
+    // Compute resources
+    createComputeResources();
+}
+
+VulkanContext::~VulkanContext() {
+    vkDestroyDescriptorPool(_device, _descriptorPool, nullptr);
+    vkDestroyCommandPool(_device, _computeCommandPool, nullptr);
+    vkDestroyDevice(_device, nullptr);
+
+    if (_enableValidationLayers) {
+        DestroyDebugReportCallbackEXT(_instance, _debugCallback, nullptr);
+    }
+
+    // It crashes... why ?
+    vkDestroyInstance(_instance, nullptr);
+}
+
+void VulkanContext::displayAvailableExtensions() {
+    // Extensions check
+    u32 extensionCount = 0;
+    vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
+    std::vector<VkExtensionProperties> extensions(extensionCount);
+    vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount,
+                                           extensions.data());
+
+    std::cout << "Extensions :" << std::endl;
+    for (auto &ext : extensions) {
+        std::cout << "\t- " << ext.extensionName << std::endl;
+    }
+}
+
+
 // ---- INITIALISATION METHODS
 
-bool VulkanContextPrivate::checkValidationLayerSupport() {
+bool VulkanContext::checkValidationLayerSupport() {
     // TODO for each validation layer in validationLayers, check if it's
     // supported and return false if at least one isn't.
     return true;
 }
 
-void VulkanContextPrivate::setupDebugCallback() {
+void VulkanContext::setupDebugCallback() {
     VkDebugReportCallbackCreateInfoEXT createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
     createInfo.flags =
@@ -78,7 +160,7 @@ void VulkanContextPrivate::setupDebugCallback() {
     }
 }
 
-void VulkanContextPrivate::pickPhysicalDevice() {
+void VulkanContext::pickPhysicalDevice() {
     u32 deviceCount = 0;
     vkEnumeratePhysicalDevices(_instance, &deviceCount, nullptr);
 
@@ -102,7 +184,7 @@ void VulkanContextPrivate::pickPhysicalDevice() {
     }
 }
 
-void VulkanContextPrivate::createLogicalDevice() {
+void VulkanContext::createLogicalDevice() {
     int familyIndex = findComputeQueueFamily();
 
     // Information about the queue
@@ -135,7 +217,7 @@ void VulkanContextPrivate::createLogicalDevice() {
     _device = _physicalDevice.createDevice(createInfo, nullptr);
 }
 
-void VulkanContextPrivate::createComputeResources() {
+void VulkanContext::createComputeResources() {
     // Get queue
     _computeQueue = _device.getQueue(findComputeQueueFamily(), 0);
 
@@ -165,7 +247,7 @@ void VulkanContextPrivate::createComputeResources() {
         _device.createCommandPool(commandPoolCreateInfo, nullptr);
 }
 
-vk::ShaderModule VulkanContextPrivate::createShader(
+vk::ShaderModule VulkanContext::createShader(
     const std::vector<char> &shaderCode) {
     VkShaderModuleCreateInfo shaderInfo = {};
     shaderInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -183,7 +265,7 @@ vk::ShaderModule VulkanContextPrivate::createShader(
     return shader;
 }
 
-int VulkanContextPrivate::findComputeQueueFamily() {
+int VulkanContext::findComputeQueueFamily() {
     // Get queues family
     u32 queueFamilyCount = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(_physicalDevice, &queueFamilyCount,
@@ -206,8 +288,7 @@ int VulkanContextPrivate::findComputeQueueFamily() {
     return -1;
 }
 
-vk::DescriptorType VulkanContextPrivate::getDescriptorType(
-    DescriptorType usage) {
+vk::DescriptorType VulkanContext::getDescriptorType(DescriptorType usage) {
     switch (usage) {
     case DescriptorType::STORAGE_BUFFER:
         return vk::DescriptorType::eStorageBuffer;
@@ -218,9 +299,9 @@ vk::DescriptorType VulkanContextPrivate::getDescriptorType(
     }
 }
 
-u32 VulkanContextPrivate::findMemoryType(
-    u32 memorySize, vk::MemoryPropertyFlags requiredFlags,
-    vk::MemoryPropertyFlags unwantedFlags) {
+u32 VulkanContext::findMemoryType(u32 memorySize,
+                                  vk::MemoryPropertyFlags requiredFlags,
+                                  vk::MemoryPropertyFlags unwantedFlags) {
     vk::PhysicalDeviceMemoryProperties properties =
         _physicalDevice.getMemoryProperties();
 
@@ -247,8 +328,8 @@ u32 VulkanContextPrivate::findMemoryType(
     return memoryTypeIndex;
 }
 
-VkwSubBuffer VulkanContextPrivate::allocate(u32 size, DescriptorType usage,
-                                            MemoryType memType) {
+VkwSubBuffer VulkanContext::allocate(u32 size, DescriptorType usage,
+                                     MemoryType memType) {
     auto key = std::make_pair(usage, memType);
     auto it = _memory.find(key);
 
@@ -264,7 +345,7 @@ VkwSubBuffer VulkanContextPrivate::allocate(u32 size, DescriptorType usage,
     return allocator.allocateBuffer(size);
 }
 
-std::vector<char> VulkanContextPrivate::readFile(const std::string &filename) {
+std::vector<char> VulkanContext::readFile(const std::string &filename) {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
     if (!file.good()) {
@@ -279,84 +360,11 @@ std::vector<char> VulkanContextPrivate::readFile(const std::string &filename) {
     return result;
 }
 
-// ---- PUBLIC METHODS
 
-VulkanContext::VulkanContext() : _internal(new VulkanContextPrivate()) {
-
-    // Create instance
-    vk::ApplicationInfo appInfo("World", VK_MAKE_VERSION(1, 0, 0), "No Engine",
-                                VK_MAKE_VERSION(1, 0, 0), VK_API_VERSION_1_0);
-
-    vk::InstanceCreateInfo createInfo;
-    createInfo.pApplicationInfo = &appInfo;
-
-    std::vector<const char *> extensions;
-
-    // Validation layers
-#ifdef _DEBUG
-    _internal->_enableValidationLayers = true;
-#else
-    _internal->_enableValidationLayers = true; // TODO set it to false when
-                                               // debug compilation mode will be
-                                               // decently useable
-#endif
-
-    if (!_internal->checkValidationLayerSupport() &&
-        _internal->_enableValidationLayers) {
-        std::cerr << "[Warning] [Vulkan] Validation layers are not supported"
-                  << std::endl;
-        _internal->_enableValidationLayers = false;
-    }
-
-    if (_internal->_enableValidationLayers) {
-        // Set layer
-        createInfo.enabledLayerCount =
-            static_cast<u32>(validationLayers.size());
-        createInfo.ppEnabledLayerNames = validationLayers.data();
-
-        // Activating suitable extension
-        extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
-    } else {
-        createInfo.enabledLayerCount = 0;
-    }
-
-    // Setup extensions
-    createInfo.enabledExtensionCount = static_cast<u32>(extensions.size());
-    createInfo.ppEnabledExtensionNames = extensions.data();
-
-    _internal->_instance = vk::createInstance(createInfo);
-
-    // Setup debug callback
-    _internal->setupDebugCallback();
-
-    // Initialization
-    _internal->pickPhysicalDevice();
-    _internal->createLogicalDevice();
-
-    // Compute resources
-    _internal->createComputeResources();
+VulkanContext &Vulkan::context() {
+    static VulkanContext context;
+    return context;
 }
-
-VulkanContext::~VulkanContext() {
-    vkDestroyDescriptorPool(_internal->_device, _internal->_descriptorPool,
-                            nullptr);
-    vkDestroyCommandPool(_internal->_device, _internal->_computeCommandPool,
-                         nullptr);
-    vkDestroyDevice(_internal->_device, nullptr);
-
-    if (_internal->_enableValidationLayers) {
-        DestroyDebugReportCallbackEXT(_internal->_instance,
-                                      _internal->_debugCallback, nullptr);
-    }
-
-    // It crashes... why ?
-    vkDestroyInstance(_internal->_instance, nullptr);
-
-    delete _internal;
-}
-
-VulkanContextPrivate &VulkanContext::internal() { return *_internal; }
-
 
 // http://www.duskborn.com/a-simple-vulkan-compute-example/
 // https://github.com/Erkaman/vulkan_minimal_compute
@@ -376,29 +384,29 @@ void VulkanContext::configTest() {
     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
     VkBuffer buffer;
-    vkCreateBuffer(_internal->_device, &bufferInfo, nullptr, &buffer);
+    vkCreateBuffer(_device, &bufferInfo, nullptr, &buffer);
 
     // Allocate memory
     VkMemoryRequirements memRequirements;
-    vkGetBufferMemoryRequirements(_internal->_device, buffer, &memRequirements);
+    vkGetBufferMemoryRequirements(_device, buffer, &memRequirements);
 
     VkMemoryAllocateInfo memoryInfo = {};
     memoryInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     memoryInfo.pNext = nullptr;
     memoryInfo.allocationSize = memRequirements.size;
-    memoryInfo.memoryTypeIndex = _internal->findMemoryType(
+    memoryInfo.memoryTypeIndex = findMemoryType(
         memorySize, vk::MemoryPropertyFlagBits::eHostVisible |
                         vk::MemoryPropertyFlagBits::eHostCoherent);
 
     VkDeviceMemory memory;
-    if (vkAllocateMemory(_internal->_device, &memoryInfo, nullptr, &memory) !=
+    if (vkAllocateMemory(_device, &memoryInfo, nullptr, &memory) !=
         VK_SUCCESS) {
         throw std::runtime_error(
             "[Vulkan] [Config-Test] failed allocate memory");
     }
 
     // Bind memory
-    vkBindBufferMemory(_internal->_device, buffer, memory, 0);
+    vkBindBufferMemory(_device, buffer, memory, 0);
 
     // ==========
 
@@ -418,9 +426,8 @@ void VulkanContext::configTest() {
     descriptorSetLayoutCreateInfo.pBindings = &descriptorSetLayoutBinding;
 
     VkDescriptorSetLayout descriptorSetLayout;
-    if (vkCreateDescriptorSetLayout(_internal->_device,
-                                    &descriptorSetLayoutCreateInfo, NULL,
-                                    &descriptorSetLayout) != VK_SUCCESS) {
+    if (vkCreateDescriptorSetLayout(_device, &descriptorSetLayoutCreateInfo,
+                                    NULL, &descriptorSetLayout) != VK_SUCCESS) {
         throw std::runtime_error(
             "[Vulkan] [Config-Test] failed create descriptor set layout");
     }
@@ -428,13 +435,13 @@ void VulkanContext::configTest() {
     // Allocate descriptor set in the pool
     VkDescriptorSetAllocateInfo descriptorSetInfo = {};
     descriptorSetInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    descriptorSetInfo.descriptorPool = _internal->_descriptorPool;
+    descriptorSetInfo.descriptorPool = _descriptorPool;
     descriptorSetInfo.descriptorSetCount = 1;
     descriptorSetInfo.pSetLayouts = &descriptorSetLayout;
 
     VkDescriptorSet descriptorSet;
-    if (vkAllocateDescriptorSets(_internal->_device, &descriptorSetInfo,
-                                 &descriptorSet) != VK_SUCCESS) {
+    if (vkAllocateDescriptorSets(_device, &descriptorSetInfo, &descriptorSet) !=
+        VK_SUCCESS) {
         throw std::runtime_error(
             "[Vulkan] [Config-Test] failed allocate descriptor set");
     }
@@ -455,14 +462,13 @@ void VulkanContext::configTest() {
         VK_DESCRIPTOR_TYPE_STORAGE_BUFFER; // storage buffer.
     writeDescriptorSet.pBufferInfo = &descriptorBufferInfo;
 
-    vkUpdateDescriptorSets(_internal->_device, 1, &writeDescriptorSet, 0,
-                           nullptr);
+    vkUpdateDescriptorSets(_device, 1, &writeDescriptorSet, 0, nullptr);
 
     // ==========
 
     // Setup the computation pipeline
     // Create shader
-    auto shader = _internal->createShader(_internal->readFile("perlin.spv"));
+    auto shader = createShader(readFile("perlin.spv"));
 
     // Create pipeline stage info
     VkPipelineShaderStageCreateInfo pipelineStageInfo = {};
@@ -479,7 +485,7 @@ void VulkanContext::configTest() {
     pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
 
     VkPipelineLayout pipelineLayout;
-    if (vkCreatePipelineLayout(_internal->_device, &pipelineLayoutInfo, nullptr,
+    if (vkCreatePipelineLayout(_device, &pipelineLayoutInfo, nullptr,
                                &pipelineLayout) != VK_SUCCESS) {
         throw std::runtime_error(
             "[Vulkan] [Config-Test] failed create pipeline layout");
@@ -492,7 +498,7 @@ void VulkanContext::configTest() {
     pipelineCreateInfo.layout = pipelineLayout;
 
     VkPipeline pipeline;
-    if (vkCreateComputePipelines(_internal->_device, VK_NULL_HANDLE, 1,
+    if (vkCreateComputePipelines(_device, VK_NULL_HANDLE, 1,
                                  &pipelineCreateInfo, nullptr,
                                  &pipeline) != VK_SUCCESS) {
         throw std::runtime_error(
@@ -505,11 +511,10 @@ void VulkanContext::configTest() {
     VkCommandPoolCreateInfo commandPoolCreateInfo = {};
     commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     commandPoolCreateInfo.flags = 0;
-    commandPoolCreateInfo.queueFamilyIndex =
-        _internal->findComputeQueueFamily();
+    commandPoolCreateInfo.queueFamilyIndex = findComputeQueueFamily();
 
     VkCommandPool commandPool;
-    if (vkCreateCommandPool(_internal->_device, &commandPoolCreateInfo, nullptr,
+    if (vkCreateCommandPool(_device, &commandPoolCreateInfo, nullptr,
                             &commandPool) != VK_SUCCESS) {
         throw std::runtime_error(
             "[Vulkan] [Config-Test] failed create command pool");
@@ -525,17 +530,17 @@ void VulkanContext::configTest() {
 
     VkCommandBuffer commandBuffer;
     // TODO Test VK_SUCCESS
-    vkAllocateCommandBuffers(_internal->_device, &commandBufferAllocateInfo,
+    vkAllocateCommandBuffers(_device, &commandBufferAllocateInfo,
                              &commandBuffer);
 
 
     // Writing the commands
     VkCommandBufferBeginInfo beginInfo = {};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.flags =
-        VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT; // the buffer is only
-                                                     // submitted and used once
-                                                     // in this application.
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT; // the buffer
+                                                                   // is only
+    // submitted and used once
+    // in this application.
 
     vkBeginCommandBuffer(commandBuffer, &beginInfo);
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
@@ -554,7 +559,7 @@ void VulkanContext::configTest() {
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submitInfo.commandBufferCount = 1; // submit a single command buffer
     submitInfo.pCommandBuffers = &commandBuffer; // the command buffer to
-                                                 // submit.
+    // submit.
 
     // Create fence
     VkFenceCreateInfo fenceCreateInfo = {};
@@ -563,29 +568,29 @@ void VulkanContext::configTest() {
 
     VkFence fence;
     // TODO Test VK_SUCCESS
-    vkCreateFence(_internal->_device, &fenceCreateInfo, NULL, &fence);
+    vkCreateFence(_device, &fenceCreateInfo, NULL, &fence);
 
     // Submid queue
     // TODO Test VK_SUCCESS
-    vkQueueSubmit(_internal->_computeQueue, 1, &submitInfo, fence);
+    vkQueueSubmit(_computeQueue, 1, &submitInfo, fence);
 
     auto start = std::chrono::steady_clock::now();
     // TODO Test VK_SUCCESS
-    vkWaitForFences(_internal->_device, 1, &fence, VK_TRUE, 100000000000);
+    vkWaitForFences(_device, 1, &fence, VK_TRUE, 100000000000);
     std::cout << "Exploration terminee en "
               << std::chrono::duration_cast<std::chrono::microseconds>(
                      std::chrono::steady_clock::now() - start)
                      .count()
               << " us" << std::endl;
 
-    vkDestroyFence(_internal->_device, fence, NULL);
+    vkDestroyFence(_device, fence, NULL);
 
     // ==========
     start = std::chrono::steady_clock::now();
 
     // Read memory
     float *mappedMemory = nullptr;
-    vkMapMemory(_internal->_device, memory, 0, memorySize, 0,
+    vkMapMemory(_device, memory, 0, memorySize, 0,
                 reinterpret_cast<void **>(&mappedMemory));
 
     // Fill and save image
@@ -606,26 +611,7 @@ void VulkanContext::configTest() {
 
     image.write("config-test.png");
 
-    vkUnmapMemory(_internal->_device, memory);
+    vkUnmapMemory(_device, memory);
 }
 
-void VulkanContext::displayAvailableExtensions() {
-    // Extensions check
-    u32 extensionCount = 0;
-    vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
-    std::vector<VkExtensionProperties> extensions(extensionCount);
-    vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount,
-                                           extensions.data());
-
-    std::cout << "Extensions :" << std::endl;
-    for (auto &ext : extensions) {
-        std::cout << "\t- " << ext.extensionName << std::endl;
-    }
-}
-
-
-VulkanContext &Vulkan::context() {
-    static VulkanContext context;
-    return context;
-}
 } // namespace world

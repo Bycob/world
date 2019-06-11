@@ -3,7 +3,6 @@
 #include <vulkan/vulkan.hpp>
 
 #include "Vulkan.h"
-#include "Vulkan_p.h"
 
 namespace world {
 
@@ -16,14 +15,14 @@ public:
 VkwDescriptorSet::VkwDescriptorSet(VkwDescriptorSetLayout &layout)
         : _internal(std::make_shared<VkwDescriptorSetPrivate>()) {
 
-    auto &vkctx = Vulkan::context().internal();
+    auto &ctx = Vulkan::context();
 
     // Allocate descriptor set in the pool
-    vk::DescriptorSetAllocateInfo descriptorSetInfo(vkctx._descriptorPool, 1,
+    vk::DescriptorSetAllocateInfo descriptorSetInfo(ctx._descriptorPool, 1,
                                                     &layout.getLayout());
     _internal->_layout = layout;
     _internal->_descriptorSet =
-        vkctx._device.allocateDescriptorSets(descriptorSetInfo)[0];
+        ctx._device.allocateDescriptorSets(descriptorSetInfo)[0];
 }
 
 void VkwDescriptorSet::addDescriptor(u32 id, IVkwBindable &bindable) {

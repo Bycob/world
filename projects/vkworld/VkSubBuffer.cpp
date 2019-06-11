@@ -1,6 +1,6 @@
 #include "VkSubBuffer.h"
 
-#include "Vulkan_p.h"
+#include "Vulkan.h"
 
 
 namespace world {
@@ -49,8 +49,8 @@ void VkwSubBuffer::registerTo(vk::DescriptorSet &descriptorSet,
                                               descriptorType, nullptr,
                                               &descriptorBufferInfo);
 
-    auto &vkctx = Vulkan::context().internal();
-    vkctx._device.updateDescriptorSets(1, &writeDescriptorSet, 0, nullptr);
+    auto &ctx = Vulkan::context();
+    ctx._device.updateDescriptorSets(1, &writeDescriptorSet, 0, nullptr);
 }
 
 vk::Buffer VkwSubBuffer::getBufferHandle(u32 offset) {
