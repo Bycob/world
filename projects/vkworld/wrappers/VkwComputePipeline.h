@@ -7,8 +7,8 @@
 
 #include <world/core/WorldTypes.h>
 
-#include "VkEnums.h"
-#include "DescriptorSetLayoutVk.h"
+#include "VkwEnums.h"
+#include "VkwDescriptorSetLayout.h"
 
 namespace vk {
 class Pipeline;

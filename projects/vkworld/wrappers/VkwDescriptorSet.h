@@ -7,9 +7,9 @@
 
 #include <world/core/WorldTypes.h>
 
-#include "IVkBindable.h"
-#include "VkEnums.h"
-#include "DescriptorSetLayoutVk.h"
+#include "IVkwBindable.h"
+#include "VkwEnums.h"
+#include "VkwDescriptorSetLayout.h"
 
 namespace vk {
 class DescriptorSet;

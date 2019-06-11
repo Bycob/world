@@ -6,8 +6,8 @@
 
 #include <world/core/TileSystem.h>
 
-#include "VkSubBuffer.h"
-#include "VkWorker.h"
+#include "wrappers/VkwSubBuffer.h"
+#include "wrappers/VkwWorker.h"
 
 namespace world {
 

@@ -7,9 +7,9 @@
 #include <world/math/Perlin.h>
 #include <world/core/Profiler.h>
 
-#include "Vulkan.h"
-#include "DescriptorSetVk.h"
-#include "ComputePipeline.h"
+#include "wrappers/Vulkan.h"
+#include "wrappers/VkwDescriptorSet.h"
+#include "wrappers/VkwComputePipeline.h"
 
 namespace world {
 

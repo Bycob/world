@@ -1,7 +1,7 @@
 #ifndef VKWORLD_PROXYGROUND_H
 #define VKWORLD_PROXYGROUND_H
 
-#include "VkWorldConfig.h"
+#include "wrappers/VkWorldConfig.h"
 
 #include <world/core/WorldNode.h>
 #include <world/core/TileSystem.h>

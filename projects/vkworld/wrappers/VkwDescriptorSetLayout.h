@@ -8,7 +8,7 @@
 
 #include <world/core/WorldTypes.h>
 
-#include "VkEnums.h"
+#include "VkwEnums.h"
 
 namespace vk {
 class DescriptorSetLayout;

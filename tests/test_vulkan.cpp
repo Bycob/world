@@ -7,7 +7,7 @@
 #include <world/core.h>
 #include <world/terrain.h>
 
-#include <vkworld/Vulkan.h>
+#include <vkworld/wrappers/Vulkan.h>
 #include <vkworld/ProgramVk.h>
 #include <vkworld/BufferVk.h>
 #include <vkworld/ProxyGround.h>

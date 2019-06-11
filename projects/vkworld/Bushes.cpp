@@ -1,11 +1,11 @@
 #include "Bushes.h"
 
-#include "Vulkan.h"
-#include "DescriptorSetLayoutVk.h"
-#include "ComputePipeline.h"
-#include "DescriptorSetVk.h"
-#include "VkWorker.h"
-#include "VkwMemoryHelper.h"
+#include "wrappers/Vulkan.h"
+#include "wrappers/VkwDescriptorSetLayout.h"
+#include "wrappers/VkwComputePipeline.h"
+#include "wrappers/VkwDescriptorSet.h"
+#include "wrappers/VkwWorker.h"
+#include "wrappers/VkwMemoryHelper.h"
 
 namespace world {
 

@@ -1,4 +1,4 @@
-#include "ComputePipeline.h"
+#include "VkwComputePipeline.h"
 
 #include <vulkan/vulkan.hpp>
 

@@ -6,7 +6,7 @@
 #include <world/assets/Image.h>
 #include <world/terrain/Terrain.h>
 
-#include "IVkMemoryAccess.h"
+#include "IVkwMemoryAccess.h"
 
 namespace world {
 

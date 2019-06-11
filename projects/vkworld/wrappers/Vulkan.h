@@ -9,9 +9,9 @@
 
 #include <world/core/WorldTypes.h>
 
-#include "VkEnums.h"
-#include "VkMemoryCache.h"
-#include "VkSubBuffer.h"
+#include "VkwEnums.h"
+#include "VkwMemoryCache.h"
+#include "VkwSubBuffer.h"
 
 namespace world {
 

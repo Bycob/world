@@ -1,14 +1,14 @@
 #ifndef WORLDAPI_BUFFERVK_H
 #define WORLDAPI_BUFFERVK_H
 
-#include "VkWorldConfig.h"
+#include "wrappers/VkWorldConfig.h"
 
 #include <memory>
 
 #include <world/core/WorldTypes.h>
 
-#include "VkEnums.h"
-#include "Vulkan.h"
+#include "wrappers/VkwEnums.h"
+#include "wrappers/Vulkan.h"
 
 namespace world {
 

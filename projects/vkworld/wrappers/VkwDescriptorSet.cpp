@@ -1,4 +1,4 @@
-#include "DescriptorSetVk.h"
+#include "VkwDescriptorSet.h"
 
 #include <vulkan/vulkan.hpp>
 

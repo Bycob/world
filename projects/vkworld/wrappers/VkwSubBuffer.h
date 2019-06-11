@@ -7,8 +7,8 @@
 
 #include <world/core/WorldTypes.h>
 
-#include "IVkMemoryAccess.h"
-#include "IVkBindable.h"
+#include "IVkwMemoryAccess.h"
+#include "IVkwBindable.h"
 
 namespace world {
 

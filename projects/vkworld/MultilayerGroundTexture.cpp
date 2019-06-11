@@ -2,11 +2,11 @@
 
 #include <list>
 
-#include "Vulkan.h"
-#include "VkwMemoryHelper.h"
-#include "VkSubBuffer.h"
-#include "VkWorker.h"
-#include "ComputePipeline.h"
+#include "wrappers/Vulkan.h"
+#include "wrappers/VkwMemoryHelper.h"
+#include "wrappers/VkwSubBuffer.h"
+#include "wrappers/VkwWorker.h"
+#include "wrappers/VkwComputePipeline.h"
 
 namespace world {
 

@@ -5,8 +5,8 @@
 
 #include <memory>
 
-#include "DescriptorSetVk.h"
-#include "ComputePipeline.h"
+#include "VkwDescriptorSet.h"
+#include "VkwComputePipeline.h"
 
 namespace world {
 
