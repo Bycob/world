@@ -23,7 +23,7 @@ class VKWORLD_EXPORT VkwDescriptorSet {
 public:
     VkwDescriptorSet(VkwDescriptorSetLayout &layout);
 
-    void addDescriptor(u32 id, DescriptorType usage, IVkwBindable &bindable);
+    void addDescriptor(u32 id, IVkwBindable &bindable);
 
     vk::DescriptorSet &handle();
 

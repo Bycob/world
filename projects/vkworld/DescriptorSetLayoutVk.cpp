@@ -44,6 +44,16 @@ void VkwDescriptorSetLayout::addBinding(DescriptorType usage, u32 binding) {
                                       vk::ShaderStageFlagBits::eCompute);
 }
 
+vk::DescriptorType VkwDescriptorSetLayout::getBindingType(u32 id) const {
+    for (auto &binding : _internal->_bindings) {
+        if (binding.binding == id) {
+            return binding.descriptorType;
+        }
+    }
+    throw std::invalid_argument("No binding for this id: " +
+                                std::to_string(id));
+}
+
 vk::DescriptorSetLayout &VkwDescriptorSetLayout::getLayout() {
     if (!_internal->_initialized) {
         _internal->createDescriptorSetLayout();

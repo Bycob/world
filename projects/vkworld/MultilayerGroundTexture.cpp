@@ -232,19 +232,19 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &img,
 
     // DescriptorSet
     VkwDescriptorSet derivDset(layoutDeriv);
-    derivDset.addDescriptor(0, DescriptorType::UNIFORM_BUFFER, unit._derivParams);
-    derivDset.addDescriptor(1, DescriptorType::STORAGE_BUFFER, unit._terrainHeight);
-    derivDset.addDescriptor(2, DescriptorType::STORAGE_BUFFER, unit._terrainSlope);
+    derivDset.addDescriptor(0, unit._derivParams);
+    derivDset.addDescriptor(1, unit._terrainHeight);
+    derivDset.addDescriptor(2, unit._terrainSlope);
 
     VkwDescriptorSet upscaleHeightDset(layoutUpscale);
-    upscaleHeightDset.addDescriptor(0, DescriptorType::UNIFORM_BUFFER, unit._upscaleHeightParams);
-    upscaleHeightDset.addDescriptor(1, DescriptorType::STORAGE_BUFFER, unit._terrainHeight);
-    upscaleHeightDset.addDescriptor(2, DescriptorType::STORAGE_BUFFER, unit._terrainHeightUp);
+    upscaleHeightDset.addDescriptor(0, unit._upscaleHeightParams);
+    upscaleHeightDset.addDescriptor(1, unit._terrainHeight);
+    upscaleHeightDset.addDescriptor(2, unit._terrainHeightUp);
 
     VkwDescriptorSet upscaleSlopeDset(layoutUpscale);
-    upscaleSlopeDset.addDescriptor(0, DescriptorType::UNIFORM_BUFFER, unit._upscaleSlopeParams);
-    upscaleSlopeDset.addDescriptor(1, DescriptorType::STORAGE_BUFFER, unit._terrainSlope);
-    upscaleSlopeDset.addDescriptor(2, DescriptorType::STORAGE_BUFFER, unit._terrainSlopeUp);
+    upscaleSlopeDset.addDescriptor(0, unit._upscaleSlopeParams);
+    upscaleSlopeDset.addDescriptor(1, unit._terrainSlope);
+    upscaleSlopeDset.addDescriptor(2, unit._terrainSlopeUp);
 
     // Worker
     unit._worker = std::make_unique<VkwWorker>();
@@ -287,13 +287,13 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &img,
         layer._distributionPerlinParams.setData(&distributionPerlinStruct);
 
         VkwDescriptorSet distributionDset(layoutDistrib);
-        distributionDset.addDescriptor(0, DescriptorType::UNIFORM_BUFFER, unit._sizeParams);
-        distributionDset.addDescriptor(1, DescriptorType::UNIFORM_BUFFER, layer._distributionParams);
-        distributionDset.addDescriptor(2, DescriptorType::UNIFORM_BUFFER, layer._distributionPerlinParams);
-        distributionDset.addDescriptor(3, DescriptorType::STORAGE_BUFFER, unit._terrainHeightUp);
-        distributionDset.addDescriptor(4, DescriptorType::STORAGE_BUFFER, unit._terrainSlopeUp);
-        distributionDset.addDescriptor(5, DescriptorType::STORAGE_BUFFER, layer._distribution);
-        distributionDset.addDescriptor(256, DescriptorType::STORAGE_BUFFER, unit._random);
+        distributionDset.addDescriptor(0, unit._sizeParams);
+        distributionDset.addDescriptor(1, layer._distributionParams);
+        distributionDset.addDescriptor(2, layer._distributionPerlinParams);
+        distributionDset.addDescriptor(3, unit._terrainHeightUp);
+        distributionDset.addDescriptor(4, unit._terrainSlopeUp);
+        distributionDset.addDescriptor(5, layer._distribution);
+        distributionDset.addDescriptor(256, unit._random);
 
         unit._worker->bindCommand(distributionPipelines[i], distributionDset);
         unit._worker->dispatchCommand(imgGroupCount, imgGroupCount, 1);
@@ -314,11 +314,11 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &img,
         layer._textureParams.setData(&textureStruct);
 
         VkwDescriptorSet textureDset(layoutTexture);
-        textureDset.addDescriptor(0, DescriptorType::UNIFORM_BUFFER, unit._sizeParams);
-        textureDset.addDescriptor(1, DescriptorType::UNIFORM_BUFFER, layer._textureParams);
-        textureDset.addDescriptor(2, DescriptorType::STORAGE_BUFFER, layer._distribution);
-        textureDset.addDescriptor(3, DescriptorType::STORAGE_BUFFER, unit._texture);
-        textureDset.addDescriptor(256, DescriptorType::STORAGE_BUFFER, unit._random);
+        textureDset.addDescriptor(0, unit._sizeParams);
+        textureDset.addDescriptor(1, layer._textureParams);
+        textureDset.addDescriptor(2, layer._distribution);
+        textureDset.addDescriptor(3, unit._texture);
+        textureDset.addDescriptor(256, unit._random);
 
         unit._worker->bindCommand(texturePipelines[i], textureDset);
         unit._worker->dispatchCommand(imgGroupCount, imgGroupCount, 1);

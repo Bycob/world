@@ -12,7 +12,8 @@
 
 namespace vk {
 class DescriptorSetLayout;
-}
+enum class DescriptorType;
+} // namespace vk
 
 namespace world {
 
@@ -25,6 +26,8 @@ public:
                            std::initializer_list<u32> storageIds);
 
     void addBinding(DescriptorType type, u32 binding);
+
+    vk::DescriptorType getBindingType(u32 binding) const;
 
     /** Get a layout built with the data provided previously. */
     vk::DescriptorSetLayout &getLayout();

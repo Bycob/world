@@ -72,10 +72,10 @@ void Bushes::collect(ICollector &collector,
     paramsBuffer.setData(&paramsStruct);
 
     VkwDescriptorSet dset(layout);
-    dset.addDescriptor(0, DescriptorType::UNIFORM_BUFFER, paramsBuffer);
-    dset.addDescriptor(1, DescriptorType::STORAGE_BUFFER, positionsBuffer);
-    dset.addDescriptor(2, DescriptorType::STORAGE_BUFFER, verticesBuffer);
-    dset.addDescriptor(3, DescriptorType::STORAGE_BUFFER, facesBuffer);
+    dset.addDescriptor(0, paramsBuffer);
+    dset.addDescriptor(1, positionsBuffer);
+    dset.addDescriptor(2, verticesBuffer);
+    dset.addDescriptor(3, facesBuffer);
     // dset.addDescriptor(255, DescriptorType::STORAGE_BUFFER, );
 
     VkwWorker worker;

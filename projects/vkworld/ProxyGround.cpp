@@ -90,10 +90,10 @@ VkwSubBuffer createTestPerlinBuffer() {
     hashBuf.setData(&hash[0]);
 
     VkwDescriptorSet perlinDset(layout22);
-    perlinDset.addDescriptor(0, DescriptorType::UNIFORM_BUFFER, outputDataBuf);
-    perlinDset.addDescriptor(1, DescriptorType::UNIFORM_BUFFER, perlinDataBuf);
-    perlinDset.addDescriptor(256, DescriptorType::STORAGE_BUFFER, hashBuf);
-    perlinDset.addDescriptor(3, DescriptorType::STORAGE_BUFFER, perlinBuf);
+    perlinDset.addDescriptor(0, outputDataBuf);
+    perlinDset.addDescriptor(1, perlinDataBuf);
+    perlinDset.addDescriptor(256, hashBuf);
+    perlinDset.addDescriptor(3, perlinBuf);
 
     VkwWorker perlinWorker;
     perlinWorker.bindCommand(perlinPipeline, perlinDset);
@@ -241,11 +241,9 @@ void ProxyGround::collect(ICollector &collector,
         tileData._upscaleData->setData(&s_upscaleData);
 
         VkwDescriptorSet upscaleDset(layoutUpscale);
-        upscaleDset.addDescriptor(0, DescriptorType::UNIFORM_BUFFER,
-                                  *tileData._upscaleData);
-        upscaleDset.addDescriptor(1, DescriptorType::STORAGE_BUFFER, perlinBuf);
-        upscaleDset.addDescriptor(2, DescriptorType::STORAGE_BUFFER,
-                                  *tileData._height);
+        upscaleDset.addDescriptor(0, *tileData._upscaleData);
+        upscaleDset.addDescriptor(1, perlinBuf);
+        upscaleDset.addDescriptor(2, *tileData._height);
 
         worker.bindCommand(upscalePipeline, upscaleDset);
         worker.dispatchCommand(dispatchX, dispatchY, dispatchZ);
@@ -277,14 +275,10 @@ void ProxyGround::collect(ICollector &collector,
             layerData._repartitionData->setData(&s_repartitionData);
 
             VkwDescriptorSet repartitionDset(layout22);
-            repartitionDset.addDescriptor(0, DescriptorType::UNIFORM_BUFFER,
-                                          outputDataBuf);
-            repartitionDset.addDescriptor(1, DescriptorType::UNIFORM_BUFFER,
-                                          *layerData._repartitionData);
-            repartitionDset.addDescriptor(2, DescriptorType::STORAGE_BUFFER,
-                                          *tileData._height);
-            repartitionDset.addDescriptor(3, DescriptorType::STORAGE_BUFFER,
-                                          *layerData._repartition);
+            repartitionDset.addDescriptor(0, outputDataBuf);
+            repartitionDset.addDescriptor(1, *layerData._repartitionData);
+            repartitionDset.addDescriptor(2, *tileData._height);
+            repartitionDset.addDescriptor(3, *layerData._repartition);
 
             worker.bindCommand(repartitionPipelines[i], repartitionDset);
             worker.dispatchCommand(dispatchX, dispatchY, dispatchZ);
@@ -311,14 +305,10 @@ void ProxyGround::collect(ICollector &collector,
 
 
             VkwDescriptorSet textureDset(layout22);
-            textureDset.addDescriptor(0, DescriptorType::UNIFORM_BUFFER,
-                                      outputDataBuf);
-            textureDset.addDescriptor(1, DescriptorType::UNIFORM_BUFFER,
-                                      *layerData._textureData);
-            textureDset.addDescriptor(2, DescriptorType::STORAGE_BUFFER,
-                                      *layerData._repartition);
-            textureDset.addDescriptor(3, DescriptorType::STORAGE_BUFFER,
-                                      *tileData._texture);
+            textureDset.addDescriptor(0, outputDataBuf);
+            textureDset.addDescriptor(1, *layerData._textureData);
+            textureDset.addDescriptor(2, *layerData._repartition);
+            textureDset.addDescriptor(3, *tileData._texture);
 
             worker.bindCommand(texturePipelines[i], textureDset);
             worker.dispatchCommand(dispatchX, dispatchY, dispatchZ);
