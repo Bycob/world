@@ -42,4 +42,14 @@ void VkwMemoryHelper::terrainToGPU(const Terrain &terrain,
     delete[] buf;
 }
 
+void VkwMemoryHelper::GPUToMesh(IVkwMemoryAccess &verticesMemory,
+                                IVkwMemoryAccess &indicesMemory, Mesh &mesh) {
+    GPUToVertices(verticesMemory, mesh);
+    GPUToIndices(indicesMemory, mesh);
+}
+
+void VkwMemoryHelper::GPUToVertices(IVkwMemoryAccess &memory, Mesh &mesh) {}
+
+void VkwMemoryHelper::GPUToIndices(IVkwMemoryAccess &memory, Mesh &mesh) {}
+
 } // namespace world

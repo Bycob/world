@@ -31,9 +31,14 @@ public:
 
     static void terrainToGPU(const Terrain &terrain, IVkwMemoryAccess &memory);
 
-    /*
-    static void fromGPU(IVkMemoryAccess &memory, Mesh &mesh);
+    static void GPUToMesh(IVkwMemoryAccess &verticesMemory,
+                          IVkwMemoryAccess &indicesMemory, Mesh &mesh);
 
+    static void GPUToVertices(IVkwMemoryAccess &memory, Mesh &mesh);
+
+    static void GPUToIndices(IVkwMemoryAccess &memory, Mesh &mesh);
+
+    /*
     static void toGPU(const Mesh &mesh, IVkwMemoryAccess &memory);
     */
 };
