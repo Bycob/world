@@ -111,8 +111,14 @@ VulkanContext::VulkanContext() {
 }
 
 VulkanContext::~VulkanContext() {
+    std::cout << "Free all vulkan memory" << std::endl;
+    _memory.clear();
+
+    std::cout << "Destroy vulkan ressources" << std::endl;
     vkDestroyDescriptorPool(_device, _descriptorPool, nullptr);
     vkDestroyCommandPool(_device, _computeCommandPool, nullptr);
+
+    std::cout << "Destroy vulkan device" << std::endl;
     vkDestroyDevice(_device, nullptr);
 
     if (_enableValidationLayers) {
@@ -234,6 +240,8 @@ void VulkanContext::createComputeResources() {
 
     vk::DescriptorPoolCreateInfo descriptorPoolInfo = {};
     descriptorPoolInfo.maxSets = 2000;
+    descriptorPoolInfo.flags |=
+        vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet;
     descriptorPoolInfo.poolSizeCount = 2;
     descriptorPoolInfo.pPoolSizes = descriptorPoolSizes;
 
@@ -305,7 +313,7 @@ u32 VulkanContext::findMemoryType(u32 memorySize,
     vk::PhysicalDeviceMemoryProperties properties =
         _physicalDevice.getMemoryProperties();
 
-    u32 memoryTypeIndex;
+    u32 memoryTypeIndex = 0;
     bool foundMemoryType = false;
 
     for (u32 i = 0; i < properties.memoryTypeCount; ++i) {
@@ -336,8 +344,9 @@ VkwSubBuffer VulkanContext::allocate(u32 size, DescriptorType usage,
     if (it == _memory.end()) {
         // segment size = 64 Mo
         it = _memory
-                 .insert(std::make_pair(
-                     key, std::make_unique<VkwMemoryCache>(64 * 1024 * 1024, usage, memType)))
+                 .insert(
+                     std::make_pair(key, std::make_unique<VkwMemoryCache>(
+                                             64 * 1024 * 1024, usage, memType)))
                  .first;
     }
 

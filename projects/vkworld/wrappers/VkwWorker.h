@@ -16,7 +16,7 @@ class VKWORLD_EXPORT VkwWorker {
 public:
     VkwWorker();
 
-    ~VkwWorker() = default;
+    ~VkwWorker();
 
     VkwWorker(const VkwWorker &other) = delete;
 
@@ -36,6 +36,10 @@ private:
     vk::CommandBuffer _commandBuffer;
 
     vk::Fence _fence;
+
+    std::vector<VkwComputePipeline> _boundPipelines;
+
+    std::vector<VkwDescriptorSet> _boundDsets;
 };
 } // namespace world
 

@@ -53,6 +53,15 @@ VkwMemoryCacheSegment::VkwMemoryCacheSegment(u32 size,
     ctx._device.bindBufferMemory(_buffer, _memory, 0);
 }
 
+VkwMemoryCacheSegment::~VkwMemoryCacheSegment() {
+    VulkanContext &ctx = Vulkan::context();
+    if (_buffer) {
+        ctx._device.destroy(_buffer);
+    }
+
+    ctx._device.free(_memory);
+}
+
 
 // MEMORY CACHE
 
@@ -103,10 +112,11 @@ VkwSubBuffer VkwMemoryCache::allocateBuffer(u32 size) {
     }
 
     if (sizeRemaining() < size) {
-        _segments.emplace_back(segmentSize, _usage, _memTypeIndex);
+        _segments.emplace_back(std::make_unique<VkwMemoryCacheSegment>(
+            segmentSize, _usage, _memTypeIndex));
     }
 
-    auto &lastSegment = _segments.back();
+    auto &lastSegment = *_segments.back();
     const u32 offset = static_cast<u32>(_segments.size() - 1) * segmentSize +
                        lastSegment._sizeAllocated;
 
@@ -130,7 +140,7 @@ void VkwMemoryCache::setData(void *data, u32 count, u32 offset) {
     const u32 segmentSize = _segmentSize;
     const u32 inSegmentOffset = offset % segmentSize;
     const u32 segmentId = offset / segmentSize;
-    auto &segment = _segments[segmentId];
+    auto &segment = *_segments[segmentId];
 
     VulkanContext &ctx = Vulkan::context();
 
@@ -144,7 +154,7 @@ void VkwMemoryCache::getData(void *data, u32 count, u32 offset) {
     const u32 segmentSize = _segmentSize;
     const u32 inSegmentOffset = offset % segmentSize;
     const u32 segmentId = offset / segmentSize;
-    auto &segment = _segments[segmentId];
+    auto &segment = *_segments[segmentId];
 
     VulkanContext &ctx = Vulkan::context();
 
@@ -157,7 +167,7 @@ void VkwMemoryCache::getData(void *data, u32 count, u32 offset) {
 vk::Buffer VkwMemoryCache::getBufferHandle(u32 offset) {
     const u32 segmentSize = _segmentSize;
     const u32 segmentId = offset / segmentSize;
-    auto &segment = _segments[segmentId];
+    auto &segment = *_segments[segmentId];
 
     return segment._buffer;
 }
@@ -171,7 +181,7 @@ u32 VkwMemoryCache::sizeRemaining() const {
         return 0;
     }
 
-    auto &lastSegment = _segments.back();
+    auto &lastSegment = *_segments.back();
     return lastSegment._totalSize - lastSegment._sizeAllocated;
 }
 } // namespace world

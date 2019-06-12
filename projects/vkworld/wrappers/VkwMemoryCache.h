@@ -27,6 +27,8 @@ struct VKWORLD_EXPORT VkwMemoryCacheSegment {
 
     VkwMemoryCacheSegment(u32 size, DescriptorType descriptorType,
                           u32 memTypeIndex);
+
+    ~VkwMemoryCacheSegment();
 };
 
 class VKWORLD_EXPORT VkwMemoryCache : public IVkwMemoryAccess {
@@ -65,7 +67,7 @@ private:
 
     u32 _memTypeIndex;
 
-    std::vector<VkwMemoryCacheSegment> _segments;
+    std::vector<std::unique_ptr<VkwMemoryCacheSegment>> _segments;
 
     u32 sizeRemaining() const;
 };

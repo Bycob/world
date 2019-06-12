@@ -18,6 +18,17 @@ public:
 
     bool _initialized = false;
 
+    ~VkwComputePipelinePrivate() {
+        if (!_initialized) {
+            return;
+        }
+
+        auto &ctx = Vulkan::context();
+        ctx._device.destroy(_shader);
+        ctx._device.destroy(_pipelineLayout);
+        ctx._device.destroy(_pipeline);
+    }
+
 
     void createPipeline() {
         auto &ctx = Vulkan::context();

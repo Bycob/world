@@ -12,6 +12,15 @@ public:
 
     bool _initialized = false;
 
+    ~VkwDescriptorSetLayoutPrivate() {
+        if (!_initialized) {
+            return;
+        }
+
+        auto &ctx = Vulkan::context();
+        ctx._device.destroy(_descriptorSetLayout);
+    }
+
 
     void createDescriptorSetLayout() {
         auto &ctx = Vulkan::context();
@@ -19,6 +28,8 @@ public:
             {}, static_cast<u32>(_bindings.size()), &_bindings[0]);
         _descriptorSetLayout = ctx._device.createDescriptorSetLayout(
             descriptorSetLayoutCreateInfo);
+
+        _initialized = true;
     }
 };
 

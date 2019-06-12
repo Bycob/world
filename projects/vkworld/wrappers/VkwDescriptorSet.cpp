@@ -10,6 +10,11 @@ class VkwDescriptorSetPrivate {
 public:
     VkwDescriptorSetLayout _layout;
     vk::DescriptorSet _descriptorSet;
+
+    ~VkwDescriptorSetPrivate() {
+        auto &ctx = Vulkan::context();
+        ctx._device.free(ctx._descriptorPool, 1, &_descriptorSet);
+    }
 };
 
 VkwDescriptorSet::VkwDescriptorSet(VkwDescriptorSetLayout &layout)

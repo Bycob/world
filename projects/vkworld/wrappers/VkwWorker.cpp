@@ -20,6 +20,15 @@ VkwWorker::VkwWorker() {
     _commandBuffer.begin(beginInfo);
 }
 
+VkwWorker::~VkwWorker() {
+    auto &ctx = Vulkan::context();
+    ctx._device.free(ctx._computeCommandPool, {_commandBuffer});
+
+    if (_fence) {
+        ctx._device.destroy(_fence);
+    }
+}
+
 void VkwWorker::bindCommand(VkwComputePipeline &pipeline,
                             VkwDescriptorSet &dset) {
     _commandBuffer.bindPipeline(vk::PipelineBindPoint::eCompute,
@@ -27,6 +36,9 @@ void VkwWorker::bindCommand(VkwComputePipeline &pipeline,
     _commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eCompute,
                                       pipeline.getLayout(), 0, dset.handle(),
                                       std::vector<u32>());
+
+    _boundPipelines.push_back(pipeline);
+    _boundDsets.push_back(dset);
 }
 
 void VkwWorker::dispatchCommand(u32 x, u32 y, u32 z) {
