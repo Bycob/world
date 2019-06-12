@@ -1,7 +1,7 @@
 #ifndef VKWORLD_VKW_MEMORY_HELPER_H
 #define VKWORLD_VKW_MEMORY_HELPER_H
 
-#include "VkWorldConfig.h"
+#include "vkworld/VkWorldConfig.h"
 
 #include <world/assets/Image.h>
 #include <world/terrain/Terrain.h>

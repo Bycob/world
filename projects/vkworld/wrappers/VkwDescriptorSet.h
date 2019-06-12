@@ -1,7 +1,7 @@
 #ifndef VKWORLD_DESCRIPTORSETVK_H
 #define VKWORLD_DESCRIPTORSETVK_H
 
-#include "VkWorldConfig.h"
+#include "vkworld/VkWorldConfig.h"
 
 #include <memory>
 

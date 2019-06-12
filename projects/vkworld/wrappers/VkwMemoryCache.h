@@ -1,7 +1,7 @@
 #ifndef WORLDAPI_VKMEMORYCACHE_H
 #define WORLDAPI_VKMEMORYCACHE_H
 
-#include "VkWorldConfig.h"
+#include "vkworld/VkWorldConfig.h"
 
 #include <memory>
 

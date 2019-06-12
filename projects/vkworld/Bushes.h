@@ -1,7 +1,7 @@
 #ifndef VKWORLD_BUSH
 #define VKWORLD_BUSH
 
-#include "wrappers/VkWorldConfig.h"
+#include "VkWorldConfig.h"
 
 #include <vector>
 

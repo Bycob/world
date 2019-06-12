@@ -1,7 +1,7 @@
 #ifndef VKWORLD_IVKBINDINABLE_H
 #define VKWORLD_IVKBINDINABLE_H
 
-#include "VkWorldConfig.h"
+#include "vkworld/VkWorldConfig.h"
 
 #include <vulkan/vulkan.hpp>
 

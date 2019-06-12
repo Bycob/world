@@ -1,7 +1,7 @@
 #ifndef VKWORLD_MULTILAYER_GROUND_TEXTURE_H
 #define VKWORLD_MULTILAYER_GROUND_TEXTURE_H
 
-#include "wrappers/VkWorldConfig.h"
+#include "VkWorldConfig.h"
 
 #include <world/terrain/ITerrainWorker.h>
 

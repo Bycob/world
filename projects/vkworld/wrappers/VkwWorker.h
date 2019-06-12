@@ -1,7 +1,7 @@
 #ifndef VKWORLD_VKWORKER_H
 #define VKWORLD_VKWORKER_H
 
-#include "VkWorldConfig.h"
+#include "vkworld/VkWorldConfig.h"
 
 #include <memory>
 

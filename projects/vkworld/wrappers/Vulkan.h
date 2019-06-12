@@ -1,7 +1,7 @@
 #ifndef WORLDAPI_VULKAN_H
 #define WORLDAPI_VULKAN_H
 
-#include "VkWorldConfig.h"
+#include "vkworld/VkWorldConfig.h"
 
 #include <vector>
 #include <map>

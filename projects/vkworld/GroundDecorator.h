@@ -1,7 +1,7 @@
 #ifndef VKWORLD_GROUNDDECORATOR_H
 #define VKWORLD_GROUNDDECORATOR_H
 
-#include "wrappers/VkWorldConfig.h"
+#include "VkWorldConfig.h"
 
 #include <world/core/IChunkDecorator.h>
 #include <world/flat/FlatWorld.h>

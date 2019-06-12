@@ -1,7 +1,7 @@
 #ifndef VKWORLD_IVKMEMORYACCESS_H
 #define VKWORLD_IVKMEMORYACCESS_H
 
-#include "VkWorldConfig.h"
+#include "vkworld/VkWorldConfig.h"
 
 #include <vulkan/vulkan.hpp>
 

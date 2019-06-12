@@ -1,7 +1,7 @@
 #ifndef VKWORLD_VKSUBBUFFER_H
 #define VKWORLD_VKSUBBUFFER_H
 
-#include "VkWorldConfig.h"
+#include "vkworld/VkWorldConfig.h"
 
 #include <memory>
 

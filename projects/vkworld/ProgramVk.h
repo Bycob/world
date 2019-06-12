@@ -1,7 +1,7 @@
 #ifndef WORLDAPI_PROGRAMVK_H
 #define WORLDAPI_PROGRAMVK_H
 
-#include "wrappers/VkWorldConfig.h"
+#include "VkWorldConfig.h"
 
 #include <memory>
 #include <string>

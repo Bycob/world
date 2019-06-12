@@ -1,7 +1,7 @@
 #ifndef WORLDAPI_BUFFERVK_H
 #define WORLDAPI_BUFFERVK_H
 
-#include "wrappers/VkWorldConfig.h"
+#include "VkWorldConfig.h"
 
 #include <memory>
 

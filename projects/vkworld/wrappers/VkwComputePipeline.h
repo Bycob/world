@@ -1,7 +1,7 @@
 #ifndef VKWORLD_COMPUTEPIPELINE_H
 #define VKWORLD_COMPUTEPIPELINE_H
 
-#include "VkWorldConfig.h"
+#include "vkworld/VkWorldConfig.h"
 
 #include <memory>
 
