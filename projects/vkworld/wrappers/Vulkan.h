@@ -70,7 +70,8 @@ private:
 
     VkDebugReportCallbackEXT _debugCallback;
 
-    std::map<std::pair<DescriptorType, MemoryType>, VkwMemoryCache> _memory;
+    typedef std::pair<DescriptorType, MemoryType> memid;
+    std::map<memid, std::unique_ptr<VkwMemoryCache>> _memory;
 
 
     // INITIALIZATION

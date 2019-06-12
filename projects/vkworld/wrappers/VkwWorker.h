@@ -16,6 +16,12 @@ class VKWORLD_EXPORT VkwWorker {
 public:
     VkwWorker();
 
+    ~VkwWorker() = default;
+
+    VkwWorker(const VkwWorker &other) = delete;
+
+    VkwWorker &operator=(const VkwWorker &other) = delete;
+
     void bindCommand(VkwComputePipeline &pipeline, VkwDescriptorSet &dset);
 
     void dispatchCommand(u32 x, u32 y, u32 z);
@@ -27,7 +33,9 @@ public:
     void waitForCompletion();
 
 private:
-    std::shared_ptr<VkwWorkerPrivate> _internal;
+    vk::CommandBuffer _commandBuffer;
+
+    vk::Fence _fence;
 };
 } // namespace world
 

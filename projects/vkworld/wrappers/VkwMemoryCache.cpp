@@ -6,79 +6,59 @@
 
 namespace world {
 
-class VkMemoryCachePrivate {
-public:
-    struct Segment {
-        Segment(u32 size, DescriptorType descriptorType, u32 memTypeIndex)
-                : _data(new char[size]), _totalSize(size), _sizeAllocated(0),
-                  _updated(false) {
-            VulkanContext &ctx = Vulkan::context();
-            auto properties = ctx._physicalDevice.getProperties();
 
-            vk::BufferCreateInfo bufferInfo;
-            bufferInfo.size = size;
+// SEGMENT
 
-            switch (descriptorType) {
-            case DescriptorType::STORAGE_BUFFER:
-                bufferInfo.usage = vk::BufferUsageFlagBits::eStorageBuffer;
-                _alignment = properties.limits.minStorageBufferOffsetAlignment;
-                break;
-            case DescriptorType::UNIFORM_BUFFER:
-                bufferInfo.usage = vk::BufferUsageFlagBits::eUniformBuffer;
-                _alignment = properties.limits.minUniformBufferOffsetAlignment;
-                break;
-            }
+VkwMemoryCacheSegment::VkwMemoryCacheSegment(u32 size,
+                                             DescriptorType descriptorType,
+                                             u32 memTypeIndex)
+        : _data(new char[size]), _totalSize(size), _sizeAllocated(0),
+          _updated(false) {
 
-            // TODO handle concurrent shared buffer
-            bufferInfo.sharingMode = vk::SharingMode::eExclusive;
+    VulkanContext &ctx = Vulkan::context();
+    auto properties = ctx._physicalDevice.getProperties();
 
-            _buffer = ctx._device.createBuffer(bufferInfo, nullptr);
+    vk::BufferCreateInfo bufferInfo;
+    bufferInfo.size = size;
 
-            // create memory
-            vk::MemoryRequirements memRequirements =
-                ctx._device.getBufferMemoryRequirements(_buffer);
+    switch (descriptorType) {
+    case DescriptorType::STORAGE_BUFFER:
+        bufferInfo.usage = vk::BufferUsageFlagBits::eStorageBuffer;
+        _alignment = properties.limits.minStorageBufferOffsetAlignment;
+        break;
+    case DescriptorType::UNIFORM_BUFFER:
+        bufferInfo.usage = vk::BufferUsageFlagBits::eUniformBuffer;
+        _alignment = properties.limits.minUniformBufferOffsetAlignment;
+        break;
+    }
+
+    // TODO handle concurrent shared buffer
+    bufferInfo.sharingMode = vk::SharingMode::eExclusive;
+
+    _buffer = ctx._device.createBuffer(bufferInfo, nullptr);
+
+    // create memory
+    vk::MemoryRequirements memRequirements =
+        ctx._device.getBufferMemoryRequirements(_buffer);
 
 
-            vk::MemoryAllocateInfo memoryInfo = {};
-            memoryInfo.pNext = nullptr;
-            memoryInfo.allocationSize = memRequirements.size;
-            memoryInfo.memoryTypeIndex = memTypeIndex;
-            // TODO check if GPU_ONLY memory is supported
+    vk::MemoryAllocateInfo memoryInfo = {};
+    memoryInfo.pNext = nullptr;
+    memoryInfo.allocationSize = memRequirements.size;
+    memoryInfo.memoryTypeIndex = memTypeIndex;
+    // TODO check if GPU_ONLY memory is supported
 
-            _memory = ctx._device.allocateMemory(memoryInfo);
+    _memory = ctx._device.allocateMemory(memoryInfo);
 
-            ctx._device.bindBufferMemory(_buffer, _memory, 0);
-        }
+    ctx._device.bindBufferMemory(_buffer, _memory, 0);
+}
 
-        std::unique_ptr<char[]> _data;
-        vk::DeviceMemory _memory;
-        vk::Buffer _buffer;
 
-        u32 _totalSize;
-        u32 _sizeAllocated;
-        u32 _alignment;
-        /** Indicates if ... uh I don't know yet */
-        bool _updated;
-    };
-
-    /** Size of each segment of memory allocated by this memory cache */
-    u32 _segmentSize;
-
-    DescriptorType _usage;
-    MemoryType _memType;
-
-    u32 _memTypeIndex;
-
-    std::vector<Segment> _segments;
-};
+// MEMORY CACHE
 
 VkwMemoryCache::VkwMemoryCache(u32 segmentSize, DescriptorType usage,
                                MemoryType memType)
-        : _internal(std::make_shared<VkMemoryCachePrivate>()) {
-
-    _internal->_segmentSize = segmentSize;
-    _internal->_usage = usage;
-    _internal->_memType = memType;
+        : _segmentSize(segmentSize), _usage(usage), _memType(memType) {
 
     VulkanContext &ctx = Vulkan::context();
 
@@ -100,11 +80,11 @@ VkwMemoryCache::VkwMemoryCache(u32 segmentSize, DescriptorType usage,
     }
 
     try {
-        _internal->_memTypeIndex = ctx.findMemoryType(
-            segmentSize, requiredProperties, unwantedProperties);
+        _memTypeIndex = ctx.findMemoryType(segmentSize, requiredProperties,
+                                           unwantedProperties);
     } catch (std::runtime_error &e) {
-        _internal->_memTypeIndex = ctx.findMemoryType(
-            segmentSize, requiredProperties, vk::MemoryPropertyFlags{});
+        _memTypeIndex = ctx.findMemoryType(segmentSize, requiredProperties,
+                                           vk::MemoryPropertyFlags{});
     }
 }
 
@@ -114,7 +94,7 @@ VkwMemoryCache::~VkwMemoryCache() = default;
 // #VUID-VkWriteDescriptorSet-descriptorType-00327
 // TODO Check for buffer max size and alignment according to specs above
 VkwSubBuffer VkwMemoryCache::allocateBuffer(u32 size) {
-    const u32 segmentSize = _internal->_segmentSize;
+    const u32 segmentSize = _segmentSize;
 
     if (size > segmentSize) {
         throw std::invalid_argument("Requested size " + std::to_string(size) +
@@ -123,14 +103,12 @@ VkwSubBuffer VkwMemoryCache::allocateBuffer(u32 size) {
     }
 
     if (sizeRemaining() < size) {
-        _internal->_segments.emplace_back(segmentSize, _internal->_usage,
-                                          _internal->_memTypeIndex);
+        _segments.emplace_back(segmentSize, _usage, _memTypeIndex);
     }
 
-    auto &lastSegment = _internal->_segments.back();
-    const u32 offset =
-        static_cast<u32>(_internal->_segments.size() - 1) * segmentSize +
-        lastSegment._sizeAllocated;
+    auto &lastSegment = _segments.back();
+    const u32 offset = static_cast<u32>(_segments.size() - 1) * segmentSize +
+                       lastSegment._sizeAllocated;
 
     lastSegment._sizeAllocated += size;
 
@@ -149,10 +127,10 @@ void VkwMemoryCache::flush() {
 }
 
 void VkwMemoryCache::setData(void *data, u32 count, u32 offset) {
-    const u32 segmentSize = _internal->_segmentSize;
+    const u32 segmentSize = _segmentSize;
     const u32 inSegmentOffset = offset % segmentSize;
     const u32 segmentId = offset / segmentSize;
-    auto &segment = _internal->_segments[segmentId];
+    auto &segment = _segments[segmentId];
 
     VulkanContext &ctx = Vulkan::context();
 
@@ -163,10 +141,10 @@ void VkwMemoryCache::setData(void *data, u32 count, u32 offset) {
 }
 
 void VkwMemoryCache::getData(void *data, u32 count, u32 offset) {
-    const u32 segmentSize = _internal->_segmentSize;
+    const u32 segmentSize = _segmentSize;
     const u32 inSegmentOffset = offset % segmentSize;
     const u32 segmentId = offset / segmentSize;
-    auto &segment = _internal->_segments[segmentId];
+    auto &segment = _segments[segmentId];
 
     VulkanContext &ctx = Vulkan::context();
 
@@ -177,23 +155,23 @@ void VkwMemoryCache::getData(void *data, u32 count, u32 offset) {
 }
 
 vk::Buffer VkwMemoryCache::getBufferHandle(u32 offset) {
-    const u32 segmentSize = _internal->_segmentSize;
+    const u32 segmentSize = _segmentSize;
     const u32 segmentId = offset / segmentSize;
-    auto &segment = _internal->_segments[segmentId];
+    auto &segment = _segments[segmentId];
 
     return segment._buffer;
 }
 
 u32 VkwMemoryCache::getBufferOffset(u32 offset) {
-    return offset - (offset % _internal->_segmentSize);
+    return offset - (offset % _segmentSize);
 }
 
 u32 VkwMemoryCache::sizeRemaining() const {
-    if (_internal->_segments.size() == 0) {
+    if (_segments.size() == 0) {
         return 0;
     }
 
-    auto &lastSegment = _internal->_segments.back();
+    auto &lastSegment = _segments.back();
     return lastSegment._totalSize - lastSegment._sizeAllocated;
 }
 } // namespace world

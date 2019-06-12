@@ -13,12 +13,30 @@
 
 namespace world {
 
-class VkMemoryCachePrivate;
+struct VKWORLD_EXPORT VkwMemoryCacheSegment {
+    std::unique_ptr<char[]> _data;
+    vk::DeviceMemory _memory;
+    vk::Buffer _buffer;
+
+    u32 _totalSize;
+    u32 _sizeAllocated;
+    u32 _alignment;
+    /** Indicates if ... uh I don't know yet */
+    bool _updated;
+
+
+    VkwMemoryCacheSegment(u32 size, DescriptorType descriptorType,
+                          u32 memTypeIndex);
+};
 
 class VKWORLD_EXPORT VkwMemoryCache : public IVkwMemoryAccess {
 public:
     VkwMemoryCache(u32 segmentSize, DescriptorType usage, MemoryType memType);
     ~VkwMemoryCache() override;
+
+    VkwMemoryCache(const VkwMemoryCache &other) = delete;
+
+    VkwMemoryCache &operator=(VkwMemoryCache &other) = delete;
 
     /** Creates a buffer of given size and binds it with one of the memory
      * segments. */
@@ -39,8 +57,15 @@ public:
     u32 getBufferOffset(u32 offset) override;
 
 private:
-    std::shared_ptr<VkMemoryCachePrivate> _internal;
+    /** Size of each segment of memory allocated by this memory cache */
+    u32 _segmentSize;
 
+    DescriptorType _usage;
+    MemoryType _memType;
+
+    u32 _memTypeIndex;
+
+    std::vector<VkwMemoryCacheSegment> _segments;
 
     u32 sizeRemaining() const;
 };

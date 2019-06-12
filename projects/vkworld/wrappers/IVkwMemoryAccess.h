@@ -3,11 +3,9 @@
 
 #include "VkWorldConfig.h"
 
-#include <world/core/WorldTypes.h>
+#include <vulkan/vulkan.hpp>
 
-namespace vk {
-class Buffer;
-}
+#include <world/core/WorldTypes.h>
 
 namespace world {
 

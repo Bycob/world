@@ -7,13 +7,10 @@
 
 #include <world/core/WorldTypes.h>
 
+#include <vulkan/vulkan.hpp>
+
 #include "VkwEnums.h"
 #include "VkwDescriptorSetLayout.h"
-
-namespace vk {
-class Pipeline;
-class PipelineLayout;
-} // namespace vk
 
 namespace world {
 

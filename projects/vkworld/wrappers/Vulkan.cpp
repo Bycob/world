@@ -330,19 +330,19 @@ u32 VulkanContext::findMemoryType(u32 memorySize,
 
 VkwSubBuffer VulkanContext::allocate(u32 size, DescriptorType usage,
                                      MemoryType memType) {
-    auto key = std::make_pair(usage, memType);
+    memid key(usage, memType);
     auto it = _memory.find(key);
 
     if (it == _memory.end()) {
         // segment size = 64 Mo
         it = _memory
                  .insert(std::make_pair(
-                     key, VkwMemoryCache(64 * 1024 * 1024, usage, memType)))
+                     key, std::make_unique<VkwMemoryCache>(64 * 1024 * 1024, usage, memType)))
                  .first;
     }
 
     auto &allocator = it->second;
-    return allocator.allocateBuffer(size);
+    return allocator->allocateBuffer(size);
 }
 
 std::vector<char> VulkanContext::readFile(const std::string &filename) {

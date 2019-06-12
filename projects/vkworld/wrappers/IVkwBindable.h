@@ -3,10 +3,7 @@
 
 #include "VkWorldConfig.h"
 
-namespace vk {
-class DescriptorSet;
-enum class DescriptorType;
-} // namespace vk
+#include <vulkan/vulkan.hpp>
 
 namespace world {
 

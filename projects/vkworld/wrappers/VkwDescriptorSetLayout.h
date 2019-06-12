@@ -6,14 +6,11 @@
 #include <memory>
 #include <initializer_list>
 
+#include <vulkan/vulkan.hpp>
+
 #include <world/core/WorldTypes.h>
 
 #include "VkwEnums.h"
-
-namespace vk {
-class DescriptorSetLayout;
-enum class DescriptorType;
-} // namespace vk
 
 namespace world {
 

@@ -7,13 +7,11 @@
 
 #include <world/core/WorldTypes.h>
 
+#include <vulkan/vulkan.hpp>
+
 #include "IVkwBindable.h"
 #include "VkwEnums.h"
 #include "VkwDescriptorSetLayout.h"
-
-namespace vk {
-class DescriptorSet;
-}
 
 namespace world {
 
