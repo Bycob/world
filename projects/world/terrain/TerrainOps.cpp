@@ -4,6 +4,10 @@
 
 namespace world {
 
+void TerrainOps::fill(Terrain &terrain, double value) {
+    terrain._array.fill(value);
+}
+
 void TerrainOps::applyOffset(Terrain &terrain, const arma::mat &offset) {
     if (offset.n_rows != terrain._array.n_rows ||
         offset.n_cols != terrain._array.n_cols) {

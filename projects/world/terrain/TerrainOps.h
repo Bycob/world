@@ -8,6 +8,8 @@ namespace world {
 
 class WORLDAPI_EXPORT TerrainOps {
 public:
+    static void fill(Terrain &terrain, double value);
+
     static void applyOffset(Terrain &terrain, const arma::mat &offset);
 
     static void applyOffset(Terrain &terrain, double offset);
