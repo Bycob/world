@@ -3,6 +3,8 @@
 
 #include "VkWorldConfig.h"
 
+#include <random>
+
 #include <world/terrain/ITerrainWorker.h>
 
 namespace world {

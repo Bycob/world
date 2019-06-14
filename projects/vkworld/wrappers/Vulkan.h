@@ -38,6 +38,10 @@ public:
 
     ~VulkanContext();
 
+    VulkanContext(const VulkanContext &other) = delete;
+
+    VulkanContext &operator=(const VulkanContext &other) = delete;
+
 
     // RESOURCES MANAGEMENT
     vk::ShaderModule createShader(const std::vector<char> &shaderCode);

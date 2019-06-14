@@ -1,6 +1,7 @@
 #include "MultilayerGroundTexture.h"
 
 #include <list>
+#include <numeric>
 
 #include "wrappers/Vulkan.h"
 #include "wrappers/VkwMemoryHelper.h"
