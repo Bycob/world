@@ -5,6 +5,7 @@
 
 #include <utility>
 #include <functional>
+#include <set>
 
 #include "world/core/TileSystem.h"
 #include "world/flat/IGround.h"
@@ -122,6 +123,8 @@ private:
      * nullopt. */
     optional<HeightmapGround::Tile &> lookUpTile(const TileCoordinates &key);
 
+    bool isGenerated(const TileCoordinates &key);
+
 
     // DATA
     /** Gets a unique string id for the given tile in the Ground. */
@@ -129,9 +132,11 @@ private:
 
 
     // GENERATION
+    void addNotGeneratedParents(std::set<TileCoordinates> &keys);
+
     /** Generate the terrains located at all the keys given in parameters. If
      * the terrains already exist they are not generated again. */
-    void generateTerrains(const std::vector<TileCoordinates> &keys);
+    void generateTerrains(const std::set<TileCoordinates> &keys);
 
     void generateMesh(const TileCoordinates &key);
 

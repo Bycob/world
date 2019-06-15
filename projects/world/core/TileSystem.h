@@ -97,7 +97,8 @@ public:
 
     /** Iterates over all the visible tiles in the given resolution model,
      * inside of the zone delimited by the given bounds. Iterated tiles
-     * are sorted as if operator< was used. */
+     * are sorted as if operator< was used, which implies low lod tiles come
+     * first. */
     TileSystemIterator iterate(const IResolutionModel &resolutionModel,
                                const BoundingBox &bounds) const;
 

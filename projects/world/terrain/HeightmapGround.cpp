@@ -16,12 +16,14 @@
 #include "AltitudeTexturer.h"
 #include "TerrainOps.h"
 #include "world/core/Profiler.h"
+#include "DiamondSquareTerrain.h"
 
 namespace world {
 
 struct HeightmapGround::Tile {
+    TileCoordinates _key;
     std::vector<optional<Terrain>> _cache;
-    std::unique_ptr<Terrain> _final;
+    std::unique_ptr<Terrain> _terrain;
     std::unique_ptr<Mesh> _mesh;
     u64 _lastAccess;
 };
@@ -71,7 +73,7 @@ public:
             return nullopt;
 
         auto parentId = _ground._tileSystem.getParentTileCoordinates(_key);
-        auto &tile = _ground.provide(parentId);
+        auto &tile = *_ground.lookUpTile(parentId);
         auto &terrain = tile._cache[_genID];
 
         if (terrain) {
@@ -119,7 +121,8 @@ HeightmapGround::HeightmapGround(double unitSize, double minAltitude,
 HeightmapGround::~HeightmapGround() { delete _internal; }
 
 void HeightmapGround::setDefaultWorkerSet() {
-    addWorker<PerlinTerrainGenerator>(3, 4., 0.35);
+    // addWorker<PerlinTerrainGenerator>(3, 4., 0.35);
+    addWorker<DiamondSquareTerrain>(0.5);
     addWorker<CustomWorldRMModifier>();
 
     // Texturer
@@ -160,17 +163,23 @@ void HeightmapGround::collect(ICollector &collector,
     wresModel.setOffset({0, 0, estimAltitude});*/
 
     // Find terrains to generate
-    std::vector<TileCoordinates> coordinates;
+    std::set<TileCoordinates> toCollect;
+    std::set<TileCoordinates> toGenerate;
 
     for (auto it = _tileSystem.iterate(resolutionModel, bbox); !it.endReached();
          ++it) {
 
-        coordinates.push_back(*it);
+        toCollect.insert(*it);
+
+        if (!isGenerated(*it)) {
+            toGenerate.insert(*it);
+        }
     }
 
-    generateTerrains(coordinates);
+    addNotGeneratedParents(toGenerate);
+    generateTerrains(toGenerate);
 
-    for (auto &coord : coordinates) {
+    for (auto &coord : toCollect) {
         addTerrain(coord, collector);
     }
 
@@ -294,6 +303,9 @@ void HeightmapGround::updateCache() {
     }
 }
 
+
+// ==== ACCESS
+
 void HeightmapGround::registerAccess(const TileCoordinates &key, Tile &tile) {
     if (!_manageCache)
         return;
@@ -320,7 +332,9 @@ Tile &HeightmapGround::provide(const TileCoordinates &key) {
     auto it = _internal->_terrains.find(key);
 
     if (it == _internal->_terrains.end()) {
-        generateTerrains({key});
+        std::set<TileCoordinates> coords{key};
+        addNotGeneratedParents(coords);
+        generateTerrains(coords);
         it = _internal->_terrains.find(key);
     }
 
@@ -330,7 +344,7 @@ Tile &HeightmapGround::provide(const TileCoordinates &key) {
 }
 
 Terrain &HeightmapGround::provideTerrain(const TileCoordinates &key) {
-    return *provide(key)._final;
+    return *provide(key)._terrain;
 }
 
 Mesh &HeightmapGround::provideMesh(const TileCoordinates &key) {
@@ -355,6 +369,11 @@ optional<HeightmapGround::Tile &> HeightmapGround::lookUpTile(
     }
 }
 
+bool HeightmapGround::isGenerated(const TileCoordinates &key) {
+    return _internal->_terrains.find(key) != _internal->_terrains.end();
+}
+
+
 std::string HeightmapGround::getTerrainDataId(
     const TileCoordinates &key) const {
     u64 id = static_cast<u64>(key._pos.x & 0x0FFFFFFFu) +
@@ -363,59 +382,83 @@ std::string HeightmapGround::getTerrainDataId(
     return std::to_string(id);
 }
 
-void HeightmapGround::generateTerrains(
-    const std::vector<TileCoordinates> &keys) {
-    std::vector<std::pair<TileCoordinates, Tile &>> generatedTiles;
-    generatedTiles.reserve(keys.size());
 
-    for (const TileCoordinates &key : keys) {
-        // Create a new tile only if it was not generated yet
-        if (_internal->_terrains.find(key) == _internal->_terrains.end()) {
-            generatedTiles.emplace_back(
-                key, _internal->_terrains[key] =
-                         Tile{std::vector<optional<Terrain>>(),
-                              std::make_unique<Terrain>(_terrainRes),
-                              std::unique_ptr<Mesh>(), 0});
-        }
-    }
+// ==== GENERATION
+void HeightmapGround::addNotGeneratedParents(std::set<TileCoordinates> &keys) {
+    std::set<TileCoordinates> temp;
 
-    // Creation of terrain and textures
-    auto texSize = _terrainRes * _textureRes;
+    do {
+        temp.clear();
 
-    for (auto &keyval : generatedTiles) {
-        const auto &key = keyval.first;
-        Terrain &terrain = *keyval.second._final;
+        for (const TileCoordinates &key : keys) {
+            if (key._lod != 0) {
+                auto pkey = _tileSystem.getParentTileCoordinates(key);
 
-        terrain.setTexture(Image(texSize, texSize, ImageType::RGB));
-
-        double terrainSize = _tileSystem.getTileSize(key._lod).x;
-        terrain.setBounds(terrainSize * key._pos.x, terrainSize * key._pos.y,
-                          _minAltitude, terrainSize * (key._pos.x + 1),
-                          terrainSize * (key._pos.y + 1), _maxAltitude);
-    }
-
-    // Generation
-    GroundContext context(*this, {}, 0);
-
-    for (auto &generator : _internal->_generators) {
-        for (auto &keyval : generatedTiles) {
-            Tile &tile = keyval.second;
-            Terrain &terrain = *tile._final;
-            std::vector<optional<Terrain>> &cache = tile._cache;
-
-            context._key = keyval.first;
-            generator->processTile(context);
-
-            if (context._registerState) {
-                cache.emplace_back(terrain);
-                context._registerState = false;
-            } else {
-                cache.emplace_back(nullopt);
+                if (keys.find(pkey) == keys.end() && !isGenerated(key)) {
+                    temp.insert(pkey);
+                }
             }
         }
 
-        generator->flush();
-        context._genID++;
+        keys.insert(temp.begin(), temp.end());
+    } while (temp.size() != 0);
+}
+
+void HeightmapGround::generateTerrains(const std::set<TileCoordinates> &keys) {
+
+    typedef std::vector<Tile *> generateTiles_t;
+    std::vector<generateTiles_t> lods(_tileSystem._maxLod + 1);
+
+    for (const TileCoordinates &key : keys) {
+        Tile *tile = &(_internal->_terrains[key] =
+                           Tile{key, std::vector<optional<Terrain>>(),
+                                std::make_unique<Terrain>(_terrainRes),
+                                std::unique_ptr<Mesh>(), 0});
+        lods[key._lod].push_back(tile);
+    }
+
+    const auto texSize = _terrainRes * _textureRes;
+
+    // Each lod is generated separately to ensure parents are
+    // created before generating children
+    for (auto &generatedTiles : lods) {
+
+        // Allocation of terrain and textures
+        for (auto &tile : generatedTiles) {
+            const auto &key = tile->_key;
+            Terrain &terrain = *tile->_terrain;
+
+            terrain.setTexture(Image(texSize, texSize, ImageType::RGB));
+
+            double terrainSize = _tileSystem.getTileSize(key._lod).x;
+            terrain.setBounds(terrainSize * key._pos.x,
+                              terrainSize * key._pos.y, _minAltitude,
+                              terrainSize * (key._pos.x + 1),
+                              terrainSize * (key._pos.y + 1), _maxAltitude);
+        }
+
+        // Generation
+        GroundContext context(*this, {}, 0);
+
+        for (auto &generator : _internal->_generators) {
+            for (auto &tile : generatedTiles) {
+                Terrain &terrain = *tile->_terrain;
+                std::vector<optional<Terrain>> &cache = tile->_cache;
+
+                context._key = tile->_key;
+                generator->processTile(context);
+
+                if (context._registerState) {
+                    cache.emplace_back(terrain);
+                    context._registerState = false;
+                } else {
+                    cache.emplace_back(nullopt);
+                }
+            }
+
+            generator->flush();
+            context._genID++;
+        }
     }
 }
 

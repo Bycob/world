@@ -11,12 +11,19 @@ void DiamondSquareTerrain::processTile(ITileContext &context) {
     int lod = context.getParentCount();
     Terrain &terrain = context.getTerrain();
 
+    vec2i c = context.getTileCoords();
+
     if (lod == 0) {
         processTerrain(terrain);
     } else {
-        copyParent(context.getParent().value(), terrain);
+        const Terrain &parent = context.getParent().value();
+        vec2i offset =
+            vec2i(mod(c.x, 2), mod(c.y, 2)) * (parent.getResolution() / 2);
+        copyParent(parent, terrain, offset);
         compute(terrain, 1);
     }
+
+    context.registerCurrentState();
 }
 
 int findMaxLevel(int terrainRes) {
@@ -83,13 +90,13 @@ void DiamondSquareTerrain::compute(Terrain &terrain, int level) {
     }
 }
 
-void DiamondSquareTerrain::copyParent(const Terrain &parent, Terrain &terrain) {
-    // We assume child resolution is 2^n + 1 and parent one is 2^(n-1) +1
-    int pres = parent.getResolution();
+void DiamondSquareTerrain::copyParent(const Terrain &parent, Terrain &terrain,
+                                      const vec2i &offset) {
+    int res = terrain.getResolution();
 
-    for (int y = 0; y < pres; ++y) {
-        for (int x = 0; x < pres; ++x) {
-            terrain(x * 2, y * 2) = parent(x, y);
+    for (int y = 0; y < res; y += 2) {
+        for (int x = 0; x < res; x += 2) {
+            terrain(x, y) = parent(x / 2 + offset.x, y / 2 + offset.y);
         }
     }
 }

@@ -30,7 +30,8 @@ private:
 
     void compute(Terrain &terrain, int level);
 
-    void copyParent(const Terrain &parent, Terrain &terrain);
+    void copyParent(const Terrain &parent, Terrain &terrain,
+                    const vec2i &offset);
 };
 
 } // namespace world
