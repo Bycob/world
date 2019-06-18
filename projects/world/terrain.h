@@ -11,6 +11,7 @@
 #include "terrain/TerrainOps.h"
 #include "terrain/TerrainStream.h"
 #include "terrain/AltitudeTexturer.h"
+#include "terrain/SimpleTexturer.h"
 
 // deprecated
 #include "terrain/TerrainSubdivisionGenerator.h"

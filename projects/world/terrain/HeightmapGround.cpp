@@ -14,6 +14,7 @@
 #include "PerlinTerrainGenerator.h"
 #include "ReliefMapModifier.h"
 #include "AltitudeTexturer.h"
+#include "SimpleTexturer.h"
 #include "TerrainOps.h"
 #include "world/core/Profiler.h"
 #include "DiamondSquareTerrain.h"
@@ -124,7 +125,7 @@ void HeightmapGround::setDefaultWorkerSet() {
     addWorker<CustomWorldRMModifier>();
 
     // Texturer
-    auto &texturer = addWorker<AltitudeTexturer>();
+    auto &texturer = addWorker<SimpleTexturer>();
     ColorMap &colorMap = texturer.getColorMap();
 
     colorMap.addPoint({0.15, 0.5}, Color4u(209, 207, 153)); // Sand
