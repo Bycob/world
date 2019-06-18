@@ -42,16 +42,11 @@ public:
 
     double getAltitudeRange() const { return _maxAltitude - _minAltitude; }
 
-    void setTerrainResolution(int terrainRes) {
-        _terrainRes = terrainRes;
-        _tileSystem._bufferRes.x = _tileSystem._bufferRes.y =
-            _terrainRes * _textureRes;
-    }
+    void setTerrainResolution(int terrainRes) { _terrainRes = terrainRes; }
 
     void setTextureRes(int textureRes) {
         _textureRes = textureRes;
-        _tileSystem._bufferRes.x = _tileSystem._bufferRes.y =
-            _terrainRes * _textureRes;
+        _tileSystem._bufferRes.x = _tileSystem._bufferRes.y = _textureRes;
     }
 
     void setMaxLOD(int lod) { _tileSystem._maxLod = lod; }
@@ -88,8 +83,7 @@ private:
     double _maxAltitude;
 
     int _terrainRes = 33;
-    /** Texture resolution, relatively to the terrain resolution */
-    int _textureRes = 4;
+    int _textureRes = 1024;
 
     TileSystem _tileSystem;
 

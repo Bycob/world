@@ -113,9 +113,7 @@ HeightmapGround::HeightmapGround(double unitSize, double minAltitude,
                                  double maxAltitude)
         : _internal(new PGround()), _minAltitude(minAltitude),
           _maxAltitude(maxAltitude),
-          _tileSystem(5,
-                      vec3d(_terrainRes * _textureRes * 4,
-                            _terrainRes * _textureRes * 4, 0),
+          _tileSystem(5, vec3d(_textureRes, _textureRes, 0),
                       vec3d(unitSize, unitSize, 0)) {}
 
 HeightmapGround::~HeightmapGround() { delete _internal; }
@@ -126,7 +124,7 @@ void HeightmapGround::setDefaultWorkerSet() {
     addWorker<CustomWorldRMModifier>();
 
     // Texturer
-    auto &texturer = addWorker<AltitudeTexturer>(_textureRes);
+    auto &texturer = addWorker<AltitudeTexturer>();
     ColorMap &colorMap = texturer.getColorMap();
 
     colorMap.addPoint({0.15, 0.5}, Color4u(209, 207, 153)); // Sand
@@ -417,8 +415,6 @@ void HeightmapGround::generateTerrains(const std::set<TileCoordinates> &keys) {
         lods[key._lod].push_back(tile);
     }
 
-    const auto texSize = _terrainRes * _textureRes;
-
     // Each lod is generated separately to ensure parents are
     // created before generating children
     for (auto &generatedTiles : lods) {
@@ -428,7 +424,7 @@ void HeightmapGround::generateTerrains(const std::set<TileCoordinates> &keys) {
             const auto &key = tile->_key;
             Terrain &terrain = *tile->_terrain;
 
-            terrain.setTexture(Image(texSize, texSize, ImageType::RGB));
+            terrain.setTexture(Image(_textureRes, _textureRes, ImageType::RGB));
 
             double terrainSize = _tileSystem.getTileSize(key._lod).x;
             terrain.setBounds(terrainSize * key._pos.x,
