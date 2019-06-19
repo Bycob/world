@@ -52,6 +52,9 @@ TEST_CASE("Test diamond square terrain generation", "[diamond_square]") {
             for (int x = 0; x < terrain.getResolution(); ++x) {
                 if (abs(terrain(x, y)) <
                     std::numeric_limits<double>::epsilon()) {
+
+                    std::cout << vec2i{x, y} << " is " << terrain(x, y)
+                              << std::endl;
                     no_nulls = false;
                 }
             }
@@ -93,5 +96,5 @@ TEST_CASE("Test diamond square terrain generation", "[diamond_square]") {
         }
     }
 
-    // TODO test errors when
+    // TODO test errors when terrain has an invalid size
 }

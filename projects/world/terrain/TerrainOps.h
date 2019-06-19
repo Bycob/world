@@ -3,6 +3,7 @@
 #include "world/core/WorldConfig.h"
 
 #include "Terrain.h"
+#include "ITerrainWorker.h"
 
 namespace world {
 
@@ -17,5 +18,7 @@ public:
     static void multiply(Terrain &terrain, const arma::mat &factor);
 
     static void multiply(Terrain &terrain, double factor);
+
+    static void copyNeighbours(Terrain &terrain, ITileContext &context);
 };
 } // namespace world

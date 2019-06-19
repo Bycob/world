@@ -410,7 +410,9 @@ void HeightmapGround::generateTerrains(const std::set<TileCoordinates> &keys) {
 
     for (const TileCoordinates &key : keys) {
         Tile *tile = &(_internal->_terrains[key] =
-                           Tile{key, std::vector<optional<Terrain>>(),
+                           Tile{key,
+                                std::vector<optional<Terrain>>(
+                                    _internal->_generators.size(), nullopt),
                                 std::make_unique<Terrain>(_terrainRes),
                                 std::unique_ptr<Mesh>(), 0});
         lods[key._lod].push_back(tile);
@@ -425,7 +427,8 @@ void HeightmapGround::generateTerrains(const std::set<TileCoordinates> &keys) {
             const auto &key = tile->_key;
             Terrain &terrain = *tile->_terrain;
 
-            terrain.setTexture(Image(_textureRes, _textureRes, ImageType::RGB));
+            terrain.setTexture(
+                Image(_textureRes / 4, _textureRes / 4, ImageType::RGB));
 
             double terrainSize = _tileSystem.getTileSize(key._lod).x;
             terrain.setBounds(terrainSize * key._pos.x,
@@ -446,10 +449,8 @@ void HeightmapGround::generateTerrains(const std::set<TileCoordinates> &keys) {
                 generator->processTile(context);
 
                 if (context._registerState) {
-                    cache.emplace_back(terrain);
+                    cache[context._genID] = terrain;
                     context._registerState = false;
-                } else {
-                    cache.emplace_back(nullopt);
                 }
             }
 
