@@ -17,10 +17,7 @@ namespace world {
 class PGround;
 
 /** This class manages an infinite ground with as much details
- * as we want. The access method are quite similar to the ones
- * used on the WorldObjects : you can collect parts of the ground
- * by specifying which part of the world you're wanting to get
- * content from. */
+ * as we want. */
 class WORLDAPI_EXPORT HeightmapGround : public GroundNode {
 public:
     struct Tile;
@@ -62,6 +59,8 @@ public:
      * each of which adds one feature after the other to the terrain.
      * */
     template <typename T, typename... Args> T &addWorker(Args &&... args);
+
+    void setLodRange(const ITerrainWorker &worker, int minLod, int maxLod);
 
     // EXPLORATION
     double observeAltitudeAt(double x, double y, double resolution) override;

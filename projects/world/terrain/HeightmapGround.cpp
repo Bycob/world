@@ -29,6 +29,11 @@ struct HeightmapGround::Tile {
     u64 _lastAccess;
 };
 
+struct WorkerConstraints {
+    int _lodMin = 0;
+    int _lodMax = 0xff;
+};
+
 using Tile = HeightmapGround::Tile;
 
 // Utility class
@@ -98,7 +103,8 @@ public:
     PGround() : _terrains(65536), _accesses(65536) {}
 
     std::unordered_map<TileCoordinates, Tile> _terrains;
-    std::list<std::unique_ptr<ITerrainWorker>> _generators;
+    std::list<std::pair<std::unique_ptr<ITerrainWorker>, WorkerConstraints>>
+        _generators;
 
     u64 _accessCounter = 0;
     std::unordered_map<u64, TileCoordinates> _accesses;
@@ -120,8 +126,9 @@ HeightmapGround::HeightmapGround(double unitSize, double minAltitude,
 HeightmapGround::~HeightmapGround() { delete _internal; }
 
 void HeightmapGround::setDefaultWorkerSet() {
-    // addWorker<PerlinTerrainGenerator>(3, 4., 0.35);
-    addWorker<DiamondSquareTerrain>(0.5);
+    // setLodRange(addWorker<PerlinTerrainGenerator>(3, 4., 0.35), 0, 0);
+    // setLodRange(addWorker<DiamondSquareTerrain>(0.5), 1, 5);
+    addWorker<PerlinTerrainGenerator>(3, 4., 0.35);
     addWorker<CustomWorldRMModifier>();
 
     // Texturer
@@ -140,6 +147,18 @@ void HeightmapGround::setDefaultWorkerSet() {
     colorMap.addPoint({1, 0}, Color4u(244, 252, 250));      // Snow
     colorMap.addPoint({1, 1}, Color4u(160, 160, 160));      // Rock
     colorMap.setOrder(3);
+}
+
+void HeightmapGround::setLodRange(const ITerrainWorker &worker, int minLod,
+                                  int maxLod) {
+    for (auto &genPair : _internal->_generators) {
+        // TODO not rely on addresses to check worker equality ?
+        if (genPair.first.get() == &worker) {
+            genPair.second._lodMin = minLod;
+            genPair.second._lodMax = maxLod;
+            break;
+        }
+    }
 }
 
 double HeightmapGround::observeAltitudeAt(double x, double y,
@@ -218,7 +237,8 @@ void HeightmapGround::paintTexture(const vec2d &origin, const vec2d &size,
 }
 
 void HeightmapGround::addWorkerInternal(ITerrainWorker *worker) {
-    _internal->_generators.push_back(std::unique_ptr<ITerrainWorker>(worker));
+    _internal->_generators.emplace_back(std::unique_ptr<ITerrainWorker>(worker),
+                                        WorkerConstraints{});
 }
 
 double HeightmapGround::observeAltitudeAt(double x, double y, int lvl) {
@@ -420,6 +440,8 @@ void HeightmapGround::generateTerrains(const std::set<TileCoordinates> &keys) {
 
     // Each lod is generated separately to ensure parents are
     // created before generating children
+    int lod = 0;
+
     for (auto &generatedTiles : lods) {
 
         // Allocation of terrain and textures
@@ -440,23 +462,35 @@ void HeightmapGround::generateTerrains(const std::set<TileCoordinates> &keys) {
         // Generation
         GroundContext context(*this, {}, 0);
 
-        for (auto &generator : _internal->_generators) {
-            for (auto &tile : generatedTiles) {
-                Terrain &terrain = *tile->_terrain;
-                std::vector<optional<Terrain>> &cache = tile->_cache;
+        for (auto &genPair : _internal->_generators) {
+            auto &generator = genPair.first;
+            auto &constraints = genPair.second;
 
-                context._key = tile->_key;
-                generator->processTile(context);
+            // check if constraints are fullfilled
+            bool doGeneration =
+                constraints._lodMin <= lod && constraints._lodMax >= lod;
 
-                if (context._registerState) {
-                    cache[context._genID] = terrain;
-                    context._registerState = false;
+            if (doGeneration) {
+                for (auto &tile : generatedTiles) {
+                    Terrain &terrain = *tile->_terrain;
+                    std::vector<optional<Terrain>> &cache = tile->_cache;
+
+                    context._key = tile->_key;
+                    generator->processTile(context);
+
+                    if (context._registerState) {
+                        cache[context._genID] = terrain;
+                        context._registerState = false;
+                    }
                 }
+
+                generator->flush();
             }
 
-            generator->flush();
             context._genID++;
         }
+
+        ++lod;
     }
 }
 
