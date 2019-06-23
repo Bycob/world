@@ -129,10 +129,12 @@ void HeightmapGround::setDefaultWorkerSet() {
     // setLodRange(addWorker<PerlinTerrainGenerator>(3, 4., 0.35), 0, 0);
     // setLodRange(addWorker<DiamondSquareTerrain>(0.5), 1, 5);
     addWorker<PerlinTerrainGenerator>(3, 4., 0.35);
-    addWorker<CustomWorldRMModifier>();
+    auto &map = addWorker<CustomWorldRMModifier>();
+    map.setRegion({0, 0}, 10000, 3, 0.1, 0.3);
+    map.setRegion({0, 0}, 6000, 0.7, 1.6, 0.8);
 
     // Texturer
-    auto &texturer = addWorker<SimpleTexturer>();
+    auto &texturer = addWorker<AltitudeTexturer>();
     ColorMap &colorMap = texturer.getColorMap();
 
     colorMap.addPoint({0.15, 0.5}, Color4u(209, 207, 153)); // Sand

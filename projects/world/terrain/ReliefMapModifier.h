@@ -7,6 +7,7 @@
 #include <random>
 #include <memory>
 
+#include "world/core/TileSystem.h"
 #include "ITerrainWorker.h"
 #include "ReliefParameters.h"
 
@@ -22,7 +23,7 @@ namespace world {
  * would have a high offset but a low diff. */
 class WORLDAPI_EXPORT ReliefMapModifier : public ITerrainWorker {
 public:
-    ReliefMapModifier();
+    ReliefMapModifier(double width = 400000, int resolution = 400);
 
     void setMapResolution(int mapres);
 
@@ -32,11 +33,15 @@ public:
 
     const std::pair<Terrain, Terrain> &obtainMap(int x, int y);
 
+    void setRegion(const vec2d &center, double radius, double curvature,
+                   double height, double diff);
+
 protected:
-    int _mapResolution = 200;
-    double _mapPointSize = 2000;
     mutable std::mt19937 _rng;
+    TileSystem _tileSystem;
     std::map<vec2i, std::pair<Terrain, Terrain>> _reliefMap;
+
+    std::pair<Terrain, Terrain> &provideMap(int x, int y);
 
     virtual void generate(Terrain &height, Terrain &heightDiff) = 0;
 };

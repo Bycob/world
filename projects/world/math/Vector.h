@@ -58,6 +58,9 @@ template <typename T> struct vec3 {
     T squaredLength(const vec3<T> &rhs) const;
     double length(const vec3<T> &rhs) const;
 
+    vec3<T> floor() const;
+    vec3<T> ceil() const;
+
     static double length(const vec3<T> &vec1, const vec3<T> &vec2);
 };
 
@@ -89,6 +92,9 @@ template <typename T> struct vec2 {
 
     T squaredLength(const vec2<T> &rhs) const;
     double length(const vec2<T> &rhs) const;
+
+    vec2<T> floor() const;
+    vec2<T> ceil() const;
 
     static double length(const vec2<T> &vec1, const vec2<T> &vec2);
 };
@@ -242,6 +248,14 @@ template <typename T> inline double vec3<T>::length(const vec3<T> &rhs) const {
     return sqrt(squaredLength(rhs));
 }
 
+template <typename T> inline vec3<T> vec3<T>::floor() const {
+    return {T(::floor(x)), T(::floor(y)), T(::floor(z))};
+}
+
+template <typename T> inline vec3<T> vec3<T>::ceil() const {
+    return {T(::ceil(x)), T(::ceil(y)), T(::ceil(z))};
+}
+
 template <typename T>
 inline double vec3<T>::length(const vec3<T> &vec1, const vec3<T> &vec2) {
     return vec1.length(vec2);
@@ -343,6 +357,14 @@ inline T vec2<T>::squaredLength(const vec2<T> &rhs) const {
 
 template <typename T> inline double vec2<T>::length(const vec2<T> &rhs) const {
     return sqrt(squaredLength(rhs));
+}
+
+template <typename T> inline vec2<T> vec2<T>::floor() const {
+    return {T(::floor(x)), T(::floor(y))};
+}
+
+template <typename T> inline vec2<T> vec2<T>::ceil() const {
+    return {T(::ceil(x)), T(::ceil(y))};
 }
 
 template <typename T>
