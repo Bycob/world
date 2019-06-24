@@ -86,8 +86,8 @@ private:
 
     TileSystem _tileSystem;
 
-    bool _manageCache = false;
-    u32 _maxCacheSize = 20000;
+    bool _manageCache = true;
+    u32 _maxCacheSize = 500;
 
     // WORKER
     void addWorkerInternal(ITerrainWorker *worker);

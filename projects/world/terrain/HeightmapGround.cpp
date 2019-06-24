@@ -120,7 +120,7 @@ HeightmapGround::HeightmapGround(double unitSize, double minAltitude,
                                  double maxAltitude)
         : _internal(new PGround()), _minAltitude(minAltitude),
           _maxAltitude(maxAltitude),
-          _tileSystem(5, vec3d(_textureRes, _textureRes, 0),
+          _tileSystem(7, vec3d(_textureRes, _textureRes, 0),
                       vec3d(unitSize, unitSize, 0)) {}
 
 HeightmapGround::~HeightmapGround() { delete _internal; }
@@ -134,7 +134,7 @@ void HeightmapGround::setDefaultWorkerSet() {
     map.setRegion({0, 0}, 6000, 0.7, 1.6, 0.8);
 
     // Texturer
-    auto &texturer = addWorker<AltitudeTexturer>();
+    auto &texturer = addWorker<SimpleTexturer>();
     ColorMap &colorMap = texturer.getColorMap();
 
     colorMap.addPoint({0.15, 0.5}, Color4u(209, 207, 153)); // Sand
@@ -453,7 +453,7 @@ void HeightmapGround::generateTerrains(const std::set<TileCoordinates> &keys) {
             Terrain &terrain = *tile->_terrain;
 
             terrain.setTexture(
-                Image(_textureRes / 4, _textureRes / 4, ImageType::RGB));
+                Image(_textureRes, _textureRes, ImageType::RGB));
 
             double terrainSize = _tileSystem.getTileSize(key._lod).x;
             terrain.setBounds(terrainSize * key._pos.x,
