@@ -385,6 +385,8 @@ template struct WORLDAPI_EXPORT vec2<int>;
 
 typedef vec3<double> vec3d;
 typedef vec3<int> vec3i;
+typedef vec3<unsigned int> vec3u;
 typedef vec2<double> vec2d;
 typedef vec2<int> vec2i;
+typedef vec2<unsigned int> vec2u;
 } // namespace world

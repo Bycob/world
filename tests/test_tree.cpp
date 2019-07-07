@@ -10,10 +10,11 @@ void testCircularSkeletton(int argc, char **argv);
 void testTreeGroup(int argc, char **argv);
 void testTree(int argc, char **argv);
 void testGrass();
+void testRock();
 
 int main(int argc, char **argv) {
     // testTree(argc, argv);
-    testGrass();
+    testRock();
 }
 
 void testCircularSkeletton(int argc, char **argv) {
@@ -120,4 +121,28 @@ void testGrass() {
     createDirectories("assets/grass");
     writer.write(scene, "assets/grass/bush");
     std::cout << "Wrote files to assets/grass" << std::endl;
+}
+
+void testRock() {
+    // A ROCK IS A TREE, AND I AM A FLOWER POT
+    VoxelField voxels{50, 50, 50};
+    for (u32 z = 0; z < 50; ++z) {
+        for (u32 y = 0; y < 50; ++y) {
+            for (u32 x = 0; x < 50; ++x) {
+                double zf = z / 20. - 1., xf = x / 10. - 2.5,
+                       yf = y / 10. - 2.5;
+                voxels.at(x, y, z) = zf - sin(xf * xf + yf * yf);
+            }
+        }
+    }
+
+    Mesh mesh;
+    voxels.fillMesh(mesh, BoundingBox({-5, -5, -1}, {5, 5, 1}));
+
+    Scene scene;
+    scene.addObject(Object3D(mesh));
+
+    createDirectories("assets/rocks/");
+    ObjLoader().write(scene, "assets/rocks/rocks");
+    std::cout << "Wrote files to assets/rocks" << std::endl;
 }

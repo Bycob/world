@@ -11,6 +11,12 @@
 - [Procedural Terrain Generation using a Level of Detail System and Stereoscopic 
 Visualization ](https://pdfs.semanticscholar.org/b4df/bd5451b8a65e68cf042fa1b80c72b7c56a3c.pdf), 2013
 
+- [GPU Gems about Voxel terrains](https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch01.html), 2007
+
+- [Transvoxel](http://transvoxel.org/)
+    > This algorithm can fill the gaps between 2 lod levels in voxel terrains.
+
+    From *Lengyel, Eric. ?Voxel-Based Terrain for Real-Time Virtual Simulations?. PhD diss., University of California at Davis, 2010.*
 ## Vegetation
 
 ### Leaves
