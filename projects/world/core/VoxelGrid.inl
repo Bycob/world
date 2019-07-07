@@ -71,7 +71,7 @@ inline void VoxelGrid<data_t>::fillMesh(Mesh &mesh,
         // Edge case: If one value is equal to 0, we still create a vertex
         // because a face may be created using this vertex.
         if (cval * dval <= 0) {
-            double p = 0.5; // (0 - cval) / (dval - cval);
+            double p = (0 - cval) / (dval - cval);
             vec3d newVert = c * (1 - p) + d * p;
             newVert = newVert / (_dims - vec3d{1}) * bbox.getDimensions() +
                       bbox.getLowerBound();

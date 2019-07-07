@@ -119,7 +119,7 @@ template <typename T> inline vec3<T> vec3<T>::operator-() const {
 template <typename T>
 template <typename R>
 inline auto vec3<T>::operator*(R rhs) const -> vec3<decltype(x * rhs)> {
-    return vec3(this->x * rhs, this->y * rhs, this->z * rhs);
+    return vec3<decltype(x * rhs)>(this->x * rhs, this->y * rhs, this->z * rhs);
 }
 
 template <typename T>
