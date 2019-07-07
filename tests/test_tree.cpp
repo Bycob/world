@@ -125,19 +125,35 @@ void testGrass() {
 
 void testRock() {
     // A ROCK IS A TREE, AND I AM A FLOWER POT
-    VoxelField voxels{50, 50, 50};
-    for (u32 z = 0; z < 50; ++z) {
-        for (u32 y = 0; y < 50; ++y) {
-            for (u32 x = 0; x < 50; ++x) {
-                double zf = z / 20. - 1., xf = x / 10. - 2.5,
-                       yf = y / 10. - 2.5;
-                voxels.at(x, y, z) = zf - sin(xf * xf + yf * yf);
+    VoxelField voxels({50, 50, 50}, -1);
+    voxels.bbox().reset({-5, -5, -5}, {5, 5, 5});
+
+    auto torus = [&] {
+        std::uniform_real_distribution<double> dist(0, 0.1);
+        std::mt19937_64 rng;
+
+        for (u32 z = 0; z < 50; ++z) {
+            for (u32 y = 0; y < 50; ++y) {
+                for (u32 x = 0; x < 50; ++x) {
+                    double zf = z / 10. - 2.5, xf = x / 10. - 2.5,
+                           yf = y / 10. - 2.5;
+                    vec3d u(xf, yf, zf);
+                    vec3d d = vec3d{xf + 0.001, yf + 0.001, 0}.normalize() * 2;
+                    voxels.at(x, y, z) = u.length(d) - 0.4 + dist(rng);
+                }
             }
         }
-    }
+    };
+
+    auto ops = [&] {
+        VoxelOps::ball(voxels, {2, 2, 2}, 3.5, 2);
+        VoxelOps::ball(voxels, {-2.5, -2, -2.5}, 5, 1);
+    };
+
+    ops();
 
     Mesh mesh;
-    voxels.fillMesh(mesh, BoundingBox({-5, -5, -1}, {5, 5, 1}));
+    voxels.fillMesh(mesh);
 
     Scene scene;
     scene.addObject(Object3D(mesh));

@@ -48,6 +48,7 @@
 #include "core/Profiler.h"
 #include "core/WeightedSkeletton.h"
 #include "core/VoxelGrid.h"
+#include "core/VoxelOps.h"
 #include "core/ColorMap.h"
 #include "core/Parameters.h"
 

@@ -7,6 +7,7 @@
 
 #include "world/core/WorldTypes.h"
 #include "world/math/Vector.h"
+#include "world/math/BoundingBox.h"
 #include "world/assets/Mesh.h"
 
 namespace world {
@@ -14,10 +15,11 @@ namespace world {
 template <typename data_t> class WORLDAPI_EXPORT VoxelGrid {
 public:
     explicit VoxelGrid(u32 x, u32 y, u32 z)
-            : _dims(x, y, z), _voxels(new data_t[x * y * z]) {}
+            : _dims(x, y, z), _bbox({0}, {1}), _voxels(new data_t[x * y * z]) {}
 
     explicit VoxelGrid(const vec3u &dims)
-            : _dims(dims), _voxels(new data_t[dims.z * dims.y * dims.z]) {}
+            : _dims(dims), _bbox({0}, {1}),
+              _voxels(new data_t[dims.z * dims.y * dims.z]) {}
 
 
     VoxelGrid(const vec3u &dims, data_t initVal) : VoxelGrid(dims) {
@@ -30,6 +32,10 @@ public:
     u32 count() const { return _dims.x * _dims.y * _dims.z; }
 
     vec3u dims() const { return _dims; }
+
+    const BoundingBox &bbox() const { return _bbox; }
+
+    BoundingBox &bbox() { return _bbox; }
 
     data_t *values() { return _voxels.get(); }
 
@@ -66,7 +72,7 @@ public:
 
     void fromMesh(const Mesh &mesh);
 
-    void fillMesh(Mesh &mesh) const { fillMesh(mesh, BoundingBox({0}, {1})); }
+    void fillMesh(Mesh &mesh) const { fillMesh(mesh, _bbox); }
 
     void fillMesh(Mesh &mesh, const BoundingBox &bbox) const;
 
@@ -75,6 +81,7 @@ protected:
 
 private:
     vec3u _dims;
+    BoundingBox _bbox;
     std::shared_ptr<data_t> _voxels;
 };
 

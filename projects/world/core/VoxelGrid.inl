@@ -7,6 +7,8 @@ namespace {
 #include <transvoxel/Transvoxel.cpp>
 }
 
+#include "world/assets/MeshOps.h"
+
 namespace world {
 
 template <typename data_t>
