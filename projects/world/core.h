@@ -42,7 +42,6 @@
 #include "core/Memory.h"
 #include "core/IOUtil.h"
 #include "core/LODData.h"
-#include "core/Lightning.h"
 #include "core/TileSystem.h"
 #include "core/StringOps.h"
 #include "core/Profiler.h"
@@ -51,5 +50,8 @@
 #include "core/VoxelOps.h"
 #include "core/ColorMap.h"
 #include "core/Parameters.h"
+
+#include "core/Lightning.h"
+#include "nature/Rocks.h"
 
 #endif //WORLD_WORLDAPI_H

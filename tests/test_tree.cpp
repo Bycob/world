@@ -3,6 +3,7 @@
 
 #include <world/core.h>
 #include <world/tree.h>
+#include <world/nature/Rocks.h>
 
 using namespace world;
 
@@ -146,8 +147,15 @@ void testRock() {
     };
 
     auto ops = [&] {
-        VoxelOps::ball(voxels, {2, 2, 2}, 3.5, 2);
-        VoxelOps::ball(voxels, {-2.5, -2, -2.5}, 5, 1);
+        VoxelOps::ball(voxels, {0, 0, 0}, 3.5, 1);
+        VoxelOps::ball(voxels, {-10, -5, 0}, 9, -1);
+        VoxelOps::ball(voxels, {0, 0, 20}, 18.5, -1);
+        VoxelOps::ball(voxels, {0, 5, -15}, 13.3, -1);
+        VoxelOps::ball(voxels, {8, 0, -2}, 6.5, -1);
+        VoxelOps::ball(voxels, {-2, 13, -2}, 12, -1);
+        VoxelOps::ball(voxels, {0.5, -6, 0}, 3.5, -1);
+        VoxelOps::ball(voxels, {5, 6, 5}, 8, -1);
+        VoxelOps::ball(voxels, {-6, 6, 5}, 8.5, -1);
     };
 
     ops();
@@ -158,7 +166,24 @@ void testRock() {
     Scene scene;
     scene.addObject(Object3D(mesh));
 
+    Collector collector;
+    collector.addStorageChannel<Object3D>();
+
+    Rocks rocks;
+
+    for (double x = -5; x <= 5.1; ++x) {
+        for (double y = -5; y <= 5.1; ++y) {
+            rocks.addRock(vec3d{x * 2, y * 2, 0});
+        }
+    }
+    rocks.collectAll(collector, 100);
+
+    Scene rockScene;
+    collector.fillScene(rockScene);
+
     createDirectories("assets/rocks/");
-    ObjLoader().write(scene, "assets/rocks/rocks");
+    ObjLoader().write(scene, "assets/rocks/voxels");
+    ObjLoader().write(rockScene, "assets/rocks/rocks");
+
     std::cout << "Wrote files to assets/rocks" << std::endl;
 }
