@@ -1,8 +1,8 @@
 #include "Rocks.h"
 
 #include "world/math/RandomHelper.h"
-#include "world/core/VoxelGrid.h"
-#include "world/core/VoxelOps.h"
+#include "world/assets/VoxelGrid.h"
+#include "world/assets/VoxelOps.h"
 
 namespace world {
 Rocks::Rocks() : _rng(time(NULL)) {}
