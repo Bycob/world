@@ -10,5 +10,6 @@
 #include "tree/TrunkGenerator.h"
 #include "tree/SimpleTreeDecorator.h"
 #include "tree/Grass.h"
+#include "tree/ForestLayer.h"
 
 #endif //WORLD_WORLDTREE_H

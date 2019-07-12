@@ -1,0 +1,39 @@
+#version 450
+#extension GL_ARB_separate_shader_objects : enable
+#extension GL_GOOGLE_include_directive : enable
+
+#include "worldlib"
+
+#define WORKGROUP_SIZE 32
+layout (local_size_x = WORKGROUP_SIZE, local_size_y = WORKGROUP_SIZE, local_size_z = 1) in;
+
+layout(binding = 0) uniform SizeParams {
+    uvec3 dims;
+};
+
+layout(std430, binding = 1) buffer InputBuffer {
+	float inputBuffer[];
+};
+
+layout(std430, binding = 2) buffer OutputBuffer {
+    float outputBuffer[];
+};
+
+void main() {
+	uvec3 loc = gl_GlobalInvocationID.xyz;
+	uvec3 outDims = dims - uvec3(1, 1, 0);
+
+	if (loc.x >= outDims.x || loc.y >= outDims.y || loc.z >= outDims.z) {
+		return;
+	}
+
+	float a = inputBuffer[id3(loc, dims)];
+	float b = inputBuffer[id3(loc + uvec3(1, 0, 0), dims)];
+	float c = inputBuffer[id3(loc + uvec3(0, 1, 0), dims)];
+	float d = inputBuffer[id3(loc + uvec3(1, 1, 0), dims)];
+
+	float dx = abs(a - b) + abs(c - d);
+	float dy = abs(a - c) + abs(b - d);
+
+	outputBuffer[id3(loc, outDims)] = length(vec2(dx, dy)) / 2.;
+}

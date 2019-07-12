@@ -60,3 +60,22 @@ TEST_CASE("Perlin - Random values modifier") {
         CHECK(arma::accu(arma::abs(noise)) > 98 * 98 * eps);
     }
 }
+
+TEST_CASE("Perlin - Benchmarks", "[!benchmark]") {
+    arma::mat noise(1024, 1024);
+
+    Perlin perlin;
+    PerlinInfo info{12, 0.4, false, 0, 4, 0, 0};
+
+    BENCHMARK("1024*1024 perlin with 4 frequency at octave 0, and 13 octaves") {
+        perlin.generatePerlinNoise2D(noise, info);
+    }
+
+    arma::mat noise2(4096, 4096);
+    info.octaves = 3;
+    info.frequency *= 4;
+
+    BENCHMARK("4096*4096 perlin with 16 frequency at octave 0, and 4 octaves") {
+        perlin.generatePerlinNoise2D(noise2, info);
+    }
+}

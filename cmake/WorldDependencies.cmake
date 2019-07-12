@@ -9,10 +9,10 @@ if (${WORLD_BUILD_OPENCV_MODULES})
     find_package(OpenCV QUIET)
 
     if(${OpenCV_FOUND})
-        message("-- Found OpenCV : $OpenCV_LIBRARIES")
+        message(STATUS "Found OpenCV : $OpenCV_LIBRARIES")
         include_directories(${OpenCV_INCLUDE_DIRS})
     else()
-        message("-- Could not find OpenCV")
+        message(STATUS "Could not find OpenCV")
     endif()
 
     set(WORLD_HAS_OPENCV ${OpenCV_FOUND})
@@ -28,7 +28,7 @@ if (${WORLD_BUILD_WORLD3D})
     if (${IRRLICHT_FOUND})
         include_directories(${IRRLICHT_INCLUDE_DIRS})
     else()
-        message("-- Could not find Irrlicht")
+        message(STATUS "Could not find Irrlicht")
     endif()
 
     set(WORLD_HAS_IRRLICHT ${IRRLICHT_FOUND})
@@ -43,6 +43,7 @@ if (${WORLD_BUILD_VULKAN_MODULES})
     find_library(Vulkan_LIBRARIES
         NAMES
             vulkan-1
+            vulkan
         PATH_SUFFIXES
             Lib/
             Lib32/
@@ -52,9 +53,9 @@ if (${WORLD_BUILD_VULKAN_MODULES})
     find_path(Vulkan_INCLUDE_DIRS
         NAMES
             vulkan.hpp
+            vulkan/vulkan.hpp
         PATH_SUFFIXES
-            Include
-            Include/vulkan
+            Include/
             include/
     )
 
@@ -68,6 +69,16 @@ if (${WORLD_BUILD_VULKAN_MODULES})
             bin/
     )
 
+    find_file(Vulkan_GLSL_COMPILER
+        NAMES
+            glslc.exe
+            glslc
+        PATH_SUFFIXES
+            Bin/
+            Bin32/
+            bin/
+    )
+
     set(Vulkan_FOUND OFF)
     if (Vulkan_LIBRARIES AND NOT (Vulkan_INCLUDE_DIRS STREQUAL "Vulkan_INCLUDE_DIRS-NOTFOUND"))
         set(Vulkan_FOUND ON)
@@ -75,10 +86,10 @@ if (${WORLD_BUILD_VULKAN_MODULES})
 
     # Configuring project
     if (Vulkan_FOUND)
-        message("-- Found Vulkan")
+        message(STATUS "Found Vulkan")
         include_directories(${Vulkan_INCLUDE_DIRS})
     else()
-        message("-- Could not find Vulkan")
+        message(STATUS "Could not find Vulkan")
     endif()
 
     set(WORLD_HAS_VULKAN ${Vulkan_FOUND})

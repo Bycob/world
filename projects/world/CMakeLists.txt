@@ -11,15 +11,13 @@ assign_source_group(${WORLD_SOURCES})
 add_library(world ${WORLD_BUILD_MODE} ${WORLD_SOURCES})
 
 # External libraries
-# TODO compile_definitions -> global ? (Or explain why not)
-# TODO avoid duplicates in below code
 if (${WORLD_BUILD_OPENCV_MODULES})
 	if (${WORLD_HAS_OPENCV})
-		message("-- Build OpenCV modules")
+		message(STATUS "Build OpenCV modules")
 		target_link_libraries(world ${OpenCV_LIBS})
         target_compile_definitions(world PRIVATE WORLD_BUILD_OPENCV_MODULES=1)
 	else()
-		message("-- Cannot build OpenCV modules : Missing dependencies (OpenCV)")
+		message(STATUS "Cannot build OpenCV modules : Missing dependencies (OpenCV)")
 	endif()
 endif()
 

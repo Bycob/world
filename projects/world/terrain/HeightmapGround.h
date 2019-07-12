@@ -41,6 +41,20 @@ public:
 
     double getAltitudeRange() const { return _maxAltitude - _minAltitude; }
 
+    void setTerrainResolution(int terrainRes) {
+        _terrainRes = terrainRes;
+        _tileSystem._bufferRes.x = _tileSystem._bufferRes.y =
+            _terrainRes * _textureRes;
+    }
+
+    void setTextureRes(int textureRes) {
+        _textureRes = textureRes;
+        _tileSystem._bufferRes.x = _tileSystem._bufferRes.y =
+            _terrainRes * _textureRes;
+    }
+
+    void setMaxLOD(int lod) { _tileSystem._maxLod = lod; }
+
     // TERRAIN WORKERS
     /** Adds a default worker set to generate heightmaps in the
      * ground. This method is for quick-setup purpose. */
@@ -88,21 +102,25 @@ private:
 
     void addTerrain(const TileCoordinates &key, ICollector &collector);
 
+
+    // CACHE
     /** Updates the cache, free old used memory if needed (by saving
      * the terrains to files or discard them) */
     void updateCache();
+
+    void registerAccess(const TileCoordinates &key, Tile &tile);
 
 
     // ACCESS
     HeightmapGround::Tile &provide(const TileCoordinates &key);
 
-    void registerAccess(const TileCoordinates &key, Tile &tile);
-
     Terrain &provideTerrain(const TileCoordinates &key);
 
     Mesh &provideMesh(const TileCoordinates &key);
 
-    optional<Terrain &> getCachedTerrain(const TileCoordinates &key, int genID);
+    /** Get tile at given key if it exists. If it does not exist, returns
+     * nullopt. */
+    optional<HeightmapGround::Tile &> lookUpTile(const TileCoordinates &key);
 
 
     // DATA
@@ -111,11 +129,9 @@ private:
 
 
     // GENERATION
-    /** Generate the terrain with given coordinates. Assume that:
-     * - the terrain wasn't generated yet,
-     * - the terrains with higher level at the same place are already
-     * generated.*/
-    void generateTerrain(const TileCoordinates &key);
+    /** Generate the terrains located at all the keys given in parameters. If
+     * the terrains already exist they are not generated again. */
+    void generateTerrains(const std::vector<TileCoordinates> &keys);
 
     void generateMesh(const TileCoordinates &key);
 

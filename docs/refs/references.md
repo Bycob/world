@@ -29,7 +29,15 @@ Visualization ](https://pdfs.semanticscholar.org/b4df/bd5451b8a65e68cf042fa1b80c
 
 - [Drawing Béziers Curves](http://ciechanowski.me/blog/2014/02/18/drawing-bezier-curves/), 2014
 
-### Data structures
+### Data structures
 
 - [The Half-Edge Tree: A Compact Data Structure for Level-of-Detail Tetrahedral 
 Meshes](ftp://ftp.disi.unige.it/person/MagilloP/PDF/het-short.pdf), 2007
+
+### GPU computing
+
+- [Mali GPU Best Practices](https://developer.arm.com/graphics/developer-guides/mali-gpu-best-practices)
+
+(Mali is a serie of GPUs designed by ARM for smartphones and tablets, but the documents contains general advices over compute shaders)
+
+- [Vulkan Memory Management](https://developer.nvidia.com/vulkan-memory-management)

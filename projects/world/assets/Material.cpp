@@ -2,12 +2,12 @@
 
 namespace world {
 
-Material::Material() : _name("") {}
+Material::Material() : Material("") {}
 
 Material::Material(const std::string &name) : _name(name) {
     setKd(1, 1, 1);
     setKa(0.2, 0.2, 0.2);
-    setKs(1, 1, 1);
+    setKs(0, 0, 0);
 }
 
 Material::~Material() {}

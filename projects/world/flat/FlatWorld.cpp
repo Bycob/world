@@ -18,6 +18,9 @@ public:
 FlatWorld *FlatWorld::createDemoFlatWorld() {
     FlatWorld *world = new FlatWorld();
 
+    HeightmapGround &ground = world->setGround<HeightmapGround>();
+    ground.setDefaultWorkerSet();
+
     auto &chunkSystem = world->addPrimaryNode<LODGridChunkSystem>({0, 0, 0});
     chunkSystem.addDecorator<ForestLayer>(world);
 
@@ -27,7 +30,6 @@ FlatWorld *FlatWorld::createDemoFlatWorld() {
 
 FlatWorld::FlatWorld() : _internal(new PFlatWorld()) {
     auto &ground = setGround<HeightmapGround>();
-    ground.setDefaultWorkerSet();
 }
 
 FlatWorld::~FlatWorld() { delete _internal; }

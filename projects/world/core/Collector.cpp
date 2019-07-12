@@ -28,7 +28,10 @@ void Collector::fillScene(Scene &scene) {
 
             for (auto material : materialChannel) {
                 Material addedMat(material._value);
-                addedMat.setMapKd(addedMat.getMapKd() + ".png");
+
+                // If texture is "" then the material has no diffuse texture
+                if (addedMat.getMapKd() != "")
+                    addedMat.setMapKd(addedMat.getMapKd() + ".png");
 
                 scene.addMaterial(addedMat);
             }

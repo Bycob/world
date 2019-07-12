@@ -1,4 +1,4 @@
-message("-- Build Libpng")
+message(STATUS "Build Libpng")
 
 file(GLOB LIBPNG_SRCS *.c)
 
