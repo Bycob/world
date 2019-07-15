@@ -4,78 +4,113 @@
 
 namespace world {
 
+// We use shared ptr because the big resources like meshes or
+// images may be shared in the future
+typedef std::shared_ptr<Mesh> SharedMesh;
+typedef std::shared_ptr<Image> SharedImage;
+
 class PScene {
 public:
-    std::vector<std::unique_ptr<Object3D>> _objects;
-    std::vector<std::shared_ptr<Material>> _materials;
-    std::map<std::string, Image> _images;
+    std::vector<std::unique_ptr<SceneNode>> _nodes;
+    std::map<std::string, std::unique_ptr<Material>> _materials;
+    std::map<std::string, SharedMesh> _meshes;
+    std::map<std::string, SharedImage> _images;
 };
 
 Scene::Scene() : _internal(new PScene()) {}
 
 Scene::~Scene() { delete _internal; }
 
+Scene::Scene(const Scene &other) : Scene() { addAll(other); }
+
+Scene::Scene(Scene &&other) : _internal(other._internal) {
+    other._internal = nullptr;
+}
+
+Scene &Scene::operator=(const Scene &other) {
+    clear();
+    addAll(other);
+}
+
+Scene &Scene::operator=(Scene &&other) {
+    delete _internal;
+    _internal = other._internal;
+    other._internal = nullptr;
+}
+
+void Scene::clear() {
+    _internal->_nodes.clear();
+    _internal->_materials.clear();
+    _internal->_meshes.clear();
+    _internal->_images.clear();
+}
+
 void Scene::addAll(const Scene &other) {
-    for (const std::unique_ptr<Object3D> &object : other._internal->_objects) {
-        _internal->_objects.emplace_back(new Object3D(*object));
+    // Deep copy
+    for (const auto &object : other._internal->_nodes) {
+        _internal->_nodes.emplace_back(std::make_unique<SceneNode>(*object));
     }
 
-    for (const std::shared_ptr<Material> &material :
-         other._internal->_materials) {
-        _internal->_materials.push_back(material);
+    for (const auto &item : other._internal->_materials) {
+        _internal->_materials[item.first] =
+            std::make_unique<Material>(*item.second);
+    }
+
+    for (const auto &item : other._internal->_meshes) {
+        _internal->_meshes[item.first] = std::make_shared<Mesh>(*item.second);
+    }
+
+    for (const auto &item : other._internal->_images) {
+        _internal->_images[item.first] = std::make_shared<Image>(*item.second);
     }
 }
 
-void world::Scene::addObject(const Object3D &object) {
-    addObjectInternal(new Object3D(object));
+void Scene::addNode(const SceneNode &object) {
+    _internal->_nodes.push_back(std::make_unique<SceneNode>(object));
 }
 
-void Scene::getObjects(std::vector<Object3D *> &output) const {
-    for (const std::unique_ptr<Object3D> &object : _internal->_objects) {
+std::vector<SceneNode *> Scene::getNodes() const {
+    std::vector<SceneNode *> output;
+    for (const std::unique_ptr<SceneNode> &object : _internal->_nodes) {
         output.push_back(object.get());
     }
-}
-
-std::vector<Object3D *> Scene::getObjects() const {
-    std::vector<Object3D *> output;
-    getObjects(output);
     return output;
 }
 
-void world::Scene::addMaterial(const Material &material) {
-    addMaterial(std::make_shared<Material>(material));
+void Scene::addMesh(std::string id, const Mesh &mesh) {
+    _internal->_meshes[id] = std::make_shared<Mesh>(mesh);
 }
 
-void Scene::addMaterial(const std::shared_ptr<Material> &material) {
-    _internal->_materials.push_back(material);
+u32 Scene::meshCount() const { return _internal->_meshes.size(); }
+
+const Mesh &Scene::getMesh(const std::string &id) const {
+    return *_internal->_meshes.at(id);
 }
 
-void Scene::getMaterials(std::vector<std::shared_ptr<Material>> &output) const {
-    for (const std::shared_ptr<Material> &material : _internal->_materials)
-        output.push_back(material);
+void Scene::addMaterial(std::string id, const Material &material) {
+    _internal->_materials[id] = std::make_unique<Material>(material);
 }
 
-std::vector<std::shared_ptr<Material>> Scene::getMaterials() const {
-    std::vector<std::shared_ptr<Material>> output;
-    getMaterials(output);
-    return output;
+bool Scene::hasMaterial(const std::string &id) const {
+    return _internal->_materials.find(id) != _internal->_materials.end();
 }
 
-void Scene::addTexture(const std::string &id, const Image &image) {
-    _internal->_images.emplace(id, image);
+u32 Scene::materialCount() const { return _internal->_materials.size(); }
+
+const Material &Scene::getMaterial(const std::string &id) const {
+    return *_internal->_materials.at(id);
 }
 
-optional<const Image &> Scene::getTexture(const std::string &id) const {
-    auto it = _internal->_images.find(id);
-
-    if (it != _internal->_images.end()) {
-        return it->second;
-    } else {
-        return nullopt;
-    }
+void Scene::addTexture(std::string id, const Image &image) {
+    _internal->_images.emplace(id, std::make_shared<Image>(image));
 }
 
-void Scene::addObjectInternal(Object3D *object) {
-    _internal->_objects.emplace_back(object);
+bool Scene::hasTexture(const std::string &id) const {
+    return _internal->_images.find(id) != _internal->_images.end();
 }
+
+const Image &Scene::getTexture(const std::string &id) const {
+    return *_internal->_images.at(id);
+}
+
 } // namespace world

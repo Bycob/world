@@ -2,7 +2,7 @@
 
 #include "world/math/MathsHelper.h"
 #include "world/assets/MeshOps.h"
-#include "world/assets/Object3D.h"
+#include "world/assets/SceneNode.h"
 #include "TreeSkelettonGenerator.h"
 #include "TrunkGenerator.h"
 #include "LeavesGenerator.h"
@@ -91,10 +91,19 @@ void TreeGroup::collect(ICollector &collector,
         MeshOps::recalculateNormals(_trunksMesh);
         MeshOps::recalculateNormals(_leavesMesh);
 
-        if (collector.hasChannel<Object3D>()) {
+        if (collector.hasChannel<SceneNode>() && collector.hasChannel<Mesh>()) {
+            auto &meshChannel = collector.getChannel<Mesh>();
 
-            Object3D trunksObj(_trunksMesh);
-            Object3D leavesObj(_leavesMesh);
+            auto &objChannel = collector.getChannel<SceneNode>();
+            std::string prefix{
+                (_internal->_updateParity = !_internal->_updateParity) ? "u"
+                                                                       : ""};
+
+            meshChannel.put({"1"}, _trunksMesh, ctx);
+            meshChannel.put({"2"}, _leavesMesh, ctx);
+
+            SceneNode trunksObj(ctx({"1"}).str());
+            SceneNode leavesObj(ctx({"2"}).str());
 
             if (collector.hasChannel<Material>()) {
                 Material trunkMaterial("trunk");
@@ -110,10 +119,6 @@ void TreeGroup::collect(ICollector &collector,
                 matChannel.put({"2"}, leafMaterial, ctx);
             }
 
-            auto &objChannel = collector.getChannel<Object3D>();
-            std::string prefix{
-                (_internal->_updateParity = !_internal->_updateParity) ? "u"
-                                                                       : ""};
             objChannel.put({prefix + "1"}, trunksObj, ctx);
             objChannel.put({prefix + "2"}, leavesObj, ctx);
         }

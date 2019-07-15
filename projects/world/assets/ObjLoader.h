@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <memory>
+#include <set>
 
 #include "Scene.h"
 
@@ -23,14 +24,16 @@ public:
     void write(const Scene &scene, std::string filename) const;
 
     void write(const Scene &scene, std::ostream &objstream,
-               std::ostream &mtlstream) const;
-
-    void writeTextures(const Scene &scene, const std::string &directory) const;
+               std::ostream &mtlstream,
+               const std::string &textureFolder = "") const;
 
     void read(Scene &scene, const std::string &filename) const;
 
 private:
     bool _triangulate;
-    std::shared_ptr<Material> _defaultMaterial;
+    Material _defaultMaterial;
+
+    void writeTextures(const Scene &scene, const std::set<std::string> &paths,
+                       const std::string &directory) const;
 };
 } // namespace world

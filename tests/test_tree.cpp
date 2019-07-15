@@ -15,7 +15,7 @@ void testRock();
 
 int main(int argc, char **argv) {
     // testTree(argc, argv);
-    testRock();
+    testTree(argc, argv);
 }
 
 void testCircularSkeletton(int argc, char **argv) {
@@ -36,7 +36,8 @@ void testCircularSkeletton(int argc, char **argv) {
 }
 
 void testTreeGroup(int argc, char **argv) {
-    Collector collector;
+    Collector collector(CollectorPresets::SCENE);
+
     TreeGroup treeGroup;
     treeGroup.addTree(vec3d{1, 1, 1});
     treeGroup.addTree(vec3d{2, 5, 1});
@@ -83,7 +84,7 @@ void testTree(int argc, char **argv) {
     tree.addWorker<LeavesGenerator>();
 
     std::cout << "Generation" << std::endl;
-    Collector collector;
+    Collector collector(CollectorPresets::SCENE);
     tree.collectAll(collector, 15);
 
     std::cout << "Converting skeletton into 3D model..." << std::endl;
@@ -92,21 +93,18 @@ void testTree(int argc, char **argv) {
     std::cout << "Ecriture du modele du squelette..." << std::endl;
     ObjLoader file;
     Scene scene;
-    scene.addObject(Object3D(*mesh));
+    scene.addMesh("mesh1", *mesh);
+    scene.addNode(SceneNode("mesh1"));
     file.write(scene, "assets/tree/skeletton");
 
     std::cout << "Ecriture du modele de l'arbre..." << std::endl;
-    Scene scene2;
-    collector.fillScene(scene2);
+    Scene scene2 = collector.toScene();
     file.write(scene2, "assets/tree/tree");
 }
 
 
 void testGrass() {
-    Collector collector;
-    collector.addStorageChannel<Object3D>();
-    collector.addStorageChannel<Material>();
-    collector.addStorageChannel<Image>();
+    Collector collector(CollectorPresets::SCENE);
 
     Grass grass;
     grass.addBush({0.5, 0.5, 0});
@@ -164,10 +162,10 @@ void testRock() {
     voxels.fillMesh(mesh);
 
     Scene scene;
-    scene.addObject(Object3D(mesh));
+    scene.addMesh("mesh1", mesh);
+    scene.addNode(SceneNode("mesh1"));
 
-    Collector collector;
-    collector.addStorageChannel<Object3D>();
+    Collector collector(CollectorPresets::SCENE);
 
     Rocks rocks;
 

@@ -7,23 +7,28 @@
 namespace world {
 Rocks::Rocks() : _rng(time(NULL)) {}
 
-void Rocks::addRock(const vec3d &location) {
-    Mesh mesh;
-    generateMesh(mesh);
-    _objects.emplace_back(mesh);
-    _objects.back().setPosition(location);
+void Rocks::addRock(const vec3d &position) {
+    _rocks.emplace_back();
+    generateMesh(_rocks.back().mesh);
+    _rocks.back().position = position;
 }
 
 void Rocks::collectSelf(ICollector &collector,
                         const IResolutionModel &resolutionModel,
                         const ExplorationContext &ctx) {
 
-    if (collector.hasChannel<Object3D>()) {
-        auto &objChan = collector.getChannel<Object3D>();
+    if (collector.hasChannel<SceneNode>() && collector.hasChannel<Mesh>()) {
+        auto &objChan = collector.getChannel<SceneNode>();
+        auto &meshChan = collector.getChannel<Mesh>();
 
         int i = 0;
-        for (auto &obj : _objects) {
-            objChan.put({std::to_string(i)}, obj, ctx);
+        for (auto &rock : _rocks) {
+            ItemKey key{std::to_string(i)};
+            meshChan.put(key, rock.mesh, ctx);
+
+            SceneNode obj(ctx.mutateKey(key).str());
+            obj.setPosition(rock.position);
+            objChan.put(key, obj, ctx);
             ++i;
         }
     }

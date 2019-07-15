@@ -17,11 +17,7 @@ Application::Application()
 
     // Collectors
     for (int i = 0; i < 2; i++) {
-        auto collector = std::make_unique<Collector>();
-        collector->addStorageChannel<Object3D>();
-        collector->addStorageChannel<Material>();
-        collector->addStorageChannel<Image>();
-
+        auto collector = std::make_unique<Collector>(CollectorPresets::SCENE);
         _emptyCollectors.emplace_back(std::move(collector));
     }
 }

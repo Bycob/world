@@ -24,7 +24,7 @@ int Face::vertexCount() const { return 3; }
 
 //----- MESH
 
-Mesh::Mesh() {}
+Mesh::Mesh(std::string name) : _name(std::move(name)) {}
 
 Mesh::~Mesh() {}
 

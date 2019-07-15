@@ -25,6 +25,10 @@ ItemKey ExplorationContext::mutateKey(const ItemKey &key) const {
     return {_keyPrefix, key};
 }
 
+ItemKey ExplorationContext::operator()(const ItemKey &key) const {
+    return mutateKey(key);
+}
+
 vec3d ExplorationContext::getOffset() const { return _offset; }
 
 bool ExplorationContext::hasEnvironment() const {

@@ -1,6 +1,6 @@
 #include "Grass.h"
 
-#include "../assets/Object3D.h"
+#include "world/assets/SceneNode.h"
 #include "../assets/Material.h"
 #include "../math/Bezier.h"
 #include "../math/RandomHelper.h"
@@ -36,8 +36,9 @@ void Grass::collect(ICollector &collector,
                     const IResolutionModel &resolutionModel,
                     const ExplorationContext &ctx) {
 
-    if (collector.hasChannel<Object3D>()) {
-        auto &objChan = collector.getChannel<Object3D>();
+    if (collector.hasChannel<SceneNode>() && collector.hasChannel<Mesh>()) {
+        auto &objChan = collector.getChannel<SceneNode>();
+        auto &meshChan = collector.getChannel<Mesh>();
 
         if (collector.hasChannel<Material>() && collector.hasChannel<Image>()) {
             auto &matChan = collector.getChannel<Material>();
@@ -53,10 +54,13 @@ void Grass::collect(ICollector &collector,
         }
 
         for (int key = 0; key < _points.size(); ++key) {
-            Object3D obj(_meshes[key]);
+            ItemKey itemKey{NodeKeys::fromInt(key)};
+            meshChan.put(itemKey, _meshes[key], ctx);
+
+            SceneNode obj(ctx.mutateKey(itemKey).str());
             obj.setMaterialID(ctx.mutateKey({"grass_material"}).str());
 
-            objChan.put({NodeKeys::fromInt(key)}, obj, ctx);
+            objChan.put(itemKey, obj, ctx);
         }
     }
 }

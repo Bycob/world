@@ -7,13 +7,21 @@
 #include <map>
 
 #include "WorldTypes.h"
-#include "world/assets/Object3D.h"
+#include "world/assets/SceneNode.h"
 #include "world/assets/Material.h"
 #include "world/assets/Scene.h"
 
 #include "ICollector.h"
 
 namespace world {
+
+// TODO remove #if _MSC_VER (we just need to implement destructor or something
+// like that)
+
+enum class CollectorPresets {
+    NONE,
+    SCENE,
+};
 
 template <typename T> class CollectorChannel;
 
@@ -23,7 +31,7 @@ template <typename T> class CollectorChannel;
  * manipulate channels of type CollectorChannel<T>. */
 class WORLDAPI_EXPORT Collector : public ICollector {
 public:
-    Collector();
+    Collector(CollectorPresets preset = CollectorPresets::NONE);
 
     /** Delete all the resources harvested from the previous
      * "collect" calls */
@@ -39,6 +47,8 @@ public:
     template <typename T> bool hasStorageChannel() const;
 
     template <typename T> CollectorChannel<T> &getStorageChannel();
+
+    Scene toScene();
 
     void fillScene(Scene &scene);
 

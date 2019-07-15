@@ -17,7 +17,7 @@
 #include "assets/Material.h"
 #include "assets/Mesh.h"
 #include "assets/MeshOps.h"
-#include "assets/Object3D.h"
+#include "world/assets/SceneNode.h"
 #include "assets/ObjLoader.h"
 #include "assets/Scene.h"
 

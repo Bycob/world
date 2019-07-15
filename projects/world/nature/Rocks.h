@@ -5,7 +5,7 @@
 
 #include <random>
 
-#include "world/assets/Object3D.h"
+#include "world/assets/SceneNode.h"
 #include "world/core/WorldNode.h"
 
 namespace world {
@@ -14,15 +14,19 @@ class WORLDAPI_EXPORT Rocks : public WorldNode {
 public:
     Rocks();
 
-    void addRock(const vec3d &location);
+    void addRock(const vec3d &position);
 
     void collectSelf(ICollector &collector,
                      const IResolutionModel &resolutionModel,
                      const ExplorationContext &ctx) override;
 
 private:
+    struct Rock {
+        vec3d position;
+        Mesh mesh;
+    };
     std::mt19937_64 _rng;
-    std::vector<Object3D> _objects;
+    std::vector<Rock> _rocks;
 
     double _radius = 1;
     // number of cuts

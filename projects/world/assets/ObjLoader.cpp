@@ -16,9 +16,8 @@
 namespace world {
 
 // TODO delete triangulate parameter (unused)
-ObjLoader::ObjLoader(bool triangulate) : _triangulate(triangulate) {
-    _defaultMaterial = std::make_shared<Material>(DEFAULT_MATERIAL_NAME);
-}
+ObjLoader::ObjLoader(bool triangulate)
+        : _defaultMaterial(DEFAULT_MATERIAL_NAME), _triangulate(triangulate) {}
 
 ObjLoader::~ObjLoader() {}
 
@@ -35,9 +34,10 @@ void ObjLoader::read(Scene &scene, const std::string &filename) const {
         throw std::ios_base::failure(errstr);
     }
 
-    // Conversion en objet 3D
+    // Convert to SceneNode
+    int meshID = 0;
+
     for (auto shape : shapes) {
-        Object3D object3D;
         Mesh mesh;
 
         // positions
@@ -85,18 +85,19 @@ void ObjLoader::read(Scene &scene, const std::string &filename) const {
             mesh.addFace(face);
         }
 
-        object3D.setMesh(mesh);
-        scene.addObject(object3D);
+        std::string meshName = "mesh" + std::to_string(meshID);
+        scene.addMesh(meshName, mesh);
+        scene.addNode(SceneNode(meshName));
     }
 }
 
-void ObjLoader::write(const Scene &object3D, std::string filename) const {
-    // On enlève l'extension si elle est passée en paramètres.
+void ObjLoader::write(const Scene &scene, std::string filename) const {
+    // Delete extension if it's already in the name
     if (endsWith(filename, ".obj")) {
         filename = filename.substr(0, filename.size() - 4);
     }
 
-    // Obtention du stream pour le fichier .obj
+    // Get .obj file stream
     std::ofstream objfile(filename + ".obj");
     if (!objfile.is_open()) {
         throw std::ios_base::failure("oh, shit, we didnt wrote u're file, " +
@@ -104,7 +105,7 @@ void ObjLoader::write(const Scene &object3D, std::string filename) const {
                                      ".obj... sorry for the disagreement :-*");
     }
 
-    // Obtention du stream pour le fichier .mtl
+    // Get .mtl file stream
     std::ofstream mtlfile(filename + ".mtl");
     if (!mtlfile.is_open()) {
         throw std::ios_base::failure("oh, shit, we didnt wrote u're file, " +
@@ -112,7 +113,7 @@ void ObjLoader::write(const Scene &object3D, std::string filename) const {
                                      ".mtl... sorry for the disagreement :-*");
     }
 
-    // Linking des deux fichiers
+    // Print mtl location in .obj file
     size_t lastSlashIndex = filename.find_last_of("/\\");
     if (lastSlashIndex == std::string::npos) {
         lastSlashIndex = 0;
@@ -120,17 +121,12 @@ void ObjLoader::write(const Scene &object3D, std::string filename) const {
     std::string localName = filename.substr(lastSlashIndex + 1);
     objfile << "mtllib " << localName << ".mtl" << std::endl;
 
-    // Création de deux string stream subsituts (pour aller plus vite)
-
-    // Ecriture
-    write(object3D, objfile, mtlfile);
+    // Write
+    std::string textureFolder = filename.substr(0, lastSlashIndex + 1);
+    write(scene, objfile, mtlfile, textureFolder);
 
     objfile.close();
     mtlfile.close();
-
-    // Textures
-    std::string folderPath = filename.substr(0, lastSlashIndex + 1);
-    writeTextures(object3D, folderPath);
 }
 
 // Useful functions
@@ -149,27 +145,23 @@ std::string getTexturePath(const std::string &texID) {
 }
 
 void ObjLoader::write(const Scene &scene, std::ostream &objstream,
-                      std::ostream &mtlstream) const {
+                      std::ostream &mtlstream,
+                      const std::string &textureFolder) const {
 
-    std::vector<std::shared_ptr<Material>> materials;
-    scene.getMaterials(materials);
-    std::vector<Object3D *> objects;
-    scene.getObjects(objects);
+    std::vector<SceneNode *> objects = scene.getNodes();
 
     int meshCount = 1;
     int verticesRead = 0;
     int normalRead = 0;
     int texCoordRead = 0;
 
-    std::string defaultMaterialName = materials.size() == 0
-                                          ? _defaultMaterial->getName()
-                                          : materials[0]->getName();
-    bool includeDefaultMaterial = materials.size() == 0;
+    std::string defaultMatName = _defaultMaterial.getName();
+    std::set<std::string> materials;
 
-    for (Object3D *object : objects) {
-        const Mesh &mesh = object->getMesh();
+    for (SceneNode *object : objects) {
+        const Mesh &mesh = scene.getMesh(object->getMeshID());
 
-        // Nom
+        // Name
         std::string name = std::string("mesh") + std::to_string(meshCount);
         objstream << "o " << name << std::endl;
 
@@ -178,13 +170,10 @@ void ObjLoader::write(const Scene &scene, std::ostream &objstream,
         std::string materialName = object->getMaterialID();
 
         if (materialName == "") {
-            objstream << defaultMaterialName;
-        } else if (materialName == _defaultMaterial->getName()) {
-            includeDefaultMaterial = true;
-        } else {
-            objstream << materialName;
+            materialName = defaultMatName;
         }
-        objstream << std::endl;
+        materials.insert(materialName);
+        objstream << materialName << std::endl;
 
         int verticesOffset = verticesRead;
         int normalOffset = normalRead;
@@ -250,32 +239,23 @@ void ObjLoader::write(const Scene &scene, std::ostream &objstream,
 
 
     // ===== Ajout des matériaux
+
     // On vérifie que le nom du "default material" n'est pas déjà pris
-    if (includeDefaultMaterial) {
-        for (std::shared_ptr<Material> &material : materials) {
-            if (material->getName() == _defaultMaterial->getName()) {
-                includeDefaultMaterial = false;
-                break;
-            }
-        }
-    }
+    bool addDefaultMaterial =
+        materials.find(defaultMatName) != materials.end() &&
+        !scene.hasMaterial(defaultMatName);
+    std::set<std::string> texturePaths;
 
-    if (includeDefaultMaterial) {
-        materials.push_back(_defaultMaterial);
-    }
+    for (std::string matName : materials) {
+        const Material &material =
+            addDefaultMaterial && matName == defaultMatName
+                ? _defaultMaterial
+                : scene.getMaterial(matName);
 
-    int materialID = 1;
-
-    for (std::shared_ptr<Material> material : materials) {
         // Déclaration du materiau
         mtlstream << std::endl << "newmtl ";
-        std::string materialName = trimSpaces(material->getName());
-
-        if (materialName == "") {
-            materialName = "material" + std::to_string(materialID);
-            materialID++;
-        }
-        mtlstream << materialName << std::endl;
+        matName = trimSpaces(matName);
+        mtlstream << matName << std::endl;
 
         // Kd, Ka, Ks
         auto writeColor = [&mtlstream = mtlstream](const std::string &name,
@@ -283,38 +263,33 @@ void ObjLoader::write(const Scene &scene, std::ostream &objstream,
             mtlstream << name << " " << value._r << " " << value._g << " "
                       << value._b << std::endl;
         };
-        writeColor("Kd", material->getKd());
-        writeColor("Ka", material->getKa());
-        writeColor("Ks", material->getKs());
+        writeColor("Kd", material.getKd());
+        writeColor("Ka", material.getKa());
+        writeColor("Ks", material.getKs());
 
         // maps
         auto writeMap = [&](const std::string &name, const std::string &value) {
             if (value != "") {
                 mtlstream << name << " " << getTexturePath(value) << std::endl;
+                texturePaths.insert(value);
             }
         };
-        writeMap("map_Kd", material->getMapKd());
+        writeMap("map_Kd", material.getMapKd());
+    }
+
+    if (textureFolder != "") {
+        writeTextures(scene, texturePaths, textureFolder);
     }
 }
 
 void ObjLoader::writeTextures(const Scene &scene,
+                              const std::set<std::string> &paths,
                               const std::string &folder) const {
-    std::set<std::string> texturesIDs;
 
-    // Collecting texture IDs
-    std::vector<std::shared_ptr<Material>> materials;
-    scene.getMaterials(materials);
-
-    for (auto &material : materials) {
-        texturesIDs.insert(material->getMapKd());
-    }
-
-    // Writing texture IDs
-    for (auto &texID : texturesIDs) {
-        optional<const Image &> texture = scene.getTexture(texID);
-
-        if (texture) {
-            texture->write(folder + getTexturePath(texID));
+    for (const std::string &path : paths) {
+        if (!path.empty()) {
+            const Image &texture = scene.getTexture(path);
+            texture.write(folder + getTexturePath(path));
         }
     }
 }

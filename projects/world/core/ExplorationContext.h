@@ -25,6 +25,9 @@ public:
 
     ItemKey mutateKey(const ItemKey &key) const;
 
+    /// Handy alias for #mutateKey
+    ItemKey operator()(const ItemKey &key) const;
+
     vec3d getOffset() const;
 
     bool hasEnvironment() const;

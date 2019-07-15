@@ -2,7 +2,18 @@
 
 namespace world {
 
-Collector::Collector() {}
+Collector::Collector(CollectorPresets preset) {
+    switch (preset) {
+    case CollectorPresets::SCENE:
+        addStorageChannel<SceneNode>();
+        addStorageChannel<Mesh>();
+        addStorageChannel<Material>();
+        addStorageChannel<Image>();
+        break;
+    case CollectorPresets ::NONE:
+        break;
+    }
+}
 
 void Collector::reset() {
     for (auto &entry : _channels) {
@@ -10,9 +21,16 @@ void Collector::reset() {
     }
 }
 
+Scene Collector::toScene() {
+    Scene scene;
+    fillScene(scene);
+    return scene;
+}
+
 void Collector::fillScene(Scene &scene) {
-    if (hasStorageChannel<Object3D>()) {
-        auto &objectChannel = getStorageChannel<Object3D>();
+    if (hasStorageChannel<SceneNode>() && hasStorageChannel<Mesh>()) {
+        auto &objectChannel = getStorageChannel<SceneNode>();
+        auto &meshChannel = getStorageChannel<Mesh>();
 
         if (hasStorageChannel<Material>()) {
             auto &materialChannel = getStorageChannel<Material>();
@@ -33,12 +51,16 @@ void Collector::fillScene(Scene &scene) {
                 if (addedMat.getMapKd() != "")
                     addedMat.setMapKd(addedMat.getMapKd() + ".png");
 
-                scene.addMaterial(addedMat);
+                scene.addMaterial(material._key.str(), addedMat);
             }
         }
 
         for (auto object : objectChannel) {
-            scene.addObject(object._value);
+            scene.addNode(object._value);
+        }
+
+        for (auto mesh : meshChannel) {
+            scene.addMesh(mesh._key.str(), mesh._value);
         }
     }
 }

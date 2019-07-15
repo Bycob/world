@@ -146,15 +146,16 @@ void testMultilayerTerrainTexture(int argc, char **argv) {
     terrain.setBounds(-0.5, -0.5, 0, 0.5, 0.5, 0.4);
 
     Mesh *mesh = terrain.createMesh();
-    Object3D object(*mesh);
+    SceneNode object("mesh1");
     object.setMaterialID("multilayer");
 
     Material mat("multilayer");
     mat.setMapKd("multilayer_texture.png");
 
     Scene scene;
-    scene.addObject(object);
-    scene.addMaterial(mat);
+    scene.addNode(object);
+    scene.addMesh("mesh1", *mesh);
+    scene.addMaterial("multilayer", mat);
     scene.addTexture("multilayer_texture.png", terrain.getTexture());
 
 
