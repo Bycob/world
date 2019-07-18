@@ -12,6 +12,7 @@ if (${WORLD_BUILD_TESTS})
             test_mesh.cpp
             test_nodes.cpp
             test_perlin.cpp
+            test_scene.cpp
             test_types.cpp
             test_terrain.cpp
             test_utilities.cpp

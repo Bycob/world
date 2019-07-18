@@ -85,9 +85,7 @@ void ObjLoader::read(Scene &scene, const std::string &filename) const {
             mesh.addFace(face);
         }
 
-        std::string meshName = "mesh" + std::to_string(meshID);
-        scene.addMesh(meshName, mesh);
-        scene.addNode(SceneNode(meshName));
+        scene.addMeshNode(SceneNode(), mesh);
     }
 }
 

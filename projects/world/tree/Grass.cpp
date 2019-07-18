@@ -40,26 +40,27 @@ void Grass::collect(ICollector &collector,
         auto &objChan = collector.getChannel<SceneNode>();
         auto &meshChan = collector.getChannel<Mesh>();
 
+        ItemKey matKey;
+
         if (collector.hasChannel<Material>() && collector.hasChannel<Image>()) {
             auto &matChan = collector.getChannel<Material>();
             auto &imgChan = collector.getChannel<Image>();
 
             imgChan.put({"grass_texture"}, _texture, ctx);
 
-            Material grassMat("grass_material");
+            Material grassMat;
             grassMat.setKd(1, 1, 1);
             grassMat.setMapKd(ctx.mutateKey({"grass_texture"}).str());
 
-            matChan.put({"grass_material"}, grassMat);
+            matKey = {"grass_material"};
+            matChan.put(matKey, grassMat);
         }
 
         for (int key = 0; key < _points.size(); ++key) {
             ItemKey itemKey{NodeKeys::fromInt(key)};
             meshChan.put(itemKey, _meshes[key], ctx);
 
-            SceneNode obj(ctx.mutateKey(itemKey).str());
-            obj.setMaterialID(ctx.mutateKey({"grass_material"}).str());
-
+            SceneNode obj = ctx.createNode(itemKey, matKey);
             objChan.put(itemKey, obj, ctx);
         }
     }

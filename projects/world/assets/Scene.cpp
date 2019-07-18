@@ -15,6 +15,9 @@ public:
     std::map<std::string, std::unique_ptr<Material>> _materials;
     std::map<std::string, SharedMesh> _meshes;
     std::map<std::string, SharedImage> _images;
+
+    u32 _meshCounter = 0;
+    u32 _materialCounter = 0;
 };
 
 Scene::Scene() : _internal(new PScene()) {}
@@ -69,6 +72,19 @@ void Scene::addNode(const SceneNode &object) {
     _internal->_nodes.push_back(std::make_unique<SceneNode>(object));
 }
 
+// TODO faire des tests sur ça
+void Scene::addMeshNode(const SceneNode &node, const Mesh &mesh) {
+    std::string meshName = mesh.getName();
+
+    if (meshName.empty()) {
+        meshName = newMeshName();
+    }
+
+    addMesh(meshName, mesh);
+    addNode(node);
+    _internal->_nodes.back()->setMesh(meshName);
+}
+
 std::vector<SceneNode *> Scene::getNodes() const {
     std::vector<SceneNode *> output;
     for (const std::unique_ptr<SceneNode> &object : _internal->_nodes) {
@@ -81,6 +97,19 @@ void Scene::addMesh(std::string id, const Mesh &mesh) {
     _internal->_meshes[id] = std::make_shared<Mesh>(mesh);
 }
 
+void Scene::addMesh(const Mesh &mesh) {
+    if (mesh.getName().empty()) {
+        // If we make up a name for the mesh, user will not be able to
+        // reference it anyway
+        throw std::runtime_error("mesh name is empty");
+    }
+    addMesh(mesh.getName(), mesh);
+}
+
+bool Scene::hasMesh(const std::string &id) const {
+    return _internal->_meshes.find(id) != _internal->_meshes.end();
+}
+
 u32 Scene::meshCount() const { return _internal->_meshes.size(); }
 
 const Mesh &Scene::getMesh(const std::string &id) const {
@@ -89,6 +118,16 @@ const Mesh &Scene::getMesh(const std::string &id) const {
 
 void Scene::addMaterial(std::string id, const Material &material) {
     _internal->_materials[id] = std::make_unique<Material>(material);
+}
+
+void Scene::addMaterial(const Material &material) {
+    if (material.getName().empty()) {
+        // If we make up a name for the mesh, user will not be able to
+        // reference it anyway
+        throw std::runtime_error("material name is empty");
+    }
+
+    addMaterial(material.getName(), material);
 }
 
 bool Scene::hasMaterial(const std::string &id) const {
@@ -111,6 +150,24 @@ bool Scene::hasTexture(const std::string &id) const {
 
 const Image &Scene::getTexture(const std::string &id) const {
     return *_internal->_images.at(id);
+}
+
+std::string Scene::newMeshName() {
+    std::string newName;
+    do {
+        newName = "mesh" + std::to_string(_internal->_meshCounter);
+        _internal->_meshCounter++;
+    } while (_internal->_meshes.find(newName) != _internal->_meshes.end());
+    return newName;
+}
+
+std::string Scene::newMaterialName() {
+    std::string newName;
+    do {
+        newName = "mat" + std::to_string(_internal->_materialCounter);
+        _internal->_materialCounter++;
+    } while (hasMaterial(newName));
+    return newName;
 }
 
 } // namespace world

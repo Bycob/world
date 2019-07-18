@@ -7,6 +7,7 @@
 #include "world/core/Memory.h"
 #include "world/math/MathsHelper.h"
 #include "Mesh.h"
+#include "Material.h"
 
 namespace world {
 
@@ -14,7 +15,11 @@ class WORLDAPI_EXPORT SceneNode {
 public:
     SceneNode();
 
-    SceneNode(std::string meshID);
+    SceneNode(std::string meshID, std::string materialID = "");
+
+    SceneNode(const Mesh &mesh);
+
+    SceneNode(const Mesh &mesh, const Material &material);
 
     void setMesh(std::string meshID) { _meshID = meshID; }
 
