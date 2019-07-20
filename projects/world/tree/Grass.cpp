@@ -32,12 +32,11 @@ void Grass::addBush(const vec3d &root) {
     }
 }
 
-void Grass::collect(ICollector &collector,
-                    const IResolutionModel &resolutionModel,
-                    const ExplorationContext &ctx) {
+std::vector<SceneNode> Grass::collectTemplates(ICollector &collector,
+                                               const ExplorationContext &ctx) {
+    std::vector<SceneNode> nodes;
 
-    if (collector.hasChannel<SceneNode>() && collector.hasChannel<Mesh>()) {
-        auto &objChan = collector.getChannel<SceneNode>();
+    if (collector.hasChannel<Mesh>()) {
         auto &meshChan = collector.getChannel<Mesh>();
 
         ItemKey matKey;
@@ -53,15 +52,31 @@ void Grass::collect(ICollector &collector,
             grassMat.setMapKd(ctx.mutateKey({"grass_texture"}).str());
 
             matKey = {"grass_material"};
-            matChan.put(matKey, grassMat);
+            matChan.put(matKey, grassMat, ctx);
         }
 
-        for (int key = 0; key < _points.size(); ++key) {
-            ItemKey itemKey{NodeKeys::fromInt(key)};
-            meshChan.put(itemKey, _meshes[key], ctx);
+        for (int i = 0; i < _points.size(); ++i) {
+            ItemKey meshKey{NodeKeys::fromInt(i)};
+            meshChan.put(meshKey, _meshes[i], ctx);
 
-            SceneNode obj = ctx.createNode(itemKey, matKey);
-            objChan.put(itemKey, obj, ctx);
+            nodes.push_back(ctx.createNode(meshKey, matKey));
+        }
+    }
+
+    return nodes;
+}
+
+void Grass::collect(ICollector &collector,
+                    const IResolutionModel &resolutionModel,
+                    const ExplorationContext &ctx) {
+
+    if (collector.hasChannel<SceneNode>()) {
+        auto &objChan = collector.getChannel<SceneNode>();
+        auto nodes = collectTemplates(collector, ctx);
+
+        for (int i = 0; i < nodes.size(); ++i) {
+            ItemKey nodeKey{NodeKeys::fromInt(i)};
+            objChan.put(nodeKey, nodes[i]);
         }
     }
 }

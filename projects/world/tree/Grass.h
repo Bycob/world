@@ -20,6 +20,9 @@ public:
 
     void addBush(const vec3d &root);
 
+    std::vector<SceneNode> collectTemplates(ICollector &collector,
+                                            const ExplorationContext &ctx);
+
     void collect(ICollector &collector, const IResolutionModel &resolutionModel,
                  const ExplorationContext &ctx) override;
 

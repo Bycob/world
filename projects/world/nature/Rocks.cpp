@@ -13,11 +13,40 @@ void Rocks::addRock(const vec3d &position) {
     _rocks.back().position = position;
 }
 
+std::vector<SceneNode> Rocks::collectTemplates(ICollector &collector,
+                                               const ExplorationContext &ctx) {
+    std::vector<SceneNode> nodes;
+
+    for (int i = 0; i < _rocks.size(); ++i) {
+        ItemKey key{NodeKeys::fromInt(i)};
+        ItemKey matKey;
+
+        if (collector.hasChannel<Mesh>()) {
+            auto &meshChan = collector.getChannel<Mesh>();
+            meshChan.put(key, _rocks[i].mesh, ctx);
+
+            if (collector.hasChannel<Material>()) {
+                auto &matChan = collector.getChannel<Material>();
+
+                Material rockMat("rock");
+                rockMat.setKd(0.6, 0.6, 0.6);
+                matChan.put(matKey = key, rockMat, ctx);
+            }
+
+            auto node = ctx.createNode(key, matKey);
+            node.setPosition(_rocks[i].position);
+            nodes.push_back(node);
+        }
+    }
+
+    return nodes;
+}
+
 void Rocks::collectSelf(ICollector &collector,
                         const IResolutionModel &resolutionModel,
                         const ExplorationContext &ctx) {
 
-    if (collector.hasChannel<SceneNode>() && collector.hasChannel<Mesh>()) {
+    if (collector.hasChannel<SceneNode>()) {
         auto &objChan = collector.getChannel<SceneNode>();
         auto &meshChan = collector.getChannel<Mesh>();
 

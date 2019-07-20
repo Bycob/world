@@ -16,6 +16,11 @@ public:
 
     void addRock(const vec3d &position);
 
+    void setRadius(double radius) { _radius = radius; }
+
+    std::vector<SceneNode> collectTemplates(ICollector &collector,
+                                            const ExplorationContext &ctx);
+
     void collectSelf(ICollector &collector,
                      const IResolutionModel &resolutionModel,
                      const ExplorationContext &ctx) override;

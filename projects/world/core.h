@@ -31,6 +31,7 @@
 #include "core/IChunkSystem.h"
 #include "core/LODGridChunkSystem.h"
 #include "core/LODGridCoordinates.h"
+#include "core/InstancePool.h"
 
 #include "core/ICollector.h"
 #include "core/Collector.h"

@@ -114,6 +114,19 @@ Chunk &LODGridChunkSystem::getChunk(const vec3d &position, double resolution) {
 void LODGridChunkSystem::collect(ICollector &collector,
                                  const IResolutionModel &resolutionModel,
                                  const ExplorationContext &ctx) {
+    // Run collect on every decorator if needed
+    int decoratorID = 0;
+    for (auto &decorator : _internal->_chunkDecorators) {
+        WorldNode *node = dynamic_cast<WorldNode *>(decorator.get());
+
+        if (node != nullptr) {
+            ExplorationContext childCtx = ctx;
+            childCtx.appendPrefix({"deco" + std::to_string(decoratorID)});
+            node->collect(collector, resolutionModel, childCtx);
+        }
+        ++decoratorID;
+    }
+
     // Explore every toplevel chunk
     auto &lodData = getLODData(0);
     vec3d chunkSize = lodData.getChunkSize();
