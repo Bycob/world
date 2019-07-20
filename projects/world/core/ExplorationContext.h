@@ -6,6 +6,7 @@
 
 #include "WorldKeys.h"
 #include "world/math/Vector.h"
+#include "world/assets/SceneNode.h"
 #include "IEnvironment.h"
 
 namespace world {
@@ -25,7 +26,13 @@ public:
 
     ItemKey mutateKey(const ItemKey &key) const;
 
+    /// Handy alias for #mutateKey
+    ItemKey operator()(const ItemKey &key) const;
+
     vec3d getOffset() const;
+
+    SceneNode createNode(const ItemKey &meshKey,
+                         const ItemKey &materialKey) const;
 
     bool hasEnvironment() const;
 

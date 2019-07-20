@@ -19,7 +19,7 @@ public:
 
 
     ObjectNodeHandler(ObjectsManager &objectsManager,
-                      const world::Object3D &obj, world::Collector &collector);
+                      const world::SceneNode &obj, world::Collector &collector);
     virtual ~ObjectNodeHandler();
 
     void setTexture(int id, const std::string &path,
@@ -33,7 +33,8 @@ private:
     irr::scene::IMeshSceneNode *_meshNode;
     std::vector<std::string> _usedTextures;
 
-    void updateObject3D(const world::Object3D &object);
+    void updateObject3D(const world::SceneNode &object,
+                        world::Collector &collector);
 };
 
 class ObjectsManager : public RenderingModule {

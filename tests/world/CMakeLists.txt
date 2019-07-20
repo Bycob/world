@@ -13,9 +13,11 @@ if (${WORLD_BUILD_TESTS})
             test_mesh.cpp
             test_nodes.cpp
             test_perlin.cpp
+            test_scene.cpp
             test_types.cpp
             test_terrain.cpp
-            test_utilities.cpp)
+            test_utilities.cpp
+            test_voxels.cpp)
 
     add_executable(runtests ${WORLD_TESTS_SOURCES})
     target_link_libraries(runtests world)

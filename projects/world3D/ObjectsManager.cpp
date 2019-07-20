@@ -15,11 +15,11 @@ using namespace world;
 //----- ObjectNodeHandler
 
 ObjectNodeHandler::ObjectNodeHandler(ObjectsManager &objectsManager,
-                                     const Object3D &object,
+                                     const SceneNode &object,
                                      Collector &collector)
         : _objManager(objectsManager), _meshNode(NULL) {
 
-    updateObject3D(object);
+    updateObject3D(object, collector);
 
     // Material
     auto &matChan = collector.getStorageChannel<Material>();
@@ -86,9 +86,16 @@ void ObjectNodeHandler::setMaterial(const Material &mat, Collector &collector) {
     setTexture(0, mat.getMapKd(), collector);
 }
 
-void ObjectNodeHandler::updateObject3D(const Object3D &object) {
-    SMesh *irrMesh = ObjectsManager::convertToIrrlichtMesh(object.getMesh(),
-                                                           _objManager._driver);
+void ObjectNodeHandler::updateObject3D(const SceneNode &object,
+                                       Collector &collector) {
+    auto &meshChannel = collector.getStorageChannel<Mesh>();
+
+    if (!meshChannel.has(key(object.getMeshID()))) {
+        return;
+    }
+    const Mesh &mesh = meshChannel.get(key(object.getMeshID()));
+    SMesh *irrMesh =
+        ObjectsManager::convertToIrrlichtMesh(mesh, _objManager._driver);
 
     if (_meshNode == NULL) {
         _meshNode = _objManager._sceneManager->addMeshSceneNode(irrMesh, 0, -1);
@@ -147,9 +154,7 @@ void ObjectsManager::update(Collector &collector) {
     }
 
     // Add new objects
-    auto &objects = collector.getStorageChannel<Object3D>();
-    auto &materials = collector.getStorageChannel<Material>();
-    auto &textures = collector.getStorageChannel<Image>();
+    auto &objects = collector.getStorageChannel<SceneNode>();
 
     for (const auto &objectEntry : objects) {
         if (_objects.find(objectEntry._key) == _objects.end() ||

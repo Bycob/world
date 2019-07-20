@@ -13,10 +13,11 @@
 
 #include "assets/Color.h"
 #include "assets/Image.h"
+#include "assets/ImageUtils.h"
 #include "assets/Material.h"
 #include "assets/Mesh.h"
 #include "assets/MeshOps.h"
-#include "assets/Object3D.h"
+#include "world/assets/SceneNode.h"
 #include "assets/ObjLoader.h"
 #include "assets/Scene.h"
 
@@ -30,6 +31,7 @@
 #include "core/IChunkSystem.h"
 #include "core/LODGridChunkSystem.h"
 #include "core/LODGridCoordinates.h"
+#include "core/InstancePool.h"
 
 #include "core/ICollector.h"
 #include "core/Collector.h"
@@ -45,7 +47,12 @@
 #include "core/StringOps.h"
 #include "core/Profiler.h"
 #include "core/WeightedSkeletton.h"
+#include "world/assets/VoxelGrid.h"
+#include "world/assets/VoxelOps.h"
 #include "core/ColorMap.h"
 #include "core/Parameters.h"
+
+#include "world/nature/Lightning.h"
+#include "nature/Rocks.h"
 
 #endif //WORLD_WORLDAPI_H

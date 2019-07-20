@@ -74,16 +74,17 @@ TEST_CASE("Collector", "[collector]") {
     Collector collector;
 
     SECTION("adding channels") {
-        CHECK_FALSE(collector.hasChannel<Object3D>());
-        CHECK_FALSE(collector.hasStorageChannel<Object3D>());
+        CHECK_FALSE(collector.hasChannel<SceneNode>());
+        CHECK_FALSE(collector.hasStorageChannel<SceneNode>());
 
-        collector.addStorageChannel<Object3D>();
+        collector.addStorageChannel<SceneNode>();
 
-        CHECK(collector.hasChannel<Object3D>());
-        CHECK(collector.hasStorageChannel<Object3D>());
+        CHECK(collector.hasChannel<SceneNode>());
+        CHECK(collector.hasStorageChannel<SceneNode>());
     }
 
-    auto &objChan = collector.addStorageChannel<Object3D>();
+    auto &objChan = collector.addStorageChannel<SceneNode>();
+    auto &meshChan = collector.addStorageChannel<Mesh>();
     auto &matChan = collector.addStorageChannel<Material>();
 
     SECTION("adding object") {
@@ -110,7 +111,7 @@ TEST_CASE("Collector", "[collector]") {
 
         ItemKey key = ItemKeys::root("b");
         ItemKey ctxKey = ItemKeys::concat(ItemKeys::root("a"), key);
-        Object3D object;
+        SceneNode object;
 
         SECTION("key modification") {
             objChan.put(key, object, context);
@@ -142,7 +143,7 @@ TEST_CASE("Collector", "[collector]") {
         Material material("blue1");
         material.setMapKd(blueKey.str());
 
-        Object3D object(m);
+        SceneNode object(blueKey.str());
         object.setPosition({1, 2, 3});
         object.setMaterialID(blueKey.str());
 
@@ -150,6 +151,7 @@ TEST_CASE("Collector", "[collector]") {
         auto &imgChan = collector.addStorageChannel<Image>();
 
         objChan.put(blueKey, object);
+        meshChan.put(blueKey, m);
         matChan.put(blueKey, material);
         imgChan.put(blueKey, img);
 
@@ -157,17 +159,19 @@ TEST_CASE("Collector", "[collector]") {
         Scene scene;
         collector.fillScene(scene);
 
-        CHECK(scene.getObjects().size() == 1);
-        Object3D *sceneObj = scene.getObjects().at(0);
+        CHECK(scene.getNodes().size() == 1);
+        SceneNode *sceneObj = scene.getNodes().at(0);
         CHECK(sceneObj->getPosition().length({1, 2, 3}) == Approx(0));
         CHECK(sceneObj->getMaterialID() == blueKey.str());
 
-        CHECK(scene.getMaterials().size() == 1);
-        auto sceneMat = scene.getMaterials()[0];
-        CHECK(sceneMat->getMapKd() == blueKey.str() + ".png");
+        CHECK(scene.materialCount() == 1);
+        auto sceneMat = scene.getMaterial(blueKey.str());
+        CHECK(sceneMat.getMapKd() == blueKey.str() + ".png");
+
+        CHECK(scene.meshCount() == 1);
 
         // Check links
-        REQUIRE(sceneMat->getName() == sceneObj->getMaterialID());
-        REQUIRE(scene.getTexture(sceneMat->getMapKd()).has_value());
+        REQUIRE(sceneMat.getName() == sceneObj->getMaterialID());
+        REQUIRE(scene.hasTexture(sceneMat.getMapKd()));
     }
 }

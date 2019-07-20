@@ -6,7 +6,7 @@
 #include <list>
 
 #include "world/core/WorldTypes.h"
-#include "world/assets/Object3D.h"
+#include "world/assets/SceneNode.h"
 #include "world/assets/Material.h"
 #include "world/assets/ImageUtils.h"
 #include "world/math/MathsHelper.h"
@@ -260,9 +260,10 @@ void HeightmapGround::addTerrain(const TileCoordinates &key,
     ItemKey itemKey = terrainToItem(getTerrainDataId(key));
     Terrain &terrain = this->provideTerrain(key);
 
-    if (collector.hasChannel<Object3D>()) {
+    if (collector.hasChannel<SceneNode>() && collector.hasChannel<Mesh>()) {
 
-        auto &objChannel = collector.getChannel<Object3D>();
+        auto &objChannel = collector.getChannel<SceneNode>();
+        auto &meshChannel = collector.getChannel<Mesh>();
 
         if (!objChannel.has(itemKey)) {
             // Relocate the terrain
@@ -270,7 +271,9 @@ void HeightmapGround::addTerrain(const TileCoordinates &key,
             vec3d offset = bbox.getLowerBound();
 
             // Create the mesh
-            Object3D object(provideMesh(key));
+            meshChannel.put(itemKey, provideMesh(key));
+
+            SceneNode object(itemKey.str());
             object.setPosition(offset);
 
             // Create the material
@@ -285,11 +288,11 @@ void HeightmapGround::addTerrain(const TileCoordinates &key,
 
             if (collector.hasChannel<Material>()) {
                 auto &matChan = collector.getChannel<Material>();
-                object.setMaterialID(ItemKeys::toString(itemKey));
+                object.setMaterialID(itemKey.str());
 
                 if (collector.hasChannel<Image>()) {
                     auto &imageChan = collector.getChannel<Image>();
-                    material.setMapKd(ItemKeys::toString(itemKey));
+                    material.setMapKd(itemKey.str());
                     imageChan.put(itemKey, texture);
                 }
 

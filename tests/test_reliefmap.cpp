@@ -9,8 +9,12 @@
 using namespace world;
 
 void testReliefMap(int, char **);
+void testLightning(int argc, char **argv);
 
-int main(int argc, char **argv) { testReliefMap(argc, argv); }
+int main(int argc, char **argv) {
+    // testReliefMap(argc, argv);
+    testLightning(argc, argv);
+}
 
 void testReliefMap(int argc, char **argv) {
     int limitBrightness = 4;
@@ -41,4 +45,19 @@ void testReliefMap(int argc, char **argv) {
 
     height.createImage().write("assets/reliefmap/height.png");
     heightDiff.createImage().write("assets/reliefmap/heightDiff.png");
+}
+
+void testLightning(int argc, char **argv) {
+    Image img(1024, 1024, ImageType::RGB);
+    ImageUtils::fill(img, Color4d(0, 0, 0));
+    /*
+    ImageUtils::drawLine(img, {54, -56}, {873, 452}, 3, Color4d(0.9, 0.95,
+    0.97)); ImageUtils::drawLine(img, {-54, 856}, {473, 52}, 3, Color4d(0.9,
+    0.95, 0.97));
+     */
+
+    JitterLightning lightning;
+    lightning.generateLightning(img, {500, 200}, {500, 800});
+
+    img.write("assets/lightning.png");
 }

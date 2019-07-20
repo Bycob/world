@@ -41,6 +41,9 @@ template <typename T> struct vec3 {
     template <typename R>
     auto operator/(const vec3<R> &rhs) const -> vec3<decltype(x / rhs.x)>;
 
+    vec3<T> &operator*=(T rhs);
+    vec3<T> &operator/=(T rhs);
+
     template <typename R> vec3<T> &operator+=(const vec3<R> &rhs);
     template <typename R> vec3<T> &operator-=(const vec3<R> &rhs);
     template <typename R> vec3<T> &operator*=(const vec3<R> &rhs);
@@ -122,7 +125,7 @@ template <typename T> inline vec3<T> vec3<T>::operator-() const {
 template <typename T>
 template <typename R>
 inline auto vec3<T>::operator*(R rhs) const -> vec3<decltype(x * rhs)> {
-    return vec3(this->x * rhs, this->y * rhs, this->z * rhs);
+    return vec3<decltype(x * rhs)>(this->x * rhs, this->y * rhs, this->z * rhs);
 }
 
 template <typename T>
@@ -161,6 +164,20 @@ inline auto vec3<T>::operator/(const vec3<R> &rhs) const
     -> vec3<decltype(x / rhs.x)> {
     return vec3<decltype(x / rhs.x)>(this->x / rhs.x, this->y / rhs.y,
                                      this->z / rhs.z);
+}
+
+template <typename T> inline vec3<T> &vec3<T>::operator*=(T rhs) {
+    x *= rhs;
+    y *= rhs;
+    z *= rhs;
+    return *this;
+}
+
+template <typename T> inline vec3<T> &vec3<T>::operator/=(T rhs) {
+    x /= rhs;
+    y /= rhs;
+    z /= rhs;
+    return *this;
 }
 
 template <typename T>
@@ -390,6 +407,8 @@ template struct WORLDAPI_EXPORT vec2<int>;
 
 typedef vec3<double> vec3d;
 typedef vec3<int> vec3i;
+typedef vec3<unsigned int> vec3u;
 typedef vec2<double> vec2d;
 typedef vec2<int> vec2i;
+typedef vec2<unsigned int> vec2u;
 } // namespace world

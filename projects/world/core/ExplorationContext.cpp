@@ -25,6 +25,20 @@ ItemKey ExplorationContext::mutateKey(const ItemKey &key) const {
     return {_keyPrefix, key};
 }
 
+ItemKey ExplorationContext::operator()(const ItemKey &key) const {
+    return mutateKey(key);
+}
+
+SceneNode ExplorationContext::createNode(const ItemKey &meshKey,
+                                         const ItemKey &materialKey) const {
+    std::string meshID =
+        meshKey == ItemKeys::defaultKey() ? "" : mutateKey(meshKey).str();
+    std::string materialID = materialKey == ItemKeys::defaultKey()
+                                 ? ""
+                                 : mutateKey(materialKey).str();
+    return SceneNode(meshID, materialID);
+}
+
 vec3d ExplorationContext::getOffset() const { return _offset; }
 
 bool ExplorationContext::hasEnvironment() const {

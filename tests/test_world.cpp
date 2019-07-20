@@ -67,10 +67,7 @@ void generate_test_world(int argc, char **argv) {
     fpsView.setPosition({0, 0, z + 5});
     std::cout << "Explorer position is " << vec3d{0, 0, z + 5} << std::endl;
 
-    Collector collector;
-    collector.addStorageChannel<Object3D>();
-    collector.addStorageChannel<Material>();
-    collector.addStorageChannel<Image>();
+    Collector collector(CollectorPresets::SCENE);
 
     std::cout << "Exploration du monde..." << std::endl;
     Profiler profiler;

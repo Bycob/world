@@ -30,8 +30,7 @@ void testTinyObjLoader(int argc, char **argv) {
             obj.read(scene, argv[1]);
             std::cout << "Mesh lu !" << std::endl;
 
-            std::vector<Object3D *> output;
-            scene.getObjects(output);
+            std::vector<SceneNode *> output = scene.getNodes();
 
             std::cout << "Reecriture du fichier sous un autre nom" << std::endl;
             obj.write(scene, "assets/terrain/result.obj");
@@ -63,7 +62,8 @@ void testRepeatable(int argc, char **argv) {
     Terrain tr(repeatable);
     Scene repeatableobj;
     std::unique_ptr<Mesh> mesh(tr.createMesh());
-    repeatableobj.addObject(Object3D(*mesh));
+    repeatableobj.addMesh("mesh1", *mesh);
+    repeatableobj.addNode(SceneNode("mesh1"));
 
     ObjLoader loader;
     loader.write(repeatableobj, "assets/terrain/repeatable");
@@ -128,13 +128,14 @@ void testPerlin(int argc, char **argv) {
     std::cout << "Conversion du terrain en mesh... " << std::endl;
     Scene scene1;
     std::shared_ptr<Mesh> mesh = std::shared_ptr<Mesh>(terrain.createMesh());
-    scene1.addObject(Object3D(*mesh));
+    scene1.addMesh("mesh1", *mesh);
+    scene1.addNode(SceneNode("mesh1"));
 
     std::shared_ptr<Material> material =
         std::make_shared<Material>("material01");
     material->setMapKd("test2_tex.png");
     material->setKs(0, 0, 0);
-    scene1.addMaterial(material);
+    scene1.addMaterial("material01", *material);
 
     std::cout << "Ecriture du mesh dans un fichier .obj..." << std::endl;
 
@@ -203,12 +204,13 @@ void testSubdivisions(int argc, char **argv) {
     TerrainSubdivisionTree &subtree = terrainTree->getSubtree(0, 0);
     std::shared_ptr<Mesh> submesh =
         std::shared_ptr<Mesh>(subtree.convertToSubmesh());
-    subterrainScene.addObject(Object3D(*submesh));
-    /*subterrainScene.addObject(Object3D(std::shared_ptr<Mesh>(terrainTree->getSubtree(1,
+    subterrainScene.addMesh("mesh1", *submesh);
+    subterrainScene.addNode(SceneNode("mesh1"));
+    /*subterrainScene.addObject(SceneNode(std::shared_ptr<Mesh>(terrainTree->getSubtree(1,
     0).convertToSubmesh())));
-    subterrainScene.addObject(Object3D(std::shared_ptr<Mesh>(terrainTree->getSubtree(1,
+    subterrainScene.addObject(SceneNode(std::shared_ptr<Mesh>(terrainTree->getSubtree(1,
     1).convertToSubmesh())));
-    subterrainScene.addObject(Object3D(std::shared_ptr<Mesh>(terrainTree->getSubtree(0,
+    subterrainScene.addNode(SceneNode(std::shared_ptr<Mesh>(terrainTree->getSubtree(0,
     1).convertToSubmesh())));*/
 
     std::cout << "Ecriture du fichier .obj..." << std::endl;

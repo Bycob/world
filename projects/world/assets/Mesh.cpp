@@ -24,7 +24,7 @@ int Face::vertexCount() const { return 3; }
 
 //----- MESH
 
-Mesh::Mesh() {}
+Mesh::Mesh(std::string name) : _name(std::move(name)) {}
 
 Mesh::~Mesh() {}
 
@@ -60,6 +60,13 @@ Face &Mesh::newFace() {
 }
 
 Face &Mesh::newFace(int *ids) {
+    _faces.emplace_back(ids);
+    _faceCount++;
+    return _faces.back();
+}
+
+Face &Mesh::newFace(int id1, int id2, int id3) {
+    int ids[]{id1, id2, id3};
     _faces.emplace_back(ids);
     _faceCount++;
     return _faces.back();
