@@ -12,7 +12,7 @@
 
 namespace world {
 
-template <typename data_t> class WORLDAPI_EXPORT VoxelGrid {
+template <typename data_t> class VoxelGrid {
 public:
     explicit VoxelGrid(u32 x, u32 y, u32 z)
             : _dims(x, y, z), _bbox({0}, {1}), _voxels(new data_t[x * y * z]) {}

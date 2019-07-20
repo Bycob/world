@@ -14,7 +14,7 @@
 namespace world {
 
 template <typename TGenerator>
-class WORLDAPI_EXPORT InstancePool : public IChunkDecorator, public WorldNode {
+class InstancePool : public IChunkDecorator, public WorldNode {
 public:
     InstancePool(IEnvironment *env)
             : _env{env}, _rng(static_cast<u64>(time(NULL))) {}

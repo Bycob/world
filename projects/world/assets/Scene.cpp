@@ -33,12 +33,14 @@ Scene::Scene(Scene &&other) : _internal(other._internal) {
 Scene &Scene::operator=(const Scene &other) {
     clear();
     addAll(other);
+    return *this;
 }
 
 Scene &Scene::operator=(Scene &&other) {
     delete _internal;
     _internal = other._internal;
     other._internal = nullptr;
+    return *this;
 }
 
 void Scene::clear() {
