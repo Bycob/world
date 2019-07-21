@@ -37,6 +37,10 @@ struct Interpolation {
                                     double x);
 };
 
+inline double smoothstep(double edge0, double edge1, double x) {
+    double t = clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
+    return t * t * (3.0 - 2.0 * t);
+}
 
 // https://en.wikipedia.org/wiki/Inverse_distance_weighting
 /** Cette classe permet de réaliser une interpolation en tout point
