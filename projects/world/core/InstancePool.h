@@ -5,22 +5,26 @@
 
 #include <random>
 #include <vector>
+#include <map>
 
 #include "WorldKeys.h"
 #include "WorldNode.h"
 #include "IChunkDecorator.h"
 #include "Chunk.h"
+#include "InstanceDistribution.h"
 
 namespace world {
 
-template <typename TGenerator>
+
+template <typename TGenerator, typename TDistribution = RandomDistribution>
 class InstancePool : public IChunkDecorator, public WorldNode {
 public:
     InstancePool(IEnvironment *env)
-            : _env{env}, _rng(static_cast<u64>(time(NULL))) {}
+            : _env{env}, _distribution(env),
+              _rng(static_cast<u64>(time(NULL))) {}
 
 
-    void setDensity(double density) { _density = density; }
+    TDistribution &distribution() { return _distribution; }
 
     void collectSelf(ICollector &collector,
                      const IResolutionModel &resolutionModel,
@@ -33,14 +37,15 @@ public:
 private:
     IEnvironment *_env;
 
+    TDistribution _distribution;
+
     std::mt19937 _rng;
     std::vector<std::unique_ptr<TGenerator>> _generators;
-    std::vector<SceneNode> _objects;
+    std::vector<std::vector<SceneNode>> _objects;
 
     double _resolution = 20;
-    // instance count per m^2
-    double _density = 0.2;
 };
+
 
 class WORLDAPI_EXPORT Instance : public WorldNode {
 public:

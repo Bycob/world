@@ -9,6 +9,7 @@ void SeedDistribution::addSeeds(Chunk &chunk) {
     auto bounds = getBounds(chunk);
     double area = _tileSize * _tileSize / 1e6;
     std::uniform_real_distribution<double> distrib(0, 1);
+    std::uniform_int_distribution<int> genDistrib(0, _habitats.size() - 1);
 
     for (int y = bounds.first.y; y <= bounds.second.y; ++y) {
         for (int x = bounds.first.x; x <= bounds.second.x; ++x) {
@@ -25,7 +26,7 @@ void SeedDistribution::addSeeds(Chunk &chunk) {
                     double distance = _maxDist * (1 - distRatio * distRatio);
 
                     // Choose the generator
-                    u32 generatorId = 0; // TODO
+                    u32 generatorId = genDistrib(_rng);
                     seeds.push_back({seedPos, generatorId, distance});
                 }
             }
@@ -51,6 +52,8 @@ std::vector<Seed> SeedDistribution::getSeedsAround(Chunk &chunk) {
 
 std::vector<vec3d> SeedDistribution::getPositions(Chunk &chunk,
                                                   int generatorId) {
+    addSeeds(chunk);
+
     std::vector<vec3d> positions;
     std::vector<Seed> seedsAround;
     HabitatFeatures &habitat = _habitats.at(generatorId);

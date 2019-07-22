@@ -9,22 +9,9 @@
 #include "world/core/IEnvironment.h"
 #include "world/math/Vector.h"
 #include "world/core/Chunk.h"
+#include "InstanceDistribution.h"
 
 namespace world {
-
-/** Habitat features for a given "species" of object. */
-struct WORLDAPI_EXPORT HabitatFeatures {
-    vec2d _altitude{0, 2000};
-    // radians
-    vec2d _slope{0, M_PI_2};
-    // celsius
-    vec2d _temperature{0, 40};
-    vec2d _humidity{0, 1};
-    bool _sea = false;
-    double _density = 0.1;
-
-    // TODO add physical materials
-};
 
 struct WORLDAPI_EXPORT Seed {
     vec2d _position;
@@ -32,17 +19,15 @@ struct WORLDAPI_EXPORT Seed {
     double _distance = 1000;
 };
 
-class WORLDAPI_EXPORT SeedDistribution {
+class WORLDAPI_EXPORT SeedDistribution : public DistributionBase {
 public:
-    SeedDistribution(IEnvironment *env)
-            : _env(env), _rng{static_cast<u32>(time(NULL))} {
+    SeedDistribution(IEnvironment *env) : DistributionBase(env) {
         _tileSize = _maxDist;
         // 0.75 = Expected value of law 1 - X^2 with X in [0, 1]
         double invMeanRadius = 1 / (0.75 * _maxDist);
         _seedDensity = 1 / M_PI * invMeanRadius * invMeanRadius * _seedAmount;
     }
 
-    // Add seeds
     void addSeeds(Chunk &chunk);
 
     std::vector<Seed> getSeedsAround(Chunk &chunk);
@@ -50,16 +35,10 @@ public:
     std::vector<vec3d> getPositions(Chunk &chunk, int generatorId);
 
 private:
-    IEnvironment *_env;
-    std::mt19937 _rng;
-
     double _tileSize;
     /// Number of seeds per km^2. Computed from seedAmount and maxDist.
     double _seedDensity;
     std::map<vec2i, std::vector<Seed>> _seeds;
-    std::map<int, HabitatFeatures> _habitats;
-
-    double _resolution = 20;
 
     /// Mean amount of seeds occupying the same territory.
     double _seedAmount = 2;

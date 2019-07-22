@@ -28,8 +28,8 @@ inline std::exponential_distribution<double> exponentialDistribFromMedian(
  * whereas 3.25 will have 75% being rounded to 3. */
 template <class RNG> inline int randRound(RNG &rng, double value) {
     static std::uniform_real_distribution<double> distribution;
-    return static_cast<int>(value - floor(value) > distrib(rng) ? floor(value)
-                                                                : ceil(value));
+    return static_cast<int>(
+        value - floor(value) > distribution(rng) ? floor(value) : ceil(value));
 }
 } // namespace world
 
