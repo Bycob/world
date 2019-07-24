@@ -310,8 +310,7 @@ void HeightmapGround::updateCache() {
         // We shrink one third of the memory
         auto count = _internal->_terrains.size() - _maxCacheSize * 2 / 3;
 
-        std::cout << "Dropping memory : " << count
-                  << " removed." << std::endl;
+        std::cout << "Dropping memory : " << count << " removed." << std::endl;
 
         while (count != 0) {
             auto accessEntry = _internal->_accesses.begin();

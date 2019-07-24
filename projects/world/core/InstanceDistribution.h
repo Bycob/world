@@ -14,7 +14,7 @@ struct WORLDAPI_EXPORT HabitatFeatures {
     vec2d _temperature{0, 40};
     vec2d _humidity{0, 1};
     bool _sea = false;
-    double _density = 0.1;
+    double _density = 0.4;
 
     // TODO add physical materials
 };

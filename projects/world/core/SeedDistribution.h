@@ -24,7 +24,7 @@ public:
     SeedDistribution(IEnvironment *env) : DistributionBase(env) {
         _tileSize = _maxDist;
         // 0.75 = Expected value of law 1 - X^2 with X in [0, 1]
-        double invMeanRadius = 1 / (0.75 * _maxDist);
+        double invMeanRadius = 1 / (0.75 / 1000 * _maxDist);
         _seedDensity = 1 / M_PI * invMeanRadius * invMeanRadius * _seedAmount;
     }
 
@@ -42,7 +42,7 @@ private:
 
     /// Mean amount of seeds occupying the same territory.
     double _seedAmount = 2;
-    /// Maximum distance a seed can
+    /// Maximum distance a seed can spread on
     double _maxDist = 2000;
 
 

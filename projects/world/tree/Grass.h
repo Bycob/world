@@ -18,6 +18,14 @@ class WORLDAPI_EXPORT Grass : public WorldNode {
 public:
     Grass();
 
+    void setGrassCount(u32 grassCount) { _grassCount = grassCount; }
+
+    void setBend(double bend) { _bend = bend; }
+
+    void setHeight(double height) { _height = height; }
+
+    void setWidth(double width) { _width = width; }
+
     void addBush(const vec3d &root);
 
     std::vector<SceneNode> collectTemplates(ICollector &collector,

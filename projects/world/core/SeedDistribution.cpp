@@ -13,7 +13,8 @@ void SeedDistribution::addSeeds(Chunk &chunk) {
 
     for (int y = bounds.first.y; y <= bounds.second.y; ++y) {
         for (int x = bounds.first.x; x <= bounds.second.x; ++x) {
-            auto ret = _seeds.insert({{x, y}, std::vector<Seed>()});
+            vec2i tileCoords{x, y};
+            auto ret = _seeds.insert({tileCoords, std::vector<Seed>()});
 
             if (ret.second) {
                 auto &seeds = ret.first->second;
@@ -21,13 +22,17 @@ void SeedDistribution::addSeeds(Chunk &chunk) {
 
                 for (int i = 0; i < count; ++i) {
                     vec2d seedPos =
-                        vec2d{distrib(_rng), distrib(_rng)} * _tileSize;
+                        (vec2d{distrib(_rng), distrib(_rng)} + tileCoords) *
+                        _tileSize;
                     double distRatio = distrib(_rng);
                     double distance = _maxDist * (1 - distRatio * distRatio);
 
                     // Choose the generator
                     u32 generatorId = genDistrib(_rng);
                     seeds.push_back({seedPos, generatorId, distance});
+
+                    // std::cout << seedPos.x << " " << seedPos.y << " " <<
+                    // distance << " " << generatorId << std::endl;
                 }
             }
         }
@@ -55,15 +60,8 @@ std::vector<vec3d> SeedDistribution::getPositions(Chunk &chunk,
     addSeeds(chunk);
 
     std::vector<vec3d> positions;
-    std::vector<Seed> seedsAround;
+    std::vector<Seed> seedsAround = getSeedsAround(chunk);
     HabitatFeatures &habitat = _habitats.at(generatorId);
-
-    // Keep only the seeds for the generator from parameters
-    for (Seed seed : getSeedsAround(chunk)) {
-        if (seed._generatorId == generatorId) {
-            seedsAround.emplace_back(std::move(seed));
-        }
-    }
 
     vec3d chunkPos = chunk.getPosition3D();
     vec3d chunkDims = chunk.getSize();
@@ -100,13 +98,23 @@ std::vector<vec3d> SeedDistribution::getPositions(Chunk &chunk,
         // double temperature = _env->getTemperature(position);
         keep *= getProb(habitat._altitude, absPos.z);
 
-        double denseProp = 0;
+        // Competition between species (introduce environmental obstacles later)
+        // <!> This algorithm considers that a species competes for the habitat
+        // even if it is not adapted to it.
+        double propFor = 0;
+        double propAgainst = 0;
+
         for (auto &seed : seedsAround) {
             double distance = seed._position.length(vec2d(absPos));
-            double ratio = max(0, distance / seed._distance);
-            denseProp += ratio * ratio;
+            double ratio = pow(2, distance / seed._distance);
+
+            if (seed._generatorId == generatorId) {
+                propFor += ratio;
+            } else {
+                propAgainst += ratio;
+            }
         }
-        keep *= min(denseProp, 1);
+        keep *= propFor / (propFor + propAgainst);
 
         if (keepDistrib(_rng) <= keep) {
             positions.push_back(position);

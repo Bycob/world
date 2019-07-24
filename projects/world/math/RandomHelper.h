@@ -29,7 +29,7 @@ inline std::exponential_distribution<double> exponentialDistribFromMedian(
 template <class RNG> inline int randRound(RNG &rng, double value) {
     static std::uniform_real_distribution<double> distribution;
     return static_cast<int>(
-        value - floor(value) > distribution(rng) ? floor(value) : ceil(value));
+        value - floor(value) < distribution(rng) ? floor(value) : ceil(value));
 }
 } // namespace world
 

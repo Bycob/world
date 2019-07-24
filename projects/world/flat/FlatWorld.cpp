@@ -29,9 +29,14 @@ FlatWorld *FlatWorld::createDemoFlatWorld() {
     auto &chunkSystem = world->addPrimaryNode<LODGridChunkSystem>({0, 0, 0});
     chunkSystem.addDecorator<ForestLayer>(world);
 
+    // Grass with seed distribution
     auto &grassPool =
         chunkSystem.addDecorator<InstancePool<Grass, SeedDistribution>>(world);
-    auto &grass = grassPool.addGenerator();
+    auto &grass1 = grassPool.addGenerator();
+
+    auto &grass2 = grassPool.addGenerator();
+    grass2.setGrassCount(5);
+    grass2.setHeight(0.5);
 
     auto &rocksPool = chunkSystem.addDecorator<InstancePool<Rocks>>(world);
     rocksPool.distribution().setDensity(0.02);
@@ -40,7 +45,8 @@ FlatWorld *FlatWorld::createDemoFlatWorld() {
     rocks.setRadius(0.7);
 
     for (int i = 0; i < 10; ++i) {
-        grass.addBush({0, 0, 0});
+        grass1.addBush({0, 0, 0});
+        grass2.addBush({0, 0, 0});
         rocks.addRock({0, 0, 0});
     }
 
