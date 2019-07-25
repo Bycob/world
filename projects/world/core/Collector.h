@@ -7,13 +7,21 @@
 #include <map>
 
 #include "WorldTypes.h"
-#include "world/assets/Object3D.h"
+#include "world/assets/SceneNode.h"
 #include "world/assets/Material.h"
 #include "world/assets/Scene.h"
 
 #include "ICollector.h"
 
 namespace world {
+
+// TODO remove #if _MSC_VER (we just need to implement destructor or something
+// like that)
+
+enum class CollectorPresets {
+    NONE,
+    SCENE,
+};
 
 template <typename T> class CollectorChannel;
 
@@ -23,7 +31,7 @@ template <typename T> class CollectorChannel;
  * manipulate channels of type CollectorChannel<T>. */
 class WORLDAPI_EXPORT Collector : public ICollector {
 public:
-    Collector();
+    Collector(CollectorPresets preset = CollectorPresets::NONE);
 
     /** Delete all the resources harvested from the previous
      * "collect" calls */
@@ -34,11 +42,13 @@ public:
     // TODO simplify method call (only one required template argument instead of
     // 2)
     template <typename T, typename CustomChannel, typename... Args>
-    CustomChannel &addCustomChannel(Args... args);
+    CustomChannel &addCustomChannel(Args &&... args);
 
     template <typename T> bool hasStorageChannel() const;
 
     template <typename T> CollectorChannel<T> &getStorageChannel();
+
+    Scene toScene();
 
     void fillScene(Scene &scene);
 
@@ -72,11 +82,17 @@ public:
 
     CollectorChannel(const CollectorChannel<T> &other) = delete;
 
-    void put(const ItemKey &key, const T &item) override;
+    void put(const ItemKey &key, const T &item,
+             const ExplorationContext &ctx =
+                 ExplorationContext::getDefault()) override;
 
-    bool has(const ItemKey &key) const override;
+    bool has(const ItemKey &key,
+             const ExplorationContext &ctx =
+                 ExplorationContext::getDefault()) const override;
 
-    void remove(const ItemKey &key) override;
+    void remove(const ItemKey &key,
+                const ExplorationContext &ctx =
+                    ExplorationContext::getDefault()) override;
 
     const T &get(const ItemKey &key) const;
 

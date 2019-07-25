@@ -31,7 +31,13 @@ struct WORLDAPI_EXPORT PerlinInfo {
     // TODO enhance documentation
     int reference;
     double frequency;
+    /** Offset along x axis, expressed in number of interpolation points.
+     * (if the frequency is n, then the number of interpolation points on
+     * the reference octave is n) */
     int offsetX;
+    /** Offset along y axis, expressed in number of interpolation points.
+     * (if the frequency is n, then the number of interpolation points on
+     * the reference octave is n) */
     int offsetY;
 };
 
@@ -65,6 +71,8 @@ public:
                                const modifier &sourceModifier);
 
     arma::Mat<double> generatePerlinNoise2D(int size, const PerlinInfo &info);
+
+    std::vector<u8> getHash() const;
 
 private:
     // Parameters

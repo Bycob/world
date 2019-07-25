@@ -66,9 +66,11 @@ private:
 class WORLDAPI_EXPORT Mesh {
 
 public:
-    Mesh();
+    Mesh(std::string name = "");
 
     virtual ~Mesh();
+
+    std::string getName() const { return _name; }
 
     /** Tells the mesh that we are going to add a certain amount
      * of faces. This method enables the mesh to adapt its buffer
@@ -87,6 +89,10 @@ public:
     Face &newFace();
 
     Face &newFace(int ids[3]);
+
+    Face &newFace(int id1, int id2, int id3);
+
+    void clearFaces();
 
     /** Tells the mesh that we are going to add a certain amount
      * of vertices. This method enables the mesh to adapt its buffer
@@ -107,7 +113,10 @@ public:
     Vertex &newVertex(const vec3d &position, const vec3d &normal = {0, 0, 1},
                       const vec2d &texture = {0, 0});
 
+    void clearVertices();
+
 private:
+    std::string _name;
     u32 _verticesCount = 0;
     std::vector<Vertex> _vertices;
     u32 _faceCount = 0;

@@ -1,6 +1,3 @@
 #include "resourcemodel.h"
 
-ResourceModel::ResourceModel()
-{
-
-}
+ResourceModel::ResourceModel() {}

@@ -8,7 +8,11 @@
 
 namespace world {
 
-std::string ChunkKeys::toString(const world::ChunkKey &key) {
+NodeKey NodeKeys::fromUint(unsigned int id) { return std::to_string(id); }
+
+NodeKey NodeKeys::fromInt(int id) { return std::to_string(id); }
+
+std::string NodeKeys::toString(const world::NodeKey &key) {
     std::stringstream stream;
     for (char c : key) {
         auto cint = static_cast<uint32_t>(static_cast<uint8_t>(c));
@@ -17,8 +21,8 @@ std::string ChunkKeys::toString(const world::ChunkKey &key) {
     return stream.str();
 }
 
-ChunkKey ChunkKeys::fromString(const std::string &str) {
-    ChunkKey result(str.length() / 2, 0);
+NodeKey NodeKeys::fromString(const std::string &str) {
+    NodeKey result(str.length() / 2, 0);
 
     for (size_t i = 0; i < result.length(); ++i) {
         try {
@@ -30,26 +34,6 @@ ChunkKey ChunkKeys::fromString(const std::string &str) {
     }
 
     return result;
-}
-
-ObjectKey ObjectKeys::fromString(const std::string &str) {
-    try {
-        return std::stoi(str);
-    } catch (std::invalid_argument &e) {
-        throw e;
-    } catch (std::out_of_range &) {
-        throw std::invalid_argument("out of range");
-    }
-}
-
-AssetKey AssetKeys::fromString(const std::string &str) {
-    try {
-        return std::stoi(str);
-    } catch (std::invalid_argument &e) {
-        throw e;
-    } catch (std::out_of_range &) {
-        throw std::invalid_argument("out of range");
-    }
 }
 
 } // namespace world

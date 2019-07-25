@@ -1,0 +1,95 @@
+#ifndef PERLIN_COMP
+#define PERLIN_COMP
+
+#include "utils.comp"
+#include "hash.comp"
+
+struct NoiseParameters {
+	uint octaves;
+	uint octaveRef;
+    int offsetX;
+    int offsetY;
+	int offsetZ;
+    float frequency;
+    float persistence;
+};
+
+
+float g(uint hash, float x, float y, float z) {
+    uint h = hash & 15;
+	float u = hash < 8 ? x : y;
+	float v = h < 4 ? y : h == 12 || h == 14 ? x : z;
+	return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
+}
+
+int calcOffset(NoiseParameters params, uint octave, int baseOffset) {
+	int diff = int(octave) - int(params.octaveRef);
+	int scaled = diff > 0 ? baseOffset << diff : baseOffset >> - diff;
+	return scaled;
+}
+
+float calcFreq(NoiseParameters params, uint octave, float baseFreq) {
+	int diff = int(octave) - int(params.octaveRef);
+	return diff > 0 ? baseFreq * (1 << diff) : baseFreq / (1 << -diff);
+}
+
+float calcOffsetRemaining(NoiseParameters params, uint octave, int baseOffset) {
+	int diff = int(octave) - int(params.octaveRef);
+	if (diff >= 0) return 0;
+
+	int reversed = calcOffset(params, octave, baseOffset) << - diff;
+	return (baseOffset - reversed) / float(1 << -diff);
+}
+
+/* x, y, z - compris entre 0 et 1, en proportion de la largeur totale. */
+float perlinOctave(NoiseParameters params, uint octave, float x, float y, float z) {
+	float freq = calcFreq(params, octave, params.frequency);
+
+	float xf = x * freq + calcOffsetRemaining(params, octave, params.offsetX);
+	float yf = y * freq + calcOffsetRemaining(params, octave, params.offsetY);
+	float zf = z * freq + calcOffsetRemaining(params, octave, params.offsetZ);
+
+	int ox = calcOffset(params, octave, params.offsetX);
+	int oy = calcOffset(params, octave, params.offsetY);
+	int oz = calcOffset(params, octave, params.offsetZ);
+
+	int x0 = int(floor(xf));
+	int x1 = int(ceil(xf));
+	int y0 = int(floor(yf));
+	int y1 = int(ceil(yf));
+	int z0 = int(floor(zf));
+	int z1 = int(ceil(zf));
+
+	float g000 = g(rand(octave, x0 + ox, y0 + oy, z0 + oz), xf - x0, yf - y0, zf - z0);
+	float g010 = g(rand(octave, x0 + ox, y1 + oy, z0 + oz), xf - x0, yf - y1, zf - z0);
+	float g100 = g(rand(octave, x1 + ox, y0 + oy, z0 + oz), xf - x1, yf - y0, zf - z0);
+	float g110 = g(rand(octave, x1 + ox, y1 + oy, z0 + oz), xf - x1, yf - y1, zf - z0);
+	float g001 = g(rand(octave, x0 + ox, y0 + oy, z1 + oz), xf - x0, yf - y0, zf - z1);
+	float g011 = g(rand(octave, x0 + ox, y1 + oy, z1 + oz), xf - x0, yf - y1, zf - z1);
+	float g101 = g(rand(octave, x1 + ox, y0 + oy, z1 + oz), xf - x1, yf - y0, zf - z1);
+	float g111 = g(rand(octave, x1 + ox, y1 + oy, z1 + oz), xf - x1, yf - y1, zf - z1);
+	
+	float ix = 0.5 - 0.5 * cos((xf - x0) * M_PI);
+	float iy = 0.5 - 0.5 * cos((yf - y0) * M_PI);
+	float iz = 0.5 - 0.5 * cos((zf - z0) * M_PI);
+
+	float l0 = mix(mix(g000, g001, iz), mix(g010, g011, iz), iy);
+	float l1 = mix(mix(g100, g101, iz), mix(g110, g111, iz), iy);
+	return 0.5 + 0.5 * mix(l0, l1, ix);
+}
+
+float perlin(NoiseParameters params, float x, float y, float z) {
+	float per = params.persistence;
+	float persum = 0;
+	float val = 0;
+
+	for (uint i = 0; i < params.octaves; ++i) {
+		val += perlinOctave(params, i, x, y, z) * per;
+		persum += per;
+		per *= params.persistence;
+	}
+
+	return val / persum;
+}
+
+#endif

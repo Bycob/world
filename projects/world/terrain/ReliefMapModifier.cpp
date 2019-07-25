@@ -14,10 +14,13 @@ using namespace arma;
 namespace world {
 
 // -----
-ReliefMapModifier::ReliefMapModifier() : _rng(static_cast<u32>(time(NULL))) {}
+ReliefMapModifier::ReliefMapModifier(double width, int resolution)
+        : _rng(static_cast<u32>(time(NULL))),
+          _tileSystem(0, vec3i{resolution, resolution, 0},
+                      vec3d{width, width, 0}) {}
 
 void ReliefMapModifier::setMapResolution(int mapres) {
-    _mapResolution = mapres;
+    _tileSystem._bufferRes = {mapres, mapres, 0};
 }
 
 void ReliefMapModifier::processTerrain(Terrain &terrain) {
@@ -25,16 +28,14 @@ void ReliefMapModifier::processTerrain(Terrain &terrain) {
     int size = terrain.getResolution();
 
     // Map
-    // TODO plutôt qu'un const cast faire une méthode privée
-    std::pair<Terrain, Terrain> &reliefMap =
-        const_cast<std::pair<Terrain, Terrain> &>(obtainMap(0, 0));
+    std::pair<Terrain, Terrain> &reliefMap = provideMap(0, 0);
     Terrain &heightMap = reliefMap.first;
     Terrain &diffMap = reliefMap.second;
 
     // Setup variables
     const vec3d terrainDims = terrain.getBoundingBox().getDimensions();
     const vec3d terrainPos = terrain.getBoundingBox().getLowerBound();
-    const double mapSize = heightMap.getResolution() * _mapPointSize;
+    const double mapSize = _tileSystem._baseSize.x;
     const double ratio = terrainDims.x / mapSize;
     const double mapOx = 0.5 + terrainPos.x / mapSize;
     const double mapOy = 0.5 + terrainPos.y / mapSize;
@@ -56,7 +57,7 @@ void ReliefMapModifier::processTerrain(Terrain &terrain) {
                                 mapX, mapY, Interpolation::COSINE) *
                             offsetCoef;
             double diff = diffMap.getInterpolatedHeight(mapX, mapY,
-                                                        Interpolation::COSINE) *
+                                                        Interpolation::LINEAR) *
                           diffCoef;
 
             bufferOffset(x, y) = offset;
@@ -82,13 +83,56 @@ void ReliefMapModifier::processTile(ITileContext &context) {
 }
 
 const std::pair<Terrain, Terrain> &ReliefMapModifier::obtainMap(int x, int y) {
+    return provideMap(x, y);
+}
+
+void ReliefMapModifier::setRegion(const vec2d &center, double radius,
+                                  double curvature, double height,
+                                  double diff) {
+
+    const vec3d mapOffset = _tileSystem._baseSize / 2;
+    const double mapRes = _tileSystem._bufferRes.x;
+    const vec3d coords = vec3d(center) + mapOffset;
+    const vec3d hsize{radius, radius, 0};
+    const vec3i lmin =
+        (_tileSystem.getLocalCoordinates(coords - hsize, 0) * (mapRes - 1))
+            .floor();
+    const vec3i lmax =
+        (_tileSystem.getLocalCoordinates(coords + hsize, 0) * (mapRes - 1))
+            .ceil();
+
+    auto &map = provideMap(0, 0);
+    auto &heightMap = map.first;
+    auto &diffMap = map.second;
+
+    const auto interp = [curvature](double x) { return pow(x, curvature); };
+
+    for (int x = lmin.x; x < lmax.x; ++x) {
+        for (int y = lmin.y; y < lmax.y; ++y) {
+            double prevHeight = heightMap(x, y);
+            double prevDiff = diffMap(x, y);
+
+            const vec2d gc = vec2d(_tileSystem.getGlobalCoordinates(
+                {{}, 0}, vec3d(x, y, 0) / (mapRes - 1)));
+            double d = center.length(gc - vec2d(mapOffset));
+
+            heightMap(x, y) = Interpolation::interpolate(0, height, radius,
+                                                         prevHeight, d, interp);
+            diffMap(x, y) = Interpolation::interpolate(0, diff, radius,
+                                                       prevDiff, d, interp);
+        }
+    }
+}
+
+std::pair<Terrain, Terrain> &ReliefMapModifier::provideMap(int x, int y) {
+    int resolution = _tileSystem._bufferRes.x;
     auto it = _reliefMap.find({x, y});
 
     if (it == _reliefMap.end()) {
         it = _reliefMap
                  .emplace(vec2i{x, y},
-                          std::make_pair<Terrain, Terrain>(
-                              Terrain(_mapResolution), Terrain(_mapResolution)))
+                          std::make_pair<Terrain, Terrain>(Terrain(resolution),
+                                                           Terrain(resolution)))
                  .first;
         generate(it->second.first, it->second.second);
     }

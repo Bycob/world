@@ -5,8 +5,8 @@
 
 #include <memory>
 
-#include <worldcore.h>
-#include <worldterrain.h>
+#include <world/core.h>
+#include <world/terrain.h>
 
 #include "generatepanel.h"
 
@@ -14,8 +14,7 @@ namespace Ui {
 class PanelTerrain;
 }
 
-class PanelTerrain : public GeneratePanel
-{
+class PanelTerrain : public GeneratePanel {
     Q_OBJECT
 
 public:
@@ -27,6 +26,7 @@ signals:
 
 public slots:
     virtual void generate();
+
 private:
     std::shared_ptr<world::Terrain> _generated;
 

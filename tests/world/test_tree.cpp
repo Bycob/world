@@ -5,6 +5,4 @@
 
 using namespace world;
 
-TEST_CASE("collect Tree group", "[tree]") {
-	
-}
+TEST_CASE("collect Tree group", "[tree]") {}

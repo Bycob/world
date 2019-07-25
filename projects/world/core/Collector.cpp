@@ -2,7 +2,18 @@
 
 namespace world {
 
-Collector::Collector() {}
+Collector::Collector(CollectorPresets preset) {
+    switch (preset) {
+    case CollectorPresets::SCENE:
+        addStorageChannel<SceneNode>();
+        addStorageChannel<Mesh>();
+        addStorageChannel<Material>();
+        addStorageChannel<Image>();
+        break;
+    case CollectorPresets ::NONE:
+        break;
+    }
+}
 
 void Collector::reset() {
     for (auto &entry : _channels) {
@@ -10,9 +21,16 @@ void Collector::reset() {
     }
 }
 
+Scene Collector::toScene() {
+    Scene scene;
+    fillScene(scene);
+    return scene;
+}
+
 void Collector::fillScene(Scene &scene) {
-    if (hasStorageChannel<Object3D>()) {
-        auto &objectChannel = getStorageChannel<Object3D>();
+    if (hasStorageChannel<SceneNode>() && hasStorageChannel<Mesh>()) {
+        auto &objectChannel = getStorageChannel<SceneNode>();
+        auto &meshChannel = getStorageChannel<Mesh>();
 
         if (hasStorageChannel<Material>()) {
             auto &materialChannel = getStorageChannel<Material>();
@@ -21,21 +39,28 @@ void Collector::fillScene(Scene &scene) {
                 auto &textureChannel = getStorageChannel<Image>();
 
                 for (auto texture : textureChannel) {
-                    scene.addTexture(ItemKeys::toString(texture._key) + ".png",
+                    scene.addTexture(texture._key.str() + ".png",
                                      texture._value);
                 }
             }
 
             for (auto material : materialChannel) {
                 Material addedMat(material._value);
-                addedMat.setMapKd(addedMat.getMapKd() + ".png");
 
-                scene.addMaterial(addedMat);
+                // If texture is "" then the material has no diffuse texture
+                if (addedMat.getMapKd() != "")
+                    addedMat.setMapKd(addedMat.getMapKd() + ".png");
+
+                scene.addMaterial(material._key.str(), addedMat);
             }
         }
 
         for (auto object : objectChannel) {
-            scene.addObject(object._value);
+            scene.addNode(object._value);
+        }
+
+        for (auto mesh : meshChannel) {
+            scene.addMesh(mesh._key.str(), mesh._value);
         }
     }
 }

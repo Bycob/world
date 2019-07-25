@@ -3,9 +3,11 @@
 
 #include "world/core/WorldConfig.h"
 
-#include "world/math/Vector.h"
+#include <functional>
+
+#include "WorldTypes.h"
 #include "IResolutionModel.h"
-#include "WorldZone.h"
+#include "world/math/Vector.h"
 
 namespace world {
 
@@ -30,6 +32,11 @@ inline bool operator<(const TileCoordinates &coord1,
     return coord1._lod < coord2._lod
                ? true
                : (coord1._lod == coord2._lod && coord1._pos < coord2._pos);
+}
+
+inline bool operator==(const TileCoordinates &coord1,
+                       const TileCoordinates &coord2) {
+    return coord1._lod == coord2._lod && coord1._pos == coord2._pos;
 }
 
 /** This class performs conversion between the world coordinates
@@ -89,18 +96,15 @@ public:
         const TileCoordinates &childCoordinates) const;
 
     /** Iterates over all the visible tiles in the given resolution model,
-     * inside of the given zone. Iterated tiles are sorted as if operator< was
-     * used. */
-    TileSystemIterator iterate(const IResolutionModel &resolutionModel,
-                               const WorldZone &zone) const;
-
-    /** Iterates over all the visible tiles in the given resolution model,
-     * inside of the zone delimited by the given bounds. */
+     * inside of the zone delimited by the given bounds. Iterated tiles
+     * are sorted as if operator< was used, which implies low lod tiles come
+     * first. */
     TileSystemIterator iterate(const IResolutionModel &resolutionModel,
                                const BoundingBox &bounds) const;
 
 private:
-    int computeLod(double resolution, double baseSize, int bufferRes) const;
+    int computeLod(double resolution, double baseSize, int bufferRes,
+                   int maxLod) const;
 
     vec3d getTileFloatingCoordinates(const vec3d &globalCoordinates,
                                      int lod) const;
@@ -118,10 +122,6 @@ private:
  */
 class WORLDAPI_EXPORT TileSystemIterator {
 public:
-    TileSystemIterator(const TileSystem &tileSystem,
-                       const IResolutionModel &resolutionModel,
-                       const WorldZone &bounds);
-
     TileSystemIterator(const TileSystem &tileSystem,
                        const IResolutionModel &resolutionModel,
                        const BoundingBox &bounds);
@@ -143,6 +143,7 @@ private:
     TileCoordinates _max;
     bool _endReached = false;
 
+
     // Increments current tile coordinates without taking the resolution model
     // into account.
     void step();
@@ -157,5 +158,18 @@ private:
 };
 
 } // namespace world
+
+namespace std {
+template <> class hash<world::TileCoordinates> {
+public:
+    size_t operator()(const world::TileCoordinates &c) const {
+        world::s64 hash = (c._pos.x << 8) + 31;
+        hash *= (c._pos.y << 8) + 31;
+        hash *= (c._pos.z << 8) + 31;
+        hash *= (c._lod << 8) + 31;
+        return static_cast<size_t>(hash);
+    }
+};
+} // namespace std
 
 #endif // WORLD_TILE_SYSTEM_H

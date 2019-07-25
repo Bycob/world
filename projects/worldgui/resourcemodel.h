@@ -3,8 +3,7 @@
 
 #include <QAbstractItemModel>
 
-class ResourceModel : QAbstractItemModel
-{
+class ResourceModel : QAbstractItemModel {
 public:
     ResourceModel();
 };

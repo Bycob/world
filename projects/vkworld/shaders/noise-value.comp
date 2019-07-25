@@ -1,0 +1,59 @@
+#version 450
+#extension GL_ARB_separate_shader_objects : enable
+#extension GL_GOOGLE_include_directive : enable
+
+#include "worldlib"
+
+#define WORKGROUP_SIZE 32
+layout (local_size_x = WORKGROUP_SIZE, local_size_y = WORKGROUP_SIZE, local_size_z = 1 ) in;
+
+
+layout(binding = 0) uniform OutputData {
+    uint width;
+    uint height;
+};
+
+layout(binding = 1) uniform PerlinData {
+    uint offsetX;
+    uint offsetY;
+    uint octaves;
+    float frequency;
+    float persistence;
+};
+
+layout(std430, binding = 3) buffer Output0 {
+   float outputBuffer[];
+};
+
+void main() {
+  
+  if(gl_GlobalInvocationID.x >= width || gl_GlobalInvocationID.y >= height)
+    return;
+
+  float x = float(gl_GlobalInvocationID.x) / float(width);
+  float y = float(gl_GlobalInvocationID.y) / float(height);
+
+  float f = frequency + 1;
+
+  float xf = x * f;
+  float yf = y * f;
+  int x0 = int(floor(xf));
+  int x1 = int(ceil(xf));
+  int y0 = int(floor(yf));
+  int y1 = int(ceil(yf));
+
+  float v00 = rand(0, x0, y0, 0);
+  float v01 = rand(0, x0, y1, 0);
+  float v10 = rand(0, x1, y0, 0);
+  float v11 = rand(0, x1, y1, 0);
+
+  float iy = 0.5 - 0.5 * cos((yf - y0) * M_PI);
+  float ix = 0.5 - 0.5 * cos((xf - x0) * M_PI);
+
+  float l0 = mix(v00, v01, iy);
+  float l1 = mix(v10, v11, iy);
+  float lf = mix(l0, l1, ix);
+
+  uint id = width * gl_GlobalInvocationID.y + gl_GlobalInvocationID.x;
+  outputBuffer[id] = lf;
+}

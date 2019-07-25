@@ -24,7 +24,7 @@ int Face::vertexCount() const { return 3; }
 
 //----- MESH
 
-Mesh::Mesh() {}
+Mesh::Mesh(std::string name) : _name(std::move(name)) {}
 
 Mesh::~Mesh() {}
 
@@ -65,6 +65,18 @@ Face &Mesh::newFace(int *ids) {
     return _faces.back();
 }
 
+Face &Mesh::newFace(int id1, int id2, int id3) {
+    int ids[]{id1, id2, id3};
+    _faces.emplace_back(ids);
+    _faceCount++;
+    return _faces.back();
+}
+
+void Mesh::clearFaces() {
+    _faces.clear();
+    _faceCount = 0;
+}
+
 void Mesh::reserveVertices(u32 count) {
     const auto maxCapacity = _vertices.max_size();
     const auto newCapacity = min(count + _verticesCount, maxCapacity);
@@ -103,4 +115,10 @@ Vertex &Mesh::newVertex(const world::vec3d &position,
     _verticesCount++;
     return _vertices.back();
 }
+
+void Mesh::clearVertices() {
+    _vertices.clear();
+    _verticesCount = 0;
+}
+
 } // namespace world

@@ -12,9 +12,7 @@ TEST_CASE("Image - general test case", "[image]") {
         REQUIRE(img.height() == 16);
     }
 
-    SECTION("type") {
-        REQUIRE(img.type() == ImageType::RGBA);
-    }
+    SECTION("type") { REQUIRE(img.type() == ImageType::RGBA); }
 
     SECTION("set and get color - u8") {
         img.rgba(0, 0).set(52, 65, 128, 254);
@@ -100,7 +98,7 @@ TEST_CASE("Image - armadillo interoperability", "[image]") {
 TEST_CASE("Image - IO", "[image]") {
     REQUIRE_THROWS(Image("unittests/img_not_found.png"));
 
-    //Image img("unittests/test.png");
+    // Image img("unittests/test.png");
 }
 
 TEST_CASE("Image - ImageStream", "[image]") {
@@ -119,19 +117,20 @@ TEST_CASE("Image - ImageStream", "[image]") {
     }
 
     // Read the stream
-    char* buffer = new char[stream.remaining()];
+    char *buffer = new char[stream.remaining()];
     stream.read(buffer, stream.remaining());
 
     SECTION("Check that data are in row-order format, and ARGB") {
         for (int y = 0; y < 3; ++y) {
             for (int x = 0; x < 3; ++x) {
-                INFO(std::string("reading ") + std::to_string(x) + ", " + std::to_string(y));
+                INFO(std::string("reading ") + std::to_string(x) + ", " +
+                     std::to_string(y));
                 // row major order, argb stream
                 auto ptr = buffer + (y * 3 + x) * 4;
-                REQUIRE((u8)ptr[0] == (u8) 255);
-                REQUIRE((u8)ptr[1] == (u8) x);
-                REQUIRE((u8)ptr[2] == (u8) y);
-                REQUIRE((u8)ptr[3] == (u8) 1);
+                REQUIRE((u8)ptr[0] == (u8)255);
+                REQUIRE((u8)ptr[1] == (u8)x);
+                REQUIRE((u8)ptr[2] == (u8)y);
+                REQUIRE((u8)ptr[3] == (u8)1);
             }
         }
     }

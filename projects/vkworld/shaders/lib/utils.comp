@@ -1,0 +1,37 @@
+#ifndef UTILS_COMP
+#define UTILS_COMP
+
+#define M_PI 3.1415926535897932384626433832795
+
+uint id2(uvec2 pos, uvec2 dims) {
+	return dims.x * pos.y + pos.x;
+}
+
+uint id3(uvec3 pos, uvec3 dims) {
+	return dims.y * dims.x * pos.z + dims.x * pos.y + pos.x;
+}
+
+float ramp(float a, float b, float c, float d, float lowb, float highb, float x) {
+    float ya = (x - a) / (b - a);
+    float yc = (d - x) / (d - c);
+    float yr = min(ya, yc);
+    return clamp(yr, lowb, highb);
+}
+
+float smoothramp(float a, float b, float c, float d, float lowb, float highb, float x) {
+    float ya = smoothstep(a, b, x);
+    float yc = smoothstep(d, c, x);
+    float yr = min(ya, yc);
+    return clamp(yr, lowb, highb);
+}
+
+/**
+ * Draw the foreground color on the background color and return
+ * the result.
+ */
+vec4 applyAlpha(vec4 bg, vec4 fg) {
+    float a = bg.a + (1 - bg.a) * fg.a;
+    return vec4(mix(bg.rgb, fg.rgb, fg.a), a);
+}
+
+#endif

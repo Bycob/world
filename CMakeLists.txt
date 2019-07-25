@@ -23,13 +23,13 @@ endif()
 
 if(${WORLD_STATIC_BUILD})
     set(WORLD_BUILD_MODE "STATIC")
-    message("-- Build libraries as static")
+    message(STATUS "Build libraries as static")
 else()
     set(WORLD_BUILD_MODE "SHARED")
-    message("-- Build libraries as dynamic")
+    message(STATUS "Build libraries as dynamic")
 endif()
 
-message("-- Build type : ${CMAKE_BUILD_TYPE}")
+message(STATUS "Build type : ${CMAKE_BUILD_TYPE}")
 
 # Paramètres du projet
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -45,11 +45,11 @@ else()
     set(WORLD_BITS 32)
 endif()
 
-message("-- Detected ${WORLD_BITS} bits platform")
+message(STATUS "Detected ${WORLD_BITS} bits platform")
 
 # Detection et paramètres du compilateur
 if(CMAKE_CXX_COMPILER_ID MATCHES "^GNU$")
-    message("-- Compiler : GNU")
+    message(STATUS "Compiler : GNU")
     set(WORLD_COMPILER_IS_GNU on)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -pthread")
 
@@ -57,7 +57,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "^GNU$")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -s -Os -Wno-attributes")
     endif()
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "^MSVC$")
-    message("-- Compiler : MSVC")
+    message(STATUS "Compiler : MSVC")
     set(WORLD_COMPILER_IS_MSVC on)
 endif()
 

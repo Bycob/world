@@ -7,8 +7,7 @@ namespace Ui {
 class DialogSaveNode;
 }
 
-class DialogSaveNode : public QDialog
-{
+class DialogSaveNode : public QDialog {
     Q_OBJECT
 
 public:

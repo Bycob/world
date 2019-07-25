@@ -3,7 +3,6 @@
 #include "world/core/WorldConfig.h"
 
 #include <string>
-#include <armadillo/armadillo>
 
 #include "Color.h"
 
@@ -11,6 +10,8 @@ namespace world {
 
 class WORLDAPI_EXPORT Material {
 public:
+    Material();
+
     Material(const std::string &name);
 
     virtual ~Material();

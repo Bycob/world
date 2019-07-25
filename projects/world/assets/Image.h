@@ -103,8 +103,11 @@ public:
 
     // infos
     ImageType type() const;
+    int elemSize() const;
     int width() const;
     int height() const;
+    /// Get the total size of the image (width * height * elemSize)
+    int size() const;
 
     // access
     /** Gets a rgba access on the pixel at (x, y). This
@@ -147,6 +150,16 @@ public:
      * @param x column of the pixel.
      * @param y line of the pixel. */
     const GreyPixel &grey(int x, int y) const;
+
+    /** Set the value of the pixel at (x, y). The number of elements
+     * copied from the array depends on the type of the image.
+     * @param values a float array holding the values to be set. */
+    void setf(int x, int y, const float *values);
+
+    /** Get the value of the pixel at (x, y). The number of elements
+     * copied to the array depends on the type of the image.
+     * @param values pixel data are copied to this array. */
+    void getf(int x, int y, float *values) const;
 
     // IO
     /** Writes the image at the specified location. The

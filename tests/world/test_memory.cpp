@@ -8,11 +8,9 @@ class MemoryTestClass {
 public:
     int _copy;
 
-    MemoryTestClass()
-            : _copy(0) {}
+    MemoryTestClass() : _copy(0) {}
 
-    MemoryTestClass(const MemoryTestClass &other)
-            : _copy(other._copy + 1) {}
+    MemoryTestClass(const MemoryTestClass &other) : _copy(other._copy + 1) {}
 };
 
 

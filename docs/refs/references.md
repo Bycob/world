@@ -11,6 +11,12 @@
 - [Procedural Terrain Generation using a Level of Detail System and Stereoscopic 
 Visualization ](https://pdfs.semanticscholar.org/b4df/bd5451b8a65e68cf042fa1b80c72b7c56a3c.pdf), 2013
 
+- [GPU Gems about Voxel terrains](https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch01.html), 2007
+
+- [Transvoxel](http://transvoxel.org/)
+    > This algorithm can fill the gaps between 2 lod levels in voxel terrains.
+
+    From *Lengyel, Eric. ?Voxel-Based Terrain for Real-Time Virtual Simulations?. PhD diss., University of California at Davis, 2010.*
 ## Vegetation
 
 ### Leaves
@@ -23,7 +29,15 @@ Visualization ](https://pdfs.semanticscholar.org/b4df/bd5451b8a65e68cf042fa1b80c
 
 - [Drawing Béziers Curves](http://ciechanowski.me/blog/2014/02/18/drawing-bezier-curves/), 2014
 
-### Data structures
+### Data structures
 
 - [The Half-Edge Tree: A Compact Data Structure for Level-of-Detail Tetrahedral 
 Meshes](ftp://ftp.disi.unige.it/person/MagilloP/PDF/het-short.pdf), 2007
+
+### GPU computing
+
+- [Mali GPU Best Practices](https://developer.arm.com/graphics/developer-guides/mali-gpu-best-practices)
+
+(Mali is a serie of GPUs designed by ARM for smartphones and tablets, but the documents contains general advices over compute shaders)
+
+- [Vulkan Memory Management](https://developer.nvidia.com/vulkan-memory-management)

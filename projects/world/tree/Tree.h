@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "world/core/IResolutionModel.h"
-#include "world/core/WorldObject.h"
+#include "world/core/WorldNode.h"
 #include "world/assets/Mesh.h"
 #include "world/assets/Material.h"
 #include "ITreeWorker.h"
@@ -15,7 +15,7 @@ namespace world {
 
 class PTree;
 
-class WORLDAPI_EXPORT Tree : public WorldObject {
+class WORLDAPI_EXPORT Tree : public WorldNode {
 public:
     Tree();
 
@@ -37,8 +37,8 @@ public:
 
     Mesh &leavesMesh();
 
-    void collect(ICollector &collector,
-                 const IResolutionModel &explorer) override;
+    void collect(ICollector &collector, const IResolutionModel &explorer,
+                 const ExplorationContext &ctx) override;
 
 private:
     PTree *_internal;

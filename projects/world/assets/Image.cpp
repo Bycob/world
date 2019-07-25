@@ -249,7 +249,7 @@ void Image::write(const std::string &file) const {
 
 namespace world {
 
-u32 elemSize(const ImageType &type) {
+u32 typeElemSize(const ImageType &type) {
     switch (type) {
     case ImageType::GREYSCALE:
         return 1;
@@ -396,7 +396,7 @@ void RGBAPixel::setf(double r, double g, double b, double a) {
 
 Image::Image(int width, int height, const ImageType &type)
         : _internal(new PImage(static_cast<u32>(width),
-                               static_cast<u32>(height), elemSize(type))),
+                               static_cast<u32>(height), typeElemSize(type))),
           _type(type) {}
 
 Image::Image(const arma::Cube<double> &data) : _type(ImageType::RGB) {
@@ -461,15 +461,20 @@ Image &Image::operator=(const Image &img) {
 
 Image &Image::operator=(Image &&img) {
     _internal = img._internal;
+    _type = img._type;
     img._internal = nullptr;
     return *this;
 }
 
 ImageType Image::type() const { return _type; }
 
+int Image::elemSize() const { return _internal->_elemSize; }
+
 int Image::width() const { return _internal->_sizeX; }
 
 int Image::height() const { return _internal->_sizeY; }
+
+int Image::size() const { return _internal->total(); }
 
 RGBAPixel &Image::rgba(int x, int y) {
     return *reinterpret_cast<RGBAPixel *>(_internal->at(x, y));
@@ -493,6 +498,22 @@ GreyPixel &Image::grey(int x, int y) {
 
 const GreyPixel &Image::grey(int x, int y) const {
     return *reinterpret_cast<GreyPixel *>(_internal->at(x, y));
+}
+
+void Image::setf(int x, int y, const float *values) {
+    u8 *target = _internal->at(x, y);
+
+    for (u32 i = 0; i < _internal->_elemSize; ++i) {
+        target[i] = fromDouble(values[i]);
+    }
+}
+
+void Image::getf(int x, int y, float *values) const {
+    const u8 *src = _internal->at(x, y);
+
+    for (u32 i = 0; i < _internal->_elemSize; ++i) {
+        values[i] = src[i];
+    }
 }
 
 // Check endianness (method from opencv/util.hpp)

@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "world/core/IResolutionModel.h"
-#include "world/assets/Object3D.h"
+#include "world/assets/SceneNode.h"
 
 namespace world {
 class PTree {
@@ -37,7 +37,8 @@ const Mesh &Tree::getLeavesMesh() const { return _leavesMesh; }
 
 Mesh &Tree::leavesMesh() { return _leavesMesh; }
 
-void Tree::collect(ICollector &collector, const IResolutionModel &explorer) {
+void Tree::collect(ICollector &collector, const IResolutionModel &explorer,
+                   const ExplorationContext &ctx) {
 
     // Generation
     if (!_generated) {
@@ -45,28 +46,32 @@ void Tree::collect(ICollector &collector, const IResolutionModel &explorer) {
     }
 
     // Collection
-    Object3D mainPart(_trunkMesh);
-    Object3D leaves(_leavesMesh);
+    SceneNode trunk(ctx({"1"}).str());
+    SceneNode leaves(ctx({"2"}).str());
 
     // Material
     Material leavesMat("leaves");
     leavesMat.setKd(0.4, 0.9, 0.4);
 
-    if (collector.hasChannel<Object3D>()) {
-        auto &objectsChannel = collector.getChannel<Object3D>();
+    if (collector.hasChannel<SceneNode>() && collector.hasChannel<Mesh>()) {
+        auto &objectsChannel = collector.getChannel<SceneNode>();
+        auto &meshChannel = collector.getChannel<Mesh>();
 
         if (collector.hasChannel<Material>()) {
             auto &materialsChannel = collector.getChannel<Material>();
 
-            mainPart.setMaterialID(ItemKeys::toString(ItemKeys::inObject(1)));
-            leaves.setMaterialID(ItemKeys::toString(ItemKeys::inObject(2)));
+            trunk.setMaterialID(ctx({"1"}).str());
+            leaves.setMaterialID(ctx({"2"}).str());
 
-            materialsChannel.put(ItemKeys::inObject(1), _trunkMaterial);
-            materialsChannel.put(ItemKeys::inObject(2), leavesMat);
+            materialsChannel.put({"1"}, _trunkMaterial, ctx);
+            materialsChannel.put({"2"}, leavesMat, ctx);
         }
 
-        objectsChannel.put(ItemKeys::inObject(1), mainPart);
-        objectsChannel.put(ItemKeys::inObject(2), leaves);
+        meshChannel.put({"1"}, _trunkMesh, ctx);
+        meshChannel.put({"2"}, _leavesMesh, ctx);
+
+        objectsChannel.put({"1"}, trunk, ctx);
+        objectsChannel.put({"2"}, leaves, ctx);
     }
 }
 

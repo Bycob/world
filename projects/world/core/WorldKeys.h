@@ -5,92 +5,129 @@
 
 #include <iostream>
 #include <string>
-#include <tuple>
+#include <vector>
 
 namespace world {
 
-typedef std::string ChunkKey;
-typedef int ObjectKey;
-typedef int AssetKey;
+typedef std::string NodeKey;
 
-struct WORLDAPI_EXPORT ChunkKeys {
-    static std::string none() { return std::string(""); }
+struct WORLDAPI_EXPORT NodeKeys {
+    static NodeKey none() { return std::string(""); }
 
-    static std::string toString(const ChunkKey &key);
-    static ChunkKey fromString(const std::string &str);
+    static NodeKey fromUint(unsigned int id);
+    static NodeKey fromInt(int id);
+
+    static std::string toString(const NodeKey &key);
+    static NodeKey fromString(const std::string &str);
 };
 
-struct WORLDAPI_EXPORT ObjectKeys {
-    constexpr static int defaultKey() { return 0; }
 
-    static std::string toString(const ObjectKey &key) {
-        return std::to_string(key);
+class WORLDAPI_EXPORT ItemKey {
+public:
+    std::vector<NodeKey> _components;
+
+
+    ItemKey() = default;
+
+    explicit ItemKey(const std::vector<NodeKey> &components)
+            : _components(components) {}
+
+    ItemKey(const NodeKey &key) { _components.push_back(key); }
+    ItemKey(const ItemKey &parent, const NodeKey &key)
+            : _components(parent._components) {
+
+        _components.push_back(key);
     }
-    static ObjectKey fromString(const std::string &str);
-};
 
-struct WORLDAPI_EXPORT AssetKeys {
-    constexpr static int defaultKey() { return 0; }
+    ItemKey(const ItemKey &key1, const ItemKey &key2)
+            : _components(key1._components) {
 
-    static std::string toString(const AssetKey &key) {
-        return std::to_string(key);
+        _components.insert(_components.end(), key2._components.begin(),
+                           key2._components.end());
     }
-    static AssetKey fromString(const std::string &str);
+
+    std::string str() const {
+        std::string result;
+        for (size_t i = 0; i < _components.size(); ++i) {
+            result += (i == 0 ? "" : "/") + NodeKeys::toString(_components[i]);
+        }
+        return result;
+    }
+
+    ItemKey parent() const {
+        if (_components.empty()) {
+            throw std::runtime_error("no parent");
+        }
+
+        ItemKey result = *this;
+        result._components.pop_back();
+        return result;
+    }
+
+    NodeKey last() const { return _components.back(); }
+
+    bool operator==(const ItemKey &other) const {
+        return _components == other._components;
+    }
+
+    bool operator!=(const ItemKey &other) const {
+        return _components != other._components;
+    }
+
+    bool operator<(const ItemKey &other) const {
+        return _components < other._components;
+    }
 };
-
-typedef std::tuple<ChunkKey, ObjectKey, AssetKey> ItemKey;
-
 
 struct WORLDAPI_EXPORT ItemKeys {
-    /** Generates a key from the world's perspective : we need to
-     * identify the chunk, the object and the part of the object.*/
-    static ItemKey inWorld(const ChunkKey &chunkKey, const ObjectKey &objKey,
-                           const AssetKey &assetKey) {
-        return std::make_tuple(chunkKey, objKey, assetKey);
+    /** Returns a key refering to a root world node (ie which has no parent)*/
+    static ItemKey root(const NodeKey &nodeKey) { return {nodeKey}; }
+
+    /** Returns a key refering to a world node which has a parent. */
+    static ItemKey child(const ItemKey &parentKey, const NodeKey &nodeKey) {
+        return {parentKey, nodeKey};
     }
 
-    /** Generates a key from inside a chunk. We just need to
-     * specify which object and which part of it we want a key for. */
-    static ItemKey inChunk(const ObjectKey &objKey, const AssetKey &assetKey) {
-        return inWorld(ChunkKeys::none(), objKey, assetKey);
+    /** Return a key beggining with "prefix" and ending with "suffix". */
+    static ItemKey concat(const ItemKey &prefix, const ItemKey &suffix) {
+        return {prefix, suffix};
     }
 
-    /** Generates a key from inside an object. We just need to
-     * specify which part of the object we want a key for. */
-    static ItemKey inObject(const AssetKey &assetKey) {
-        return inWorld(ChunkKeys::none(), ObjectKeys::defaultKey(), assetKey);
-    }
+    static ItemKey getParent(const ItemKey &key) { return key.parent(); }
 
-    static ItemKey defaultKey() {
-        return inWorld(ChunkKeys::none(), ObjectKeys::defaultKey(),
-                       AssetKeys::defaultKey());
-    }
+    static NodeKey getLastNode(const ItemKey &key) { return key.last(); }
+
+    static ItemKey defaultKey() { return {}; }
 
     static ItemKey fromString(const std::string &str) {
-        size_t sep1 = str.find_first_of('/');
-        size_t sep2 = str.find_first_of('/', sep1 + 1);
+        ItemKey result;
+        size_t sep;
+        size_t start = 0;
 
-        if (sep1 == std::string::npos && sep2 == std::string::npos) {
-            throw std::invalid_argument("not a ItemKey");
-        }
+        do {
+            sep = str.find_first_of('/', start);
+            std::string keystr;
 
-        try {
-            return std::make_tuple(
-                ChunkKeys::fromString(str.substr(0, sep1)),
-                ObjectKeys::fromString(str.substr(sep1 + 1, sep2 - sep1 - 1)),
-                AssetKeys::fromString(str.substr(sep2 + 1)));
-        } catch (std::invalid_argument &e) {
-            throw e;
-        }
+            if (sep == std::string::npos) {
+                keystr = str.substr(start);
+            } else {
+                keystr = str.substr(start, sep - start);
+                start = sep + 1;
+            }
+
+            try {
+                result._components.push_back(NodeKeys::fromString(keystr));
+            } catch (std::invalid_argument &e) {
+                throw e;
+            }
+        } while (sep != std::string::npos);
+
+        return result;
     }
 
     /** Gets an unique string representation for this key. The
      * string is printable and usable in a file system. */
-    static std::string toString(const ItemKey &key) {
-        return world::ChunkKeys::toString(std::get<0>(key)) + "/" +
-               world::ObjectKeys::toString(std::get<1>(key)) + "/" +
-               world::AssetKeys::toString(std::get<2>(key));
-    }
+    static std::string toString(const ItemKey &key) { return key.str(); }
 };
 
 inline ItemKey key(const std::string &str) {
