@@ -7,6 +7,7 @@ public class Character : MonoBehaviour
     public float ratio = 0.2f;
     public float speed = 0.07f;
 
+    private bool lockCursor;
     private Vector3 prevMousePosition;
 
     // Start is called before the first frame update
@@ -18,12 +19,11 @@ public class Character : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
         // view rotation
         Vector3 deltaPos = Input.mousePosition - prevMousePosition;
         transform.Rotate(new Vector3(0, deltaPos.x * ratio, 0), Space.World);
         transform.Rotate(new Vector3(- deltaPos.y * ratio, 0, 0), Space.Self);
-
-        prevMousePosition = Input.mousePosition;
 
         // go forward
         if (Input.GetKey(KeyCode.W)) {
@@ -32,5 +32,13 @@ public class Character : MonoBehaviour
         else if (Input.GetKey(KeyCode.S)) {
             transform.Translate(new Vector3(0, 0, -speed));
         }
+        
+        // Change cursor mode
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            lockCursor = !lockCursor;
+        }
+        
+        prevMousePosition = Input.mousePosition;
     }
 }
