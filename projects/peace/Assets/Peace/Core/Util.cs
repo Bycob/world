@@ -18,7 +18,7 @@ namespace Peace
 
             for (int i = 0; i < ptrArray.Length; ++i)
             {
-                strArray[i] = Marshal.PtrToStringAuto(ptrArray[i]);
+                strArray[i] = Marshal.PtrToStringAnsi(ptrArray[i]);
             }
 
             return strArray;
