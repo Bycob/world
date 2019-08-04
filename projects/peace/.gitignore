@@ -50,10 +50,11 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 
+# Jetbrains plugin
+[Aa]ssets/Plugins/Editor/
+[Aa]ssets/Plugins/Editor.meta
+
 ####### World specifics #######
 
 # Generated plugins
-[Aa]ssets/Plugins/*.dll
-[Aa]ssets/Plugins/*.dll.meta
-[Aa]ssets/Plugins/*.so
-[Aa]ssets/Plugins/*.so.meta
+[Aa]ssets/Peace/Plugins/
