@@ -14,6 +14,19 @@ Material::~Material() {}
 
 void Material::setName(const std::string &name) { _name = name; }
 
+void Material::setShader(std::string shader) {
+    _shader = shader;
+}
+
+void Material::setShaderParam(std::string name, ShaderParam value) {
+   _shaderParams[name] = value;
+}
+
+ShaderParam Material::getShaderParam(const std::string &name) const {
+    auto it = _shaderParams.find(name);
+    return it == _shaderParams.end() ? ShaderParam::NONE : it->second;
+}
+
 void Material::setKd(double r, double g, double b) { _Kd.set(r, g, b); }
 
 void Material::setKa(double r, double g, double b) { _Ka.set(r, g, b); }
