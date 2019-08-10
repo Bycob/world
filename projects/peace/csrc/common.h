@@ -6,7 +6,7 @@
 #if defined(peace_EXPORTS)
 #define PEACE_EXPORT __declspec(dllexport)
 #else
-#define PEACE_EXPORT __declspec(dllimport)
+#define PEACE_EXPORT
 #endif
 #else /* defined (_WIN32) */
 #define PEACE_EXPORT

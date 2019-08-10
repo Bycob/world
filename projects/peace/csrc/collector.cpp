@@ -52,7 +52,7 @@ PEACE_EXPORT int collectorGetChannelSize(CollectorPtr collectorPtr, int type) {
     auto *collector = static_cast<Collector *>(collectorPtr);
     switch (type) {
     case NODE_CHANNEL:
-        return collector->getStorageChannel<Mesh>().size();
+        return collector->getStorageChannel<SceneNode>().size();
     case MESH_CHANNEL:
         return collector->getStorageChannel<Mesh>().size();
     case MATERIAL_CHANNEL:
