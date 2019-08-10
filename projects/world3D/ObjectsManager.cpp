@@ -106,6 +106,10 @@ void ObjectNodeHandler::setMaterial(const Material &mat, Collector &collector) {
             mc->drop();
         }
     }
+
+    for (u32 i = 1; i < _meshNode->getMaterialCount(); ++i) {
+        _meshNode->getMaterial(i) = irrmat;
+    }
 }
 
 void ObjectNodeHandler::updateObject3D(const SceneNode &object,
@@ -141,6 +145,9 @@ void ObjectNodeHandler::updateObject3D(const SceneNode &object,
     material.SpecularColor.set(255, 255, 255, 255);
     material.DiffuseColor.set(255, 200, 178, 126); // 100, 50, 0);
 
+    for (u32 i = 1; i < _meshNode->getMaterialCount(); ++i) {
+        _meshNode->getMaterial(i) = material;
+    }
     irrMesh->drop();
 
     //_objManager._sceneManager->getActiveCamera()->setTarget(_meshNode->getPosition());
@@ -270,8 +277,8 @@ void ObjectsManager::removeTextureUser(const std::string &texId) {
 
 SMesh *ObjectsManager::convertToIrrlichtMesh(const Mesh &mesh,
                                              IVideoDriver *driver) {
-    SMesh *irrMesh = new SMesh();
-    irr::s32 maxPrimitives = driver->getMaximalPrimitiveCount();
+    auto *irrMesh = new SMesh();
+    irr::s64 maxPrimitives = min(driver->getMaximalPrimitiveCount(), 0xFFFF);
     int primitiveCount = 0;
 
     int bufID = -1;
@@ -287,6 +294,8 @@ SMesh *ObjectsManager::convertToIrrlichtMesh(const Mesh &mesh,
         if (bufID == -1 || primitiveCount + 3 >= maxPrimitives) {
             // last calculations on current buffer
             if (bufID != -1) {
+                buffer->Vertices.set_used(primitiveCount);
+                buffer->Indices.set_used(primitiveCount);
                 buffer->recalculateBoundingBox();
             }
 
@@ -301,8 +310,9 @@ SMesh *ObjectsManager::convertToIrrlichtMesh(const Mesh &mesh,
                 buffer->drop();
             }
 
-            buffer->Vertices.set_used(mesh.getFaceCount() * 3);
-            buffer->Indices.set_used(mesh.getFaceCount() * 3);
+            buffer->Vertices.set_used(maxPrimitives);
+            buffer->Indices.set_used(maxPrimitives);
+            primitiveCount = 0;
         }
 
         // Add face data
@@ -325,6 +335,8 @@ SMesh *ObjectsManager::convertToIrrlichtMesh(const Mesh &mesh,
     }
 
     if (buffer != nullptr) {
+        buffer->Vertices.set_used(primitiveCount);
+        buffer->Indices.set_used(primitiveCount);
         buffer->recalculateBoundingBox();
     }
 
