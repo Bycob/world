@@ -14,14 +14,13 @@ public class Character : MonoBehaviour
 
     public Canvas ui;
     public Slider speedSlider;
+    public Text positionText;
 
     private bool inGame;
-    private Vector3 prevMousePosition;
 
     // Start is called before the first frame update
     void Start()
     {
-        prevMousePosition = Input.mousePosition;
         SetInGame(true);
 
         if (speedSlider)
@@ -62,6 +61,9 @@ public class Character : MonoBehaviour
     {
         if (inGame)
         {
+            // Adapt speed
+            SetSpeedExponent(speedFactor + Input.mouseScrollDelta.y * 0.1f);
+
             // view rotation
             Vector2 deltaPos = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y"));
             transform.Rotate(new Vector3(0, deltaPos.x * sensitivity, 0), Space.World);
@@ -83,7 +85,10 @@ public class Character : MonoBehaviour
         {
             ToggleInGame();
         }
-        
-        prevMousePosition = Input.mousePosition;
+
+        if (positionText)
+        {
+            positionText.text = transform.position.ToString();
+        }
     }
 }

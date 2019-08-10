@@ -15,7 +15,8 @@ namespace Peace
 
         private CollectorView _view;
 
-        private List<CollectorNode> _nodes;
+        private HashSet<string> _newNodes;
+        private Dictionary<string, CollectorNode> _nodes;
         private Dictionary<string, Mesh> _meshes;
         private Dictionary<string, Material> _materials;
         private Dictionary<string, Texture2D> _textures;
@@ -24,8 +25,9 @@ namespace Peace
         public Collector()
         {
             _handle = createCollector();
-            
-            _nodes = new List<CollectorNode>();
+
+            _newNodes = new HashSet<string>();
+            _nodes = new Dictionary<string, CollectorNode>();
             _meshes = new Dictionary<string, Mesh>();
             _materials = new Dictionary<string, Material>();
             _textures = new Dictionary<string, Texture2D>();
@@ -35,6 +37,7 @@ namespace Peace
 
         public void Reset()
         {
+            _newNodes.Clear();
             _nodes.Clear();
             _meshes.Clear();
             _materials.Clear();
@@ -58,13 +61,12 @@ namespace Peace
             names = Util.ToStringArray(namesPtrArray);
             items = itemsArray;
         }
-        
+
         public async Task Collect(World world)
         {
-            Reset();
-            
             await Task.Run(() => collect(_handle, world._handle, _view));
-
+            
+            // Get from native code
             IntPtr[] nodes, meshes, materials, textures;
             string[] nodeNames, meshNames, materialNames, textureNames;
 
@@ -72,37 +74,109 @@ namespace Peace
             GetChannel(MESH_CHANNEL, out meshNames, out meshes);
             GetChannel(MATERIAL_CHANNEL, out materialNames, out materials);
             GetChannel(TEXTURE_CHANNEL, out textureNames, out textures);
-            
-            foreach (IntPtr nodePtr in nodes)
+
+            // Update scene nodes
+            _newNodes.Clear();
+            HashSet<string> toRemove = new HashSet<string>(_nodes.Keys);
+
+            for (int i = 0; i < nodes.Length; ++i)
             {
-                _nodes.Add(readNode(nodePtr));
+                try
+                {
+                    _nodes.Add(nodeNames[i], readNode(nodes[i]));
+                    _newNodes.Add(nodeNames[i]);
+                }
+                catch (ArgumentException)
+                {
+                    toRemove.Remove(nodeNames[i]);
+                }
             }
+
+            foreach (var key in toRemove)
+            {
+                _nodes.Remove(key);
+            }
+
+            // Update meshes
+            toRemove = new HashSet<string>(_meshes.Keys);
 
             for (int i = 0; i < meshes.Length; ++i)
             {
-                _meshes[meshNames[i]] = Assets.GetMesh(meshes[i]);
+                try
+                {
+                    _meshes.Add(meshNames[i], Assets.GetMesh(meshes[i]));
+                }
+                catch (ArgumentException)
+                {
+                    toRemove.Remove(meshNames[i]);
+                }
+            }
+
+            foreach (var key in toRemove)
+            {
+                _meshes.Remove(key);
             }
             
+            // Update textures
+            toRemove = new HashSet<string>(_textures.Keys);
+
             for (int i = 0; i < textures.Length; ++i)
             {
-                _textures[textureNames[i]] = Assets.GetTexture(textures[i]);
+                try
+                {
+                    _textures.Add(textureNames[i], Assets.GetTexture(textures[i]));
+                }
+                catch
+                {
+                    toRemove.Remove(textureNames[i]);
+                }
             }
+
+            foreach (var key in toRemove)
+            {
+                _textures.Remove(key);
+            }
+            
+            // Update materials
+            toRemove = new HashSet<string>(_materials.Keys);
 
             for (int i = 0; i < materials.Length; ++i)
             {
-                Material material = Assets.GetMaterial(materials[i]);
-                Texture2D texture;
-                if (_textures.TryGetValue(Assets.GetMaterialTexture(materials[i]), out texture))
+                if (!_materials.ContainsKey(materialNames[i]))
                 {
-                    material.mainTexture = texture;
+                    Material material = Assets.GetMaterial(materials[i]);
+                    Texture2D texture;
+                    if (_textures.TryGetValue(Assets.GetMaterialTexture(materials[i]), out texture))
+                    {
+                        material.mainTexture = texture;
+                    }
+                    _materials[materialNames[i]] = material;
                 }
-                _materials[materialNames[i]] = material;
+                else
+                {
+                    toRemove.Remove(materialNames[i]);
+                }
+            }
+
+            foreach (var key in toRemove)
+            {
+                _materials.Remove(key);
             }
         }
 
-        public IEnumerable<CollectorNode> GetNodes()
+        public IEnumerable<string> GetNewNodes()
         {
-            return _nodes;
+            return _newNodes;
+        }
+
+        public bool HasNode(string key)
+        {
+            return _nodes.ContainsKey(key);
+        }
+
+        public CollectorNode GetNode(string key)
+        {
+            return _nodes[key];
         }
         
         public Mesh GetMesh(string key)

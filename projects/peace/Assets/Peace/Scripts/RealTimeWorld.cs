@@ -35,18 +35,23 @@ namespace Peace
             for (int i = _objectsUsed.Count - 1; i >= 0; --i)
             {
                 GameObject used = _objectsUsed[i];
-                _objectsUsed.RemoveAt(i);
-                used.SetActive(false);
-                _objectPool.Enqueue(used);
+
+                if (!_collector.HasNode(used.name))
+                {
+                    _objectsUsed.RemoveAt(i);
+                    used.SetActive(false);
+                    _objectPool.Enqueue(used);
+                }
             }
             
-            foreach (var node in _collector.GetNodes())
+            foreach (var nodeKey in _collector.GetNewNodes())
             {
+                var node = _collector.GetNode(nodeKey);
                 Mesh mesh = _collector.GetMesh(node.Mesh);
 
                 if (mesh != null)
                 {
-                    GameObject child = AllocateObject(node.Mesh);
+                    GameObject child = AllocateObject(nodeKey);
                     child.transform.localPosition = new Vector3((float)node.posX, (float)node.posZ, (float)node.posY);
                     child.transform.localScale = new Vector3((float)node.scaleX, (float)node.scaleZ, (float)node.scaleY);
                     child.transform.localEulerAngles = new Vector3((float)node.rotX, (float)node.rotZ, (float)node.rotY);
@@ -108,7 +113,6 @@ namespace Peace
             }
             
             _collector = new Collector();
-            // RunCollect();
         }
 
         void Update()
