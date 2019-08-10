@@ -14,12 +14,10 @@ Material::~Material() {}
 
 void Material::setName(const std::string &name) { _name = name; }
 
-void Material::setShader(std::string shader) {
-    _shader = shader;
-}
+void Material::setShader(std::string shader) { _shader = shader; }
 
-void Material::setShaderParam(std::string name, ShaderParam value) {
-   _shaderParams[name] = value;
+void Material::setShaderParam(std::string name, const ShaderParam &value) {
+    _shaderParams[std::move(name)] = value;
 }
 
 ShaderParam Material::getShaderParam(const std::string &name) const {

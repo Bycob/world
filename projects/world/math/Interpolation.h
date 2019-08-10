@@ -42,7 +42,8 @@ double cuberp(double values[4], double x);
 
 
 // https://en.wikipedia.org/wiki/Inverse_distance_weighting
-/** Spatial interpolation based on several known values at arbitrary locations. */
+/** Spatial interpolation based on several known values at arbitrary locations.
+ */
 template <typename T_Pts, typename T_Data> class IDWInterpolator {
 public:
     typedef std::pair<T_Pts, T_Data> DataPoint;

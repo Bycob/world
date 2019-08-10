@@ -26,9 +26,11 @@ public:
 
     std::string getShader() const { return _shader; }
 
-    void setShaderParam(std::string name, ShaderParam value);
+    void setShaderParam(std::string name, const ShaderParam &value);
 
     ShaderParam getShaderParam(const std::string &name) const;
+
+    const auto &getShaderParams() const { return _shaderParams; }
 
     void setKd(double r, double g, double b);
 

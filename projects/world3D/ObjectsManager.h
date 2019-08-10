@@ -22,7 +22,8 @@ public:
                       const world::SceneNode &obj, world::Collector &collector);
     virtual ~ObjectNodeHandler();
 
-    void setTexture(int id, const std::string &path,
+    /// return true if texture was found
+    bool setTexture(int id, const std::string &path,
                     world::Collector &collector);
     void setMaterial(const world::Material &material,
                      world::Collector &collector);
@@ -39,12 +40,17 @@ private:
 
 class ObjectsManager : public RenderingModule {
 public:
+    std::map<std::string, irr::video::E_MATERIAL_TYPE> _loadedShaders;
+
+
     ObjectsManager(Application &app, irr::IrrlichtDevice *device);
     ~ObjectsManager() override;
 
     void initialize(world::Collector &collector) override;
     void update(world::Collector &collector) override;
 
+    irr::video::ITexture *getOrLoadTexture(const std::string &texture,
+                                           world::Collector &collector);
     void addTextureUser(const std::string &texId);
     void removeTextureUser(const std::string &texId);
 
