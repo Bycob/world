@@ -44,8 +44,8 @@ namespace Peace
         public void SetPosition(Vector3 position)
         {
             _view.X = position.x;
-            _view.Y = position.y;
-            _view.Z = position.z;
+            _view.Y = position.z;
+            _view.Z = position.y;
         }
 
         private void GetChannel(int type, out string[] names, out IntPtr[] items)

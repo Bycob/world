@@ -17,6 +17,9 @@ namespace Peace
         private Vector3 _position;
 
         private bool _collecting;
+
+        private Queue<GameObject> _objectPool;
+        private List<GameObject> _objectsUsed;
         
         private async void RunCollect()
         {
@@ -29,9 +32,12 @@ namespace Peace
 
         private void UpdateFromCollector()
         {
-            for (int i = 0; i < transform.childCount; ++i)
+            for (int i = _objectsUsed.Count - 1; i >= 0; --i)
             {
-                Destroy(transform.GetChild(i).gameObject);
+                GameObject used = _objectsUsed[i];
+                _objectsUsed.RemoveAt(i);
+                used.SetActive(false);
+                _objectPool.Enqueue(used);
             }
             
             foreach (var node in _collector.GetNodes())
@@ -40,16 +46,15 @@ namespace Peace
 
                 if (mesh != null)
                 {
-                    GameObject child = new GameObject(node.Mesh);
-                    child.transform.SetParent(transform);
+                    GameObject child = AllocateObject(node.Mesh);
                     child.transform.localPosition = new Vector3((float)node.posX, (float)node.posZ, (float)node.posY);
                     child.transform.localScale = new Vector3((float)node.scaleX, (float)node.scaleZ, (float)node.scaleY);
                     child.transform.localEulerAngles = new Vector3((float)node.rotX, (float)node.rotZ, (float)node.rotY);
                     
-                    MeshFilter meshFilter = child.AddComponent<MeshFilter>();
+                    MeshFilter meshFilter = child.GetComponent<MeshFilter>();
                     meshFilter.sharedMesh = mesh;
 
-                    MeshRenderer meshRenderer = child.AddComponent<MeshRenderer>();
+                    MeshRenderer meshRenderer = child.GetComponent<MeshRenderer>();
 
                     Material material = _collector.GetMaterial(node.Material);
 
@@ -61,13 +66,38 @@ namespace Peace
                     {
                         meshRenderer.material.shader = Shader.Find("Standard");
                     }
+
+                    _objectsUsed.Add(child);
                 }
             }
+        }
+
+        private GameObject AllocateObject(string name)
+        {
+            GameObject obj;
+
+            if (_objectPool.Count != 0)
+            {
+                obj = _objectPool.Dequeue();
+                obj.SetActive(true);
+                obj.name = name;
+            }
+            else
+            {
+                obj = new GameObject(name);
+                obj.transform.SetParent(transform);
+                obj.AddComponent<MeshFilter>();
+                obj.AddComponent<MeshRenderer>();
+            }
+            return obj;
         }
         
         // Start is called before the first frame update
         void Start()
         {
+            _objectPool = new Queue<GameObject>();
+            _objectsUsed = new List<GameObject>();
+
             if (configLocation == "")
             {
                 _world = World.CreateDemo();
@@ -78,7 +108,7 @@ namespace Peace
             }
             
             _collector = new Collector();
-            RunCollect();
+            // RunCollect();
         }
 
         void Update()
@@ -88,7 +118,7 @@ namespace Peace
             if (Vector3.Distance(newPos, _position) > 1 && !_collecting)
             {
                 _position = newPos;
-                // RunCollect();
+                RunCollect();
             }
         }
     }
