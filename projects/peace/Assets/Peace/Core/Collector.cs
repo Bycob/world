@@ -81,12 +81,12 @@ namespace Peace
 
             for (int i = 0; i < nodes.Length; ++i)
             {
-                try
+                if (!_nodes.ContainsKey(nodeNames[i]))
                 {
                     _nodes.Add(nodeNames[i], readNode(nodes[i]));
                     _newNodes.Add(nodeNames[i]);
                 }
-                catch (ArgumentException)
+                else
                 {
                     toRemove.Remove(nodeNames[i]);
                 }
@@ -102,11 +102,11 @@ namespace Peace
 
             for (int i = 0; i < meshes.Length; ++i)
             {
-                try
+                if (!_meshes.ContainsKey(meshNames[i]))
                 {
                     _meshes.Add(meshNames[i], Assets.GetMesh(meshes[i]));
                 }
-                catch (ArgumentException)
+                else
                 {
                     toRemove.Remove(meshNames[i]);
                 }
@@ -122,11 +122,11 @@ namespace Peace
 
             for (int i = 0; i < textures.Length; ++i)
             {
-                try
+                if (!_textures.ContainsKey(textureNames[i]))
                 {
                     _textures.Add(textureNames[i], Assets.GetTexture(textures[i]));
                 }
-                catch
+                else
                 {
                     toRemove.Remove(textureNames[i]);
                 }

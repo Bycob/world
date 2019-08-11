@@ -119,7 +119,7 @@ namespace Peace
         {
             Vector3 newPos = tracking.transform.position;
 
-            if (Vector3.Distance(newPos, _position) > 1 && !_collecting)
+            if (Vector3.Distance(newPos, _position) > 10 && !_collecting)
             {
                 _position = newPos;
                 RunCollect();

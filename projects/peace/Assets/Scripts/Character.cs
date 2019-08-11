@@ -73,8 +73,8 @@ public class Character : MonoBehaviour
             float speed = REF_SPEED * Mathf.Pow(10, speedFactor);
             float step = speed * Time.deltaTime;
 
-            float forward = Input.GetAxis("Vertical");
-            float side = Input.GetAxis("Horizontal");
+            float forward = Input.GetAxisRaw("Vertical");
+            float side = Input.GetAxisRaw("Horizontal");
             Vector3 moving = new Vector3(side, 0, forward);
             moving.Normalize();
             transform.Translate(moving * step);
