@@ -96,6 +96,7 @@ public:
 
     const T &get(const ItemKey &key) const;
 
+    size_t size() const { return _items.size(); }
 
     /** Delete all the resources harvested from the previous
      * "collect" calls */

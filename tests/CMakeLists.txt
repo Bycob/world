@@ -26,3 +26,4 @@ if (${WORLD_BUILD_TESTS})
 endif()
 
 add_subdirectory(world)
+add_subdirectory(peace)

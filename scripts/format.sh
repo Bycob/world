@@ -8,4 +8,4 @@ cd $current_dir/..
 clang-format -i -style=file projects/world/*/*.h projects/world/*/*.cpp projects/world/*/*.inl
 clang-format -i -style=file projects/world3D/*.cpp projects/world3D/*.h
 clang-format -i -style=file projects/worldgui/*.cpp projects/worldgui/*.h
-clang-format -i -style=file tests/*.cpp tests/world/*.cpp
+clang-format -i -style=file tests/*.cpp tests/world/*.cpp tests/peace/*.cpp

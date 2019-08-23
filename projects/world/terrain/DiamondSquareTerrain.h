@@ -3,6 +3,8 @@
 
 #include "world/core/WorldConfig.h"
 
+#include <random>
+
 #include "ITerrainWorker.h"
 
 namespace world {
