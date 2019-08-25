@@ -15,6 +15,7 @@ option(WORLD_BUILD_TESTS "Build test targets" ON)
 option(WORLD_BUILD_WORLD3D "Build the graphical demo" ON)
 option(WORLD_BUILD_OPENCV_MODULES "Build the modules based on OpenCV" OFF)
 option(WORLD_BUILD_VULKAN_MODULES "Build the modules based on Vulkan" ON)
+option(WORLD_BUILD_PEACE "Build the native library for Peace Unity Plugin" ON)
 
 # Setup variables for build configuration
 if (NOT CMAKE_BUILD_TYPE)
@@ -85,6 +86,8 @@ add_subdirectory(projects/world/)
 add_subdirectory(projects/vkworld/)
 # Ajout de World 3D
 add_subdirectory(projects/world3D/)
+# Ajout de Peace
+add_subdirectory(projects/peace/)
 # Ajout du répertoire de tests
 add_subdirectory(tests/)
 
