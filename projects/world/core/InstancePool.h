@@ -23,7 +23,6 @@ public:
             : _env{env}, _distribution(env),
               _rng(static_cast<u64>(time(NULL))) {}
 
-
     TDistribution &distribution() { return _distribution; }
 
     void collectSelf(ICollector &collector,
@@ -42,8 +41,16 @@ private:
     std::mt19937 _rng;
     std::vector<std::unique_ptr<TGenerator>> _generators;
     std::vector<std::vector<SceneNode>> _objects;
+    u64 _chunksDecorated = 0;
+    /// Internal field to remember the typical chunk area at the resolution of
+    /// the pool
+    double _chunkArea = 0;
 
     double _resolution = 20;
+    /// The instance pool automatically adds new generators when expanding
+    double _speciesDensity = 0.2;
+    /// Minimal species count
+    u32 _minSpecies = 10;
 };
 
 

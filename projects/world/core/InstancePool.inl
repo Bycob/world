@@ -5,16 +5,26 @@
 
 namespace world {
 
-
 template <typename TGenerator, typename TDistribution>
 inline void InstancePool<TGenerator, TDistribution>::collectSelf(
     ICollector &collector, const IResolutionModel &resolutionModel,
     const ExplorationContext &ctx) {
 
+    // Add new species if required
+    double totalArea = _chunksDecorated * _chunkArea;
+
+    while (_generators.size() < _speciesDensity * totalArea &&
+           _generators.size() < _minSpecies) {
+        std::unique_ptr<TGenerator> newSpecies = std::make_unique<TGenerator>();
+        _distribution.addGenerator(newSpecies->randomize());
+        _generators.push_back(std::move(newSpecies));
+    }
+
+    // Collect generators objects
     _objects.clear();
 
     for (int id = 0; id < _generators.size(); ++id) {
-        auto &generator = _generators[id];
+        auto &generator = _generators.at(id);
         auto childCtx = ctx;
         childCtx.appendPrefix({NodeKeys::fromInt(id)});
 
@@ -34,13 +44,16 @@ inline void InstancePool<TGenerator, TDistribution>::decorate(Chunk &chunk) {
         return;
     }
 
+    ++_chunksDecorated;
+    vec3d chunkDims = chunk.getSize();
+    _chunkArea = chunkDims.x * chunkDims.y;
+
     // Distribution
     std::uniform_real_distribution<double> rotDistrib(0, M_PI * 2);
-
     auto &instance = chunk.addChild<Instance>();
 
     for (int genID = 0; genID < _generators.size(); ++genID) {
-        auto &templates = _objects[genID];
+        auto &templates = _objects.at(genID);
 
         if (templates.empty()) {
             continue;
@@ -67,6 +80,7 @@ template <typename... Args>
 TGenerator &InstancePool<TGenerator, TDistribution>::addGenerator(
     Args... args) {
     _generators.push_back(std::make_unique<TGenerator>(args...));
+    // TODO Add custom HabitatFeatures
     _distribution.addGenerator(HabitatFeatures{});
     return *_generators.back();
 }

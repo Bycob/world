@@ -32,12 +32,8 @@ FlatWorld *FlatWorld::createDemoFlatWorld() {
     // Grass with seed distribution
     auto &grassPool =
         chunkSystem.addDecorator<InstancePool<Grass, SeedDistribution>>(world);
-    auto &grass1 = grassPool.addGenerator();
 
-    auto &grass2 = grassPool.addGenerator();
-    grass2.setGrassCount(5);
-    grass2.setHeight(0.5);
-
+    // Rocks
     auto &rocksPool = chunkSystem.addDecorator<InstancePool<Rocks>>(world);
     rocksPool.distribution().setDensity(0.02);
 
@@ -45,8 +41,6 @@ FlatWorld *FlatWorld::createDemoFlatWorld() {
     rocks.setRadius(0.7);
 
     for (int i = 0; i < 10; ++i) {
-        grass1.addBush({0, 0, 0});
-        grass2.addBush({0, 0, 0});
         rocks.addRock({0, 0, 0});
     }
 

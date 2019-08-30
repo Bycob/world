@@ -3,10 +3,13 @@
 
 #include "world/core/WorldConfig.h"
 
+#include "world/core/Chunk.h"
+
 namespace world {
 
 /** Habitat features for a given "species" of object. */
 struct WORLDAPI_EXPORT HabitatFeatures {
+    // in m
     vec2d _altitude{0, 2000};
     // radians
     vec2d _slope{0, M_PI_2};
@@ -14,6 +17,7 @@ struct WORLDAPI_EXPORT HabitatFeatures {
     vec2d _temperature{0, 40};
     vec2d _humidity{0, 1};
     bool _sea = false;
+    /// Density per m^2
     double _density = 0.4;
 
     // TODO add physical materials
