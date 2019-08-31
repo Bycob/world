@@ -17,6 +17,8 @@ public:
 
     vec3d getDimensions() const;
 
+    bool contains(const vec3d &c) const;
+
     void translate(const vec3d &vec);
 
 private:

@@ -7,7 +7,8 @@
 
 namespace world {
 
-Grass::Grass() : _rng(time(NULL)), _texture(32, 256, ImageType::RGB) {
+Grass::Grass()
+        : _rng(std::random_device{}()), _texture(32, 256, ImageType::RGB) {
     generateTexture();
 }
 

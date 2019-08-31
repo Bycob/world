@@ -33,6 +33,11 @@ public:
 
     template <typename... Args> TGenerator &addGenerator(Args... args);
 
+    /** Export species meshes in a scene and habitat features in a json file.
+     * \param avgSize Average size of the element, used to compute spacing
+     * between objects in the scene. */
+    void exportSpecies(const std::string &outputDir, double avgSize = 1);
+
 private:
     IEnvironment *_env;
 
@@ -47,8 +52,9 @@ private:
     double _chunkArea = 0;
 
     double _resolution = 20;
-    /// The instance pool automatically adds new generators when expanding
-    double _speciesDensity = 0.2;
+    /// The instance pool automatically adds new generators when expanding.
+    /// This is the density of the species per km^2
+    double _speciesDensity = 0.05;
     /// Minimal species count
     u32 _minSpecies = 10;
 };

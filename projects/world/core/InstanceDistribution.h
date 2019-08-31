@@ -35,6 +35,10 @@ public:
         _habitats.emplace_back(std::move(habitat));
     }
 
+    const std::vector<HabitatFeatures> &getHabitatFeatures() const {
+        return _habitats;
+    }
+
 protected:
     IEnvironment *_env;
     std::mt19937 _rng;
