@@ -40,6 +40,12 @@ public:
     void collect(ICollector &collector, const IResolutionModel &explorer,
                  const ExplorationContext &ctx) override;
 
+public:
+    Mesh _simpleTrunk;
+    Mesh _simpleLeaves;
+
+    void generateSimpleMeshes();
+
 private:
     PTree *_internal;
 
