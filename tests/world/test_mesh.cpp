@@ -4,6 +4,29 @@
 
 using namespace world;
 
+TEST_CASE("MeshOps", "[mesh]") {
+    SECTION("Concatenation") {
+        Mesh meshes[3];
+
+        for (int i = 0; i < 3; ++i) {
+            double j = i * 3;
+            meshes[i].newVertex({j, j, j});
+            meshes[i].newVertex({j + 1, j, j});
+            meshes[i].newVertex({j + 2, j, j});
+            meshes[i].newFace(0, 1, 2);
+        }
+
+        Mesh result = MeshOps::concatMeshes(meshes[0], meshes[1], meshes[2]);
+        REQUIRE(result.getVerticesCount() == 9);
+        REQUIRE(result.getFaceCount() == 3);
+
+        CHECK((result.getVertex(8).getPosition() - vec3d{8, 6, 6}).norm() ==
+              Approx(0));
+        CHECK(result.getFace(2).getID(2) == 8);
+        CHECK(result.getFace(1).getID(2) == 5);
+    }
+}
+
 TEST_CASE("Mesh benchmarks", "[mesh][!benchmark]") {
     Mesh mesh1;
     Mesh mesh2;
