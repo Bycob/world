@@ -28,6 +28,9 @@ public:
 
     template <typename T> bool hasChannel() const;
 
+    template <typename T, typename T2, typename... Args>
+    bool hasChannel() const;
+
 protected:
     virtual ICollectorChannelBase &getChannelByType(size_t type) = 0;
 
@@ -86,6 +89,10 @@ public:
 template <typename T> inline ICollectorChannel<T> &ICollector::getChannel() {
     size_t type = typeid(T).hash_code();
     return dynamic_cast<ICollectorChannel<T> &>(getChannelByType(type));
+}
+
+template <typename T, typename T2, typename... Args> inline bool ICollector::hasChannel() const {
+    return hasChannel<T>() && hasChannel<T2, Args...>();
 }
 
 template <typename T> inline bool ICollector::hasChannel() const {
