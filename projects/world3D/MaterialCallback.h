@@ -54,6 +54,7 @@ public:
         world = world.getTransposed();
         services->setVertexShaderConstant("mTransWorld", world.pointer(), 16);
 
+        // Parameters from world
         for (const auto &keyval : _material.getShaderParams()) {
             const auto &key = keyval.first;
             const auto &param = keyval.second;
@@ -81,6 +82,7 @@ public:
 
 private:
     world::Material _material;
+    /// Texture to id in material
     std::map<std::string, int> _textures;
 };
 

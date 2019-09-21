@@ -82,7 +82,7 @@ private:
     double _maxAltitude;
 
     int _terrainRes = 33;
-    int _textureRes = 1024;
+    int _textureRes = 256;
 
     TileSystem _tileSystem;
 

@@ -98,6 +98,8 @@ public:
     void registerCurrentState() override { _registerState = true; }
 };
 
+#define GROUND_SHADER
+
 class PGround {
 public:
     PGround() : _terrains(65536), _accesses(65536) {}
@@ -108,6 +110,11 @@ public:
 
     u64 _accessCounter = 0;
     std::unordered_map<u64, TileCoordinates> _accesses;
+
+    // Material (experimental)
+    Shader _groundShader{"", "ground.frag"};
+    Material _groundMat{"ground"};
+    std::vector<Image> _groundTextures;
 };
 
 // Idees d'ameliorations :
@@ -121,7 +128,18 @@ HeightmapGround::HeightmapGround(double unitSize, double minAltitude,
         : _internal(new PGround()), _minAltitude(minAltitude),
           _maxAltitude(maxAltitude),
           _tileSystem(5, vec3d(_textureRes, _textureRes, 0),
-                      vec3d(unitSize, unitSize, 0)) {}
+                      vec3d(unitSize, unitSize, 0)) {
+
+#ifdef GROUND_SHADER
+    // Material
+    _internal->_groundMat.setKd(1, 1, 1);
+    _internal->_groundMat.setShader(ItemKey{"ground"}.str());
+    std::string texNames[] = {"groundtex/rock.png", "groundtex/sand.png", "groundtex/soil.png", "groundtex/grass.png"};
+    for (const auto & texName : texNames) {
+        _internal->_groundTextures.push_back(Image::read(texName));
+    }
+#endif
+}
 
 HeightmapGround::~HeightmapGround() { delete _internal; }
 
@@ -149,6 +167,8 @@ void HeightmapGround::setDefaultWorkerSet() {
     colorMap.addPoint({1, 0}, Color4u(244, 252, 250));      // Snow
     colorMap.addPoint({1, 1}, Color4u(160, 160, 160));      // Rock
     colorMap.setOrder(3);
+
+    _internal->_generators.pop_back();
 }
 
 void HeightmapGround::setLodRange(const ITerrainWorker &worker, int minLod,
@@ -174,6 +194,27 @@ void HeightmapGround::collect(ICollector &collector,
                               const ExplorationContext &ctx) {
 
     BoundingBox bbox = resolutionModel.getBounds();
+
+#ifdef GROUND_SHADER
+    // Collect material and shaders
+    if (collector.hasChannel<Material, Image, Shader>()) {
+        auto &matChan = collector.getChannel<Material>();
+        auto &imgChan = collector.getChannel<Image>();
+        auto &shaderChan = collector.getChannel<Shader>();
+
+        std::string texIds;
+        int i = 0;
+        for (auto &img : _internal->_groundTextures) {
+            ItemKey key{"ground" + std::to_string(i)};
+            imgChan.put(key, img);
+            texIds += (i !=0 ? "" : ",") + key.str();
+            ++i;
+        }
+        _internal->_groundMat.setShaderParam("textures", {ShaderParam::Type::TEXTURE_ARRAY, texIds});
+        matChan.put({"ground"}, _internal->_groundMat);
+        shaderChan.put({"ground"}, _internal->_groundShader);
+    }
+#endif
 
     // Tune altitude for the resolution model
     /*double estimAltitude = observeAltitudeAt(offset.x + chunkSize.x / 2,
@@ -276,27 +317,31 @@ void HeightmapGround::addTerrain(const TileCoordinates &key,
             SceneNode object(itemKey.str());
             object.setPosition(offset);
 
-            // Create the material
-            Material material("terrain");
-            material.setKd(1, 1, 1);
-            // material.setKd(1, (double) key._lod / _tileSystem._maxLod, 1 -
-            // (double)key._lod / _tileSystem._maxLod);
-            material.setMapKd("texture01");
-
-            // Retrieve the texture
-            auto &texture = terrain.getTexture();
-
             if (collector.hasChannel<Material>()) {
                 auto &matChan = collector.getChannel<Material>();
+
+#ifndef GROUND_SHADER
+                // Create the material
+                Material material("terrain");
+                material.setKd(1, 1, 1);
+                // material.setKd(1, (double) key._lod / _tileSystem._maxLod, 1 -
+                // (double)key._lod / _tileSystem._maxLod);
+                material.setMapKd("texture01");
                 object.setMaterialID(itemKey.str());
 
                 if (collector.hasChannel<Image>()) {
                     auto &imageChan = collector.getChannel<Image>();
                     material.setMapKd(itemKey.str());
+
+                    // Retrieve the texture
+                    auto &texture = terrain.getTexture();
                     imageChan.put(itemKey, texture);
                 }
 
                 matChan.put(itemKey, material);
+#else
+                object.setMaterialID(ItemKey{"ground"}.str());
+#endif
             }
 
             objChannel.put(itemKey, object);
@@ -456,7 +501,7 @@ void HeightmapGround::generateTerrains(const std::set<TileCoordinates> &keys) {
             Terrain &terrain = *tile->_terrain;
 
             terrain.setTexture(
-                Image(_textureRes / 4, _textureRes / 4, ImageType::RGB));
+                Image(_textureRes, _textureRes, ImageType::RGB));
 
             double terrainSize = _tileSystem.getTileSize(key._lod).x;
             terrain.setBounds(terrainSize * key._pos.x,

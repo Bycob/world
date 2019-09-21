@@ -73,9 +73,7 @@ void ObjectNodeHandler::setMaterial(const Material &mat, Collector &collector) {
     auto it = _objManager._loadedShaders.find(shaderName);
     if (it != _objManager._loadedShaders.end()) {
         irrmat.MaterialType = it->second;
-    }
-
-    if (!shaderName.empty() && collector.hasStorageChannel<Shader>()) {
+    } else if (!shaderName.empty() && collector.hasStorageChannel<Shader>()) {
         auto &shaderChan = collector.getStorageChannel<Shader>();
 
         if (shaderChan.has(key(shaderName))) {
@@ -93,7 +91,7 @@ void ObjectNodeHandler::setMaterial(const Material &mat, Collector &collector) {
                 }
             }
 
-            const Shader &shader = shaderChan.get(shaderName);
+            const Shader &shader = shaderChan.get(key(shaderName));
             s32 shaderMat = gpu->addHighLevelShaderMaterialFromFiles(
                 shader.getVertexPath().c_str(), "main", video::EVST_VS_1_1,
                 shader.getFragmentPath().c_str(), "main", video::EPST_PS_1_1,

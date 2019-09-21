@@ -1,6 +1,3 @@
-#version 450
-#extension GL_ARB_separate_shader_objects : enable
-
 // From BynaryNoiseLib
 float rand(vec2 v) {
     return fract(sin(dot(v + vec2(-8.5123, 23.2156), vec2(12.9898, 59.233))) * 4758.5453123);
@@ -68,7 +65,6 @@ layout(binding = 1) uniform Layers {
 
 layout(binding = 2) uniform sampler2DArray textures;
 
-// Textures
 layout(location = 0) in vec3 fragVert;
 layout(location = 1) in vec3 fragNorm;
 
