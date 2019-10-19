@@ -17,12 +17,6 @@ public:
     virtual void setData(void *data, u32 count, u32 offset) = 0;
 
     virtual void getData(void *data, u32 count, u32 offset) = 0;
-
-    virtual vk::Buffer getBufferHandle(u32 offset) = 0;
-
-    /** Get the offset of the buffer containing data at the specified offset. */
-    // TODO change to translateOffset(u32 offset)
-    virtual u32 getBufferOffset(u32 offset) = 0;
 };
 
 }; // namespace world

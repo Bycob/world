@@ -62,6 +62,22 @@ VkwMemoryCacheSegment::~VkwMemoryCacheSegment() {
     ctx._device.free(_memory);
 }
 
+void VkwMemoryCacheSegment::setData(void *data, u32 count, u32 offset) {
+    VulkanContext &ctx = Vulkan::context();
+
+    void *mapped = ctx._device.mapMemory(_memory, offset, count);
+    memcpy(mapped, data, count);
+    ctx._device.unmapMemory(_memory);
+}
+
+void VkwMemoryCacheSegment::getData(void *data, u32 count, u32 offset) {
+    VulkanContext &ctx = Vulkan::context();
+
+    void *mapped = ctx._device.mapMemory(_memory, offset, count);
+    memcpy(data, mapped, count);
+    ctx._device.unmapMemory(_memory);
+}
+
 
 // MEMORY CACHE
 
@@ -97,8 +113,6 @@ VkwMemoryCache::VkwMemoryCache(u32 segmentSize, DescriptorType usage,
     }
 }
 
-VkwMemoryCache::~VkwMemoryCache() = default;
-
 // https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html
 // #VUID-VkWriteDescriptorSet-descriptorType-00327
 // TODO Check for buffer max size and alignment according to specs above
@@ -117,8 +131,7 @@ VkwSubBuffer VkwMemoryCache::allocateBuffer(u32 size) {
     }
 
     auto &lastSegment = *_segments.back();
-    const u32 offset = static_cast<u32>(_segments.size() - 1) * segmentSize +
-                       lastSegment._sizeAllocated;
+    const u32 offset = lastSegment._sizeAllocated;
 
     lastSegment._sizeAllocated += size;
 
@@ -129,55 +142,15 @@ VkwSubBuffer VkwMemoryCache::allocateBuffer(u32 size) {
         lastSegment._sizeAllocated += lastSegment._alignment - rem;
     }
 
-    return VkwSubBuffer{*this, size, offset};
+    return VkwSubBuffer{lastSegment, lastSegment._buffer, size, offset};
 }
 
 void VkwMemoryCache::flush() {
     // Nothing yet
 }
 
-void VkwMemoryCache::setData(void *data, u32 count, u32 offset) {
-    const u32 segmentSize = _segmentSize;
-    const u32 inSegmentOffset = offset % segmentSize;
-    const u32 segmentId = offset / segmentSize;
-    auto &segment = *_segments[segmentId];
-
-    VulkanContext &ctx = Vulkan::context();
-
-    void *mapped =
-        ctx._device.mapMemory(segment._memory, inSegmentOffset, count);
-    memcpy(mapped, data, count);
-    ctx._device.unmapMemory(segment._memory);
-}
-
-void VkwMemoryCache::getData(void *data, u32 count, u32 offset) {
-    const u32 segmentSize = _segmentSize;
-    const u32 inSegmentOffset = offset % segmentSize;
-    const u32 segmentId = offset / segmentSize;
-    auto &segment = *_segments[segmentId];
-
-    VulkanContext &ctx = Vulkan::context();
-
-    void *mapped =
-        ctx._device.mapMemory(segment._memory, inSegmentOffset, count);
-    memcpy(data, mapped, count);
-    ctx._device.unmapMemory(segment._memory);
-}
-
-vk::Buffer VkwMemoryCache::getBufferHandle(u32 offset) {
-    const u32 segmentSize = _segmentSize;
-    const u32 segmentId = offset / segmentSize;
-    auto &segment = *_segments[segmentId];
-
-    return segment._buffer;
-}
-
-u32 VkwMemoryCache::getBufferOffset(u32 offset) {
-    return offset - (offset % _segmentSize);
-}
-
 u32 VkwMemoryCache::sizeRemaining() const {
-    if (_segments.size() == 0) {
+    if (_segments.empty()) {
         return 0;
     }
 

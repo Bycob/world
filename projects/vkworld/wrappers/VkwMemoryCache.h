@@ -13,7 +13,7 @@
 
 namespace world {
 
-struct VKWORLD_EXPORT VkwMemoryCacheSegment {
+struct VKWORLD_EXPORT VkwMemoryCacheSegment : public IVkwMemoryAccess {
     std::unique_ptr<char[]> _data;
     vk::DeviceMemory _memory;
     vk::Buffer _buffer;
@@ -28,13 +28,18 @@ struct VKWORLD_EXPORT VkwMemoryCacheSegment {
     VkwMemoryCacheSegment(u32 size, DescriptorType descriptorType,
                           u32 memTypeIndex);
 
-    ~VkwMemoryCacheSegment();
+    ~VkwMemoryCacheSegment() override;
+
+    // ===== IVkwMemoryAccess
+
+    void setData(void *data, u32 count, u32 offset) override;
+
+    void getData(void *data, u32 count, u32 offset) override;
 };
 
-class VKWORLD_EXPORT VkwMemoryCache : public IVkwMemoryAccess {
+class VKWORLD_EXPORT VkwMemoryCache {
 public:
     VkwMemoryCache(u32 segmentSize, DescriptorType usage, MemoryType memType);
-    ~VkwMemoryCache() override;
 
     VkwMemoryCache(const VkwMemoryCache &other) = delete;
 
@@ -44,19 +49,11 @@ public:
      * segments. */
     VkwSubBuffer allocateBuffer(u32 size);
 
+    // VkwImage allocateImage(u32 size);
+
     /** Upload memory to vulkan. This method should always be called before
      * using the memory on the GPU. */
     void flush();
-
-    // ===== IVkwMemoryAccess
-
-    void setData(void *data, u32 count, u32 offset) override;
-
-    void getData(void *data, u32 count, u32 offset) override;
-
-    vk::Buffer getBufferHandle(u32 offset) override;
-
-    u32 getBufferOffset(u32 offset) override;
 
 private:
     /** Size of each segment of memory allocated by this memory cache */

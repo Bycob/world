@@ -8,6 +8,7 @@
 namespace world {
 
 class VkwFramebufferPrivate {
+public:
     int _width, _height;
     vk::Image _image;
     vk::RenderPass _renderPass;

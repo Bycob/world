@@ -41,3 +41,5 @@ Meshes](ftp://ftp.disi.unige.it/person/MagilloP/PDF/het-short.pdf), 2007
 (Mali is a serie of GPUs designed by ARM for smartphones and tablets, but the documents contains general advices over compute shaders)
 
 - [Vulkan Memory Management](https://developer.nvidia.com/vulkan-memory-management)
+
+- [Dos and Don'ts](https://devblogs.nvidia.com/vulkan-dos-donts/)

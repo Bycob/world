@@ -18,6 +18,8 @@ public:
 
     vk::Pipeline _pipeline;
 
+    vk::RenderPass _renderPass;
+
     bool _initialized = false;
 
     ~VkwGraphicsPipelinePrivate() {

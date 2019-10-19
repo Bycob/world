@@ -20,7 +20,8 @@ public:
     static const VkwSubBuffer NONE;
 
     VkwSubBuffer();
-    VkwSubBuffer(IVkwMemoryAccess &memAccess, u32 size, u32 offset);
+    VkwSubBuffer(IVkwMemoryAccess &memAccess, vk::Buffer buffer, u32 size,
+                 u32 offset);
 
     u32 getSize() const;
     u32 getOffset() const;
@@ -34,12 +35,6 @@ public:
 
     void setData(void *data);
     void setData(void *data, u32 count, u32 offset = 0) override;
-
-
-    vk::Buffer getBufferHandle(u32 offset) override;
-
-    /** Get the offset of the buffer containing data at the specified offset. */
-    u32 getBufferOffset(u32 offset) override;
 
 private:
     std::shared_ptr<VkwSubBufferPrivate> _internal;
