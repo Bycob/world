@@ -65,7 +65,7 @@ public:
         // TODO: Allow user to chose PrimitiveTopology
         vk::PipelineInputAssemblyStateCreateInfo inputAssemblyStageInfo(
             {}, vk::PrimitiveTopology::eTriangleList);
-        // TODO: Specify the size of the viewport from parameters
+        // FIXME: Specify the size of the viewport from parameters
         vk::Viewport viewport(0, 0, 100, 100, 0, 1);
         vk::Rect2D scissor({0, 0}, {100, 100});
         vk::PipelineViewportStateCreateInfo viewportStageInfo({}, 1, &viewport,

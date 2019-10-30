@@ -38,7 +38,7 @@ struct ProcessUnit {
 
     VkwSubBuffer _texture;
 
-    std::unique_ptr<VkwWorker> _worker;
+    std::unique_ptr<VkwComputeWorker> _worker;
 
 
     ProcessUnit(Image &img) : _textureImg(img) {}
@@ -248,7 +248,7 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &img,
     upscaleSlopeDset.addDescriptor(2, unit._terrainSlopeUp);
 
     // Worker
-    unit._worker = std::make_unique<VkwWorker>();
+    unit._worker = std::make_unique<VkwComputeWorker>();
 
     unit._worker->bindCommand(derivPipeline, derivDset);
     unit._worker->dispatchCommand(derivGroupCount, derivGroupCount, 1);

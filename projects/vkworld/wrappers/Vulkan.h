@@ -27,9 +27,8 @@ public:
 
     vk::PhysicalDevice _physicalDevice;
 
-    vk::Queue _computeQueue;
-
     vk::CommandPool _computeCommandPool;
+    vk::CommandPool _graphicsCommandPool;
 
     vk::DescriptorPool _descriptorPool;
 
@@ -48,10 +47,13 @@ public:
 
     VkwSubBuffer allocate(u32 size, DescriptorType usage, MemoryType memType);
 
+    // TODO queue type ?
+    vk::Queue queue(vk::QueueFlags flags);
+
 
     // MISC
     /** Simple method to get a queue for computation. */
-    int findComputeQueueFamily();
+    int findQueueFamily(vk::QueueFlags flags);
 
     vk::DescriptorType getDescriptorType(DescriptorType type);
 
@@ -88,6 +90,8 @@ private:
     void createLogicalDevice();
 
     void createComputeResources();
+
+    void createGraphicsResources();
 
     // TODO Remove dat
     friend class ProgramVk;

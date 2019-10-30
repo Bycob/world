@@ -12,17 +12,20 @@
 #include <vkworld/BufferVk.h>
 #include <vkworld/ProxyGround.h>
 #include <vkworld/MultilayerGroundTexture.h>
+#include <vkworld/VkwTextureGenerator.h>
 
 using namespace world;
 
 void testVulkanVersion(int argc, char **argv);
 void testProxyGround(int argc, char **argv);
 void testMultilayerTerrainTexture(int argc, char **argv);
+void testTextureGenerator();
 
 int main(int argc, char **argv) {
     // testVulkanVersion(argc, argv);
     // testProxyGround(argc, argv);
     testMultilayerTerrainTexture(argc, argv);
+    // testTextureGenerator();
 }
 
 void testVulkanVersion(int argc, char **argv) {
@@ -164,4 +167,9 @@ void testMultilayerTerrainTexture(int argc, char **argv) {
     obj.write(scene, "assets/vulkan/multilayer/multilayer.obj");
 
     delete mesh;
+}
+
+void testTextureGenerator() {
+    VkwTextureGenerator generator(1000, 1000, "test_texture");
+    generator.generateTexture().write("assets/vulkan/test_generator.png");
 }

@@ -16,7 +16,7 @@ public:
     VkwSubBuffer _vertices;
     VkwSubBuffer _faces;
 
-    std::unique_ptr<VkwWorker> _worker;
+    std::unique_ptr<VkwComputeWorker> _worker;
 };
 
 struct BushesParams {};
@@ -79,7 +79,7 @@ void Bushes::prepare() {
     dset.addDescriptor(3, _internal->_faces);
     // dset.addDescriptor(255, DescriptorType::STORAGE_BUFFER, );
 
-    _internal->_worker = std::make_unique<VkwWorker>();
+    _internal->_worker = std::make_unique<VkwComputeWorker>();
     _internal->_worker->bindCommand(pipeline, dset);
     _internal->_worker->dispatchCommand(xGroupCount, yGroupCount, zGroupCount);
 

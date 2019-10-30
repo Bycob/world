@@ -95,7 +95,7 @@ VkwSubBuffer createTestPerlinBuffer() {
     perlinDset.addDescriptor(256, hashBuf);
     perlinDset.addDescriptor(3, perlinBuf);
 
-    VkwWorker perlinWorker;
+    VkwComputeWorker perlinWorker;
     perlinWorker.bindCommand(perlinPipeline, perlinDset);
     perlinWorker.dispatchCommand(bufferWidth / 32, bufferHeight / 32, 1);
     perlinWorker.endCommandRecording();
@@ -194,7 +194,8 @@ void ProxyGround::collect(ICollector &collector,
     for (const TileCoordinates &tc : coords) {
         auto &tileData = getData(tc);
 
-        VkwWorker &worker = *(tileData._worker = std::make_unique<VkwWorker>());
+        VkwComputeWorker &worker =
+            *(tileData._worker = std::make_unique<VkwComputeWorker>());
 
         // --- UPSCALE
         // vec3d bboxDims = bbox.getDimensions();

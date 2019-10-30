@@ -25,7 +25,7 @@ public:
 
     std::vector<Layer> _layers;
 
-    std::unique_ptr<VkwWorker> _worker;
+    std::unique_ptr<VkwComputeWorker> _worker;
 };
 
 class ProxyGroundPrivate {

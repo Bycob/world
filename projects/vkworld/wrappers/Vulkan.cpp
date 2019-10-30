@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <set>
 #include <chrono>
 
 #include <vulkan/vulkan.h>
@@ -115,18 +116,19 @@ VulkanContext::~VulkanContext() {
     _memory.clear();
 
     std::cout << "Destroy vulkan ressources" << std::endl;
-    vkDestroyDescriptorPool(_device, _descriptorPool, nullptr);
-    vkDestroyCommandPool(_device, _computeCommandPool, nullptr);
+    _device.destroy(_descriptorPool);
+    _device.destroy(_computeCommandPool);
+    _device.destroy(_graphicsCommandPool);
 
     std::cout << "Destroy vulkan device" << std::endl;
-    vkDestroyDevice(_device, nullptr);
+    _device.destroy();
 
     if (_enableValidationLayers) {
         DestroyDebugReportCallbackEXT(_instance, _debugCallback, nullptr);
     }
 
     // It crashes... why ?
-    vkDestroyInstance(_instance, nullptr);
+    _instance.destroy();
 }
 
 void VulkanContext::displayAvailableExtensions() {
@@ -191,23 +193,24 @@ void VulkanContext::pickPhysicalDevice() {
 }
 
 void VulkanContext::createLogicalDevice() {
-    int familyIndex = findComputeQueueFamily();
+    std::set<int> familyIndexes;
+    familyIndexes.insert(findQueueFamily(vk::QueueFlagBits::eGraphics));
+    familyIndexes.insert(findQueueFamily(vk::QueueFlagBits::eCompute));
 
-    // Information about the queue
-    vk::DeviceQueueCreateInfo queueCreateInfo;
-    queueCreateInfo.queueFamilyIndex = familyIndex;
-    queueCreateInfo.queueCount = 1;
+    std::vector<vk::DeviceQueueCreateInfo> queueInfos;
 
-    float queuePriority = 1.0f;
-    queueCreateInfo.pQueuePriorities = &queuePriority;
-
-    vk::PhysicalDeviceFeatures deviceFeatures;
+    for (int familyIndex : familyIndexes) {
+        float queuePriority = 1.0f;
+        queueInfos.push_back(
+            vk::DeviceQueueCreateInfo({}, familyIndex, 1, &queuePriority));
+    }
 
     // Device creation
-    vk::DeviceCreateInfo createInfo;
-    createInfo.pQueueCreateInfos = &queueCreateInfo;
-    createInfo.queueCreateInfoCount = 1;
+    vk::PhysicalDeviceFeatures deviceFeatures;
+    // Enable properties, extensions, etc
+    // deviceFeatures.geometryShader = true;
 
+    vk::DeviceCreateInfo createInfo({}, queueInfos.size(), &queueInfos[0]);
     createInfo.pEnabledFeatures = &deviceFeatures;
     createInfo.enabledExtensionCount = 0;
 
@@ -224,13 +227,11 @@ void VulkanContext::createLogicalDevice() {
 }
 
 void VulkanContext::createComputeResources() {
-    // Get queue
-    _computeQueue = _device.getQueue(findComputeQueueFamily(), 0);
-
     // Create descriptor pool
     // TODO Scale descriptor pool size according to needs. Change the system if
     // it's no more sufficient.
-    vk::DescriptorPoolSize descriptorPoolSizes[2];
+    std::vector<vk::DescriptorPoolSize> descriptorPoolSizes;
+    descriptorPoolSizes.resize(3);
 
     descriptorPoolSizes[0].type = vk::DescriptorType::eStorageBuffer;
     descriptorPoolSizes[0].descriptorCount = 2000;
@@ -238,55 +239,47 @@ void VulkanContext::createComputeResources() {
     descriptorPoolSizes[1].type = vk::DescriptorType::eUniformBuffer;
     descriptorPoolSizes[1].descriptorCount = 2000;
 
+    descriptorPoolSizes[2].type = vk::DescriptorType::eSampledImage;
+    descriptorPoolSizes[2].descriptorCount = 2000;
+
     vk::DescriptorPoolCreateInfo descriptorPoolInfo = {};
-    descriptorPoolInfo.maxSets = 2000;
+    descriptorPoolInfo.maxSets = 750;
     descriptorPoolInfo.flags |=
         vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet;
-    descriptorPoolInfo.poolSizeCount = 2;
-    descriptorPoolInfo.pPoolSizes = descriptorPoolSizes;
+    descriptorPoolInfo.poolSizeCount = descriptorPoolSizes.size();
+    descriptorPoolInfo.pPoolSizes = &descriptorPoolSizes[0];
 
     _descriptorPool = _device.createDescriptorPool(descriptorPoolInfo, nullptr);
 
-    // Create compute command pool
-    vk::CommandPoolCreateInfo commandPoolCreateInfo = {};
-    commandPoolCreateInfo.queueFamilyIndex = findComputeQueueFamily();
+    // Create command pools
+    vk::CommandPoolCreateInfo computePoolInfo(
+        {}, findQueueFamily(vk::QueueFlagBits::eCompute));
+    _computeCommandPool = _device.createCommandPool(computePoolInfo, nullptr);
 
-    _computeCommandPool =
-        _device.createCommandPool(commandPoolCreateInfo, nullptr);
+    vk::CommandPoolCreateInfo graphicsPoolInfo(
+        {}, findQueueFamily(vk::QueueFlagBits::eGraphics));
+    _graphicsCommandPool = _device.createCommandPool(graphicsPoolInfo, nullptr);
 }
 
 vk::ShaderModule VulkanContext::createShader(
     const std::vector<char> &shaderCode) {
-    VkShaderModuleCreateInfo shaderInfo = {};
-    shaderInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    shaderInfo.codeSize = shaderCode.size();
-    shaderInfo.pCode = reinterpret_cast<const u32 *>(shaderCode.data());
-
-    VkShaderModule shader;
-    if (vkCreateShaderModule(_device, &shaderInfo, nullptr, &shader) !=
-        VK_SUCCESS) {
-        throw std::runtime_error(
-            "[Vulkan] [Create-Shader] failed to create shader!");
-    }
+    vk::ShaderModuleCreateInfo shaderInfo(
+        {}, shaderCode.size(),
+        reinterpret_cast<const u32 *>(shaderCode.data()));
+    vk::ShaderModule shader = _device.createShaderModule(shaderInfo);
 
     // Add to the internal register for further deleting
     return shader;
 }
 
-int VulkanContext::findComputeQueueFamily() {
+int VulkanContext::findQueueFamily(vk::QueueFlags flags) {
     // Get queues family
-    u32 queueFamilyCount = 0;
-    vkGetPhysicalDeviceQueueFamilyProperties(_physicalDevice, &queueFamilyCount,
-                                             nullptr);
-
-    std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
-    vkGetPhysicalDeviceQueueFamilyProperties(_physicalDevice, &queueFamilyCount,
-                                             queueFamilies.data());
+    std::vector<vk::QueueFamilyProperties> queueFamilies =
+        _physicalDevice.getQueueFamilyProperties();
 
     int i = 0;
     for (auto &queueFamily : queueFamilies) {
-        if (queueFamily.queueCount > 0 &&
-            queueFamily.queueFlags & VK_QUEUE_COMPUTE_BIT) {
+        if (queueFamily.queueCount > 0 && queueFamily.queueFlags & flags) {
             return i;
         }
 
@@ -352,6 +345,10 @@ VkwSubBuffer VulkanContext::allocate(u32 size, DescriptorType usage,
 
     auto &allocator = it->second;
     return allocator->allocateBuffer(size);
+}
+
+vk::Queue VulkanContext::queue(vk::QueueFlags flags) {
+    return _device.getQueue(findQueueFamily(flags), 0);
 }
 
 std::vector<char> VulkanContext::readFile(const std::string &filename) {
@@ -520,7 +517,8 @@ void VulkanContext::configTest() {
     VkCommandPoolCreateInfo commandPoolCreateInfo = {};
     commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     commandPoolCreateInfo.flags = 0;
-    commandPoolCreateInfo.queueFamilyIndex = findComputeQueueFamily();
+    commandPoolCreateInfo.queueFamilyIndex =
+        findQueueFamily(vk::QueueFlagBits::eCompute);
 
     VkCommandPool commandPool;
     if (vkCreateCommandPool(_device, &commandPoolCreateInfo, nullptr,
@@ -581,7 +579,7 @@ void VulkanContext::configTest() {
 
     // Submid queue
     // TODO Test VK_SUCCESS
-    vkQueueSubmit(_computeQueue, 1, &submitInfo, fence);
+    vkQueueSubmit(queue(vk::QueueFlagBits::eCompute), 1, &submitInfo, fence);
 
     auto start = std::chrono::steady_clock::now();
     // TODO Test VK_SUCCESS

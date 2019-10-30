@@ -104,6 +104,8 @@ VkwMemoryCache::VkwMemoryCache(u32 segmentSize, DescriptorType usage,
         break;
     }
 
+    // Search for optimal memory type.
+    // If not found, search for a usable memory type.
     try {
         _memTypeIndex = ctx.findMemoryType(segmentSize, requiredProperties,
                                            unwantedProperties);
@@ -116,7 +118,7 @@ VkwMemoryCache::VkwMemoryCache(u32 segmentSize, DescriptorType usage,
 // https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html
 // #VUID-VkWriteDescriptorSet-descriptorType-00327
 // TODO Check for buffer max size and alignment according to specs above
-VkwSubBuffer VkwMemoryCache::allocateBuffer(u32 size) {
+u32 VkwMemoryCache::allocate(u32 size) {
     const u32 segmentSize = _segmentSize;
 
     if (size > segmentSize) {
@@ -132,7 +134,6 @@ VkwSubBuffer VkwMemoryCache::allocateBuffer(u32 size) {
 
     auto &lastSegment = *_segments.back();
     const u32 offset = lastSegment._sizeAllocated;
-
     lastSegment._sizeAllocated += size;
 
     // Complete to respect alignment required by standard
@@ -141,9 +142,16 @@ VkwSubBuffer VkwMemoryCache::allocateBuffer(u32 size) {
     if (rem != 0) {
         lastSegment._sizeAllocated += lastSegment._alignment - rem;
     }
+    return offset;
+}
 
+VkwSubBuffer VkwMemoryCache::allocateBuffer(u32 size) {
+    u32 offset = allocate(size);
+    auto &lastSegment = *_segments.back();
     return VkwSubBuffer{lastSegment, lastSegment._buffer, size, offset};
 }
+
+void VkwMemoryCache::allocateImage(VkwImage &image) {}
 
 void VkwMemoryCache::flush() {
     // Nothing yet

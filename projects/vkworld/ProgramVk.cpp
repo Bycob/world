@@ -266,7 +266,8 @@ void ProgramVk::run() {
 
     // Submid queue
     // TODO Test VK_SUCCESS
-    vkQueueSubmit(internalCtx._computeQueue, 1, &submitInfo, fence);
+    vkQueueSubmit(internalCtx.queue(vk::QueueFlagBits::eCompute), 1,
+                  &submitInfo, fence);
     vkWaitForFences(internalCtx._device, 1, &fence, VK_TRUE, 100000000000);
     vkDestroyFence(internalCtx._device, fence, NULL);
 }

@@ -10,6 +10,7 @@
 #include "VkwEnums.h"
 #include "IVkwMemoryAccess.h"
 #include "VkwSubBuffer.h"
+#include "VkwImage.h"
 
 namespace world {
 
@@ -49,7 +50,7 @@ public:
      * segments. */
     VkwSubBuffer allocateBuffer(u32 size);
 
-    // VkwImage allocateImage(u32 size);
+    void allocateImage(VkwImage &image);
 
     /** Upload memory to vulkan. This method should always be called before
      * using the memory on the GPU. */
@@ -67,6 +68,9 @@ private:
     std::vector<std::unique_ptr<VkwMemoryCacheSegment>> _segments;
 
     u32 sizeRemaining() const;
+
+    // returns offset of allocated memory
+    u32 allocate(u32 size);
 };
 
 } // namespace world
