@@ -18,10 +18,10 @@ ProxyGround::ProxyGround(f64 width, u32 resolution) {
     const u32 tileCount = resolution / tileSize;
     _internal = new ProxyGroundPrivate(width / tileCount, tileSize, tileCount);
 
-    _internal->_layers.emplace_back(
-        ProxyGroundPrivate::LayerInfo{"distribution-default", "texture-soil"});
-    _internal->_layers.emplace_back(
-        ProxyGroundPrivate::LayerInfo{"distribution-default", "texture-grass"});
+    _internal->_layers.emplace_back(ProxyGroundPrivate::LayerInfo{
+        "distribution-default.comp", "texture-soil.comp"});
+    _internal->_layers.emplace_back(ProxyGroundPrivate::LayerInfo{
+        "distribution-default.comp", "texture-grass.comp"});
 }
 
 ProxyGround::~ProxyGround() { delete _internal; }
@@ -35,7 +35,7 @@ VkwSubBuffer createTestPerlinBuffer() {
     layout22.addBinding(DescriptorType::STORAGE_BUFFER, 256);
     layout22.addBinding(DescriptorType::STORAGE_BUFFER, 3);
 
-    VkwComputePipeline perlinPipeline(layout22, "noise-perlin");
+    VkwComputePipeline perlinPipeline(layout22, "noise-perlin.comp");
 
     Perlin perlin;
     std::vector<u32> hash;

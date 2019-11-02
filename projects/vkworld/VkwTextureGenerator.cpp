@@ -40,7 +40,7 @@ void VkwTextureGenerator::generateTextureAsync() {
 
     VkwGraphicsPipeline pipeline(_layout);
     // TODO parameters
-    pipeline.setBuiltinShader(VkwShaderType::VERTEX, "generic_texture");
+    pipeline.setBuiltinShader(VkwShaderType::VERTEX, "generic_texture.vert");
     pipeline.setBuiltinShader(VkwShaderType::FRAGMENT, _shaderName);
 
     // This is only one render pass

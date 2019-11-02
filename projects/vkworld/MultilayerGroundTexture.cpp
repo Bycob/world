@@ -65,31 +65,31 @@ void MultilayerGroundTexture::addDefaultLayers() {
     addLayer(DistributionParams{-1, 0, 1, 2, // h
                                 -1, 0, 1, 2, // dh
                                 0, 1, 0, 1, 0.2},
-             "texture-rock");
+             "texture-rock.comp");
 
     // Sand
     addLayer(DistributionParams{-1, 0, 0.4, 0.45, // h
                                 -1, 0, 0.4, 0.6,  // dh
                                 0, 1, 0, 1, 0.2},
-             "texture-sand");
+             "texture-sand.comp");
 
     // Soil
     addLayer(DistributionParams{0.33, 0.4, 0.6, 0.75, // h
                                 -1, 0, 0.4, 0.9,      // dh
                                 0, 0.85, 0.25, 0.85, 0.2},
-             "texture-soil");
+             "texture-soil.comp");
 
     // Grass
     addLayer(DistributionParams{0.33, 0.4, 0.6, 0.7, // h
                                 -1, 0, 0.2, 0.6,     // dh
                                 0., 1., 0.25, 0.6, 0.2},
-             "texture-grass");
+             "texture-grass.comp");
 
     // Snow
     addLayer(DistributionParams{0.65, 0.8, 1, 2, // h
                                 -1, 0, 0.5, 0.7, // dh
                                 0.0, 1.0, 0, 1., 0.2},
-             "texture-snow");
+             "texture-snow.comp");
 }
 
 void MultilayerGroundTexture::addLayer(const DistributionParams &distribution,
@@ -160,15 +160,15 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &img,
     VkwDescriptorSetLayout layoutTexture({0, 1}, {2, 3, 256});
 
     // Pipelines
-    VkwComputePipeline derivPipeline(layoutDeriv, "derivation");
-    VkwComputePipeline upscalePipeline(layoutUpscale, "upscale");
+    VkwComputePipeline derivPipeline(layoutDeriv, "derivation.comp");
+    VkwComputePipeline upscalePipeline(layoutUpscale, "upscale.comp");
 
     std::vector<VkwComputePipeline> distributionPipelines;
     std::vector<VkwComputePipeline> texturePipelines;
 
     for (auto &layerInfo : _internal->_layers) {
         distributionPipelines.emplace_back(layoutDistrib,
-                                           "distribution-height");
+                                           "distribution-height.comp");
         texturePipelines.emplace_back(layoutTexture, layerInfo._textureShader);
 
         unit._layers.emplace_back();

@@ -24,7 +24,7 @@ endif()
 message(STATUS "Shader output directory is: ${WORLD_SHADERS_OUTPUT_DIRECTORY}")
 
 foreach(SOURCE_SHADER ${WORLD_SHADERS_SOURCES})
-	get_filename_component(SHADER_NAME "${SOURCE_SHADER}" NAME_WE)
+	get_filename_component(SHADER_NAME "${SOURCE_SHADER}" NAME)
 	set(COMPILED_SHADER "${WORLD_SHADERS_OUTPUT_DIRECTORY}/${SHADER_NAME}.spv")
 
 	add_custom_command(

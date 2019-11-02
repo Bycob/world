@@ -171,6 +171,6 @@ void testMultilayerTerrainTexture(int argc, char **argv) {
 
 void testTextureGenerator() {
     const u32 size = 1024;
-    VkwTextureGenerator generator(size, size, "test_texture");
+    VkwTextureGenerator generator(size, size, "test_texture.frag");
     generator.generateTexture().write("assets/vulkan/test_generator.png");
 }
