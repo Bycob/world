@@ -171,6 +171,26 @@ void testMultilayerTerrainTexture(int argc, char **argv) {
 
 void testTextureGenerator() {
     const u32 size = 1024;
-    VkwTextureGenerator generator(size, size, "test_texture.frag");
+    VkwTextureGenerator generator(size, size, "texture-grass.frag");
+
+    // Texture size
+    struct {
+        float offsetX = 0, offsetY = 0;
+        float sizeX = 0.1, sizeY = 0.1;
+    } textureStruct;
+    generator.addParameter(0, DescriptorType::UNIFORM_BUFFER,
+                           MemoryUsage::CPU_WRITES, sizeof(textureStruct),
+                           &textureStruct);
+
+    // Random
+    /*std::mt19937 _rng(42);
+    std::vector<u32> random(256);
+    std::iota(random.begin(), random.end(), 0);
+    std::shuffle(random.begin(), random.end(), _rng);
+    random.insert(random.end(), random.begin(), random.end());
+
+    generator.addParameter(256, DescriptorType::STORAGE_BUFFER,
+    MemoryUsage::CPU_WRITES, random.size() * sizeof(u32), &random[0]); */
+
     generator.generateTexture().write("assets/vulkan/test_generator.png");
 }

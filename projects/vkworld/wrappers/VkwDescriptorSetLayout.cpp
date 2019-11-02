@@ -1,5 +1,7 @@
 #include "VkwDescriptorSetLayout.h"
 
+#include <iostream>
+
 #include "Vulkan.h"
 
 namespace world {
@@ -52,7 +54,7 @@ void VkwDescriptorSetLayout::addBinding(DescriptorType usage, u32 binding) {
     vk::DescriptorType descriptorType =
         Vulkan::context().getDescriptorType(usage);
     _internal->_bindings.emplace_back(binding, descriptorType, 1,
-                                      vk::ShaderStageFlagBits::eCompute);
+                                      vk::ShaderStageFlagBits::eAll);
 }
 
 vk::DescriptorType VkwDescriptorSetLayout::getBindingType(u32 id) const {

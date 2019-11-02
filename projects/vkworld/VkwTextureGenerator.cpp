@@ -24,6 +24,7 @@ void VkwTextureGenerator::addParameter(int id, DescriptorType type,
     _layout.addBinding(type, id);
     auto &ctx = Vulkan::context();
     VkwSubBuffer buffer = ctx.allocate(size, type, memtype);
+    buffer.setData(data);
     _buffers[id] = buffer;
 }
 
