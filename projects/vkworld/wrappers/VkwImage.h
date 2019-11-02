@@ -9,8 +9,14 @@
 
 #include "vkworld/wrappers/IVkwBindable.h"
 #include "vkworld/wrappers/IVkwMemoryAccess.h"
+#include "VkwEnums.h"
 
 namespace world {
+
+enum class VkwImageUsage {
+    TEXTURE,
+    OFFSCREEN_RENDER,
+};
 
 class VkwImagePrivate {
 public:
@@ -23,13 +29,17 @@ public:
     int _width, _height;
     vk::Format _imageFormat;
 
-    VkwImagePrivate(int width, int height);
+    VkwImagePrivate(VkwImageUsage usage, int width, int height);
     ~VkwImagePrivate();
 };
 
 class VKWORLD_EXPORT VkwImage : public IVkwBindable, public IVkwMemoryAccess {
 public:
-    VkwImage(int width = 1, int height = 1);
+    static int getMemoryType(VkwImageUsage imgUse, u32 size);
+
+
+    VkwImage(VkwImageUsage imgUse = VkwImageUsage::TEXTURE, int width = 1,
+             int height = 1);
 
     /** Adds this buffer as binding to the given descriptorSet. */
     void registerTo(vk::DescriptorSet &descriptorSet,
@@ -42,6 +52,8 @@ public:
     int width() const { return _internal->_width; }
 
     int height() const { return _internal->_height; }
+
+    vk::Format format() const { return _internal->_imageFormat; }
 
     vk::ImageView getImageView();
 

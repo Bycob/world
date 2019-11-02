@@ -81,6 +81,10 @@ VkwGraphicsWorker::VkwGraphicsWorker() {
         ctx._graphicsCommandPool, vk::CommandBufferLevel::ePrimary, 1);
     _commandBuffer =
         ctx._device.allocateCommandBuffers(commandBufferAllocateInfo)[0];
+
+    vk::CommandBufferBeginInfo beginInfo(
+        vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
+    _commandBuffer.begin(beginInfo);
 }
 
 VkwGraphicsWorker::~VkwGraphicsWorker() {
@@ -104,22 +108,22 @@ void VkwGraphicsWorker::beginRenderPass(vk::RenderPass renderPass,
                                         vk::Framebuffer framebuffer, int width,
                                         int height) {
     vk::ClearValue clearValues[2];
-    clearValues[0].color = std::array<float, 4>{0.0f, 0.0f, 0.0f, 0.0f};
-    clearValues[1].depthStencil = vk::ClearDepthStencilValue{1.0f, 0};
+    clearValues[0].color = std::array<float, 4>{0.0f, 0.0f, 1.0f, 1.0f};
+    // clearValues[1].depthStencil = vk::ClearDepthStencilValue{1.0f, 0};
 
-    // Set viewport
-    // Set scissors
+    vk::Viewport viewport(0, 0, static_cast<float>(width),
+                          static_cast<float>(height), 0.0f, 1.0f);
     vk::Rect2D renderArea(vk::Offset2D(), vk::Extent2D(width, height));
 
-    vk::RenderPassBeginInfo renderPassBeginInfo(_renderPass, framebuffer,
+    vk::RenderPassBeginInfo renderPassBeginInfo(renderPass, framebuffer,
                                                 renderArea, 2, clearValues);
     _commandBuffer.beginRenderPass(renderPassBeginInfo,
                                    vk::SubpassContents::eInline);
+    _commandBuffer.setViewport(0, 1, &viewport);
+    _commandBuffer.setScissor(0, 1, &renderArea);
 }
 
-void VkwGraphicsWorker::draw(int count) {
-    _commandBuffer.drawIndexed(count, 1, 0, 0, 0);
-}
+void VkwGraphicsWorker::draw(int count) { _commandBuffer.draw(count, 1, 0, 0); }
 
 void VkwGraphicsWorker::endRenderPass() { _commandBuffer.endRenderPass(); }
 

@@ -82,37 +82,11 @@ void VkwMemoryCacheSegment::getData(void *data, u32 count, u32 offset) {
 // MEMORY CACHE
 
 VkwMemoryCache::VkwMemoryCache(u32 segmentSize, DescriptorType usage,
-                               MemoryType memType)
-        : _segmentSize(segmentSize), _usage(usage), _memType(memType) {
-
+                               MemoryUsage memUse)
+        : _segmentSize(segmentSize), _usage(usage), _memType(memUse) {
     VulkanContext &ctx = Vulkan::context();
 
-    vk::MemoryPropertyFlags requiredProperties;
-    vk::MemoryPropertyFlags unwantedProperties;
-
-    switch (memType) {
-    case MemoryType::CPU_READS:
-        requiredProperties = vk::MemoryPropertyFlagBits::eHostVisible |
-                             vk::MemoryPropertyFlagBits::eHostCoherent;
-        break;
-    case MemoryType::CPU_WRITES:
-        requiredProperties = vk::MemoryPropertyFlagBits::eHostVisible;
-        break;
-    case MemoryType::GPU_ONLY:
-        requiredProperties = vk::MemoryPropertyFlagBits::eDeviceLocal;
-        unwantedProperties = vk::MemoryPropertyFlagBits::eHostVisible;
-        break;
-    }
-
-    // Search for optimal memory type.
-    // If not found, search for a usable memory type.
-    try {
-        _memTypeIndex = ctx.findMemoryType(segmentSize, requiredProperties,
-                                           unwantedProperties);
-    } catch (std::runtime_error &e) {
-        _memTypeIndex = ctx.findMemoryType(segmentSize, requiredProperties,
-                                           vk::MemoryPropertyFlags{});
-    }
+    _memTypeIndex = ctx.getMemoryType(memUse, segmentSize);
 }
 
 // https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html

@@ -28,6 +28,10 @@ class VKWORLD_EXPORT VkwGraphicsPipeline {
 public:
     VkwGraphicsPipeline(VkwDescriptorSetLayout &descriptorSetLayout);
 
+    void setDimensions(u32 width, u32 height);
+
+    void setRenderPass(vk::RenderPass renderPass);
+
     void setBuiltinShader(VkwShaderType type, const std::string &shaderName);
 
     /** Returns the pipeline created with current configuration of this

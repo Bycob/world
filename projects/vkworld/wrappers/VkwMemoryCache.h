@@ -40,7 +40,7 @@ struct VKWORLD_EXPORT VkwMemoryCacheSegment : public IVkwMemoryAccess {
 
 class VKWORLD_EXPORT VkwMemoryCache {
 public:
-    VkwMemoryCache(u32 segmentSize, DescriptorType usage, MemoryType memType);
+    VkwMemoryCache(u32 segmentSize, DescriptorType usage, MemoryUsage memUse);
 
     VkwMemoryCache(const VkwMemoryCache &other) = delete;
 
@@ -61,7 +61,7 @@ private:
     u32 _segmentSize;
 
     DescriptorType _usage;
-    MemoryType _memType;
+    MemoryUsage _memType;
 
     u32 _memTypeIndex;
 

@@ -45,7 +45,7 @@ public:
     // RESOURCES MANAGEMENT
     vk::ShaderModule createShader(const std::vector<char> &shaderCode);
 
-    VkwSubBuffer allocate(u32 size, DescriptorType usage, MemoryType memType);
+    VkwSubBuffer allocate(u32 size, DescriptorType usage, MemoryUsage memType);
 
     // TODO queue type ?
     vk::Queue queue(vk::QueueFlags flags);
@@ -60,6 +60,8 @@ public:
     /** Simple method to find a suitable memory type. */
     u32 findMemoryType(u32 memorySize, vk::MemoryPropertyFlags requiredFlags,
                        vk::MemoryPropertyFlags unwantedFlags = {});
+
+    u32 getMemoryType(MemoryUsage memUse, u32 requiredSize);
 
     std::vector<char> readFile(const std::string &filename);
 
@@ -76,7 +78,7 @@ private:
 
     VkDebugReportCallbackEXT _debugCallback;
 
-    typedef std::pair<DescriptorType, MemoryType> memid;
+    typedef std::pair<DescriptorType, MemoryUsage> memid;
     std::map<memid, std::unique_ptr<VkwMemoryCache>> _memory;
 
 
@@ -106,7 +108,7 @@ struct VKWORLD_EXPORT Vulkan {
 
 /* REFACTOR
  *
- * - Changer le nom des classes : DescriptorType, MemoryType
+ * - Changer le nom des classes : DescriptorType, MemoryUsage
  * - Passer le VulkanContext en paramètres partout ou nulle part
  * - Destroy resources
  * - register commands on worker a bit less ugly

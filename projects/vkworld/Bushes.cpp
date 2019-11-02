@@ -56,21 +56,21 @@ void Bushes::prepare() {
     // 2 vertices per face + 2, 8 float per vertex
     u32 verticesSize = (faceCount + 1) * 2 * 8 * sizeof(float);
     _internal->_vertices = vkctx.allocate(
-        verticesSize, DescriptorType::STORAGE_BUFFER, MemoryType::CPU_READS);
+        verticesSize, DescriptorType::STORAGE_BUFFER, MemoryUsage::CPU_READS);
 
     // 2 triangle faces per "face"
     u32 facesSize = faceCount * 6 * sizeof(float);
     _internal->_faces = vkctx.allocate(
-        facesSize, DescriptorType::STORAGE_BUFFER, MemoryType::CPU_READS);
+        facesSize, DescriptorType::STORAGE_BUFFER, MemoryUsage::CPU_READS);
 
     // Input
     u32 positionsSize = _positions.size() * 3 * sizeof(float);
     _internal->_positions = vkctx.allocate(
-        positionsSize, DescriptorType::STORAGE_BUFFER, MemoryType::CPU_WRITES);
+        positionsSize, DescriptorType::STORAGE_BUFFER, MemoryUsage::CPU_WRITES);
 
     _internal->_params =
         vkctx.allocate(sizeof(BushesParams), DescriptorType::UNIFORM_BUFFER,
-                       MemoryType::CPU_WRITES);
+                       MemoryUsage::CPU_WRITES);
 
     VkwDescriptorSet dset(layout);
     dset.addDescriptor(0, _internal->_params);

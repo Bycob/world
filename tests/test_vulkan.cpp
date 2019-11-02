@@ -24,8 +24,8 @@ void testTextureGenerator();
 int main(int argc, char **argv) {
     // testVulkanVersion(argc, argv);
     // testProxyGround(argc, argv);
-    testMultilayerTerrainTexture(argc, argv);
-    // testTextureGenerator();
+    // testMultilayerTerrainTexture(argc, argv);
+    testTextureGenerator();
 }
 
 void testVulkanVersion(int argc, char **argv) {
@@ -170,6 +170,7 @@ void testMultilayerTerrainTexture(int argc, char **argv) {
 }
 
 void testTextureGenerator() {
-    VkwTextureGenerator generator(1000, 1000, "test_texture");
+    const u32 size = 1024;
+    VkwTextureGenerator generator(size, size, "test_texture");
     generator.generateTexture().write("assets/vulkan/test_generator.png");
 }

@@ -175,12 +175,12 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &img,
     }
 
     // Buffers
-    unit._terrainHeight = vkctx.allocate(terrainSize, DescriptorType::STORAGE_BUFFER, MemoryType::CPU_WRITES);
-    unit._terrainSlope = vkctx.allocate(derivSize, DescriptorType::STORAGE_BUFFER, MemoryType::GPU_ONLY);
-    unit._terrainHeightUp = vkctx.allocate(imgPixSize, DescriptorType::STORAGE_BUFFER, MemoryType::GPU_ONLY);
-    unit._terrainSlopeUp = vkctx.allocate(imgPixSize, DescriptorType::STORAGE_BUFFER, MemoryType::GPU_ONLY);
-    unit._texture = vkctx.allocate(imgSize, DescriptorType::STORAGE_BUFFER, MemoryType::CPU_READS);
-    unit._random = vkctx.allocate(static_cast<u32>(random.size()) * sizeof(u32), DescriptorType::STORAGE_BUFFER, MemoryType::CPU_WRITES);
+    unit._terrainHeight = vkctx.allocate(terrainSize, DescriptorType::STORAGE_BUFFER, MemoryUsage::CPU_WRITES);
+    unit._terrainSlope = vkctx.allocate(derivSize, DescriptorType::STORAGE_BUFFER, MemoryUsage::GPU_ONLY);
+    unit._terrainHeightUp = vkctx.allocate(imgPixSize, DescriptorType::STORAGE_BUFFER, MemoryUsage::GPU_ONLY);
+    unit._terrainSlopeUp = vkctx.allocate(imgPixSize, DescriptorType::STORAGE_BUFFER, MemoryUsage::GPU_ONLY);
+    unit._texture = vkctx.allocate(imgSize, DescriptorType::STORAGE_BUFFER, MemoryUsage::CPU_READS);
+    unit._random = vkctx.allocate(static_cast<u32>(random.size()) * sizeof(u32), DescriptorType::STORAGE_BUFFER, MemoryUsage::CPU_WRITES);
 
     VkwMemoryHelper::terrainToGPU(terrain, unit._terrainHeight);
     unit._random.setData(random.data());
@@ -193,7 +193,7 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &img,
     derivParamsStruct.width = terrainRes;
     derivParamsStruct.height = terrainRes;
 
-    unit._derivParams = vkctx.allocate(sizeof(derivParamsStruct), DescriptorType::UNIFORM_BUFFER, MemoryType::CPU_WRITES);
+    unit._derivParams = vkctx.allocate(sizeof(derivParamsStruct), DescriptorType::UNIFORM_BUFFER, MemoryUsage::CPU_WRITES);
     unit._derivParams.setData(&derivParamsStruct);
 
     struct {
@@ -220,12 +220,12 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &img,
     upscaleStruct.dstHeight = static_cast<u32>(img.height());
     upscaleStruct.srcWidth = upscaleStruct.srcHeight = upscaleStruct.srcSizeX = upscaleStruct.srcSizeY = terrainRes;
 
-    unit._upscaleHeightParams = vkctx.allocate(sizeof(upscaleStruct), DescriptorType::UNIFORM_BUFFER, MemoryType::CPU_WRITES);
+    unit._upscaleHeightParams = vkctx.allocate(sizeof(upscaleStruct), DescriptorType::UNIFORM_BUFFER, MemoryUsage::CPU_WRITES);
     unit._upscaleHeightParams.setData(&upscaleStruct);
 
     upscaleStruct.srcWidth = upscaleStruct.srcHeight = upscaleStruct.srcSizeX = upscaleStruct.srcSizeY = derivRes;
 
-    unit._upscaleSlopeParams = vkctx.allocate(sizeof(upscaleStruct), DescriptorType::UNIFORM_BUFFER, MemoryType::CPU_WRITES);
+    unit._upscaleSlopeParams = vkctx.allocate(sizeof(upscaleStruct), DescriptorType::UNIFORM_BUFFER, MemoryUsage::CPU_WRITES);
     unit._upscaleSlopeParams.setData(&upscaleStruct);
 
     // Here is a little hack: we have the size of the image already embedded at the beggining of our upscale struct.
@@ -263,9 +263,9 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &img,
         auto &layer = unit._layers[i];
 
         // Buffers
-        layer._distribution = vkctx.allocate(imgPixSize, DescriptorType::STORAGE_BUFFER, MemoryType::GPU_ONLY);
+        layer._distribution = vkctx.allocate(imgPixSize, DescriptorType::STORAGE_BUFFER, MemoryUsage::GPU_ONLY);
 
-        layer._distributionParams = vkctx.allocate(sizeof(DistributionParams), DescriptorType::UNIFORM_BUFFER, MemoryType::CPU_WRITES);
+        layer._distributionParams = vkctx.allocate(sizeof(DistributionParams), DescriptorType::UNIFORM_BUFFER, MemoryUsage::CPU_WRITES);
         layerInfo._distributionParams.slopeFactor = terrainDims.z * terrainRes / terrainDims.x;
         layer._distributionParams.setData(&layerInfo._distributionParams);
 
@@ -284,7 +284,7 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &img,
         distributionPerlinStruct.offsetX = tileCoords.x * frequency;
         distributionPerlinStruct.offsetY = tileCoords.y * frequency;
         distributionPerlinStruct.frequency = frequency;
-        layer._distributionPerlinParams = vkctx.allocate(sizeof(distributionPerlinStruct), DescriptorType::UNIFORM_BUFFER, MemoryType::CPU_WRITES);
+        layer._distributionPerlinParams = vkctx.allocate(sizeof(distributionPerlinStruct), DescriptorType::UNIFORM_BUFFER, MemoryUsage::CPU_WRITES);
         layer._distributionPerlinParams.setData(&distributionPerlinStruct);
 
         VkwDescriptorSet distributionDset(layoutDistrib);
@@ -311,7 +311,7 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &img,
         textureStruct.sizeY = tileSize;
         textureStruct.offsetX = tileCoords.x * textureStruct.sizeX;
         textureStruct.offsetY = tileCoords.y * textureStruct.sizeY;
-        layer._textureParams = vkctx.allocate(sizeof(textureStruct), DescriptorType::UNIFORM_BUFFER, MemoryType::CPU_WRITES);
+        layer._textureParams = vkctx.allocate(sizeof(textureStruct), DescriptorType::UNIFORM_BUFFER, MemoryUsage::CPU_WRITES);
         layer._textureParams.setData(&textureStruct);
 
         VkwDescriptorSet textureDset(layoutTexture);

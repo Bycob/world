@@ -1,15 +1,25 @@
 #include "VkwTextureGenerator.h"
 
+
+#include "wrappers/VkwMemoryHelper.h"
+
 namespace world {
 VkwTextureGenerator::VkwTextureGenerator(int width, int height,
                                          std::string shaderName)
-        : _width(width), _height(height), _texture(width, height),
+        : _width(width), _height(height),
+          _texture(VkwImageUsage::OFFSCREEN_RENDER, width, height),
           _shaderName(std::move(shaderName)) {
     _worker = std::make_unique<VkwGraphicsWorker>();
 }
 
+VkwTextureGenerator::~VkwTextureGenerator() {
+    auto &ctx = Vulkan::context();
+    ctx._device.destroy(_renderPass);
+    ctx._device.destroy(_framebuffer);
+}
+
 void VkwTextureGenerator::addParameter(int id, DescriptorType type,
-                                       MemoryType memtype, size_t size,
+                                       MemoryUsage memtype, size_t size,
                                        void *data) {
     _layout.addBinding(type, id);
     auto &ctx = Vulkan::context();
@@ -37,13 +47,12 @@ void VkwTextureGenerator::generateTextureAsync() {
     // --- Create Render Pass
     auto &ctx = Vulkan::context();
 
-    // TODO: Setup format for offline rendering
-    vk::AttachmentDescription colorAttachment({}, vk::Format::eUndefined);
+    vk::AttachmentDescription colorAttachment({}, _texture.format());
     colorAttachment.loadOp = vk::AttachmentLoadOp::eClear;
     colorAttachment.storeOp = vk::AttachmentStoreOp::eStore;
     colorAttachment.initialLayout = vk::ImageLayout::eUndefined;
     // TODO: ePresentSrcKHR if we need to display it to the presentation
-    colorAttachment.finalLayout = vk::ImageLayout::eTransferDstOptimal;
+    colorAttachment.finalLayout = vk::ImageLayout::eGeneral;
 
     vk::AttachmentReference attachmentRef(
         0, vk::ImageLayout::eColorAttachmentOptimal);
@@ -53,6 +62,9 @@ void VkwTextureGenerator::generateTextureAsync() {
     vk::RenderPassCreateInfo renderPassInfo({}, 1, &colorAttachment, 1,
                                             &subpass);
     _renderPass = ctx._device.createRenderPass(renderPassInfo);
+
+    pipeline.setDimensions(_width, _height);
+    pipeline.setRenderPass(_renderPass);
 
     // --- Create framebuffer
     vk::ImageView imgView = _texture.getImageView();
@@ -77,7 +89,8 @@ void VkwTextureGenerator::generateTextureAsync() {
 
 Image VkwTextureGenerator::getGeneratedImage() {
     _worker->waitForCompletion();
-    Image img(1, 1, ImageType::RGB);
+    Image img(_width, _height, ImageType::RGB);
+    VkwMemoryHelper::GPUToImage(_texture, img, 4);
     return img;
 }
 } // namespace world

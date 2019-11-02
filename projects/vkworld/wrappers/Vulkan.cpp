@@ -329,8 +329,37 @@ u32 VulkanContext::findMemoryType(u32 memorySize,
     return memoryTypeIndex;
 }
 
+u32 VulkanContext::getMemoryType(MemoryUsage memUse, u32 requiredSize) {
+    vk::MemoryPropertyFlags requiredProperties;
+    vk::MemoryPropertyFlags unwantedProperties;
+
+    switch (memUse) {
+    case MemoryUsage::CPU_READS:
+        requiredProperties = vk::MemoryPropertyFlagBits::eHostVisible |
+                             vk::MemoryPropertyFlagBits::eHostCoherent;
+        break;
+    case MemoryUsage::CPU_WRITES:
+        requiredProperties = vk::MemoryPropertyFlagBits::eHostVisible;
+        break;
+    case MemoryUsage::GPU_ONLY:
+        requiredProperties = vk::MemoryPropertyFlagBits::eDeviceLocal;
+        unwantedProperties = vk::MemoryPropertyFlagBits::eHostVisible;
+        break;
+    }
+
+    // Search for optimal memory type.
+    // If not found, search for a usable memory type.
+    try {
+        return findMemoryType(requiredSize, requiredProperties,
+                              unwantedProperties);
+    } catch (std::runtime_error &e) {
+        return findMemoryType(requiredSize, requiredProperties,
+                              vk::MemoryPropertyFlags{});
+    }
+}
+
 VkwSubBuffer VulkanContext::allocate(u32 size, DescriptorType usage,
-                                     MemoryType memType) {
+                                     MemoryUsage memType) {
     memid key(usage, memType);
     auto it = _memory.find(key);
 
@@ -355,7 +384,8 @@ std::vector<char> VulkanContext::readFile(const std::string &filename) {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
     if (!file.good()) {
-        throw std::runtime_error("[Vulkan] [readFile] File not found");
+        throw std::runtime_error("[Vulkan] [readFile] File not found " +
+                                 filename);
     }
 
     size_t filesize = static_cast<size_t>(file.tellg());

@@ -72,18 +72,18 @@ VkwSubBuffer createTestPerlinBuffer() {
 
     VkwSubBuffer outputDataBuf =
         vkctx.allocate(sizeof(s_outputData), DescriptorType::UNIFORM_BUFFER,
-                       MemoryType::CPU_WRITES);
+                       MemoryUsage::CPU_WRITES);
 
     VkwSubBuffer perlinDataBuf =
         vkctx.allocate(sizeof(s_perlinData), DescriptorType::UNIFORM_BUFFER,
-                       MemoryType::CPU_WRITES);
+                       MemoryUsage::CPU_WRITES);
 
     VkwSubBuffer hashBuf =
         vkctx.allocate(hash.size() * sizeof(u32),
-                       DescriptorType::STORAGE_BUFFER, MemoryType::CPU_WRITES);
+                       DescriptorType::STORAGE_BUFFER, MemoryUsage::CPU_WRITES);
 
     VkwSubBuffer perlinBuf = vkctx.allocate(
-        bufferSize, DescriptorType::STORAGE_BUFFER, MemoryType::GPU_ONLY);
+        bufferSize, DescriptorType::STORAGE_BUFFER, MemoryUsage::GPU_ONLY);
 
     outputDataBuf.setData(&s_outputData);
     perlinDataBuf.setData(&s_perlinData);
@@ -186,7 +186,7 @@ void ProxyGround::collect(ICollector &collector,
 
     VkwSubBuffer outputDataBuf =
         vkctx.allocate(sizeof(s_outputData), DescriptorType::UNIFORM_BUFFER,
-                       MemoryType::CPU_WRITES);
+                       MemoryUsage::CPU_WRITES);
 
     outputDataBuf.setData(&s_outputData);
 
@@ -235,9 +235,10 @@ void ProxyGround::collect(ICollector &collector,
 
         tileData._upscaleData = std::make_unique<VkwSubBuffer>(vkctx.allocate(
             sizeof(s_upscaleData), DescriptorType::UNIFORM_BUFFER,
-            MemoryType::CPU_WRITES)),
-        tileData._height = std::make_unique<VkwSubBuffer>(vkctx.allocate(
-            bufferSize, DescriptorType::STORAGE_BUFFER, MemoryType::CPU_READS));
+            MemoryUsage::CPU_WRITES)),
+        tileData._height = std::make_unique<VkwSubBuffer>(
+            vkctx.allocate(bufferSize, DescriptorType::STORAGE_BUFFER,
+                           MemoryUsage::CPU_READS));
 
         tileData._upscaleData->setData(&s_upscaleData);
 
@@ -252,7 +253,7 @@ void ProxyGround::collect(ICollector &collector,
         // Prealloc final texture buffer
         tileData._texture = std::make_unique<VkwSubBuffer>(
             vkctx.allocate(bufferSize * 4, DescriptorType::STORAGE_BUFFER,
-                           MemoryType::CPU_READS));
+                           MemoryUsage::CPU_READS));
 
         int i = 0;
 
@@ -268,10 +269,10 @@ void ProxyGround::collect(ICollector &collector,
             layerData._repartitionData =
                 std::make_unique<VkwSubBuffer>(vkctx.allocate(
                     sizeof(s_repartitionData), DescriptorType::UNIFORM_BUFFER,
-                    MemoryType::CPU_WRITES)),
+                    MemoryUsage::CPU_WRITES)),
             layerData._repartition = std::make_unique<VkwSubBuffer>(
                 vkctx.allocate(bufferSize, DescriptorType::STORAGE_BUFFER,
-                               MemoryType::CPU_READS));
+                               MemoryUsage::CPU_READS));
 
             layerData._repartitionData->setData(&s_repartitionData);
 
@@ -300,7 +301,7 @@ void ProxyGround::collect(ICollector &collector,
             layerData._textureData =
                 std::make_unique<VkwSubBuffer>(vkctx.allocate(
                     sizeof(s_textureData), DescriptorType::UNIFORM_BUFFER,
-                    MemoryType::CPU_WRITES));
+                    MemoryUsage::CPU_WRITES));
 
             layerData._textureData->setData(&s_textureData);
 

@@ -19,7 +19,9 @@ class VKWORLD_EXPORT VkwTextureGenerator {
 public:
     VkwTextureGenerator(int width, int height, std::string shaderName);
 
-    void addParameter(int id, DescriptorType type, MemoryType memtype,
+    ~VkwTextureGenerator();
+
+    void addParameter(int id, DescriptorType type, MemoryUsage memtype,
                       size_t size, void *data);
 
     Image generateTexture();

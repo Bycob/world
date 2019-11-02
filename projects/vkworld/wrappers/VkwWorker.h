@@ -71,8 +71,6 @@ public:
 
 private:
     std::vector<VkwGraphicsPipeline> _boundPipelines;
-
-    vk::RenderPass _renderPass;
 };
 } // namespace world
 

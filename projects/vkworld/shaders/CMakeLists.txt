@@ -3,7 +3,7 @@ message(STATUS "Build shaders with ${Vulkan_GLSL_VALIDATOR}")
 file(
 	GLOB
 	WORLD_SHADERS_SOURCES
-	./*.comp
+	"./*.comp" "./*.frag" "./*.vert"
 )
 
 file(
