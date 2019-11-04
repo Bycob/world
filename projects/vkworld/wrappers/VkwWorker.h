@@ -5,6 +5,7 @@
 
 #include <memory>
 
+#include "VkwSubBuffer.h"
 #include "VkwDescriptorSet.h"
 #include "VkwComputePipeline.h"
 #include "VkwGraphicsPipeline.h"
@@ -59,11 +60,15 @@ public:
     ~VkwGraphicsWorker() override;
 
     void beginRenderPass(vk::RenderPass renderPass, vk::Framebuffer framebuffer,
-                         int width, int height);
+                         u32 width, u32 height);
 
     void bindCommand(VkwGraphicsPipeline &pipeline, VkwDescriptorSet &dset);
 
-    void draw(int count);
+    void draw(u32 count);
+
+    // TODO keep ref of all resources so that we dont have to bother
+    void drawIndexed(VkwSubBuffer &indicesBuf, VkwSubBuffer &verticesBuf,
+                     u32 count);
 
     void endRenderPass();
 

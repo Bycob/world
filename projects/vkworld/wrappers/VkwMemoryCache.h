@@ -21,7 +21,7 @@ struct VKWORLD_EXPORT VkwMemoryCacheSegment : public IVkwMemoryAccess {
 
     u32 _totalSize;
     u32 _sizeAllocated;
-    u32 _alignment;
+    u32 _alignment = 1;
     /** Indicates if ... uh I don't know yet */
     bool _updated;
 

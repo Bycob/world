@@ -26,6 +26,7 @@ u32 VkwSubBuffer::getSize() const { return _internal->_size; }
 
 u32 VkwSubBuffer::getOffset() const { return _internal->_offset; }
 
+vk::Buffer VkwSubBuffer::handle() const { return _internal->_buffer; }
 
 void VkwSubBuffer::getData(void *data) { getData(data, _internal->_size); }
 

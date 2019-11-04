@@ -5,6 +5,8 @@
 
 #include <vulkan/vulkan.hpp>
 
+#include "VkwMemoryHelper.h"
+
 #include "Vulkan.h"
 
 namespace world {
@@ -15,6 +17,8 @@ public:
     vk::RenderPass _renderPass;
 
     u32 _width = 0, _height = 0;
+
+    bool _vertexBuffer = true;
 
 
     // Resources (destroyed with the pipeline)
@@ -74,9 +78,24 @@ public:
         }
 
         // Fixed stages
-        // TODO: Actually provide data if there is some
+        std::vector<vk::VertexInputBindingDescription> bindings;
+        std::vector<vk::VertexInputAttributeDescription> attributes;
+
+        if (_vertexBuffer) {
+            bindings.emplace_back(0, sizeof(VkwVertex),
+                                  vk::VertexInputRate::eVertex);
+
+            // position, normal, uv
+            attributes.emplace_back(0, 0, vk::Format::eR32G32B32Sfloat,
+                                    offsetof(VkwVertex, _position));
+            attributes.emplace_back(1, 0, vk::Format::eR32G32B32Sfloat,
+                                    offsetof(VkwVertex, _normal));
+            attributes.emplace_back(2, 0, vk::Format::eR32G32Sfloat,
+                                    offsetof(VkwVertex, _uv));
+        }
         vk::PipelineVertexInputStateCreateInfo vertInputStageInfo(
-            {}, 0, nullptr, 0, nullptr);
+            {}, bindings.size(), &bindings[0], attributes.size(),
+            &attributes[0]);
 
         // TODO: Allow user to chose PrimitiveTopology
         vk::PipelineInputAssemblyStateCreateInfo inputAssemblyStageInfo(
@@ -148,6 +167,10 @@ VkwGraphicsPipeline::VkwGraphicsPipeline(
         : _internal(std::make_shared<VkwGraphicsPipelinePrivate>()) {
 
     _internal->_descriptorSetLayout = descriptorSetLayout.getLayout();
+}
+
+void VkwGraphicsPipeline::enableVertexBuffer(bool enabled) {
+    _internal->_vertexBuffer = enabled;
 }
 
 void VkwGraphicsPipeline::setDimensions(u32 width, u32 height) {

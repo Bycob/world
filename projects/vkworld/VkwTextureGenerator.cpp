@@ -40,8 +40,14 @@ void VkwTextureGenerator::generateTextureAsync() {
     }
 
     VkwGraphicsPipeline pipeline(_layout);
-    // TODO parameters
-    pipeline.setBuiltinShader(VkwShaderType::VERTEX, "generic_texture.vert");
+
+    if (_mesh.empty()) {
+        pipeline.setBuiltinShader(VkwShaderType::VERTEX,
+                                  "generic_texture.vert");
+        pipeline.enableVertexBuffer(false);
+    } else {
+        pipeline.setBuiltinShader(VkwShaderType::VERTEX, "generic_2D.vert");
+    }
     pipeline.setBuiltinShader(VkwShaderType::FRAGMENT, _shaderName);
 
     // This is only one render pass
@@ -77,10 +83,41 @@ void VkwTextureGenerator::generateTextureAsync() {
     _worker->beginRenderPass(_renderPass, _framebuffer, _width, _height);
     // --- Bind descriptor set & pipeline
     _worker->bindCommand(pipeline, dset);
-    // Bind Vertex buffer
-    // Bind Indices buffer
-    // Draw Indexed
-    _worker->draw(6);
+
+    // --- Draw
+    if (_mesh.empty()) {
+        _worker->draw(6);
+    } else {
+        // TODO Staging buffers
+        // Setup Vertex buffer
+        std::vector<VkwVertex> vertices;
+
+        for (u32 i = 0; i < _mesh.getVerticesCount(); ++i) {
+            vertices.emplace_back(_mesh.getVertex(i));
+        }
+        _verticesBuf = ctx.allocate(vertices.size() * sizeof(VkwVertex),
+                                    DescriptorType::VERTEX_BUFFER,
+                                    MemoryUsage::CPU_WRITES);
+        _verticesBuf.setData(&vertices[0]);
+
+        // Setup Indices buffer
+        std::vector<u32> indices;
+
+        for (u32 i = 0; i < _mesh.getFaceCount(); ++i) {
+            const Face &face = _mesh.getFace(i);
+
+            for (u32 j = 0; j < face.vertexCount(); ++j) {
+                indices.push_back(face.getID(j));
+            }
+        }
+        _indicesBuf =
+            ctx.allocate(indices.size() * sizeof(u32),
+                         DescriptorType::INDEX_BUFFER, MemoryUsage::CPU_WRITES);
+        _indicesBuf.setData(&indices[0]);
+
+        // Draw Indexed
+        _worker->drawIndexed(_indicesBuf, _verticesBuf, indices.size());
+    }
     // End renderpass
     _worker->endRenderPass();
     _worker->endCommandRecording();

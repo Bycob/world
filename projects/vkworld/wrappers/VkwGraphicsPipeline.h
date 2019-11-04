@@ -28,6 +28,9 @@ class VKWORLD_EXPORT VkwGraphicsPipeline {
 public:
     VkwGraphicsPipeline(VkwDescriptorSetLayout &descriptorSetLayout);
 
+    /** Enable or disable vertex buffer. Vertex buffer is enabled by default. */
+    void enableVertexBuffer(bool enabled);
+
     void setDimensions(u32 width, u32 height);
 
     void setRenderPass(vk::RenderPass renderPass);

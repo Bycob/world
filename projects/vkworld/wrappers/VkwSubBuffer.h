@@ -26,6 +26,8 @@ public:
     u32 getSize() const;
     u32 getOffset() const;
 
+    vk::Buffer handle() const;
+
     /** Adds this buffer as binding to the given descriptorSet. */
     void registerTo(vk::DescriptorSet &descriptorSet,
                     vk::DescriptorType descriptorType, u32 id) override;

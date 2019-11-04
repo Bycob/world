@@ -105,10 +105,10 @@ void VkwGraphicsWorker::bindCommand(VkwGraphicsPipeline &pipeline,
 }
 
 void VkwGraphicsWorker::beginRenderPass(vk::RenderPass renderPass,
-                                        vk::Framebuffer framebuffer, int width,
-                                        int height) {
+                                        vk::Framebuffer framebuffer, u32 width,
+                                        u32 height) {
     vk::ClearValue clearValues[2];
-    clearValues[0].color = std::array<float, 4>{0.0f, 0.0f, 1.0f, 1.0f};
+    clearValues[0].color = std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f};
     // clearValues[1].depthStencil = vk::ClearDepthStencilValue{1.0f, 0};
 
     vk::Viewport viewport(0, 0, static_cast<float>(width),
@@ -123,7 +123,16 @@ void VkwGraphicsWorker::beginRenderPass(vk::RenderPass renderPass,
     _commandBuffer.setScissor(0, 1, &renderArea);
 }
 
-void VkwGraphicsWorker::draw(int count) { _commandBuffer.draw(count, 1, 0, 0); }
+void VkwGraphicsWorker::draw(u32 count) { _commandBuffer.draw(count, 1, 0, 0); }
+
+void VkwGraphicsWorker::drawIndexed(VkwSubBuffer &indicesBuf,
+                                    VkwSubBuffer &verticesBuf, u32 count) {
+    _commandBuffer.bindIndexBuffer(indicesBuf.handle(), indicesBuf.getOffset(),
+                                   vk::IndexType::eUint32);
+    _commandBuffer.bindVertexBuffers(0, verticesBuf.handle(),
+                                     verticesBuf.getOffset());
+    _commandBuffer.drawIndexed(count, 1, 0, 0, 0);
+}
 
 void VkwGraphicsWorker::endRenderPass() { _commandBuffer.endRenderPass(); }
 

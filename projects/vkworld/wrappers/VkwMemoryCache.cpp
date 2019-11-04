@@ -30,6 +30,12 @@ VkwMemoryCacheSegment::VkwMemoryCacheSegment(u32 size,
         bufferInfo.usage = vk::BufferUsageFlagBits::eUniformBuffer;
         _alignment = properties.limits.minUniformBufferOffsetAlignment;
         break;
+    case DescriptorType::VERTEX_BUFFER:
+        bufferInfo.usage = vk::BufferUsageFlagBits::eVertexBuffer;
+        break;
+    case DescriptorType::INDEX_BUFFER:
+        bufferInfo.usage = vk::BufferUsageFlagBits::eIndexBuffer;
+        break;
     }
 
     // TODO handle concurrent shared buffer

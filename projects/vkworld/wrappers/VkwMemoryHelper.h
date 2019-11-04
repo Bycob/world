@@ -10,6 +10,16 @@
 
 namespace world {
 
+struct VKWORLD_EXPORT VkwVertex {
+    vec3f _position;
+    vec3f _normal;
+    vec3f _uv;
+
+    VkwVertex(Vertex vert)
+            : _position(vert.getPosition()), _normal(vert.getNormal()),
+              _uv(vert.getTexture()) {}
+};
+
 class VKWORLD_EXPORT VkwMemoryHelper {
 public:
     /** Copy GPU buffer into an image. The GPU buffer must contain floating

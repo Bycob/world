@@ -13,6 +13,7 @@
 #include <vkworld/ProxyGround.h>
 #include <vkworld/MultilayerGroundTexture.h>
 #include <vkworld/VkwTextureGenerator.h>
+#include <vkworld/VkwGrass.h>
 
 using namespace world;
 
@@ -20,12 +21,14 @@ void testVulkanVersion(int argc, char **argv);
 void testProxyGround(int argc, char **argv);
 void testMultilayerTerrainTexture(int argc, char **argv);
 void testTextureGenerator();
+void testVkwGrass();
 
 int main(int argc, char **argv) {
     // testVulkanVersion(argc, argv);
     // testProxyGround(argc, argv);
     // testMultilayerTerrainTexture(argc, argv);
-    testTextureGenerator();
+    // testTextureGenerator();
+    testVkwGrass();
 }
 
 void testVulkanVersion(int argc, char **argv) {
@@ -176,7 +179,7 @@ void testTextureGenerator() {
     // Texture size
     struct {
         float offsetX = 0, offsetY = 0;
-        float sizeX = 0.1, sizeY = 0.1;
+        float sizeX = 0.5, sizeY = 0.5;
     } textureStruct;
     generator.addParameter(0, DescriptorType::UNIFORM_BUFFER,
                            MemoryUsage::CPU_WRITES, sizeof(textureStruct),
@@ -193,4 +196,14 @@ void testTextureGenerator() {
     MemoryUsage::CPU_WRITES, random.size() * sizeof(u32), &random[0]); */
 
     generator.generateTexture().write("assets/vulkan/test_generator.png");
+}
+
+void testVkwGrass() {
+    VkwGrass grass;
+
+    Collector collector(CollectorPresets::SCENE);
+    grass.collectAll(collector, 10);
+
+    Image img = (*collector.getStorageChannel<Image>().begin())._value;
+    img.write("assets/vulkan/vkwgrass.png");
 }

@@ -80,6 +80,9 @@ public:
 
     u32 getFaceCount() const;
 
+    /** @returns getFaceCount() == 0 */
+    bool empty() const { return getFaceCount() == 0; }
+
     Face &getFace(u32 id);
 
     const Face &getFace(u32 id) const;

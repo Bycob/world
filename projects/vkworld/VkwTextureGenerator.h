@@ -7,6 +7,7 @@
 #include <map>
 
 #include <world/assets/Image.h>
+#include <world/assets/Mesh.h>
 
 #include "wrappers/VkwFramebuffer.h"
 #include "wrappers/VkwGraphicsPipeline.h"
@@ -32,16 +33,22 @@ public:
      * image. */
     Image getGeneratedImage();
 
+    Mesh &mesh() { return _mesh; }
+
 private:
     int _width, _height;
-    VkwImage _texture;
     std::string _shaderName;
-    std::unique_ptr<VkwGraphicsWorker> _worker;
+    Mesh _mesh;
 
     VkwDescriptorSetLayout _layout;
+    std::map<int, VkwSubBuffer> _buffers;
+
+    std::unique_ptr<VkwGraphicsWorker> _worker;
+    VkwSubBuffer _indicesBuf;
+    VkwSubBuffer _verticesBuf;
+    VkwImage _texture;
     vk::RenderPass _renderPass;
     vk::Framebuffer _framebuffer;
-    std::map<int, VkwSubBuffer> _buffers;
 };
 
 } // namespace world
