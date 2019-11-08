@@ -238,7 +238,7 @@ void VulkanContext::createComputeResources() {
     descriptorPoolSizes[1].type = vk::DescriptorType::eUniformBuffer;
     descriptorPoolSizes[1].descriptorCount = 2000;
 
-    descriptorPoolSizes[2].type = vk::DescriptorType::eSampledImage;
+    descriptorPoolSizes[2].type = vk::DescriptorType::eCombinedImageSampler;
     descriptorPoolSizes[2].descriptorCount = 2000;
 
     vk::DescriptorPoolCreateInfo descriptorPoolInfo = {};
@@ -294,6 +294,8 @@ vk::DescriptorType VulkanContext::getDescriptorType(DescriptorType usage) {
         return vk::DescriptorType::eStorageBuffer;
     case DescriptorType::UNIFORM_BUFFER:
         return vk::DescriptorType::eUniformBuffer;
+    case DescriptorType::IMAGE:
+        return vk::DescriptorType::eCombinedImageSampler;
     default:
         throw std::invalid_argument("unkown descriptor usage");
     }

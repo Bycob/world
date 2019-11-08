@@ -2,6 +2,8 @@
 #extension GL_ARB_separate_shader_objects : enable
 
 layout(location = 0) in vec2 fragCoord;
+layout(location = 1) in vec3 fragNorm;
+layout(location = 2) in vec2 fragUV;
 
 layout(location = 0) out vec4 fragColor;
 
@@ -66,5 +68,5 @@ void mainOsc(in vec2 uv, out vec4 fragColor) {
 }
 
 void main() {
-    mainOsc(fragCoord, fragColor);
+    mainOsc(fragUV, fragColor);
 }

@@ -3,6 +3,7 @@
 #include <world/math/Bezier.h>
 
 #include "VkwTextureGenerator.h"
+#include "wrappers/VkwRandomTexture.h"
 
 namespace world {
 
@@ -31,10 +32,14 @@ void VkwGrass::collectSelf(ICollector &collector,
 }
 
 void VkwGrass::setup() {
-    u32 size = 256;
+    u32 size = 512;
     _internal->_generator =
         std::make_unique<VkwTextureGenerator>(size, size, "grass.frag");
     auto &generator = *_internal->_generator;
+
+    VkwRandomTexture randTexture;
+    generator.addImageParameter(0, randTexture.get());
+
     Mesh &mesh = generator.mesh();
 
     // Setup mesh
@@ -54,9 +59,9 @@ void VkwGrass::setup() {
 
         const u32 first = mesh.getVerticesCount();
         const u32 line = 3;
-        mesh.newVertex(base - deriv * dist);
-        mesh.newVertex(base);
-        mesh.newVertex(base + deriv * dist);
+        mesh.newVertex(base - deriv * dist, {0, 0, 1}, {-1, t});
+        mesh.newVertex(base, {0, 0, 1}, {0, t});
+        mesh.newVertex(base + deriv * dist, {0, 0, 1}, {1, t});
 
         if (i != subdiv) {
             mesh.newFace(first, first + 1, first + line + 1);

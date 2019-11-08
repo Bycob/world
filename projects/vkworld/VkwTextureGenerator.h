@@ -25,6 +25,8 @@ public:
     void addParameter(int id, DescriptorType type, MemoryUsage memtype,
                       size_t size, void *data);
 
+    void addImageParameter(int id, const VkwImage &image);
+
     Image generateTexture();
 
     void generateTextureAsync();
@@ -42,6 +44,7 @@ private:
 
     VkwDescriptorSetLayout _layout;
     std::map<int, VkwSubBuffer> _buffers;
+    std::map<int, VkwImage> _images;
 
     std::unique_ptr<VkwGraphicsWorker> _worker;
     VkwSubBuffer _indicesBuf;

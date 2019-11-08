@@ -13,7 +13,7 @@ namespace world {
 struct VKWORLD_EXPORT VkwVertex {
     vec3f _position;
     vec3f _normal;
-    vec3f _uv;
+    vec2f _uv;
 
     VkwVertex(Vertex vert)
             : _position(vert.getPosition()), _normal(vert.getNormal()),

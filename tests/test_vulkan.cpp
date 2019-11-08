@@ -8,6 +8,7 @@
 #include <world/terrain.h>
 
 #include <vkworld/wrappers/Vulkan.h>
+#include <vkworld/wrappers/VkwRandomTexture.h>
 #include <vkworld/ProgramVk.h>
 #include <vkworld/BufferVk.h>
 #include <vkworld/ProxyGround.h>
@@ -173,9 +174,13 @@ void testMultilayerTerrainTexture(int argc, char **argv) {
 }
 
 void testTextureGenerator() {
-    const u32 size = 1024;
-    VkwTextureGenerator generator(size, size, "texture-grass.frag");
+#define GEN_SHADER_NAME "grass.frag"
+#define GEN_RAND_TEX
 
+    const u32 size = 1024;
+    VkwTextureGenerator generator(size, size, GEN_SHADER_NAME);
+
+#ifdef GEN_GRASS
     // Texture size
     struct {
         float offsetX = 0, offsetY = 0;
@@ -184,16 +189,26 @@ void testTextureGenerator() {
     generator.addParameter(0, DescriptorType::UNIFORM_BUFFER,
                            MemoryUsage::CPU_WRITES, sizeof(textureStruct),
                            &textureStruct);
+#endif
 
+#ifdef GEN_PERLIN
     // Random
-    /*std::mt19937 _rng(42);
+    std::mt19937 _rng(42);
     std::vector<u32> random(256);
     std::iota(random.begin(), random.end(), 0);
     std::shuffle(random.begin(), random.end(), _rng);
     random.insert(random.end(), random.begin(), random.end());
 
     generator.addParameter(256, DescriptorType::STORAGE_BUFFER,
-    MemoryUsage::CPU_WRITES, random.size() * sizeof(u32), &random[0]); */
+                           MemoryUsage::CPU_WRITES, random.size() * sizeof(u32),
+                           &random[0]);
+#endif
+
+#ifdef GEN_RAND_TEX
+    // Random texture
+    VkwRandomTexture randomTex;
+    generator.addImageParameter(0, randomTex.get());
+#endif
 
     generator.generateTexture().write("assets/vulkan/test_generator.png");
 }

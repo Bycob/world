@@ -7,7 +7,8 @@ namespace world {
 VkwTextureGenerator::VkwTextureGenerator(int width, int height,
                                          std::string shaderName)
         : _width(width), _height(height),
-          _texture(VkwImageUsage::OFFSCREEN_RENDER, width, height),
+          _texture(VkwImageUsage::OFFSCREEN_RENDER,
+                   vk::Format::eR32G32B32A32Sfloat, width, height),
           _shaderName(std::move(shaderName)) {
     _worker = std::make_unique<VkwGraphicsWorker>();
 }
@@ -22,10 +23,16 @@ void VkwTextureGenerator::addParameter(int id, DescriptorType type,
                                        MemoryUsage memtype, size_t size,
                                        void *data) {
     _layout.addBinding(type, id);
+
     auto &ctx = Vulkan::context();
     VkwSubBuffer buffer = ctx.allocate(size, type, memtype);
     buffer.setData(data);
     _buffers[id] = buffer;
+}
+
+void VkwTextureGenerator::addImageParameter(int id, const VkwImage &image) {
+    _layout.addBinding(DescriptorType::IMAGE, id);
+    _images[id] = image;
 }
 
 Image VkwTextureGenerator::generateTexture() {
@@ -36,6 +43,10 @@ Image VkwTextureGenerator::generateTexture() {
 void VkwTextureGenerator::generateTextureAsync() {
     VkwDescriptorSet dset(_layout);
     for (auto &entry : _buffers) {
+        dset.addDescriptor(entry.first, entry.second);
+    }
+
+    for (auto &entry : _images) {
         dset.addDescriptor(entry.first, entry.second);
     }
 

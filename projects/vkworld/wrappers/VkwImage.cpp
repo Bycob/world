@@ -6,11 +6,10 @@
 
 namespace world {
 
-VkwImagePrivate::VkwImagePrivate(VkwImageUsage imgUse, int width, int height)
-        : _width(width), _height(height) {
+VkwImagePrivate::VkwImagePrivate(VkwImageUsage imgUse, vk::Format format,
+                                 int width, int height)
+        : _width(width), _height(height), _imageFormat(format) {
     auto &ctx = Vulkan::context();
-
-    _imageFormat = vk::Format::eR32G32B32A32Sfloat;
 
     // Create the image
     vk::ImageUsageFlags imgUsageBits;
@@ -30,6 +29,7 @@ VkwImagePrivate::VkwImagePrivate(VkwImageUsage imgUse, int width, int height)
         {}, vk::ImageType::e2D, _imageFormat,
         {static_cast<u32>(_width), static_cast<u32>(_height), 1}, 1, 1,
         vk::SampleCountFlagBits::e1, vk::ImageTiling::eLinear, imgUsageBits);
+    imageInfo.initialLayout = vk::ImageLayout::ePreinitialized;
     _image = ctx._device.createImage(imageInfo);
 
     // Allocate memory for the image
@@ -55,10 +55,10 @@ VkwImagePrivate::VkwImagePrivate(VkwImageUsage imgUse, int width, int height)
 
     vk::SamplerCreateInfo samplerInfo(
         {}, vk::Filter::eLinear, vk::Filter::eLinear,
-        vk::SamplerMipmapMode::eLinear, vk::SamplerAddressMode::eClampToEdge,
-        vk::SamplerAddressMode::eClampToEdge,
-        vk::SamplerAddressMode::eClampToEdge, 0.0f, VK_FALSE, 1.0f, VK_FALSE,
-        vk::CompareOp::eAlways, 0.0f, 1.0f, vk::BorderColor::eFloatOpaqueWhite);
+        vk::SamplerMipmapMode::eLinear, vk::SamplerAddressMode::eRepeat,
+        vk::SamplerAddressMode::eRepeat, vk::SamplerAddressMode::eClampToEdge,
+        0.0f, VK_FALSE, 1.0f, VK_FALSE, vk::CompareOp::eAlways, 0.0f, 1.0f,
+        vk::BorderColor::eFloatOpaqueWhite);
     _sampler = ctx._device.createSampler(samplerInfo);
 }
 
@@ -80,14 +80,15 @@ int VkwImage::getMemoryType(VkwImageUsage imgUse, u32 size) {
     return ctx.getMemoryType(memUse, size);
 }
 
-VkwImage::VkwImage(VkwImageUsage imgUse, int width, int height)
-        : _internal(std::make_shared<VkwImagePrivate>(imgUse, width, height)) {}
+VkwImage::VkwImage(VkwImageUsage imgUse, vk::Format format, int width,
+                   int height)
+        : _internal(std::make_shared<VkwImagePrivate>(imgUse, format, width,
+                                                      height)) {}
 
 void VkwImage::registerTo(vk::DescriptorSet &descriptorSet,
                           vk::DescriptorType descriptorType, u32 id) {
-    vk::DescriptorImageInfo descriptorImageInfo(_internal->_sampler,
-                                                _internal->_imageView,
-                                                vk::ImageLayout::eUndefined);
+    vk::DescriptorImageInfo descriptorImageInfo(
+        _internal->_sampler, _internal->_imageView, vk::ImageLayout::eGeneral);
     vk::WriteDescriptorSet writeDescriptorSet(
         descriptorSet, id, 0, 1, descriptorType, &descriptorImageInfo);
 

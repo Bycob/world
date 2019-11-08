@@ -6,6 +6,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include <world/core/WorldTypes.h>
+#include <world/assets/Image.h>
 
 #include "vkworld/wrappers/IVkwBindable.h"
 #include "vkworld/wrappers/IVkwMemoryAccess.h"
@@ -29,7 +30,8 @@ public:
     int _width, _height;
     vk::Format _imageFormat;
 
-    VkwImagePrivate(VkwImageUsage usage, int width, int height);
+    VkwImagePrivate(VkwImageUsage usage, vk::Format format, int width,
+                    int height);
     ~VkwImagePrivate();
 };
 
@@ -38,7 +40,8 @@ public:
     static int getMemoryType(VkwImageUsage imgUse, u32 size);
 
 
-    VkwImage(VkwImageUsage imgUse = VkwImageUsage::TEXTURE, int width = 1,
+    VkwImage(VkwImageUsage imgUse = VkwImageUsage::TEXTURE,
+             vk::Format format = vk::Format::eR32G32B32A32Sfloat, int width = 1,
              int height = 1);
 
     /** Adds this buffer as binding to the given descriptorSet. */
