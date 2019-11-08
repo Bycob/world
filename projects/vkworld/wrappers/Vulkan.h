@@ -63,6 +63,11 @@ public:
 
     u32 getMemoryType(MemoryUsage memUse, u32 requiredSize);
 
+    vk::SampleCountFlagBits getMaxUsableSampleCount(
+        vk::SampleCountFlagBits maxBits = vk::SampleCountFlagBits::e64) const;
+
+    vk::SampleCountFlagBits getDefaultMSAASample() { return _msaaSample; }
+
     std::vector<char> readFile(const std::string &filename);
 
 
@@ -80,6 +85,7 @@ private:
 
     typedef std::pair<DescriptorType, MemoryUsage> memid;
     std::map<memid, std::unique_ptr<VkwMemoryCache>> _memory;
+    vk::SampleCountFlagBits _msaaSample;
 
 
     // INITIALIZATION

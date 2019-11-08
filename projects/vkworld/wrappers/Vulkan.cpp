@@ -185,8 +185,11 @@ void VulkanContext::pickPhysicalDevice() {
         // best
 
         _physicalDevice = device;
+        _msaaSample = getMaxUsableSampleCount(vk::SampleCountFlagBits::e8);
         std::cout << "picked device "
                   << _physicalDevice.getProperties().deviceName << std::endl;
+        std::cout << "max sample count " << static_cast<u32>(_msaaSample)
+                  << std::endl;
         break;
     }
 }
@@ -357,6 +360,42 @@ u32 VulkanContext::getMemoryType(MemoryUsage memUse, u32 requiredSize) {
         return findMemoryType(requiredSize, requiredProperties,
                               vk::MemoryPropertyFlags{});
     }
+}
+
+vk::SampleCountFlagBits VulkanContext::getMaxUsableSampleCount(
+    vk::SampleCountFlagBits maxBits) const {
+
+    vk::PhysicalDeviceProperties properties = _physicalDevice.getProperties();
+    const vk::SampleCountFlags &flags =
+        properties.limits.framebufferColorSampleCounts;
+    // TODO take depth max sample count into account
+
+    if (vk::SampleCountFlagBits::e64 <= maxBits &&
+        flags & vk::SampleCountFlagBits::e64) {
+        return vk::SampleCountFlagBits::e64;
+    }
+    if (vk::SampleCountFlagBits::e32 <= maxBits &&
+        flags & vk::SampleCountFlagBits::e32) {
+        return vk::SampleCountFlagBits::e32;
+    }
+    if (vk::SampleCountFlagBits::e16 <= maxBits &&
+        flags & vk::SampleCountFlagBits::e16) {
+        return vk::SampleCountFlagBits::e16;
+    }
+    if (vk::SampleCountFlagBits::e8 <= maxBits &&
+        flags & vk::SampleCountFlagBits::e8) {
+        return vk::SampleCountFlagBits::e8;
+    }
+    if (vk::SampleCountFlagBits::e4 <= maxBits &&
+        flags & vk::SampleCountFlagBits::e4) {
+        return vk::SampleCountFlagBits::e4;
+    }
+    if (vk::SampleCountFlagBits::e2 <= maxBits &&
+        flags & vk::SampleCountFlagBits::e2) {
+        return vk::SampleCountFlagBits::e2;
+    }
+
+    return vk::SampleCountFlagBits::e1;
 }
 
 VkwSubBuffer VulkanContext::allocate(u32 size, DescriptorType usage,
