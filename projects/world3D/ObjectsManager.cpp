@@ -5,6 +5,7 @@
 
 #include "WorldIrrlicht.h"
 #include "Application.h"
+#include "MaterialCallback.h"
 
 using namespace irr;
 using namespace scene;
@@ -38,39 +39,18 @@ ObjectNodeHandler::~ObjectNodeHandler() {
     }
 }
 
-void ObjectNodeHandler::setTexture(int id, const std::string &path,
+bool ObjectNodeHandler::setTexture(int id, const std::string &path,
                                    Collector &collector) {
-    auto &texChan = collector.getStorageChannel<Image>();
-
-    if (!texChan.has(key(path))) {
-        return;
-    }
-
-    auto driver = _objManager._driver;
-
-    if (!driver->findTexture(path.c_str())) {
-        const Image &image = texChan.get(key(path));
-
-        ImageStream stream(image);
-        int dataSize = stream.remaining();
-        char *data = new char[dataSize];
-        stream.read(data, dataSize);
-
-        IImage *irrimg = driver->createImageFromData(
-            image.type() == ImageType::RGBA ? ECF_A8R8G8B8
-                                            : ECF_R8G8B8, // TODO support
-                                                          // greyscale
-            {static_cast<irr::u32>(image.width()),
-             static_cast<irr::u32>(image.height())},
-            data, true);
-
-        driver->addTexture(path.c_str(), irrimg);
-    }
-
     SMaterial &irrmat = _meshNode->getMaterial(0);
-    irrmat.setTexture(id, driver->getTexture(path.c_str()));
-    _objManager.addTextureUser(path);
-    _usedTextures.emplace_back(path);
+    auto texID = _objManager.getOrLoadTexture(path, collector);
+
+    if (texID != nullptr) {
+        irrmat.setTexture(id, texID);
+        _objManager.addTextureUser(path);
+        _usedTextures.emplace_back(path);
+        return true;
+    }
+    return false;
 }
 
 void ObjectNodeHandler::setMaterial(const Material &mat, Collector &collector) {
@@ -80,10 +60,56 @@ void ObjectNodeHandler::setMaterial(const Material &mat, Collector &collector) {
     irrmat.SpecularColor = toIrrColor(mat.getKs());
     irrmat.DiffuseColor = toIrrColor(mat.getKd());
 
-    irrmat.TextureLayer[0].BilinearFilter = false;
-    irrmat.TextureLayer[0].TrilinearFilter = false;
+    irrmat.TextureLayer[0].BilinearFilter = true;
+    irrmat.TextureLayer[0].TrilinearFilter = true;
 
-    setTexture(0, mat.getMapKd(), collector);
+    // Textures
+    int texstart = 0;
+    if (setTexture(0, mat.getMapKd(), collector))
+        texstart = 1;
+
+    // Shader
+    std::string shaderName = mat.getShader();
+    auto it = _objManager._loadedShaders.find(shaderName);
+    if (it != _objManager._loadedShaders.end()) {
+        irrmat.MaterialType = it->second;
+    }
+
+    if (!shaderName.empty() && collector.hasStorageChannel<Shader>()) {
+        auto &shaderChan = collector.getStorageChannel<Shader>();
+
+        if (shaderChan.has(key(shaderName))) {
+            video::IGPUProgrammingServices *gpu =
+                _objManager._driver->getGPUProgrammingServices();
+            auto *mc = new MaterialCallback(mat);
+
+            for (auto &texture : mc->getTextures()) {
+                if (setTexture(texstart, texture, collector)) {
+                    mc->setTextureID(texture, texstart);
+                    texstart++;
+                } else {
+                    // callback requires an id for every texture
+                    mc->setTextureID(texture, 0);
+                }
+            }
+
+            const Shader &shader = shaderChan.get(shaderName);
+            s32 shaderMat = gpu->addHighLevelShaderMaterialFromFiles(
+                shader.getVertexPath().c_str(), "main", video::EVST_VS_1_1,
+                shader.getFragmentPath().c_str(), "main", video::EPST_PS_1_1,
+                mc, video::EMT_SOLID, 0, video::EGSL_DEFAULT);
+
+            irrmat.MaterialType =
+                static_cast<video::E_MATERIAL_TYPE>(shaderMat);
+            _objManager._loadedShaders[shaderName] = irrmat.MaterialType;
+
+            mc->drop();
+        }
+    }
+
+    for (u32 i = 1; i < _meshNode->getMaterialCount(); ++i) {
+        _meshNode->getMaterial(i) = irrmat;
+    }
 }
 
 void ObjectNodeHandler::updateObject3D(const SceneNode &object,
@@ -107,7 +133,7 @@ void ObjectNodeHandler::updateObject3D(const SceneNode &object,
     // std::cout << "graph : " << object.getPosition() << std::endl;
     _meshNode->setScale(toIrrlicht(object.getScale()));
 
-    // Materiau
+    // Material
     _meshNode->setMaterialFlag(EMF_LIGHTING, true);
     _meshNode->setMaterialFlag(EMF_FOG_ENABLE, true);
 
@@ -119,6 +145,9 @@ void ObjectNodeHandler::updateObject3D(const SceneNode &object,
     material.SpecularColor.set(255, 255, 255, 255);
     material.DiffuseColor.set(255, 200, 178, 126); // 100, 50, 0);
 
+    for (u32 i = 1; i < _meshNode->getMaterialCount(); ++i) {
+        _meshNode->getMaterial(i) = material;
+    }
     irrMesh->drop();
 
     //_objManager._sceneManager->getActiveCamera()->setTarget(_meshNode->getPosition());
@@ -192,6 +221,36 @@ void ObjectsManager::update(Collector &collector) {
     }
 }
 
+ITexture *ObjectsManager::getOrLoadTexture(const std::string &path,
+                                           Collector &collector) {
+    auto &texChan = collector.getStorageChannel<Image>();
+
+    if (!texChan.has(key(path))) {
+        return nullptr;
+    }
+
+    if (!_driver->findTexture(path.c_str())) {
+        const Image &image = texChan.get(key(path));
+
+        ImageStream stream(image);
+        int dataSize = stream.remaining();
+        char *data = new char[dataSize];
+        stream.read(data, dataSize);
+
+        IImage *irrimg = _driver->createImageFromData(
+            image.type() == ImageType::RGBA ? ECF_A8R8G8B8
+                                            : ECF_R8G8B8, // TODO support
+            // greyscale
+            {static_cast<irr::u32>(image.width()),
+             static_cast<irr::u32>(image.height())},
+            data, true);
+
+        _driver->addTexture(path.c_str(), irrimg);
+    }
+
+    return _driver->getTexture(path.c_str());
+}
+
 void ObjectsManager::addTextureUser(const std::string &texId) {
     auto it = _loadedTextures.find(texId);
 
@@ -218,8 +277,8 @@ void ObjectsManager::removeTextureUser(const std::string &texId) {
 
 SMesh *ObjectsManager::convertToIrrlichtMesh(const Mesh &mesh,
                                              IVideoDriver *driver) {
-    SMesh *irrMesh = new SMesh();
-    irr::s32 maxPrimitives = driver->getMaximalPrimitiveCount();
+    auto *irrMesh = new SMesh();
+    irr::s64 maxPrimitives = min(driver->getMaximalPrimitiveCount(), 0xFFFF);
     int primitiveCount = 0;
 
     int bufID = -1;
@@ -235,6 +294,8 @@ SMesh *ObjectsManager::convertToIrrlichtMesh(const Mesh &mesh,
         if (bufID == -1 || primitiveCount + 3 >= maxPrimitives) {
             // last calculations on current buffer
             if (bufID != -1) {
+                buffer->Vertices.set_used(primitiveCount);
+                buffer->Indices.set_used(primitiveCount);
                 buffer->recalculateBoundingBox();
             }
 
@@ -249,8 +310,9 @@ SMesh *ObjectsManager::convertToIrrlichtMesh(const Mesh &mesh,
                 buffer->drop();
             }
 
-            buffer->Vertices.set_used(mesh.getFaceCount() * 3);
-            buffer->Indices.set_used(mesh.getFaceCount() * 3);
+            buffer->Vertices.set_used(maxPrimitives);
+            buffer->Indices.set_used(maxPrimitives);
+            primitiveCount = 0;
         }
 
         // Add face data
@@ -273,6 +335,8 @@ SMesh *ObjectsManager::convertToIrrlichtMesh(const Mesh &mesh,
     }
 
     if (buffer != nullptr) {
+        buffer->Vertices.set_used(primitiveCount);
+        buffer->Indices.set_used(primitiveCount);
         buffer->recalculateBoundingBox();
     }
 

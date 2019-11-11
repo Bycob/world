@@ -4,6 +4,7 @@
 #include "world/core/WorldConfig.h"
 
 #include <functional>
+#include <list>
 
 #include "WorldTypes.h"
 #include "IResolutionModel.h"
@@ -74,6 +75,11 @@ public:
 
     // GLOBAL -> TILE
 
+    /** Return the lowest lod that satisfies the given resolution constraint,
+     * i.e. tiles with should have a better resolution than the given one.
+     *
+     * If the requested resolution is too high, max_lod is returned, and
+     * the resolution constraint may not be satisfied. */
     int getLod(double resolution) const;
 
     TileCoordinates getTileCoordinates(const vec3d &globalCoordinates,
@@ -143,17 +149,18 @@ private:
     TileCoordinates _max;
     bool _endReached = false;
 
+    std::list<TileCoordinates> _parents;
 
     // Increments current tile coordinates without taking the resolution model
     // into account.
     void step();
 
-    // Once a lod was fully iterated over, this method can be used to start
-    // iterating the next one.
-    void startLod(int lod);
+    // Once lowest lod levels have been fully explored, we start to look into
+    // the tiles tagged as "parents"
+    void startTile(TileCoordinates coordinates);
 
-    // Indicates if the tile at given coordinates needs to be displayed. Wether
-    // a tile needs or not to be displayed is determined by the tile system.
+    // If true, the tile will be displayed, if not, the iterator will explore
+    // its children.
     bool isTileRequired(TileCoordinates coordinates);
 };
 

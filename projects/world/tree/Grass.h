@@ -5,26 +5,42 @@
 
 #include <random>
 #include <vector>
+#include <world/core/InstanceDistribution.h>
 
 #include "world/core/WorldTypes.h"
 #include "world/core/WorldNode.h"
 #include "world/math/Vector.h"
 #include "world/assets/Mesh.h"
 #include "world/assets/Image.h"
+#include "world/core/IInstanceGenerator.h"
 
 namespace world {
 
-class WORLDAPI_EXPORT Grass : public WorldNode {
+class WORLDAPI_EXPORT Grass : public WorldNode, public IInstanceGenerator {
 public:
     Grass();
 
-    void addBush(const vec3d &root);
+    void setGrassCount(u32 grassCount) { _grassCount = grassCount; }
+
+    void setBend(double bend) { _bend = bend; }
+
+    void setHeight(double height) { _height = height; }
+
+    void setWidth(double width) { _width = width; }
+
+    void addBush(const vec3d &root = {});
+
+    void removeAllBushes();
 
     std::vector<SceneNode> collectTemplates(ICollector &collector,
                                             const ExplorationContext &ctx);
 
     void collect(ICollector &collector, const IResolutionModel &resolutionModel,
                  const ExplorationContext &ctx) override;
+
+    /** Creates a new specie of grass.
+     * Returns HabitatFeatures of this specie. */
+    HabitatFeatures randomize();
 
 private:
     std::mt19937_64 _rng;

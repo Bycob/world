@@ -53,12 +53,8 @@ void ReliefMapModifier::processTerrain(Terrain &terrain) {
             double mapX = mapOx + ((double)x / (size - 1)) * ratio;
             double mapY = mapOy + ((double)y / (size - 1)) * ratio;
 
-            double offset = heightMap.getInterpolatedHeight(
-                                mapX, mapY, Interpolation::COSINE) *
-                            offsetCoef;
-            double diff = diffMap.getInterpolatedHeight(mapX, mapY,
-                                                        Interpolation::LINEAR) *
-                          diffCoef;
+            double offset = heightMap.getCubicHeight(mapX, mapY) * offsetCoef;
+            double diff = diffMap.getCubicHeight(mapX, mapY) * diffCoef;
 
             bufferOffset(x, y) = offset;
             bufferDiff(x, y) = diff;

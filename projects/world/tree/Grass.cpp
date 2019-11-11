@@ -7,7 +7,8 @@
 
 namespace world {
 
-Grass::Grass() : _rng(time(NULL)), _texture(32, 256, ImageType::RGB) {
+Grass::Grass()
+        : _rng(std::random_device{}()), _texture(32, 256, ImageType::RGB) {
     generateTexture();
 }
 
@@ -30,6 +31,11 @@ void Grass::addBush(const vec3d &root) {
 
         addBlade(root, points.back(), mesh);
     }
+}
+
+void Grass::removeAllBushes() {
+    _points.clear();
+    _meshes.clear();
 }
 
 std::vector<SceneNode> Grass::collectTemplates(ICollector &collector,
@@ -120,6 +126,39 @@ void Grass::generateTexture() {
             _texture.rgb(x, y).setf(0.4, 0.8, 0.2);
         }
     }
+}
+
+HabitatFeatures Grass::randomize() {
+    // Generate characteristics first, then deduce habitat features from it
+    std::geometric_distribution<int> count(0.045); // so that (1 - p) ^ 100 <
+                                                   // 0.99
+    _grassCount = count(_rng);
+    _dispersion = randScale(_rng, 0.1, 1.5);
+    _height = randScale(_rng, 0.1, 1.3);
+    _width = randScale(_rng, 0.1 * _height, 1.5);
+    auto bend = exponentialDistribFromMedian(_height / 2.0);
+    _bend = bend(_rng);
+
+    double surface = _width * _bend + 0.04;
+
+    HabitatFeatures features{};
+    features._sea = false;
+    features._slope = {0, 70.0 / 180.0 * M_PI};
+    std::uniform_real_distribution<double> altMax(200, 3000 - surface * 2000);
+    features._altitude.y = altMax(_rng);
+    std::uniform_real_distribution<double> altMin(
+        0, max(0, features._altitude.y - 300));
+    features._altitude.x = altMin(_rng);
+    features._density = 0.1 / (surface * _grassCount);
+
+    // Add bunch of variations
+    removeAllBushes();
+
+    for (int i = 0; i < 10; ++i) {
+        addBush();
+    }
+
+    return features;
 }
 
 } // namespace world

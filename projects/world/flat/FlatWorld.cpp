@@ -1,4 +1,3 @@
-#include <world/core/InstancePool.h>
 #include "FlatWorld.h"
 
 #include "world/core/LODGridChunkSystem.h"
@@ -9,6 +8,8 @@
 #include "world/tree/SimpleTreeDecorator.h"
 #include "world/nature/Rocks.h"
 #include "world/core/Profiler.h"
+#include "world/core/InstancePool.h"
+#include "world/core/SeedDistribution.h"
 
 namespace world {
 
@@ -28,19 +29,18 @@ FlatWorld *FlatWorld::createDemoFlatWorld() {
     auto &chunkSystem = world->addPrimaryNode<LODGridChunkSystem>({0, 0, 0});
     chunkSystem.addDecorator<ForestLayer>(world);
 
-    auto &grassPool = chunkSystem.addDecorator<InstancePool<Grass>>(world);
-    grassPool.setDensity(0.4);
+    // Grass with seed distribution
+    auto &grassPool =
+        chunkSystem.addDecorator<InstancePool<Grass, SeedDistribution>>(world);
 
-    auto &grass = grassPool.addGenerator();
-
+    // Rocks
     auto &rocksPool = chunkSystem.addDecorator<InstancePool<Rocks>>(world);
-    rocksPool.setDensity(0.02);
+    rocksPool.distribution().setDensity(0.02);
 
     auto &rocks = rocksPool.addGenerator();
     rocks.setRadius(0.7);
 
     for (int i = 0; i < 10; ++i) {
-        grass.addBush({0, 0, 0});
         rocks.addRock({0, 0, 0});
     }
 

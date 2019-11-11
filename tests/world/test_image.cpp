@@ -96,9 +96,23 @@ TEST_CASE("Image - armadillo interoperability", "[image]") {
 }
 
 TEST_CASE("Image - IO", "[image]") {
-    REQUIRE_THROWS(Image("unittests/img_not_found.png"));
+    world::createDirectories("unittests");
 
-    // Image img("unittests/test.png");
+    REQUIRE_THROWS(Image::read("unittests/img_not_found.png"));
+
+    Image test(2, 2, ImageType::RGBA);
+    test.rgba(0, 0).setf(0.2f, 0.5f, 0.3f, 0.5f);
+    test.write("unittests/test.png");
+    Image test2 = Image::read("unittests/test.png");
+    CHECK(test2.width() == 2);
+    CHECK(test2.height() == 2);
+    CHECK(test2.type() == ImageType::RGBA);
+    auto pix1 = test.rgba(0, 0);
+    auto pix2 = test2.rgba(0 ,0);
+    CHECK(pix1.getRed() == pix2.getRed());
+    CHECK(pix1.getBlue() == pix2.getBlue());
+    CHECK(pix1.getGreen() == pix2.getGreen());
+    CHECK(pix1.getAlpha() == pix2.getAlpha());
 }
 
 TEST_CASE("Image - ImageStream", "[image]") {

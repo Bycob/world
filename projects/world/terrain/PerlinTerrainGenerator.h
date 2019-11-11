@@ -24,6 +24,11 @@ public:
 
     void setOctaveCount(int octaveCount);
 
+    /** Perlin generator automatically adds octaves when generating bigger
+     * lods. This parameter controls how many octaves the terrain can
+     * have at maximum. 0 for unlimited.*/
+    void setMaxOctaveCount(u32 maxOctaveCount);
+
     void processTerrain(Terrain &terrain) override;
 
     void processTile(ITileContext &context) override;
@@ -31,6 +36,7 @@ public:
 private:
     PerlinInfo _perlinInfo;
     Perlin _perlin;
+    u32 _maxOctaves = 0;
 
     void processByNeighbours(Terrain &terrain, ITileContext &context);
 

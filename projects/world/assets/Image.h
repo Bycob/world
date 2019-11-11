@@ -87,8 +87,6 @@ public:
     Image(int width, int height, const ImageType &type);
     Image(const arma::Cube<double> &data);
     Image(const arma::Mat<double> &data);
-    Image(const std::string &filename);
-    Image(const char *filename);
     // move constructor
     Image(Image &&img);
     // copy constructor
@@ -162,12 +160,15 @@ public:
     void getf(int x, int y, float *values) const;
 
     // IO
+    /** Read image from the given path. Only supports png images. */
+    static Image read(const std::string &path);
+
     /** Writes the image at the specified location. The
      * extension of the file is used to determine the format
      * of the written image.
      * @param file a relative or absolute pathname to
      * the file.*/
-    void write(const std::string &file) const;
+    void write(const std::string &path) const;
 
 private:
     PImage *_internal;

@@ -49,4 +49,29 @@ void MeshOps::recalculateNormals(Mesh &mesh) {
         vn.setNormal(normal);
     }
 }
+
+void MeshOps::addAll(Mesh &dst, const Mesh &src) {
+    int offset = dst.getVerticesCount();
+
+    for (u32 i = 0; i < src.getVerticesCount(); ++i) {
+        dst.addVertex(src.getVertex(i));
+    }
+
+    for (u32 i = 0; i < src.getFaceCount(); ++i) {
+        Face f = src.getFace(i);
+
+        for (int j = 0; j < f.vertexCount(); ++j) {
+            f.setID(j, f.getID(j) + offset);
+        }
+
+        dst.addFace(f);
+    }
+}
+
+Mesh MeshOps::concatMeshes(const Mesh &mesh1, const Mesh &mesh2) {
+    Mesh concat = mesh1;
+    addAll(concat, mesh2);
+    return concat;
+}
+
 } // namespace world

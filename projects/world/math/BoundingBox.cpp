@@ -25,6 +25,11 @@ vec3d BoundingBox::getUpperBound() const { return _upper; }
 
 vec3d BoundingBox::getDimensions() const { return _upper - _lower; }
 
+bool BoundingBox::contains(const vec3d &c) const {
+    return _lower.x <= c.x && _lower.y <= c.y && _lower.z <= c.z &&
+           _upper.x >= c.x && _upper.y >= c.y && _upper.z >= c.z;
+}
+
 void BoundingBox::translate(const vec3d &vec) {
     _lower += vec;
     _upper += vec;

@@ -5,22 +5,25 @@
 
 #include <random>
 #include <vector>
+#include <map>
 
 #include "WorldKeys.h"
 #include "WorldNode.h"
 #include "IChunkDecorator.h"
 #include "Chunk.h"
+#include "InstanceDistribution.h"
 
 namespace world {
 
-template <typename TGenerator>
+
+template <typename TGenerator, typename TDistribution = RandomDistribution>
 class InstancePool : public IChunkDecorator, public WorldNode {
 public:
     InstancePool(IEnvironment *env)
-            : _env{env}, _rng(static_cast<u64>(time(NULL))) {}
+            : _env{env}, _distribution(env),
+              _rng(static_cast<u64>(time(NULL))) {}
 
-
-    void setDensity(double density) { _density = density; }
+    TDistribution &distribution() { return _distribution; }
 
     void collectSelf(ICollector &collector,
                      const IResolutionModel &resolutionModel,
@@ -30,17 +33,32 @@ public:
 
     template <typename... Args> TGenerator &addGenerator(Args... args);
 
+    /** Export species meshes in a scene and habitat features in a json file.
+     * \param avgSize Average size of the element, used to compute spacing
+     * between objects in the scene. */
+    void exportSpecies(const std::string &outputDir, double avgSize = 1);
+
 private:
     IEnvironment *_env;
 
+    TDistribution _distribution;
+
     std::mt19937 _rng;
     std::vector<std::unique_ptr<TGenerator>> _generators;
-    std::vector<SceneNode> _objects;
+    std::vector<std::vector<SceneNode>> _objects;
+    u64 _chunksDecorated = 0;
+    /// Internal field to remember the typical chunk area at the resolution of
+    /// the pool
+    double _chunkArea = 0;
 
     double _resolution = 20;
-    // instance count per m^2
-    double _density = 0.2;
+    /// The instance pool automatically adds new generators when expanding.
+    /// This is the density of the species per km^2
+    double _speciesDensity = 0.05;
+    /// Minimal species count
+    u32 _minSpecies = 10;
 };
+
 
 class WORLDAPI_EXPORT Instance : public WorldNode {
 public:

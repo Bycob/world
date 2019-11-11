@@ -55,18 +55,18 @@ public:
 
     double getSlope(int x, int y) const;
 
-    /** Gets the height from the height map case which is the
+    /** Get the height from the height map case which is the
      * nearest to (x, y).  */
     double getRawHeight(double x, double y) const;
 
-    /** Gets the height of the terrain at the specified point,
+    /** Get the height of the terrain at the specified point,
      * using the given interpolation method. This method perform
      * an interpolation on both x and y axis between the nearest
      * heightmap points around (x, y). */
     double getInterpolatedHeight(double x, double y,
                                  const Interpolation::interpFunc &func) const;
 
-    /** Gets the height of the terrain at the specified point.
+    /** Get the height of the terrain at the specified point.
      * The height given by this method corresponds to the exact
      * height of the terrain mesh at the point (x, y), given
      * that it's xy bounds are [0,1] on both axis.
@@ -74,6 +74,10 @@ public:
      * 0 to 1.
      * @param y see above */
     double getExactHeightAt(double x, double y) const;
+
+    /** Get cubic interpolation of the height at (x, y).
+     * x and y are between 0 and 1*/
+    double getCubicHeight(double x, double y) const;
 
     double getSlopeAt(double x, double y) const;
 

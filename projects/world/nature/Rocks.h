@@ -7,10 +7,11 @@
 
 #include "world/assets/SceneNode.h"
 #include "world/core/WorldNode.h"
+#include "world/core/IInstanceGenerator.h"
 
 namespace world {
 
-class WORLDAPI_EXPORT Rocks : public WorldNode {
+class WORLDAPI_EXPORT Rocks : public WorldNode, public IInstanceGenerator {
 public:
     Rocks();
 
@@ -24,6 +25,8 @@ public:
     void collectSelf(ICollector &collector,
                      const IResolutionModel &resolutionModel,
                      const ExplorationContext &ctx) override;
+
+    HabitatFeatures randomize() { return {}; }
 
 private:
     struct Rock {

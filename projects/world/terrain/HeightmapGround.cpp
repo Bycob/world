@@ -128,7 +128,8 @@ HeightmapGround::~HeightmapGround() { delete _internal; }
 void HeightmapGround::setDefaultWorkerSet() {
     // setLodRange(addWorker<PerlinTerrainGenerator>(3, 4., 0.35), 0, 0);
     // setLodRange(addWorker<DiamondSquareTerrain>(0.5), 1, 5);
-    addWorker<PerlinTerrainGenerator>(3, 4., 0.35);
+    addWorker<PerlinTerrainGenerator>(3, 4., 0.35)
+            .setMaxOctaveCount(6);
     auto &map = addWorker<CustomWorldRMModifier>();
     map.setRegion({0, 0}, 10000, 3, 0.1, 0.3);
     map.setRegion({0, 0}, 6000, 0.7, 1.6, 0.8);
@@ -279,8 +280,12 @@ void HeightmapGround::addTerrain(const TileCoordinates &key,
             // Create the material
             Material material("terrain");
             material.setKd(1, 1, 1);
-            // material.setKd(1, (double) key._lod / _tileSystem._maxLod, 1 -
-            // (double)key._lod / _tileSystem._maxLod);
+// #define DEBUG_COLOR
+#ifdef DEBUG_COLOR
+            double value = (double) key._lod / _tileSystem._maxLod;
+            double _void;
+            material.setKd(modf(0.5 + value, &_void), 1 - value, value);
+#endif
             material.setMapKd("texture01");
 
             // Retrieve the texture
@@ -310,8 +315,7 @@ void HeightmapGround::updateCache() {
         // We shrink one third of the memory
         auto count = _internal->_terrains.size() - _maxCacheSize * 2 / 3;
 
-        std::cout << "Dropping memory : " << count
-                  << " removed." << std::endl;
+        std::cout << "Dropping memory : " << count << " removed." << std::endl;
 
         while (count != 0) {
             auto accessEntry = _internal->_accesses.begin();
@@ -456,7 +460,7 @@ void HeightmapGround::generateTerrains(const std::set<TileCoordinates> &keys) {
             Terrain &terrain = *tile->_terrain;
 
             terrain.setTexture(
-                Image(_textureRes / 4, _textureRes / 4, ImageType::RGB));
+                Image(_textureRes, _textureRes, ImageType::RGB));
 
             double terrainSize = _tileSystem.getTileSize(key._lod).x;
             terrain.setBounds(terrainSize * key._pos.x,

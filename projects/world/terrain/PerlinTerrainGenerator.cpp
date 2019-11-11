@@ -37,6 +37,10 @@ void PerlinTerrainGenerator::setOctaveCount(int octaveCount) {
     _perlinInfo.octaves = octaveCount;
 }
 
+void PerlinTerrainGenerator::setMaxOctaveCount(u32 maxOctaveCount) {
+    _maxOctaves = maxOctaveCount;
+}
+
 void PerlinTerrainGenerator::processTerrain(Terrain &terrain) {
     _perlin.generatePerlinNoise2D(terrain._array, _perlinInfo);
 
@@ -99,6 +103,8 @@ void PerlinTerrainGenerator::processByTileCoords(Terrain &terrain,
     localInfo.offsetX = tileCoords.x;
     localInfo.offsetY = tileCoords.y;
     localInfo.octaves += localInfo.reference;
+    if (_maxOctaves > 0 && localInfo.octaves > _maxOctaves)
+        localInfo.octaves = _maxOctaves;
 
     _perlin.generatePerlinNoise2D(terrain._array, localInfo);
 

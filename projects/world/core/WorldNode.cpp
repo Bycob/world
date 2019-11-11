@@ -7,29 +7,9 @@
 #include "LODGridChunkSystem.h"
 #include "Collector.h"
 #include "IResolutionModel.h"
+#include "ConstantResolution.h"
 
 namespace world {
-
-class ConstantResolution : public IResolutionModel {
-public:
-    double _resolution;
-
-    ConstantResolution(double resolution) : _resolution(resolution) {}
-
-    double getResolutionAt(const vec3d &coord) const override {
-        return _resolution;
-    }
-
-    double getMaxResolutionIn(const BoundingBox &bbox) const override {
-        return _resolution;
-    }
-
-    // TODO set a more precise bbox
-    BoundingBox getBounds() const override {
-        return {{-10000, -10000, -10000}, {10000, 10000, 10000}};
-    }
-};
-
 
 WorldNode::WorldNode() : _internal(new WorldNodePrivate()) {}
 
