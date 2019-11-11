@@ -8,19 +8,24 @@ TileSystemIterator::TileSystemIterator(const TileSystem &tileSystem,
         : _tileSystem(tileSystem), _resolutionModel(resolutionModel),
           _bounds(bounds) {
 
-    // Start at lod 0
-    startLod(0);
+    // start at lod 0
+    _min = _tileSystem.getTileCoordinates(_bounds.getLowerBound(), 0);
+    _max = _tileSystem.getTileCoordinates(_bounds.getUpperBound(), 0);
+    _current = _min;
 
-    while (!isTileRequired(_current) && !_endReached)
+    while (!_endReached && !isTileRequired(_current)) {
+        _parents.push_back(_current);
         step();
+    }
 }
 
 void TileSystemIterator::operator++() {
-    BoundingBox tileBbox;
-
-    do {
+    while (!_endReached) {
         step();
-    } while (!isTileRequired(_current) && !_endReached);
+        if (!isTileRequired(_current))
+            _parents.push_back(_current);
+        else break;
+    }
 }
 
 TileCoordinates TileSystemIterator::operator*() { return _current; }
@@ -40,10 +45,11 @@ void TileSystemIterator::step() {
             if (_current._pos.x < _max._pos.x) {
                 _current._pos.x++;
             } else {
-                int newLod = _current._lod + 1;
-                if (newLod <= _tileSystem._maxLod) {
-                    startLod(newLod);
-                } else {
+                if (!_parents.empty()) {
+                    startTile(_parents.front());
+                    _parents.pop_front();
+                }
+                else {
                     _endReached = true;
                 }
             }
@@ -51,9 +57,20 @@ void TileSystemIterator::step() {
     }
 }
 
-void TileSystemIterator::startLod(int lod) {
-    _min = _tileSystem.getTileCoordinates(_bounds.getLowerBound(), lod);
-    _max = _tileSystem.getTileCoordinates(_bounds.getUpperBound(), lod);
+void TileSystemIterator::startTile(TileCoordinates coords) {
+    _min = { coords._pos * _tileSystem._factor, coords._lod + 1 };
+    _max = _min;
+    _max._pos += vec3i{_tileSystem._factor - 1};
+
+    // if dim == 0 set max = 0
+    auto eps = std::numeric_limits<double>::epsilon();
+    if (abs(_tileSystem._baseSize.x) < eps)
+        _max._pos.x = 0;
+    if (abs(_tileSystem._baseSize.y) < eps)
+        _max._pos.y = 0;
+    if (abs(_tileSystem._baseSize.z) < eps)
+        _max._pos.z = 0;
+
     _current = _min;
 }
 
@@ -87,19 +104,7 @@ bool TileSystemIterator::isTileRequired(TileCoordinates coordinates) {
     expandDimension(bbox);
     double resolutionInTile = _resolutionModel.getMaxResolutionIn(bbox);
     int refLod = _tileSystem.getLod(resolutionInTile);
-
-    if (coordinates._lod >= refLod) {
-        while (coordinates._lod > 0) {
-            coordinates = _tileSystem.getParentTileCoordinates(coordinates);
-
-            if (isTileRequired(coordinates)) {
-                return false;
-            }
-        }
-        return true;
-    } else {
-        return false;
-    }
+    return coordinates._lod >= refLod;
 }
 
 } // namespace world

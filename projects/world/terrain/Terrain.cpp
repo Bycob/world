@@ -100,6 +100,25 @@ double Terrain::getInterpolatedHeight(
     return Interpolation::interpolate(yi, v1, yi + 1, v2, y, func);
 }
 
+double Terrain::getCubicHeight(double x, double y) const {
+    double res = getResolution();
+    x *= res;
+    y *= res;
+    int xi = static_cast<int>(floor(x));
+    int yi = static_cast<int>(floor(y));
+
+    double vx[4];
+    for (int xn = 0; xn < 4; ++xn) {
+        double vy[4];
+        for (int yn = 0; yn < 4; ++yn) {
+            vy[yn] =
+                _array(clamp(xi + xn, 0, res - 1), clamp(yi + yn, 0, res - 1));
+        }
+        vx[xn] = cuberp(vy, y - yi);
+    }
+    return cuberp(vx, x - xi);
+}
+
 double Terrain::getExactHeightAt(double x, double y) const {
     int width = (int)(_array.n_rows - 1);
     int height = (int)(_array.n_cols - 1);

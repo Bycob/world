@@ -81,11 +81,14 @@ TEST_CASE("Collector", "[collector]") {
 
         CHECK(collector.hasChannel<SceneNode>());
         CHECK(collector.hasStorageChannel<SceneNode>());
+        CHECK_FALSE(collector.hasChannel<SceneNode, Material>());
     }
 
     auto &objChan = collector.addStorageChannel<SceneNode>();
     auto &meshChan = collector.addStorageChannel<Mesh>();
     auto &matChan = collector.addStorageChannel<Material>();
+
+    REQUIRE(collector.hasStorageChannel<SceneNode, Material, Mesh>());
 
     SECTION("adding object") {
         auto key = ItemKeys::root("a");

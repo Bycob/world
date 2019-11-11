@@ -3,8 +3,10 @@
 #include "world/core/WorldConfig.h"
 
 #include <string>
+#include <map>
 
 #include "Color.h"
+#include "Shader.h"
 
 namespace world {
 
@@ -19,6 +21,16 @@ public:
     void setName(const std::string &name);
 
     std::string getName() const { return _name; }
+
+    void setShader(std::string shader);
+
+    std::string getShader() const { return _shader; }
+
+    void setShaderParam(std::string name, const ShaderParam &value);
+
+    ShaderParam getShaderParam(const std::string &name) const;
+
+    const auto &getShaderParams() const { return _shaderParams; }
 
     void setKd(double r, double g, double b);
 
@@ -38,10 +50,19 @@ public:
 
 private:
     std::string _name;
+    std::string _shader;
 
+    std::map<std::string, ShaderParam> _shaderParams;
+
+    /// Specular exponent from 0 to 1000
+    double _Ns;
+    /// Refraction coefficient
+    double _Ni;
     Color4d _Kd;
     Color4d _Ka;
     Color4d _Ks;
     std::string _mapKd;
+    std::string _mapKs;
+    std::string _mapBump;
 };
 } // namespace world

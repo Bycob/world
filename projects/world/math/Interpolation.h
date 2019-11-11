@@ -42,10 +42,12 @@ inline double smoothstep(double edge0, double edge1, double x) {
     return t * t * (3.0 - 2.0 * t);
 }
 
+/** Hermite cubic interpolation */
+double cuberp(double values[4], double x);
+
 // https://en.wikipedia.org/wiki/Inverse_distance_weighting
-/** Cette classe permet de réaliser une interpolation en tout point
-de l'espace de départ, à partir des valeurs connues en certains points
-totalement arbitraires.*/
+/** Spatial interpolation based on several known values at arbitrary locations.
+ */
 template <typename T_Pts, typename T_Data> class IDWInterpolator {
 public:
     typedef std::pair<T_Pts, T_Data> DataPoint;

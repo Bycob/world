@@ -46,6 +46,8 @@ public:
 
     template <typename T> bool hasStorageChannel() const;
 
+    template <typename T, typename T2, typename... TN> bool hasStorageChannel() const;
+
     template <typename T> CollectorChannel<T> &getStorageChannel();
 
     Scene toScene();

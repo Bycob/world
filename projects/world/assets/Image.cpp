@@ -432,12 +432,6 @@ Image::Image(const arma::Mat<double> &data) : _type(ImageType::GREYSCALE) {
     }
 }
 
-Image::Image(const std::string &filename) {
-    throw std::runtime_error("Not supported");
-}
-
-Image::Image(const char *filename) : Image(std::string(filename)) {}
-
 Image::Image(Image &&image) : _internal(image._internal), _type(image._type) {
     image._internal = nullptr;
 }
@@ -519,6 +513,82 @@ void Image::getf(int x, int y, float *values) const {
 // Check endianness (method from opencv/util.hpp)
 bool isBigEndian(void) {
     return (((const int *)"\0\x1\x2\x3\x4\x5\x6\x7")[0] & 255) != 0;
+}
+
+// from gist https://gist.github.com/niw/5963798
+Image Image::read(const std::string &path) {
+    FILE *file = fopen(path.c_str(), "rb");
+    if (file == nullptr) {
+        throw std::runtime_error("File does not exist: " + path);
+    }
+
+    png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    if(!png) {
+        throw std::runtime_error("Error reading png image: " + path);
+    }
+
+    png_infop info = png_create_info_struct(png);
+    if(!info) {
+        throw std::runtime_error("Error reading png image: " + path);
+    }
+
+    if(setjmp(png_jmpbuf(png))) {
+        throw std::runtime_error("Error reading png image: " + path);
+    }
+
+    png_init_io(png, file);
+    png_read_info(png, info);
+
+    int width      = png_get_image_width(png, info);
+    int height     = png_get_image_height(png, info);
+    png_byte color_type = png_get_color_type(png, info);
+    png_byte bit_depth  = png_get_bit_depth(png, info);
+
+    // Read any color_type into 8bit depth, RGBA format.
+    // See http://www.libpng.org/pub/png/libpng-manual.txt
+
+    if(bit_depth == 16)
+        png_set_strip_16(png);
+
+    if(color_type == PNG_COLOR_TYPE_PALETTE)
+        png_set_palette_to_rgb(png);
+
+    // PNG_COLOR_TYPE_GRAY_ALPHA is always 8 or 16bit depth.
+    if(color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8)
+        png_set_expand_gray_1_2_4_to_8(png);
+
+    if(png_get_valid(png, info, PNG_INFO_tRNS))
+        png_set_tRNS_to_alpha(png);
+
+    // These color_type don't have an alpha channel then fill it with 0xff.
+    if(color_type == PNG_COLOR_TYPE_RGB ||
+       color_type == PNG_COLOR_TYPE_GRAY ||
+       color_type == PNG_COLOR_TYPE_PALETTE)
+        png_set_filler(png, 0xFF, PNG_FILLER_AFTER);
+
+    if(color_type == PNG_COLOR_TYPE_GRAY ||
+       color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
+        png_set_gray_to_rgb(png);
+
+    png_read_update_info(png, info);
+
+    // Read directly inplace
+    Image img(width, height, ImageType::RGBA);
+    auto *rowptrs = new png_bytep[img._internal->_sizeY];
+
+    for (u32 y = 0; y < img._internal->_sizeY; y++) {
+        rowptrs[y] = img._internal->at(0, y);
+    }
+
+    png_read_image(png, rowptrs);
+
+    fclose(file);
+    png_destroy_read_struct(&png, &info, NULL);
+
+    // free memory
+    delete[] rowptrs;
+
+    return img;
 }
 
 // inspired by the example here : http://zarb.org/~gc/html/libpng.html
