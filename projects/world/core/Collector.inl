@@ -24,7 +24,8 @@ template <typename T> inline bool Collector::hasStorageChannel() const {
            dynamic_cast<CollectorChannel<T> *>(it->second.get()) != nullptr;
 }
 
-template <typename T, typename T2, typename... TN> bool Collector::hasStorageChannel() const {
+template <typename T, typename T2, typename... TN>
+bool Collector::hasStorageChannel() const {
     return hasStorageChannel<T>() && hasStorageChannel<T2, TN...>();
 }
 

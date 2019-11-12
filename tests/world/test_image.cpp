@@ -108,7 +108,7 @@ TEST_CASE("Image - IO", "[image]") {
     CHECK(test2.height() == 2);
     CHECK(test2.type() == ImageType::RGBA);
     auto pix1 = test.rgba(0, 0);
-    auto pix2 = test2.rgba(0 ,0);
+    auto pix2 = test2.rgba(0, 0);
     CHECK(pix1.getRed() == pix2.getRed());
     CHECK(pix1.getBlue() == pix2.getBlue());
     CHECK(pix1.getGreen() == pix2.getGreen());

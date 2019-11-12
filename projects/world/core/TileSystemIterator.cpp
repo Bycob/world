@@ -24,7 +24,8 @@ void TileSystemIterator::operator++() {
         step();
         if (!isTileRequired(_current))
             _parents.push_back(_current);
-        else break;
+        else
+            break;
     }
 }
 
@@ -48,8 +49,7 @@ void TileSystemIterator::step() {
                 if (!_parents.empty()) {
                     startTile(_parents.front());
                     _parents.pop_front();
-                }
-                else {
+                } else {
                     _endReached = true;
                 }
             }
@@ -58,7 +58,7 @@ void TileSystemIterator::step() {
 }
 
 void TileSystemIterator::startTile(TileCoordinates coords) {
-    _min = { coords._pos * _tileSystem._factor, coords._lod + 1 };
+    _min = {coords._pos * _tileSystem._factor, coords._lod + 1};
     _max = _min;
     _max._pos += vec3i{_tileSystem._factor - 1};
 

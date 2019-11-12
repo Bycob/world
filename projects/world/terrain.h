@@ -5,6 +5,7 @@
 #include "terrain/ITerrainWorker.h"
 #include "terrain/PerlinTerrainGenerator.h"
 #include "terrain/DiamondSquareTerrain.h"
+#include "terrain/GridStorage.h"
 #include "terrain/ReliefMapModifier.h"
 #include "terrain/ReliefParameters.h"
 #include "terrain/Terrain.h"

@@ -18,8 +18,8 @@ TEST_CASE("normal wrapper use case", "[peace][.long]") {
         collect(&collector, world, CollectorView{0, 0, 1000});
 
         auto chanSize = collector.getStorageChannel<SceneNode>().size();
-        char **names = new char*[chanSize];
-        void **nodes = new void*[chanSize];
+        char **names = new char *[chanSize];
+        void **nodes = new void *[chanSize];
         collectorGetChannel(&collector, NODE_CHANNEL, names, nodes);
 
         for (int i = 0; i < chanSize; ++i) {

@@ -91,7 +91,8 @@ template <typename T> inline ICollectorChannel<T> &ICollector::getChannel() {
     return dynamic_cast<ICollectorChannel<T> &>(getChannelByType(type));
 }
 
-template <typename T, typename T2, typename... Args> inline bool ICollector::hasChannel() const {
+template <typename T, typename T2, typename... Args>
+inline bool ICollector::hasChannel() const {
     return hasChannel<T>() && hasChannel<T2, Args...>();
 }
 

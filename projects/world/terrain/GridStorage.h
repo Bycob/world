@@ -1,0 +1,66 @@
+#ifndef WORLD_GRID_STORAGE_H
+#define WORLD_GRID_STORAGE_H
+
+#include "world/core/WorldConfig.h"
+
+#include <type_traits>
+#include <map>
+
+#include "world/core/TileSystem.h"
+
+namespace world {
+
+class WORLDAPI_EXPORT GridStorageBase {
+public:
+    virtual ~GridStorageBase() = default;
+};
+
+class WORLDAPI_EXPORT IGridElement {
+public:
+    virtual ~IGridElement() = default;
+
+    // Add save(...) and load(...) when serialization will be implemented
+};
+
+template <
+    typename TElement,
+    std::enable_if_t<std::is_base_of<IGridElement, TElement>::value, int> = 0>
+class WORLDAPI_EXPORT GridStorage : public GridStorageBase {
+public:
+    GridStorage() = default;
+    ~GridStorage() override = default;
+
+    GridStorage(const GridStorage &other) = delete;
+    // TODO Add other constructors
+
+    template <typename... Args>
+    TElement &set(const TileCoordinates &coords, Args &&... args) {
+        return *(_storage[coords] = std::make_unique<TElement>(args...));
+    }
+
+    template <typename... Args>
+    TElement &getOrCreate(const TileCoordinates &coords, Args &&... args) {
+        auto it = _storage.insert({coords, nullptr});
+        if (it.second) {
+            it.first->second = std::make_unique<TElement>(args...);
+        }
+        return *it.first->second;
+    }
+
+    bool tryGet(const TileCoordinates &coords, TElement **elemPtr) {
+        auto it = _storage.find(coords);
+        if (it != _storage.end()) {
+            *elemPtr = it->second.get();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+private:
+    std::map<TileCoordinates, std::unique_ptr<TElement>> _storage;
+};
+
+} // namespace world
+
+#endif // WORLD_GRID_STORAGE_H

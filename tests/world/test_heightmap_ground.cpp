@@ -30,3 +30,54 @@ TEST_CASE("HeightmapGround - observeAltitudeAt benchmark",
         }
     }
 }
+
+class TestElement : public IGridElement {
+public:
+    int _count;
+    TestElement(int &count) {
+        count++;
+        _count = count;
+    }
+
+    ~TestElement() override = default;
+};
+
+TEST_CASE("GridStorage", "[terrain]") {
+    // assert it does not work
+    // GridStorage<vec3d> failed;
+
+    GridStorage<TestElement> storage;
+    TileCoordinates c1{{1, 2, 3}, 2};
+    int count = 0;
+
+    SECTION("set then try get") {
+        TestElement *elem = nullptr;
+        CHECK_FALSE(storage.tryGet(c1, &elem));
+        CHECK(elem == nullptr);
+        storage.set(c1, count);
+        CHECK(storage.tryGet(c1, &elem));
+        REQUIRE(elem != nullptr);
+        CHECK(elem->_count == 1);
+
+        // Check that element didn't get copied
+        elem->_count = 2;
+        elem = nullptr;
+        CHECK(storage.tryGet(c1, &elem));
+        REQUIRE(elem != nullptr);
+        CHECK(elem->_count == 2);
+    }
+
+    SECTION("set twice") {
+        storage.set(c1, count);
+        auto &elem = storage.set(c1, count);
+        CHECK(count == 2);
+        CHECK(elem._count == 2);
+    }
+
+    SECTION("getOrCreate") {
+        storage.getOrCreate(c1, count);
+        auto &elem = storage.getOrCreate(c1, count);
+        CHECK(count == 1);
+        CHECK(elem._count == 1);
+    }
+}
