@@ -42,6 +42,6 @@ void AltitudeTexturer::processTerrain(Terrain &terrain) {
 }
 
 void AltitudeTexturer::processTile(ITileContext &context) {
-    processTerrain(context.getTerrain());
+    processTerrain(context.getTile().terrain());
 }
 } // namespace world

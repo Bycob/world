@@ -20,33 +20,35 @@ int findMaxLevel(int terrainRes) {
 
 
 void DiamondSquareTerrain::processTile(ITileContext &context) {
-    int lod = context.getParentCount();
-    Terrain &terrain = context.getTerrain();
-    vec2i c = context.getTileCoords();
+    Terrain &terrain = context.getTile().terrain();
+    TileCoordinates tc = context.getCoords();
+    vec2i c(tc._pos);
+    int lod = tc._lod;
 
-    bool left = context.getNeighbour(-1, 0).has_value();
-    bool right = context.getNeighbour(1, 0).has_value();
-    bool top = context.getNeighbour(0, -1).has_value();
-    bool bottom = context.getNeighbour(0, 1).has_value();
+    bool left = _storage.has(tc + vec2i{-1, 0});
+    bool right = _storage.has(tc + vec2i{1, 0});
+    bool top = _storage.has(tc + vec2i{0, -1});
+    bool bottom = _storage.has(tc + vec2i{0, 1});
 
     if (lod == 0) {
         init(terrain);
-        TerrainOps::copyNeighbours(terrain, context);
+        TerrainOps::copyNeighbours(terrain, tc, _storage);
 
         for (int i = findMaxLevel(terrain.getResolution()); i >= 1; --i) {
             compute(terrain, i, left, right, top, bottom);
         }
     } else {
-        const Terrain &parent = context.getParent().value();
+        const Terrain &parent =
+            _storage.get(context.getParentCoords())._terrain;
         vec2i offset =
             vec2i(mod(c.x, 2), mod(c.y, 2)) * (parent.getResolution() / 2);
 
         copyParent(parent, terrain, offset);
-        TerrainOps::copyNeighbours(terrain, context);
+        TerrainOps::copyNeighbours(terrain, tc, _storage);
         compute(terrain, 1, left, right, top, bottom);
     }
 
-    context.registerCurrentState();
+    _storage.set(tc, terrain);
 }
 
 void DiamondSquareTerrain::processTerrain(Terrain &terrain) {

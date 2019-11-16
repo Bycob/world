@@ -103,9 +103,10 @@ void MultilayerGroundTexture::processTerrain(Terrain &terrain) {
 }
 
 void MultilayerGroundTexture::processTile(ITileContext &context) {
-    Terrain &terrain = context.getTerrain();
-    Image &img = context.getTexture();
-    process(terrain, img, context.getTileCoords(), context.getParentCount());
+    Terrain &terrain = context.getTile().terrain();
+    Image &img = context.getTile().texture();
+    process(terrain, img, vec2i{context.getCoords()._pos},
+            context.getCoords()._lod);
 }
 
 void MultilayerGroundTexture::process(Terrain &terrain, Image &img,

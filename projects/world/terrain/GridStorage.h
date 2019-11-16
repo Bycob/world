@@ -7,12 +7,15 @@
 #include <map>
 
 #include "world/core/TileSystem.h"
+#include "Terrain.h"
 
 namespace world {
 
 class WORLDAPI_EXPORT GridStorageBase {
 public:
     virtual ~GridStorageBase() = default;
+
+    virtual bool has(const TileCoordinates &coords) const = 0;
 };
 
 class WORLDAPI_EXPORT IGridElement {
@@ -20,6 +23,15 @@ public:
     virtual ~IGridElement() = default;
 
     // Add save(...) and load(...) when serialization will be implemented
+};
+
+class WORLDAPI_EXPORT TerrainElement : public IGridElement {
+public:
+    Terrain _terrain;
+
+    TerrainElement(int size) : _terrain(size) {}
+
+    TerrainElement(const Terrain &terrain) : _terrain(terrain) {}
 };
 
 template <
@@ -47,7 +59,19 @@ public:
         return *it.first->second;
     }
 
-    bool tryGet(const TileCoordinates &coords, TElement **elemPtr) {
+    template <typename... Args>
+    TElement &getOrCreateCallback(const TileCoordinates &coords,
+                                  std::function<void(TElement &)> callback,
+                                  Args &&... args) {
+        auto it = _storage.insert({coords, nullptr});
+        if (it.second) {
+            it.first->second = std::make_unique<TElement>(args...);
+            callback(*it.first->second);
+        }
+        return *it.first->second;
+    }
+
+    bool tryGet(const TileCoordinates &coords, TElement **elemPtr) const {
         auto it = _storage.find(coords);
         if (it != _storage.end()) {
             *elemPtr = it->second.get();
@@ -57,9 +81,35 @@ public:
         }
     }
 
+    TElement &get(const TileCoordinates &coords) const {
+        TElement *elemPtr;
+        if (tryGet(coords, &elemPtr)) {
+            return *elemPtr;
+        } else {
+            std::stringstream sstream;
+            sstream << "Tile not found: " << coords._pos << ", " << coords._lod;
+            throw std::runtime_error(sstream.str());
+        }
+    }
+
+    optional<TElement &> getopt(const TileCoordinates &coords) const {
+        TElement *elemPtr;
+        if (tryGet(coords, &elemPtr)) {
+            return *elemPtr;
+        } else {
+            return nullopt;
+        }
+    }
+
+    bool has(const TileCoordinates &coords) const override {
+        return _storage.find(coords) != _storage.end();
+    }
+
 private:
     std::map<TileCoordinates, std::unique_ptr<TElement>> _storage;
 };
+
+typedef GridStorage<TerrainElement> TerrainGrid;
 
 } // namespace world
 

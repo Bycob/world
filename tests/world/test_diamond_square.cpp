@@ -7,31 +7,20 @@ using namespace world;
 
 class DummyTileContext : public ITileContext {
 public:
-    Terrain &terrain;
-    Terrain &parent;
+    TerrainTile &terrain;
 
-    DummyTileContext(Terrain &terrain, Terrain &parent)
-            : terrain(terrain), parent(parent) {}
+    DummyTileContext(TerrainTile &terrain) : terrain(terrain) {}
 
-    Terrain &getTerrain() const override { return terrain; }
+    TerrainTile &getTile() const override { return terrain; }
 
-    Image &getTexture() const override { return terrain.getTexture(); }
+    TileCoordinates getCoords() const override { return {{}, 1}; }
 
-    optional<const Terrain &> getNeighbour(int x, int y) const override {
-        return nullopt;
-    }
-
-    optional<const Terrain &> getParent() const override { return parent; }
-
-    int getParentCount() const override { return 1; }
-
-    vec2i getTileCoords() const override { return {0, 0}; }
-
-    void registerCurrentState() override {}
+    TileCoordinates getParentCoords() const override { return {}; }
 };
 
 TEST_CASE("Test diamond square terrain generation", "[diamond_square]") {
-    Terrain terrain(129);
+    TerrainTile tile({}, 129);
+    Terrain &terrain = tile._terrain;
     TerrainOps::fill(terrain, 0);
 
     double accu = 0;
@@ -63,9 +52,12 @@ TEST_CASE("Test diamond square terrain generation", "[diamond_square]") {
     }
 
     SECTION("Generation from parent") {
+        // Create parent
         Terrain parent(65);
         TerrainOps::fill(parent, 2);
-        DummyTileContext ctx(terrain, parent);
+        diasqua.getStorage()->set({}, parent);
+
+        DummyTileContext ctx(tile);
 
         SECTION("with jitter") {
             diasqua.processTile(ctx);
@@ -84,6 +76,7 @@ TEST_CASE("Test diamond square terrain generation", "[diamond_square]") {
 
         SECTION("without jitter") {
             DiamondSquareTerrain woJitter(0);
+            woJitter.getStorage()->set({}, parent);
             woJitter.processTile(ctx);
 
             accu = 0;

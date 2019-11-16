@@ -16,6 +16,8 @@ public:
     void processTile(ITileContext &context) override;
 
 private:
+    TerrainGrid _storage;
+
     double _childRate;
     double _parentOverflow;
 

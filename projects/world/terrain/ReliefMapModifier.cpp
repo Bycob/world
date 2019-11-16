@@ -28,9 +28,9 @@ void ReliefMapModifier::processTerrain(Terrain &terrain) {
     int size = terrain.getResolution();
 
     // Map
-    std::pair<Terrain, Terrain> &reliefMap = provideMap(0, 0);
-    Terrain &heightMap = reliefMap.first;
-    Terrain &diffMap = reliefMap.second;
+    ReliefMapEntry &reliefMap = provideMap(0, 0);
+    Terrain &heightMap = reliefMap._height;
+    Terrain &diffMap = reliefMap._diff;
 
     // Setup variables
     const vec3d terrainDims = terrain.getBoundingBox().getDimensions();
@@ -75,10 +75,10 @@ void ReliefMapModifier::processTerrain(Terrain &terrain) {
 }
 
 void ReliefMapModifier::processTile(ITileContext &context) {
-    processTerrain(context.getTerrain());
+    processTerrain(context.getTile().terrain());
 }
 
-const std::pair<Terrain, Terrain> &ReliefMapModifier::obtainMap(int x, int y) {
+const ReliefMapEntry &ReliefMapModifier::obtainMap(int x, int y) {
     return provideMap(x, y);
 }
 
@@ -98,41 +98,33 @@ void ReliefMapModifier::setRegion(const vec2d &center, double radius,
             .ceil();
 
     auto &map = provideMap(0, 0);
-    auto &heightMap = map.first;
-    auto &diffMap = map.second;
 
     const auto interp = [curvature](double x) { return pow(x, curvature); };
 
     for (int x = lmin.x; x < lmax.x; ++x) {
         for (int y = lmin.y; y < lmax.y; ++y) {
-            double prevHeight = heightMap(x, y);
-            double prevDiff = diffMap(x, y);
+            double prevHeight = map._height(x, y);
+            double prevDiff = map._diff(x, y);
 
             const vec2d gc = vec2d(_tileSystem.getGlobalCoordinates(
                 {{}, 0}, vec3d(x, y, 0) / (mapRes - 1)));
             double d = center.length(gc - vec2d(mapOffset));
 
-            heightMap(x, y) = Interpolation::interpolate(0, height, radius,
-                                                         prevHeight, d, interp);
-            diffMap(x, y) = Interpolation::interpolate(0, diff, radius,
-                                                       prevDiff, d, interp);
+            map._height(x, y) = Interpolation::interpolate(
+                0, height, radius, prevHeight, d, interp);
+            map._diff(x, y) = Interpolation::interpolate(0, diff, radius,
+                                                         prevDiff, d, interp);
         }
     }
 }
 
-std::pair<Terrain, Terrain> &ReliefMapModifier::provideMap(int x, int y) {
+ReliefMapEntry &ReliefMapModifier::provideMap(int x, int y) {
     int resolution = _tileSystem._bufferRes.x;
-    auto it = _reliefMap.find({x, y});
 
-    if (it == _reliefMap.end()) {
-        it = _reliefMap
-                 .emplace(vec2i{x, y},
-                          std::make_pair<Terrain, Terrain>(Terrain(resolution),
-                                                           Terrain(resolution)))
-                 .first;
-        generate(it->second.first, it->second.second);
-    }
-    return it->second;
+    return _reliefMap.getOrCreateCallback(
+        TileCoordinates({x, y, 0}, 0),
+        [&](ReliefMapEntry &elem) { generate(elem._height, elem._diff); },
+        resolution);
 }
 
 // -----

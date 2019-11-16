@@ -19,6 +19,7 @@ public:
 
     static void multiply(Terrain &terrain, double factor);
 
-    static void copyNeighbours(Terrain &terrain, ITileContext &context);
+    static void copyNeighbours(Terrain &terrain, const TileCoordinates &coords,
+                               const TerrainGrid &storage);
 };
 } // namespace world

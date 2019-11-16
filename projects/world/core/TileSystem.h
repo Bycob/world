@@ -24,6 +24,15 @@ struct WORLDAPI_EXPORT TileCoordinates {
     TileCoordinates(int x, int y, int z, int lod) : _pos{x, y, z}, _lod(lod) {}
     TileCoordinates(const vec3i &pos, int lod) : _pos(pos), _lod(lod) {}
 
+    // Utility method
+    TileCoordinates operator+(const vec2i &coords) const {
+        return operator+(vec3i(coords));
+    }
+
+    TileCoordinates operator+(const vec3i &coords) const {
+        return {_pos + coords, _lod};
+    }
+
     vec3i _pos;
     int _lod = 0;
 };

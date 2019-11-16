@@ -38,6 +38,8 @@ private:
     Perlin _perlin;
     u32 _maxOctaves = 0;
 
+    TerrainGrid _storage;
+
     void processByNeighbours(Terrain &terrain, ITileContext &context);
 
     void processByTileCoords(Terrain &terrain, ITileContext &context);

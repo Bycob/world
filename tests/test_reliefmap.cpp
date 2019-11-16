@@ -38,8 +38,8 @@ void testReliefMap(int argc, char **argv) {
     std::cout << "Generation de la ReliefMap" << std::endl;
 
     auto &result = generator.obtainMap(0, 0);
-    auto &height = result.first;
-    auto &heightDiff = result.second;
+    auto &height = result._height;
+    auto &heightDiff = result._diff;
 
     std::cout << "Conversion en image et ecriture" << std::endl;
 

@@ -20,10 +20,14 @@ public:
 
     void processTile(ITileContext &context) override;
 
+    TerrainGrid *getStorage() override { return &_storage; }
+
 private:
     std::mt19937_64 _rng;
 
     std::uniform_real_distribution<double> _jitter;
+
+    TerrainGrid _storage;
 
 
     double value(double h1, double h2);

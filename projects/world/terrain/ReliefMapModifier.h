@@ -13,6 +13,13 @@
 
 namespace world {
 
+struct ReliefMapEntry : public IGridElement {
+    Terrain _height;
+    Terrain _diff;
+
+    ReliefMapEntry(int resolution) : _height(resolution), _diff(resolution) {}
+};
+
 /** Base class for generating relief maps.
  * A relief map is compound of 2 layers : an "offset" layer
  * and a "diff" layer. The offset is the minimum/average
@@ -31,7 +38,7 @@ public:
 
     void processTile(ITileContext &context) override;
 
-    const std::pair<Terrain, Terrain> &obtainMap(int x, int y);
+    const ReliefMapEntry &obtainMap(int x, int y);
 
     void setRegion(const vec2d &center, double radius, double curvature,
                    double height, double diff);
@@ -39,9 +46,11 @@ public:
 protected:
     mutable std::mt19937 _rng;
     TileSystem _tileSystem;
-    std::map<vec2i, std::pair<Terrain, Terrain>> _reliefMap;
 
-    std::pair<Terrain, Terrain> &provideMap(int x, int y);
+    GridStorage<ReliefMapEntry> _reliefMap;
+
+
+    ReliefMapEntry &provideMap(int x, int y);
 
     virtual void generate(Terrain &height, Terrain &heightDiff) = 0;
 };

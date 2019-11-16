@@ -13,16 +13,22 @@ void ApplyParentTerrain::processTerrain(world::Terrain &terrain) {
 
 void ApplyParentTerrain::processTile(ITileContext &context) {
     // Get parent. Generate it if needed
-    Terrain &child = context.getTerrain();
-    auto optParent = context.getParent();
+    TerrainTile &tile = context.getTile();
+    Terrain &child = tile.terrain();
+    TileCoordinates coords = context.getCoords();
+    int lvl = coords._lod;
 
-    if (!optParent) {
+    if (lvl == 0)
         return;
-    }
 
-    const Terrain &parent = *optParent;
+    TileCoordinates parentCoords = context.getParentCoords();
+    TerrainElement *parentElem;
 
-    int lvl = context.getParentCount();
+    if (!_storage.tryGet(parentCoords, &parentElem))
+        return;
+
+    Terrain &parent = parentElem->_terrain;
+
     int res = child.getResolution();
 
     // Useful variables
@@ -59,7 +65,7 @@ void ApplyParentTerrain::processTile(ITileContext &context) {
     // to unapply
     // TerrainOps::applyOffset(child, bufferParent);
     // TerrainOps::multiply(child, 1. / childProp);
-    context.registerCurrentState();
+    _storage.set(coords, child);
 }
 
 double ApplyParentTerrain::getContribution(int parentCount, double ratio) {

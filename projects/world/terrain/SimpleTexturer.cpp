@@ -34,6 +34,6 @@ void SimpleTexturer::processTerrain(Terrain &terrain) {
 }
 
 void SimpleTexturer::processTile(ITileContext &context) {
-    processTerrain(context.getTerrain());
+    processTerrain(context.getTile().terrain());
 }
 } // namespace world

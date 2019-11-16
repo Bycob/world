@@ -36,50 +36,51 @@ void TerrainOps::multiply(Terrain &terrain, double factor) {
     terrain._array *= factor;
 }
 
-void TerrainOps::copyNeighbours(Terrain &terrain, ITileContext &context) {
+void TerrainOps::copyNeighbours(Terrain &terrain, const TileCoordinates &coords,
+                                const TerrainGrid &storage) {
     // TODO unit test this method
     int m = terrain.getResolution() - 1;
 
     // corners
-    auto neighbour = context.getNeighbour(-1, -1);
-    if (neighbour) {
-        terrain(0, 0) = (*neighbour)(m, m);
+    TerrainElement *neighbour;
+    if (storage.tryGet(coords + vec2i{-1, -1}, &neighbour)) {
+        terrain(0, 0) = neighbour->_terrain(m, m);
     }
 
-    if ((neighbour = context.getNeighbour(-1, 1))) {
-        terrain(0, m) = (*neighbour)(m, 0);
+    if (storage.tryGet(coords + vec2i{-1, 1}, &neighbour)) {
+        terrain(0, m) = neighbour->_terrain(m, 0);
     }
 
-    if ((neighbour = context.getNeighbour(1, -1))) {
-        terrain(m, 0) = (*neighbour)(0, m);
+    if (storage.tryGet(coords + vec2i{1, -1}, &neighbour)) {
+        terrain(m, 0) = neighbour->_terrain(0, m);
     }
 
-    if ((neighbour = context.getNeighbour(1, 1))) {
-        terrain(m, m) = (*neighbour)(0, 0);
+    if (storage.tryGet(coords + vec2i{1, 1}, &neighbour)) {
+        terrain(m, m) = neighbour->_terrain(0, 0);
     }
 
     // sides
-    if ((neighbour = context.getNeighbour(-1, 0))) {
+    if (storage.tryGet(coords + vec2i{-1, 0}, &neighbour)) {
         for (int i = 0; i <= m; ++i) {
-            terrain(0, i) = (*neighbour)(m, i);
+            terrain(0, i) = neighbour->_terrain(m, i);
         }
     }
 
-    if ((neighbour = context.getNeighbour(1, 0))) {
+    if (storage.tryGet(coords + vec2i{1, 0}, &neighbour)) {
         for (int i = 0; i <= m; ++i) {
-            terrain(m, i) = (*neighbour)(0, i);
+            terrain(m, i) = neighbour->_terrain(0, i);
         }
     }
 
-    if ((neighbour = context.getNeighbour(0, -1))) {
+    if (storage.tryGet(coords + vec2i{0, -1}, &neighbour)) {
         for (int i = 0; i <= m; ++i) {
-            terrain(i, 0) = (*neighbour)(i, m);
+            terrain(i, 0) = neighbour->_terrain(i, m);
         }
     }
 
-    if ((neighbour = context.getNeighbour(0, 1))) {
+    if (storage.tryGet(coords + vec2i{0, 1}, &neighbour)) {
         for (int i = 0; i <= m; ++i) {
-            terrain(i, m) = (*neighbour)(i, 0);
+            terrain(i, m) = neighbour->_terrain(i, 0);
         }
     }
 }

@@ -16,14 +16,25 @@ namespace world {
 
 class PGround;
 
+class HeightmapGroundTile : public TerrainTile {
+public:
+    HeightmapGroundTile(TileCoordinates coords, int terrainRes)
+            : TerrainTile(coords, terrainRes), _lastAccess(0) {}
+
+private:
+    u64 _lastAccess = 0;
+
+    friend class HeightmapGround;
+};
+
 /** This class manages an infinite ground with as much details
  * as we want. */
 class WORLDAPI_EXPORT HeightmapGround : public GroundNode {
 public:
-    struct Tile;
+    using Tile = HeightmapGroundTile;
 
-    HeightmapGround(double unitSize = 6000, double minAltitude = -2000,
-                    double maxAltitude = 4000);
+    explicit HeightmapGround(double unitSize = 6000, double minAltitude = -2000,
+                             double maxAltitude = 4000);
 
     ~HeightmapGround() override;
 
@@ -102,7 +113,7 @@ private:
      * the terrains to files or discard them) */
     void updateCache();
 
-    void registerAccess(const TileCoordinates &key, Tile &tile);
+    void registerAccess(Tile &tile);
 
 
     // ACCESS
