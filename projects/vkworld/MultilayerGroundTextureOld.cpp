@@ -1,4 +1,4 @@
-#include "MultilayerGroundTexture.h"
+#include "MultilayerGroundTextureOld.h"
 
 #include <list>
 #include <numeric>
@@ -44,7 +44,7 @@ struct ProcessUnit {
     ProcessUnit(Image &img) : _textureImg(img) {}
 };
 
-class MultilayerGroundTexturePrivate {
+class MultilayerGroundTextureOldPrivate {
 public:
     struct LayerInfo {
         DistributionParams _distributionParams;
@@ -55,12 +55,12 @@ public:
     std::list<ProcessUnit> _units;
 };
 
-MultilayerGroundTexture::MultilayerGroundTexture()
-        : _internal(new MultilayerGroundTexturePrivate()), _rng(time(NULL)) {}
+MultilayerGroundTextureOld::MultilayerGroundTextureOld()
+        : _internal(new MultilayerGroundTextureOldPrivate()), _rng(time(NULL)) {}
 
-MultilayerGroundTexture::~MultilayerGroundTexture() { delete _internal; }
+MultilayerGroundTextureOld::~MultilayerGroundTextureOld() { delete _internal; }
 
-void MultilayerGroundTexture::addDefaultLayers() {
+void MultilayerGroundTextureOld::addDefaultLayers() {
     // Rock
     addLayer(DistributionParams{-1, 0, 1, 2, // h
                                 -1, 0, 1, 2, // dh
@@ -92,25 +92,25 @@ void MultilayerGroundTexture::addDefaultLayers() {
              "texture-snow.comp");
 }
 
-void MultilayerGroundTexture::addLayer(const DistributionParams &distribution,
-                                       const std::string &textureShader) {
+void MultilayerGroundTextureOld::addLayer(
+    const DistributionParams &distribution, const std::string &textureShader) {
     _internal->_layers.push_back({distribution, textureShader});
 }
 
-void MultilayerGroundTexture::processTerrain(Terrain &terrain) {
+void MultilayerGroundTextureOld::processTerrain(Terrain &terrain) {
     process(terrain, terrain.getTexture(), {0, 0}, 0);
     flush();
 }
 
-void MultilayerGroundTexture::processTile(ITileContext &context) {
+void MultilayerGroundTextureOld::processTile(ITileContext &context) {
     Terrain &terrain = context.getTile().terrain();
     Image &img = context.getTile().texture();
     process(terrain, img, vec2i{context.getCoords()._pos},
             context.getCoords()._lod);
 }
 
-void MultilayerGroundTexture::process(Terrain &terrain, Image &img,
-                                      vec2i tileCoords, int parentGap) {
+void MultilayerGroundTextureOld::process(Terrain &terrain, Image &img,
+                                         vec2i tileCoords, int parentGap) {
     // Assume that terrains and images are squared
     const u32 groupSize = 32;
 
@@ -334,7 +334,7 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &img,
     // clang-format on
 }
 
-void MultilayerGroundTexture::flush() {
+void MultilayerGroundTextureOld::flush() {
     for (auto &unit : _internal->_units) {
         unit._worker->waitForCompletion();
         VkwMemoryHelper::GPUToImage(unit._texture, unit._textureImg, 4);

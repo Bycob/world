@@ -1,5 +1,5 @@
-#ifndef VKWORLD_MULTILAYER_GROUND_TEXTURE_H
-#define VKWORLD_MULTILAYER_GROUND_TEXTURE_H
+#ifndef VKWORLD_MULTILAYER_GROUND_TEXTURE_OLD_H
+#define VKWORLD_MULTILAYER_GROUND_TEXTURE_OLD_H
 
 #include "VkWorldConfig.h"
 
@@ -7,32 +7,17 @@
 
 #include <world/terrain/ITerrainWorker.h>
 
+#include "DistributionParams.h"
+
 namespace world {
 
-class MultilayerGroundTexturePrivate;
+class MultilayerGroundTextureOldPrivate;
 
-struct VKWORLD_EXPORT DistributionParams {
-    float ha;
-    float hb;
-    float hc;
-    float hd;
-    float dha;
-    float dhb;
-    float dhc;
-    float dhd;
-    float hmin;
-    float hmax;
-    float dhmin;
-    float dhmax;
-    float threshold;
-    float slopeFactor;
-};
-
-class VKWORLD_EXPORT MultilayerGroundTexture : public ITerrainWorker {
+class VKWORLD_EXPORT MultilayerGroundTextureOld : public ITerrainWorker {
 public:
-    MultilayerGroundTexture();
+    MultilayerGroundTextureOld();
 
-    ~MultilayerGroundTexture() override;
+    ~MultilayerGroundTextureOld() override;
 
     /** Add layers corresponding to a world similar to the Earth. */
     void addDefaultLayers();
@@ -47,7 +32,7 @@ public:
     void flush() override;
 
 private:
-    MultilayerGroundTexturePrivate *_internal;
+    MultilayerGroundTextureOldPrivate *_internal;
 
     std::mt19937_64 _rng;
 

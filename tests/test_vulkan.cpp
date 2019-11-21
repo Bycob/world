@@ -9,14 +9,12 @@
 
 #include <vkworld/wrappers/Vulkan.h>
 #include <vkworld/wrappers/VkwRandomTexture.h>
-#include <vkworld/ProxyGround.h>
-#include <vkworld/MultilayerGroundTexture.h>
-#include <vkworld/VkwTextureGenerator.h>
+#include <vkworld/MultilayerGroundTextureOld.h>
+#include <vkworld/wrappers/VkwTextureGenerator.h>
 #include <vkworld/VkwGrass.h>
 
 using namespace world;
 
-void testProxyGround(int argc, char **argv);
 void testMultilayerTerrainTexture(int argc, char **argv);
 void testTextureGenerator();
 void testVkwGrass();
@@ -28,27 +26,6 @@ int main(int argc, char **argv) {
     testVkwGrass();
 }
 
-void testProxyGround(int argc, char **argv) {
-    auto &context = Vulkan::context();
-
-    // Create a proxyground 16 meters large, with at least one point per
-    // centimeter
-    ProxyGround proxyGround(16, 1600);
-
-    Collector collector;
-    auto &imgChan = collector.addStorageChannel<Image>();
-
-    proxyGround.collectAll(collector, 100);
-
-    world::createDirectories("assets/vulkan/proxyground/");
-    for (const auto &entry : imgChan) {
-        std::string id = entry._key.str();
-        id = std::string("assets/vulkan/proxyground/") + id + ".png";
-        // std::cout << id << std::endl;
-        entry._value.write(id);
-    }
-}
-
 void testMultilayerTerrainTexture(int argc, char **argv) {
     Terrain terrain(128);
     terrain.setBounds(-500, -500, 0, 500, 500, 400);
@@ -57,7 +34,7 @@ void testMultilayerTerrainTexture(int argc, char **argv) {
     PerlinTerrainGenerator terrainGen(5, 4, 0.4);
     terrainGen.processTerrain(terrain);
 
-    MultilayerGroundTexture textureGen;
+    MultilayerGroundTextureOld textureGen;
     textureGen.addDefaultLayers();
     textureGen.processTerrain(terrain);
     terrain.setBounds(-0.5, -0.5, 0, 0.5, 0.5, 0.4);

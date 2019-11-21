@@ -2,7 +2,7 @@
 
 #include <world/math/Bezier.h>
 
-#include "VkwTextureGenerator.h"
+#include "vkworld/wrappers/VkwTextureGenerator.h"
 #include "wrappers/VkwRandomTexture.h"
 
 namespace world {

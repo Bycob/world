@@ -1,7 +1,7 @@
 #include "VkwTextureGenerator.h"
 
 
-#include "wrappers/VkwMemoryHelper.h"
+#include "VkwMemoryHelper.h"
 
 namespace world {
 VkwTextureGenerator::VkwTextureGenerator(int width, int height,

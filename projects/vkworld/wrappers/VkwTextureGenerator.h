@@ -9,10 +9,10 @@
 #include <world/assets/Image.h>
 #include <world/assets/Mesh.h>
 
-#include "wrappers/VkwFramebuffer.h"
-#include "wrappers/VkwGraphicsPipeline.h"
-#include "wrappers/VkwWorker.h"
-#include "wrappers/VkwSubBuffer.h"
+#include "VkwFramebuffer.h"
+#include "VkwGraphicsPipeline.h"
+#include "VkwWorker.h"
+#include "VkwSubBuffer.h"
 
 namespace world {
 
