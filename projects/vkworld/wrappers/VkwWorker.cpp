@@ -104,9 +104,12 @@ void VkwGraphicsWorker::bindCommand(VkwGraphicsPipeline &pipeline,
     _boundDsets.push_back(dset);
 }
 
-void VkwGraphicsWorker::beginRenderPass(vk::RenderPass renderPass,
-                                        vk::Framebuffer framebuffer, u32 width,
-                                        u32 height) {
+void VkwGraphicsWorker::beginRenderPass(VkwRenderPass &renderPass) {
+    _renderPasses.push_back(renderPass);
+
+    int width = renderPass.image().width();
+    int height = renderPass.image().height();
+
     vk::ClearValue clearValues[2];
     clearValues[0].color = std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f};
     // clearValues[1].depthStencil = vk::ClearDepthStencilValue{1.0f, 0};
@@ -115,7 +118,8 @@ void VkwGraphicsWorker::beginRenderPass(vk::RenderPass renderPass,
                           static_cast<float>(height), 0.0f, 1.0f);
     vk::Rect2D renderArea(vk::Offset2D(), vk::Extent2D(width, height));
 
-    vk::RenderPassBeginInfo renderPassBeginInfo(renderPass, framebuffer,
+    vk::RenderPassBeginInfo renderPassBeginInfo(renderPass.handle(),
+                                                renderPass.framebuffer(),
                                                 renderArea, 2, clearValues);
     _commandBuffer.beginRenderPass(renderPassBeginInfo,
                                    vk::SubpassContents::eInline);

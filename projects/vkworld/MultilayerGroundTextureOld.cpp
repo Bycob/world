@@ -56,7 +56,8 @@ public:
 };
 
 MultilayerGroundTextureOld::MultilayerGroundTextureOld()
-        : _internal(new MultilayerGroundTextureOldPrivate()), _rng(time(NULL)) {}
+        : _internal(new MultilayerGroundTextureOldPrivate()), _rng(time(NULL)) {
+}
 
 MultilayerGroundTextureOld::~MultilayerGroundTextureOld() { delete _internal; }
 

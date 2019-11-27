@@ -6,8 +6,8 @@
 
 namespace world {
 
-VkwImagePrivate::VkwImagePrivate(VkwImageUsage imgUse, vk::Format format,
-                                 int width, int height)
+VkwImagePrivate::VkwImagePrivate(int width, int height, VkwImageUsage imgUse,
+                                 vk::Format format)
         : _width(width), _height(height), _imageFormat(format) {
     auto &ctx = Vulkan::context();
 
@@ -80,10 +80,10 @@ int VkwImage::getMemoryType(VkwImageUsage imgUse, u32 size) {
     return ctx.getMemoryType(memUse, size);
 }
 
-VkwImage::VkwImage(VkwImageUsage imgUse, vk::Format format, int width,
-                   int height)
-        : _internal(std::make_shared<VkwImagePrivate>(imgUse, format, width,
-                                                      height)) {}
+VkwImage::VkwImage(int width, int height, VkwImageUsage imgUse,
+                   vk::Format format)
+        : _internal(std::make_shared<VkwImagePrivate>(width, height, imgUse,
+                                                      format)) {}
 
 void VkwImage::registerTo(vk::DescriptorSet &descriptorSet,
                           vk::DescriptorType descriptorType, u32 id) {

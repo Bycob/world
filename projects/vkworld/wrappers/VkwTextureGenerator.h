@@ -9,7 +9,7 @@
 #include <world/assets/Image.h>
 #include <world/assets/Mesh.h>
 
-#include "VkwFramebuffer.h"
+#include "VkwRenderPass.h"
 #include "VkwGraphicsPipeline.h"
 #include "VkwWorker.h"
 #include "VkwSubBuffer.h"
@@ -35,6 +35,8 @@ public:
      * image. */
     Image getGeneratedImage();
 
+    void getGeneratedImage(Image &image);
+
     Mesh &mesh() { return _mesh; }
 
 private:
@@ -50,8 +52,6 @@ private:
     VkwSubBuffer _indicesBuf;
     VkwSubBuffer _verticesBuf;
     VkwImage _texture;
-    vk::RenderPass _renderPass;
-    vk::Framebuffer _framebuffer;
 };
 
 } // namespace world

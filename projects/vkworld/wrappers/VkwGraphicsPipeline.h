@@ -11,6 +11,7 @@
 
 #include "VkwEnums.h"
 #include "VkwDescriptorSetLayout.h"
+#include "VkwRenderPass.h"
 
 namespace world {
 
@@ -26,14 +27,18 @@ enum class VkwShaderType {
 
 class VKWORLD_EXPORT VkwGraphicsPipeline {
 public:
+    VkwGraphicsPipeline();
+
     VkwGraphicsPipeline(VkwDescriptorSetLayout &descriptorSetLayout);
+
+    void setLayout(VkwDescriptorSetLayout &dsetLayout);
 
     /** Enable or disable vertex buffer. Vertex buffer is enabled by default. */
     void enableVertexBuffer(bool enabled);
 
-    void setDimensions(u32 width, u32 height);
+    void setPrimitive(vk::PrimitiveTopology &primitive);
 
-    void setRenderPass(vk::RenderPass renderPass);
+    void setRenderPass(VkwRenderPass renderPass);
 
     void setBuiltinShader(VkwShaderType type, const std::string &shaderName);
 

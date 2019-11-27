@@ -30,8 +30,8 @@ public:
     int _width, _height;
     vk::Format _imageFormat;
 
-    VkwImagePrivate(VkwImageUsage usage, vk::Format format, int width,
-                    int height);
+    VkwImagePrivate(int width, int height, VkwImageUsage usage,
+                    vk::Format format);
     ~VkwImagePrivate();
 };
 
@@ -40,9 +40,9 @@ public:
     static int getMemoryType(VkwImageUsage imgUse, u32 size);
 
 
-    VkwImage(VkwImageUsage imgUse = VkwImageUsage::TEXTURE,
-             vk::Format format = vk::Format::eR32G32B32A32Sfloat, int width = 1,
-             int height = 1);
+    VkwImage(int width, int height,
+             VkwImageUsage imgUse = VkwImageUsage::TEXTURE,
+             vk::Format format = vk::Format::eR32G32B32A32Sfloat);
 
     /** Adds this buffer as binding to the given descriptorSet. */
     void registerTo(vk::DescriptorSet &descriptorSet,

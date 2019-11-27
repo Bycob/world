@@ -9,6 +9,7 @@
 #include "VkwDescriptorSet.h"
 #include "VkwComputePipeline.h"
 #include "VkwGraphicsPipeline.h"
+#include "VkwRenderPass.h"
 
 namespace world {
 
@@ -59,8 +60,7 @@ public:
 
     ~VkwGraphicsWorker() override;
 
-    void beginRenderPass(vk::RenderPass renderPass, vk::Framebuffer framebuffer,
-                         u32 width, u32 height);
+    void beginRenderPass(VkwRenderPass &renderPass);
 
     void bindCommand(VkwGraphicsPipeline &pipeline, VkwDescriptorSet &dset);
 
@@ -76,6 +76,7 @@ public:
 
 private:
     std::vector<VkwGraphicsPipeline> _boundPipelines;
+    std::vector<VkwRenderPass> _renderPasses;
 };
 } // namespace world
 

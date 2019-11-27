@@ -20,6 +20,8 @@ public:
 
     bool _vertexBuffer = true;
 
+    vk::PrimitiveTopology _primitive = vk::PrimitiveTopology::eTriangleList;
+
 
     // Resources (destroyed with the pipeline)
     std::map<VkwShaderType, vk::ShaderModule> _shaders;
@@ -97,9 +99,8 @@ public:
             {}, bindings.size(), &bindings[0], attributes.size(),
             &attributes[0]);
 
-        // TODO: Allow user to chose PrimitiveTopology
         vk::PipelineInputAssemblyStateCreateInfo inputAssemblyStageInfo(
-            {}, vk::PrimitiveTopology::eTriangleList);
+            {}, _primitive);
 
         vk::Viewport viewport(0, 0, _width, _height, 0, 1);
         vk::Rect2D scissor({0, 0}, {_width, _height});
@@ -162,6 +163,9 @@ public:
 };
 
 
+VkwGraphicsPipeline::VkwGraphicsPipeline()
+        : _internal(std::make_shared<VkwGraphicsPipelinePrivate>()) {}
+
 VkwGraphicsPipeline::VkwGraphicsPipeline(
     VkwDescriptorSetLayout &descriptorSetLayout)
         : _internal(std::make_shared<VkwGraphicsPipelinePrivate>()) {
@@ -169,17 +173,22 @@ VkwGraphicsPipeline::VkwGraphicsPipeline(
     _internal->_descriptorSetLayout = descriptorSetLayout.getLayout();
 }
 
+void VkwGraphicsPipeline::setLayout(VkwDescriptorSetLayout &dsetLayout) {
+    _internal->_descriptorSetLayout = dsetLayout.getLayout();
+}
+
 void VkwGraphicsPipeline::enableVertexBuffer(bool enabled) {
     _internal->_vertexBuffer = enabled;
 }
 
-void VkwGraphicsPipeline::setDimensions(u32 width, u32 height) {
-    _internal->_width = width;
-    _internal->_height = height;
+void VkwGraphicsPipeline::setPrimitive(vk::PrimitiveTopology &primitive) {
+    _internal->_primitive = primitive;
 }
 
-void VkwGraphicsPipeline::setRenderPass(vk::RenderPass renderPass) {
-    _internal->_renderPass = renderPass;
+void VkwGraphicsPipeline::setRenderPass(VkwRenderPass renderPass) {
+    _internal->_renderPass = renderPass.handle();
+    _internal->_width = renderPass.image().width();
+    _internal->_height = renderPass.image().height();
 }
 
 void VkwGraphicsPipeline::setBuiltinShader(VkwShaderType type,

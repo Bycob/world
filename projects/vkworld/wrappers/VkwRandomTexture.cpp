@@ -20,8 +20,8 @@ VkwRandomTexture::VkwRandomTexture(u32 size, u64 seed) : _rng(seed) {
     // Put pixels in vulkan image
     auto &ctx = Vulkan::context();
 
-    _texture = std::make_unique<VkwImage>(
-        VkwImageUsage::TEXTURE, vk::Format::eR8G8B8A8Unorm, size, size);
+    _texture = std::make_unique<VkwImage>(size, size, VkwImageUsage::TEXTURE,
+                                          vk::Format::eR8G8B8A8Unorm);
     _texture->setData(pixels.data(), count * sizeof(u32), 0);
 }
 } // namespace world
