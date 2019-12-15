@@ -6,9 +6,9 @@ layout(binding = 0x100) buffer PerlinTable {
 };
 
 uint rand(uint octave, int x, int y, int z) {
-	uint ux = uint(x) & 255;
-	uint uy = uint(y) & 255;
-	uint uz = uint(z) & 255;
+	uint ux = uint(x) & 255u;
+	uint uy = uint(y) & 255u;
+	uint uz = uint(z) & 255u;
 	uint a = p[uz] + uy;
 	uint b = p[a] + ux;
 	uint c = p[b] + octave;

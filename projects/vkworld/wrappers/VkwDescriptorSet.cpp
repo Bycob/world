@@ -1,5 +1,6 @@
 #include "VkwDescriptorSet.h"
 
+#include <vector>
 #include <vulkan/vulkan.hpp>
 
 #include "Vulkan.h"
@@ -8,8 +9,11 @@ namespace world {
 
 class VkwDescriptorSetPrivate {
 public:
-    VkwDescriptorSetLayout _layout;
     vk::DescriptorSet _descriptorSet;
+
+    VkwDescriptorSetLayout _layout;
+    std::vector<VkwSubBuffer> _buffers;
+    std::vector<VkwImage> _images;
 
     ~VkwDescriptorSetPrivate() {
         auto &ctx = Vulkan::context();
@@ -37,5 +41,9 @@ void VkwDescriptorSet::addDescriptor(u32 id, IVkwBindable &bindable) {
 
 vk::DescriptorSet &VkwDescriptorSet::handle() {
     return _internal->_descriptorSet;
+}
+
+void VkwDescriptorSet::storeBuffer(VkwSubBuffer &buffer) {
+    _internal->_buffers.push_back(buffer);
 }
 } // namespace world

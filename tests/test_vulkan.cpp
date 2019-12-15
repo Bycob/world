@@ -10,11 +10,13 @@
 #include <vkworld/wrappers/Vulkan.h>
 #include <vkworld/wrappers/VkwRandomTexture.h>
 #include <vkworld/MultilayerGroundTextureOld.h>
+#include <vkworld/MultilayerGroundTexture.h>
 #include <vkworld/wrappers/VkwTextureGenerator.h>
 #include <vkworld/VkwGrass.h>
 
 using namespace world;
 
+void testMultilayerTerrainTextureOld(int argc, char **argv);
 void testMultilayerTerrainTexture(int argc, char **argv);
 void testTextureGenerator();
 void testVkwGrass();
@@ -27,6 +29,43 @@ int main(int argc, char **argv) {
 }
 
 void testMultilayerTerrainTexture(int argc, char **argv) {
+    Terrain terrain(128);
+    terrain.setBounds(-500, -500, 0, 500, 500, 400);
+    terrain.setTexture(Image(128 * 16, 128 * 16, ImageType::RGBA));
+
+    PerlinTerrainGenerator terrainGen(5, 4, 0.4);
+    terrainGen.processTerrain(terrain);
+
+    MultilayerGroundTexture textureGen;
+    textureGen.addLayer(DistributionParams{0.33, 0.4, 0.6, 0.7, // h
+                                           -1, 0, 0.2, 0.6,     // dh
+                                           0., 1., 0.25, 0.6, 0.2},
+                        "texture-grass.frag");
+    textureGen.processTerrain(terrain);
+    terrain.setBounds(-0.5, -0.5, 0, 0.5, 0.5, 0.4);
+
+    Mesh *mesh = terrain.createMesh();
+    SceneNode object("mesh1");
+    object.setMaterialID("multilayer");
+
+    Material mat("multilayer");
+    mat.setMapKd("multilayer_texture.png");
+
+    Scene scene;
+    scene.addNode(object);
+    scene.addMesh("mesh1", *mesh);
+    scene.addMaterial("multilayer", mat);
+    scene.addTexture("multilayer_texture.png", terrain.getTexture());
+
+
+    world::createDirectories("assets/vulkan/multilayer/");
+    ObjLoader obj;
+    obj.write(scene, "assets/vulkan/multilayer/multilayer.obj");
+
+    delete mesh;
+}
+
+void testMultilayerTerrainTextureOld(int argc, char **argv) {
     Terrain terrain(128);
     terrain.setBounds(-500, -500, 0, 500, 500, 400);
     terrain.setTexture(Image(128 * 16, 128 * 16, ImageType::RGBA));

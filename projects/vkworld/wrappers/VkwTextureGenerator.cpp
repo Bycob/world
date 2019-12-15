@@ -50,10 +50,10 @@ void VkwTextureGenerator::generateTextureAsync() {
 
     if (_mesh.empty()) {
         pipeline.setBuiltinShader(VkwShaderType::VERTEX,
-                                  "generic_texture.vert");
+                                  "generic-texture.vert");
         pipeline.enableVertexBuffer(false);
     } else {
-        pipeline.setBuiltinShader(VkwShaderType::VERTEX, "generic_2D.vert");
+        pipeline.setBuiltinShader(VkwShaderType::VERTEX, "generic-2D.vert");
     }
     pipeline.setBuiltinShader(VkwShaderType::FRAGMENT, _shaderName);
 

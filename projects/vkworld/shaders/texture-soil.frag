@@ -4,25 +4,13 @@
 
 #include "worldlib"
 
-#define WORKGROUP_SIZE 32
+layout(location = 0) in vec2 fragCoord;
 
-layout (local_size_x = WORKGROUP_SIZE, local_size_y = WORKGROUP_SIZE, local_size_z = 1 ) in;
+layout(location = 0) out vec4 fragColor;
 
-layout(binding = 0) uniform OutputData {
-    uvec3 dims;
-};
-
-layout(binding = 1) uniform TextureData {
+layout(binding = 0) uniform TextureData {
     vec2 offset;
-	vec2 size;
-};
-
-layout(std430, binding = 2) buffer Input0 {
-	float inputDistribution[];
-};
-
-layout(std430, binding = 3) buffer Output0 {
-    vec4 outputTexture[];
+    vec2 size;
 };
 
 #define PI 3.14
@@ -87,9 +75,6 @@ vec4 getSoilAt(vec2 uv) {
 }
 
 void main() {
-    vec2 uv = gl_GlobalInvocationID.xy / vec2(dims.xy) * size + offset;
-	uint id = id3(gl_GlobalInvocationID.xyz, dims);
-
-    vec4 newColor = getSoilAt(uv) * vec4(1, 1, 1, inputDistribution[id]);
-	outputTexture[id] = applyAlpha(outputTexture[id], newColor);
+    vec2 uv = fragCoord * size + offset;
+    fragColor = getSoilAt(uv);
 }

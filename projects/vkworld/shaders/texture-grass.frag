@@ -4,14 +4,14 @@
 
 #include "worldlib"
 
-layout(binding = 0) uniform TextureData {
-    vec2 offset;
-	vec2 size;
-};
-
 layout(location = 0) in vec2 fragCoord;
 
 layout(location = 0) out vec4 fragColor;
+
+layout(binding = 0) uniform TextureData {
+    vec2 offset;
+    vec2 size;
+};
 
 #define BLADES_SPACING 0.004
 #define JITTER_MAX 0.004
@@ -115,5 +115,4 @@ float getPoint(in vec2 position, out vec4 color) {
 void main() {
     vec2 uv = fragCoord * size + offset;
     getPoint(uv, fragColor);
-	// applyAlpha(vec4(0), newColor);
 }
