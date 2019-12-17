@@ -1,6 +1,7 @@
 #pragma once
 
 namespace world {
+// TODO Try to remove use of this enum
 enum class DescriptorType {
     STORAGE_BUFFER = 0,
     UNIFORM_BUFFER = 1,

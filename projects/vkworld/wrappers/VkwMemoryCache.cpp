@@ -68,7 +68,7 @@ VkwMemoryCacheSegment::~VkwMemoryCacheSegment() {
     ctx._device.free(_memory);
 }
 
-void VkwMemoryCacheSegment::setData(void *data, u32 count, u32 offset) {
+void VkwMemoryCacheSegment::setData(const void *data, u32 count, u32 offset) {
     VulkanContext &ctx = Vulkan::context();
 
     void *mapped = ctx._device.mapMemory(_memory, offset, count);

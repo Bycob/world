@@ -50,10 +50,11 @@ VkwDescriptorSetLayout::VkwDescriptorSetLayout(
     }
 }
 
-void VkwDescriptorSetLayout::addBinding(DescriptorType usage, u32 binding) {
+void VkwDescriptorSetLayout::addBinding(DescriptorType usage, u32 binding,
+                                        u32 count) {
     vk::DescriptorType descriptorType =
         Vulkan::context().getDescriptorType(usage);
-    _internal->_bindings.emplace_back(binding, descriptorType, 1,
+    _internal->_bindings.emplace_back(binding, descriptorType, count,
                                       vk::ShaderStageFlagBits::eAll);
 }
 

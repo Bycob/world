@@ -12,6 +12,7 @@ class VKWORLD_EXPORT IVkwBindable {
 public:
     virtual ~IVkwBindable() = default;
 
+    // TODO this method is ugly
     virtual void registerTo(vk::DescriptorSet &descriptorSet,
                             vk::DescriptorType descriptorType, u32 id) = 0;
 };

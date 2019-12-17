@@ -18,12 +18,12 @@ layout(binding = 0) uniform DistributionParameters {
 	float slopeFactor;
 };
 
-layout(binding = 2) uniform PerlinParams {
+layout(binding = 1) uniform PerlinParams {
 	NoiseParameters uNoiseParams;
 };
 
+layout(binding = 2) uniform sampler2D inputHeight;
 layout(binding = 3) uniform sampler2D random;
-layout(binding = 4) uniform sampler2D inputHeight;
 // layout(binding = 3) uniform sampler2D inputDHeight;
 
 #define PI 3.14

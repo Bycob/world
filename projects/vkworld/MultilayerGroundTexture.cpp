@@ -9,6 +9,7 @@
 #include "wrappers/VkwRandomTexture.h"
 #include "wrappers/VkwMemoryHelper.h"
 #include "wrappers/VkwWorker.h"
+#include "wrappers/VkwPerlin.h"
 
 namespace world {
 
@@ -67,6 +68,7 @@ public:
     GridStorage<MultilayerElement> _storage;
 
     VkwRandomTexture _randTex;
+    VkwSubBuffer _perlinHash;
     std::vector<VkwGraphicsPipeline> _distribPipelines;
     VkwGraphicsPipeline _texPipeline;
 
@@ -74,7 +76,9 @@ public:
     std::map<int, LodTextures> _lodTextures;
 
 
-    MultilayerGroundTexturePrivate() : _rng(std::random_device()()) {}
+    MultilayerGroundTexturePrivate()
+            : _rng(std::random_device()()),
+              _perlinHash(VkwPerlin::createPerlinHash()) {}
 
     /** Start the texture generation. Generated textures will then be
      * used for each tiles (in texture arrays). */
@@ -85,6 +89,9 @@ public:
      * @param width The width of the texture to be generated at this lod. */
     void getTileTextures(const TileCoordinates &tc, MultilayerElement &elem,
                          float width);
+
+    VkwPerlinParameters getPerlinParameters(const TileCoordinates &tc,
+                                            int layer);
 
     void process(Terrain &terrain, Image &image, const TileCoordinates &tc);
 };
@@ -150,7 +157,7 @@ void MultilayerGroundTexturePrivate::launchTextureGeneration(LodTextures &t) {
         t._layerTextures.push_back(image);
 
         // Generate image
-        VkwDescriptorSetLayout layout({0}, {}); // TODO image Ids
+        VkwDescriptorSetLayout layout({0}, {});
 
         VkwGraphicsPipeline pipeline(layout);
         pipeline.enableVertexBuffer(false);
@@ -180,6 +187,7 @@ void MultilayerGroundTexturePrivate::launchTextureGeneration(LodTextures &t) {
         t._texWorker->draw(6);
         t._texWorker->endRenderPass();
     }
+
     t._texWorker->endCommandRecording();
     t._texWorker->run();
 }
@@ -196,8 +204,25 @@ void MultilayerGroundTexturePrivate::getTileTextures(const TileCoordinates &tc,
         t._texWorker->waitForCompletion();
     }
 
+    // TODO transitions to textures ?
+
     elem._textures.insert(elem._textures.begin(), t._layerTextures.begin(),
                           t._layerTextures.end());
+}
+
+VkwPerlinParameters MultilayerGroundTexturePrivate::getPerlinParameters(
+    const TileCoordinates &tc, int layer) {
+
+    VkwPerlinParameters params;
+    const int frequency = 8;
+    params.octaves = u32(tc._lod + 4);
+    params.octaveRef = u32(tc._lod);
+    params.offsetX = tc._pos.x * frequency;
+    params.offsetY = tc._pos.y * frequency;
+    params.offsetZ = layer;
+    params.frequency = frequency;
+
+    return params;
 }
 
 void MultilayerGroundTexturePrivate::process(Terrain &terrain, Image &image,
@@ -222,33 +247,57 @@ void MultilayerGroundTexturePrivate::process(Terrain &terrain, Image &image,
         distribParams.slopeFactor =
             static_cast<float>(terrainDims.z * terrainRes / terrainDims.x);
 
-        VkwDescriptorSetLayout layout({0}, {1, 2});
+        VkwDescriptorSetLayout layout({0, 1}, {256});
+        layout.addBinding(DescriptorType::IMAGE, 2);
 
         VkwGraphicsPipeline pipeline(layout);
-        pipeline.setBuiltinShader(VkwShaderType::VERTEX, "");
+        pipeline.setBuiltinShader(VkwShaderType::VERTEX, "generic-2D.vert");
         pipeline.setBuiltinShader(VkwShaderType::FRAGMENT,
                                   "distribution-height.frag");
 
         VkwDescriptorSet dset(layout);
-        dset.addUniformStruct(0, layerInfo._distribParams);
-        // TODO ....
+        dset.addUniformStruct(0, distribParams);
+        dset.addUniformStruct(1, getPerlinParameters(tc, i));
 
-        // elem._worker->beginRenderPass();
+        dset.addDescriptor(2, elem._terrain);
+        dset.addDescriptor(256, _perlinHash);
+
+        VkwRenderPass renderPass(elem._distributions[i]);
+        pipeline.setRenderPass(renderPass);
+
+        elem._worker->beginRenderPass(renderPass);
         elem._worker->bindCommand(pipeline, dset);
         elem._worker->draw(6);
         elem._worker->endRenderPass();
 
-        // TODO transitions
-
-        elem._distributions[i];
+        // TODO transitions to textures
     }
 
-    VkwDescriptorSetLayout layout({0}, {1, 2});
+    VkwDescriptorSetLayout layout({0}, {});
+    layout.addBinding(DescriptorType::IMAGE, 1, elem._distributions.size());
+    layout.addBinding(DescriptorType::IMAGE, 2, elem._textures.size());
 
     VkwGraphicsPipeline pipeline(layout);
+    pipeline.setBuiltinShader(VkwShaderType::VERTEX, "generic-2D.vert");
+    pipeline.setBuiltinShader(VkwShaderType::FRAGMENT,
+                              "multilayer-texture.frag");
+
+    VkwDescriptorSet dset(layout);
+
+    struct {
+        uint32_t texCount;
+    } metadata;
+    metadata.texCount = elem._textures.size();
+    dset.addUniformStruct(0, metadata);
+    dset.addTextureArray(1, elem._distributions);
+    dset.addTextureArray(2, elem._textures);
+
+    VkwRenderPass renderPass(elem._finalTexture);
+    pipeline.setRenderPass(renderPass);
 
     // Merge all layers into one
-    // elem._worker->beginRenderPass();
+    elem._worker->beginRenderPass(renderPass);
+    elem._worker->bindCommand(pipeline, dset);
     elem._worker->draw(6);
     elem._worker->endRenderPass();
     elem._worker->endCommandRecording();

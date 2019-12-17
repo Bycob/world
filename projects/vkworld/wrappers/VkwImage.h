@@ -33,11 +33,19 @@ public:
     VkwImagePrivate(int width, int height, VkwImageUsage usage,
                     vk::Format format);
     ~VkwImagePrivate();
+
+    void createImageView();
+
+    void createSampler();
 };
 
 class VKWORLD_EXPORT VkwImage : public IVkwBindable, public IVkwMemoryAccess {
 public:
     static int getMemoryType(VkwImageUsage imgUse, u32 size);
+
+    static void registerArray(std::vector<VkwImage> &imgs,
+                              vk::DescriptorSet &descriptorSet,
+                              vk::DescriptorType type, u32 id);
 
 
     VkwImage(int width, int height,
@@ -48,7 +56,7 @@ public:
     void registerTo(vk::DescriptorSet &descriptorSet,
                     vk::DescriptorType descriptorType, u32 id) override;
 
-    void setData(void *data, u32 count, u32 offset) override;
+    void setData(const void *data, u32 count, u32 offset) override;
 
     void getData(void *data, u32 count, u32 offset) override;
 

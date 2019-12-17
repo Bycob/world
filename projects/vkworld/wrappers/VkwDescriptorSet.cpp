@@ -39,6 +39,11 @@ void VkwDescriptorSet::addDescriptor(u32 id, IVkwBindable &bindable) {
                         _internal->_layout.getBindingType(id), id);
 }
 
+void VkwDescriptorSet::addTextureArray(u32 id, std::vector<VkwImage> &array) {
+    VkwImage::registerArray(array, _internal->_descriptorSet,
+                            _internal->_layout.getBindingType(id), id);
+}
+
 vk::DescriptorSet &VkwDescriptorSet::handle() {
     return _internal->_descriptorSet;
 }

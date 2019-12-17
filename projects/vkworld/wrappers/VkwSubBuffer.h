@@ -35,8 +35,8 @@ public:
     void getData(void *data);
     void getData(void *data, u32 count, u32 offset = 0) override;
 
-    void setData(void *data);
-    void setData(void *data, u32 count, u32 offset = 0) override;
+    void setData(const void *data);
+    void setData(const void *data, u32 count, u32 offset = 0) override;
 
 private:
     std::shared_ptr<VkwSubBufferPrivate> _internal;

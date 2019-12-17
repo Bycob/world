@@ -23,9 +23,11 @@ public:
 
     void addDescriptor(u32 id, IVkwBindable &bindable);
 
+    void addTextureArray(u32 id, std::vector<VkwImage> &array);
+
     /** Allocate memory for struct, load in memory and add the
      * descriptor. */
-    template <typename T> void addUniformStruct(u32 id, T &value);
+    template <typename T> void addUniformStruct(u32 id, const T &value);
 
     vk::DescriptorSet &handle();
 
@@ -36,7 +38,7 @@ private:
 };
 
 template <typename T>
-void VkwDescriptorSet::addUniformStruct(u32 id, T &value) {
+void VkwDescriptorSet::addUniformStruct(u32 id, const T &value) {
     auto &ctx = Vulkan::context();
     VkwSubBuffer buffer = ctx.allocate(
         sizeof(T), DescriptorType::UNIFORM_BUFFER, MemoryUsage::CPU_WRITES);

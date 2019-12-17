@@ -33,7 +33,7 @@ struct VKWORLD_EXPORT VkwMemoryCacheSegment : public IVkwMemoryAccess {
 
     // ===== IVkwMemoryAccess
 
-    void setData(void *data, u32 count, u32 offset) override;
+    void setData(const void *data, u32 count, u32 offset) override;
 
     void getData(void *data, u32 count, u32 offset) override;
 };

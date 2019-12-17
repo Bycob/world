@@ -43,23 +43,8 @@ VkwImagePrivate::VkwImagePrivate(int width, int height, VkwImageUsage imgUse,
     _memory = ctx._device.allocateMemory(memAllocate);
     ctx._device.bindImageMemory(_image, _memory, 0);
 
-    // Create the image view
-    vk::ImageViewCreateInfo imageViewInfo({}, _image, vk::ImageViewType::e2D,
-                                          _imageFormat);
-    imageViewInfo.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
-    imageViewInfo.subresourceRange.baseMipLevel = 0;
-    imageViewInfo.subresourceRange.levelCount = 1;
-    imageViewInfo.subresourceRange.baseArrayLayer = 0;
-    imageViewInfo.subresourceRange.layerCount = 1;
-    _imageView = ctx._device.createImageView(imageViewInfo);
-
-    vk::SamplerCreateInfo samplerInfo(
-        {}, vk::Filter::eLinear, vk::Filter::eLinear,
-        vk::SamplerMipmapMode::eLinear, vk::SamplerAddressMode::eRepeat,
-        vk::SamplerAddressMode::eRepeat, vk::SamplerAddressMode::eClampToEdge,
-        0.0f, VK_FALSE, 1.0f, VK_FALSE, vk::CompareOp::eAlways, 0.0f, 1.0f,
-        vk::BorderColor::eFloatOpaqueWhite);
-    _sampler = ctx._device.createSampler(samplerInfo);
+    createImageView();
+    createSampler();
 }
 
 VkwImagePrivate::~VkwImagePrivate() {
@@ -71,6 +56,31 @@ VkwImagePrivate::~VkwImagePrivate() {
     ctx._device.free(_memory);
 }
 
+void VkwImagePrivate::createImageView() {
+    auto &ctx = Vulkan::context();
+
+    vk::ImageViewCreateInfo imageViewInfo({}, _image, vk::ImageViewType::e2D,
+                                          _imageFormat);
+    imageViewInfo.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+    imageViewInfo.subresourceRange.baseMipLevel = 0;
+    imageViewInfo.subresourceRange.levelCount = 1;
+    imageViewInfo.subresourceRange.baseArrayLayer = 0;
+    imageViewInfo.subresourceRange.layerCount = 1;
+    _imageView = ctx._device.createImageView(imageViewInfo);
+}
+
+void VkwImagePrivate::createSampler() {
+    auto &ctx = Vulkan::context();
+
+    vk::SamplerCreateInfo samplerInfo(
+        {}, vk::Filter::eLinear, vk::Filter::eLinear,
+        vk::SamplerMipmapMode::eLinear, vk::SamplerAddressMode::eRepeat,
+        vk::SamplerAddressMode::eRepeat, vk::SamplerAddressMode::eClampToEdge,
+        0.0f, VK_FALSE, 1.0f, VK_FALSE, vk::CompareOp::eAlways, 0.0f, 1.0f,
+        vk::BorderColor::eFloatOpaqueWhite);
+    _sampler = ctx._device.createSampler(samplerInfo);
+}
+
 
 int VkwImage::getMemoryType(VkwImageUsage imgUse, u32 size) {
     auto &ctx = Vulkan::context();
@@ -78,6 +88,24 @@ int VkwImage::getMemoryType(VkwImageUsage imgUse, u32 size) {
                              ? MemoryUsage::CPU_WRITES
                              : MemoryUsage::CPU_READS;
     return ctx.getMemoryType(memUse, size);
+}
+
+void VkwImage::registerArray(std::vector<VkwImage> &imgs,
+                             vk::DescriptorSet &descriptorSet,
+                             vk::DescriptorType type, u32 id) {
+    std::vector<vk::DescriptorImageInfo> imgInfos;
+    imgInfos.reserve(imgs.size());
+
+    for (VkwImage &img : imgs) {
+        imgInfos.emplace_back(img._internal->_sampler,
+                              img._internal->_imageView,
+                              vk::ImageLayout::eGeneral);
+    }
+
+    vk::WriteDescriptorSet writeDescriptorSet(descriptorSet, id, 0, imgs.size(),
+                                              type, &imgInfos[0]);
+    auto &ctx = Vulkan::context();
+    ctx._device.updateDescriptorSets(1, &writeDescriptorSet, 0, nullptr);
 }
 
 VkwImage::VkwImage(int width, int height, VkwImageUsage imgUse,
@@ -96,7 +124,7 @@ void VkwImage::registerTo(vk::DescriptorSet &descriptorSet,
     ctx._device.updateDescriptorSets(1, &writeDescriptorSet, 0, nullptr);
 }
 
-void VkwImage::setData(void *data, u32 count, u32 offset) {
+void VkwImage::setData(const void *data, u32 count, u32 offset) {
     VulkanContext &ctx = Vulkan::context();
 
     void *mapped = ctx._device.mapMemory(_internal->_memory, offset, count);

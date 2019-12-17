@@ -22,7 +22,7 @@ public:
     VkwDescriptorSetLayout(std::initializer_list<u32> uniformIds,
                            std::initializer_list<u32> storageIds);
 
-    void addBinding(DescriptorType type, u32 binding);
+    void addBinding(DescriptorType type, u32 binding, u32 count = 1);
 
     vk::DescriptorType getBindingType(u32 binding) const;
 

@@ -14,7 +14,7 @@ class VKWORLD_EXPORT IVkwMemoryAccess {
 public:
     virtual ~IVkwMemoryAccess() = default;
 
-    virtual void setData(void *data, u32 count, u32 offset) = 0;
+    virtual void setData(const void *data, u32 count, u32 offset) = 0;
 
     virtual void getData(void *data, u32 count, u32 offset) = 0;
 };

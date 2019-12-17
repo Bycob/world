@@ -34,9 +34,11 @@ void VkwSubBuffer::getData(void *data, u32 count, u32 offset) {
     _internal->_memAccess.getData(data, count, _internal->_offset + offset);
 }
 
-void VkwSubBuffer::setData(void *data) { setData(data, _internal->_size); }
+void VkwSubBuffer::setData(const void *data) {
+    setData(data, _internal->_size);
+}
 
-void VkwSubBuffer::setData(void *data, u32 count, u32 offset) {
+void VkwSubBuffer::setData(const void *data, u32 count, u32 offset) {
     _internal->_memAccess.setData(data, count, _internal->_offset + offset);
 }
 
