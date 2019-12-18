@@ -236,16 +236,16 @@ void VulkanContext::createComputeResources() {
     descriptorPoolSizes.resize(3);
 
     descriptorPoolSizes[0].type = vk::DescriptorType::eStorageBuffer;
-    descriptorPoolSizes[0].descriptorCount = 2000;
+    descriptorPoolSizes[0].descriptorCount = 4000;
 
     descriptorPoolSizes[1].type = vk::DescriptorType::eUniformBuffer;
-    descriptorPoolSizes[1].descriptorCount = 2000;
+    descriptorPoolSizes[1].descriptorCount = 4000;
 
     descriptorPoolSizes[2].type = vk::DescriptorType::eCombinedImageSampler;
-    descriptorPoolSizes[2].descriptorCount = 2000;
+    descriptorPoolSizes[2].descriptorCount = 4000;
 
     vk::DescriptorPoolCreateInfo descriptorPoolInfo = {};
-    descriptorPoolInfo.maxSets = 750;
+    descriptorPoolInfo.maxSets = 1500;
     descriptorPoolInfo.flags |=
         vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet;
     descriptorPoolInfo.poolSizeCount = descriptorPoolSizes.size();

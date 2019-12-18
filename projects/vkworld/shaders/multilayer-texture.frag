@@ -34,6 +34,7 @@ void main() {
     for (int i = 0; i < texCount; ++i) {
         // newColor = applyAlpha(newColor, texture(textures, vec3(texUV, i)) * vec4(vec3(1), texture(distributions, vec3(uv, i)).r));
         newColor = applyAlpha(newColor, texture(textures[i], texUV) * vec4(vec3(1), texture(distributions[i], uv).r));
+        // newColor = texture(distributions[i], uv);
     }
 
     fragColor = newColor;

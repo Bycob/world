@@ -17,19 +17,19 @@ int main(int argc, char **argv) { generate_test_world(argc, argv); }
 
 #ifdef USE_VKWORLD
 
-#include <vkworld/MultilayerGroundTextureOld.h>
+#include <vkworld/MultilayerGroundTexture.h>
 
 FlatWorld *createWorld() {
     FlatWorld *world = new FlatWorld();
     HeightmapGround &ground = world->setGround<HeightmapGround>();
 
     ground.setTerrainResolution(65);
-    ground.setTextureRes(16);
+    ground.setTextureRes(128);
     ground.setMaxLOD(5);
 
     ground.addWorker<PerlinTerrainGenerator>(3, 4., 0.35);
     // ground.addWorker<CustomWorldRMModifier>(1);
-    ground.addWorker<MultilayerGroundTextureOld>().addDefaultLayers();
+    ground.addWorker<MultilayerGroundTexture>().addDefaultLayers();
 
     return world;
 }

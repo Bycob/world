@@ -142,6 +142,14 @@ void VkwImage::getData(void *data, u32 count, u32 offset) {
     ctx._device.unmapMemory(_internal->_memory);
 }
 
+vk::SubresourceLayout VkwImage::getSubresourceLayout() {
+    VulkanContext &ctx = Vulkan::context();
+    // TODO ensure subresource is correctly selected
+    vk::ImageSubresource subresource(vk::ImageAspectFlagBits::eColor, 0, 0);
+    return ctx._device.getImageSubresourceLayout(_internal->_image,
+                                                 subresource);
+}
+
 vk::ImageView VkwImage::getImageView() { return _internal->_imageView; }
 
 } // namespace world

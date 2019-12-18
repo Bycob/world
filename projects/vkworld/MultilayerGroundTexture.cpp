@@ -239,7 +239,7 @@ void MultilayerGroundTexturePrivate::process(Terrain &terrain, Image &image,
         _storage.getOrCreate(tc, terrainRes, imgWidth, _layers.size(), &image);
     getTileTextures(tc, elem, terrainDims.x);
 
-    VkwMemoryHelper::terrainToGPU(terrain, elem._terrain);
+    VkwMemoryHelper::terrainToGPUImage(terrain, elem._terrain);
     // slope is not used yet
 
     elem._worker = std::make_unique<VkwGraphicsWorker>();
@@ -324,9 +324,14 @@ void MultilayerGroundTexturePrivate::process(Terrain &terrain, Image &image,
 void MultilayerGroundTexture::flush() {
     for (const TileCoordinates &tc : _internal->_queue) {
         auto &elem = _internal->_storage.get(tc);
+        std::cout << tc._pos << " " << tc._lod << " " << elem._image
+                  << std::endl;
         elem._worker->waitForCompletion();
-        VkwMemoryHelper::GPUToImage(elem._finalTexture, *elem._image);
-        elem._image = nullptr;
+        VkwMemoryHelper::GPUToImage(elem._finalTexture, *elem._image, 4);
+        // Dealocate resources
+        elem._worker = nullptr;
+        // TODO this tile is generated multiple times wtf
+        // elem._image = nullptr;
     }
 
     _internal->_queue.clear();

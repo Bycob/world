@@ -7,6 +7,7 @@
 #include <world/terrain/Terrain.h>
 
 #include "IVkwMemoryAccess.h"
+#include "VkwImage.h"
 
 namespace world {
 
@@ -40,6 +41,8 @@ public:
     static void GPUToTerrain(IVkwMemoryAccess &memory, Terrain &terrain);
 
     static void terrainToGPU(const Terrain &terrain, IVkwMemoryAccess &memory);
+
+    static void terrainToGPUImage(const Terrain &terrain, VkwImage &image);
 
     static void GPUToMesh(IVkwMemoryAccess &verticesMemory,
                           IVkwMemoryAccess &indicesMemory, Mesh &mesh);

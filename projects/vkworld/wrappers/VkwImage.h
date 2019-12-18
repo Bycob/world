@@ -66,6 +66,8 @@ public:
 
     vk::Format format() const { return _internal->_imageFormat; }
 
+    vk::SubresourceLayout getSubresourceLayout();
+
     vk::ImageView getImageView();
 
 private:

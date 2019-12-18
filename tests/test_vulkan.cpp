@@ -26,6 +26,13 @@ int main(int argc, char **argv) {
     // testVkwGrass();
 }
 
+// TODO
+// - Profiling
+// - Change array of textures to texture arrays
+// - Fix vulkan warnings
+// - Fix gradient
+// - Implement what it takes to deallocate resources and not saturate the RAM
+// - Address potential performance issues
 void testMultilayerTerrainTexture(int argc, char **argv) {
     Terrain terrain(128);
     terrain.setBounds(-500, -500, 0, 500, 500, 400);
