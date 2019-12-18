@@ -106,31 +106,31 @@ void MultilayerGroundTexture::addDefaultLayers() {
     addLayer(DistributionParams{-1, 0, 1, 2, // h
                                 -1, 0, 1, 2, // dh
                                 0, 1, 0, 1, 0.2},
-             "texture-rock.comp");
+             "texture-rock.frag");
 
     // Sand
     addLayer(DistributionParams{-1, 0, 0.4, 0.45, // h
                                 -1, 0, 0.4, 0.6,  // dh
                                 0, 1, 0, 1, 0.2},
-             "texture-sand.comp");
+             "texture-sand.frag");
 
     // Soil
     addLayer(DistributionParams{0.33, 0.4, 0.6, 0.75, // h
                                 -1, 0, 0.4, 0.9,      // dh
                                 0, 0.85, 0.25, 0.85, 0.2},
-             "texture-soil.comp");
+             "texture-soil.frag");
 
     // Grass
     addLayer(DistributionParams{0.33, 0.4, 0.6, 0.7, // h
                                 -1, 0, 0.2, 0.6,     // dh
                                 0., 1., 0.25, 0.6, 0.2},
-             "texture-grass.comp");
+             "texture-grass.frag");
 
     // Snow
     addLayer(DistributionParams{0.65, 0.8, 1, 2, // h
                                 -1, 0, 0.5, 0.7, // dh
                                 0.0, 1.0, 0, 1., 0.2},
-             "texture-snow.comp");
+             "texture-snow.frag");
 }
 
 void MultilayerGroundTexture::addLayer(const DistributionParams &distribution,
@@ -140,6 +140,7 @@ void MultilayerGroundTexture::addLayer(const DistributionParams &distribution,
 
 void MultilayerGroundTexture::processTerrain(Terrain &terrain) {
     _internal->process(terrain, terrain.getTexture(), {});
+    flush();
 }
 
 void MultilayerGroundTexture::processTile(ITileContext &context) {
@@ -158,6 +159,7 @@ void MultilayerGroundTexturePrivate::launchTextureGeneration(LodTextures &t) {
 
         // Generate image
         VkwDescriptorSetLayout layout({0}, {});
+        layout.addBinding(DescriptorType::IMAGE, 1);
 
         VkwGraphicsPipeline pipeline(layout);
         pipeline.enableVertexBuffer(false);
@@ -178,6 +180,7 @@ void MultilayerGroundTexturePrivate::launchTextureGeneration(LodTextures &t) {
         sizes.height = t._width;
 
         dset.addUniformStruct(0, sizes);
+        dset.addDescriptor(1, _randTex.get());
 
         VkwRenderPass renderPass(image);
         pipeline.setRenderPass(renderPass);
@@ -229,11 +232,11 @@ void MultilayerGroundTexturePrivate::process(Terrain &terrain, Image &image,
                                              const TileCoordinates &tc) {
 
     const u32 terrainRes = terrain.getResolution();
-    const u32 imgSideCount = image.width();
+    const u32 imgWidth = image.width();
     vec3d terrainDims = terrain.getBoundingBox().getDimensions();
 
-    auto &elem = _storage.getOrCreate(tc, terrainRes, imgSideCount,
-                                      _layers.size(), &image);
+    auto &elem =
+        _storage.getOrCreate(tc, terrainRes, imgWidth, _layers.size(), &image);
     getTileTextures(tc, elem, terrainDims.x);
 
     VkwMemoryHelper::terrainToGPU(terrain, elem._terrain);
@@ -247,11 +250,13 @@ void MultilayerGroundTexturePrivate::process(Terrain &terrain, Image &image,
         distribParams.slopeFactor =
             static_cast<float>(terrainDims.z * terrainRes / terrainDims.x);
 
-        VkwDescriptorSetLayout layout({0, 1}, {256});
+        VkwDescriptorSetLayout layout({0, 1, 3}, {256});
         layout.addBinding(DescriptorType::IMAGE, 2);
 
         VkwGraphicsPipeline pipeline(layout);
-        pipeline.setBuiltinShader(VkwShaderType::VERTEX, "generic-2D.vert");
+        pipeline.enableVertexBuffer(false);
+        pipeline.setBuiltinShader(VkwShaderType::VERTEX,
+                                  "generic-texture.vert");
         pipeline.setBuiltinShader(VkwShaderType::FRAGMENT,
                                   "distribution-height.frag");
 
@@ -260,6 +265,9 @@ void MultilayerGroundTexturePrivate::process(Terrain &terrain, Image &image,
         dset.addUniformStruct(1, getPerlinParameters(tc, i));
 
         dset.addDescriptor(2, elem._terrain);
+        float imgSizes[] = {static_cast<float>(imgWidth),
+                            static_cast<float>(imgWidth)};
+        dset.addUniformStruct(3, imgSizes);
         dset.addDescriptor(256, _perlinHash);
 
         VkwRenderPass renderPass(elem._distributions[i]);
@@ -278,15 +286,22 @@ void MultilayerGroundTexturePrivate::process(Terrain &terrain, Image &image,
     layout.addBinding(DescriptorType::IMAGE, 2, elem._textures.size());
 
     VkwGraphicsPipeline pipeline(layout);
-    pipeline.setBuiltinShader(VkwShaderType::VERTEX, "generic-2D.vert");
+    pipeline.enableVertexBuffer(false);
+    pipeline.setBuiltinShader(VkwShaderType::VERTEX, "generic-texture.vert");
     pipeline.setBuiltinShader(VkwShaderType::FRAGMENT,
                               "multilayer-texture.frag");
 
     VkwDescriptorSet dset(layout);
 
     struct {
+        float offsetX;
+        float offsetY;
+        float sizeX;
+        float sizeY;
         uint32_t texCount;
     } metadata;
+    metadata.sizeY = metadata.sizeX = static_cast<float>(imgWidth) / _texWidth;
+    metadata.offsetY = metadata.offsetX = 0; // TODO
     metadata.texCount = elem._textures.size();
     dset.addUniformStruct(0, metadata);
     dset.addTextureArray(1, elem._distributions);
@@ -301,14 +316,20 @@ void MultilayerGroundTexturePrivate::process(Terrain &terrain, Image &image,
     elem._worker->draw(6);
     elem._worker->endRenderPass();
     elem._worker->endCommandRecording();
+
+    elem._worker->run();
+    _queue.push_back(tc);
 }
 
 void MultilayerGroundTexture::flush() {
     for (const TileCoordinates &tc : _internal->_queue) {
         auto &elem = _internal->_storage.get(tc);
-        // elem._texGen.getGeneratedImage(*elem._image);
+        elem._worker->waitForCompletion();
+        VkwMemoryHelper::GPUToImage(elem._finalTexture, *elem._image);
         elem._image = nullptr;
     }
+
+    _internal->_queue.clear();
 }
 
 Image MultilayerGroundTexture::getTexture(int lod, int layerId) {}

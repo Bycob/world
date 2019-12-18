@@ -19,7 +19,9 @@ VkwImagePrivate::VkwImagePrivate(int width, int height, VkwImageUsage imgUse,
         break;
     case VkwImageUsage::OFFSCREEN_RENDER:
         imgUsageBits |= vk::ImageUsageFlagBits::eColorAttachment |
-                        vk::ImageUsageFlagBits::eTransferSrc;
+                        vk::ImageUsageFlagBits::eTransferSrc |
+                        vk::ImageUsageFlagBits::eSampled;
+        // TODO find how to convert rendered image into sampled
         break;
     }
     // What is color attachment

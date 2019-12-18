@@ -5,7 +5,10 @@
 #include "worldlib"
 
 layout(location = 0) in vec2 fragCoord;
-layout(location = 0) out vec4 fragColor;
+layout(location = 1) in vec3 fragNorm;
+layout(location = 2) in vec2 fragUV;
+
+layout(location = 0) out float fragColor;
 
 layout(binding = 0) uniform DistributionParameters {
     vec4 height;
@@ -23,16 +26,18 @@ layout(binding = 1) uniform PerlinParams {
 };
 
 layout(binding = 2) uniform sampler2D inputHeight;
-layout(binding = 3) uniform sampler2D random;
+// to compute derivatives
+layout(binding = 3) uniform GradientParams {
+	vec2 imgSizes;
+};
 // layout(binding = 3) uniform sampler2D inputDHeight;
 
 #define PI 3.14
 
 void main() {
-	vec2 uv = fragCoord;
+	vec2 uv = fragUV;
 	float h = texture(inputHeight, uv).r;
-	// TODO Compute gradient of the texture
-	float dh = atan(texture(inputHeight, uv).r * slopeFactor) * 2. / PI;
+	float dh = atan(texGradient(inputHeight, uv, 1 / imgSizes).r * slopeFactor) * 2. / PI;
 	
 	float r1 = ramp(height.x, height.y, height.z, height.w, hmin, hmax, h);
 	float r2 = ramp(dheight.x, dheight.y, dheight.z, dheight.w, dhmin, dhmax, dh);
@@ -40,5 +45,5 @@ void main() {
 	NoiseParameters noiseParams = uNoiseParams;
 	float x = perlin(noiseParams, uv.x, uv.y, 0);
 	
-	fragColor = vec4(smoothstep(r + threshold, r - threshold, x));
+	fragColor = smoothstep(r + threshold, r - threshold, x);
 }

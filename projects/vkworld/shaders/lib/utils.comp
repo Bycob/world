@@ -34,4 +34,17 @@ vec4 applyAlpha(vec4 bg, vec4 fg) {
     return vec4(mix(bg.rgb, fg.rgb, fg.a), a);
 }
 
+vec4 texGradient(in sampler2D tex, vec2 uv, vec2 eps) {
+    vec2 e2 = eps / 2;
+    vec4 a = texture(tex, uv + vec2(-e2.x, -e2.y));
+    vec4 b = texture(tex, uv + vec2(e2.x, -e2.y));
+    vec4 c = texture(tex, uv + vec2(-e2.x, e2.y));
+    vec4 d = texture(tex, uv + vec2(e2.x, e2.y));
+
+    vec4 dx = abs(a - b) + abs(c - d);
+    vec4 dy = abs(a - c) + abs(b - d);
+
+    return sqrt(dx * dx + dy * dy) / 2.;
+}
+
 #endif
