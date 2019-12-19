@@ -8,7 +8,6 @@
 #include "world/tree/SimpleTreeDecorator.h"
 #include "world/nature/Rocks.h"
 #include "world/core/Profiler.h"
-#include "world/core/InstancePool.h"
 #include "world/core/SeedDistribution.h"
 
 namespace world {
