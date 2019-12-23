@@ -114,15 +114,19 @@ void VkwGraphicsWorker::beginRenderPass(VkwRenderPass &renderPass) {
     clearValues[0].color = std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f};
     // clearValues[1].depthStencil = vk::ClearDepthStencilValue{1.0f, 0};
 
-    vk::Viewport viewport(0, 0, static_cast<float>(width),
-                          static_cast<float>(height), 0.0f, 1.0f);
     vk::Rect2D renderArea(vk::Offset2D(), vk::Extent2D(width, height));
-
     vk::RenderPassBeginInfo renderPassBeginInfo(renderPass.handle(),
                                                 renderPass.framebuffer(),
                                                 renderArea, 2, clearValues);
     _commandBuffer.beginRenderPass(renderPassBeginInfo,
                                    vk::SubpassContents::eInline);
+}
+
+void VkwGraphicsWorker::setViewport(int width, int height) {
+    vk::Viewport viewport(0, 0, static_cast<float>(width),
+                          static_cast<float>(height), 0.0f, 1.0f);
+    vk::Rect2D renderArea(vk::Offset2D(), vk::Extent2D(width, height));
+
     _commandBuffer.setViewport(0, 1, &viewport);
     _commandBuffer.setScissor(0, 1, &renderArea);
 }

@@ -20,6 +20,8 @@ public:
 
     bool _vertexBuffer = true;
 
+    bool _dynamicViewport = false;
+
     vk::PrimitiveTopology _primitive = vk::PrimitiveTopology::eTriangleList;
 
 
@@ -196,6 +198,10 @@ void VkwGraphicsPipeline::setBuiltinShader(VkwShaderType type,
     auto &ctx = Vulkan::context();
     _internal->_shaders[type] =
         ctx.createShader(ctx.readFile(shaderName + ".spv"));
+}
+
+bool VkwGraphicsPipeline::hasDynamicViewport() const {
+    return _internal->_dynamicViewport;
 }
 
 vk::Pipeline &VkwGraphicsPipeline::getPipeline() {

@@ -1,7 +1,7 @@
 #ifndef HASH_COMP
 #define HASH_COMP
 
-layout(binding = 0x100) buffer PerlinTable {
+layout(binding = 0x100) buffer readonly PerlinTable {
     uint p[512];
 };
 

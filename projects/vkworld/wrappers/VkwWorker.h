@@ -62,6 +62,8 @@ public:
 
     void beginRenderPass(VkwRenderPass &renderPass);
 
+    void setViewport(int width, int height);
+
     void bindCommand(VkwGraphicsPipeline &pipeline, VkwDescriptorSet &dset);
 
     void draw(u32 count);

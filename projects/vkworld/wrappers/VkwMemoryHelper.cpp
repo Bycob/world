@@ -45,7 +45,6 @@ void VkwMemoryHelper::terrainToGPU(const Terrain &terrain,
 void VkwMemoryHelper::terrainToGPUImage(const Terrain &terrain,
                                         VkwImage &image) {
     auto imgLayout = image.getSubresourceLayout();
-    std::cout << imgLayout.size << std::endl;
     int res = terrain.getResolution();
     float *buf = new float[res];
 

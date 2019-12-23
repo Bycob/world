@@ -19,7 +19,7 @@ FlatWorld *VkWorld::createDemoFlatWorld() {
     FlatWorld *world = new FlatWorld();
 
     HeightmapGround &ground = world->setGround<HeightmapGround>();
-    ground.setMaxLOD(1);
+    ground.setMaxLOD(8);
     ground.setTextureRes(128);
     ground.addWorker<PerlinTerrainGenerator>(3, 4., 0.35).setMaxOctaveCount(6);
     auto &map = ground.addWorker<CustomWorldRMModifier>();

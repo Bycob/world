@@ -42,6 +42,8 @@ public:
 
     void setBuiltinShader(VkwShaderType type, const std::string &shaderName);
 
+    bool hasDynamicViewport() const;
+
     /** Returns the pipeline created with current configuration of this
      * GraphicsPipeline. */
     vk::Pipeline &getPipeline();
