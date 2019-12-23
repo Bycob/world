@@ -69,8 +69,6 @@ public:
 
     VkwRandomTexture _randTex;
     VkwSubBuffer _perlinHash;
-    std::vector<VkwGraphicsPipeline> _distribPipelines;
-    VkwGraphicsPipeline _texPipeline;
 
     u32 _texWidth = 2048;
     std::map<int, LodTextures> _lodTextures;
@@ -324,14 +322,12 @@ void MultilayerGroundTexturePrivate::process(Terrain &terrain, Image &image,
 void MultilayerGroundTexture::flush() {
     for (const TileCoordinates &tc : _internal->_queue) {
         auto &elem = _internal->_storage.get(tc);
-        std::cout << tc._pos << " " << tc._lod << " " << elem._image
-                  << std::endl;
         elem._worker->waitForCompletion();
         VkwMemoryHelper::GPUToImage(elem._finalTexture, *elem._image, 4);
+
         // Dealocate resources
         elem._worker = nullptr;
-        // TODO this tile is generated multiple times wtf
-        // elem._image = nullptr;
+        elem._image = nullptr;
     }
 
     _internal->_queue.clear();

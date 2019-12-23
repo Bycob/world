@@ -54,7 +54,8 @@ public:
 
     void setTextureRes(int textureRes) {
         _textureRes = textureRes;
-        _tileSystem._bufferRes.x = _tileSystem._bufferRes.y = _textureRes;
+        _tileSystem._bufferRes.x = _tileSystem._bufferRes.y =
+            _textureRes * _texPixSize;
     }
 
     void setMaxLOD(int lod) { _tileSystem._maxLod = lod; }
@@ -86,14 +87,17 @@ public:
 private:
     PGround *_internal;
 
-    // Paramètres
-    /** L'altitude minimum du monde. Le niveau de la mer est fixé à 0. */
+    // Parameters
+    /** World lowest possible altitude. Sea level is 0. */
     double _minAltitude;
-    /** L'altitude maximum du monde. Le niveau de la mer est fixé à 0. */
+    /** World highest possible altitude. Sea level is 0. */
     double _maxAltitude;
 
     int _terrainRes = 33;
     int _textureRes = 128;
+    /** The wanted "size" of a texture pixel in the final picture. Ideally 1,
+     * set it to more if you need performances. */
+    int _texPixSize = 4;
 
     TileSystem _tileSystem;
 

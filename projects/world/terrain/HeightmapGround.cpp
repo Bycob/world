@@ -77,8 +77,9 @@ HeightmapGround::HeightmapGround(double unitSize, double minAltitude,
                                  double maxAltitude)
         : _internal(new PGround()), _minAltitude(minAltitude),
           _maxAltitude(maxAltitude),
-          _tileSystem(5, vec3d(_textureRes, _textureRes, 0),
-                      vec3d(unitSize, unitSize, 0)) {}
+          _tileSystem(
+              5, vec3d(_textureRes * _texPixSize, _textureRes * _texPixSize, 0),
+              vec3d(unitSize, unitSize, 0)) {}
 
 HeightmapGround::~HeightmapGround() { delete _internal; }
 
@@ -379,7 +380,7 @@ void HeightmapGround::addNotGeneratedParents(std::set<TileCoordinates> &keys) {
             if (key._lod != 0) {
                 auto pkey = _tileSystem.getParentTileCoordinates(key);
 
-                if (keys.find(pkey) == keys.end() && !isGenerated(key)) {
+                if (keys.find(pkey) == keys.end() && !isGenerated(pkey)) {
                     temp.insert(pkey);
                 }
             }
@@ -390,7 +391,6 @@ void HeightmapGround::addNotGeneratedParents(std::set<TileCoordinates> &keys) {
 }
 
 void HeightmapGround::generateTerrains(const std::set<TileCoordinates> &keys) {
-
     typedef std::vector<Tile *> generateTiles_t;
     std::vector<generateTiles_t> lods(_tileSystem._maxLod + 1);
 
