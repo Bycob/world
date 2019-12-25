@@ -35,7 +35,7 @@ void MeshOps::recalculateNormals(Mesh &mesh) {
     }
 
     // On set les normales
-    for (u32 i = 0; i < normalSum.size(); i++) {
+    for (u64 i = 0; i < normalSum.size(); i++) {
         int count = normalCount.at(i);
         vec3d normal;
 
@@ -47,6 +47,14 @@ void MeshOps::recalculateNormals(Mesh &mesh) {
 
         Vertex &vn = mesh.getVertex(i);
         vn.setNormal(normal);
+    }
+}
+
+void MeshOps::scale(Mesh &mesh, vec3d scaleFactor) {
+    for (u32 i = 0; i < mesh.getVerticesCount(); ++i) {
+        Vertex &vert = mesh.getVertex(i);
+        vert.setPosition(vert.getPosition() * scaleFactor);
+        vert.setNormal((vert.getNormal() * scaleFactor).normalize());
     }
 }
 

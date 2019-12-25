@@ -18,6 +18,8 @@ public:
     /** Add every faces and vertices from mesh `src` to mesh `dst`. */
     static void addAll(Mesh &dst, const Mesh &src);
 
+    static void scale(Mesh &mesh, vec3d scaleFactor);
+
     /** Utility function to concatenate more than two meshes inplace. See
      * #addAll() for details. */
     template <typename... Meshes>
