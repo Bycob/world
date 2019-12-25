@@ -58,27 +58,25 @@ inline void InstancePool<TGenerator, TDistribution>::decorate(Chunk &chunk) {
     // Distribution
     std::uniform_real_distribution<double> rotDistrib(0, M_PI * 2);
     auto &instance = chunk.addChild<Instance>();
+    auto positions = _distribution.getPositions(chunk);
 
-    for (int genID = 0; genID < _generators.size(); ++genID) {
-        auto &templates = _objects.at(genID);
+    for (auto &position : positions) {
+        auto &templates = _objects.at(position._genID);
 
         if (templates.empty()) {
             continue;
         }
+
         std::uniform_int_distribution<int> select(0, templates.size() - 1);
-        auto positions = _distribution.getPositions(chunk, genID);
+        SceneNode object = templates[select(_rng)];
 
-        for (auto &position : positions) {
-            SceneNode object = templates[select(_rng)];
+        // Apply random rotation and scaling
+        object.setPosition(position._pos);
+        object.setRotation({0, 0, rotDistrib(_rng)});
+        double scale = randScale(_rng, 1, 1.2);
+        object.setScale({scale});
 
-            // Apply random rotation and scaling
-            object.setPosition(position);
-            object.setRotation({0, 0, rotDistrib(_rng)});
-            double scale = randScale(_rng, 1, 1.2);
-            object.setScale({scale});
-
-            instance.addNode(std::move(object));
-        }
+        instance.addNode(std::move(object));
     }
 }
 

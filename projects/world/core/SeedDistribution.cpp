@@ -28,6 +28,7 @@ void SeedDistribution::addSeeds(Chunk &chunk) {
                     double distance = _maxDist * (1 - distRatio * distRatio);
 
                     // Choose the generator
+                    // TODO choose the generator according to local conditions
                     u32 generatorId = genDistrib(_rng);
                     seeds.push_back({seedPos, generatorId, distance});
 
@@ -55,23 +56,46 @@ std::vector<Seed> SeedDistribution::getSeedsAround(Chunk &chunk) {
     return seeds;
 }
 
-std::vector<vec3d> SeedDistribution::getPositions(Chunk &chunk,
-                                                  int generatorId) {
+std::vector<SeedDistribution::Position> SeedDistribution::getPositions(
+    Chunk &chunk) {
     addSeeds(chunk);
 
-    std::vector<vec3d> positions;
+    std::vector<Position> positions;
     std::vector<Seed> seedsAround = getSeedsAround(chunk);
-    HabitatFeatures &habitat = _habitats.at(generatorId);
 
+    if (seedsAround.empty()) {
+        std::cerr << "[WARN] No seed found in the region. Author is required "
+                     "to fix his algorithm";
+        return positions;
+    }
+    // We assume that seedsAround.size() != 0
+
+    // Find the highest possible density
+    double maxDensity = 0;
+
+    for (Seed &seed : seedsAround) {
+        double density = _habitats.at(seed._generatorId)._density;
+
+        if (density > maxDensity) {
+            maxDensity = density;
+        }
+    }
+
+    // Get max number of instance in the chunk, so we can generate
+    // as much random positions as needed
     vec3d chunkPos = chunk.getPosition3D();
     vec3d chunkDims = chunk.getSize();
     double chunkArea = chunkDims.x * chunkDims.y;
-    int count = randRound(_rng, habitat._density * chunkArea);
+    int count = randRound(_rng, maxDensity * chunkArea);
 
     std::uniform_real_distribution<double> posDistrib(0, 1);
     std::uniform_real_distribution<double> keepDistrib(0, 1);
 
+    // For each position, species will compete with each others
+    // <!> This algorithm considers that a species competes for the habitat
+    // even if it is not adapted to it.
     for (int i = 0; i < count; ++i) {
+        // Get 3D position (with altitude)
         vec3d position{posDistrib(_rng) * chunkDims.x,
                        posDistrib(_rng) * chunkDims.y, -10000};
         vec3d absPos = _env->findNearestFreePoint(
@@ -83,41 +107,67 @@ std::vector<vec3d> SeedDistribution::getPositions(Chunk &chunk,
             continue;
         }
 
-        if (absPos.z < 0 && !habitat._sea) {
-            continue;
-        }
+        // Compute chance for each species to win the place
+        std::vector<double> habitatCoefs;
+        habitatCoefs.reserve(seedsAround.size());
 
-        // drop according to local conditions
-        auto getProb = [](vec2d range, double x) {
+        std::vector<double> distanceCoefs;
+        distanceCoefs.reserve(seedsAround.size());
+
+        double total = 0;
+
+        // This lambda compute the chance of surviving at x if species life zone
+        // is range
+        const auto getProb = [](vec2d range, double x) {
             double l = (range.y - range.x) * 0.1;
             return min(smoothstep(range.x - l, range.x + l, x),
                        smoothstep(range.y + l, range.y - l, x));
         };
-        double keep = 1;
-        // double humidity = _env->getHumidity(position);
-        // double temperature = _env->getTemperature(position);
-        keep *= getProb(habitat._altitude, absPos.z);
-
-        // Competition between species (introduce environmental obstacles later)
-        // <!> This algorithm considers that a species competes for the habitat
-        // even if it is not adapted to it.
-        double propFor = 0;
-        double propAgainst = 0;
 
         for (auto &seed : seedsAround) {
-            double distance = seed._position.length(vec2d(absPos));
-            double ratio = pow(2, distance / seed._distance);
+            HabitatFeatures &habitat = _habitats.at(seed._generatorId);
+            double habitatCoef = 1;
 
-            if (seed._generatorId == generatorId) {
-                propFor += ratio;
-            } else {
-                propAgainst += ratio;
+            if (absPos.z < 0 && !habitat._sea) {
+                habitatCoef = 0;
             }
-        }
-        keep *= propFor / (propFor + propAgainst);
 
-        if (keepDistrib(_rng) <= keep) {
-            positions.push_back(position);
+            habitatCoef *= getProb(habitat._altitude, absPos.z);
+            // TODO add humidity and temperature
+            // double humidity = _env->getHumidity(position);
+            // double temperature = _env->getTemperature(position);
+
+            habitatCoefs.push_back(habitatCoef);
+
+            double distance = seed._position.length(vec2d(absPos));
+            double distanceCoef = pow(2, -distance / seed._distance) / 2;
+            distanceCoefs.push_back(distanceCoef);
+            // TODO (advanced) introduce environmental obstacles
+
+            total += habitatCoef * distanceCoef;
+        }
+
+        // Select seed according to previously computed probabilities
+        double selector = keepDistrib(_rng) * total;
+        int selectedSeedID = -1;
+
+        double sum = 0;
+        while (sum <= selector &&
+               selectedSeedID < int(seedsAround.size()) - 1) {
+            // without int() cast, above expression is always false
+            selectedSeedID++;
+            sum += habitatCoefs[selectedSeedID];
+        }
+
+        // Once a seed is chosen, we still filter the point according to the
+        // chosen species density
+        Seed &seed = seedsAround[selectedSeedID];
+        HabitatFeatures &habitat = _habitats[seed._generatorId];
+        double keepRate =
+            habitatCoefs[selectedSeedID] * habitat._density / maxDensity;
+
+        if (keepDistrib(_rng) <= keepRate) {
+            positions.push_back({position, int(seed._generatorId)});
         }
     }
 

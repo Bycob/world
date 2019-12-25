@@ -4,6 +4,7 @@
 #include "../assets/Material.h"
 #include "../math/Bezier.h"
 #include "../math/RandomHelper.h"
+#include "world/assets/MeshOps.h"
 
 namespace world {
 
@@ -61,7 +62,7 @@ std::vector<SceneNode> Grass::collectTemplates(ICollector &collector,
             matChan.put(matKey, grassMat, ctx);
         }
 
-        for (int i = 0; i < _points.size(); ++i) {
+        for (u64 i = 0; i < _points.size(); ++i) {
             ItemKey meshKey{NodeKeys::fromInt(i)};
             meshChan.put(meshKey, _meshes[i], ctx);
 
@@ -80,7 +81,7 @@ void Grass::collect(ICollector &collector,
         auto &objChan = collector.getChannel<SceneNode>();
         auto nodes = collectTemplates(collector, ctx);
 
-        for (int i = 0; i < nodes.size(); ++i) {
+        for (u64 i = 0; i < nodes.size(); ++i) {
             ItemKey nodeKey{NodeKeys::fromInt(i)};
             objChan.put(nodeKey, nodes[i]);
         }

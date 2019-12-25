@@ -24,8 +24,16 @@ struct WORLDAPI_EXPORT HabitatFeatures {
 };
 
 
+// TODO blog post on species generation and seed distribution
+
 class WORLDAPI_EXPORT DistributionBase {
 public:
+    struct Position {
+        vec3d _pos;
+        int _genID;
+    };
+
+
     DistributionBase(IEnvironment *env)
             : _env{env}, _rng{static_cast<u32>(time(NULL))} {}
 
@@ -54,8 +62,8 @@ public:
 
     void setDensity(double density) { _density = density; }
 
-    std::vector<vec3d> getPositions(Chunk &chunk, int generatorId) {
-        std::vector<vec3d> positions;
+    std::vector<Position> getPositions(Chunk &chunk) {
+        std::vector<Position> positions;
 
         const vec3d chunkPos = chunk.getPosition3D();
         const vec3d chunkDims = chunk.getSize();
@@ -63,6 +71,8 @@ public:
         double chunkArea = chunkDims.x * chunkDims.y;
         int instanceCount = static_cast<int>(floor(chunkArea * _density));
         std::uniform_real_distribution<double> posDistrib(0, 1);
+        std::uniform_int_distribution<int> genIDDistrib(0,
+                                                        _habitats.size() - 1);
 
         for (int i = 0; i < instanceCount; ++i) {
             double x = posDistrib(_rng) * chunkDims.x;
@@ -77,7 +87,7 @@ public:
                 continue;
             }
 
-            positions.push_back(position);
+            positions.push_back({position, genIDDistrib(_rng)});
         }
 
         return positions;

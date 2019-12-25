@@ -32,7 +32,7 @@ public:
 
     std::vector<Seed> getSeedsAround(Chunk &chunk);
 
-    std::vector<vec3d> getPositions(Chunk &chunk, int generatorId);
+    std::vector<Position> getPositions(Chunk &chunk);
 
 private:
     double _tileSize;
