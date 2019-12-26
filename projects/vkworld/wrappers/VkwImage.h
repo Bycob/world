@@ -29,6 +29,9 @@ public:
 
     int _width, _height;
     vk::Format _imageFormat;
+    vk::SamplerAddressMode _addressX = vk::SamplerAddressMode::eRepeat,
+                           _addressY = vk::SamplerAddressMode::eRepeat;
+
 
     VkwImagePrivate(int width, int height, VkwImageUsage usage,
                     vk::Format format);
@@ -52,6 +55,12 @@ public:
              VkwImageUsage imgUse = VkwImageUsage::TEXTURE,
              vk::Format format = vk::Format::eR32G32B32A32Sfloat);
 
+    // Parameters
+    void setSamplerAddressMode(vk::SamplerAddressMode addMode);
+
+    void setSamplerAddressMode(vk::SamplerAddressMode addModeX,
+                               vk::SamplerAddressMode addModeY);
+
     /** Adds this buffer as binding to the given descriptorSet. */
     void registerTo(vk::DescriptorSet &descriptorSet,
                     vk::DescriptorType descriptorType, u32 id) override;
@@ -69,6 +78,8 @@ public:
     vk::SubresourceLayout getSubresourceLayout();
 
     vk::ImageView getImageView();
+
+    vk::Sampler getSampler();
 
 private:
     std::shared_ptr<VkwImagePrivate> _internal;

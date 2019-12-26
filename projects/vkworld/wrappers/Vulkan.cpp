@@ -70,9 +70,7 @@ VulkanContext::VulkanContext() {
 #ifdef _DEBUG
     _enableValidationLayers = true;
 #else
-    _enableValidationLayers = true; // TODO set it to false when
-                                    // debug compilation mode will be
-                                    // decently useable
+    _enableValidationLayers = false;
 #endif
 
     if (!checkValidationLayerSupport() && _enableValidationLayers) {
@@ -106,8 +104,9 @@ VulkanContext::VulkanContext() {
     pickPhysicalDevice();
     createLogicalDevice();
 
-    // Compute resources
+    // Compute & graphics resources
     createComputeResources();
+    createGraphicsResources();
 }
 
 VulkanContext::~VulkanContext() {
@@ -154,6 +153,10 @@ bool VulkanContext::checkValidationLayerSupport() {
 }
 
 void VulkanContext::setupDebugCallback() {
+    if (!_enableValidationLayers) {
+        return;
+    }
+
     VkDebugReportCallbackCreateInfoEXT createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
     createInfo.flags =
@@ -257,7 +260,9 @@ void VulkanContext::createComputeResources() {
     vk::CommandPoolCreateInfo computePoolInfo(
         {}, findQueueFamily(vk::QueueFlagBits::eCompute));
     _computeCommandPool = _device.createCommandPool(computePoolInfo, nullptr);
+}
 
+void VulkanContext::createGraphicsResources() {
     vk::CommandPoolCreateInfo graphicsPoolInfo(
         {}, findQueueFamily(vk::QueueFlagBits::eGraphics));
     _graphicsCommandPool = _device.createCommandPool(graphicsPoolInfo, nullptr);

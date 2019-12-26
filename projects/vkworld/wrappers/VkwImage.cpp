@@ -44,16 +44,15 @@ VkwImagePrivate::VkwImagePrivate(int width, int height, VkwImageUsage imgUse,
 
     _memory = ctx._device.allocateMemory(memAllocate);
     ctx._device.bindImageMemory(_image, _memory, 0);
-
-    createImageView();
-    createSampler();
 }
 
 VkwImagePrivate::~VkwImagePrivate() {
     auto &ctx = Vulkan::context();
 
-    ctx._device.destroy(_imageView);
-    ctx._device.destroy(_sampler);
+    if (_imageView)
+        ctx._device.destroy(_imageView);
+    if (_sampler)
+        ctx._device.destroy(_sampler);
     ctx._device.destroy(_image);
     ctx._device.free(_memory);
 }
@@ -76,10 +75,9 @@ void VkwImagePrivate::createSampler() {
 
     vk::SamplerCreateInfo samplerInfo(
         {}, vk::Filter::eLinear, vk::Filter::eLinear,
-        vk::SamplerMipmapMode::eLinear, vk::SamplerAddressMode::eRepeat,
-        vk::SamplerAddressMode::eRepeat, vk::SamplerAddressMode::eClampToEdge,
-        0.0f, VK_FALSE, 1.0f, VK_FALSE, vk::CompareOp::eAlways, 0.0f, 1.0f,
-        vk::BorderColor::eFloatOpaqueWhite);
+        vk::SamplerMipmapMode::eLinear, _addressX, _addressY,
+        vk::SamplerAddressMode::eClampToEdge, 0.0f, VK_FALSE, 1.0f, VK_FALSE,
+        vk::CompareOp::eAlways, 0.0f, 1.0f, vk::BorderColor::eFloatOpaqueWhite);
     _sampler = ctx._device.createSampler(samplerInfo);
 }
 
@@ -99,8 +97,7 @@ void VkwImage::registerArray(std::vector<VkwImage> &imgs,
     imgInfos.reserve(imgs.size());
 
     for (VkwImage &img : imgs) {
-        imgInfos.emplace_back(img._internal->_sampler,
-                              img._internal->_imageView,
+        imgInfos.emplace_back(img.getSampler(), img.getImageView(),
                               vk::ImageLayout::eGeneral);
     }
 
@@ -115,10 +112,20 @@ VkwImage::VkwImage(int width, int height, VkwImageUsage imgUse,
         : _internal(std::make_shared<VkwImagePrivate>(width, height, imgUse,
                                                       format)) {}
 
+void VkwImage::setSamplerAddressMode(vk::SamplerAddressMode addMode) {
+    setSamplerAddressMode(addMode, addMode);
+}
+
+void VkwImage::setSamplerAddressMode(vk::SamplerAddressMode addModeX,
+                                     vk::SamplerAddressMode addModeY) {
+    _internal->_addressX = addModeX;
+    _internal->_addressY = addModeY;
+}
+
 void VkwImage::registerTo(vk::DescriptorSet &descriptorSet,
                           vk::DescriptorType descriptorType, u32 id) {
-    vk::DescriptorImageInfo descriptorImageInfo(
-        _internal->_sampler, _internal->_imageView, vk::ImageLayout::eGeneral);
+    vk::DescriptorImageInfo descriptorImageInfo(getSampler(), getImageView(),
+                                                vk::ImageLayout::eGeneral);
     vk::WriteDescriptorSet writeDescriptorSet(
         descriptorSet, id, 0, 1, descriptorType, &descriptorImageInfo);
 
@@ -150,6 +157,18 @@ vk::SubresourceLayout VkwImage::getSubresourceLayout() {
                                                  subresource);
 }
 
-vk::ImageView VkwImage::getImageView() { return _internal->_imageView; }
+vk::ImageView VkwImage::getImageView() {
+    if (!_internal->_imageView) {
+        _internal->createImageView();
+    }
+    return _internal->_imageView;
+}
+
+vk::Sampler VkwImage::getSampler() {
+    if (!_internal->_sampler) {
+        _internal->createSampler();
+    }
+    return _internal->_sampler;
+}
 
 } // namespace world

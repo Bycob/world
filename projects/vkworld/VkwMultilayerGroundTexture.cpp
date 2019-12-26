@@ -1,4 +1,4 @@
-#include "MultilayerGroundTexture.h"
+#include "VkwMultilayerGroundTexture.h"
 
 #include <list>
 
@@ -43,6 +43,8 @@ public:
               _finalTexture(texSize, texSize, VkwImageUsage::OFFSCREEN_RENDER,
                             vk::Format::eR32G32B32A32Sfloat),
               _image(image) {
+
+        _terrain.setSamplerAddressMode(vk::SamplerAddressMode::eClampToEdge);
 
         for (int i = 0; i < layerCount; ++i) {
             _distributions.emplace_back(texSize, texSize,
@@ -94,12 +96,12 @@ public:
     void process(Terrain &terrain, Image &image, const TileCoordinates &tc);
 };
 
-MultilayerGroundTexture::MultilayerGroundTexture()
+VkwMultilayerGroundTexture::VkwMultilayerGroundTexture()
         : _internal(new MultilayerGroundTexturePrivate()) {}
 
-MultilayerGroundTexture::~MultilayerGroundTexture() { delete _internal; }
+VkwMultilayerGroundTexture::~VkwMultilayerGroundTexture() { delete _internal; }
 
-void MultilayerGroundTexture::addDefaultLayers() {
+void VkwMultilayerGroundTexture::addDefaultLayers() {
     // Rock
     addLayer(DistributionParams{-1, 0, 1, 2, // h
                                 -1, 0, 1, 2, // dh
@@ -131,17 +133,17 @@ void MultilayerGroundTexture::addDefaultLayers() {
              "texture-snow.frag");
 }
 
-void MultilayerGroundTexture::addLayer(const DistributionParams &distribution,
-                                       const std::string &textureShader) {
+void VkwMultilayerGroundTexture::addLayer(
+    const DistributionParams &distribution, const std::string &textureShader) {
     _internal->_layers.push_back({distribution, textureShader});
 }
 
-void MultilayerGroundTexture::processTerrain(Terrain &terrain) {
+void VkwMultilayerGroundTexture::processTerrain(Terrain &terrain) {
     _internal->process(terrain, terrain.getTexture(), {});
     flush();
 }
 
-void MultilayerGroundTexture::processTile(ITileContext &context) {
+void VkwMultilayerGroundTexture::processTile(ITileContext &context) {
     _internal->process(context.getTile().terrain(), context.getTile().texture(),
                        context.getCoords());
 }
@@ -299,7 +301,9 @@ void MultilayerGroundTexturePrivate::process(Terrain &terrain, Image &image,
         uint32_t texCount;
     } metadata;
     metadata.sizeY = metadata.sizeX = static_cast<float>(imgWidth) / _texWidth;
-    metadata.offsetY = metadata.offsetX = 0; // TODO
+    float empty;
+    metadata.offsetX = std::modf(tc._pos.x * metadata.sizeX, &empty);
+    metadata.offsetY = std::modf(tc._pos.y * metadata.sizeY, &empty);
     metadata.texCount = elem._textures.size();
     dset.addUniformStruct(0, metadata);
     dset.addTextureArray(1, elem._distributions);
@@ -319,7 +323,7 @@ void MultilayerGroundTexturePrivate::process(Terrain &terrain, Image &image,
     _queue.push_back(tc);
 }
 
-void MultilayerGroundTexture::flush() {
+void VkwMultilayerGroundTexture::flush() {
     for (const TileCoordinates &tc : _internal->_queue) {
         auto &elem = _internal->_storage.get(tc);
         elem._worker->waitForCompletion();
@@ -333,6 +337,6 @@ void MultilayerGroundTexture::flush() {
     _internal->_queue.clear();
 }
 
-Image MultilayerGroundTexture::getTexture(int lod, int layerId) {}
+Image VkwMultilayerGroundTexture::getTexture(int lod, int layerId) {}
 
 } // namespace world

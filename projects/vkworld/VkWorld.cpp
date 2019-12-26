@@ -12,20 +12,20 @@
 #include "world/terrain/PerlinTerrainGenerator.h"
 #include "world/terrain/ReliefMapModifier.h"
 
-#include "MultilayerGroundTexture.h"
+#include "VkwMultilayerGroundTexture.h"
 
 namespace world {
 FlatWorld *VkWorld::createDemoFlatWorld() {
     FlatWorld *world = new FlatWorld();
 
     HeightmapGround &ground = world->setGround<HeightmapGround>();
-    ground.setMaxLOD(8);
+    ground.setMaxLOD(10);
     ground.setTextureRes(128);
     ground.addWorker<PerlinTerrainGenerator>(3, 4., 0.35).setMaxOctaveCount(6);
     auto &map = ground.addWorker<CustomWorldRMModifier>();
     map.setRegion({0, 0}, 10000, 3, 0.1, 0.3);
     map.setRegion({0, 0}, 6000, 0.7, 1.6, 0.8);
-    ground.addWorker<MultilayerGroundTexture>().addDefaultLayers();
+    ground.addWorker<VkwMultilayerGroundTexture>().addDefaultLayers();
 
     auto &chunkSystem = world->addPrimaryNode<LODGridChunkSystem>({0, 0, 0});
     chunkSystem.addDecorator<ForestLayer>(world);

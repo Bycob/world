@@ -13,11 +13,11 @@ namespace world {
 
 class MultilayerGroundTexturePrivate;
 
-class VKWORLD_EXPORT MultilayerGroundTexture : public ITerrainWorker {
+class VKWORLD_EXPORT VkwMultilayerGroundTexture : public ITerrainWorker {
 public:
-    MultilayerGroundTexture();
+    VkwMultilayerGroundTexture();
 
-    ~MultilayerGroundTexture() override;
+    ~VkwMultilayerGroundTexture() override;
 
     /** Add layers corresponding to a world similar to the Earth. */
     void addDefaultLayers();

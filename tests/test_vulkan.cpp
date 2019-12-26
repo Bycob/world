@@ -10,7 +10,7 @@
 #include <vkworld/wrappers/Vulkan.h>
 #include <vkworld/wrappers/VkwRandomTexture.h>
 #include <vkworld/MultilayerGroundTextureOld.h>
-#include <vkworld/MultilayerGroundTexture.h>
+#include <vkworld/VkwMultilayerGroundTexture.h>
 #include <vkworld/wrappers/VkwTextureGenerator.h>
 #include <vkworld/VkwGrass.h>
 
@@ -28,9 +28,10 @@ int main(int argc, char **argv) {
 
 // TODO
 // - Profiling
+// - Clean world3D to use vkworld only if it is available
 // - Change array of textures to texture arrays
+// - Transition images correctly, use the right layout for the right usage
 // - Fix vulkan warnings
-// - Fix gradient
 // - Implement what it takes to deallocate resources and not saturate the RAM
 // - Address potential performance issues
 void testMultilayerTerrainTexture(int argc, char **argv) {
@@ -41,7 +42,7 @@ void testMultilayerTerrainTexture(int argc, char **argv) {
     PerlinTerrainGenerator terrainGen(5, 4, 0.4);
     terrainGen.processTerrain(terrain);
 
-    MultilayerGroundTexture textureGen;
+    VkwMultilayerGroundTexture textureGen;
     textureGen.addDefaultLayers();
     textureGen.processTerrain(terrain);
     terrain.setBounds(-0.5, -0.5, 0, 0.5, 0.5, 0.4);

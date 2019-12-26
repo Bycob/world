@@ -119,6 +119,6 @@ float getPoint(in vec2 position, out vec4 color) {
 
 void main() {
     vec2 uv = fragCoord * size + offset;
-    uv /= 10;
+    uv /= 3;
     getPoint(uv, fragColor);
 }
