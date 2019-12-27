@@ -13,6 +13,7 @@
 #include "terrain/TerrainStream.h"
 #include "terrain/AltitudeTexturer.h"
 #include "terrain/SimpleTexturer.h"
+#include "terrain/MapFilteredDistribution.h"
 
 // deprecated
 #include "terrain/TerrainSubdivisionGenerator.h"

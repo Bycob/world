@@ -8,6 +8,7 @@ if (${WORLD_BUILD_TESTS})
             test_diamond_square.cpp
             test_heightmap_ground.cpp
             test_image.cpp
+            test_instance_pool.cpp
             test_math.cpp
             test_memory.cpp
             test_mesh.cpp
