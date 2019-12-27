@@ -111,6 +111,28 @@ std::unique_ptr<world::Collector> Application::popFull() {
     return std::move(ret);
 }
 
+#ifdef USE_VKWORLD
+#include "vkworld/VkWorld.h"
+#endif
+
 void Application::loadWorld(int argc, char **argv) {
+    bool vulkan = false;
+
+    if (argc > 1 && std::string(argv[1]) == "vulkan") {
+        vulkan = true;
+    }
+
+#ifdef USE_VKWORLD
+    if (vulkan) {
+        _world = std::unique_ptr<FlatWorld>(VkWorld::createDemoFlatWorld());
+    } else {
+        _world = std::unique_ptr<FlatWorld>(FlatWorld::createDemoFlatWorld());
+    }
+#else
+    if (vulkan) {
+        std::cout << "Vulkan not supported, fallback to default world"
+                  << std::endl;
+    }
     _world = std::unique_ptr<FlatWorld>(FlatWorld::createDemoFlatWorld());
+#endif
 }

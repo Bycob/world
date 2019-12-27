@@ -32,6 +32,7 @@ int main(int argc, char **argv) {
 // - Change array of textures to texture arrays
 // - Transition images correctly, use the right layout for the right usage
 // - Fix vulkan warnings
+// - Use the right compile definition with cmake. Documentation about it.
 // - Implement what it takes to deallocate resources and not saturate the RAM
 // - Address potential performance issues
 void testMultilayerTerrainTexture(int argc, char **argv) {
