@@ -301,9 +301,15 @@ int ImageStream::read(char *buffer, int count) {
 
         switch (_image._type) {
         case ImageType::RGBA:
-            // RGBA to ARGB
+            buffer[read] = data[0];
+            read++;
+            buffer[read] = data[1];
+            read++;
+            buffer[read] = data[2];
+            read++;
             buffer[read] = data[3];
             read++;
+            break;
         case ImageType::RGB:
             buffer[read] = data[0];
             read++;

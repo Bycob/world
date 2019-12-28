@@ -106,7 +106,7 @@ void VkwTextureGenerator::generateTextureAsync() {
 }
 
 Image VkwTextureGenerator::getGeneratedImage() {
-    Image img(_width, _height, ImageType::RGB);
+    Image img(_width, _height, ImageType::RGBA);
     getGeneratedImage(img);
     return img;
 }

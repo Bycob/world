@@ -7,12 +7,14 @@ layout(location = 2) in vec2 fragUV;
 
 layout(location = 0) out vec4 fragColor;
 
-layout(binding = 0) uniform sampler2D random;
-
-vec3 grassColor = vec3(0.48, 0.96, 0.34);
+layout(binding = 0) uniform Metadata {
+    vec3 grassColor;
+};
+layout(binding = 1) uniform sampler2D random;
 
 void main() {
     vec3 baseColor = fragUV.x > 0 ? grassColor : grassColor * 0.7;
+    baseColor = mix(baseColor * 0.3, baseColor, smoothstep(0.0, 0.6, fragUV.y));
 
     // dashes on grass
     vec2 texCoords = abs(fragUV);

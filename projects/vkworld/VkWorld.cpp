@@ -13,18 +13,22 @@
 #include "world/terrain/ReliefMapModifier.h"
 
 #include "VkwMultilayerGroundTexture.h"
+#include "VkwGrass.h"
 
 namespace world {
 FlatWorld *VkWorld::createDemoFlatWorld() {
     FlatWorld *world = new FlatWorld();
 
     HeightmapGround &ground = world->setGround<HeightmapGround>();
-    ground.setMaxLOD(10);
+    ground.setMaxLOD(8);
     ground.setTextureRes(128);
+
     ground.addWorker<PerlinTerrainGenerator>(3, 4., 0.35).setMaxOctaveCount(6);
+
     auto &map = ground.addWorker<CustomWorldRMModifier>();
     map.setRegion({0, 0}, 10000, 3, 0.1, 0.3);
     map.setRegion({0, 0}, 6000, 0.7, 1.6, 0.8);
+
     ground.addWorker<VkwMultilayerGroundTexture>().addDefaultLayers();
 
     auto &chunkSystem = world->addPrimaryNode<LODGridChunkSystem>({0, 0, 0});
@@ -32,7 +36,8 @@ FlatWorld *VkWorld::createDemoFlatWorld() {
 
     // Grass with seed distribution
     auto &grassPool =
-        chunkSystem.addDecorator<InstancePool<Grass, SeedDistribution>>(world);
+        chunkSystem.addDecorator<InstancePool<VkwGrass, SeedDistribution>>(
+            world);
 
     // Rocks
     auto &rocksPool = chunkSystem.addDecorator<InstancePool<Rocks>>(world);

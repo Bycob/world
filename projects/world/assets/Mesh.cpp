@@ -11,6 +11,8 @@ namespace world {
 
 Face::Face() : _ids{0, 0, 0} {}
 
+Face::Face(int id1, int id2, int id3) : _ids{id1, id2, id3} {}
+
 Face::Face(int *ids) : _ids{ids[0], ids[1], ids[2]} {}
 
 Face::~Face() {}

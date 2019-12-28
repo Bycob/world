@@ -48,6 +48,8 @@ class WORLDAPI_EXPORT Face {
 public:
     Face();
 
+    Face(int id1, int id2, int id3);
+
     Face(int ids[3]);
 
     virtual ~Face();

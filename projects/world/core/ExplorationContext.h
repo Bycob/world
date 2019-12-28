@@ -31,6 +31,10 @@ public:
 
     vec3d getOffset() const;
 
+    /** Create a node with the keys given in parameters. Keys are mutated as
+     * needed.
+     * @param meshKey The relative key of the mesh.
+     * @param materialKey The relative key of the material. */
     SceneNode createNode(const ItemKey &meshKey,
                          const ItemKey &materialKey) const;
 

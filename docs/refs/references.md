@@ -23,6 +23,10 @@ Visualization ](https://pdfs.semanticscholar.org/b4df/bd5451b8a65e68cf042fa1b80c
 
 - [Biologically motivated algorithms](http://pubs.cs.uct.ac.za/honsproj/cgi-bin/view/2012/foster_mazzolini_pieterse.zip/Yggdrasil%20Webpage/Documents/Foster%20-%20Thesis.pdf), \> 2009
 
+### Grass
+
+- [Grass rendering (GPU gems)](http://developer.download.nvidia.com/books/HTML/gpugems/gpugems_ch07.html), 2003
+
 ## Misc
 
 ### Maths

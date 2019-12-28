@@ -45,9 +45,7 @@ public:
         return newPositions;
     }
 
-    void setLayer(int layer) {
-        _layer = layer;
-    }
+    void setLayer(int layer) { _layer = layer; }
 
 private:
     IDistributionMapProvider *_mapProvider;

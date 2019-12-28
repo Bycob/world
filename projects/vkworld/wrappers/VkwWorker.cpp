@@ -111,7 +111,7 @@ void VkwGraphicsWorker::beginRenderPass(VkwRenderPass &renderPass) {
     int height = renderPass.image().height();
 
     vk::ClearValue clearValues[2];
-    clearValues[0].color = std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f};
+    clearValues[0].color = std::array<float, 4>{0.0f, 0.0f, 0.0f, 0.0f};
     // clearValues[1].depthStencil = vk::ClearDepthStencilValue{1.0f, 0};
 
     vk::Rect2D renderArea(vk::Offset2D(), vk::Extent2D(width, height));
