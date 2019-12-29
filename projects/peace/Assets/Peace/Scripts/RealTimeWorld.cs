@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Peace
 {
-    
     public class RealTimeWorld : MonoBehaviour
     {
         public String configLocation = "";
@@ -17,6 +17,8 @@ namespace Peace
         private Vector3 _position;
 
         private bool _collecting;
+
+        private RealTimeWorldStatistics _stats = new RealTimeWorldStatistics();
 
         private Queue<GameObject> _objectPool;
         private List<GameObject> _objectsUsed;
@@ -32,6 +34,11 @@ namespace Peace
 
         private void UpdateFromCollector()
         {
+            _stats.removed = 0;
+            _stats.added = 0;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
             for (int i = _objectsUsed.Count - 1; i >= 0; --i)
             {
                 GameObject used = _objectsUsed[i];
@@ -74,7 +81,13 @@ namespace Peace
 
                     _objectsUsed.Add(child);
                 }
+
+                _stats.added++;
             }
+
+            sw.Stop();
+            _stats.updateTime = (float)sw.Elapsed.TotalMilliseconds;
+            _stats.collectorStats = _collector.LastStats;
         }
 
         private GameObject AllocateObject(string name)

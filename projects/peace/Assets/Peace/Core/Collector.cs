@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -21,6 +22,8 @@ namespace Peace
         private Dictionary<string, Material> _materials;
         private Dictionary<string, Texture2D> _textures;
         
+        public CollectorStats LastStats = new CollectorStats();
+
 
         public Collector()
         {
@@ -65,20 +68,28 @@ namespace Peace
         public async Task Collect(World world)
         {
             await Task.Run(() => collect(_handle, world._handle, _view));
-            
-            // Get from native code
-            IntPtr[] nodes, meshes, materials, textures;
-            string[] nodeNames, meshNames, materialNames, textureNames;
 
-            GetChannel(NODE_CHANNEL, out nodeNames, out nodes);
-            GetChannel(MESH_CHANNEL, out meshNames, out meshes);
-            GetChannel(MATERIAL_CHANNEL, out materialNames, out materials);
-            GetChannel(TEXTURE_CHANNEL, out textureNames, out textures);
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
+            // Get from native code
+            IntPtr[] nodes = new IntPtr[0], meshes = new IntPtr[0], materials = new IntPtr[0], textures = new IntPtr[0];
+            string[] nodeNames = new string[0], meshNames = new string[0], materialNames = new string[0], textureNames = new string[0];
+
+            await Task.Run(() =>
+            {
+                GetChannel(NODE_CHANNEL, out nodeNames, out nodes);
+                GetChannel(MESH_CHANNEL, out meshNames, out meshes);
+                GetChannel(MATERIAL_CHANNEL, out materialNames, out materials);
+                GetChannel(TEXTURE_CHANNEL, out textureNames, out textures);
+            });
+
+            double l = LastStats.interopTime = sw.Elapsed.TotalMilliseconds;
 
             // Update scene nodes
             _newNodes.Clear();
             HashSet<string> toRemove = new HashSet<string>(_nodes.Keys);
-
+            
             for (int i = 0; i < nodes.Length; ++i)
             {
                 if (!_nodes.ContainsKey(nodeNames[i]))
@@ -91,11 +102,14 @@ namespace Peace
                     toRemove.Remove(nodeNames[i]);
                 }
             }
-
+            
             foreach (var key in toRemove)
             {
                 _nodes.Remove(key);
             }
+
+            LastStats.nodesTime = sw.Elapsed.TotalMilliseconds - l;
+            l = sw.Elapsed.TotalMilliseconds;
 
             // Update meshes
             toRemove = new HashSet<string>(_meshes.Keys);
@@ -116,7 +130,10 @@ namespace Peace
             {
                 _meshes.Remove(key);
             }
-            
+
+            LastStats.meshesTime = sw.Elapsed.TotalMilliseconds - l;
+            l = sw.Elapsed.TotalMilliseconds;
+
             // Update textures
             toRemove = new HashSet<string>(_textures.Keys);
 
@@ -136,7 +153,10 @@ namespace Peace
             {
                 _textures.Remove(key);
             }
-            
+
+            LastStats.texturesTime = sw.Elapsed.TotalMilliseconds - l;
+            l = sw.Elapsed.TotalMilliseconds;
+
             // Update materials
             toRemove = new HashSet<string>(_materials.Keys);
 
@@ -162,6 +182,10 @@ namespace Peace
             {
                 _materials.Remove(key);
             }
+
+            sw.Stop();
+            LastStats.materialsTime = sw.Elapsed.TotalMilliseconds - l;
+            LastStats.totalTime = sw.Elapsed.TotalMilliseconds;
         }
 
         public IEnumerable<string> GetNewNodes()
