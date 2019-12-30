@@ -15,7 +15,7 @@ public:
 };
 
 template <typename TDistribution>
-class WORLDAPI_EXPORT MapFilteredDistribution : public TDistribution {
+class MapFilteredDistribution : public TDistribution {
 public:
     using Position = DistributionBase::Position;
 

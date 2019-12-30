@@ -37,13 +37,16 @@ public:
 template <
     typename TElement,
     std::enable_if_t<std::is_base_of<IGridElement, TElement>::value, int> = 0>
-class WORLDAPI_EXPORT GridStorage : public GridStorageBase {
+class GridStorage : public GridStorageBase {
 public:
     GridStorage() = default;
     ~GridStorage() override = default;
 
     GridStorage(const GridStorage &other) = delete;
-    // TODO Add other constructors
+    GridStorage(GridStorage &&other) = default;
+
+    GridStorage &operator=(const GridStorage& other) = delete;
+    GridStorage &operator=(GridStorage&& other) = default;
 
     template <typename... Args>
     TElement &set(const TileCoordinates &coords, Args &&... args) {

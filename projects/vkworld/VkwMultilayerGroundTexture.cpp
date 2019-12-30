@@ -164,7 +164,7 @@ void MultilayerGroundTexturePrivate::launchTextureGeneration(LodTextures &t) {
         VkwGraphicsPipeline pipeline(layout);
         pipeline.enableVertexBuffer(false);
         pipeline.setBuiltinShader(VkwShaderType::VERTEX,
-                                  "generic_texture.vert");
+                                  "generic-texture.vert");
         pipeline.setBuiltinShader(VkwShaderType::FRAGMENT,
                                   layerInfo._textureShader);
 
@@ -337,6 +337,9 @@ void VkwMultilayerGroundTexture::flush() {
     _internal->_queue.clear();
 }
 
-Image VkwMultilayerGroundTexture::getTexture(int lod, int layerId) {}
+Image VkwMultilayerGroundTexture::getTexture(int lod, int layerId) {
+    // TODO
+    return Image(1, 1, ImageType::GREYSCALE);
+}
 
 } // namespace world

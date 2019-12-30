@@ -1,5 +1,7 @@
 #include "VkwPerlin.h"
 
+#include <numeric>
+
 namespace world {
 
 VkwSubBuffer VkwPerlin::createPerlinHash() {
