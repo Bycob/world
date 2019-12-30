@@ -85,8 +85,7 @@ public:
         std::vector<vk::VertexInputBindingDescription> bindings;
         std::vector<vk::VertexInputAttributeDescription> attributes;
 
-        vk::PipelineVertexInputStateCreateInfo vertInputStageInfo(
-            {}, 0, nullptr, 0, nullptr);
+        vk::PipelineVertexInputStateCreateInfo vertInputStageInfo;
 
         if (_vertexBuffer) {
             bindings.emplace_back(0, sizeof(VkwVertex),
@@ -103,7 +102,8 @@ public:
             vertInputStageInfo.vertexBindingDescriptionCount = bindings.size();
             vertInputStageInfo.pVertexBindingDescriptions = &bindings[0];
 
-            vertInputStageInfo.vertexAttributeDescriptionCount = attributes.size();
+            vertInputStageInfo.vertexAttributeDescriptionCount =
+                attributes.size();
             vertInputStageInfo.pVertexAttributeDescriptions = &attributes[0];
         }
 

@@ -311,7 +311,8 @@ vk::DescriptorType VulkanContext::getDescriptorType(DescriptorType usage) {
 
 u32 VulkanContext::findMemoryType(u32 memorySize,
                                   vk::MemoryPropertyFlags requiredFlags,
-                                  vk::MemoryPropertyFlags unwantedFlags, u32 typeFilter) {
+                                  vk::MemoryPropertyFlags unwantedFlags,
+                                  u32 typeFilter) {
     vk::PhysicalDeviceMemoryProperties properties =
         _physicalDevice.getMemoryProperties();
 
@@ -323,7 +324,8 @@ u32 VulkanContext::findMemoryType(u32 memorySize,
 
         if ((requiredFlags & memoryType.propertyFlags) == requiredFlags &&
             (~unwantedFlags | memoryType.propertyFlags) == ~unwantedFlags &&
-            (properties.memoryHeaps[memoryType.heapIndex].size > memorySize) && (typeFilter & (1 << i)) != 0) {
+            (properties.memoryHeaps[memoryType.heapIndex].size > memorySize) &&
+            (typeFilter & (1 << i)) != 0) {
             memoryTypeIndex = i;
             foundMemoryType = true;
             break;

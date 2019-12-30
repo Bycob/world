@@ -45,8 +45,8 @@ public:
     GridStorage(const GridStorage &other) = delete;
     GridStorage(GridStorage &&other) = default;
 
-    GridStorage &operator=(const GridStorage& other) = delete;
-    GridStorage &operator=(GridStorage&& other) = default;
+    GridStorage &operator=(const GridStorage &other) = delete;
+    GridStorage &operator=(GridStorage &&other) = default;
 
     template <typename... Args>
     TElement &set(const TileCoordinates &coords, Args &&... args) {

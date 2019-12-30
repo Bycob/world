@@ -40,9 +40,10 @@ VkwImagePrivate::VkwImagePrivate(int width, int height, VkwImageUsage imgUse,
     // VkwImage::getMemoryType(imgUse, memRequirements.size);
 
     vk::MemoryAllocateInfo memAllocate(memRequirements.size,
-        memRequirements.alignment);
-    memAllocate.memoryTypeIndex = ctx.findMemoryType(memRequirements.size, {}, {}, memRequirements.memoryTypeBits);
-    
+                                       memRequirements.alignment);
+    memAllocate.memoryTypeIndex = ctx.findMemoryType(
+        memRequirements.size, {}, {}, memRequirements.memoryTypeBits);
+
     _memory = ctx._device.allocateMemory(memAllocate);
     ctx._device.bindImageMemory(_image, _memory, 0);
 }
@@ -139,14 +140,24 @@ void VkwImage::setData(const void *data, u32 count, u32 offset) {
 
     // TODO Use staging buffer elsewhere
     // Create staging buffer
-    VkwSubBuffer staging = ctx.allocate(count, DescriptorType::STORAGE_BUFFER, MemoryUsage::CPU_WRITES);
+    VkwSubBuffer staging = ctx.allocate(count, DescriptorType::STORAGE_BUFFER,
+                                        MemoryUsage::CPU_WRITES);
     staging.setData(data, count, offset);
 
     // Copy staging buffer to image
-    vk::CommandBufferAllocateInfo commandBufInfo(ctx._graphicsCommandPool, vk::CommandBufferLevel::ePrimary, 1);
+    vk::CommandBufferAllocateInfo commandBufInfo(
+        ctx._graphicsCommandPool, vk::CommandBufferLevel::ePrimary, 1);
     auto commandBuf = ctx._device.allocateCommandBuffers(commandBufInfo).at(0);
-    vk::BufferImageCopy imgCopy{0u, 0u, 0u, vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0u, 0u), vk::Offset3D{0, 0, 0}, vk::Extent3D{static_cast<u32>(_internal->_width), static_cast<u32>(_internal->_height), 1u}};
-    commandBuf.copyBufferToImage(staging.handle(), _internal->_image, vk::ImageLayout::eGeneral, imgCopy);
+    vk::BufferImageCopy imgCopy{
+        0u,
+        0u,
+        0u,
+        vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0u, 0u),
+        vk::Offset3D{0, 0, 0},
+        vk::Extent3D{static_cast<u32>(_internal->_width),
+                     static_cast<u32>(_internal->_height), 1u}};
+    commandBuf.copyBufferToImage(staging.handle(), _internal->_image,
+                                 vk::ImageLayout::eGeneral, imgCopy);
     commandBuf.end();
 
     auto fence = ctx._device.createFence(vk::FenceCreateInfo());
@@ -164,13 +175,23 @@ void VkwImage::getData(void *data, u32 count, u32 offset) {
     VulkanContext &ctx = Vulkan::context();
 
     // Create staging buffer
-    VkwSubBuffer staging = ctx.allocate(count, DescriptorType::STORAGE_BUFFER, MemoryUsage::CPU_WRITES);
+    VkwSubBuffer staging = ctx.allocate(count, DescriptorType::STORAGE_BUFFER,
+                                        MemoryUsage::CPU_WRITES);
 
     // Copy image to buffer
-    vk::CommandBufferAllocateInfo commandBufInfo(ctx._graphicsCommandPool, vk::CommandBufferLevel::ePrimary, 1);
+    vk::CommandBufferAllocateInfo commandBufInfo(
+        ctx._graphicsCommandPool, vk::CommandBufferLevel::ePrimary, 1);
     auto commandBuf = ctx._device.allocateCommandBuffers(commandBufInfo).at(0);
-    vk::BufferImageCopy imgCopy{0u, 0u, 0u, vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0u, 0u), vk::Offset3D{0, 0, 0}, vk::Extent3D{static_cast<u32>(_internal->_width), static_cast<u32>(_internal->_height), 1u}};
-    commandBuf.copyImageToBuffer(_internal->_image, vk::ImageLayout::eGeneral, staging.handle(), imgCopy);
+    vk::BufferImageCopy imgCopy{
+        0u,
+        0u,
+        0u,
+        vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0u, 0u),
+        vk::Offset3D{0, 0, 0},
+        vk::Extent3D{static_cast<u32>(_internal->_width),
+                     static_cast<u32>(_internal->_height), 1u}};
+    commandBuf.copyImageToBuffer(_internal->_image, vk::ImageLayout::eGeneral,
+                                 staging.handle(), imgCopy);
     commandBuf.end();
 
     auto fence = ctx._device.createFence(vk::FenceCreateInfo());

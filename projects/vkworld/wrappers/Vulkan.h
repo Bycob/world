@@ -59,7 +59,8 @@ public:
 
     /** Simple method to find a suitable memory type. */
     u32 findMemoryType(u32 memorySize, vk::MemoryPropertyFlags requiredFlags,
-                       vk::MemoryPropertyFlags unwantedFlags = {}, u32 typeFilter = 0xFFFFFFFF);
+                       vk::MemoryPropertyFlags unwantedFlags = {},
+                       u32 typeFilter = 0xFFFFFFFF);
 
     u32 getMemoryType(MemoryUsage memUse, u32 requiredSize);
 
