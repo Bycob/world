@@ -239,7 +239,7 @@ void MultilayerGroundTexturePrivate::process(Terrain &terrain, Image &image,
         _storage.getOrCreate(tc, terrainRes, imgWidth, _layers.size(), &image);
     getTileTextures(tc, elem, terrainDims.x);
 
-    VkwMemoryHelper::terrainToGPUImage(terrain, elem._terrain);
+    VkwMemoryHelper::terrainToGPU(terrain, elem._terrain);
     // slope is not used yet
 
     elem._worker = std::make_unique<VkwGraphicsWorker>();

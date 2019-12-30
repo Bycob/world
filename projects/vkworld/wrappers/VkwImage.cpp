@@ -30,18 +30,19 @@ VkwImagePrivate::VkwImagePrivate(int width, int height, VkwImageUsage imgUse,
     vk::ImageCreateInfo imageInfo(
         {}, vk::ImageType::e2D, _imageFormat,
         {static_cast<u32>(_width), static_cast<u32>(_height), 1}, 1, 1,
-        vk::SampleCountFlagBits::e1, vk::ImageTiling::eLinear, imgUsageBits);
+        vk::SampleCountFlagBits::e1, vk::ImageTiling::eOptimal, imgUsageBits);
     imageInfo.initialLayout = vk::ImageLayout::ePreinitialized;
     _image = ctx._device.createImage(imageInfo);
 
     // Allocate memory for the image
     vk::MemoryRequirements memRequirements =
         ctx._device.getImageMemoryRequirements(_image);
-    vk::MemoryAllocateInfo memAllocate(memRequirements.size,
-                                       memRequirements.alignment);
-    memAllocate.memoryTypeIndex =
-        VkwImage::getMemoryType(imgUse, memRequirements.size);
+    // VkwImage::getMemoryType(imgUse, memRequirements.size);
 
+    vk::MemoryAllocateInfo memAllocate(memRequirements.size,
+        memRequirements.alignment);
+    memAllocate.memoryTypeIndex = ctx.findMemoryType(memRequirements.size, {}, {}, memRequirements.memoryTypeBits);
+    
     _memory = ctx._device.allocateMemory(memAllocate);
     ctx._device.bindImageMemory(_image, _memory, 0);
 }
@@ -136,17 +137,54 @@ void VkwImage::registerTo(vk::DescriptorSet &descriptorSet,
 void VkwImage::setData(const void *data, u32 count, u32 offset) {
     VulkanContext &ctx = Vulkan::context();
 
-    void *mapped = ctx._device.mapMemory(_internal->_memory, offset, count);
-    memcpy(mapped, data, count);
-    ctx._device.unmapMemory(_internal->_memory);
+    // TODO Use staging buffer elsewhere
+    // Create staging buffer
+    VkwSubBuffer staging = ctx.allocate(count, DescriptorType::STORAGE_BUFFER, MemoryUsage::CPU_WRITES);
+    staging.setData(data, count, offset);
+
+    // Copy staging buffer to image
+    vk::CommandBufferAllocateInfo commandBufInfo(ctx._graphicsCommandPool, vk::CommandBufferLevel::ePrimary, 1);
+    auto commandBuf = ctx._device.allocateCommandBuffers(commandBufInfo).at(0);
+    vk::BufferImageCopy imgCopy{0u, 0u, 0u, vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0u, 0u), vk::Offset3D{0, 0, 0}, vk::Extent3D{static_cast<u32>(_internal->_width), static_cast<u32>(_internal->_height), 1u}};
+    commandBuf.copyBufferToImage(staging.handle(), _internal->_image, vk::ImageLayout::eGeneral, imgCopy);
+    commandBuf.end();
+
+    auto fence = ctx._device.createFence(vk::FenceCreateInfo());
+    vk::SubmitInfo submitInfo(0, nullptr, nullptr, 1, &commandBuf);
+    ctx.queue(vk::QueueFlagBits::eGraphics).submit(submitInfo, fence);
+
+    ctx._device.waitForFences(fence, true, 1000000);
+
+    // Destroy resources
+    ctx._device.freeCommandBuffers(ctx._graphicsCommandPool, commandBuf);
+    ctx._device.destroyFence(fence);
 }
 
 void VkwImage::getData(void *data, u32 count, u32 offset) {
     VulkanContext &ctx = Vulkan::context();
 
-    void *mapped = ctx._device.mapMemory(_internal->_memory, offset, count);
-    memcpy(data, mapped, count);
-    ctx._device.unmapMemory(_internal->_memory);
+    // Create staging buffer
+    VkwSubBuffer staging = ctx.allocate(count, DescriptorType::STORAGE_BUFFER, MemoryUsage::CPU_WRITES);
+
+    // Copy image to buffer
+    vk::CommandBufferAllocateInfo commandBufInfo(ctx._graphicsCommandPool, vk::CommandBufferLevel::ePrimary, 1);
+    auto commandBuf = ctx._device.allocateCommandBuffers(commandBufInfo).at(0);
+    vk::BufferImageCopy imgCopy{0u, 0u, 0u, vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0u, 0u), vk::Offset3D{0, 0, 0}, vk::Extent3D{static_cast<u32>(_internal->_width), static_cast<u32>(_internal->_height), 1u}};
+    commandBuf.copyImageToBuffer(_internal->_image, vk::ImageLayout::eGeneral, staging.handle(), imgCopy);
+    commandBuf.end();
+
+    auto fence = ctx._device.createFence(vk::FenceCreateInfo());
+    vk::SubmitInfo submitInfo(0, nullptr, nullptr, 1, &commandBuf);
+    ctx.queue(vk::QueueFlagBits::eGraphics).submit(submitInfo, fence);
+
+    ctx._device.waitForFences(fence, true, 1000000);
+
+    // Get data from staging buffer
+    staging.getData(data, count, offset);
+
+    // Destroy resources
+    ctx._device.freeCommandBuffers(ctx._graphicsCommandPool, commandBuf);
+    ctx._device.destroyFence(fence);
 }
 
 vk::SubresourceLayout VkwImage::getSubresourceLayout() {

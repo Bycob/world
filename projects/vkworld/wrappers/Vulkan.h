@@ -59,7 +59,7 @@ public:
 
     /** Simple method to find a suitable memory type. */
     u32 findMemoryType(u32 memorySize, vk::MemoryPropertyFlags requiredFlags,
-                       vk::MemoryPropertyFlags unwantedFlags = {});
+                       vk::MemoryPropertyFlags unwantedFlags = {}, u32 typeFilter = 0xFFFFFFFF);
 
     u32 getMemoryType(MemoryUsage memUse, u32 requiredSize);
 
@@ -100,10 +100,6 @@ private:
     void createComputeResources();
 
     void createGraphicsResources();
-
-    // TODO Remove dat
-    friend class ProgramVk;
-    friend class BufferVk;
 };
 
 struct VKWORLD_EXPORT Vulkan {

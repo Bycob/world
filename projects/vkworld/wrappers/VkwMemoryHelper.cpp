@@ -42,22 +42,6 @@ void VkwMemoryHelper::terrainToGPU(const Terrain &terrain,
     delete[] buf;
 }
 
-void VkwMemoryHelper::terrainToGPUImage(const Terrain &terrain,
-                                        VkwImage &image) {
-    auto imgLayout = image.getSubresourceLayout();
-    int res = terrain.getResolution();
-    float *buf = new float[res];
-
-    for (int y = 0; y < res; ++y) {
-        for (int x = 0; x < res; ++x) {
-            buf[x] = float(terrain(x, y));
-        }
-        image.setData(buf, res * sizeof(float), y * imgLayout.rowPitch);
-    }
-
-    delete[] buf;
-}
-
 void VkwMemoryHelper::GPUToMesh(IVkwMemoryAccess &verticesMemory,
                                 IVkwMemoryAccess &indicesMemory, Mesh &mesh) {
     GPUToVertices(verticesMemory, mesh);
