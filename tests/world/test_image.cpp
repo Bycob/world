@@ -139,12 +139,12 @@ TEST_CASE("Image - ImageStream", "[image]") {
             for (int x = 0; x < 3; ++x) {
                 INFO(std::string("reading ") + std::to_string(x) + ", " +
                      std::to_string(y));
-                // row major order, argb stream
+                // row major order, rgba stream
                 auto ptr = buffer + (y * 3 + x) * 4;
-                REQUIRE((u8)ptr[0] == (u8)255);
-                REQUIRE((u8)ptr[1] == (u8)x);
-                REQUIRE((u8)ptr[2] == (u8)y);
-                REQUIRE((u8)ptr[3] == (u8)1);
+                REQUIRE((u8)ptr[0] == (u8)x);
+                REQUIRE((u8)ptr[1] == (u8)y);
+                REQUIRE((u8)ptr[2] == (u8)1);
+                REQUIRE((u8)ptr[3] == (u8)255);
             }
         }
     }

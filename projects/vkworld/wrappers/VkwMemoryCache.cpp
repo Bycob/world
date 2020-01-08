@@ -36,6 +36,11 @@ VkwMemoryCacheSegment::VkwMemoryCacheSegment(u32 size,
     case DescriptorType::INDEX_BUFFER:
         bufferInfo.usage = vk::BufferUsageFlagBits::eIndexBuffer;
         break;
+    case DescriptorType ::TRANSFER_DST:
+        bufferInfo.usage = vk::BufferUsageFlagBits ::eTransferDst;
+        break;
+    case DescriptorType ::TRANSFER_SRC:
+        bufferInfo.usage = vk::BufferUsageFlagBits ::eTransferSrc;
     }
 
     // TODO handle concurrent shared buffer

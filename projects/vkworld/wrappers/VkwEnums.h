@@ -7,6 +7,8 @@ enum class DescriptorType {
     UNIFORM_BUFFER = 1,
     VERTEX_BUFFER = 2,
     INDEX_BUFFER = 3,
+    TRANSFER_SRC = 4,
+    TRANSFER_DST = 5,
     IMAGE = 4,
 };
 

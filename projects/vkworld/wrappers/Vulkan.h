@@ -10,6 +10,7 @@
 #include <world/core/WorldTypes.h>
 
 #include "VkwEnums.h"
+#include "VkwStats.h"
 #include "VkwMemoryCache.h"
 #include "VkwSubBuffer.h"
 
@@ -52,6 +53,8 @@ public:
 
 
     // MISC
+    VkwStats &stats() { return _stats; };
+
     /** Simple method to get a queue for computation. */
     int findQueueFamily(vk::QueueFlags flags);
 
@@ -87,6 +90,8 @@ private:
     typedef std::pair<DescriptorType, MemoryUsage> memid;
     std::map<memid, std::unique_ptr<VkwMemoryCache>> _memory;
     vk::SampleCountFlagBits _msaaSample;
+
+    VkwStats _stats;
 
 
     // INITIALIZATION

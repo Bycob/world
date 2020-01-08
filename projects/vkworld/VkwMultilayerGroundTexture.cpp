@@ -72,7 +72,7 @@ public:
     VkwRandomTexture _randTex;
     VkwSubBuffer _perlinHash;
 
-    u32 _texWidth = 2048;
+    u32 _texWidth = 1024;
     std::map<int, LodTextures> _lodTextures;
 
 

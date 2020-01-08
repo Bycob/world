@@ -15,7 +15,8 @@ VkwImagePrivate::VkwImagePrivate(int width, int height, VkwImageUsage imgUse,
     vk::ImageUsageFlags imgUsageBits;
     switch (imgUse) {
     case VkwImageUsage::TEXTURE:
-        imgUsageBits |= vk::ImageUsageFlagBits::eSampled;
+        imgUsageBits |= vk::ImageUsageFlagBits::eSampled |
+                        vk::ImageUsageFlagBits::eTransferDst;
         break;
     case VkwImageUsage::OFFSCREEN_RENDER:
         imgUsageBits |= vk::ImageUsageFlagBits::eColorAttachment |
@@ -30,8 +31,8 @@ VkwImagePrivate::VkwImagePrivate(int width, int height, VkwImageUsage imgUse,
     vk::ImageCreateInfo imageInfo(
         {}, vk::ImageType::e2D, _imageFormat,
         {static_cast<u32>(_width), static_cast<u32>(_height), 1}, 1, 1,
-        vk::SampleCountFlagBits::e1, vk::ImageTiling::eOptimal, imgUsageBits);
-    imageInfo.initialLayout = vk::ImageLayout::ePreinitialized;
+        vk::SampleCountFlagBits::e1, vk::ImageTiling::eLinear, imgUsageBits);
+    imageInfo.initialLayout = vk::ImageLayout::eUndefined;
     _image = ctx._device.createImage(imageInfo);
 
     // Allocate memory for the image
@@ -138,9 +139,9 @@ void VkwImage::registerTo(vk::DescriptorSet &descriptorSet,
 void VkwImage::setData(const void *data, u32 count, u32 offset) {
     VulkanContext &ctx = Vulkan::context();
 
-    // TODO Use staging buffer elsewhere
+    // TODO Put staging buffering in functions somewhere
     // Create staging buffer
-    VkwSubBuffer staging = ctx.allocate(count, DescriptorType::STORAGE_BUFFER,
+    VkwSubBuffer staging = ctx.allocate(count, DescriptorType::TRANSFER_SRC,
                                         MemoryUsage::CPU_WRITES);
     staging.setData(data, count, offset);
 
@@ -148,23 +149,38 @@ void VkwImage::setData(const void *data, u32 count, u32 offset) {
     vk::CommandBufferAllocateInfo commandBufInfo(
         ctx._graphicsCommandPool, vk::CommandBufferLevel::ePrimary, 1);
     auto commandBuf = ctx._device.allocateCommandBuffers(commandBufInfo).at(0);
+    commandBuf.begin(vk::CommandBufferBeginInfo(
+        vk::CommandBufferUsageFlagBits::eOneTimeSubmit));
+
+    insertBarrier(commandBuf, {}, vk::AccessFlagBits ::eTransferWrite,
+                  vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral,
+                  vk::PipelineStageFlagBits::eTopOfPipe,
+                  vk::PipelineStageFlagBits::eTransfer);
+
     vk::BufferImageCopy imgCopy{
         0u,
         0u,
         0u,
-        vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0u, 0u),
+        vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1),
         vk::Offset3D{0, 0, 0},
         vk::Extent3D{static_cast<u32>(_internal->_width),
                      static_cast<u32>(_internal->_height), 1u}};
     commandBuf.copyBufferToImage(staging.handle(), _internal->_image,
                                  vk::ImageLayout::eGeneral, imgCopy);
+
+    insertBarrier(commandBuf, vk::AccessFlagBits ::eTransferWrite,
+                  vk::AccessFlagBits ::eShaderRead, vk::ImageLayout::eGeneral,
+                  vk::ImageLayout::eGeneral,
+                  vk::PipelineStageFlagBits::eTransfer,
+                  vk::PipelineStageFlagBits::eFragmentShader);
+
     commandBuf.end();
 
     auto fence = ctx._device.createFence(vk::FenceCreateInfo());
     vk::SubmitInfo submitInfo(0, nullptr, nullptr, 1, &commandBuf);
     ctx.queue(vk::QueueFlagBits::eGraphics).submit(submitInfo, fence);
 
-    ctx._device.waitForFences(fence, true, 1000000);
+    ctx._device.waitForFences(fence, true, 1000000000000);
 
     // Destroy resources
     ctx._device.freeCommandBuffers(ctx._graphicsCommandPool, commandBuf);
@@ -175,18 +191,26 @@ void VkwImage::getData(void *data, u32 count, u32 offset) {
     VulkanContext &ctx = Vulkan::context();
 
     // Create staging buffer
-    VkwSubBuffer staging = ctx.allocate(count, DescriptorType::STORAGE_BUFFER,
-                                        MemoryUsage::CPU_WRITES);
+    VkwSubBuffer staging = ctx.allocate(count, DescriptorType::TRANSFER_DST,
+                                        MemoryUsage::CPU_READS);
 
     // Copy image to buffer
     vk::CommandBufferAllocateInfo commandBufInfo(
         ctx._graphicsCommandPool, vk::CommandBufferLevel::ePrimary, 1);
     auto commandBuf = ctx._device.allocateCommandBuffers(commandBufInfo).at(0);
+    commandBuf.begin(vk::CommandBufferBeginInfo(
+        vk::CommandBufferUsageFlagBits::eOneTimeSubmit));
+
+    insertBarrier(commandBuf, {}, vk::AccessFlagBits ::eTransferRead,
+                  vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral,
+                  vk::PipelineStageFlagBits ::eBottomOfPipe,
+                  vk::PipelineStageFlagBits ::eTransfer);
+
     vk::BufferImageCopy imgCopy{
         0u,
         0u,
         0u,
-        vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0u, 0u),
+        vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0u, 0u, 1),
         vk::Offset3D{0, 0, 0},
         vk::Extent3D{static_cast<u32>(_internal->_width),
                      static_cast<u32>(_internal->_height), 1u}};
@@ -198,7 +222,7 @@ void VkwImage::getData(void *data, u32 count, u32 offset) {
     vk::SubmitInfo submitInfo(0, nullptr, nullptr, 1, &commandBuf);
     ctx.queue(vk::QueueFlagBits::eGraphics).submit(submitInfo, fence);
 
-    ctx._device.waitForFences(fence, true, 1000000);
+    ctx._device.waitForFences(fence, true, 1000000000000);
 
     // Get data from staging buffer
     staging.getData(data, count, offset);
@@ -206,6 +230,22 @@ void VkwImage::getData(void *data, u32 count, u32 offset) {
     // Destroy resources
     ctx._device.freeCommandBuffers(ctx._graphicsCommandPool, commandBuf);
     ctx._device.destroyFence(fence);
+}
+
+void VkwImage::insertBarrier(vk::CommandBuffer commandBuf,
+                             vk::AccessFlags srcAccessMask,
+                             vk::AccessFlags dstAccessMask,
+                             vk::ImageLayout srcLayout,
+                             vk::ImageLayout dstLayout,
+                             vk::PipelineStageFlags srcStageMask,
+                             vk::PipelineStageFlags dstStageMask) {
+    vk::ImageMemoryBarrier memBarrier(srcAccessMask, dstAccessMask, srcLayout,
+                                      dstLayout);
+    memBarrier.image = _internal->_image;
+    memBarrier.subresourceRange =
+        vk::ImageSubresourceRange(vk::ImageAspectFlagBits ::eColor, 0, 1, 0, 1);
+    commandBuf.pipelineBarrier(srcStageMask, dstStageMask, {}, {}, {},
+                               memBarrier);
 }
 
 vk::SubresourceLayout VkwImage::getSubresourceLayout() {
