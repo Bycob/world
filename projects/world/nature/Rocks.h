@@ -19,8 +19,8 @@ public:
 
     void setRadius(double radius) { _radius = radius; }
 
-    std::vector<SceneNode> collectTemplates(ICollector &collector,
-                                            const ExplorationContext &ctx);
+    std::vector<Template> collectTemplates(ICollector &collector,
+                                           const ExplorationContext &ctx);
 
     void collectSelf(ICollector &collector,
                      const IResolutionModel &resolutionModel,

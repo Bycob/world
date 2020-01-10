@@ -13,9 +13,9 @@ void Rocks::addRock(const vec3d &position) {
     _rocks.back().position = position;
 }
 
-std::vector<SceneNode> Rocks::collectTemplates(ICollector &collector,
-                                               const ExplorationContext &ctx) {
-    std::vector<SceneNode> nodes;
+std::vector<Template> Rocks::collectTemplates(ICollector &collector,
+                                              const ExplorationContext &ctx) {
+    std::vector<Template> nodes;
 
     for (int i = 0; i < _rocks.size(); ++i) {
         ItemKey key{NodeKeys::fromInt(i)};
@@ -35,7 +35,7 @@ std::vector<SceneNode> Rocks::collectTemplates(ICollector &collector,
 
             auto node = ctx.createNode(key, matKey);
             node.setPosition(_rocks[i].position);
-            nodes.push_back(node);
+            nodes.emplace_back(node);
         }
     }
 

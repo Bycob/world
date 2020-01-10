@@ -5,6 +5,9 @@ namespace world {
 Template::Template(const SceneNode &node) { insert(node); }
 
 void Template::insert(const Item &item) {
+    if (item._minRes < 0)
+        throw std::runtime_error("Min res cannot be under 0.");
+
     auto it = _items.begin();
 
     while (it != _items.end() && it->_minRes > item._minRes) {
@@ -43,5 +46,14 @@ Template::Item *Template::getAt(double resolution) {
             return &item;
     }
     return nullptr;
+}
+
+SceneNode Template::getDefaultNode() {
+    auto *u = getAt(0);
+    if (u != nullptr && !u->_nodes.empty()) {
+        return u->_nodes.at(0);
+    } else {
+        return SceneNode();
+    }
 }
 } // namespace world

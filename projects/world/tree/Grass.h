@@ -32,8 +32,8 @@ public:
 
     void removeAllBushes();
 
-    std::vector<SceneNode> collectTemplates(ICollector &collector,
-                                            const ExplorationContext &ctx);
+    std::vector<Template> collectTemplates(ICollector &collector,
+                                           const ExplorationContext &ctx);
 
     void collect(ICollector &collector, const IResolutionModel &resolutionModel,
                  const ExplorationContext &ctx) override;

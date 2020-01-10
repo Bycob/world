@@ -15,8 +15,8 @@ public:
     VkwGrass();
     ~VkwGrass() override;
 
-    std::vector<SceneNode> collectTemplates(ICollector &collector,
-                                            const ExplorationContext &ctx);
+    std::vector<Template> collectTemplates(ICollector &collector,
+                                           const ExplorationContext &ctx);
 
     HabitatFeatures randomize();
 

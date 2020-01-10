@@ -20,14 +20,14 @@ VkwGrass::VkwGrass()
 
 VkwGrass::~VkwGrass() { delete _internal; }
 
-std::vector<SceneNode> VkwGrass::collectTemplates(
+std::vector<Template> VkwGrass::collectTemplates(
     ICollector &collector, const ExplorationContext &ctx) {
     if (!_isInitialized) {
         setup();
         _isInitialized = true;
     }
 
-    std::vector<SceneNode> nodes;
+    std::vector<Template> nodes;
 
     if (collector.hasChannel<Mesh>()) {
         auto &meshChan = collector.getChannel<Mesh>();
@@ -51,7 +51,7 @@ std::vector<SceneNode> VkwGrass::collectTemplates(
         ItemKey meshKey{"mesh"};
         meshChan.put(meshKey, _internal->_mesh, ctx);
 
-        nodes.push_back(ctx.createNode(meshKey, matKey));
+        nodes.emplace_back(ctx.createNode(meshKey, matKey));
     }
 
     return nodes;
@@ -68,7 +68,7 @@ void VkwGrass::collectSelf(ICollector &collector,
     if (collector.hasChannel<SceneNode>()) {
         auto &nodeChan = collector.getChannel<SceneNode>();
 
-        nodeChan.put({"item"}, nodes.at(0), ctx);
+        nodeChan.put({"item"}, nodes.at(0).getDefaultNode(), ctx);
     }
 }
 

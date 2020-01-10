@@ -39,9 +39,9 @@ void Grass::removeAllBushes() {
     _meshes.clear();
 }
 
-std::vector<SceneNode> Grass::collectTemplates(ICollector &collector,
-                                               const ExplorationContext &ctx) {
-    std::vector<SceneNode> nodes;
+std::vector<Template> Grass::collectTemplates(ICollector &collector,
+                                              const ExplorationContext &ctx) {
+    std::vector<Template> nodes;
 
     if (collector.hasChannel<Mesh>()) {
         auto &meshChan = collector.getChannel<Mesh>();
@@ -66,7 +66,7 @@ std::vector<SceneNode> Grass::collectTemplates(ICollector &collector,
             ItemKey meshKey{NodeKeys::fromInt(i)};
             meshChan.put(meshKey, _meshes[i], ctx);
 
-            nodes.push_back(ctx.createNode(meshKey, matKey));
+            nodes.emplace_back(ctx.createNode(meshKey, matKey));
         }
     }
 
@@ -83,7 +83,7 @@ void Grass::collect(ICollector &collector,
 
         for (u64 i = 0; i < nodes.size(); ++i) {
             ItemKey nodeKey{NodeKeys::fromInt(i)};
-            objChan.put(nodeKey, nodes[i]);
+            objChan.put(nodeKey, nodes[i].getDefaultNode());
         }
     }
 }

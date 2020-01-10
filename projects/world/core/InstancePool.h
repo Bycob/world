@@ -12,6 +12,7 @@
 #include "IChunkDecorator.h"
 #include "Chunk.h"
 #include "InstanceDistribution.h"
+#include "IInstanceGenerator.h"
 
 namespace world {
 
@@ -45,7 +46,7 @@ private:
 
     std::mt19937 _rng;
     std::vector<std::unique_ptr<TGenerator>> _generators;
-    std::vector<std::vector<SceneNode>> _objects;
+    std::vector<std::vector<Template>> _objects;
     u64 _chunksDecorated = 0;
     /// Internal field to remember the typical chunk area at the resolution of
     /// the pool
@@ -62,18 +63,18 @@ private:
 
 class WORLDAPI_EXPORT Instance : public WorldNode {
 public:
-    Instance() {}
+    Instance() = default;
 
-    Instance(SceneNode node) : _nodes{std::move(node)} {}
+    explicit Instance(Template tp) : _templates{std::move(tp)} {}
 
-    void addNode(SceneNode node);
+    void addNode(Template tp);
 
     void collectSelf(ICollector &collector,
                      const IResolutionModel &resolutionModel,
                      const ExplorationContext &ctx) override;
 
 private:
-    std::vector<SceneNode> _nodes;
+    std::vector<Template> _templates;
 };
 
 } // namespace world

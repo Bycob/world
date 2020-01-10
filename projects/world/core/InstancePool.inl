@@ -68,13 +68,13 @@ inline void InstancePool<TGenerator, TDistribution>::decorate(Chunk &chunk) {
         }
 
         std::uniform_int_distribution<int> select(0, templates.size() - 1);
-        SceneNode object = templates[select(_rng)];
+        Template object = templates[select(_rng)];
 
         // Apply random rotation and scaling
-        object.setPosition(position._pos);
-        object.setRotation({0, 0, rotDistrib(_rng)});
+        object._position = position._pos;
+        object._rotation = {0, 0, rotDistrib(_rng)};
         double scale = randScale(_rng, 1, 1.2);
-        object.setScale({scale});
+        object._scale = {scale};
 
         instance.addNode(std::move(object));
     }
@@ -144,8 +144,8 @@ void InstancePool<TGenerator, TDistribution>::exportSpecies(
     file << buf.GetString();
 }
 
-inline void Instance::addNode(world::SceneNode node) {
-    _nodes.push_back(std::move(node));
+inline void Instance::addNode(Template tp) {
+    _templates.push_back(std::move(tp));
 }
 
 
@@ -155,9 +155,26 @@ inline void Instance::collectSelf(ICollector &collector,
     if (collector.hasChannel<SceneNode>()) {
         auto &objChan = collector.getChannel<SceneNode>();
 
-        for (int i = 0; i < _nodes.size(); ++i) {
+        for (size_t i = 0; i < _templates.size(); ++i) {
             ItemKey key{std::to_string(i)};
-            objChan.put(key, _nodes[i], ctx);
+            auto &tp = _templates[i];
+
+            // Get the nodes corresponding to the right resolution
+            double resolution = resolutionModel.getResolutionAt(tp._position);
+            auto *nodes = tp.getAt(resolution);
+
+            if (nodes != nullptr) {
+                // Add every node of the resolution level to the collector
+                for (SceneNode node : nodes->_nodes) {
+                    // Update each object's transform based on the global one
+                    node.setPosition(node.getPosition() * tp._scale +
+                                     tp._position);
+                    // TODO update position based on rotation
+                    node.setRotation(tp._rotation);
+                    node.setScale(node.getScale() * tp._scale);
+                    objChan.put(key, node, ctx);
+                }
+            }
         }
     }
 }

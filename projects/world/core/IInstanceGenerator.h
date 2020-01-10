@@ -23,6 +23,11 @@ public:
         }
     };
 
+    vec3d _position;
+    vec3d _rotation;
+    vec3d _scale;
+
+
     Template() = default;
 
     Template(const SceneNode &node);
@@ -38,6 +43,10 @@ public:
      * is available at this resolution. */
     Item *getAt(double resolution);
 
+    /** Get a scene node from the template, if any, else returns an empty
+     * SceneNode. */
+    SceneNode getDefaultNode();
+
 private:
     /// Scene nodes that will be collected, at different resolution
     std::list<Item> _items;
@@ -47,8 +56,8 @@ private:
 // (by specifying TGenerator in the InstancePool)
 class WORLDAPI_EXPORT IInstanceGenerator {
 public:
-    std::vector<SceneNode> collectTemplates(ICollector &collector,
-                                            const ExplorationContext &ctx);
+    std::vector<Template> collectTemplates(ICollector &collector,
+                                           const ExplorationContext &ctx);
 
     HabitatFeatures randomize();
 
