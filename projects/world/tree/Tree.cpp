@@ -42,67 +42,36 @@ void Tree::collect(ICollector &collector,
                    const IResolutionModel &resolutionModel,
                    const ExplorationContext &ctx) {
 
-    double resolution = resolutionModel.getResolutionAt({}, ctx);
-
-    const double SIMPLE_RES = 1;
     const double BASE_RES = 5;
 
-    vec3d posOffset{};
-    ItemKey trunkKey{"1"};
-    ItemKey leavesKey{"2"};
+    double resolution = resolutionModel.getResolutionAt({}, ctx);
+    auto templates = collectTemplates(collector, ctx, resolution);
 
-    if (resolution < SIMPLE_RES) {
-        return;
-    } else if (resolution < BASE_RES) {
-        if (_simpleTrunk.getVerticesCount() == 0)
-            generateSimpleMeshes();
+    if (!templates.empty() && collector.hasChannel<SceneNode>()) {
+        auto &objChan = collector.getChannel<SceneNode>();
+        Template &tp = templates.at(0);
+        auto *item = tp.getAt(resolution);
 
-        trunkKey = {"s1"};
-        leavesKey = {"s2"};
-    } else {
-        if (!_generated) {
-            generateBase();
+        if (item != nullptr) {
+            int i = 0;
+
+            for (SceneNode node : item->_nodes) {
+                ItemKey key{std::to_string(i) + "." +
+                            std::to_string(item->_minRes)};
+
+                if (resolution > BASE_RES) {
+                    node.setPosition(
+                        node.getPosition() +
+                        (ctx.hasEnvironment()
+                             ? ctx.getEnvironment().findNearestFreePoint(
+                                   {}, {0, 0, 1}, resolution, ctx)
+                             : vec3d{}));
+                }
+
+                objChan.put(key, node, ctx);
+                ++i;
+            }
         }
-        posOffset = ctx.hasEnvironment()
-                        ? ctx.getEnvironment().findNearestFreePoint(
-                              {}, {0, 0, 1}, resolution, ctx)
-                        : vec3d{};
-    }
-
-    // Collection
-    SceneNode trunk(ctx(trunkKey).str());
-    SceneNode leaves(ctx(leavesKey).str());
-
-    // Material
-    Material leavesMat("leaves");
-    leavesMat.setKd(0.4, 0.9, 0.4);
-
-    if (collector.hasChannel<SceneNode>() && collector.hasChannel<Mesh>()) {
-        auto &objectsChannel = collector.getChannel<SceneNode>();
-        auto &meshChannel = collector.getChannel<Mesh>();
-
-        if (collector.hasChannel<Material>()) {
-            auto &materialsChannel = collector.getChannel<Material>();
-
-            trunk.setMaterialID(ctx({"1"}).str());
-            leaves.setMaterialID(ctx({"2"}).str());
-
-            materialsChannel.put({"1"}, _trunkMaterial, ctx);
-            materialsChannel.put({"2"}, leavesMat, ctx);
-        }
-
-        if (resolution < BASE_RES) {
-            meshChannel.put(trunkKey, _simpleTrunk, ctx);
-            meshChannel.put(leavesKey, _simpleLeaves, ctx);
-        } else {
-            meshChannel.put(trunkKey, _trunkMesh, ctx);
-            meshChannel.put(leavesKey, _leavesMesh, ctx);
-        }
-
-        trunk.setPosition(posOffset);
-        leaves.setPosition(posOffset);
-        objectsChannel.put(trunkKey, trunk, ctx);
-        objectsChannel.put(leavesKey, leaves, ctx);
     }
 }
 
@@ -161,6 +130,74 @@ void Tree::generateSimpleMeshes() {
     MeshOps::recalculateNormals(_simpleTrunk);
     MeshOps::recalculateNormals(_simpleLeaves);
 }
+
+std::vector<Template> Tree::collectTemplates(ICollector &collector,
+                                             const ExplorationContext &ctx,
+                                             double maxRes) {
+
+    const double SIMPLE_RES = 1;
+    const double BASE_RES = 5;
+
+    std::vector<Template> templates;
+
+    if (collector.hasChannel<Mesh>()) {
+        auto &meshChannel = collector.getChannel<Mesh>();
+
+        // Simple model (from far away)
+        SceneNode simpleTrunk(ctx({"s1"}).str());
+        SceneNode simpleLeaves(ctx({"s2"}).str());
+
+        if (_simpleTrunk.getVerticesCount() == 0)
+            generateSimpleMeshes();
+
+        meshChannel.put({"s1"}, _simpleTrunk, ctx);
+        meshChannel.put({"s2"}, _simpleLeaves, ctx);
+
+
+        // Complex tree model
+        SceneNode trunk(ctx({"1"}).str());
+        SceneNode leaves(ctx({"2"}).str());
+
+        if (maxRes > BASE_RES) {
+            if (!_generated) {
+                generateBase();
+            }
+
+            meshChannel.put({"1"}, _trunkMesh, ctx);
+            meshChannel.put({"2"}, _leavesMesh, ctx);
+        }
+
+
+        if (collector.hasChannel<Material>()) {
+            auto &materialsChannel = collector.getChannel<Material>();
+
+            Material leavesMat("leaves");
+            leavesMat.setKd(0.4, 0.9, 0.4);
+
+            simpleTrunk.setMaterialID(ctx({"1"}).str());
+            simpleLeaves.setMaterialID(ctx({"2"}).str());
+
+            trunk.setMaterialID(ctx({"1"}).str());
+            leaves.setMaterialID(ctx({"2"}).str());
+
+            materialsChannel.put({"1"}, _trunkMaterial, ctx);
+            materialsChannel.put({"2"}, leavesMat, ctx);
+        }
+
+        Template tp;
+        tp.insert(SIMPLE_RES, {simpleTrunk, simpleLeaves});
+
+        if (maxRes > BASE_RES) {
+            tp.insert(BASE_RES, {trunk, leaves});
+        }
+
+        templates.push_back(tp);
+    }
+
+    return templates;
+}
+
+HabitatFeatures Tree::randomize() { return HabitatFeatures{}; }
 
 void Tree::generateBase() {
     for (auto &worker : _internal->_workers) {

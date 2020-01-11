@@ -16,7 +16,8 @@ public:
     ~VkwGrass() override;
 
     std::vector<Template> collectTemplates(ICollector &collector,
-                                           const ExplorationContext &ctx);
+                                           const ExplorationContext &ctx,
+                                           double maxRes);
 
     HabitatFeatures randomize();
 

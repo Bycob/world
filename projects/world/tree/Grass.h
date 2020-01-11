@@ -33,7 +33,8 @@ public:
     void removeAllBushes();
 
     std::vector<Template> collectTemplates(ICollector &collector,
-                                           const ExplorationContext &ctx);
+                                           const ExplorationContext &ctx,
+                                           double maxRes);
 
     void collect(ICollector &collector, const IResolutionModel &resolutionModel,
                  const ExplorationContext &ctx) override;

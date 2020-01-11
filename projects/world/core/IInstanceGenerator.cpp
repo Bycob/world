@@ -2,6 +2,11 @@
 
 namespace world {
 
+// TODO
+// - Add and delete methods to Template to have a coherent and handy API
+// - Add a method to automatically collect a template at a specific resolution
+// - In Instance, adapt instance position to the ground at a specific resolution
+
 Template::Template(const SceneNode &node) { insert(node); }
 
 void Template::insert(const Item &item) {
@@ -19,6 +24,10 @@ void Template::insert(const Item &item) {
 
 void Template::insert(double resolution, const SceneNode &node) {
     insert(Item{{node}, resolution});
+}
+
+void Template::insert(double resolution, const std::vector<SceneNode> &nodes) {
+    insert(Item{nodes, resolution});
 }
 
 /*Item &getOrCreate(double resolution) {

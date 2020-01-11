@@ -40,7 +40,8 @@ void Grass::removeAllBushes() {
 }
 
 std::vector<Template> Grass::collectTemplates(ICollector &collector,
-                                              const ExplorationContext &ctx) {
+                                              const ExplorationContext &ctx,
+                                              double maxRes) {
     std::vector<Template> nodes;
 
     if (collector.hasChannel<Mesh>()) {
@@ -79,7 +80,7 @@ void Grass::collect(ICollector &collector,
 
     if (collector.hasChannel<SceneNode>()) {
         auto &objChan = collector.getChannel<SceneNode>();
-        auto nodes = collectTemplates(collector, ctx);
+        auto nodes = collectTemplates(collector, ctx, 0);
 
         for (u64 i = 0; i < nodes.size(); ++i) {
             ItemKey nodeKey{NodeKeys::fromInt(i)};

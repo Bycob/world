@@ -14,7 +14,8 @@ void Rocks::addRock(const vec3d &position) {
 }
 
 std::vector<Template> Rocks::collectTemplates(ICollector &collector,
-                                              const ExplorationContext &ctx) {
+                                              const ExplorationContext &ctx,
+                                              double maxRes) {
     std::vector<Template> nodes;
 
     for (int i = 0; i < _rocks.size(); ++i) {

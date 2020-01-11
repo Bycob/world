@@ -26,6 +26,7 @@ public:
     vec3d _position;
     vec3d _rotation;
     vec3d _scale;
+    int _id = 0;
 
 
     Template() = default;
@@ -35,6 +36,8 @@ public:
     void insert(const Item &item);
 
     void insert(double resolution, const SceneNode &node);
+
+    void insert(double resolution, const std::vector<SceneNode> &nodes);
 
     void insert(const SceneNode &node);
 
@@ -57,7 +60,8 @@ private:
 class WORLDAPI_EXPORT IInstanceGenerator {
 public:
     std::vector<Template> collectTemplates(ICollector &collector,
-                                           const ExplorationContext &ctx);
+                                           const ExplorationContext &ctx,
+                                           double maxRes);
 
     HabitatFeatures randomize();
 

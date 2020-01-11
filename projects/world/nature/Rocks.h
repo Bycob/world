@@ -20,7 +20,8 @@ public:
     void setRadius(double radius) { _radius = radius; }
 
     std::vector<Template> collectTemplates(ICollector &collector,
-                                           const ExplorationContext &ctx);
+                                           const ExplorationContext &ctx,
+                                           double maxRes);
 
     void collectSelf(ICollector &collector,
                      const IResolutionModel &resolutionModel,

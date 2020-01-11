@@ -33,7 +33,11 @@ inline void InstancePool<TGenerator, TDistribution>::collectSelf(
         auto childCtx = ctx;
         childCtx.appendPrefix({NodeKeys::fromInt(id)});
 
-        auto templates = generator->collectTemplates(collector, childCtx);
+        // TODO collect at the correct resolution, then update all templates of
+        // the instance. At the moment the max res is set to 10000, so we
+        // collect (hopefully) all the LODs.
+        auto templates =
+            generator->collectTemplates(collector, childCtx, 10000);
         _objects.emplace_back(templates);
     }
 }

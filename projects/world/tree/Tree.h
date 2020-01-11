@@ -6,6 +6,7 @@
 
 #include "world/core/IResolutionModel.h"
 #include "world/core/WorldNode.h"
+#include "world/core/IInstanceGenerator.h"
 #include "world/assets/Mesh.h"
 #include "world/assets/Material.h"
 #include "ITreeWorker.h"
@@ -15,7 +16,7 @@ namespace world {
 
 class PTree;
 
-class WORLDAPI_EXPORT Tree : public WorldNode {
+class WORLDAPI_EXPORT Tree : public WorldNode, public IInstanceGenerator {
 public:
     Tree();
 
@@ -40,6 +41,12 @@ public:
     void collect(ICollector &collector, const IResolutionModel &explorer,
                  const ExplorationContext &ctx) override;
 
+    std::vector<Template> collectTemplates(ICollector &collector,
+                                           const ExplorationContext &ctx,
+                                           double maxRes);
+
+    HabitatFeatures randomize();
+
 public:
     Mesh _simpleTrunk;
     Mesh _simpleLeaves;
@@ -55,6 +62,7 @@ private:
     Material _trunkMaterial;
 
     bool _generated = false;
+
 
     void addWorkerInternal(ITreeWorker *worker);
 

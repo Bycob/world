@@ -20,8 +20,9 @@ VkwGrass::VkwGrass()
 
 VkwGrass::~VkwGrass() { delete _internal; }
 
-std::vector<Template> VkwGrass::collectTemplates(
-    ICollector &collector, const ExplorationContext &ctx) {
+std::vector<Template> VkwGrass::collectTemplates(ICollector &collector,
+                                                 const ExplorationContext &ctx,
+                                                 double maxRes) {
     if (!_isInitialized) {
         setup();
         _isInitialized = true;
@@ -63,7 +64,7 @@ void VkwGrass::collectSelf(ICollector &collector,
                            const IResolutionModel &resolutionModel,
                            const ExplorationContext &ctx) {
 
-    auto nodes = collectTemplates(collector, ctx);
+    auto nodes = collectTemplates(collector, ctx, 0);
 
     if (collector.hasChannel<SceneNode>()) {
         auto &nodeChan = collector.getChannel<SceneNode>();
