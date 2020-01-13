@@ -31,7 +31,7 @@ VkwImagePrivate::VkwImagePrivate(int width, int height, VkwImageUsage imgUse,
     vk::ImageCreateInfo imageInfo(
         {}, vk::ImageType::e2D, _imageFormat,
         {static_cast<u32>(_width), static_cast<u32>(_height), 1}, 1, 1,
-        vk::SampleCountFlagBits::e1, vk::ImageTiling::eLinear, imgUsageBits);
+        vk::SampleCountFlagBits::e1, vk::ImageTiling::eOptimal, imgUsageBits);
     imageInfo.initialLayout = vk::ImageLayout::eUndefined;
     _image = ctx._device.createImage(imageInfo);
 
@@ -158,7 +158,7 @@ void VkwImage::setData(const void *data, u32 count, u32 offset) {
                   vk::PipelineStageFlagBits::eTransfer);
 
     vk::BufferImageCopy imgCopy{
-        0u,
+        staging.getOffset(),
         0u,
         0u,
         vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1),
@@ -207,7 +207,7 @@ void VkwImage::getData(void *data, u32 count, u32 offset) {
                   vk::PipelineStageFlagBits ::eTransfer);
 
     vk::BufferImageCopy imgCopy{
-        0u,
+        staging.getOffset(),
         0u,
         0u,
         vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0u, 0u, 1),
