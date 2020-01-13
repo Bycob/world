@@ -3,6 +3,10 @@
 
 #include <vkworld/VkWorldConfig.h>
 
+#include <iostream>
+
+#include <world/core/WorldTypes.h>
+
 namespace world {
 
 /** This struct tracks some information about allocated resources and
