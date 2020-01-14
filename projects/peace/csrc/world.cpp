@@ -4,6 +4,10 @@
 #include <world/flat.h>
 #include <world/terrain.h>
 
+#if USE_VKWORLD
+#include <vkworld/VkWorld.h>
+#endif
+
 using namespace world;
 
 extern "C" {
@@ -22,5 +26,15 @@ PEACE_EXPORT WorldPtr createTestWorld() {
     return world;
 }
 
-PEACE_EXPORT WorldPtr createDemoWorld() { return World::createDemoWorld(); }
+PEACE_EXPORT WorldPtr createDemoWorld(char* name) {
+    if (name == std::string("vulkan")) {
+#ifdef USE_VKWORLD
+        return VkWorld::createDemoFlatWorld();
+#else
+        std::cout << "Not supported ! Return default world instead..." << std::endl;
+#endif
+    }
+    return World::createDemoWorld();
+}
+
 }

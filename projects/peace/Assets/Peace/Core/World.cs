@@ -12,7 +12,7 @@ namespace Peace
         
         public static World CreateDemo()
         {
-            return new World(createDemoWorld());
+            return new World(createDemoWorld("vulkan"));
         }
 
         private World(IntPtr handle)
@@ -34,6 +34,6 @@ namespace Peace
         private static extern IntPtr createTestWorld();
         
         [DllImport("peace")]
-        private static extern IntPtr createDemoWorld();
+        private static extern IntPtr createDemoWorld(string name);
     }
 }
