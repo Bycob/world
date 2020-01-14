@@ -169,6 +169,8 @@ inline void Instance::collectSelf(ICollector &collector,
 
             if (nodes != nullptr) {
                 // Add every node of the resolution level to the collector
+                int j = 0;
+
                 for (SceneNode node : nodes->_nodes) {
                     // Update each object's transform based on the global one
                     node.setPosition(node.getPosition() * tp._scale +
@@ -176,7 +178,8 @@ inline void Instance::collectSelf(ICollector &collector,
                     // TODO update position based on rotation
                     node.setRotation(tp._rotation);
                     node.setScale(node.getScale() * tp._scale);
-                    objChan.put(key, node, ctx);
+                    objChan.put({key, std::to_string(j)}, node, ctx);
+                    ++j;
                 }
             }
         }

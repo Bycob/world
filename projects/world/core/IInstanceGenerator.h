@@ -25,7 +25,7 @@ public:
 
     vec3d _position;
     vec3d _rotation;
-    vec3d _scale;
+    vec3d _scale = {1};
     int _id = 0;
 
 
