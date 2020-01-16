@@ -28,9 +28,9 @@ FlatWorld *FlatWorld::createDemoFlatWorld() {
     auto &chunkSystem = world->addPrimaryNode<LODGridChunkSystem>({0, 0, 0});
     chunkSystem.addDecorator<ForestLayer>(world);
 
-    // TODO
     // auto &treePool = chunkSystem.addDecorator<InstancePool<Tree>>(world);
-    // treePool.distribution().setDensity(0.02);
+    // treePool.setResolution(1);
+    // treePool.distribution().setDensity(0.0008);
 
     // Grass with seed distribution
     auto &grassPool =

@@ -24,6 +24,8 @@ public:
             : _env{env}, _distribution(env),
               _rng(static_cast<u64>(time(NULL))) {}
 
+    void setResolution(double resolution);
+
     TDistribution &distribution() { return _distribution; }
 
     void collectSelf(ICollector &collector,
@@ -52,6 +54,8 @@ private:
     /// the pool
     double _chunkArea = 0;
 
+    /// Typical resolution of an instance. Used to compute the chunk levels of
+    /// the instances
     double _resolution = 20;
     /// The instance pool automatically adds new generators when expanding.
     /// This is the density of the species per km^2

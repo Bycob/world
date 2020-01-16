@@ -11,6 +11,11 @@
 namespace world {
 
 template <typename TGenerator, typename TDistribution>
+void InstancePool<TGenerator, TDistribution>::setResolution(double resolution) {
+    _resolution = resolution;
+}
+
+template <typename TGenerator, typename TDistribution>
 inline void InstancePool<TGenerator, TDistribution>::collectSelf(
     ICollector &collector, const IResolutionModel &resolutionModel,
     const ExplorationContext &ctx) {
@@ -164,7 +169,8 @@ inline void Instance::collectSelf(ICollector &collector,
             auto &tp = _templates[i];
 
             // Get the nodes corresponding to the right resolution
-            double resolution = resolutionModel.getResolutionAt(tp._position);
+            double resolution =
+                resolutionModel.getResolutionAt(tp._position, ctx);
             auto *nodes = tp.getAt(resolution);
 
             if (nodes != nullptr) {
@@ -178,7 +184,9 @@ inline void Instance::collectSelf(ICollector &collector,
                     // TODO update position based on rotation
                     node.setRotation(tp._rotation);
                     node.setScale(node.getScale() * tp._scale);
-                    objChan.put({key, std::to_string(j)}, node, ctx);
+                    objChan.put({key, std::to_string(j) + "." +
+                                          std::to_string(nodes->_minRes)},
+                                node, ctx);
                     ++j;
                 }
             }

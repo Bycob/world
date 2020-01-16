@@ -21,6 +21,6 @@ inline std::ostream &operator<<(std::ostream &stream, const VkwStats &stats) {
     return stream;
 }
 
-}
+} // namespace world
 
-#endif //VKWORLD_VKWSTATS_H
+#endif // VKWORLD_VKWSTATS_H

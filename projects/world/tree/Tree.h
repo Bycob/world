@@ -68,6 +68,9 @@ private:
 
     void generateBase();
 
+    /** Ungenerate the tree */
+    void reset();
+
     friend class TrunkGenerator;
 };
 

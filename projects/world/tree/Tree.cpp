@@ -5,6 +5,9 @@
 #include "world/core/IResolutionModel.h"
 #include "world/assets/SceneNode.h"
 #include "world/assets/MeshOps.h"
+#include "TreeSkelettonGenerator.h"
+#include "TrunkGenerator.h"
+#include "LeavesGenerator.h"
 
 namespace world {
 class PTree {
@@ -197,7 +200,28 @@ std::vector<Template> Tree::collectTemplates(ICollector &collector,
     return templates;
 }
 
-HabitatFeatures Tree::randomize() { return HabitatFeatures{}; }
+HabitatFeatures Tree::randomize() {
+    // TODO merge TreeGroup and Tree to profit of multiple instances per species
+
+    _internal->_workers.clear();
+    reset();
+
+    auto &skeletton = addWorker<TreeSkelettonGenerator>();
+    skeletton.setRootWeight(TreeParamsd::gaussian(3, 0.2));
+    skeletton.setForkingCount(
+        TreeParamsi::WeightThreshold(0.15, TreeParamsi::uniform_int(3, 4)));
+    skeletton.setInclination(
+        TreeParamsd::PhiOffset(TreeParamsd::gaussian(0.2 * M_PI, 0.05 * M_PI)));
+    skeletton.setTheta(
+        TreeParamsd::UniformTheta(TreeParamsd::gaussian(0, 0.05 * M_PI)));
+    skeletton.setSize(
+        TreeParamsd::SizeFactor(TreeParamsd::uniform_real(0.5, 0.75)));
+
+    addWorker<TrunkGenerator>(12);
+    addWorker<LeavesGenerator>(0.2, 0.15);
+
+    return HabitatFeatures{};
+}
 
 void Tree::generateBase() {
     for (auto &worker : _internal->_workers) {
@@ -205,6 +229,15 @@ void Tree::generateBase() {
     }
 
     _generated = true;
+}
+
+void Tree::reset() {
+    _generated = false;
+
+    _trunkMesh = Mesh();
+    _leavesMesh = Mesh();
+    _simpleTrunk = Mesh();
+    _simpleLeaves = Mesh();
 }
 
 void Tree::addWorkerInternal(ITreeWorker *worker) {
