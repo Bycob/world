@@ -11,12 +11,9 @@
 #include "wrappers/VkwWorker.h"
 #include "wrappers/VkwPerlin.h"
 
-namespace world {
+#include "VkwGroundTextureGenerator.h"
 
-struct LayerInfo {
-    DistributionParams _distribParams;
-    std::string _textureShader;
-};
+namespace world {
 
 class MultilayerElement : public IGridElement {
 public:
@@ -54,35 +51,23 @@ public:
     }
 };
 
-/** All the textures for a specific lod*/
-struct LodTextures {
-    float _width = 0;
-    std::unique_ptr<VkwGraphicsWorker> _texWorker;
-    std::vector<VkwImage> _layerTextures;
-};
-
 class MultilayerGroundTexturePrivate {
 public:
     std::mt19937 _rng;
-    std::vector<LayerInfo> _layers;
+    std::vector<DistributionParams> _layers;
+    VkwGroundTextureGenerator _texGenerator;
 
     std::list<TileCoordinates> _queue;
     GridStorage<MultilayerElement> _storage;
 
-    VkwRandomTexture _randTex;
-    VkwSubBuffer _perlinHash;
-
     u32 _texWidth = 1024;
-    std::map<int, LodTextures> _lodTextures;
+
+    VkwSubBuffer _perlinHash;
 
 
     MultilayerGroundTexturePrivate()
             : _rng(std::random_device()()),
               _perlinHash(VkwPerlin::createPerlinHash()) {}
-
-    /** Start the texture generation. Generated textures will then be
-     * used for each tiles (in texture arrays). */
-    void launchTextureGeneration(LodTextures &t);
 
     /** Wait for texture generation to be finished and transition to a
      * texture usage. Then assign every textures to the element.
@@ -135,7 +120,9 @@ void VkwMultilayerGroundTexture::addDefaultLayers() {
 
 void VkwMultilayerGroundTexture::addLayer(
     const DistributionParams &distribution, const std::string &textureShader) {
-    _internal->_layers.push_back({distribution, textureShader});
+
+    _internal->_layers.push_back(distribution);
+    _internal->_texGenerator.addLayer(textureShader);
 }
 
 void VkwMultilayerGroundTexture::processTerrain(Terrain &terrain) {
@@ -148,69 +135,14 @@ void VkwMultilayerGroundTexture::processTile(ITileContext &context) {
                        context.getCoords());
 }
 
-void MultilayerGroundTexturePrivate::launchTextureGeneration(LodTextures &t) {
-    t._texWorker = std::make_unique<VkwGraphicsWorker>();
-
-    for (size_t i = 0; i < _layers.size(); ++i) {
-        LayerInfo layerInfo = _layers[i];
-
-        VkwImage image(_texWidth, _texWidth, VkwImageUsage::OFFSCREEN_RENDER);
-        t._layerTextures.push_back(image);
-
-        // Generate image
-        VkwDescriptorSetLayout layout({0}, {});
-        layout.addBinding(DescriptorType::IMAGE, 1);
-
-        VkwGraphicsPipeline pipeline(layout);
-        pipeline.enableVertexBuffer(false);
-        pipeline.setBuiltinShader(VkwShaderType::VERTEX,
-                                  "generic-texture.vert");
-        pipeline.setBuiltinShader(VkwShaderType::FRAGMENT,
-                                  layerInfo._textureShader);
-
-        VkwDescriptorSet dset(layout);
-
-        struct {
-            float offsetX = 0;
-            float offsetY = 0;
-            float width;
-            float height;
-        } sizes;
-        sizes.width = t._width;
-        sizes.height = t._width;
-
-        dset.addUniformStruct(0, sizes);
-        dset.addDescriptor(1, _randTex.get());
-
-        VkwRenderPass renderPass(image);
-        pipeline.setRenderPass(renderPass);
-
-        t._texWorker->beginRenderPass(renderPass);
-        t._texWorker->bindCommand(pipeline, dset);
-        t._texWorker->draw(6);
-        t._texWorker->endRenderPass();
-    }
-
-    t._texWorker->endCommandRecording();
-    t._texWorker->run();
-}
-
 void MultilayerGroundTexturePrivate::getTileTextures(const TileCoordinates &tc,
                                                      MultilayerElement &elem,
                                                      float width) {
-    auto it = _lodTextures.insert({tc._lod, LodTextures{}});
-    LodTextures &t = it.first->second;
 
-    if (it.second) {
-        t._width = width;
-        launchTextureGeneration(t);
-        t._texWorker->waitForCompletion();
+    for (size_t i = 0; i < _layers.size(); ++i) {
+        _texGenerator._realWidth = width;
+        elem._textures.push_back(_texGenerator.getVkTexture(i, tc._lod));
     }
-
-    // TODO transitions to textures ?
-
-    elem._textures.insert(elem._textures.begin(), t._layerTextures.begin(),
-                          t._layerTextures.end());
 }
 
 VkwPerlinParameters MultilayerGroundTexturePrivate::getPerlinParameters(
@@ -245,8 +177,7 @@ void MultilayerGroundTexturePrivate::process(Terrain &terrain, Image &image,
     elem._worker = std::make_unique<VkwGraphicsWorker>();
 
     for (size_t i = 0; i < _layers.size(); ++i) {
-        LayerInfo layerInfo = _layers[i];
-        DistributionParams distribParams = layerInfo._distribParams;
+        DistributionParams distribParams = _layers[i];
         distribParams.slopeFactor =
             static_cast<float>(terrainDims.z * terrainRes / terrainDims.x);
 
@@ -335,11 +266,6 @@ void VkwMultilayerGroundTexture::flush() {
     }
 
     _internal->_queue.clear();
-}
-
-Image VkwMultilayerGroundTexture::getTexture(int lod, int layerId) {
-    // TODO
-    return Image(1, 1, ImageType::GREYSCALE);
 }
 
 } // namespace world

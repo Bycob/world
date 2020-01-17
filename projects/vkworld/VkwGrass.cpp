@@ -60,7 +60,7 @@ std::vector<Template> VkwGrass::collectTemplates(ICollector &collector,
 
 HabitatFeatures VkwGrass::randomize() {
     HabitatFeatures habitat;
-    habitat._density = 100;
+    habitat._density = 4;
     return habitat;
 }
 

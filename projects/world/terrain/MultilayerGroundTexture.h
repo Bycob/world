@@ -5,9 +5,7 @@
 
 #include "GridStorage.h"
 #include "ITerrainWorker.h"
-
-// TODO move DistributionParams to world
-#include <vkworld/DistributionParams.h>
+#include "DistributionParams.h"
 
 namespace world {
 

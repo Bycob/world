@@ -6,8 +6,7 @@
 #include <random>
 
 #include <world/terrain/ITerrainWorker.h>
-
-#include "DistributionParams.h"
+#include <world/terrain/DistributionParams.h>
 
 namespace world {
 
@@ -30,9 +29,6 @@ public:
     void processTile(ITileContext &context) override;
 
     void flush() override;
-
-    /** Get specific layer texture */
-    Image getTexture(int lod, int layerId);
 
 private:
     MultilayerGroundTexturePrivate *_internal;

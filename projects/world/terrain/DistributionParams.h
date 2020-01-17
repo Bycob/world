@@ -1,11 +1,11 @@
 #ifndef VKWORLD_DISTRIBUTION_PARAMS_H
 #define VKWORLD_DISTRIBUTION_PARAMS_H
 
-#include "VkWorldConfig.h"
+#include "world/core/WorldConfig.h"
 
 namespace world {
 
-struct VKWORLD_EXPORT DistributionParams {
+struct WORLDAPI_EXPORT DistributionParams {
     float ha;
     float hb;
     float hc;

@@ -6,8 +6,7 @@
 #include <random>
 
 #include <world/terrain/ITerrainWorker.h>
-
-#include "DistributionParams.h"
+#include <world/terrain/DistributionParams.h>
 
 namespace world {
 
