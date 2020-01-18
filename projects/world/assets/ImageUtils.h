@@ -13,6 +13,8 @@ class WORLDAPI_EXPORT ImageUtils {
 public:
     ImageUtils() = delete;
 
+    static Image toType(const Image &src, ImageType type);
+
     /**
      * \param dstPos position of the top-left corner of the source image on
      * the destination image. {0., 0.} is top left and {1., 1.} is bottom right.

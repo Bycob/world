@@ -36,6 +36,8 @@ public:
      * smaller number of components. */
     static void GPUToImage(IVkwMemoryAccess &memory, Image &img, u32 elemCount);
 
+    static Image GPUToImage(VkwImage &vkimg);
+
     static void imageToGPU(const Image &img, IVkwMemoryAccess &memory);
 
     static void GPUToTerrain(IVkwMemoryAccess &memory, Terrain &terrain);

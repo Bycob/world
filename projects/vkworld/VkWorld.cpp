@@ -1,21 +1,42 @@
 #include "VkWorld.h"
 
-#include "world/flat/FlatWorld.h"
 #include "world/core/LODGridChunkSystem.h"
 #include "world/core/InstancePool.h"
-#include "world/terrain/HeightmapGround.h"
+#include "world/core/Profiler.h"
+#include "world/core/SeedDistribution.h"
+#include "world/flat/FlatWorld.h"
 #include "world/tree/ForestLayer.h"
 #include "world/tree/Grass.h"
 #include "world/nature/Rocks.h"
-#include "world/core/Profiler.h"
-#include "world/core/SeedDistribution.h"
+#include "world/terrain/HeightmapGround.h"
 #include "world/terrain/PerlinTerrainGenerator.h"
 #include "world/terrain/ReliefMapModifier.h"
+#include "world/terrain/MultilayerGroundTexture.h"
 
 #include "VkwMultilayerGroundTexture.h"
 #include "VkwGrass.h"
+#include "VkwGroundTextureGenerator.h"
 
 namespace world {
+
+void testCPUMultilayer(HeightmapGround &ground) {
+    auto &tex = ground.addWorker<MultilayerGroundTexture>();
+    tex.addLayer(DistributionParams{-1, 0, 1, 2, // h
+                                    -1, 0, 1, 2, // dh
+                                    0, 1, 0, 1, 0.2});
+    tex.addLayer(DistributionParams{0.33, 0.4, 0.6, 0.75, // h
+                                    -1, 0, 0.4, 0.9,      // dh
+                                    0, 0.85, 0.25, 0.85, 0.2});
+    tex.addLayer(DistributionParams{0.33, 0.4, 0.6, 0.7, // h
+                                    -1, 0, 0.2, 0.6,     // dh
+                                    0., 1., 0.25, 0.6, 0.2});
+    auto &texGen = tex.setTextureProvider<VkwGroundTextureGenerator>();
+    texGen.setBaseWorldWidth(100);
+    texGen.addLayer("texture-rock.frag");
+    texGen.addLayer("texture-soil.frag");
+    texGen.addLayer("texture-grass.frag");
+}
+
 FlatWorld *VkWorld::createDemoFlatWorld() {
     FlatWorld *world = new FlatWorld();
 

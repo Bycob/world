@@ -139,8 +139,11 @@ void MultilayerGroundTexturePrivate::getTileTextures(const TileCoordinates &tc,
                                                      MultilayerElement &elem,
                                                      float width) {
 
+    if (tc._lod == 0) {
+        _texGenerator.setBaseWorldWidth(width);
+    }
+
     for (size_t i = 0; i < _layers.size(); ++i) {
-        _texGenerator._realWidth = width;
         elem._textures.push_back(_texGenerator.getVkTexture(i, tc._lod));
     }
 }

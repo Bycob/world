@@ -21,6 +21,28 @@ void VkwMemoryHelper::GPUToImage(IVkwMemoryAccess &memory, Image &img, u32 e) {
     }
 }
 
+Image VkwMemoryHelper::GPUToImage(VkwImage &vkimg) {
+    ImageType imType;
+
+    switch (vkimg.format()) {
+    case vk::Format::eR32G32B32A32Sfloat:
+        imType = ImageType::RGBA;
+        break;
+    case vk::Format::eR32G32B32Sfloat:
+        imType = ImageType::RGB;
+        break;
+    case vk::Format::eR32Sfloat:
+        imType = ImageType::GREYSCALE;
+        break;
+    default:
+        throw std::runtime_error("GPUToImage: Vk image format not supported (" +
+                                 std::to_string(int(vkimg.format())) + ")");
+    }
+    Image img(vkimg.width(), vkimg.height(), imType);
+    GPUToImage(vkimg, img);
+    return img;
+}
+
 void VkwMemoryHelper::imageToGPU(const Image &img, IVkwMemoryAccess &memory) {}
 
 void VkwMemoryHelper::GPUToTerrain(IVkwMemoryAccess &memory, Terrain &terrain) {

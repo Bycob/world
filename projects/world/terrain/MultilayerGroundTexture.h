@@ -22,7 +22,10 @@ public:
         std::vector<Terrain> _distributions;
     };
 
-    MultilayerGroundTexture(ITextureProvider *texProvider);
+    MultilayerGroundTexture();
+
+    template <typename T, typename... Args>
+    T &setTextureProvider(Args &&... args);
 
     void processTerrain(Terrain &terrain) override;
 
@@ -33,12 +36,18 @@ public:
 private:
     GridStorage<Element> _storage;
 
-    ITextureProvider *_texProvider;
+    std::unique_ptr<ITextureProvider> _texProvider;
     std::vector<DistributionParams> _layers;
 
 
     void process(Terrain &terrain, Image &image, const TileCoordinates &tc);
 };
+
+template <typename T, typename... Args>
+T &MultilayerGroundTexture::setTextureProvider(Args &&... args) {
+    _texProvider = std::make_unique<T>(args...);
+    return static_cast<T &>(*_texProvider);
+}
 
 } // namespace world
 

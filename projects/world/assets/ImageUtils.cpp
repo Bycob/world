@@ -2,6 +2,20 @@
 
 namespace world {
 
+Image ImageUtils::toType(const Image &src, ImageType type) {
+    Image dst(src.width(), src.height(), type);
+    float array[] = {0, 0, 0, 1};
+
+    for (int y = 0; y < dst.height(); ++y) {
+        for (int x = 0; x < dst.width(); ++x) {
+            src.getf(x, y, array);
+            dst.setf(x, y, array);
+        }
+    }
+
+    return dst;
+}
+
 void ImageUtils::paintTexturef(Image &dst, const Image &src,
                                const vec2d &dstPos, const vec2d &dstSize) {
     vec2i dstDims{dst.width(), dst.height()};

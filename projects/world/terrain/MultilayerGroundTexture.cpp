@@ -1,15 +1,11 @@
+#include <world/assets/ImageUtils.h>
 #include "MultilayerGroundTexture.h"
 
 namespace world {
 
 using MultilayerElement = MultilayerGroundTexture::Element;
 
-MultilayerGroundTexture::MultilayerGroundTexture(ITextureProvider *texProvider)
-        : _texProvider(texProvider) {
-    if (_texProvider == nullptr) {
-        throw std::runtime_error("Texture provider was initialized to null");
-    }
-}
+MultilayerGroundTexture::MultilayerGroundTexture() = default;
 
 void MultilayerGroundTexture::processTerrain(Terrain &terrain) {
     process(terrain, terrain.getTexture(), {});
@@ -35,9 +31,14 @@ double ramp(double a, double b, double c, double d, double lowb, double highb,
 void MultilayerGroundTexture::process(Terrain &terrain, Image &image,
                                       const TileCoordinates &tc) {
 
-    const u32 imWidth = u32(image.width());
-    const u32 imHeight = u32(image.height());
+    if (_texProvider == nullptr) {
+        throw std::runtime_error("Texture provider is nullptr");
+    }
+
+    const int imWidth = image.width();
+    const int imHeight = image.height();
     const u32 tRes = u32(terrain.getResolution());
+    Image proxy(imWidth, imHeight, ImageType::RGBA);
 
     MultilayerElement &elem = _storage.getOrCreate(tc);
 
@@ -52,7 +53,7 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &image,
             for (u32 x = 0; x < tRes; ++x) {
                 // See shader distribution-height.frag in vkworld for more
                 // details
-                vec2d uv = vec2u{x, y} / double(tRes - 1);
+                vec2d uv = vec2d{vec2u{x, y}} / (tRes - 1);
                 double h = terrain.getExactHeightAt(uv.x, uv.y);
                 double dh =
                     std::atan(terrain.getSlopeAt(uv.x, uv.y)) * 2.0 / M_PI;
@@ -71,31 +72,33 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &image,
 
         // Sum with final image
         Image &layerTex = _texProvider->getTexture(layer, tc._lod);
-        const u32 texWidth = u32(layerTex.width());
-        const u32 texHeight = u32(layerTex.height());
+        const int texWidth = layerTex.width();
+        const int texHeight = layerTex.height();
         vec2i offset(world::mod<int>(tc._pos.x * imWidth, texWidth),
                      world::mod<int>(tc._pos.y * imHeight, texHeight));
 
-        for (u32 y = 0; y < imHeight; ++y) {
-            for (u32 x = 0; x < imWidth; ++x) {
-                auto origin = image.rgba(x, y);
+        for (int y = 0; y < imHeight; ++y) {
+            for (int x = 0; x < imWidth; ++x) {
+                auto origin = proxy.rgba(x, y);
                 auto texPix = layerTex.rgba((x + offset.x) % texWidth,
                                             (y + offset.y) % texHeight);
 
                 vec2d uv =
-                    vec2u{x, y} / vec2d{vec2u{imWidth - 1, imHeight - 1}};
+                    vec2d{vec2i{x, y}} / vec2i{imWidth - 1, imHeight - 1};
                 double p = distrib.getCubicHeight(uv.x, uv.y);
                 double alpha = p * texPix.getAlphaf();
 
-                auto &dest = image.rgba(x, y);
+                auto &dest = proxy.rgba(x, y);
                 dest.setf(
                     origin.getRedf() * (1 - alpha) + texPix.getRedf() * alpha,
                     origin.getGreenf() * (1 - alpha) +
                         texPix.getGreenf() * alpha,
                     origin.getBluef() * (1 - alpha) + texPix.getBluef() * alpha,
-                    origin.getAlphaf() + (1 - origin.getAlphaf()) * alpha);
+                    origin.getAlphaf() + (1 - texPix.getAlphaf()) * alpha);
             }
         }
     }
+
+    image = ImageUtils::toType(proxy, ImageType::RGB);
 }
 } // namespace world

@@ -512,7 +512,7 @@ void Image::getf(int x, int y, float *values) const {
     const u8 *src = _internal->at(x, y);
 
     for (u32 i = 0; i < _internal->_elemSize; ++i) {
-        values[i] = src[i];
+        values[i] = toDouble(src[i]);
     }
 }
 

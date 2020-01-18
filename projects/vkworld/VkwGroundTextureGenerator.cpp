@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <vkworld/wrappers/VkwMemoryHelper.h>
 
 #include "wrappers/VkwImage.h"
 #include "wrappers/VkwWorker.h"
@@ -48,12 +49,12 @@ size_t VkwGroundTextureGenerator::getLayerCount() {
 }
 
 VkwImage &VkwGroundTextureGenerator::getVkTexture(int layer, int lod) {
-    auto &lodTex = _internal->getOrCreate(lod, _realWidth);
+    auto &lodTex = _internal->getOrCreate(lod, getWorldWidth(lod));
     return lodTex._layerTextures.at(layer);
 }
 
 Image &VkwGroundTextureGenerator::getTexture(int layer, int lod) {
-    auto &lodTex = _internal->getOrCreate(lod, _realWidth, true);
+    auto &lodTex = _internal->getOrCreate(lod, getWorldWidth(lod), true);
     return lodTex._layerImages.at(layer);
 }
 
@@ -68,18 +69,22 @@ LodTextures &VkwGroundTextureGeneratorPrivate::getOrCreate(int lod, float width,
         t._texWorker->waitForCompletion();
     }
 
-    if (cpu && t._layerTextures.size() != t._layerImages.size()) {
-        // TODO
-    }
-
     // TODO transitions to textures ?
+
+    if (cpu && t._layerTextures.size() != t._layerImages.size()) {
+        t._layerImages.clear();
+
+        for (VkwImage &img : t._layerTextures) {
+            t._layerImages.push_back(VkwMemoryHelper::GPUToImage(img));
+        }
+    }
     return t;
 }
 
 void VkwGroundTextureGeneratorPrivate::launchTextureGeneration(LodTextures &t) {
     t._texWorker = std::make_unique<VkwGraphicsWorker>();
 
-    for (size_t i = 0; i < _layers.size(); ++i) {
+    for (const auto &layer : _layers) {
         VkwImage image(_texWidth, _texWidth, VkwImageUsage::OFFSCREEN_RENDER);
         t._layerTextures.push_back(image);
 
@@ -91,7 +96,7 @@ void VkwGroundTextureGeneratorPrivate::launchTextureGeneration(LodTextures &t) {
         pipeline.enableVertexBuffer(false);
         pipeline.setBuiltinShader(VkwShaderType::VERTEX,
                                   "generic-texture.vert");
-        pipeline.setBuiltinShader(VkwShaderType::FRAGMENT, _layers[i]);
+        pipeline.setBuiltinShader(VkwShaderType::FRAGMENT, layer);
 
         VkwDescriptorSet dset(layout);
 
@@ -118,5 +123,9 @@ void VkwGroundTextureGeneratorPrivate::launchTextureGeneration(LodTextures &t) {
 
     t._texWorker->endCommandRecording();
     t._texWorker->run();
+}
+
+float VkwGroundTextureGenerator::getWorldWidth(int lod) {
+    return _baseWorldWidth * powi(2.0f, -lod);
 }
 } // namespace world

@@ -4,6 +4,7 @@
 #include "VkWorldConfig.h"
 
 #include <world/assets/Image.h>
+#include <world/terrain/MultilayerGroundTexture.h>
 
 #include <vkworld/wrappers/VkwImage.h>
 
@@ -11,7 +12,7 @@ namespace world {
 
 class VkwGroundTextureGeneratorPrivate;
 
-class VKWORLD_EXPORT VkwGroundTextureGenerator {
+class VKWORLD_EXPORT VkwGroundTextureGenerator : public ITextureProvider {
 public:
     VkwGroundTextureGenerator();
     ~VkwGroundTextureGenerator();
@@ -28,9 +29,15 @@ public:
 
     Image &getTexture(int layer, int lod);
 
-    float _realWidth; // TODO this variable changes and makes no sense :P
+    void setBaseWorldWidth(float width) { _baseWorldWidth = width; }
+
 private:
     VkwGroundTextureGeneratorPrivate *_internal;
+
+    float _baseWorldWidth = 100;
+
+
+    float getWorldWidth(int lod);
 };
 
 } // namespace world
