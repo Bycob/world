@@ -43,10 +43,14 @@ public:
 
     template <typename T, typename... Args> T &addChild(Args &&... args);
 
+    void removeChild(WorldNode &child);
+
 protected:
     WorldNodePrivate *_internal;
 
     vec3d _position;
+    NodeKey _key = NodeKeys::none();
+
 
     virtual void collectSelf(ICollector &collector,
                              const IResolutionModel &resolutionModel,

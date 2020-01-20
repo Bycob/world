@@ -6,7 +6,6 @@
 #include "world/core/SeedDistribution.h"
 #include "world/flat/FlatWorld.h"
 #include "world/tree/ForestLayer.h"
-#include "world/tree/Grass.h"
 #include "world/nature/Rocks.h"
 #include "world/terrain/HeightmapGround.h"
 #include "world/terrain/PerlinTerrainGenerator.h"

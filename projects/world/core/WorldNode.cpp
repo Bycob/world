@@ -54,9 +54,14 @@ void WorldNode::collectChild(const NodeKey &key, WorldNode &childObject,
     childObject.collect(collector, resolutionModel, newCtx);
 }
 
+void WorldNode::removeChild(WorldNode &child) {
+    _internal->_children.erase(child._key);
+}
+
 void WorldNode::addChildInternal(WorldNode *node) {
-    _internal->_children.emplace(NodeKeys::fromInt(_internal->_counter),
-                                 std::unique_ptr<WorldNode>(node));
+    NodeKey key = NodeKeys::fromInt(_internal->_counter);
+    _internal->_children.emplace(key, std::unique_ptr<WorldNode>(node));
+    node->_key = key;
     _internal->_counter++;
 }
 } // namespace world

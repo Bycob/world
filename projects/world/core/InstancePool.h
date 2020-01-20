@@ -73,6 +73,8 @@ public:
 
     void addNode(Template tp);
 
+    size_t getNodeCount() const;
+
     void collectSelf(ICollector &collector,
                      const IResolutionModel &resolutionModel,
                      const ExplorationContext &ctx) override;

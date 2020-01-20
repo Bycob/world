@@ -87,6 +87,10 @@ inline void InstancePool<TGenerator, TDistribution>::decorate(Chunk &chunk) {
 
         instance.addNode(std::move(object));
     }
+
+    if (instance.getNodeCount() == 0) {
+        chunk.removeChild(instance);
+    }
 }
 
 template <typename TGenerator, typename TDistribution>
@@ -153,10 +157,14 @@ void InstancePool<TGenerator, TDistribution>::exportSpecies(
     file << buf.GetString();
 }
 
+
+// #### Instance
+
 inline void Instance::addNode(Template tp) {
     _templates.push_back(std::move(tp));
 }
 
+inline size_t Instance::getNodeCount() const { return _templates.size(); }
 
 inline void Instance::collectSelf(ICollector &collector,
                                   const IResolutionModel &resolutionModel,

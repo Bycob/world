@@ -18,6 +18,7 @@ int main(int argc, char **argv) { generate_test_world(argc, argv); }
 #ifdef USE_VKWORLD
 
 #include <vkworld/VkwMultilayerGroundTexture.h>
+#include <vkworld/VkWorld.h>
 
 FlatWorld *createWorld() {
     FlatWorld *world = new FlatWorld();

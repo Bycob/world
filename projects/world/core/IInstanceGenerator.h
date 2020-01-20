@@ -52,7 +52,7 @@ public:
 
 private:
     /// Scene nodes that will be collected, at different resolution
-    std::list<Item> _items;
+    std::vector<Item> _items;
 };
 
 // TODO Force every instance generator to inherit this class
