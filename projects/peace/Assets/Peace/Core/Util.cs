@@ -23,5 +23,17 @@ namespace Peace
 
             return strArray;
         }
+
+        public static void FreePtrs(IntPtr[] array)
+        {
+            freePtrs(array.Length, array);
+        }
+        
+        
+        // Dll functions
+        // C-like free
+        [DllImport("peace")]
+        // TODO change [In, Out] to read only
+        private static extern void freePtrs(int size, [In, Out] IntPtr[] array);
     }
 }

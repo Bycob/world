@@ -37,4 +37,8 @@ PEACE_EXPORT WorldPtr createDemoWorld(char* name) {
     return World::createDemoWorld();
 }
 
+PEACE_EXPORT void freeWorld(WorldPtr worldPtr) {
+    delete static_cast<World*>(worldPtr);
+}
+
 }

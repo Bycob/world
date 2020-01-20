@@ -20,6 +20,11 @@ namespace Peace
             _handle = handle;
         }
 
+        ~World()
+        {
+            freeWorld(_handle);
+        }
+
         public World(String configFile)
         {
             throw new NotSupportedException(
@@ -35,5 +40,8 @@ namespace Peace
         
         [DllImport("peace")]
         private static extern IntPtr createDemoWorld(string name);
+        
+        [DllImport("peace")]
+        private static extern void freeWorld(IntPtr handle);
     }
 }

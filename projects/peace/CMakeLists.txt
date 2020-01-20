@@ -5,7 +5,8 @@ if (${WORLD_BUILD_PEACE})
     add_library(peace SHARED
             csrc/world.cpp
             csrc/collector.cpp
-            csrc/assets.cpp)
+            csrc/assets.cpp
+            csrc/util.cpp)
 
     target_link_libraries(peace world)
 

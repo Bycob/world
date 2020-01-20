@@ -38,6 +38,11 @@ namespace Peace
             SetPosition(Vector3.zero);
         }
 
+        ~Collector()
+        {
+            freeCollector(_handle);
+        }
+
         public void Reset()
         {
             _newNodes.Clear();
@@ -240,6 +245,9 @@ namespace Peace
         
         [DllImport("peace")]
         private static extern IntPtr createCollector();
+        
+        [DllImport("peace")]
+        private static extern void freeCollector(IntPtr handle);
         
         [DllImport("peace")]
         private static extern void collect(IntPtr collector, IntPtr world, CollectorView view);

@@ -21,13 +21,15 @@ public:
 
     SceneNode(const Mesh &mesh, const Material &material);
 
-    void setMesh(std::string meshID) { _meshID = meshID; }
+    void setMesh(std::string meshID) { _meshID = std::move(meshID); }
 
-    std::string getMeshID() const { return _meshID; }
+    const std::string &getMeshID() const { return _meshID; }
 
-    void setMaterialID(std::string materialID) { _materialID = materialID; }
+    void setMaterialID(std::string materialID) {
+        _materialID = std::move(materialID);
+    }
 
-    std::string getMaterialID() const { return _materialID; }
+    const std::string &getMaterialID() const { return _materialID; }
 
     void setPosition(vec3d position) { _position = position; }
 
