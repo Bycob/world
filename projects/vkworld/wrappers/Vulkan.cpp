@@ -7,6 +7,8 @@
 
 #include <vulkan/vulkan.h>
 
+#include <RCLib-shaderlib.h>
+
 #include "world/core/WorldTypes.h"
 #include "world/assets/Image.h"
 
@@ -443,6 +445,9 @@ std::vector<char> VulkanContext::readFile(const std::string &filename) {
     return result;
 }
 
+std::vector<char> VulkanContext::readInternalFile(const std::string &filename) {
+    return Resources::readFile(filename);
+}
 
 VulkanContext &Vulkan::context() {
     static VulkanContext context;

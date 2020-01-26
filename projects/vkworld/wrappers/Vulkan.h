@@ -74,6 +74,8 @@ public:
 
     std::vector<char> readFile(const std::string &filename);
 
+    std::vector<char> readInternalFile(const std::string &filename);
+
 
     // TEST
     void configTest();

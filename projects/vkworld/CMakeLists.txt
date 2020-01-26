@@ -7,7 +7,8 @@ if (${WORLD_BUILD_VULKAN_MODULES})
 
         add_library(vkworld ${WORLD_BUILD_MODE} ${VKWORLD_SOURCES})
 
-        target_link_libraries(vkworld world ${Vulkan_LIBRARIES} ${THIRD_PARTY_LIBRARIES})
+        target_link_libraries(vkworld world ${Vulkan_LIBRARIES} ${THIRD_PARTY_LIBRARIES} shaderlib)
+        rclib_include_directory(shaderlib)
 
         add_subdirectory(shaders/)
     else()

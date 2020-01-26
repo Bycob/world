@@ -11,7 +11,7 @@ file(
 	WORLD_SHADERLIB_SOURCES
 	lib/*.comp
 )
-	
+
 set(WORLD_SHADERS_BIN ${WORLD_SHADERLIB_SOURCES})
 
 # Choose output directory according to the target and the compiler
@@ -20,9 +20,11 @@ if(WORLD_COMPILER_IS_MSVC)
 else()
 	set(WORLD_SHADERS_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 endif()
+set(WORLD_SHADERS_OUTPUT_DIRECTORY ${WORLD_SHADERS_OUTPUT_DIRECTORY}/shaders)
 
 message(STATUS "Shader output directory is: ${WORLD_SHADERS_OUTPUT_DIRECTORY}")
 
+# Compile all shaders
 foreach(SOURCE_SHADER ${WORLD_SHADERS_SOURCES})
 	get_filename_component(SHADER_NAME "${SOURCE_SHADER}" NAME)
 	set(COMPILED_SHADER "${WORLD_SHADERS_OUTPUT_DIRECTORY}/${SHADER_NAME}.spv")
@@ -39,5 +41,5 @@ foreach(SOURCE_SHADER ${WORLD_SHADERS_SOURCES})
 	set(WORLD_SHADERS_BIN ${WORLD_SHADERS_BIN} ${COMPILED_SHADER})
 endforeach()
 
-add_custom_target(shaders DEPENDS ${WORLD_SHADERS_BIN})
-add_dependencies(vkworld shaders)
+# Add shaders to resource library
+rclib_add_resource_library(shaderlib world ${WORLD_SHADERS_BIN})

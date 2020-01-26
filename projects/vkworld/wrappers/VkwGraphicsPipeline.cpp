@@ -203,7 +203,7 @@ void VkwGraphicsPipeline::setBuiltinShader(VkwShaderType type,
                                            const std::string &shaderName) {
     auto &ctx = Vulkan::context();
     _internal->_shaders[type] =
-        ctx.createShader(ctx.readFile(shaderName + ".spv"));
+        ctx.createShader(ctx.readInternalFile(shaderName + ".spv"));
 }
 
 bool VkwGraphicsPipeline::hasDynamicViewport() const {

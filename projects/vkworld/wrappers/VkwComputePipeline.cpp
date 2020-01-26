@@ -70,7 +70,8 @@ VkwComputePipeline::VkwComputePipeline(
 
 void VkwComputePipeline::setBuiltinShader(const std::string &shaderName) {
     auto &ctx = Vulkan::context();
-    _internal->_shader = ctx.createShader(ctx.readFile(shaderName + ".spv"));
+    _internal->_shader =
+        ctx.createShader(ctx.readInternalFile(shaderName + ".spv"));
 }
 
 vk::Pipeline &VkwComputePipeline::getPipeline() {
