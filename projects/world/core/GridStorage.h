@@ -7,7 +7,7 @@
 #include <map>
 
 #include "world/core/TileSystem.h"
-#include "Terrain.h"
+#include "world/terrain/Terrain.h"
 
 namespace world {
 

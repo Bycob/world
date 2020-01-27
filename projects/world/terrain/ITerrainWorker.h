@@ -6,7 +6,7 @@
 #include "world/core/TileSystem.h"
 
 #include "Terrain.h"
-#include "GridStorage.h"
+#include "world/core/GridStorage.h"
 
 namespace world {
 

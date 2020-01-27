@@ -2,7 +2,7 @@
 
 #include <list>
 
-#include <world/terrain/GridStorage.h>
+#include <world/core/GridStorage.h>
 
 #include "wrappers/VkwImage.h"
 #include "wrappers/VkwTextureGenerator.h"

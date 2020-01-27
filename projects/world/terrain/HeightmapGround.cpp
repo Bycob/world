@@ -18,7 +18,7 @@
 #include "TerrainOps.h"
 #include "world/core/Profiler.h"
 #include "DiamondSquareTerrain.h"
-#include "GridStorage.h"
+#include "world/core/GridStorage.h"
 
 namespace world {
 

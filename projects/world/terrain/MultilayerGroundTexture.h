@@ -3,7 +3,7 @@
 
 #include "world/core/WorldConfig.h"
 
-#include "GridStorage.h"
+#include "world/core/GridStorage.h"
 #include "ITerrainWorker.h"
 #include "DistributionParams.h"
 
