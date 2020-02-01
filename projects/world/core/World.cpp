@@ -3,7 +3,7 @@
 #include <map>
 
 #include "world/flat/FlatWorld.h"
-#include "LODGridChunkSystem.h"
+#include "GridChunkSystem.h"
 
 namespace world {
 

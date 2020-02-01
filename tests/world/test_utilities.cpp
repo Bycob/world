@@ -6,6 +6,34 @@ using namespace world;
 
 TEST_CASE("TileSystem", "[utilities]") {
 
+    SECTION("TileCoordinates") {
+        TileCoordinates c1a(0, 0, 0, 0);
+        TileCoordinates c1b(0, 0, 0, 0);
+        TileCoordinates c2(0, 0, 0, 1);
+        TileCoordinates c3(0, 0, 1, 0);
+
+        SECTION("test operator==") {
+            REQUIRE(c1a == c1b);
+            REQUIRE_FALSE(c1a == c2);
+            REQUIRE_FALSE(c1a == c3);
+            REQUIRE_FALSE(c2 == c3);
+        }
+
+        // TODO Test operator<
+
+        SECTION("test toKey") {
+            REQUIRE(c1a.toKey() == c1b.toKey());
+            REQUIRE(c1a.toKey() != c2.toKey());
+            REQUIRE(c1a.toKey() != c3.toKey());
+            REQUIRE(c2.toKey() != c3.toKey());
+        }
+
+        SECTION("test toKey features") {
+            REQUIRE(c1a.toKey().length() == sizeof(int) * 4);
+            REQUIRE((c1a.toKey() + c2.toKey()).length() == sizeof(int) * 8);
+        }
+    }
+
     TileSystem ts(5, {16, 16, 0}, {1600, 1600, 0});
 
     SECTION("resolution to lod") {

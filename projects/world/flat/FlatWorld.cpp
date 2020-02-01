@@ -1,6 +1,6 @@
 #include "FlatWorld.h"
 
-#include "world/core/LODGridChunkSystem.h"
+#include "world/core/GridChunkSystem.h"
 #include "world/core/InstancePool.h"
 #include "world/terrain/HeightmapGround.h"
 #include "world/tree/ForestLayer.h"
@@ -25,7 +25,7 @@ FlatWorld *FlatWorld::createDemoFlatWorld() {
     HeightmapGround &ground = world->setGround<HeightmapGround>();
     ground.setDefaultWorkerSet();
 
-    auto &chunkSystem = world->addPrimaryNode<LODGridChunkSystem>({0, 0, 0});
+    auto &chunkSystem = world->addPrimaryNode<GridChunkSystem>({0, 0, 0});
     chunkSystem.addDecorator<ForestLayer>(world);
 
     // auto &treePool = chunkSystem.addDecorator<InstancePool<Tree>>(world);

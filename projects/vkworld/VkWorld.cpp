@@ -1,6 +1,6 @@
 #include "VkWorld.h"
 
-#include "world/core/LODGridChunkSystem.h"
+#include "world/core/GridChunkSystem.h"
 #include "world/core/InstancePool.h"
 #include "world/core/Profiler.h"
 #include "world/core/SeedDistribution.h"
@@ -51,7 +51,7 @@ FlatWorld *VkWorld::createDemoFlatWorld() {
 
     ground.addWorker<VkwMultilayerGroundTexture>().addDefaultLayers();
 
-    auto &chunkSystem = world->addPrimaryNode<LODGridChunkSystem>({0, 0, 0});
+    auto &chunkSystem = world->addPrimaryNode<GridChunkSystem>({0, 0, 0});
     chunkSystem.addDecorator<ForestLayer>(world);
 
     // Grass with seed distribution

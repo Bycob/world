@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <iostream>
 
-#include "LODGridChunkSystem.h"
+#include "GridChunkSystem.h"
 #include "Collector.h"
 #include "IResolutionModel.h"
 #include "ConstantResolution.h"

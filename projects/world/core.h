@@ -31,8 +31,7 @@
 
 #include "core/Chunk.h"
 #include "core/IChunkSystem.h"
-#include "core/LODGridChunkSystem.h"
-#include "core/LODGridCoordinates.h"
+#include "world/core/GridChunkSystem.h"
 #include "core/GridStorage.h"
 #include "core/InstancePool.h"
 #include "core/SeedDistribution.h"
@@ -46,7 +45,6 @@
 #include "core/ICloneable.h"
 #include "core/Memory.h"
 #include "core/IOUtil.h"
-#include "core/LODData.h"
 #include "core/TileSystem.h"
 #include "core/StringOps.h"
 #include "core/Profiler.h"

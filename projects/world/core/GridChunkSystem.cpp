@@ -1,4 +1,4 @@
-#include "LODGridChunkSystem.h"
+#include "GridChunkSystem.h"
 
 #include <string>
 #include <map>
@@ -12,7 +12,7 @@ namespace world {
 class ChunkEntry : public IGridElement {
 public:
     ChunkEntry(const TileCoordinates &tc, const TileSystem &ts,
-               LODGridChunkSystem &chunkSystem);
+               GridChunkSystem &chunkSystem);
 
     TileCoordinates _coords;
     Chunk _chunk;
@@ -20,20 +20,18 @@ public:
 
 #define MAX_LOD 20
 
-class LODGridChunkSystemPrivate {
+class GridChunkSystemPrivate {
 public:
-    LODData _lodData[MAX_LOD];
-    std::map<NodeKey, std::unique_ptr<ChunkEntry>> _chunks;
     std::vector<std::unique_ptr<IChunkDecorator>> _chunkDecorators;
 
     TileSystem _tileSystem;
     GridStorage<ChunkEntry> _storage;
 
-    LODGridChunkSystemPrivate() : _tileSystem(0, {}, {}) {}
+    GridChunkSystemPrivate() : _tileSystem(0, {}, {}) {}
 };
 
 ChunkEntry::ChunkEntry(const TileCoordinates &tc, const TileSystem &ts,
-                       LODGridChunkSystem &chunkSystem)
+                       GridChunkSystem &chunkSystem)
         : _coords(tc),
           _chunk(ts.getTileSize(tc._lod), ts.getMinResolution(tc._lod),
                  ts.getMaxResolution(tc._lod)) {
@@ -46,9 +44,9 @@ ChunkEntry::ChunkEntry(const TileCoordinates &tc, const TileSystem &ts,
 }
 
 
-LODGridChunkSystem::LODGridChunkSystem(double baseChunkSize, int maxLod,
-                                       double baseRes)
-        : _internal(new LODGridChunkSystemPrivate()) {
+GridChunkSystem::GridChunkSystem(double baseChunkSize, int maxLod,
+                                 double baseRes)
+        : _internal(new GridChunkSystemPrivate()) {
 
     TileSystem &ts = tileSystem();
     ts._maxLod = maxLod;
@@ -67,18 +65,18 @@ LODGridChunkSystem::LODGridChunkSystem(double baseChunkSize, int maxLod,
     ts._bufferRes = {static_cast<int>(bufferRes)};
 }
 
-LODGridChunkSystem::~LODGridChunkSystem() { delete _internal; }
+GridChunkSystem::~GridChunkSystem() { delete _internal; }
 
-Chunk &LODGridChunkSystem::getChunk(const vec3d &position, double resolution) {
+Chunk &GridChunkSystem::getChunk(const vec3d &position, double resolution) {
     TileSystem &ts = tileSystem();
     TileCoordinates tc = ts.getTileCoordinates(position, ts.getLod(resolution));
     auto &entry = getOrCreateEntry(tc);
     return entry._chunk;
 }
 
-void LODGridChunkSystem::collect(ICollector &collector,
-                                 const IResolutionModel &resolutionModel,
-                                 const ExplorationContext &ctx) {
+void GridChunkSystem::collect(ICollector &collector,
+                              const IResolutionModel &resolutionModel,
+                              const ExplorationContext &ctx) {
     // Run collect on every decorator if needed
     int decoratorID = 0;
     for (auto &decorator : _internal->_chunkDecorators) {
@@ -104,28 +102,28 @@ void LODGridChunkSystem::collect(ICollector &collector,
     }
 }
 
-void LODGridChunkSystem::collectChunk(const TileCoordinates &chunkKey,
-                                      ICollector &collector,
-                                      const IResolutionModel &resolutionModel,
-                                      const ExplorationContext &ctx) {
+void GridChunkSystem::collectChunk(const TileCoordinates &chunkKey,
+                                   ICollector &collector,
+                                   const IResolutionModel &resolutionModel,
+                                   const ExplorationContext &ctx) {
 
     Chunk &chunk = getOrCreateEntry(chunkKey)._chunk;
     collectChild(chunkKey.toKey(), chunk, collector, resolutionModel, ctx);
 }
 
-vec3d LODGridChunkSystem::getOffset(const TileCoordinates &tc) const {
+vec3d GridChunkSystem::getOffset(const TileCoordinates &tc) const {
     return tileSystem().getTileOffset(tc);
 }
 
-ChunkEntry &LODGridChunkSystem::getOrCreateEntry(const TileCoordinates &tc) {
+ChunkEntry &GridChunkSystem::getOrCreateEntry(const TileCoordinates &tc) {
     return _internal->_storage.getOrCreate(tc, tc, tileSystem(), *this);
 }
 
-void LODGridChunkSystem::addDecoratorInternal(IChunkDecorator *decorator) {
+void GridChunkSystem::addDecoratorInternal(IChunkDecorator *decorator) {
     _internal->_chunkDecorators.emplace_back(decorator);
 }
 
-TileSystem &LODGridChunkSystem::tileSystem() const {
+TileSystem &GridChunkSystem::tileSystem() const {
     return _internal->_tileSystem;
 }
 

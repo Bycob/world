@@ -47,7 +47,7 @@ FlatWorld *createWorld() {
     ground.addWorker<PerlinTerrainGenerator>(3, 4., 0.4);
     ground.addWorker<CustomWorldRMModifier>(1);
 
-    auto &chunkSystem = world->addPrimaryNode<LODGridChunkSystem>({0, 0, 0});
+    auto &chunkSystem = world->addPrimaryNode<GridChunkSystem>({0, 0, 0});
     chunkSystem.addDecorator<ForestLayer>(world);
 
     return world;

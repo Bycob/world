@@ -7,27 +7,25 @@
 #include "WorldNode.h"
 #include "IChunkSystem.h"
 #include "Chunk.h"
-#include "LODGridCoordinates.h"
-#include "LODData.h"
 #include "IChunkDecorator.h"
 #include "TileSystem.h"
 
 namespace world {
 
-class LODGridChunkSystemPrivate;
+class GridChunkSystemPrivate;
 class ChunkEntry;
 
-class WORLDAPI_EXPORT LODGridChunkSystem : public WorldNode, IChunkSystem {
+class WORLDAPI_EXPORT GridChunkSystem : public WorldNode, IChunkSystem {
 public:
     /**
      * @param baseChunkSize Size of the highest level of details
      * @param maxLod maximum allowed level of details
      * @param baseRes maximum resolution of lod #0
      */
-    LODGridChunkSystem(double baseChunkSize = 1000, int maxLod = 6,
-                       double baseRes = 0.5);
+    GridChunkSystem(double baseChunkSize = 1000, int maxLod = 6,
+                    double baseRes = 0.5);
 
-    ~LODGridChunkSystem();
+    ~GridChunkSystem();
 
     const TileSystem &getTileSystem() const { return tileSystem(); }
 
@@ -51,7 +49,7 @@ protected:
                       const ExplorationContext &ctx);
 
 private:
-    LODGridChunkSystemPrivate *_internal;
+    GridChunkSystemPrivate *_internal;
 
 
     ChunkEntry &getOrCreateEntry(const TileCoordinates &tc);
@@ -65,7 +63,7 @@ private:
 
 
 template <typename T, typename... Args>
-T &LODGridChunkSystem::addDecorator(Args &... args) {
+T &GridChunkSystem::addDecorator(Args &... args) {
     T *decorator = new T(args...);
     addDecoratorInternal(decorator);
     return *decorator;
