@@ -21,6 +21,17 @@ class TileSystemIterator;
  */
 struct WORLDAPI_EXPORT TileCoordinates {
     TileCoordinates() {}
+    TileCoordinates(const NodeKey &key) {
+        const int keySize = sizeof(int) * 4;
+
+        if (key.length() != keySize)
+            throw std::runtime_error("bad usage : please provide a valid key");
+
+        const int *features = reinterpret_cast<const int *>(key.c_str());
+
+        _pos = {features[0], features[1], features[2]};
+        _lod = features[3];
+    }
     TileCoordinates(int x, int y, int z, int lod) : _pos{x, y, z}, _lod(lod) {}
     TileCoordinates(const vec3i &pos, int lod) : _pos(pos), _lod(lod) {}
 
@@ -31,6 +42,12 @@ struct WORLDAPI_EXPORT TileCoordinates {
 
     TileCoordinates operator+(const vec3i &coords) const {
         return {_pos + coords, _lod};
+    }
+
+    NodeKey toKey() const {
+        int features[] = {_pos.x, _pos.y, _pos.z, _lod};
+        return std::string(reinterpret_cast<char *>(features),
+                           sizeof(features));
     }
 
     vec3i _pos;
@@ -88,8 +105,15 @@ public:
      * i.e. tiles with should have a better resolution than the given one.
      *
      * If the requested resolution is too high, max_lod is returned, and
-     * the resolution constraint may not be satisfied. */
+     * the resolution constraint may not be satisfied.
+     *
+     * The resolution is given in points per meter. For exemple, a mesh
+     * whose faces are 20 cm large has a resolution of 5. */
     int getLod(double resolution) const;
+
+    double getMinResolution(int lod) const;
+
+    double getMaxResolution(int lod) const;
 
     TileCoordinates getTileCoordinates(const vec3d &globalCoordinates,
                                        int lod) const;
@@ -115,7 +139,11 @@ public:
      * are sorted as if operator< was used, which implies low lod tiles come
      * first. */
     TileSystemIterator iterate(const IResolutionModel &resolutionModel,
-                               const BoundingBox &bounds) const;
+                               const BoundingBox &bounds,
+                               bool includeParents = false) const;
+
+    TileSystemIterator iterate(const IResolutionModel &resolutionModel,
+                               bool includeParents = false) const;
 
 private:
     int computeLod(double resolution, double baseSize, int bufferRes,
@@ -139,7 +167,7 @@ class WORLDAPI_EXPORT TileSystemIterator {
 public:
     TileSystemIterator(const TileSystem &tileSystem,
                        const IResolutionModel &resolutionModel,
-                       const BoundingBox &bounds);
+                       const BoundingBox &bounds, bool includeParents = false);
 
     void operator++();
 
@@ -150,6 +178,7 @@ public:
 private:
     const TileSystem &_tileSystem;
     const IResolutionModel &_resolutionModel;
+    bool _includeParents;
 
     BoundingBox _bounds;
 

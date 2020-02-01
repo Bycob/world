@@ -25,6 +25,24 @@ int TileSystem::getLod(double resolution) const {
     return lodZ;
 }
 
+double TileSystem::getMinResolution(int lod) const {
+    if (lod == 0) {
+        return 0;
+    } else {
+        // TODO use the max of all factors
+        double ref = _bufferRes.x / _baseSize.x;
+        return ref * powi(_factor, lod);
+    }
+}
+
+double TileSystem::getMaxResolution(int lod) const {
+    if (lod == _maxLod) {
+        return 1e100;
+    } else {
+        return getMinResolution(lod + 1);
+    }
+}
+
 vec3d TileSystem::getTileFloatingCoordinates(const vec3d &globalCoordinates,
                                              int lod) const {
     vec3d tileSize = getTileSize(lod);
@@ -68,17 +86,20 @@ vec3d TileSystem::getGlobalCoordinates(const TileCoordinates &tileCoordinates,
 TileCoordinates TileSystem::getParentTileCoordinates(
     const TileCoordinates &childCoordinates) const {
     double f = _factor;
-    vec3d parentCoordinates = {
-        floor(static_cast<double>(childCoordinates._pos.x) / f),
-        floor(static_cast<double>(childCoordinates._pos.y) / f),
-        floor(static_cast<double>(childCoordinates._pos.z) / f)};
-    return TileCoordinates(static_cast<vec3i>(parentCoordinates),
+    vec3d parentCoordinates = childCoordinates._pos / f;
+    return TileCoordinates(parentCoordinates.floor(),
                            childCoordinates._lod - 1);
 }
 
 TileSystemIterator TileSystem::iterate(const IResolutionModel &resolutionModel,
-                                       const BoundingBox &bounds) const {
-    return TileSystemIterator(*this, resolutionModel, bounds);
+                                       const BoundingBox &bounds,
+                                       bool includeParents) const {
+    return TileSystemIterator(*this, resolutionModel, bounds, includeParents);
+}
+
+TileSystemIterator TileSystem::iterate(const IResolutionModel &resolutionModel,
+                                       bool includeParents) const {
+    return iterate(resolutionModel, resolutionModel.getBounds());
 }
 
 } // namespace world

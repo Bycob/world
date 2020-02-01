@@ -104,24 +104,21 @@ void SnitchNode::collect(ICollector &collector, const IResolutionModel &model,
 }
 
 TEST_CASE("LODGridChunkSystem", "[chunksystem]") {
-    LODGridChunkSystem chunkSystem(1000);
+    LODGridChunkSystem chunkSystem(1000, 6, 0.5);
     ExplorationSpy &spy = chunkSystem.addDecorator<ExplorationSpy>();
 
-    SECTION("Test chunk position") {
-        auto lod0 = chunkSystem.getLODData(0);
-        auto lod1 = chunkSystem.getLODData(1);
+    SECTION("TileSystem config") {
+        const TileSystem &ts = chunkSystem.getTileSystem();
 
-        vec3i pos1{-4, -5, 8};
-        vec3i pos2{1, 1, 0};
+        std::stringstream resolutions;
 
-        LODGridCoordinates c1{pos1, 0};
-        LODGridCoordinates c2{pos2, 1};
+        for (int i = 0; i <= ts._maxLod; ++i) {
+            resolutions << ts.getMinResolution(i) << " "
+                        << ts.getMaxResolution(i) << std::endl;
+        }
+        INFO(resolutions.str());
 
-        NodeKey key = c2.toKey(c1.toKey());
-        vec3d offset = chunkSystem.getOffset(key);
-        vec3d correctOffset =
-            lod0.getChunkSize() * pos1 + lod1.getChunkSize() * pos2;
-        CHECK(offset.length(correctOffset) == Approx(0));
+        CHECK(ts.getMaxResolution(0) == Approx(0.5));
     }
 
     SECTION("Collecting") {
@@ -134,7 +131,7 @@ TEST_CASE("LODGridChunkSystem", "[chunksystem]") {
         std::stringstream errors;
 
         for (auto &entry : spy._positions) {
-            vec3d goodOffset = chunkSystem.getOffset(entry.first);
+            vec3d goodOffset = chunkSystem.getOffset({entry.first});
             vec3d realOffset = entry.second;
 
             if (goodOffset.length(realOffset) != Approx(0)) {

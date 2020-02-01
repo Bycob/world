@@ -36,7 +36,7 @@ public:
      * this box has a resolution of 0. */
     virtual BoundingBox getBounds() const = 0;
 
-    BoundingBox getBounds(const ExplorationContext &ctx) {
+    BoundingBox getBounds(const ExplorationContext &ctx) const {
         BoundingBox bounds = getBounds();
         bounds.translate(-ctx.getOffset());
         return bounds;

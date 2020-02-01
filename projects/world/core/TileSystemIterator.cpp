@@ -4,9 +4,10 @@ namespace world {
 
 TileSystemIterator::TileSystemIterator(const TileSystem &tileSystem,
                                        const IResolutionModel &resolutionModel,
-                                       const BoundingBox &bounds)
+                                       const BoundingBox &bounds,
+                                       bool includeParents)
         : _tileSystem(tileSystem), _resolutionModel(resolutionModel),
-          _bounds(bounds) {
+          _includeParents(includeParents), _bounds(bounds) {
 
     // start at lod 0
     _min = _tileSystem.getTileCoordinates(_bounds.getLowerBound(), 0);
@@ -22,9 +23,13 @@ TileSystemIterator::TileSystemIterator(const TileSystem &tileSystem,
 void TileSystemIterator::operator++() {
     while (!_endReached) {
         step();
-        if (!isTileRequired(_current))
+
+        if (!isTileRequired(_current)) {
             _parents.push_back(_current);
-        else
+
+            if (_includeParents)
+                break;
+        } else
             break;
     }
 }

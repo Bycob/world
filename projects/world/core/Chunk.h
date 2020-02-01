@@ -18,9 +18,7 @@ namespace world {
 /**  */
 class WORLDAPI_EXPORT Chunk : public WorldNode {
 public:
-    Chunk(const vec3d &size);
-
-    Chunk(const Chunk &chunk) = delete;
+    Chunk(const vec3d &size = {}, double minRes = 0, double maxRes = 1e100);
 
     void setResolutionLimits(double min, double max);
 
@@ -31,8 +29,8 @@ public:
     const vec3d &getSize() const { return _size; }
 
 private:
-    double _minResolution = 0;
-    double _maxResolution = 1e100;
+    double _minResolution;
+    double _maxResolution;
     vec3d _size;
 };
 } // namespace world
