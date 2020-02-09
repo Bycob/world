@@ -18,8 +18,6 @@ public:
     Chunk _chunk;
 };
 
-#define MAX_LOD 20
-
 class GridChunkSystemPrivate {
 public:
     std::vector<std::unique_ptr<IChunkDecorator>> _chunkDecorators;

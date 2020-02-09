@@ -91,6 +91,116 @@ TEST_CASE("TileSystem", "[utilities]") {
     }
 }
 
+class TestElement : public IGridElement {
+public:
+    int _count;
+    TestElement(int &count) {
+        count++;
+        _count = count;
+    }
+
+    ~TestElement() override = default;
+};
+
+class DummyGridStorage : public GridStorageBase {
+public:
+    std::set<TileCoordinates> _tcs;
+    GridStorageReducer *_reducer = nullptr;
+
+    void add(const TileCoordinates &coords) {
+        if (_reducer != nullptr) {
+            _reducer->registerAccess(coords);
+        }
+        _tcs.insert(coords);
+    }
+
+    void remove(const TileCoordinates &coords) override { _tcs.erase(coords); }
+
+    bool has(const TileCoordinates &coords) const override {
+        return _tcs.find(coords) != _tcs.end();
+    }
+};
+
+TEST_CASE("GridStorage", "[utilities]") {
+    // assert it does not work
+    // GridStorage<vec3d> failed;
+
+    GridStorage<TestElement> storage;
+    TileCoordinates c1{{1, 2, 3}, 2};
+    int count = 0;
+
+    SECTION("set then try get") {
+        TestElement *elem = nullptr;
+        CHECK_FALSE(storage.tryGet(c1, &elem));
+        CHECK(elem == nullptr);
+        storage.set(c1, count);
+        CHECK(storage.tryGet(c1, &elem));
+        REQUIRE(elem != nullptr);
+        CHECK(elem->_count == 1);
+
+        // Check that element didn't get copied
+        elem->_count = 2;
+        elem = nullptr;
+        CHECK(storage.tryGet(c1, &elem));
+        REQUIRE(elem != nullptr);
+        CHECK(elem->_count == 2);
+    }
+
+    SECTION("set twice") {
+        storage.set(c1, count);
+        auto &elem = storage.set(c1, count);
+        CHECK(count == 2);
+        CHECK(elem._count == 2);
+    }
+
+    SECTION("getOrCreate") {
+        storage.getOrCreate(c1, count);
+        auto &elem = storage.getOrCreate(c1, count);
+        CHECK(count == 1);
+        CHECK(elem._count == 1);
+    }
+
+    SECTION("GridStorageReducer") {
+        TileSystem ts{1, {1}, {1}};
+
+        DummyGridStorage storage;
+        GridStorageReducer reducer(ts, 3);
+
+        storage._reducer = &reducer;
+        reducer.registerStorage(&storage);
+
+        // p = parent, c = child, r = removed
+        TileCoordinates p1 = {{0}, 0}, p1c1r = {{0}, 1}, p2r = {{1}, 0},
+                        p2cr = {{2}, 1}, p3 = {{-1}, 0}, p3cr = {{-1}, 1},
+                        p1c2 = {{1}, 1};
+
+        // Check for mistake in coordinate choice
+        REQUIRE(ts.getParentTileCoordinates(p1c1r) == p1);
+        REQUIRE(ts.getParentTileCoordinates(p1c2) == p1);
+        REQUIRE(ts.getParentTileCoordinates(p2cr) == p2r);
+        REQUIRE(ts.getParentTileCoordinates(p3cr) == p3);
+
+        // Actual testing
+        storage.add(p1);
+        storage.add(p1c1r);
+        storage.add(p2r);
+        storage.add(p2cr);
+        storage.add(p3);
+        storage.add(p3cr);
+        storage.add(p1c2);
+
+        reducer.reduceStorage();
+
+        CHECK(storage._tcs.find(p1) != storage._tcs.end());
+        CHECK(storage._tcs.find(p1c1r) == storage._tcs.end());
+        CHECK(storage._tcs.find(p2r) == storage._tcs.end());
+        CHECK(storage._tcs.find(p2cr) == storage._tcs.end());
+        CHECK(storage._tcs.find(p3) != storage._tcs.end());
+        CHECK(storage._tcs.find(p3cr) == storage._tcs.end());
+        CHECK(storage._tcs.find(p1c2) != storage._tcs.end());
+    }
+}
+
 TEST_CASE("Test StringOps.h", "[utilities]") {
 
     SECTION("split") {

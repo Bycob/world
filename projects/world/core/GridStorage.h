@@ -16,6 +16,8 @@ public:
     virtual ~GridStorageBase() = default;
 
     virtual bool has(const TileCoordinates &coords) const = 0;
+
+    virtual void remove(const TileCoordinates &coords) = 0;
 };
 
 class WORLDAPI_EXPORT IGridElement {
@@ -31,7 +33,9 @@ public:
 
     TerrainElement(int size) : _terrain(size) {}
 
-    TerrainElement(const Terrain &terrain) : _terrain(terrain) {}
+    TerrainElement(Terrain terrain) : _terrain(std::move(terrain)) {}
+
+    TerrainElement(Terrain &&terrain) : _terrain(terrain) {}
 };
 
 template <
@@ -106,6 +110,10 @@ public:
 
     bool has(const TileCoordinates &coords) const override {
         return _storage.find(coords) != _storage.end();
+    }
+
+    void remove(const TileCoordinates &coords) override {
+        _storage.erase(coords);
     }
 
 private:

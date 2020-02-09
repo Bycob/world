@@ -31,8 +31,9 @@
 
 #include "core/Chunk.h"
 #include "core/IChunkSystem.h"
-#include "world/core/GridChunkSystem.h"
+#include "core/GridChunkSystem.h"
 #include "core/GridStorage.h"
+#include "core/GridStorageReducer.h"
 #include "core/InstancePool.h"
 #include "core/SeedDistribution.h"
 
