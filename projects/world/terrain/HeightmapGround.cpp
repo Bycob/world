@@ -58,9 +58,9 @@ public:
 
 class PGround {
 public:
-    PGround() : _terrains(65536), _accesses(65536) {}
+    PGround() : _accesses(65536) {}
 
-    std::unordered_map<TileCoordinates, Tile> _terrains;
+    GridStorage<HeightmapGroundTile> _terrains;
     std::list<WorkerEntry> _generators;
 
     u64 _accessCounter = 0;
@@ -160,8 +160,6 @@ void HeightmapGround::collect(ICollector &collector,
     for (auto &coord : toCollect) {
         addTerrain(coord, collector);
     }
-
-    updateCache();
 }
 
 void HeightmapGround::paintTexture(const vec2d &origin, const vec2d &size,
@@ -205,7 +203,6 @@ double HeightmapGround::observeAltitudeAt(double x, double y, int lvl) {
     vec3d inTile = _tileSystem.getLocalCoordinates({x, y, 0}, lvl);
 
     const Terrain &terrain = this->provideTerrain(key);
-    updateCache();
     return _minAltitude +
            getAltitudeRange() * terrain.getExactHeightAt(inTile.x, inTile.y);
 }
@@ -265,68 +262,17 @@ void HeightmapGround::addTerrain(const TileCoordinates &key,
     }
 }
 
-void HeightmapGround::updateCache() {
-    if (_manageCache && _internal->_terrains.size() > _maxCacheSize) {
-
-        // We shrink one third of the memory
-        auto count = _internal->_terrains.size() - _maxCacheSize * 2 / 3;
-
-        std::cout << "Dropping memory : " << count << " removed." << std::endl;
-
-        while (count != 0) {
-            auto accessEntry = _internal->_accesses.begin();
-
-            // Free memory
-            // TODO call to a drop manager
-            _internal->_terrains.erase(accessEntry->second);
-
-            // Remove access entry
-            _internal->_accesses.erase(accessEntry);
-
-            count--;
-        }
-    }
-}
-
-
 // ==== ACCESS
 
-void HeightmapGround::registerAccess(Tile &tile) {
-    if (!_manageCache)
-        return;
-
-    _internal->_accessCounter++;
-    TileCoordinates key = tile._key;
-
-    // Remove last access entry for this tile
-    if (tile._lastAccess != 0) {
-        _internal->_accesses.erase(tile._lastAccess);
-    }
-
-    // Make a new entry
-    tile._lastAccess = _internal->_accessCounter;
-    _internal->_accesses.emplace(tile._lastAccess, key);
-
-    // Update parent
-    if (key._lod != 0) {
-        auto parentKey = _tileSystem.getParentTileCoordinates(key);
-        registerAccess(provide(parentKey));
-    }
-}
-
 Tile &HeightmapGround::provide(const TileCoordinates &key) {
-    auto it = _internal->_terrains.find(key);
-
-    if (it == _internal->_terrains.end()) {
-        std::set<TileCoordinates> coords{key};
-        addNotGeneratedParents(coords);
-        generateTerrains(coords);
-        it = _internal->_terrains.find(key);
-    }
-
-    auto &tile = it->second;
-    registerAccess(tile);
-    return tile;
+    return _internal->_terrains.getOrCreateCallback(
+        key,
+        [this, &key](HeightmapGroundTile &tile) {
+            std::set<TileCoordinates> coords{key};
+            addNotGeneratedParents(coords);
+            generateTerrains(coords);
+        },
+        key, _terrainRes);
 }
 
 Terrain &HeightmapGround::provideTerrain(const TileCoordinates &key) {
@@ -343,20 +289,8 @@ Mesh &HeightmapGround::provideMesh(const TileCoordinates &key) {
     return mesh;
 }
 
-optional<HeightmapGround::Tile &> HeightmapGround::lookUpTile(
-    const TileCoordinates &key) {
-    auto it = _internal->_terrains.find(key);
-
-    if (it == _internal->_terrains.end()) {
-        return nullopt;
-    } else {
-        registerAccess(it->second);
-        return it->second;
-    }
-}
-
 bool HeightmapGround::isGenerated(const TileCoordinates &key) {
-    return _internal->_terrains.find(key) != _internal->_terrains.end();
+    return _internal->_terrains.has(key);
 }
 
 
@@ -387,7 +321,7 @@ void HeightmapGround::addNotGeneratedParents(std::set<TileCoordinates> &keys) {
         }
 
         keys.insert(temp.begin(), temp.end());
-    } while (temp.size() != 0);
+    } while (!temp.empty());
 }
 
 void HeightmapGround::generateTerrains(const std::set<TileCoordinates> &keys) {
@@ -395,8 +329,7 @@ void HeightmapGround::generateTerrains(const std::set<TileCoordinates> &keys) {
     std::vector<generateTiles_t> lods(_tileSystem._maxLod + 1);
 
     for (const TileCoordinates &key : keys) {
-        Tile *tile = &_internal->_terrains.insert({key, Tile(key, _terrainRes)})
-                          .first->second;
+        Tile *tile = &_internal->_terrains.getOrCreate(key, key, _terrainRes);
         lods[key._lod].push_back(tile);
     }
 

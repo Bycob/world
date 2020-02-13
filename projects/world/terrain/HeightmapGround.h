@@ -16,7 +16,7 @@ namespace world {
 
 class PGround;
 
-class HeightmapGroundTile : public TerrainTile {
+class HeightmapGroundTile : public TerrainTile, public IGridElement {
 public:
     HeightmapGroundTile(TileCoordinates coords, int terrainRes)
             : TerrainTile(coords, terrainRes), _lastAccess(0) {}
@@ -101,9 +101,6 @@ private:
 
     TileSystem _tileSystem;
 
-    bool _manageCache = false;
-    u32 _maxCacheSize = 20000;
-
     // WORKER
     void addWorkerInternal(ITerrainWorker *worker);
 
@@ -112,24 +109,12 @@ private:
     void addTerrain(const TileCoordinates &key, ICollector &collector);
 
 
-    // CACHE
-    /** Updates the cache, free old used memory if needed (by saving
-     * the terrains to files or discard them) */
-    void updateCache();
-
-    void registerAccess(Tile &tile);
-
-
     // ACCESS
     HeightmapGround::Tile &provide(const TileCoordinates &key);
 
     Terrain &provideTerrain(const TileCoordinates &key);
 
     Mesh &provideMesh(const TileCoordinates &key);
-
-    /** Get tile at given key if it exists. If it does not exist, returns
-     * nullopt. */
-    optional<HeightmapGround::Tile &> lookUpTile(const TileCoordinates &key);
 
     bool isGenerated(const TileCoordinates &key);
 
