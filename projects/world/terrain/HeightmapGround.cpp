@@ -19,6 +19,7 @@
 #include "world/core/Profiler.h"
 #include "DiamondSquareTerrain.h"
 #include "world/core/GridStorage.h"
+#include "world/core/GridStorageReducer.h"
 
 namespace world {
 
@@ -28,6 +29,7 @@ struct WorkerConstraints {
     int _lodMax = 0xff;
 };
 
+
 struct WorkerEntry {
     WorkerConstraints _constraints;
     std::unique_ptr<ITerrainWorker> _worker;
@@ -36,6 +38,7 @@ struct WorkerEntry {
 };
 
 using Tile = HeightmapGround::Tile;
+
 
 // Utility class
 class GroundContext : public ITileContext {
@@ -56,16 +59,18 @@ public:
     }
 };
 
+
 class PGround {
 public:
-    PGround() : _accesses(65536) {}
+    PGround(TileSystem &ts) : _reducer(ts, ts._maxLod * 100) {
+        _terrains.setReducer(&_reducer);
+    }
 
+    GridStorageReducer _reducer;
     GridStorage<HeightmapGroundTile> _terrains;
     std::list<WorkerEntry> _generators;
-
-    u64 _accessCounter = 0;
-    std::unordered_map<u64, TileCoordinates> _accesses;
 };
+
 
 // Idees d'ameliorations :
 // - Systeme de coordonnees semblable a celui du chunk system : les
@@ -75,11 +80,12 @@ public:
 
 HeightmapGround::HeightmapGround(double unitSize, double minAltitude,
                                  double maxAltitude)
-        : _internal(new PGround()), _minAltitude(minAltitude),
-          _maxAltitude(maxAltitude),
+        : _minAltitude(minAltitude), _maxAltitude(maxAltitude),
           _tileSystem(
               5, vec3d(_textureRes * _texPixSize, _textureRes * _texPixSize, 0),
-              vec3d(unitSize, unitSize, 0)) {}
+              vec3d(unitSize, unitSize, 0)) {
+    _internal = new PGround(_tileSystem);
+}
 
 HeightmapGround::~HeightmapGround() { delete _internal; }
 
@@ -160,6 +166,11 @@ void HeightmapGround::collect(ICollector &collector,
     for (auto &coord : toCollect) {
         addTerrain(coord, collector);
     }
+
+    std::cout << "Ground before reducing: " << _internal->_terrains.size();
+    _internal->_reducer.reduceStorage();
+    std::cout << ", Ground after reducing: " << _internal->_terrains.size()
+              << std::endl;
 }
 
 void HeightmapGround::paintTexture(const vec2d &origin, const vec2d &size,
@@ -196,6 +207,11 @@ void HeightmapGround::paintTexture(const vec2d &origin, const vec2d &size,
 
 void HeightmapGround::addWorkerInternal(ITerrainWorker *worker) {
     _internal->_generators.emplace_back(worker);
+    auto *storage = worker->getStorage();
+
+    if (storage != nullptr) {
+        _internal->_reducer.registerStorage(storage);
+    }
 }
 
 double HeightmapGround::observeAltitudeAt(double x, double y, int lvl) {

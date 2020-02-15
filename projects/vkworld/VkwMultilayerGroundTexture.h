@@ -11,6 +11,7 @@
 namespace world {
 
 class MultilayerGroundTexturePrivate;
+class GridStorageBase;
 
 class VKWORLD_EXPORT VkwMultilayerGroundTexture : public ITerrainWorker {
 public:
@@ -29,6 +30,8 @@ public:
     void processTile(ITileContext &context) override;
 
     void flush() override;
+
+    GridStorageBase *getStorage() override;
 
 private:
     MultilayerGroundTexturePrivate *_internal;

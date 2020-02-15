@@ -4,9 +4,10 @@
 #include "world/core/WorldConfig.h"
 
 #include "TileSystem.h"
-#include "GridStorage.h"
 
 namespace world {
+
+class GridStorageBase;
 
 class WORLDAPI_EXPORT GridStorageReducer {
 public:

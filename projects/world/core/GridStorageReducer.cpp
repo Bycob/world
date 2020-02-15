@@ -2,10 +2,15 @@
 
 #include <set>
 
+#include "GridStorage.h"
+
 namespace world {
 
 void GridStorageReducer::registerStorage(GridStorageBase *storage) {
-    _storages.push_back(storage);
+    if (std::find(_storages.begin(), _storages.end(), storage) ==
+        _storages.end()) {
+        _storages.push_back(storage);
+    }
 }
 
 void GridStorageReducer::registerAccess(const TileCoordinates &tc) {
@@ -71,6 +76,10 @@ void GridStorageReducer::reduceStorage() {
         for (u64 i = 0; i < removeCount; ++i) {
             storage->remove(accesses[i].second);
         }
+    }
+
+    for (u64 i = 0; i < removeCount; ++i) {
+        _accessTracker.erase(accesses[i].second);
     }
 }
 } // namespace world

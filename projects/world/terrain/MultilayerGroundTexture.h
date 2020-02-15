@@ -33,6 +33,8 @@ public:
 
     void addLayer(DistributionParams params);
 
+    GridStorageBase *getStorage() override;
+
 private:
     GridStorage<Element> _storage;
 

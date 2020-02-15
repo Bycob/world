@@ -23,9 +23,13 @@ public:
     std::vector<std::unique_ptr<IChunkDecorator>> _chunkDecorators;
 
     TileSystem _tileSystem;
+    GridStorageReducer _reducer;
     GridStorage<ChunkEntry> _storage;
 
-    GridChunkSystemPrivate() : _tileSystem(0, {}, {}) {}
+    GridChunkSystemPrivate()
+            : _tileSystem(0, {}, {}), _reducer(_tileSystem, 30000) {
+        _storage.setReducer(&_reducer);
+    }
 };
 
 ChunkEntry::ChunkEntry(const TileCoordinates &tc, const TileSystem &ts,
@@ -98,6 +102,11 @@ void GridChunkSystem::collect(ICollector &collector,
         TileCoordinates tc = *it;
         collectChunk(tc, collector, resolutionModel, ctx);
     }
+
+    std::cout << "ChunkSystem before reducing: " << _internal->_storage.size();
+    _internal->_reducer.reduceStorage();
+    std::cout << ", ChunkSystem after reducing: " << _internal->_storage.size()
+              << std::endl;
 }
 
 void GridChunkSystem::collectChunk(const TileCoordinates &chunkKey,

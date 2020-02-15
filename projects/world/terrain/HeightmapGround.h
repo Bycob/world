@@ -19,11 +19,9 @@ class PGround;
 class HeightmapGroundTile : public TerrainTile, public IGridElement {
 public:
     HeightmapGroundTile(TileCoordinates coords, int terrainRes)
-            : TerrainTile(coords, terrainRes), _lastAccess(0) {}
+            : TerrainTile(coords, terrainRes) {}
 
 private:
-    u64 _lastAccess = 0;
-
     friend class HeightmapGround;
 };
 

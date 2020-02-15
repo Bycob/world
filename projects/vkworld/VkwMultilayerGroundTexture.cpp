@@ -271,4 +271,8 @@ void VkwMultilayerGroundTexture::flush() {
     _internal->_queue.clear();
 }
 
+GridStorageBase *VkwMultilayerGroundTexture::getStorage() {
+    return &_internal->_storage;
+}
+
 } // namespace world

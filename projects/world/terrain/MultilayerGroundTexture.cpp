@@ -20,6 +20,8 @@ void MultilayerGroundTexture::addLayer(DistributionParams params) {
     _layers.push_back(params);
 }
 
+GridStorageBase *MultilayerGroundTexture::getStorage() { return &_storage; }
+
 double ramp(double a, double b, double c, double d, double lowb, double highb,
             double x) {
     double ya = (x - a) / (b - a);
