@@ -23,6 +23,11 @@ if (${WORLD_BUILD_TESTS})
         target_link_libraries(test_world vkworld)
         target_compile_definitions(test_world PRIVATE USE_VKWORLD=1)
     endif()
+
+    if (WORLD_COMPILER_IS_GNU)
+        add_executable(mem_test mem_test.cpp)
+        target_link_libraries(mem_test world)
+    endif()
 endif()
 
 add_subdirectory(world)

@@ -14,8 +14,13 @@ class WorldNodePrivate;
 class WORLDAPI_EXPORT WorldNode {
 public:
     WorldNode();
+    WorldNode(const WorldNode &other) = delete;
+    WorldNode(WorldNode &&other) = delete;
 
     virtual ~WorldNode();
+
+    WorldNode &operator=(const WorldNode &node) = delete;
+    WorldNode &operator=(WorldNode &&node) = delete;
 
     void setPosition3D(const vec3d &pos);
 

@@ -59,7 +59,7 @@ private:
     double _resolution = 20;
     /// The instance pool automatically adds new generators when expanding.
     /// This is the density of the species per km^2
-    double _speciesDensity = 0.05;
+    double _speciesDensity = 0.0004;
     /// Minimal species count
     u32 _minSpecies = 10;
 };
