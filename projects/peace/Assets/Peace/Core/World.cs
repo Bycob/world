@@ -12,7 +12,7 @@ namespace Peace
         
         public static World CreateDemo()
         {
-            return new World(createDemoWorld("vulkan"));
+            return new World(createDemoWorld(""));
         }
 
         private World(IntPtr handle)
