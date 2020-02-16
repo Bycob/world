@@ -40,6 +40,8 @@ FlatWorld *createWorld() { return FlatWorld::createDemoFlatWorld(); }
 
 void generate_test_world(int argc, char **argv) {
     int itcount = 5;
+    bool land = true;
+    double max = 180000;
 
     if (argc > 1) {
         try {
@@ -59,10 +61,24 @@ void generate_test_world(int argc, char **argv) {
     Collector collector(CollectorPresets::SCENE);
 
     double step = 20000;
+    double xpos = -step;
+    double ypos = 0;
 
     for (int i = 0; i < itcount; ++i) {
-        double z = world->ground().observeAltitudeAt(i * step, 0, 1);
-        vec3d pos{i * step, 0, z + 5};
+        xpos += step;
+        double z = world->ground().observeAltitudeAt(xpos, ypos, 1);
+
+        while (!land || z < 100 || z > 1500) {
+            xpos += z > 1500 ? 10 : 1000;
+
+            if (xpos > max) {
+                xpos = -max;
+                ypos = ypos > max ? -max : ypos + step;
+            }
+
+            z = world->ground().observeAltitudeAt(xpos, ypos, 1);
+        }
+        vec3d pos{xpos, ypos, z + 5};
         fpsView.setPosition(pos);
         std::cout << "Explorer position is " << pos << std::endl;
 
@@ -72,8 +88,7 @@ void generate_test_world(int argc, char **argv) {
         std::cout << "Done!" << std::endl;
 
         // Print memory information
-        rusage usage;
-        getrusage(RUSAGE_SELF, &usage);
-        std::cout << "Max memory used (kB): " << usage.ru_maxrss << std::endl;
+        std::cout << "Max memory used: " << getReadableMemoryUsage(5)
+                  << std::endl;
     }
 }

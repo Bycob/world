@@ -141,7 +141,7 @@ HabitatFeatures Grass::randomize() {
     auto bend = exponentialDistribFromMedian(_height / 2.0);
     _bend = bend(_rng);
 
-    double surface = _width * _bend + 0.04;
+    double surface = _width * _bend + 0.07;
 
     HabitatFeatures features{};
     features._sea = false;

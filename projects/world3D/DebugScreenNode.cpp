@@ -38,6 +38,7 @@ void DebugScreenNode::render() {
     str += std::to_string(_userPos.y);
     str += "\nz : ";
     str += std::to_string(_userPos.z);
+    str += "\n" + world::getReadableMemoryUsage();
 
     font->draw(str.c_str(), rect<s32>(10, 10, 4000, 400),
                SColor(255, 255, 255, 255));

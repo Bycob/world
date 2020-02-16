@@ -5,6 +5,7 @@
 #include <vector>
 #include <sys/stat.h>
 #include <regex>
+#include <iomanip>
 
 #ifdef _WIN32
 #include <direct.h>
@@ -80,4 +81,35 @@ std::vector<std::string> getFileList(const std::string &directory) {
 
     return result;
 }
+
+#if defined(WIN32)
+#else
+#include <sys/resource.h>
+#endif
+
+long getMemoryUsage() {
+#if defined(WIN32)
+    return 0;
+#else
+    rusage usage;
+    getrusage(RUSAGE_SELF, &usage);
+    return usage.ru_maxrss;
+#endif
+}
+
+std::string getReadableMemoryUsage(int digits) {
+    double memuse = static_cast<double>(getMemoryUsage());
+    std::string exps[] = {"kB", "MB", "GB"};
+
+    int i = 0;
+    while (i < sizeof(exps) - 1 && memuse > 1000) {
+        i++;
+        memuse /= 1000;
+    }
+
+    std::stringstream sstream;
+    sstream << std::setprecision(digits) << memuse << exps[i];
+    return sstream.str();
+}
+
 } // namespace world

@@ -210,6 +210,7 @@ void ObjectsManager::update(Collector &collector) {
             ++iter;
         }
     }
+    _driver->removeAllHardwareBuffers();
 
     _elapsedTime += std::chrono::duration_cast<std::chrono::milliseconds>(
                         std::chrono::steady_clock::now() - start)
@@ -252,6 +253,7 @@ ITexture *ObjectsManager::getOrLoadTexture(const std::string &path,
 }
 
 void ObjectsManager::addTextureUser(const std::string &texId) {
+    // TODO check if texId.c_str() is the id of texture for driver
     auto it = _loadedTextures.find(texId);
 
     if (it != _loadedTextures.end()) {

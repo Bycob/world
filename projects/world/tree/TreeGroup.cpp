@@ -12,8 +12,6 @@ namespace world {
 struct TreeData {
     u32 _id;
     vec3d _position;
-    std::vector<Face> _trunkFaces;
-    std::vector<Face> _leavesFaces;
     std::unique_ptr<Tree> _tree;
 
 
@@ -23,13 +21,12 @@ struct TreeData {
 
 class PTreeGroup {
 public:
-    bool _updateParity = false;
     std::vector<TreeData> _trees;
 };
 
 TreeGroup::TreeGroup() : _internal(new PTreeGroup()) {}
 
-TreeGroup::~TreeGroup() {}
+TreeGroup::~TreeGroup() { delete _internal; }
 
 void TreeGroup::addTree(const vec3d &pos) {
     _internal->_trees.emplace_back((u32)_internal->_trees.size(), pos);
@@ -44,9 +41,6 @@ void TreeGroup::collect(ICollector &collector,
     }
 
     for (TreeData &treeData : _internal->_trees) {
-        double resolution =
-            resolutionModel.getResolutionAt(treeData._position, ctx);
-
         if (treeData._tree == nullptr) {
             treeData._tree = std::make_unique<Tree>();
 

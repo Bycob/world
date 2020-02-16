@@ -12,4 +12,13 @@ void WORLDAPI_EXPORT createDirectories(const std::string &directory);
 
 std::vector<std::string> WORLDAPI_EXPORT
 getFileList(const std::string &directory);
+
+// TODO Move that on the correct file
+/** On linux returns memory usage in kB. */
+long WORLDAPI_EXPORT getMemoryUsage();
+
+/** Returns a fancy string containing memory usage with suffix (kB, MB, GB, ...)
+ */
+std::string WORLDAPI_EXPORT getReadableMemoryUsage(int digits = 3);
+
 } // namespace world

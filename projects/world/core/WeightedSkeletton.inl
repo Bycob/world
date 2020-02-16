@@ -11,34 +11,6 @@ template <class T>
 SkelettonNode<T>::SkelettonNode(const T &info)
         : _info(info), _parent(nullptr) {}
 
-template <class T> SkelettonNode<T>::~SkelettonNode() {
-    // Passage en suppression
-    _deleting = true;
-
-    for (u32 i = 0; i < _children_or_neighbour.size(); i++) {
-        SkelettonNode<T> *node = _children_or_neighbour.at(i);
-
-        if (node != nullptr) {
-            // On coupe d'abord les liens avec le noeud qui va être supprimé
-            if (node->_parent != this) {
-                auto &vec = node->_children_or_neighbour;
-
-                for (auto it = vec.begin(); it != vec.end(); it++) {
-                    if (*it == this) {
-                        *it = nullptr;
-                    }
-                }
-            }
-
-            // puis on le supprime
-            if (!node->_deleting) {
-                delete node;
-                _children_or_neighbour[i] = nullptr;
-            }
-        }
-    }
-}
-
 template <class T> void SkelettonNode<T>::addChild(SkelettonNode<T> *child) {
     _children_or_neighbour.push_back(child);
     child->_parent = this;
@@ -84,7 +56,15 @@ template <class T>
 WeightedSkeletton<T>::WeightedSkeletton()
         : _primaryNode(new SkelettonNode<T>(T())) {}
 
-template <class T> WeightedSkeletton<T>::~WeightedSkeletton() {}
+template <class T> WeightedSkeletton<T>::~WeightedSkeletton() {
+    auto nodeList = getNodeList();
+
+    for (auto *node : nodeList) {
+        if (node != _primaryNode.get()) {
+            delete node;
+        }
+    }
+}
 
 template <class T>
 std::vector<SkelettonNode<T> *> WeightedSkeletton<T>::getNodeList() {

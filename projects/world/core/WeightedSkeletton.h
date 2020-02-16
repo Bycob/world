@@ -24,8 +24,6 @@ public:
 
 template <class T> class SkelettonNode {
 public:
-    ~SkelettonNode();
-
     const T &getInfo() const { return _info; }
 
     T &getInfo() { return _info; }
@@ -68,15 +66,12 @@ private:
 
     // TRAITEMENT DES GRAPHES
 
-    /// Ce champ est utilisé uniquement lors de la suppression d'un
-    /// arbre de noeuds.
-    bool _deleting = false;
     /// Ce champ est utilisé dans les traitements sur la totalité du
     /// squelette pour ne pas repasser deux fois au même endroit
     bool _mark = false;
     /// L'id du noeud est utilisé temporairement pour mapper tout le
     /// réseau.
-    int _id;
+    int _id = -1;
 };
 
 /** Un WeightedSkeletton est la structure d'un objet en 3 dimensions.
