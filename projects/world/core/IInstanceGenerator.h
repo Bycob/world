@@ -10,7 +10,7 @@
 
 namespace world {
 
-class Template {
+class WORLDAPI_EXPORT Template {
 public:
     /** One object at one resolution */
     struct Item {

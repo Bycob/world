@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <string>
 
 int main(int argc, char** argv) {
     if (argc < 2) {
@@ -39,4 +40,5 @@ int main(int argc, char** argv) {
     }
 
     dest.close();
+    return 0;
 }
