@@ -11,7 +11,9 @@ public class SystemInfoUpdater : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        long unityMemory = Profiler.GetMonoHeapSizeLong();
-        infoBox.text = unityMemory.ToString();
+        // long unityMemory = Profiler.GetMonoHeapSizeLong();
+        long reservedMemory = Profiler.GetTotalReservedMemoryLong();
+        long unusedMemory = Profiler.GetTotalUnusedReservedMemoryLong();
+        infoBox.text = (unusedMemory / 1e6).ToString("0.0") + "MB / "  + (reservedMemory / 1e6).ToString("0.0") + "MB";
     }
 }

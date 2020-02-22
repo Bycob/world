@@ -133,6 +133,7 @@ namespace Peace
 
             foreach (var key in toRemove)
             {
+                Object.Destroy(_meshes[key]);
                 _meshes.Remove(key);
             }
 
@@ -156,6 +157,7 @@ namespace Peace
 
             foreach (var key in toRemove)
             {
+                Object.Destroy(_textures[key]);
                 _textures.Remove(key);
             }
 
@@ -185,6 +187,7 @@ namespace Peace
 
             foreach (var key in toRemove)
             {
+                Object.Destroy(_materials[key]);
                 _materials.Remove(key);
             }
 

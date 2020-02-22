@@ -126,6 +126,7 @@ TEST_CASE("GridStorage", "[utilities]") {
     // GridStorage<vec3d> failed;
 
     GridStorage<TestElement> storage;
+    TileSystem ts{1, {1}, {1}};
     TileCoordinates c1{{1, 2, 3}, 2};
     int count = 0;
 
@@ -161,8 +162,6 @@ TEST_CASE("GridStorage", "[utilities]") {
     }
 
     SECTION("GridStorageReducer") {
-        TileSystem ts{1, {1}, {1}};
-
         DummyGridStorage storage;
         GridStorageReducer reducer(ts, 3);
 
@@ -198,6 +197,12 @@ TEST_CASE("GridStorage", "[utilities]") {
         CHECK(storage._tcs.find(p3) != storage._tcs.end());
         CHECK(storage._tcs.find(p3cr) == storage._tcs.end());
         CHECK(storage._tcs.find(p1c2) != storage._tcs.end());
+    }
+
+    SECTION("GridStorage && Reducer interaction") {
+        GridStorageReducer reducer(ts);
+
+        SECTION("setReducer()") { reducer.registerStorage(&storage); }
     }
 }
 
