@@ -47,8 +47,9 @@ namespace Peace
             
             Material material = new Material(Shader.Find("Standard"));
             material.color = new Color((float)matDesc.Kdr, (float)matDesc.Kdg, (float)matDesc.Kdb);
-            material.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
-            
+            material.SetFloat("_Glossiness", .0f);
+            // material.EnableKeyword("_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A");
+            material.EnableKeyword("_SPECGLOSSMAP");
             return material;
         }
 
