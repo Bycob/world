@@ -97,7 +97,6 @@ void Tree::generateSimpleMeshes() {
         _simpleTrunk.newFace(ids[1]);
     }
 
-
     // leaves
     // TODO utiliser l'algorithme "QuickHull" pour générer des enveloppes
     // convexes
