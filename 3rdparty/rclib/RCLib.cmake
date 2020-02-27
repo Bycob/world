@@ -28,9 +28,10 @@ function(rclib_add_resource_library RC_LIB_NAME RC_NAMESPACE)
     add_dependencies(${RC_LIB_NAME}_files rcc)
 
     add_custom_command(
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
         TARGET ${RC_LIB_NAME}_files
         PRE_BUILD
-        COMMAND $<TARGET_FILE_NAME:rcc>
+        COMMAND $<TARGET_FILE:rcc>
         ARGS ${RC_HEADER_FILE} ${RESOURCES_FILES}
         DEPENDS ${RESOURCES_FILES}
         COMMENT "Building resource header ${RC_HEADER_FILE}"
