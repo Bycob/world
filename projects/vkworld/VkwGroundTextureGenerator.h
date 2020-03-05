@@ -11,11 +11,12 @@
 namespace world {
 
 class VkwGroundTextureGeneratorPrivate;
+class LodTextures;
 
 class VKWORLD_EXPORT VkwGroundTextureGenerator : public ITextureProvider {
 public:
     VkwGroundTextureGenerator();
-    ~VkwGroundTextureGenerator();
+    ~VkwGroundTextureGenerator() override;
 
     VkwGroundTextureGenerator(const VkwGroundTextureGenerator &) = delete;
     VkwGroundTextureGenerator &operator=(const VkwGroundTextureGenerator &) =
@@ -27,7 +28,7 @@ public:
 
     VkwImage &getVkTexture(int layer, int lod);
 
-    Image &getTexture(int layer, int lod);
+    Image &getTexture(int layer, int lod) override;
 
     void setBaseWorldWidth(float width) { _baseWorldWidth = width; }
 
@@ -38,6 +39,10 @@ private:
 
 
     float getWorldWidth(int lod);
+
+    /// @param cpu Si true, récupère les textures sur le cpu depuis la carte
+    /// graphique
+    LodTextures &getOrCreate(int lod, bool cpu = false);
 };
 
 } // namespace world

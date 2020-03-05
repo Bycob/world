@@ -6,6 +6,7 @@
 #include "world/core/GridStorage.h"
 #include "ITerrainWorker.h"
 #include "DistributionParams.h"
+#include "world/core/NodeCache.h"
 
 namespace world {
 
@@ -14,6 +15,26 @@ public:
     virtual ~ITextureProvider() = default;
 
     virtual Image &getTexture(int layer, int lod) = 0;
+
+    void configureCacheOverride(const std::string &path) {
+        _cache.setRoot(path);
+    }
+
+    bool configureCache(NodeCache &parent, const std::string &id) {
+        if (_cache.isAvailable())
+            return false;
+        else {
+            _cache.setChild(parent, id);
+            return true;
+        }
+    }
+
+protected:
+    NodeCache _cache;
+
+    std::string getImageId(int layer, int lod) const {
+        return "tex" + std::to_string(layer) + "_" + std::to_string(lod);
+    }
 };
 
 class WORLDAPI_EXPORT MultilayerGroundTexture : public ITerrainWorker {

@@ -160,7 +160,9 @@ public:
     void getf(int x, int y, float *values) const;
 
     // IO
-    /** Read image from the given path. Only supports png images. */
+    /** Read image from the given path. Only supports png images.
+     *
+     * If the file does not exists, throws runtime_error. */
     static Image read(const std::string &path);
 
     /** Writes the image at the specified location. The

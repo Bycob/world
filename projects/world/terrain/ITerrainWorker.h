@@ -7,6 +7,7 @@
 
 #include "Terrain.h"
 #include "world/core/GridStorage.h"
+#include "world/core/NodeCache.h"
 
 namespace world {
 
@@ -35,18 +36,6 @@ public:
     virtual TileCoordinates getCoords() const = 0;
 
     virtual TileCoordinates getParentCoords() const = 0;
-
-    /*
-        virtual Terrain &getTerrain() const = 0;
-
-        virtual Image &getTexture() const = 0;
-
-        virtual optional<const Terrain &> getNeighbour(int x, int y) const = 0;
-
-        virtual optional<const Terrain &> getParent() const = 0;
-
-        virtual int getParentCount() const = 0;
-    */
 };
 
 class WORLDAPI_EXPORT ITerrainWorker {
@@ -60,6 +49,8 @@ public:
     // This may even not be useful if tile dropping is managed by
     // GridStorage
     virtual GridStorageBase *getStorage() { return nullptr; };
+
+    virtual NodeCache *getCache() { return nullptr; }
 
     virtual void processTerrain(Terrain &terrain) = 0;
 

@@ -27,7 +27,6 @@
 #include "core/WorldKeys.h"
 #include "core/World.h"
 #include "core/WorldNode.h"
-#include "core/WorldFolder.h"
 
 #include "core/Chunk.h"
 #include "core/IChunkSystem.h"

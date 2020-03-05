@@ -20,6 +20,8 @@
 #include "DiamondSquareTerrain.h"
 #include "world/core/GridStorage.h"
 #include "world/core/GridStorageReducer.h"
+#include "MultilayerGroundTexture.h"
+#include "DefaultTextureProvider.h"
 
 namespace world {
 
@@ -211,6 +213,13 @@ void HeightmapGround::addWorkerInternal(ITerrainWorker *worker) {
 
     if (storage != nullptr) {
         _internal->_reducer.registerStorage(storage);
+    }
+
+    auto *cache = worker->getCache();
+
+    if (cache != nullptr) {
+        cache->setChild(
+            _cache, "worker" + std::to_string(_internal->_generators.size()));
     }
 }
 

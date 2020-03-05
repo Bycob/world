@@ -21,7 +21,7 @@ public:
 World *World::createDemoWorld() { return FlatWorld::createDemoFlatWorld(); }
 
 
-World::World() : _internal(new WorldPrivate()), _directory() {}
+World::World() : _internal(new WorldPrivate()) {}
 
 World::~World() { delete _internal; }
 
@@ -45,8 +45,13 @@ void World::addPrimaryNodeInternal(WorldNode *node) {
             "a chunksystem instead.");
     }
 
-    _internal->_primaryNodes.emplace(std::to_string(++_internal->_counter),
-                                     std::unique_ptr<WorldNode>(node));
+    auto it = _internal->_primaryNodes
+                  .emplace(std::to_string(++_internal->_counter),
+                           std::unique_ptr<WorldNode>(node))
+                  .first;
+    it->second->setKey(it->first);
+    it->second->configureCache(_cacheRoot, it->first);
+    // But we have to set the key still, we cannot ignore that problem :(
 }
 
 IEnvironment *World::getInitialEnvironment() { return nullptr; }

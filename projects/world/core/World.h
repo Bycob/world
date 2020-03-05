@@ -11,7 +11,6 @@
 
 #include "IChunkSystem.h"
 #include "WorldNode.h"
-#include "WorldFolder.h"
 #include "IChunkDecorator.h"
 #include "ICollector.h"
 
@@ -57,9 +56,7 @@ protected:
 private:
     WorldPrivate *_internal;
 
-    // TODO remplacer ça par un ICache, qui peut être un
-    // dossier, une interface réseau, rien...
-    WorldFolder _directory;
+    NodeCache _cacheRoot;
 };
 } // namespace world
 

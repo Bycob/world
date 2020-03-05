@@ -6,6 +6,7 @@
 #include "world/math/MathsHelper.h"
 #include "ICollector.h"
 #include "IResolutionModel.h"
+#include "NodeCache.h"
 
 namespace world {
 
@@ -18,6 +19,12 @@ public:
     WorldNode(WorldNode &&other) = delete;
 
     virtual ~WorldNode();
+
+    // Deprecated / internal use only
+    // TODO find a solution
+    void setKey(NodeKey key);
+
+    void configureCache(NodeCache &parent, const NodeKey &key);
 
     WorldNode &operator=(const WorldNode &node) = delete;
     WorldNode &operator=(WorldNode &&node) = delete;
@@ -52,6 +59,8 @@ public:
 
 protected:
     WorldNodePrivate *_internal;
+
+    NodeCache _cache;
 
     vec3d _position;
     NodeKey _key = NodeKeys::none();

@@ -49,7 +49,9 @@ FlatWorld *VkWorld::createDemoFlatWorld() {
     map.setRegion({0, 0}, 10000, 3, 0.1, 0.3);
     map.setRegion({0, 0}, 6000, 0.7, 1.6, 0.8);
 
-    ground.addWorker<VkwMultilayerGroundTexture>().addDefaultLayers();
+    auto &multilayer = ground.addWorker<VkwMultilayerGroundTexture>();
+    multilayer.addDefaultLayers();
+    multilayer.getTextureGenerator().configureCacheOverride("multilayer/");
 
     auto &chunkSystem = world->addPrimaryNode<GridChunkSystem>({0, 0, 0});
     chunkSystem.addDecorator<ForestLayer>(world);

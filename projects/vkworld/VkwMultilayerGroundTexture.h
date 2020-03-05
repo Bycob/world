@@ -8,6 +8,8 @@
 #include <world/terrain/ITerrainWorker.h>
 #include <world/terrain/DistributionParams.h>
 
+#include "VkwGroundTextureGenerator.h"
+
 namespace world {
 
 class MultilayerGroundTexturePrivate;
@@ -31,7 +33,10 @@ public:
 
     void flush() override;
 
+    VkwGroundTextureGenerator &getTextureGenerator();
+
     GridStorageBase *getStorage() override;
+    // TODO add getCache
 
 private:
     MultilayerGroundTexturePrivate *_internal;

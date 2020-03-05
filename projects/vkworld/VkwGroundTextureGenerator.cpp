@@ -27,10 +27,6 @@ public:
     std::map<int, LodTextures> _lodTextures;
 
 
-    /// @param cpu Si true, récupère les textures sur le cpu depuis la carte
-    /// graphique
-    LodTextures &getOrCreate(int lod, float width, bool cpu = false);
-
     void launchTextureGeneration(LodTextures &t);
 };
 
@@ -49,23 +45,24 @@ size_t VkwGroundTextureGenerator::getLayerCount() {
 }
 
 VkwImage &VkwGroundTextureGenerator::getVkTexture(int layer, int lod) {
-    auto &lodTex = _internal->getOrCreate(lod, getWorldWidth(lod));
+    // FIXME cpu was set to false, but we actually need (...)
+    // to set it to true to take advantage of the cache
+    auto &lodTex = getOrCreate(lod, true);
     return lodTex._layerTextures.at(layer);
 }
 
 Image &VkwGroundTextureGenerator::getTexture(int layer, int lod) {
-    auto &lodTex = _internal->getOrCreate(lod, getWorldWidth(lod), true);
+    auto &lodTex = getOrCreate(lod, true);
     return lodTex._layerImages.at(layer);
 }
 
-LodTextures &VkwGroundTextureGeneratorPrivate::getOrCreate(int lod, float width,
-                                                           bool cpu) {
-    auto it = _lodTextures.insert({lod, LodTextures{}});
+LodTextures &VkwGroundTextureGenerator::getOrCreate(int lod, bool cpu) {
+    auto it = _internal->_lodTextures.insert({lod, LodTextures{}});
     LodTextures &t = it.first->second;
 
     if (it.second) {
-        t._width = width;
-        launchTextureGeneration(t);
+        t._width = getWorldWidth(lod);
+        _internal->launchTextureGeneration(t);
         t._texWorker->waitForCompletion();
     }
 
@@ -76,6 +73,8 @@ LodTextures &VkwGroundTextureGeneratorPrivate::getOrCreate(int lod, float width,
 
         for (VkwImage &img : t._layerTextures) {
             t._layerImages.push_back(VkwMemoryHelper::GPUToImage(img));
+            _cache.saveImage(getImageId(t._layerImages.size() - 1, lod),
+                             t._layerImages.back());
         }
     }
     return t;

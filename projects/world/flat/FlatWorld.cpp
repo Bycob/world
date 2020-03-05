@@ -1,3 +1,5 @@
+#include <world/terrain/PerlinTerrainGenerator.h>
+#include <world/terrain.h>
 #include "FlatWorld.h"
 
 #include "world/core/GridChunkSystem.h"
@@ -9,6 +11,8 @@
 #include "world/nature/Rocks.h"
 #include "world/core/Profiler.h"
 #include "world/core/SeedDistribution.h"
+#include "world/terrain/MultilayerGroundTexture.h"
+#include "world/terrain/DefaultTextureProvider.h"
 
 namespace world {
 
@@ -23,7 +27,24 @@ FlatWorld *FlatWorld::createDemoFlatWorld() {
     FlatWorld *world = new FlatWorld();
 
     HeightmapGround &ground = world->setGround<HeightmapGround>();
-    ground.setDefaultWorkerSet();
+
+    ground.addWorker<PerlinTerrainGenerator>(3, 4., 0.35).setMaxOctaveCount(6);
+
+    auto &map = ground.addWorker<CustomWorldRMModifier>();
+    map.setRegion({0, 0}, 10000, 3, 0.1, 0.3);
+    map.setRegion({0, 0}, 6000, 0.7, 1.6, 0.8);
+
+    auto &multilayer = ground.addWorker<MultilayerGroundTexture>();
+    multilayer.setTextureProvider<DefaultTextureProvider>("multilayer/");
+    // rock
+    multilayer.addLayer(DistributionParams{-1, 0, 1, 2, // h
+                                           -1, 0, 1, 2, // dh
+                                           0, 1, 0, 1, 0.2});
+    // sand
+    multilayer.addLayer(DistributionParams{-1, 0, 0.4, 0.45, // h
+                                           -1, 0, 0.4, 0.6,  // dh
+                                           0, 1, 0, 1, 0.2});
+
 
     auto &chunkSystem = world->addPrimaryNode<GridChunkSystem>({0, 0, 0});
     chunkSystem.addDecorator<ForestLayer>(world);

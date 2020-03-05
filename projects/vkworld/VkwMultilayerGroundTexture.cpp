@@ -135,6 +135,10 @@ void VkwMultilayerGroundTexture::processTile(ITileContext &context) {
                        context.getCoords());
 }
 
+VkwGroundTextureGenerator &VkwMultilayerGroundTexture::getTextureGenerator() {
+    return _internal->_texGenerator;
+}
+
 void MultilayerGroundTexturePrivate::getTileTextures(const TileCoordinates &tc,
                                                      MultilayerElement &elem,
                                                      float width) {
