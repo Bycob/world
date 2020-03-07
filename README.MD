@@ -52,10 +52,8 @@ and follow the instructions there. Those are really good instructions, I guess.
 ### As a Unity Plugin
 
 You can download *Peace* (World Plugin for Unity) [here](https://github.com/BynaryCobweb/world/releases).
-Just add it to your Unity project and it should be working.
 
-<!-- TODO add a tutorial on how to add it to you Unity project
-Don't forget to add both windows and linux library in the distributed plugin -->
+Follow the tutorial on how to use the plugin for the first time [here](docs/tuto-unity.md).
 
 ### Try the demo
 
