@@ -7,6 +7,7 @@
 #include "ITerrainWorker.h"
 #include "DistributionParams.h"
 #include "world/core/NodeCache.h"
+#include "world/math/Perlin.h"
 
 namespace world {
 
@@ -61,6 +62,8 @@ private:
 
     std::unique_ptr<ITextureProvider> _texProvider;
     std::vector<DistributionParams> _layers;
+
+    Perlin _perlin;
 
 
     void process(Terrain &terrain, Image &image, const TileCoordinates &tc);

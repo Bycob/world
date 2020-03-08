@@ -54,6 +54,32 @@ TEST_CASE("Terrain - getExactHeightAt", "[terrain]") {
         REQUIRE(terrain.getExactHeightAt(0.5, 1) == Approx(0.55));
         REQUIRE(terrain.getExactHeightAt(1, 0.5) == Approx(0.6));
     }
+
+    SECTION("Slope") {
+        Terrain terrain2(3);
+        terrain2.setBounds(0, 0, 0, 1, 1, 1);
+
+        SECTION("X slope") {
+            for (int x = 0; x < 3; ++x) {
+                for (int y = 0; y < 3; ++y) {
+                    terrain2(x, y) = x / 2.;
+                }
+            }
+
+            CHECK(terrain2.getSlope(1, 1) == Approx(1));
+            CHECK(terrain2.getSlope(0, 0) == Approx(1));
+        }
+
+        SECTION("X Y slope") {
+            for (int x = 0; x < 3; ++x) {
+                for (int y = 0; y < 3; ++y) {
+                    terrain2(x, y) = (x + y) / 4.;
+                }
+            }
+
+            CHECK(terrain2.getSlope(1, 1) == Approx(sqrt(2.) / 2.));
+        }
+    }
 }
 
 TEST_CASE("Terrain - Mesh generation benchmark", "[terrain][!benchmark]") {

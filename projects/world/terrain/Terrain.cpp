@@ -56,16 +56,20 @@ void Terrain::setBounds(double xmin, double ymin, double zmin, double xmax,
 const BoundingBox &Terrain::getBoundingBox() const { return _bbox; }
 
 vec3d Terrain::getNormal(int x, int y) const {
+    vec3d dims = getBoundingBox().getDimensions();
     int size_1 = getResolution() - 1;
-    const double xUnit = 1. / size_1;
-    const double yUnit = xUnit;
+    double pixSize = dims.x / size_1;
 
-    int xa = max(x - 1, 0), xb = min(x + 1, size_1), xm = xb - xa;
-    vec3d nx{(_array(xa, y) - _array(xb, y)), 0, xm * xUnit};
+    double v = _array(x, y);
+    double vxa = x > 0 ? _array(x - 1, y) : v + v - _array(x + 1, y);
+    double vxb = x < size_1 ? _array(x + 1, y) : v + v - _array(x - 1, y);
+    double xSlope = dims.z * (vxb - vxa); // / (2 * pixSize);
 
-    int ya = max(y - 1, 0), yb = min(y + 1, size_1), ym = yb - ya;
-    vec3d ny{0, (_array(x, ya) - _array(x, yb)), ym * yUnit};
-    return (nx * ym + ny * xm).normalize();
+    double vya = y > 0 ? _array(x, y - 1) : v + v - _array(x, y + 1);
+    double vyb = y < size_1 ? _array(x, y + 1) : v + v - _array(x, y - 1);
+    double ySlope = dims.z * (vyb - vya); // / (2 * pixSize);
+
+    return vec3d{-xSlope, -ySlope, 2 * pixSize}.normalize();
 }
 
 double Terrain::getSlope(int x, int y) const {

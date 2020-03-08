@@ -9,8 +9,6 @@ ColorMap &AltitudeTexturer::getColorMap() { return _colorMap; }
 
 void AltitudeTexturer::processTerrain(Terrain &terrain) {
     Image &texture = terrain.getTexture();
-    auto dims = terrain.getBoundingBox().getDimensions();
-    double heightEdgeRatio = dims.z / dims.x;
 
     std::uniform_real_distribution<double> positive(0, 1);
     std::uniform_real_distribution<double> jitter(-1, 1);
@@ -25,9 +23,8 @@ void AltitudeTexturer::processTerrain(Terrain &terrain) {
 
             // get the parameters to pick in the colormap
             double p1 = clamp(altitude + jitter(_rng) * 0.01, 0, 1);
-            double p2 = clamp(atan(abs(slope) * heightEdgeRatio) * 2 / M_PI +
-                                  jitter(_rng) * 0.01,
-                              0, 1);
+            double p2 =
+                clamp(atan(slope) * 2 / M_PI + jitter(_rng) * 0.01, 0, 1);
 
             // pick the color
             Color4d color = _colorMap.getColorAt({p1, p2});

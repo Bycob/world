@@ -39,11 +39,23 @@ FlatWorld *FlatWorld::createDemoFlatWorld() {
     // rock
     multilayer.addLayer(DistributionParams{-1, 0, 1, 2, // h
                                            -1, 0, 1, 2, // dh
-                                           0, 1, 0, 1, 0.2});
+                                           0, 1, 0, 1, 0.05});
     // sand
     multilayer.addLayer(DistributionParams{-1, 0, 0.4, 0.45, // h
                                            -1, 0, 0.4, 0.6,  // dh
-                                           0, 1, 0, 1, 0.2});
+                                           0, 1, 0, 1, 0.05});
+    // soil
+    multilayer.addLayer(DistributionParams{0.33, 0.4, 0.6, 0.75, // h
+                                           -1, 0, 0.45, 0.65,    // dh
+                                           0, 0.85, 0.25, 0.85, 0.05});
+    // grass
+    multilayer.addLayer(DistributionParams{0.33, 0.4, 0.6, 0.7, // h
+                                           -1, 0, 0.4, 0.6,     // dh
+                                           0., 1., 0.25, 0.6, 0.05});
+    // snow
+    multilayer.addLayer(DistributionParams{0.65, 0.8, 1, 2, // h
+                                           -1, 0, 0.5, 0.7, // dh
+                                           0.0, 1.0, 0, 1., 0.05});
 
 
     auto &chunkSystem = world->addPrimaryNode<GridChunkSystem>({0, 0, 0});

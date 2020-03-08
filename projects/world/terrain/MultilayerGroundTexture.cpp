@@ -37,10 +37,18 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &image,
         throw std::runtime_error("Texture provider is nullptr");
     }
 
+
     const int imWidth = image.width();
     const int imHeight = image.height();
     const u32 tRes = u32(terrain.getResolution());
     Image proxy(imWidth, imHeight, ImageType::RGBA);
+
+    // generate perlin matrix
+    PerlinInfo pinfo{2 + tc._lod, 0.9, false, tc._lod, 4};
+    int factor = 4;
+    pinfo.offsetX = tc._pos.x * factor;
+    pinfo.offsetY = tc._pos.y * factor;
+    auto perlinMat = _perlin.generatePerlinNoise2D(tRes, pinfo);
 
     MultilayerElement &elem = _storage.getOrCreate(tc);
 
@@ -65,7 +73,7 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &image,
                 double r2 = ramp(params.dha, params.dhb, params.dhc, params.dhd,
                                  params.dhmin, params.dhmax, dh);
                 double r = r1 * r2;
-                double t = 0.5; // TODO perlin(noiseParams, uv.x, uv.y, 0);
+                double t = perlinMat(x, y);
 
                 distrib(x, y) =
                     smoothstep(r + params.threshold, r - params.threshold, t);
@@ -88,7 +96,7 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &image,
                 vec2d uv =
                     vec2d{vec2i{x, y}} / vec2i{imWidth - 1, imHeight - 1};
                 double p = distrib.getCubicHeight(uv.x, uv.y);
-                double alpha = p * texPix.getAlphaf();
+                double alpha = clamp(p * texPix.getAlphaf(), 0, 1);
 
                 auto &dest = proxy.rgba(x, y);
                 dest.setf(
@@ -96,7 +104,7 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &image,
                     origin.getGreenf() * (1 - alpha) +
                         texPix.getGreenf() * alpha,
                     origin.getBluef() * (1 - alpha) + texPix.getBluef() * alpha,
-                    origin.getAlphaf() + (1 - texPix.getAlphaf()) * alpha);
+                    1);
             }
         }
     }
