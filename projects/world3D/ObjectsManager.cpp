@@ -63,6 +63,10 @@ void ObjectNodeHandler::setMaterial(const Material &mat, Collector &collector) {
     irrmat.TextureLayer[0].BilinearFilter = true;
     irrmat.TextureLayer[0].TrilinearFilter = true;
 
+    if (mat.isTransparent()) {
+        irrmat.MaterialType = EMT_TRANSPARENT_ALPHA_CHANNEL;
+    }
+
     // Textures
     int texstart = 0;
     if (setTexture(0, mat.getMapKd(), collector))

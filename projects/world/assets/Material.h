@@ -48,6 +48,10 @@ public:
 
     std::string getMapKd() const { return _mapKd; }
 
+    void setTransparent(bool transparent) { _transparent = transparent; }
+
+    bool isTransparent() const { return _transparent; }
+
 private:
     std::string _name;
     std::string _shader;
@@ -64,5 +68,7 @@ private:
     std::string _mapKd;
     std::string _mapKs;
     std::string _mapBump;
+
+    bool _transparent = false;
 };
 } // namespace world

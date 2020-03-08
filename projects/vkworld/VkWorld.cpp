@@ -60,6 +60,7 @@ FlatWorld *VkWorld::createDemoFlatWorld() {
     auto &grassPool =
         chunkSystem.addDecorator<InstancePool<VkwGrass, SeedDistribution>>(
             world);
+    grassPool.setResolution(40);
 
     // Rocks
     auto &rocksPool = chunkSystem.addDecorator<InstancePool<Rocks>>(world);

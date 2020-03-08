@@ -42,6 +42,7 @@ std::vector<Template> VkwGrass::collectTemplates(ICollector &collector,
             imgChan.put({"texturea"}, _internal->_finalTexture, ctx);
 
             Material grassMat;
+            grassMat.setTransparent(true);
             grassMat.setKd(1, 1, 1);
             grassMat.setMapKd(ctx({"texturea"}).str());
 
