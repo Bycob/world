@@ -24,8 +24,8 @@ The repository also includes:
 - Peace: World package for Unity. Embeds a real-time demo too (this is where the
 screenshot comes from)
 
-There are also a bunch of embryonic packages that are not worth mentioning yet
-, but may be with future development (Pyworld, blender integration, WorldGUI)
+There are also a bunch of embryonic packages that are not worth mentioning yet,
+but might be developped further (Pyworld, blender integration, WorldGUI)
 
 ## Install
 
