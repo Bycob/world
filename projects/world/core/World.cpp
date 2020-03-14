@@ -38,6 +38,36 @@ void World::collect(ICollector &collector,
     }
 }
 
+void World::write(const std::string &filename) const {
+    WorldFile wf;
+    write(wf);
+    wf.write(filename);
+}
+
+void World::write(WorldFile &wf) const {
+    for (auto &entry : _internal->_primaryNodes) {
+        WorldFile nodeFile = entry.second->write();
+        wf.addToArray("nodes", nodeFile);
+    }
+}
+
+void World::read(const std::string &filename) {
+    WorldFile wf;
+    wf.read(filename);
+    read(wf);
+}
+
+void World::read(const WorldFile &wf) {
+    std::vector<WorldFile> nodeFiles;
+    wf.readArrayOpt("nodes", nodeFiles);
+
+    for (WorldFile &nodeFile : nodeFiles) {
+        auto node = std::make_unique<WorldNode>();
+        node->read(nodeFile);
+        _internal->_primaryNodes.emplace(node->getKey(), std::move(node));
+    }
+}
+
 void World::addPrimaryNodeInternal(WorldNode *node) {
     if (_internal->_counter > MAX_PRIMARY_NODES) {
         throw std::runtime_error(

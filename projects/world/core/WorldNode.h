@@ -7,12 +7,16 @@
 #include "ICollector.h"
 #include "IResolutionModel.h"
 #include "NodeCache.h"
+#include "WorldFile.h"
 
 namespace world {
 
 class WorldNodePrivate;
 
-class WORLDAPI_EXPORT WorldNode {
+class WORLDAPI_EXPORT WorldNode : public ISerializable {
+
+    WORLD_REGISTER_BASE_CLASS(WorldNode)
+
 public:
     WorldNode();
     WorldNode(const WorldNode &other) = delete;
@@ -23,6 +27,8 @@ public:
     // Deprecated / internal use only
     // TODO find a solution
     void setKey(NodeKey key);
+
+    NodeKey getKey() const { return _key; }
 
     void configureCache(NodeCache &parent, const NodeKey &key);
 

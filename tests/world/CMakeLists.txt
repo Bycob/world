@@ -15,6 +15,7 @@ if (${WORLD_BUILD_TESTS})
             test_nodes.cpp
             test_perlin.cpp
             test_scene.cpp
+            test_serialize.cpp
             test_types.cpp
             test_terrain.cpp
             test_utilities.cpp

@@ -13,6 +13,7 @@
 #include "WorldNode.h"
 #include "IChunkDecorator.h"
 #include "ICollector.h"
+#include "WorldFile.h"
 
 #define MAX_PRIMARY_NODES 1024
 
@@ -20,7 +21,7 @@ namespace world {
 
 class WorldPrivate;
 
-class WORLDAPI_EXPORT World {
+class WORLDAPI_EXPORT World : public ISerializable {
 public:
     /** Create a complete and rich world that can be used
      * as a demonstration of the API capabilities. */
@@ -46,6 +47,14 @@ public:
     // ASSETS
     virtual void collect(ICollector &collector,
                          const IResolutionModel &resolutionModel);
+
+    void write(const std::string &filename) const;
+
+    void write(WorldFile &wf) const override;
+
+    void read(const std::string &filename);
+
+    void read(const WorldFile &wf) override;
 
 protected:
     void addPrimaryNodeInternal(WorldNode *node);
