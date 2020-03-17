@@ -48,11 +48,7 @@ public:
     virtual void collect(ICollector &collector,
                          const IResolutionModel &resolutionModel);
 
-    void write(const std::string &filename) const;
-
     void write(WorldFile &wf) const override;
-
-    void read(const std::string &filename);
 
     void read(const WorldFile &wf) override;
 

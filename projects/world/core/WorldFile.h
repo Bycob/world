@@ -5,12 +5,23 @@
 
 #include <string>
 #include <vector>
+#include <memory>
+
+#include "JsonUtils.h"
 
 namespace world {
 
 class WORLDAPI_EXPORT WorldFile {
 public:
     WorldFile();
+
+    WorldFile(const WorldFile &wf) = delete;
+
+    WorldFile(WorldFile &&wf);
+
+    WorldFile &operator=(const WorldFile &wf) = delete;
+
+    WorldFile &operator=(WorldFile &&wf);
 
     void addString(const std::string &id, const std::string &str);
 
@@ -59,7 +70,17 @@ public:
 
     void read(const std::string &filename);
 
+    std::string toJson() const;
+
+    void fromJson(const std::string &jsonStr);
+
 private:
+    std::shared_ptr<Json> _jdoc;
+
+    rapidjson::Value _jval;
+
+
+    WorldFile(std::shared_ptr<Json> jdoc, rapidjson::Value &&value);
 };
 
 class WORLDAPI_EXPORT ISerializable {
@@ -72,7 +93,11 @@ public:
         return f;
     }
 
+    void write(const std::string &filename) const;
+
     virtual void write(WorldFile &worldFile) const {};
+
+    void read(const std::string &filename);
 
     virtual void read(const WorldFile &worldFile) {}
 };

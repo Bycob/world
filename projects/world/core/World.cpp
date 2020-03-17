@@ -38,12 +38,6 @@ void World::collect(ICollector &collector,
     }
 }
 
-void World::write(const std::string &filename) const {
-    WorldFile wf;
-    write(wf);
-    wf.write(filename);
-}
-
 void World::write(WorldFile &wf) const {
     for (auto &entry : _internal->_primaryNodes) {
         WorldFile nodeFile = entry.second->write();
@@ -51,19 +45,12 @@ void World::write(WorldFile &wf) const {
     }
 }
 
-void World::read(const std::string &filename) {
-    WorldFile wf;
-    wf.read(filename);
-    read(wf);
-}
-
 void World::read(const WorldFile &wf) {
     std::vector<WorldFile> nodeFiles;
     wf.readArrayOpt("nodes", nodeFiles);
 
     for (WorldFile &nodeFile : nodeFiles) {
-        auto node = std::make_unique<WorldNode>();
-        node->read(nodeFile);
+        std::unique_ptr<WorldNode> node(WorldNode::readSubclass(nodeFile));
         _internal->_primaryNodes.emplace(node->getKey(), std::move(node));
     }
 }
