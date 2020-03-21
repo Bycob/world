@@ -17,14 +17,12 @@ TEST_CASE("WorldFile", "[serialize]") {
 
     a1.addString("0", "0s");
     a2.addString("0", "1s");
-    // wf.addArray("5", std::vector<WorldFile>{std::move(a1), std::move(a2)});
-
-    a3.addString("0", "2s");
-    a4.addString("0", "3s");
-    wf.addToArray("6", a3);
-    wf.addToArray("6", a4);
+    wf.addToArray("6", a1);
+    wf.addToArray("6", a2);
 
     WorldFile c1;
+    c1.addString("0", "s");
+    wf.addChild("c1", c1);
 
     SECTION("Test read") {
         CHECK(wf.readString("1") == "1s");
@@ -37,6 +35,24 @@ TEST_CASE("WorldFile", "[serialize]") {
         CHECK_THROWS(wf.readFloat("2"));
         CHECK_THROWS(wf.readInt("3"));
         CHECK_THROWS(wf.readString("100"));
+    }
+
+    SECTION("Test read objects") {
+        auto &rc1 = wf.readChild("c1");
+        CHECK(rc1.readString("0") == "s");
+
+        SECTION("Try to reread objects") {
+            auto &rc1bis = wf.readChild("c1");
+            CHECK(rc1bis.readString("0") == "s");
+        }
+    }
+
+    SECTION("Test read array") {
+        std::vector<std::string> results;
+        for (auto &it = wf.readArray("6"); !it.end(); ++it) {
+            results.push_back(it->readString("0"));
+        }
+        CHECK(results == std::vector<std::string>{"0s", "1s"});
     }
 
     SECTION("Test jsonify") {
@@ -87,7 +103,7 @@ TEST_CASE("ISerializable", "[serialize]") {
 
         WorldFile wf;
         ChildClass1 c1;
-        c1.write(wf);
+        // BaseClass1::writeSubclass(c1, wf);
 
         BaseClass1 *r = BaseClass1::readSubclass(wf);
         CHECK(dynamic_cast<ChildClass1 *>(r) != nullptr);

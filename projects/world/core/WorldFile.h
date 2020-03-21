@@ -6,10 +6,13 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <map>
 
 #include "JsonUtils.h"
 
 namespace world {
+
+class WorldFileIterator;
 
 class WORLDAPI_EXPORT WorldFile {
 public:
@@ -51,18 +54,13 @@ public:
 
     bool readBoolOpt(const std::string &id, bool &b) const;
 
-    void addArray(const std::string &id, const std::vector<WorldFile> &array);
+    void addToArray(const std::string &id, WorldFile &item);
 
-    void addToArray(const std::string &id, const WorldFile &item);
+    WorldFileIterator &readArray(const std::string &id) const;
 
-    std::vector<WorldFile> readArray(const std::string &id) const;
+    void addChild(const std::string &id, WorldFile &child);
 
-    bool readArrayOpt(const std::string &id,
-                      std::vector<WorldFile> &array) const;
-
-    void addChild(const std::string &id, const WorldFile &child);
-
-    WorldFile readChild(const std::string &id) const;
+    const WorldFile &readChild(const std::string &id) const;
 
     // IO
 
@@ -79,8 +77,37 @@ private:
 
     rapidjson::Value _jval;
 
+    mutable std::map<std::string, std::unique_ptr<WorldFile>> _children;
+    mutable std::map<std::string, std::unique_ptr<WorldFileIterator>> _arrays;
 
-    WorldFile(std::shared_ptr<Json> jdoc, rapidjson::Value &&value);
+
+    WorldFile(std::shared_ptr<Json> jdoc, rapidjson::Value &value);
+
+    friend class WorldFileIterator;
+};
+
+
+class WORLDAPI_EXPORT WorldFileIterator {
+public:
+    void operator++();
+
+    const WorldFile &operator*() const;
+
+    const WorldFile *operator->() const;
+
+    bool end() const;
+
+private:
+    rapidjson::Document::ValueIterator _it;
+    rapidjson::Document::ValueIterator _end;
+    std::shared_ptr<Json> _jdoc;
+
+    mutable std::vector<std::unique_ptr<WorldFile>> _items;
+
+
+    WorldFileIterator(std::shared_ptr<Json> jdoc, rapidjson::Value &val);
+
+    friend class WorldFile;
 };
 
 class WORLDAPI_EXPORT ISerializable {
