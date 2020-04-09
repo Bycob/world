@@ -120,6 +120,14 @@ public:
         return f;
     }
 
+    WorldFile writeSubclass() const  {
+        WorldFile f;
+        writeSubclass(f);
+        return f;
+    }
+
+    virtual void writeSubclass(WorldFile &file) const;
+
     void write(const std::string &filename) const;
 
     virtual void write(WorldFile &worldFile) const {};
@@ -158,7 +166,16 @@ public:                                                                        \
         auto &deserIndex = ParentClass::getDeserializeIndex();                 \
         deserIndex[ClassID] = read##ChildClass;                                \
         return nullptr;                                                        \
-    }();
+    }();                                                                       \
+                                                                               \
+    void ChildClass::writeSubclass(WorldFile &wf) const {                      \
+        wf.addString("type", ClassID);                                         \
+        this->write(wf);                                                       \
+    }
+
+#define WORLD_WRITE_SUBCLASS_METHOD                                            \
+public:                                                                        \
+    void writeSubclass(WorldFile &wf) const override;
 
 } // namespace world
 

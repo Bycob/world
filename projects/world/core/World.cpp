@@ -40,7 +40,7 @@ void World::collect(ICollector &collector,
 
 void World::write(WorldFile &wf) const {
     for (auto &entry : _internal->_primaryNodes) {
-        WorldFile nodeFile = entry.second->write();
+        WorldFile nodeFile = entry.second->writeSubclass();
         wf.addToArray("nodes", nodeFile);
     }
 }

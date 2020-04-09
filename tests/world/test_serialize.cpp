@@ -91,9 +91,13 @@ class BaseClass1 : public ISerializable {
     WORLD_REGISTER_BASE_CLASS(BaseClass1)
 };
 
-class ChildClass1 : public BaseClass1 {};
+class ChildClass1 : public BaseClass1 {
+    WORLD_WRITE_SUBCLASS_METHOD
+};
 
-class ChildClass2 : public BaseClass1 {};
+class ChildClass2 : public BaseClass1 {
+    WORLD_WRITE_SUBCLASS_METHOD
+};
 
 WORLD_REGISTER_CHILD_CLASS(BaseClass1, ChildClass1, "1")
 WORLD_REGISTER_CHILD_CLASS(BaseClass1, ChildClass2, "2")
@@ -103,7 +107,7 @@ TEST_CASE("ISerializable", "[serialize]") {
 
         WorldFile wf;
         ChildClass1 c1;
-        // BaseClass1::writeSubclass(c1, wf);
+        c1.writeSubclass(wf);
 
         BaseClass1 *r = BaseClass1::readSubclass(wf);
         CHECK(dynamic_cast<ChildClass1 *>(r) != nullptr);

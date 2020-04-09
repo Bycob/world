@@ -235,6 +235,10 @@ void ISerializable::read(const std::string &filename) {
     read(wf);
 }
 
+void ISerializable::writeSubclass(WorldFile &file) const {
+    // references ?
+}
+
 void ISerializable::write(const std::string &filename) const {
     WorldFile wf;
     write(wf);
