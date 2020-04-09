@@ -13,7 +13,9 @@ using namespace world;
 
 void generate_test_world(int argc, char **argv);
 
-int main(int argc, char **argv) { generate_test_world(argc, argv); }
+void save_world_config(int argc, char **argv);
+
+int main(int argc, char **argv) { save_world_config(argc, argv); }
 
 #ifdef USE_VKWORLD
 
@@ -92,4 +94,11 @@ void generate_test_world(int argc, char **argv) {
     profiler.endSection();
 
     profiler.dump();
+}
+
+void save_world_config(int argc, char **argv) {
+    world::createDirectories("assets");
+
+    World::createDemoWorld()->save("assets/demo.json");
+    std::cout << "Saved demo world to assets/demo.json" << std::endl;
 }

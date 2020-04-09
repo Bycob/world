@@ -63,6 +63,10 @@ public:
 
     void removeChild(WorldNode &child);
 
+    void write(WorldFile &wf) const override;
+
+    void read(const WorldFile &wf) override;
+
 protected:
     WorldNodePrivate *_internal;
 

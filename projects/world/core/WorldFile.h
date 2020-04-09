@@ -54,19 +54,29 @@ public:
 
     bool readBoolOpt(const std::string &id, bool &b) const;
 
+    template <typename T> void addStruct(const std::string &id, const T &s);
+
+    template <typename T> void readStruct(const std::string &id, T &s) const;
+
+    // TODO addArray
+
     void addToArray(const std::string &id, WorldFile &item);
+
+    void addToArray(const std::string &id, WorldFile &&item);
 
     WorldFileIterator &readArray(const std::string &id) const;
 
     void addChild(const std::string &id, WorldFile &child);
 
+    void addChild(const std::string &id, WorldFile &&child);
+
     const WorldFile &readChild(const std::string &id) const;
 
     // IO
 
-    void write(const std::string &filename) const;
+    void save(const std::string &filename) const;
 
-    void read(const std::string &filename);
+    void load(const std::string &filename);
 
     std::string toJson() const;
 
@@ -86,6 +96,25 @@ private:
     friend class WorldFileIterator;
 };
 
+template <typename T> void write(const T &s, WorldFile &wf);
+
+template <typename T> void read(const WorldFile &wf, T &s);
+
+template <typename T> inline WorldFile serialize(const T &s) {
+    WorldFile wf;
+    world::write<T>(s, wf);
+    return wf;
+}
+
+template <typename T>
+inline void WorldFile::addStruct(const std::string &id, const T &s) {
+    addChild(id, serialize(s));
+}
+
+template <typename T>
+inline void WorldFile::readStruct(const std::string &id, T &s) const {
+    world::read<T>(*this, s);
+}
 
 class WORLDAPI_EXPORT WorldFileIterator {
 public:
@@ -114,13 +143,13 @@ class WORLDAPI_EXPORT ISerializable {
 public:
     virtual ~ISerializable() = default;
 
-    WorldFile write() const {
+    WorldFile serialize() const {
         WorldFile f;
         write(f);
         return f;
     }
 
-    WorldFile writeSubclass() const  {
+    WorldFile serializeSubclass() const {
         WorldFile f;
         writeSubclass(f);
         return f;
@@ -128,11 +157,11 @@ public:
 
     virtual void writeSubclass(WorldFile &file) const;
 
-    void write(const std::string &filename) const;
+    void save(const std::string &filename) const;
 
     virtual void write(WorldFile &worldFile) const {};
 
-    void read(const std::string &filename);
+    void load(const std::string &filename);
 
     virtual void read(const WorldFile &worldFile) {}
 };
@@ -178,5 +207,7 @@ public:                                                                        \
     void writeSubclass(WorldFile &wf) const override;
 
 } // namespace world
+
+#include "Serialization.inl"
 
 #endif // WORLD_WORLDFILE_H

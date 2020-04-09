@@ -69,10 +69,10 @@ TEST_CASE("WorldFile", "[serialize]") {
         world::createDirectories("unittests");
 
         std::string filename("unittests/wf_test.json");
-        wf.write(filename);
+        wf.save(filename);
 
         WorldFile wf2;
-        wf2.read(filename);
+        wf2.load(filename);
 
         CHECK(wf2.readString("1") == "1s");
         CHECK(wf2.readInt("2") == 1);

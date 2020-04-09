@@ -131,6 +131,16 @@ void WorldFile::addToArray(const std::string &id, WorldFile &item) {
                        _jdoc->GetAllocator());
 }
 
+void WorldFile::addToArray(const std::string &id, WorldFile &&item) {
+    if (!_jval.HasMember(id)) {
+        _jval.AddMember(JsonUtils::strToVal(id, *_jdoc), Value().SetArray(),
+                        _jdoc->GetAllocator());
+    }
+
+    _jval[id].PushBack(Value().CopyFrom(item._jval, _jdoc->GetAllocator()),
+                       _jdoc->GetAllocator());
+}
+
 WorldFileIterator &WorldFile::readArray(const std::string &id) const {
     auto res =
         _arrays.insert({id, std::unique_ptr<WorldFileIterator>(nullptr)});
@@ -151,6 +161,11 @@ void WorldFile::addChild(const std::string &id, WorldFile &child) {
                     _jdoc->GetAllocator());
 }
 
+void WorldFile::addChild(const std::string &id, WorldFile &&child) {
+    _jval.AddMember(JsonUtils::strToVal(id, *_jdoc), child._jval,
+                    _jdoc->GetAllocator());
+}
+
 const WorldFile &WorldFile::readChild(const std::string &id) const {
     auto res = _children.insert({id, std::unique_ptr<WorldFile>(nullptr)});
     if (res.second) {
@@ -165,11 +180,11 @@ const WorldFile &WorldFile::readChild(const std::string &id) const {
     return *res.first->second;
 }
 
-void WorldFile::write(const std::string &filename) const {
+void WorldFile::save(const std::string &filename) const {
     JsonUtils::write(filename, _jval);
 }
 
-void WorldFile::read(const std::string &filename) {
+void WorldFile::load(const std::string &filename) {
     std::ifstream is(filename, std::ios::ate);
     size_t filesize = static_cast<size_t>(is.tellg());
     char *buf = new char[filesize];
@@ -229,19 +244,21 @@ bool WorldFileIterator::end() const { return _it == _end; }
 // ##### ISerializable
 
 
-void ISerializable::read(const std::string &filename) {
+void ISerializable::load(const std::string &filename) {
     WorldFile wf;
-    wf.read(filename);
+    wf.load(filename);
     read(wf);
 }
 
 void ISerializable::writeSubclass(WorldFile &file) const {
     // references ?
+
+    write(file);
 }
 
-void ISerializable::write(const std::string &filename) const {
+void ISerializable::save(const std::string &filename) const {
     WorldFile wf;
     write(wf);
-    wf.write(filename);
+    wf.save(filename);
 }
 } // namespace world
