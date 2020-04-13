@@ -17,12 +17,14 @@ TEST_CASE("WorldFile", "[serialize]") {
 
     a1.addString("0", "0s");
     a2.addString("0", "1s");
-    wf.addToArray("6", a1);
-    wf.addToArray("6", a2);
+
+    wf.addArray("6");
+    wf.addToArray("6", std::move(a1));
+    wf.addToArray("6", std::move(a2));
 
     WorldFile c1;
     c1.addString("0", "s");
-    wf.addChild("c1", c1);
+    wf.addChild("c1", std::move(c1));
 
     SECTION("Test read") {
         CHECK(wf.readString("1") == "1s");
@@ -49,7 +51,7 @@ TEST_CASE("WorldFile", "[serialize]") {
 
     SECTION("Test read array") {
         std::vector<std::string> results;
-        for (auto &it = wf.readArray("6"); !it.end(); ++it) {
+        for (auto it = wf.readArray("6"); !it.end(); ++it) {
             results.push_back(it->readString("0"));
         }
         CHECK(results == std::vector<std::string>{"0s", "1s"});
@@ -84,6 +86,18 @@ TEST_CASE("WorldFile", "[serialize]") {
         WorldFile wfc(std::move(wf));
 
         CHECK(wfc.readBool("4"));
+    }
+
+    SECTION("Complex json") {
+        WorldFile wcin;
+        wcin.addStruct("position", vec3d{5});
+        INFO(wcin.toJson());
+
+        WorldFile wcout;
+        wcout.addArray("nodes");
+        wcout.addToArray("nodes", std::move(wcin));
+        CHECK(wcout.toJson() ==
+              "{\"nodes\":[{\"position\":{\"x\":5.0,\"y\":5.0,\"z\":5.0}}]}");
     }
 }
 

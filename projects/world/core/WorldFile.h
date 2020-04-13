@@ -58,15 +58,11 @@ public:
 
     template <typename T> void readStruct(const std::string &id, T &s) const;
 
-    // TODO addArray
-
-    void addToArray(const std::string &id, WorldFile &item);
+    void addArray(const std::string &id);
 
     void addToArray(const std::string &id, WorldFile &&item);
 
-    WorldFileIterator &readArray(const std::string &id) const;
-
-    void addChild(const std::string &id, WorldFile &child);
+    WorldFileIterator readArray(const std::string &id) const;
 
     void addChild(const std::string &id, WorldFile &&child);
 
@@ -85,13 +81,13 @@ public:
 private:
     std::shared_ptr<Json> _jdoc;
 
-    rapidjson::Value _jval;
-
-    mutable std::map<std::string, std::unique_ptr<WorldFile>> _children;
-    mutable std::map<std::string, std::unique_ptr<WorldFileIterator>> _arrays;
+    std::map<std::string, std::unique_ptr<WorldFile>> _children;
+    std::map<std::string, std::vector<std::unique_ptr<WorldFile>>> _arrays;
 
 
-    WorldFile(std::shared_ptr<Json> jdoc, rapidjson::Value &value);
+    void writeToJdoc(Json &json, rapidjson::Value &jval) const;
+
+    void readFromJdoc(const rapidjson::Value &jval);
 
     friend class WorldFileIterator;
 };
@@ -127,14 +123,13 @@ public:
     bool end() const;
 
 private:
-    rapidjson::Document::ValueIterator _it;
-    rapidjson::Document::ValueIterator _end;
-    std::shared_ptr<Json> _jdoc;
+    typedef std::vector<std::unique_ptr<WorldFile>>::const_iterator
+        iterator_type;
 
-    mutable std::vector<std::unique_ptr<WorldFile>> _items;
+    iterator_type _current;
+    iterator_type _end;
 
-
-    WorldFileIterator(std::shared_ptr<Json> jdoc, rapidjson::Value &val);
+    WorldFileIterator(const std::vector<std::unique_ptr<WorldFile>> &vec);
 
     friend class WorldFile;
 };

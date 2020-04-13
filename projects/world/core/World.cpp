@@ -37,14 +37,16 @@ void World::collect(ICollector &collector,
 }
 
 void World::write(WorldFile &wf) const {
+    wf.addArray("nodes");
+
     for (auto &entry : _internal->_primaryNodes) {
         WorldFile nodeFile = entry.second->serializeSubclass();
-        wf.addToArray("nodes", nodeFile);
+        wf.addToArray("nodes", std::move(nodeFile));
     }
 }
 
 void World::read(const WorldFile &wf) {
-    for (auto &it = wf.readArray("nodes"); !it.end(); ++it) {
+    for (auto it = wf.readArray("nodes"); !it.end(); ++it) {
         std::unique_ptr<WorldNode> node(WorldNode::readSubclass(*it));
         _internal->_primaryNodes.emplace(node->getKey(), std::move(node));
     }

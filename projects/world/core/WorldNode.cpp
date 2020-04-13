@@ -67,6 +67,7 @@ void WorldNode::removeChild(WorldNode &child) {
 void WorldNode::write(WorldFile &wf) const {
     wf.addString("key", NodeKeys::toString(_key));
     wf.addStruct("position", _position);
+    wf.addArray("children");
 
     for (auto &p : _internal->_children) {
         wf.addToArray("children", p.second->serializeSubclass());
@@ -78,7 +79,7 @@ void WorldNode::read(const WorldFile &wf) {
     _key = NodeKeys::fromString(wf.readString("key"));
     wf.readStruct("position", _position);
 
-    for (auto &it = wf.readArray("children"); !it.end(); ++it) {
+    for (auto it = wf.readArray("children"); !it.end(); ++it) {
         // We don't keep the serialized key (maybe we should?)
         addChildInternal(WorldNode::readSubclass(*it));
     }

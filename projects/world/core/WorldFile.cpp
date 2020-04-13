@@ -9,179 +9,171 @@ namespace world {
 
 using namespace rapidjson;
 
-WorldFile::WorldFile() : _jdoc(std::make_shared<Json>(kObjectType)) {
-    _jval = _jdoc->GetObject();
-}
+WorldFile::WorldFile() : _jdoc(std::make_shared<Json>(kObjectType)) {}
 
-WorldFile::WorldFile(WorldFile &&wf) : _jdoc(wf._jdoc) { _jval = wf._jval; }
+WorldFile::WorldFile(WorldFile &&wf)
+        : _jdoc(wf._jdoc), _children(std::move(wf._children)),
+          _arrays(std::move(wf._arrays)) {}
 
 WorldFile &WorldFile::operator=(WorldFile &&wf) {
     _jdoc = wf._jdoc;
-    _jval = wf._jval;
     return *this;
 }
 
 void WorldFile::addString(const std::string &id, const std::string &str) {
-    _jval.AddMember(JsonUtils::strToVal(id, *_jdoc),
-                    JsonUtils::strToVal(str, *_jdoc), _jdoc->GetAllocator());
+    _jdoc->AddMember(JsonUtils::strToVal(id, *_jdoc),
+                     JsonUtils::strToVal(str, *_jdoc), _jdoc->GetAllocator());
 }
 
 std::string WorldFile::readString(const std::string &id) const {
-    if (!_jval.HasMember(id))
+    if (!_jdoc->HasMember(id))
         throw std::runtime_error("WorldFile: No member named " + id);
-    if (!_jval[id].IsString())
+    if (!(*_jdoc)[id].IsString())
         throw std::runtime_error("WorldFile: " + id + " not of type 'String'");
-    return std::string(_jval[id].GetString(), _jval[id].GetStringLength());
+    return std::string((*_jdoc)[id].GetString(),
+                       (*_jdoc)[id].GetStringLength());
 }
 
 bool WorldFile::readStringOpt(const std::string &id, std::string &str) const {
-    if (_jval.HasMember(id) && _jval[id].IsDouble()) {
-        str = std::string(_jval[id].GetString(), _jval[id].GetStringLength());
+    if (_jdoc->HasMember(id) && (*_jdoc)[id].IsDouble()) {
+        str = std::string((*_jdoc)[id].GetString(),
+                          (*_jdoc)[id].GetStringLength());
         return true;
     } else
         return false;
 }
 
 void WorldFile::addFloating(const std::string &id, double f) {
-    _jval.AddMember(JsonUtils::strToVal(id, *_jdoc), Value().SetDouble(f),
-                    _jdoc->GetAllocator());
+    _jdoc->AddMember(JsonUtils::strToVal(id, *_jdoc), Value().SetDouble(f),
+                     _jdoc->GetAllocator());
 }
 
 double WorldFile::readDouble(const std::string &id) const {
-    if (!_jval.HasMember(id))
+    if (!_jdoc->HasMember(id))
         throw std::runtime_error("WorldFile: No member named " + id);
-    if (!_jval[id].IsDouble())
+    if (!(*_jdoc)[id].IsDouble())
         throw std::runtime_error("WorldFile: " + id + " not of type 'Double'");
-    return _jval[id].GetDouble();
+    return (*_jdoc)[id].GetDouble();
 }
 
 bool WorldFile::readDoubleOpt(const std::string &id, double &d) const {
-    if (_jval.HasMember(id) && _jval[id].IsDouble()) {
-        d = _jval[id].GetDouble();
+    if (_jdoc->HasMember(id) && (*_jdoc)[id].IsDouble()) {
+        d = (*_jdoc)[id].GetDouble();
         return true;
     } else
         return false;
 }
 
 float WorldFile::readFloat(const std::string &id) const {
-    if (!_jval.HasMember(id))
+    if (!_jdoc->HasMember(id))
         throw std::runtime_error("WorldFile: No member named " + id);
-    if (!_jval[id].IsFloat())
+    if (!(*_jdoc)[id].IsFloat())
         throw std::runtime_error("WorldFile: " + id + " not of type 'Float'");
-    return _jval[id].GetFloat();
+    return (*_jdoc)[id].GetFloat();
 }
 
 bool WorldFile::readFloatOpt(const std::string &id, float &f) const {
-    if (_jval.HasMember(id) && _jval[id].IsFloat()) {
-        f = _jval[id].GetFloat();
+    if (_jdoc->HasMember(id) && (*_jdoc)[id].IsFloat()) {
+        f = (*_jdoc)[id].GetFloat();
         return true;
     } else
         return false;
 }
 
 void WorldFile::addInt(const std::string &id, int i) {
-    _jval.AddMember(JsonUtils::strToVal(id, *_jdoc), Value().SetInt(i),
-                    _jdoc->GetAllocator());
+    _jdoc->AddMember(JsonUtils::strToVal(id, *_jdoc), Value().SetInt(i),
+                     _jdoc->GetAllocator());
 }
 
 int WorldFile::readInt(const std::string &id) const {
-    if (!_jval.HasMember(id))
+    if (!_jdoc->HasMember(id))
         throw std::runtime_error("WorldFile: No member named " + id);
-    if (!_jval[id].IsInt())
+    if (!(*_jdoc)[id].IsInt())
         throw std::runtime_error("WorldFile: " + id + " not of type 'Int'");
-    return _jval[id].GetInt();
+    return (*_jdoc)[id].GetInt();
 }
 
 bool WorldFile::readIntOpt(const std::string &id, int &i) const {
-    if (_jval.HasMember(id) && _jval[id].IsInt()) {
-        i = _jval[id].GetInt();
+    if (_jdoc->HasMember(id) && (*_jdoc)[id].IsInt()) {
+        i = (*_jdoc)[id].GetInt();
         return true;
     } else
         return false;
 }
 
 void WorldFile::addBool(const std::string &id, bool b) {
-    _jval.AddMember(JsonUtils::strToVal(id, *_jdoc), Value().SetBool(b),
-                    _jdoc->GetAllocator());
+    _jdoc->AddMember(JsonUtils::strToVal(id, *_jdoc), Value().SetBool(b),
+                     _jdoc->GetAllocator());
 }
 
 bool WorldFile::readBool(const std::string &id) const {
-    if (!_jval.HasMember(id))
+    if (!_jdoc->HasMember(id))
         throw std::runtime_error("WorldFile: No member named " + id);
-    if (!_jval[id].IsBool())
+    if (!(*_jdoc)[id].IsBool())
         throw std::runtime_error("WorldFile: " + id + " not of type 'Bool'");
-    return _jval[id].GetBool();
+    return (*_jdoc)[id].GetBool();
 }
 
 bool WorldFile::readBoolOpt(const std::string &id, bool &b) const {
-    if (_jval.HasMember(id) && _jval[id].IsBool()) {
-        b = _jval[id].GetBool();
+    if (_jdoc->HasMember(id) && (*_jdoc)[id].IsBool()) {
+        b = (*_jdoc)[id].GetBool();
         return true;
     } else
         return false;
 }
 
-void WorldFile::addToArray(const std::string &id, WorldFile &item) {
-    if (!_jval.HasMember(id)) {
-        _jval.AddMember(JsonUtils::strToVal(id, *_jdoc), Value().SetArray(),
-                        _jdoc->GetAllocator());
-    }
-
-    _jval[id].PushBack(Value().CopyFrom(item._jval, _jdoc->GetAllocator()),
-                       _jdoc->GetAllocator());
+void WorldFile::addArray(const std::string &id) {
+    _arrays.insert(
+        std::make_pair(id, std::vector<std::unique_ptr<WorldFile>>()));
 }
 
 void WorldFile::addToArray(const std::string &id, WorldFile &&item) {
-    if (!_jval.HasMember(id)) {
-        _jval.AddMember(JsonUtils::strToVal(id, *_jdoc), Value().SetArray(),
-                        _jdoc->GetAllocator());
+    auto it = _arrays.find(id);
+
+    if (it == _arrays.end()) {
+        // The array could be created automatically without asking to the user.
+        // The reason we don't do that, is because the arrays elements are
+        // generally serialized in a loop. If no element is serialized, the
+        // array is not created, triggering an error when deserializing. So even
+        // if the array contains 0 element, you still want it to be serialized.
+        throw std::runtime_error("Please create the array with addArray() "
+                                 "before adding any item to it");
     }
 
-    _jval[id].PushBack(Value().CopyFrom(item._jval, _jdoc->GetAllocator()),
-                       _jdoc->GetAllocator());
+    auto &vec = it->second;
+    auto ptr = std::make_unique<WorldFile>(std::move(item));
+    vec.emplace_back(std::move(ptr));
 }
 
-WorldFileIterator &WorldFile::readArray(const std::string &id) const {
-    auto res =
-        _arrays.insert({id, std::unique_ptr<WorldFileIterator>(nullptr)});
-    if (res.second) {
-        if (!_jval.HasMember(id))
-            throw std::runtime_error("WorldFile: No member named " + id);
-        if (!_jval[id].IsArray())
-            throw std::runtime_error("WorldFile: " + id +
-                                     " not of type 'Array'");
-        res.first->second.reset(
-            new WorldFileIterator(_jdoc, const_cast<Value &>(_jval[id])));
+WorldFileIterator WorldFile::readArray(const std::string &id) const {
+    auto it = _arrays.find(id);
+
+    if (it == _arrays.end()) {
+        throw std::runtime_error("WorldFile: No array named " + id);
     }
-    return *res.first->second;
-}
-
-void WorldFile::addChild(const std::string &id, WorldFile &child) {
-    _jval.AddMember(JsonUtils::strToVal(id, *_jdoc), child._jval,
-                    _jdoc->GetAllocator());
+    return WorldFileIterator(it->second);
 }
 
 void WorldFile::addChild(const std::string &id, WorldFile &&child) {
-    _jval.AddMember(JsonUtils::strToVal(id, *_jdoc), child._jval,
-                    _jdoc->GetAllocator());
+    _children.insert(
+        std::make_pair(id, std::make_unique<WorldFile>(std::move(child))));
 }
 
 const WorldFile &WorldFile::readChild(const std::string &id) const {
-    auto res = _children.insert({id, std::unique_ptr<WorldFile>(nullptr)});
-    if (res.second) {
-        if (!_jval.HasMember(id))
-            throw std::runtime_error("WorldFile: No member named " + id);
-        if (!_jval[id].IsObject())
-            throw std::runtime_error("WorldFile: " + id +
-                                     " not of type 'Object'");
-        res.first->second.reset(
-            new WorldFile(_jdoc, const_cast<Value &>(_jval[id])));
+    auto it = _children.find(id);
+
+    if (it == _children.end()) {
+        throw std::runtime_error("WorldFile: No child named " + id);
     }
-    return *res.first->second;
+    return *it->second;
 }
 
+// TODO make toJson, fromJson, save and load methods work a consistent way
+
 void WorldFile::save(const std::string &filename) const {
-    JsonUtils::write(filename, _jval);
+    Json jdoc;
+    writeToJdoc(jdoc, jdoc);
+    JsonUtils::write(filename, jdoc);
 }
 
 void WorldFile::load(const std::string &filename) {
@@ -192,53 +184,97 @@ void WorldFile::load(const std::string &filename) {
     is.read(buf, filesize);
     is.close();
 
-    _jdoc = std::make_shared<Json>();
-    _jdoc->Parse(buf, filesize);
-    _jval = _jdoc->GetObject();
+    Json jdoc;
+    jdoc.Parse(buf, filesize);
+    readFromJdoc(jdoc);
 
     delete[] buf;
 }
 
 void WorldFile::fromJson(const std::string &jsonStr) {
-    _jdoc = std::make_shared<Json>();
-    _jdoc->Parse(jsonStr);
-    _jval = _jdoc->GetObject();
+    Json jdoc;
+    jdoc.Parse(jsonStr);
+
+    readFromJdoc(jdoc);
 }
 
 std::string WorldFile::toJson() const {
+    Json jdoc;
+    writeToJdoc(jdoc, jdoc);
+
     StringBuffer buffer;
     Writer<StringBuffer> writer(buffer);
-    _jval.Accept(writer);
+    jdoc.Accept(writer);
     return std::string(buffer.GetString(), buffer.GetLength());
 }
 
-WorldFile::WorldFile(std::shared_ptr<Json> jdoc, Value &jval)
-        : _jdoc(std::move(jdoc)) {
-    _jval = jval;
+void WorldFile::writeToJdoc(Json &json, Value &jval) const {
+    jval.CopyFrom(*_jdoc, json.GetAllocator());
+
+    for (const auto &e : _arrays) {
+        jval.AddMember(JsonUtils::strToVal(e.first, json), Value().SetArray(),
+                       json.GetAllocator());
+
+        for (auto &ptr : e.second) {
+            Value val;
+            ptr->writeToJdoc(json, val);
+            jval[e.first].PushBack(val, _jdoc->GetAllocator());
+        }
+    }
+
+    for (const auto &e : _children) {
+        // TODO improve usage of the library syntax
+        Value val;
+        e.second->writeToJdoc(json, val);
+        jval.AddMember(JsonUtils::strToVal(e.first, json), val,
+                       _jdoc->GetAllocator());
+    }
+}
+
+void WorldFile::readFromJdoc(const Value &jval) {
+    for (auto it = jval.MemberBegin(); it != jval.MemberEnd(); it++) {
+        if (it->value.IsArray()) {
+            std::string id = it->name.GetString();
+            _arrays[id] = std::move(std::vector<std::unique_ptr<WorldFile>>{});
+            auto &vec = _arrays[id];
+
+            for (auto it2 = it->value.Begin(); it2 != it->value.End(); it2++) {
+                auto ptr = std::make_unique<WorldFile>();
+                ptr->readFromJdoc(*it2);
+                vec.emplace_back(std::move(ptr));
+            }
+        } else if (it->value.IsObject()) {
+            auto ptr = std::make_unique<WorldFile>();
+            ptr->readFromJdoc(it->value);
+            _children[it->name.GetString()] = std::move(ptr);
+        } else {
+            // TODO improve syntax
+            Value name;
+            name.CopyFrom(it->name, _jdoc->GetAllocator());
+            Value value;
+            value.CopyFrom(it->value, _jdoc->GetAllocator());
+            _jdoc->AddMember(name, value, _jdoc->GetAllocator());
+        }
+    }
 }
 
 
 // ##### WorldFileIterator
 
 
-WorldFileIterator::WorldFileIterator(std::shared_ptr<Json> jdoc, Value &val)
-        : _it(val.Begin()), _end(val.End()), _jdoc(std::move(jdoc)) {
+WorldFileIterator::WorldFileIterator(
+    const std::vector<std::unique_ptr<WorldFile>> &vec)
+        : _current(vec.begin()), _end(vec.end()) {}
 
-    _items.push_back(std::unique_ptr<WorldFile>(new WorldFile(_jdoc, *_it)));
-}
-
-const WorldFile &WorldFileIterator::operator*() const { return *_items.back(); }
+const WorldFile &WorldFileIterator::operator*() const { return *(*_current); }
 
 const WorldFile *WorldFileIterator::operator->() const {
-    return _items.back().get();
+    return _current->get();
 }
 
-void WorldFileIterator::operator++() {
-    ++_it;
-    _items.push_back(std::unique_ptr<WorldFile>(new WorldFile(_jdoc, *_it)));
-}
+void WorldFileIterator::operator++() { _current++; }
 
-bool WorldFileIterator::end() const { return _it == _end; }
+bool WorldFileIterator::end() const { return _current == _end; }
 
 
 // ##### ISerializable
