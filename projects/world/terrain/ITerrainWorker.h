@@ -8,6 +8,7 @@
 #include "Terrain.h"
 #include "world/core/GridStorage.h"
 #include "world/core/NodeCache.h"
+#include "world/core/WorldFile.h"
 
 namespace world {
 
@@ -38,7 +39,7 @@ public:
     virtual TileCoordinates getParentCoords() const = 0;
 };
 
-class WORLDAPI_EXPORT ITerrainWorker {
+class WORLDAPI_EXPORT ITerrainWorker : public ISerializable {
 public:
     virtual ~ITerrainWorker() = default;
 

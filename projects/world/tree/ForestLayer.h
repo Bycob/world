@@ -12,10 +12,15 @@
 namespace world {
 
 class WORLDAPI_EXPORT ForestLayer : public IChunkDecorator {
+    WORLD_WRITE_SUBCLASS_METHOD
 public:
-    ForestLayer(FlatWorld *world);
+    ForestLayer(FlatWorld *world = nullptr);
 
     void decorate(Chunk &chunk) override;
+
+    void write(WorldFile &wf) const override;
+
+    void read(const WorldFile &wf) override;
 
 private:
     std::mt19937 _rng;

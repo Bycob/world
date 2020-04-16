@@ -39,6 +39,7 @@ protected:
 };
 
 class WORLDAPI_EXPORT MultilayerGroundTexture : public ITerrainWorker {
+    WORLD_WRITE_SUBCLASS_METHOD
 public:
     struct Element : public IGridElement {
         std::vector<Terrain> _distributions;
@@ -56,6 +57,10 @@ public:
     void addLayer(DistributionParams params);
 
     GridStorageBase *getStorage() override;
+
+    void write(WorldFile &wf) const;
+
+    void read(const WorldFile &wf);
 
 private:
     GridStorage<Element> _storage;

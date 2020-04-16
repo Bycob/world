@@ -46,6 +46,8 @@ ChunkEntry::ChunkEntry(const TileCoordinates &tc, const TileSystem &ts,
 }
 
 
+WORLD_REGISTER_CHILD_CLASS(WorldNode, GridChunkSystem, "GridChunkSystem")
+
 GridChunkSystem::GridChunkSystem(double baseChunkSize, int maxLod,
                                  double baseRes)
         : _internal(new GridChunkSystemPrivate()) {
@@ -74,6 +76,16 @@ Chunk &GridChunkSystem::getChunk(const vec3d &position, double resolution) {
     TileCoordinates tc = ts.getTileCoordinates(position, ts.getLod(resolution));
     auto &entry = getOrCreateEntry(tc);
     return entry._chunk;
+}
+
+void GridChunkSystem::write(WorldFile &wf) const {
+    wf.addStruct("tileSystem", _internal->_tileSystem);
+    WorldNode::write(wf);
+}
+
+void GridChunkSystem::read(const WorldFile &wf) {
+    wf.readStruct("tileSystem", _internal->_tileSystem);
+    WorldNode::read(wf);
 }
 
 void GridChunkSystem::collect(ICollector &collector,

@@ -17,9 +17,8 @@
 namespace world {
 
 class WORLDAPI_EXPORT Grass : public WorldNode, public IInstanceGenerator {
-public:
     WORLD_WRITE_SUBCLASS_METHOD
-
+public:
     Grass();
 
     void setGrassCount(u32 grassCount) { _grassCount = grassCount; }

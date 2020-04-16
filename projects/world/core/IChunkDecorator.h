@@ -2,13 +2,15 @@
 
 #include "world/core/WorldConfig.h"
 
+#include "WorldFile.h"
+
 namespace world {
 
 class World;
 class Chunk;
 
 /** This object is used to populate newly created chunks. */
-class WORLDAPI_EXPORT IChunkDecorator {
+class WORLDAPI_EXPORT IChunkDecorator : public ISerializable {
 public:
     virtual ~IChunkDecorator() = default;
 

@@ -3,6 +3,9 @@
 
 namespace world {
 
+WORLD_REGISTER_CHILD_CLASS(ITerrainWorker, MultilayerGroundTexture,
+                           "MultilayerGroundTexture")
+
 using MultilayerElement = MultilayerGroundTexture::Element;
 
 MultilayerGroundTexture::MultilayerGroundTexture() = default;
@@ -21,6 +24,20 @@ void MultilayerGroundTexture::addLayer(DistributionParams params) {
 }
 
 GridStorageBase *MultilayerGroundTexture::getStorage() { return &_storage; }
+
+void MultilayerGroundTexture::write(WorldFile &wf) const {
+    wf.addArray("layers");
+
+    for (auto &layer : _layers) {
+        wf.addToArray("layers", world::serialize(layer));
+    }
+}
+
+void MultilayerGroundTexture::read(const WorldFile &wf) {
+    for (auto it = wf.readArray("layers"); !it.end(); ++it) {
+        _layers.push_back(world::deserialize<DistributionParams>(*it));
+    }
+}
 
 double ramp(double a, double b, double c, double d, double lowb, double highb,
             double x) {

@@ -13,6 +13,7 @@
 #include "world/core/SeedDistribution.h"
 #include "world/terrain/MultilayerGroundTexture.h"
 #include "world/terrain/DefaultTextureProvider.h"
+#include "world/core/WorldFile.h"
 
 namespace world {
 
@@ -105,6 +106,16 @@ vec3d FlatWorld::findNearestFreePoint(const vec3d &origin,
     double z = _internal->_ground->observeAltitudeAt(pos.x, pos.y, resolution);
     // std::cout << z - ctx.getOffset().z << " <> " << origin.z << std::endl;
     return {origin.x, origin.y, z - ctx.getOffset().z};
+}
+
+void FlatWorld::write(WorldFile &wf) const {
+    wf.addChild("ground", _internal->_ground->serializeSubclass());
+    World::write(wf);
+}
+
+void FlatWorld::read(const WorldFile &wf) {
+    _internal->_ground.reset(readSubclass<GroundNode>(wf.readChild("ground")));
+    World::read(wf);
 }
 
 IEnvironment *FlatWorld::getInitialEnvironment() { return this; }

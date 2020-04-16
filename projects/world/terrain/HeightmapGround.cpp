@@ -74,6 +74,8 @@ public:
 };
 
 
+WORLD_REGISTER_CHILD_CLASS(GroundNode, HeightmapGround, "HeightmapGround")
+
 // Idees d'ameliorations :
 // - Systeme de coordonnees semblable a celui du chunk system : les
 // coordonnees sont relatives au niveau du dessus
@@ -204,6 +206,37 @@ void HeightmapGround::paintTexture(const vec2d &origin, const vec2d &size,
                                           {imgSize.x, imgSize.y});
             }
         }
+    }
+}
+
+void HeightmapGround::write(WorldFile &wf) const {
+    wf.addDouble("minAltitude", _minAltitude);
+    wf.addDouble("maxAltitude", _maxAltitude);
+    wf.addInt("terrainRes", _terrainRes);
+    wf.addInt("textureRes", _textureRes);
+    wf.addInt("texPixSize", _texPixSize);
+
+    // TODO not save the tilesystem but deduce it from the other parameters?
+    wf.addStruct("tileSystem", _tileSystem);
+
+    wf.addArray("workers");
+
+    for (auto &generator : _internal->_generators) {
+        wf.addToArray("workers", generator._worker->serializeSubclass());
+    }
+}
+
+void HeightmapGround::read(const WorldFile &wf) {
+    wf.readDoubleOpt("minAltitude", _minAltitude);
+    wf.readDoubleOpt("maxAltitude", _maxAltitude);
+    wf.readIntOpt("terrainRes", _terrainRes);
+    wf.readIntOpt("textureRes", _textureRes);
+    wf.readIntOpt("texPixSize", _texPixSize);
+
+    wf.readStruct("tileSystem", _tileSystem);
+
+    for (auto it = wf.readArray("workers"); !it.end(); ++it) {
+        _internal->_generators.emplace_back(readSubclass<ITerrainWorker>(*it));
     }
 }
 

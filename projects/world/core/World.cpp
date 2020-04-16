@@ -47,7 +47,7 @@ void World::write(WorldFile &wf) const {
 
 void World::read(const WorldFile &wf) {
     for (auto it = wf.readArray("nodes"); !it.end(); ++it) {
-        std::unique_ptr<WorldNode> node(WorldNode::readSubclass(*it));
+        std::unique_ptr<WorldNode> node(readSubclass<WorldNode>(*it));
         _internal->_primaryNodes.emplace(node->getKey(), std::move(node));
     }
 }

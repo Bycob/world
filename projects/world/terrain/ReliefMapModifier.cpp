@@ -118,6 +118,14 @@ void ReliefMapModifier::setRegion(const vec2d &center, double radius,
     }
 }
 
+void ReliefMapModifier::write(WorldFile &wf) const {
+    wf.addStruct("tileSystem", _tileSystem);
+}
+
+void ReliefMapModifier::read(const WorldFile &wf) {
+    wf.readStruct("tileSystem", _tileSystem);
+}
+
 ReliefMapEntry &ReliefMapModifier::provideMap(int x, int y) {
     int resolution = _tileSystem._bufferRes.x;
 
@@ -128,6 +136,9 @@ ReliefMapEntry &ReliefMapModifier::provideMap(int x, int y) {
 }
 
 // -----
+WORLD_REGISTER_CHILD_CLASS(ITerrainWorker, CustomWorldRMModifier,
+                           "CustomWorldRMModifier")
+
 const double CustomWorldRMModifier::PIXEL_UNIT = 10;
 
 CustomWorldRMModifier::CustomWorldRMModifier(double biomeDensity,
@@ -273,5 +284,24 @@ void CustomWorldRMModifier::generate(Terrain &height, Terrain &heightDiff) {
             heightDiff(x, y) = result.y;
         }
     }
+}
+/** Le nombre moyen de biomes par bloc de 100 pixels de WorldMap.*/
+double _biomeDensity;
+/** La netteté des limites entre les biomes. En pratique c'est
+ *le "p" dans l'algo de l'interpolation. */
+int _limitBrightness;
+
+void CustomWorldRMModifier::write(WorldFile &wf) const {
+    ReliefMapModifier::write(wf);
+
+    wf.addDouble("biomeDensity", _biomeDensity);
+    wf.addInt("limitBrightness", _limitBrightness);
+}
+
+void CustomWorldRMModifier::read(const WorldFile &wf) {
+    ReliefMapModifier::read(wf);
+
+    wf.readDoubleOpt("biomeDensity", _biomeDensity);
+    wf.readIntOpt("limitBrightness", _limitBrightness);
 }
 } // namespace world

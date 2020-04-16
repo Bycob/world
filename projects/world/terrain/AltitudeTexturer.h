@@ -11,6 +11,7 @@
 namespace world {
 
 class WORLDAPI_EXPORT AltitudeTexturer : public ITerrainWorker {
+    WORLD_WRITE_SUBCLASS_METHOD
 public:
     AltitudeTexturer();
 
@@ -19,6 +20,10 @@ public:
     void processTerrain(Terrain &terrain) override;
 
     void processTile(ITileContext &context) override;
+
+    void write(WorldFile &wf) const;
+
+    void read(const WorldFile &wf);
 
 private:
     std::mt19937 _rng;

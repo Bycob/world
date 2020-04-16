@@ -14,6 +14,7 @@
 namespace world {
 
 class WORLDAPI_EXPORT PerlinTerrainGenerator : public ITerrainWorker {
+    WORLD_WRITE_SUBCLASS_METHOD
 public:
     PerlinTerrainGenerator(int octaveCount = 5, double frequency = 8,
                            double persistence = 0.5);
@@ -32,6 +33,10 @@ public:
     void processTerrain(Terrain &terrain) override;
 
     void processTile(ITileContext &context) override;
+
+    void write(WorldFile &wf) const;
+
+    void read(const WorldFile &wf);
 
 private:
     PerlinInfo _perlinInfo;

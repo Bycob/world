@@ -28,6 +28,7 @@ private:
 /** This class manages an infinite ground with as much details
  * as we want. */
 class WORLDAPI_EXPORT HeightmapGround : public GroundNode {
+    WORLD_WRITE_SUBCLASS_METHOD
 public:
     using Tile = HeightmapGroundTile;
 
@@ -81,6 +82,11 @@ public:
 
     void paintTexture(const vec2d &origin, const vec2d &size,
                       const vec2d &resolutionRange, const Image &img) override;
+
+    // IO
+    void write(WorldFile &wf) const;
+
+    void read(const WorldFile &wf);
 
 private:
     PGround *_internal;

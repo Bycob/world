@@ -9,6 +9,9 @@ using namespace arma;
 
 namespace world {
 
+WORLD_REGISTER_CHILD_CLASS(ITerrainWorker, PerlinTerrainGenerator,
+                           "PerlinTerrainGenerator")
+
 PerlinTerrainGenerator::PerlinTerrainGenerator(int octaveCount,
                                                double frequency,
                                                double persistence) {
@@ -50,6 +53,16 @@ void PerlinTerrainGenerator::processTerrain(Terrain &terrain) {
 
 void PerlinTerrainGenerator::processTile(ITileContext &context) {
     processByTileCoords(context.getTile().terrain(), context);
+}
+
+void PerlinTerrainGenerator::write(WorldFile &wf) const {
+    wf.addInt("maxOctaves", _maxOctaves);
+    wf.addStruct("perlinInfo", _perlinInfo);
+}
+
+void PerlinTerrainGenerator::read(const WorldFile &wf) {
+    wf.readUintOpt("maxOctaves", _maxOctaves);
+    wf.readStruct("perlinInfo", _perlinInfo);
 }
 
 void PerlinTerrainGenerator::processByNeighbours(world::Terrain &terrain,

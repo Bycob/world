@@ -43,7 +43,7 @@ bool WorldFile::readStringOpt(const std::string &id, std::string &str) const {
         return false;
 }
 
-void WorldFile::addFloating(const std::string &id, double f) {
+void WorldFile::addDouble(const std::string &id, double f) {
     _jdoc->AddMember(JsonUtils::strToVal(id, *_jdoc), Value().SetDouble(f),
                      _jdoc->GetAllocator());
 }
@@ -62,6 +62,11 @@ bool WorldFile::readDoubleOpt(const std::string &id, double &d) const {
         return true;
     } else
         return false;
+}
+
+void WorldFile::addFloat(const std::string &id, float f) {
+    _jdoc->AddMember(JsonUtils::strToVal(id, *_jdoc), Value().SetFloat(f),
+                     _jdoc->GetAllocator());
 }
 
 float WorldFile::readFloat(const std::string &id) const {
@@ -96,6 +101,27 @@ int WorldFile::readInt(const std::string &id) const {
 bool WorldFile::readIntOpt(const std::string &id, int &i) const {
     if (_jdoc->HasMember(id) && (*_jdoc)[id].IsInt()) {
         i = (*_jdoc)[id].GetInt();
+        return true;
+    } else
+        return false;
+}
+
+void WorldFile::addUint(const std::string &id, world::u32 u) {
+    _jdoc->AddMember(JsonUtils::strToVal(id, *_jdoc), Value().SetUint(u),
+                     _jdoc->GetAllocator());
+}
+
+u32 WorldFile::readUint(const std::string &id) const {
+    if (!_jdoc->HasMember(id))
+        throw std::runtime_error("WorldFile: No member named " + id);
+    if (!(*_jdoc)[id].IsUint())
+        throw std::runtime_error("WorldFile: " + id + " not of type 'Int'");
+    return (*_jdoc)[id].GetUint();
+}
+
+bool WorldFile::readUintOpt(const std::string &id, u32 &u) const {
+    if (_jdoc->HasMember(id) && (*_jdoc)[id].IsUint()) {
+        u = (*_jdoc)[id].GetUint();
         return true;
     } else
         return false;

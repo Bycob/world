@@ -11,6 +11,8 @@
 
 namespace world {
 
+WORLD_REGISTER_BASE_CLASS(WorldNode)
+
 WorldNode::WorldNode() : _internal(new WorldNodePrivate()) {}
 
 WorldNode::~WorldNode() { delete _internal; }
@@ -81,7 +83,7 @@ void WorldNode::read(const WorldFile &wf) {
 
     for (auto it = wf.readArray("children"); !it.end(); ++it) {
         // We don't keep the serialized key (maybe we should?)
-        addChildInternal(WorldNode::readSubclass(*it));
+        addChildInternal(readSubclass<WorldNode>(*it));
     }
 }
 

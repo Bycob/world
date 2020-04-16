@@ -59,6 +59,31 @@ Image *ColorMap::createImage() {
     return new Image(_cache);
 }
 
+void ColorMap::write(WorldFile &wf) const {
+    wf.addInt("order", _order);
+    wf.addArray("points");
+
+    for (auto &pt : _points) {
+        WorldFile pointWf;
+        pointWf.addStruct("position", pt.first);
+        pointWf.addStruct("color", pt.second);
+        wf.addToArray("points", std::move(pointWf));
+    }
+}
+
+void ColorMap::read(const WorldFile &wf) {
+    wf.readIntOpt("order", _order);
+
+    _points.clear();
+
+    for (auto it = wf.readArray("points"); !it.end(); ++it) {
+        std::pair<position, color> pt;
+        it->readStruct("position", pt.first);
+        it->readStruct("color", pt.second);
+        _points.push_back(pt);
+    }
+}
+
 ColorMap::color ColorMap::toInternalColor(const Color4d &color) {
     return {color._r, color._g, color._b};
 }

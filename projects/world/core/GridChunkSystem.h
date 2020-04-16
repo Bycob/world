@@ -16,6 +16,7 @@ class GridChunkSystemPrivate;
 class ChunkEntry;
 
 class WORLDAPI_EXPORT GridChunkSystem : public WorldNode, IChunkSystem {
+    WORLD_WRITE_SUBCLASS_METHOD
 public:
     /**
      * @param baseChunkSize Size of the highest level of details
@@ -39,6 +40,10 @@ public:
                      ExplorationContext::getDefault()) override;
 
     template <typename T, typename... Args> T &addDecorator(Args &... args);
+
+    void write(WorldFile &wf) const override;
+
+    void read(const WorldFile &wf) override;
 
 protected:
     /** Test if the given chunk should be collected. If it is the case,

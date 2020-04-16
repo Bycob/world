@@ -20,7 +20,7 @@ public:
     static void write(const std::string &path, const rapidjson::Value &json) {
         using namespace rapidjson;
         StringBuffer buffer;
-        Writer<StringBuffer> writer(buffer);
+        PrettyWriter<StringBuffer> writer(buffer);
         json.Accept(writer);
 
         std::ofstream file(path);

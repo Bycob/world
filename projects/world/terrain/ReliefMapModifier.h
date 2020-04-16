@@ -43,6 +43,10 @@ public:
     void setRegion(const vec2d &center, double radius, double curvature,
                    double height, double diff);
 
+    void write(WorldFile &wf) const;
+
+    void read(const WorldFile &wf);
+
 protected:
     mutable std::mt19937 _rng;
     TileSystem _tileSystem;
@@ -56,6 +60,7 @@ protected:
 };
 
 class WORLDAPI_EXPORT CustomWorldRMModifier : public ReliefMapModifier {
+    WORLD_WRITE_SUBCLASS_METHOD
 public:
     CustomWorldRMModifier(double biomeDensity = 1, int limitBrightness = 4);
 
@@ -64,6 +69,10 @@ public:
     void setLimitBrightness(int);
 
     void setDifferentialLaw(const AltDiffParam &law);
+
+    void write(WorldFile &wf) const;
+
+    void read(const WorldFile &wf);
 
 protected:
     void generate(Terrain &height, Terrain &heightDiff) override;

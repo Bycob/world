@@ -31,6 +31,10 @@ public:
                                double resolution,
                                const ExplorationContext &ctx) const override;
 
+    void write(WorldFile &wf) const override;
+
+    void read(const WorldFile &wf) override;
+
 protected:
     IEnvironment *getInitialEnvironment() override;
 

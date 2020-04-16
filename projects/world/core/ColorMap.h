@@ -12,6 +12,7 @@
 #include "world/assets/Image.h"
 #include "world/math/Vector.h"
 #include "world/math/Interpolation.h"
+#include "WorldFile.h"
 
 namespace world {
 
@@ -22,7 +23,7 @@ namespace world {
  * the colormap. Then it's possible to retrieve the value at a special point
  * calling the method getColorAt(). All the coordinates are bounded to [0, 1].
  * At the moment this colormap only supports 2 dimensions. */
-class WORLDAPI_EXPORT ColorMap {
+class WORLDAPI_EXPORT ColorMap : public ISerializable {
 public:
     typedef vec2d position;
     typedef vec3d color;
@@ -41,6 +42,10 @@ public:
     Color4d getColorAt(const vec2d &pos);
 
     Image *createImage();
+
+    void write(WorldFile &wf) const;
+
+    void read(const WorldFile &wf);
 
 private:
     int _order = 3;

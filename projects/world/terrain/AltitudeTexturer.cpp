@@ -2,6 +2,8 @@
 
 namespace world {
 
+WORLD_REGISTER_CHILD_CLASS(ITerrainWorker, AltitudeTexturer, "AltitudeTexturer")
+
 AltitudeTexturer::AltitudeTexturer()
         : _rng(static_cast<u32>(time(NULL))), _colorMap({513, 65}) {}
 
@@ -40,5 +42,13 @@ void AltitudeTexturer::processTerrain(Terrain &terrain) {
 
 void AltitudeTexturer::processTile(ITileContext &context) {
     processTerrain(context.getTile().terrain());
+}
+
+void AltitudeTexturer::write(WorldFile &wf) const {
+    wf.addChild("colorMap", _colorMap.serialize());
+}
+
+void AltitudeTexturer::read(const WorldFile &wf) {
+    _colorMap.read(wf.readChild("colorMap"));
 }
 } // namespace world

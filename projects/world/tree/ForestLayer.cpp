@@ -5,6 +5,8 @@
 
 namespace world {
 
+WORLD_REGISTER_CHILD_CLASS(IChunkDecorator, ForestLayer, "ForestLayer")
+
 ForestLayer::ForestLayer(FlatWorld *flatWorld)
         : _rng(static_cast<u32>(time(NULL))), _flatWorld(flatWorld),
           _treeSprite(3, 3, ImageType::RGB) {
@@ -84,6 +86,14 @@ void ForestLayer::decorate(Chunk &chunk) {
                 {0, 1}, _treeSprite);*/
         }
     }
+}
+
+void ForestLayer::write(WorldFile &wf) const {
+    wf.addDouble("maxDensity", _maxDensity);
+}
+
+void ForestLayer::read(const WorldFile &wf) {
+    wf.readDoubleOpt("maxDensity", _maxDensity);
 }
 
 double ForestLayer::getDensityAtAltitude(double altitude) {

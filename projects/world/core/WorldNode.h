@@ -14,9 +14,6 @@ namespace world {
 class WorldNodePrivate;
 
 class WORLDAPI_EXPORT WorldNode : public ISerializable {
-
-    WORLD_REGISTER_BASE_CLASS(WorldNode)
-
 public:
     WorldNode();
     WorldNode(const WorldNode &other) = delete;

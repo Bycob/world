@@ -7,7 +7,9 @@
 #include <vector>
 #include <memory>
 #include <map>
+#include <functional>
 
+#include "WorldTypes.h"
 #include "JsonUtils.h"
 
 namespace world {
@@ -32,11 +34,13 @@ public:
 
     bool readStringOpt(const std::string &id, std::string &str) const;
 
-    void addFloating(const std::string &id, double f);
+    void addDouble(const std::string &id, double f);
 
     double readDouble(const std::string &id) const;
 
     bool readDoubleOpt(const std::string &id, double &d) const;
+
+    void addFloat(const std::string &id, float f);
 
     float readFloat(const std::string &id) const;
 
@@ -47,6 +51,12 @@ public:
     int readInt(const std::string &id) const;
 
     bool readIntOpt(const std::string &id, int &i) const;
+
+    void addUint(const std::string &id, u32 u);
+
+    u32 readUint(const std::string &id) const;
+
+    bool readUintOpt(const std::string &id, u32 &u) const;
 
     void addBool(const std::string &id, bool b);
 
@@ -102,6 +112,12 @@ template <typename T> inline WorldFile serialize(const T &s) {
     return wf;
 }
 
+template <typename T> inline T deserialize(const WorldFile &wf) {
+    T t;
+    world::read<T>(wf, t);
+    return t;
+}
+
 template <typename T>
 inline void WorldFile::addStruct(const std::string &id, const T &s) {
     addChild(id, serialize(s));
@@ -154,30 +170,48 @@ public:
 
     void save(const std::string &filename) const;
 
-    virtual void write(WorldFile &worldFile) const {};
+    virtual void write(WorldFile &wf) const {};
 
     void load(const std::string &filename);
 
-    virtual void read(const WorldFile &worldFile) {}
+    virtual void read(const WorldFile &wf) {}
 };
 
+template <typename T>
+std::map<std::string, std::function<T *(const WorldFile &file)>>
+    &getDeserializeIndex();
+
+template <typename T> T *readSubclass(const WorldFile &file);
+
 #define WORLD_REGISTER_BASE_CLASS(ClassName)                                   \
-public:                                                                        \
-    static std::map<std::string,                                               \
-                    std::function<ClassName *(const WorldFile &file)>>         \
-        &getDeserializeIndex() {                                               \
+    template <>                                                                \
+    std::map<std::string, std::function<ClassName *(const WorldFile &file)>>   \
+        &getDeserializeIndex<ClassName>() {                                    \
         static std::map<std::string,                                           \
                         std::function<ClassName *(const WorldFile &file)>>     \
             index;                                                             \
         return index;                                                          \
     }                                                                          \
                                                                                \
-    static ClassName *readSubclass(const WorldFile &file) {                    \
+    template <> ClassName *readSubclass<ClassName>(const WorldFile &file) {    \
         std::string type = file.readString("type");                            \
-        auto &deserIndex = getDeserializeIndex();                              \
+        auto &deserIndex = getDeserializeIndex<ClassName>();                   \
         auto readFunc = deserIndex.at(type);                                   \
         return readFunc(file);                                                 \
     }
+
+#define WORLD_SECOND_REGISTER_CHILD_CLASS(ParentClass, ChildClass, ClassID)    \
+    ParentClass *read##ChildClass(const WorldFile &wf) {                       \
+        auto *instance = new ChildClass();                                     \
+        instance->read(wf);                                                    \
+        return instance;                                                       \
+    }                                                                          \
+                                                                               \
+    void *_register##ChildClass##_##ParentClass = []() {                       \
+        auto &deserIndex = getDeserializeIndex<ParentClass>();                 \
+        deserIndex[ClassID] = read##ChildClass;                                \
+        return nullptr;                                                        \
+    }();
 
 #define WORLD_REGISTER_CHILD_CLASS(ParentClass, ChildClass, ClassID)           \
     ParentClass *read##ChildClass(const WorldFile &wf) {                       \
@@ -186,8 +220,8 @@ public:                                                                        \
         return instance;                                                       \
     }                                                                          \
                                                                                \
-    void *_register##ChildClass = []() {                                       \
-        auto &deserIndex = ParentClass::getDeserializeIndex();                 \
+    void *_register##ChildClass##_##ParentClass = []() {                       \
+        auto &deserIndex = getDeserializeIndex<ParentClass>();                 \
         deserIndex[ClassID] = read##ChildClass;                                \
         return nullptr;                                                        \
     }();                                                                       \
