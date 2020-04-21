@@ -10,7 +10,7 @@ TEST_CASE("WorldFile", "[serialize]") {
     WorldFile wf;
     wf.addString("1", "1s");
     wf.addInt("2", 1);
-    wf.addFloating("3", 3.2);
+    wf.addDouble("3", 3.2);
     wf.addBool("4", true);
 
     WorldFile a1, a2, a3, a4;
@@ -101,9 +101,7 @@ TEST_CASE("WorldFile", "[serialize]") {
     }
 }
 
-class BaseClass1 : public ISerializable {
-    WORLD_REGISTER_BASE_CLASS(BaseClass1)
-};
+class BaseClass1 : public ISerializable {};
 
 class ChildClass1 : public BaseClass1 {
     WORLD_WRITE_SUBCLASS_METHOD
@@ -113,6 +111,11 @@ class ChildClass2 : public BaseClass1 {
     WORLD_WRITE_SUBCLASS_METHOD
 };
 
+// The current implementation of WORLD_REGISTER_BASE_CLASS
+// does not compile out of the world namespace.
+namespace world {
+WORLD_REGISTER_BASE_CLASS(BaseClass1)
+}
 WORLD_REGISTER_CHILD_CLASS(BaseClass1, ChildClass1, "1")
 WORLD_REGISTER_CHILD_CLASS(BaseClass1, ChildClass2, "2")
 
@@ -123,7 +126,7 @@ TEST_CASE("ISerializable", "[serialize]") {
         ChildClass1 c1;
         c1.writeSubclass(wf);
 
-        BaseClass1 *r = BaseClass1::readSubclass(wf);
+        BaseClass1 *r = readSubclass<BaseClass1>(wf);
         CHECK(dynamic_cast<ChildClass1 *>(r) != nullptr);
         CHECK(dynamic_cast<ChildClass2 *>(r) == nullptr);
     }
