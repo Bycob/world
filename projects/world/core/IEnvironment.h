@@ -19,6 +19,20 @@ public:
                                        const ExplorationContext &ctx) const = 0;
 };
 
+class WORLDAPI_EXPORT DefaultEnvironment : public IEnvironment {
+public:
+    /** Definition in ExplorationContext.cpp */
+    static DefaultEnvironment &getDefault();
+
+    vec3d findNearestFreePoint(const vec3d &origin, const vec3d &direction,
+                               double resolution,
+                               const ExplorationContext &ctx) const {
+        vec3d res = origin;
+        res.z = 0;
+        return res;
+    }
+};
+
 } // namespace world
 
 #endif // WORLD_IENVIRONMENT_H

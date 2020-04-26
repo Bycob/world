@@ -17,12 +17,11 @@
 namespace world {
 
 
-template <typename TGenerator, typename TDistribution = RandomDistribution>
+template <typename TDistribution = RandomDistribution>
 class InstancePool : public IChunkDecorator, public WorldNode {
+    WORLD_WRITE_SUBCLASS_METHOD
 public:
-    InstancePool(IEnvironment *env)
-            : _env{env}, _distribution(env),
-              _rng(static_cast<u64>(time(NULL))) {}
+    InstancePool() : _distribution(), _rng(static_cast<u64>(time(NULL))) {}
 
     void setResolution(double resolution);
 
@@ -32,22 +31,28 @@ public:
                      const IResolutionModel &resolutionModel,
                      const ExplorationContext &ctx) override;
 
-    void decorate(Chunk &chunk) override;
+    void decorate(Chunk &chunk, const ExplorationContext &ctx) override;
 
-    template <typename... Args> TGenerator &addGenerator(Args... args);
+    template <typename TGenerator> void setTemplateGenerator();
+
+    template <typename TGenerator, typename... Args>
+    TGenerator &addGenerator(Args... args);
 
     /** Export species meshes in a scene and habitat features in a json file.
      * \param avgSize Average size of the element, used to compute spacing
      * between objects in the scene. */
     void exportSpecies(const std::string &outputDir, double avgSize = 1);
 
-private:
-    IEnvironment *_env;
+    void write(WorldFile &wf) const override;
 
+    void read(const WorldFile &wf) override;
+
+private:
     TDistribution _distribution;
 
     std::mt19937 _rng;
-    std::vector<std::unique_ptr<TGenerator>> _generators;
+    std::unique_ptr<IInstanceGenerator> _templateGenerator;
+    std::vector<std::unique_ptr<IInstanceGenerator>> _generators;
     std::vector<std::vector<Template>> _objects;
     u64 _chunksDecorated = 0;
     /// Internal field to remember the typical chunk area at the resolution of

@@ -44,13 +44,9 @@ void TreeGroup::collect(ICollector &collector,
         if (treeData._tree == nullptr) {
             treeData._tree = std::make_unique<Tree>();
 
-            if (ctx.hasEnvironment()) {
-                treeData._tree->setPosition3D(
-                    ctx.getEnvironment().findNearestFreePoint(
-                        treeData._position, {0, 0, 1}, 1, ctx));
-            } else {
-                treeData._tree->setPosition3D(treeData._position);
-            }
+            treeData._tree->setPosition3D(
+                ctx.getEnvironment().findNearestFreePoint(treeData._position,
+                                                          {0, 0, 1}, 1, ctx));
             configTree(*treeData._tree);
         }
 

@@ -35,14 +35,16 @@ public:
 
     std::vector<Template> collectTemplates(ICollector &collector,
                                            const ExplorationContext &ctx,
-                                           double maxRes);
+                                           double maxRes) override;
 
     void collect(ICollector &collector, const IResolutionModel &resolutionModel,
                  const ExplorationContext &ctx) override;
 
     /** Creates a new specie of grass.
      * Returns HabitatFeatures of this specie. */
-    HabitatFeatures randomize();
+    HabitatFeatures randomize() override;
+
+    Grass *newInstance() override { return new Grass(); }
 
 private:
     std::mt19937_64 _rng;

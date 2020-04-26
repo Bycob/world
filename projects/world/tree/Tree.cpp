@@ -63,12 +63,9 @@ void Tree::collect(ICollector &collector,
                             std::to_string(item->_minRes)};
 
                 if (resolution > BASE_RES) {
-                    node.setPosition(
-                        node.getPosition() +
-                        (ctx.hasEnvironment()
-                             ? ctx.getEnvironment().findNearestFreePoint(
-                                   {}, {0, 0, 1}, resolution, ctx)
-                             : vec3d{}));
+                    node.setPosition(node.getPosition() +
+                                     ctx.getEnvironment().findNearestFreePoint(
+                                         {}, {0, 0, 1}, resolution, ctx));
                 }
 
                 objChan.put(key, node, ctx);

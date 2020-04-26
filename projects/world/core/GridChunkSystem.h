@@ -57,7 +57,8 @@ private:
     GridChunkSystemPrivate *_internal;
 
 
-    ChunkEntry &getOrCreateEntry(const TileCoordinates &tc);
+    ChunkEntry &getOrCreateEntry(const TileCoordinates &tc,
+                                 const ExplorationContext &ctx);
 
     void addDecoratorInternal(IChunkDecorator *decorator);
 

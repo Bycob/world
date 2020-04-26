@@ -7,8 +7,8 @@ namespace world {
 
 WORLD_REGISTER_CHILD_CLASS(IChunkDecorator, ForestLayer, "ForestLayer")
 
-ForestLayer::ForestLayer(FlatWorld *flatWorld)
-        : _rng(static_cast<u32>(time(NULL))), _flatWorld(flatWorld),
+ForestLayer::ForestLayer()
+        : _rng(static_cast<u32>(time(NULL))),
           _treeSprite(3, 3, ImageType::RGB) {
 
     for (int x = 0; x < 3; ++x) {
@@ -18,7 +18,7 @@ ForestLayer::ForestLayer(FlatWorld *flatWorld)
     }
 }
 
-void ForestLayer::decorate(Chunk &chunk) {
+void ForestLayer::decorate(Chunk &chunk, const ExplorationContext &ctx) {
     // Check resolution
     const double resolution = 0.01;
     const double minres = chunk.getMinResolution();
@@ -28,7 +28,7 @@ void ForestLayer::decorate(Chunk &chunk) {
         return;
     }
 
-    IGround &ground = _flatWorld->ground();
+    const IEnvironment &env = ctx.getEnvironment();
 
     // Compute area
     vec3d chunkSize = chunk.getSize();
@@ -61,8 +61,11 @@ void ForestLayer::decorate(Chunk &chunk) {
     TreeGroup *treeGroup = nullptr;
 
     for (auto &pt : randomPoints) {
-        const double altitude = ground.observeAltitudeAt(
-            chunkOffset.x + pt.x, chunkOffset.y + pt.y, resolution);
+        vec3d origin{chunkOffset.x + pt.x, chunkOffset.y + pt.y, 0};
+        const double altitude =
+            ctx.getEnvironment()
+                .findNearestFreePoint(origin, {0, 0, 1}, resolution, ctx)
+                .z;
 
         // skip if altitude is not in this chunk
         if (altitude < chunkOffset.z ||

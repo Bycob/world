@@ -60,7 +60,7 @@ FlatWorld *FlatWorld::createDemoFlatWorld() {
 
 
     auto &chunkSystem = world->addPrimaryNode<GridChunkSystem>({0, 0, 0});
-    chunkSystem.addDecorator<ForestLayer>(world);
+    chunkSystem.addDecorator<ForestLayer>();
 
     // auto &treePool = chunkSystem.addDecorator<InstancePool<Tree>>(world);
     // treePool.setResolution(1);
@@ -68,13 +68,15 @@ FlatWorld *FlatWorld::createDemoFlatWorld() {
 
     // Grass with seed distribution
     auto &grassPool =
-        chunkSystem.addDecorator<InstancePool<Grass, SeedDistribution>>(world);
+        chunkSystem.addDecorator<InstancePool<SeedDistribution>>();
+    grassPool.setTemplateGenerator<Grass>();
 
     // Rocks
-    auto &rocksPool = chunkSystem.addDecorator<InstancePool<Rocks>>(world);
+    auto &rocksPool = chunkSystem.addDecorator<InstancePool<>>();
+    rocksPool.setTemplateGenerator<Rocks>();
     rocksPool.distribution().setDensity(0.02);
 
-    auto &rocks = rocksPool.addGenerator();
+    auto &rocks = rocksPool.addGenerator<Rocks>();
     rocks.setRadius(0.7);
 
     for (int i = 0; i < 10; ++i) {

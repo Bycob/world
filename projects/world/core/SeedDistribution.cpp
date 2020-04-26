@@ -57,7 +57,7 @@ std::vector<Seed> SeedDistribution::getSeedsAround(Chunk &chunk) {
 }
 
 std::vector<SeedDistribution::Position> SeedDistribution::getPositions(
-    Chunk &chunk) {
+    Chunk &chunk, const ExplorationContext &ctx) {
     addSeeds(chunk);
 
     std::vector<Position> positions;
@@ -98,7 +98,7 @@ std::vector<SeedDistribution::Position> SeedDistribution::getPositions(
         // Get 3D position (with altitude)
         vec3d position{posDistrib(_rng) * chunkDims.x,
                        posDistrib(_rng) * chunkDims.y, -10000};
-        vec3d absPos = _env->findNearestFreePoint(
+        vec3d absPos = ctx.getEnvironment().findNearestFreePoint(
             chunkPos + position, vec3d{0, 0, 1}, _resolution,
             ExplorationContext::getDefault());
         position = absPos - chunkPos;

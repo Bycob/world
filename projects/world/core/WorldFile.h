@@ -214,19 +214,29 @@ template <typename T> T *readSubclass(const WorldFile &file);
     }();
 
 #define WORLD_REGISTER_CHILD_CLASS(ParentClass, ChildClass, ClassID)           \
-    ParentClass *read##ChildClass(const WorldFile &wf) {                       \
-        auto *instance = new ChildClass();                                     \
+    WORLD_SECOND_REGISTER_CHILD_CLASS(ParentClass, ChildClass, ClassID)        \
+                                                                               \
+    void ChildClass::writeSubclass(WorldFile &wf) const {                      \
+        wf.addString("type", ClassID);                                         \
+        this->write(wf);                                                       \
+    }
+
+#define WORLD_REGISTER_TEMPLATE_CHILD_CLASS(ParentClass, ChildClass,           \
+                                            TemplateType, ClassID)             \
+    ParentClass *read##ChildClass##_##TemplateType(const WorldFile &wf) {      \
+        auto *instance = new ChildClass<TemplateType>();                       \
         instance->read(wf);                                                    \
         return instance;                                                       \
     }                                                                          \
                                                                                \
-    void *_register##ChildClass##_##ParentClass = []() {                       \
+    void *_register##ChildClass##_##TemplateType##_##ParentClass = []() {      \
         auto &deserIndex = getDeserializeIndex<ParentClass>();                 \
-        deserIndex[ClassID] = read##ChildClass;                                \
+        deserIndex[ClassID] = read##ChildClass##_##TemplateType;               \
         return nullptr;                                                        \
     }();                                                                       \
                                                                                \
-    void ChildClass::writeSubclass(WorldFile &wf) const {                      \
+    template <>                                                                \
+    void ChildClass<TemplateType>::writeSubclass(WorldFile &wf) const {        \
         wf.addString("type", ClassID);                                         \
         this->write(wf);                                                       \
     }

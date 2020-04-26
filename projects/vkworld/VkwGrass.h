@@ -17,9 +17,11 @@ public:
 
     std::vector<Template> collectTemplates(ICollector &collector,
                                            const ExplorationContext &ctx,
-                                           double maxRes);
+                                           double maxRes) override;
 
-    HabitatFeatures randomize();
+    HabitatFeatures randomize() override;
+
+    VkwGrass *newInstance() override { return new VkwGrass(); }
 
 protected:
     void collectSelf(ICollector &collector,

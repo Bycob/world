@@ -7,16 +7,17 @@
 #include "Collector.h"
 #include "ConstantResolution.h"
 #include "IOUtil.h"
+#include "world/assets/SceneNode.h"
 
 namespace world {
 
-template <typename TGenerator, typename TDistribution>
-void InstancePool<TGenerator, TDistribution>::setResolution(double resolution) {
+template <typename TDistribution>
+void InstancePool<TDistribution>::setResolution(double resolution) {
     _resolution = resolution;
 }
 
-template <typename TGenerator, typename TDistribution>
-inline void InstancePool<TGenerator, TDistribution>::collectSelf(
+template <typename TDistribution>
+inline void InstancePool<TDistribution>::collectSelf(
     ICollector &collector, const IResolutionModel &resolutionModel,
     const ExplorationContext &ctx) {
 
@@ -25,7 +26,15 @@ inline void InstancePool<TGenerator, TDistribution>::collectSelf(
 
     while (_generators.size() < _speciesDensity * totalArea ||
            _generators.size() < _minSpecies) {
-        std::unique_ptr<TGenerator> newSpecies = std::make_unique<TGenerator>();
+
+        if (!_templateGenerator) {
+            throw std::runtime_error(
+                "[InstancePool] No template, generation can not be performed");
+        }
+
+        std::unique_ptr<IInstanceGenerator> newSpecies =
+            std::unique_ptr<IInstanceGenerator>(
+                _templateGenerator->newInstance());
         _distribution.addGenerator(newSpecies->randomize());
         _generators.push_back(std::move(newSpecies));
     }
@@ -47,8 +56,9 @@ inline void InstancePool<TGenerator, TDistribution>::collectSelf(
     }
 }
 
-template <typename TGenerator, typename TDistribution>
-inline void InstancePool<TGenerator, TDistribution>::decorate(Chunk &chunk) {
+template <typename TDistribution>
+inline void InstancePool<TDistribution>::decorate(
+    Chunk &chunk, const ExplorationContext &ctx) {
     // Update species metadata
     vec3d chunkPos = chunk.getPosition3D();
     vec3d chunkDims = chunk.getSize();
@@ -67,7 +77,7 @@ inline void InstancePool<TGenerator, TDistribution>::decorate(Chunk &chunk) {
     // Distribution
     std::uniform_real_distribution<double> rotDistrib(0, M_PI * 2);
     auto &instance = chunk.addChild<Instance>();
-    auto positions = _distribution.getPositions(chunk);
+    auto positions = _distribution.getPositions(chunk, ctx);
 
     for (auto &position : positions) {
         auto &templates = _objects.at(position._genID);
@@ -93,19 +103,30 @@ inline void InstancePool<TGenerator, TDistribution>::decorate(Chunk &chunk) {
     }
 }
 
-template <typename TGenerator, typename TDistribution>
-template <typename... Args>
-TGenerator &InstancePool<TGenerator, TDistribution>::addGenerator(
-    Args... args) {
+template <typename TDistribution>
+template <typename TGenerator>
+void InstancePool<TDistribution>::setTemplateGenerator() {
+    _templateGenerator = std::make_unique<TGenerator>();
+}
+
+template <typename TDistribution>
+template <typename TGenerator, typename... Args>
+TGenerator &InstancePool<TDistribution>::addGenerator(Args... args) {
     _generators.push_back(std::make_unique<TGenerator>(args...));
     // TODO Add custom HabitatFeatures
     _distribution.addGenerator(HabitatFeatures{});
-    return *_generators.back();
+    return static_cast<TGenerator &>(*_generators.back());
 }
 
-template <typename TGenerator, typename TDistribution>
-void InstancePool<TGenerator, TDistribution>::exportSpecies(
-    const std::string &outputDir, double avgSize) {
+template <typename TDistribution>
+void InstancePool<TDistribution>::write(WorldFile &wf) const {}
+
+template <typename TDistribution>
+void InstancePool<TDistribution>::read(const WorldFile &wf) {}
+
+template <typename TDistribution>
+void InstancePool<TDistribution>::exportSpecies(const std::string &outputDir,
+                                                double avgSize) {
     world::createDirectories(outputDir);
 
     // Export different instance throught the scene
@@ -120,7 +141,7 @@ void InstancePool<TGenerator, TDistribution>::exportSpecies(
 
         for (size_t y = 0; y < templates.size(); ++y) {
             vec3d c{x * sep, y * sep, 0};
-            SceneNode node = templates[y];
+            SceneNode node = templates[y].getDefaultNode();
             node.setPosition(c);
             nodeChan.put({std::to_string(x), std::to_string(y)}, node);
         }

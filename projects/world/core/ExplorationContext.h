@@ -38,8 +38,6 @@ public:
     SceneNode createNode(const ItemKey &meshKey,
                          const ItemKey &materialKey) const;
 
-    bool hasEnvironment() const;
-
     const IEnvironment &getEnvironment() const;
 
 private:

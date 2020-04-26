@@ -111,6 +111,11 @@ class ChildClass2 : public BaseClass1 {
     WORLD_WRITE_SUBCLASS_METHOD
 };
 
+template <typename T> class ChildClassTemplate : public BaseClass1 {
+public:
+    WORLD_WRITE_SUBCLASS_METHOD
+};
+
 // The current implementation of WORLD_REGISTER_BASE_CLASS
 // does not compile out of the world namespace.
 namespace world {
@@ -118,6 +123,9 @@ WORLD_REGISTER_BASE_CLASS(BaseClass1)
 }
 WORLD_REGISTER_CHILD_CLASS(BaseClass1, ChildClass1, "1")
 WORLD_REGISTER_CHILD_CLASS(BaseClass1, ChildClass2, "2")
+WORLD_REGISTER_TEMPLATE_CHILD_CLASS(BaseClass1, ChildClassTemplate, int, "int")
+WORLD_REGISTER_TEMPLATE_CHILD_CLASS(BaseClass1, ChildClassTemplate, double,
+                                    "double")
 
 TEST_CASE("ISerializable", "[serialize]") {
     SECTION("Polymorphism") {
@@ -129,5 +137,16 @@ TEST_CASE("ISerializable", "[serialize]") {
         BaseClass1 *r = readSubclass<BaseClass1>(wf);
         CHECK(dynamic_cast<ChildClass1 *>(r) != nullptr);
         CHECK(dynamic_cast<ChildClass2 *>(r) == nullptr);
+    }
+
+    SECTION("Template polymorphism") {
+        WorldFile wf;
+        ChildClassTemplate<double> ct;
+        ct.writeSubclass(wf);
+
+        BaseClass1 *r = readSubclass<BaseClass1>(wf);
+        CHECK(dynamic_cast<ChildClass1 *>(r) == nullptr);
+        CHECK(dynamic_cast<ChildClassTemplate<int> *>(r) == nullptr);
+        CHECK(dynamic_cast<ChildClassTemplate<double> *>(r) != nullptr);
     }
 }

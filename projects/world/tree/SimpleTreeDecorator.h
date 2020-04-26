@@ -12,16 +12,15 @@ namespace world {
 
 class WORLDAPI_EXPORT SimpleTreeDecorator : public IChunkDecorator {
 public:
-    SimpleTreeDecorator(FlatWorld *flatWorld, int maxTreesPerChunk = 1);
+    SimpleTreeDecorator(int maxTreesPerChunk = 1);
 
     void setModel(const Tree &model);
 
-    void decorate(Chunk &chunk) override;
+    void decorate(Chunk &chunk, const ExplorationContext &ctx) override;
 
 private:
     int _maxTreesPerChunk;
     Tree _model;
-    FlatWorld *_flatWorld;
 
     std::mt19937 _rng;
 };

@@ -36,8 +36,7 @@ public:
     };
 
 
-    DistributionBase(IEnvironment *env)
-            : _env{env}, _rng{static_cast<u32>(time(NULL))} {}
+    DistributionBase() : _rng{static_cast<u32>(time(NULL))} {}
 
     void setResolution(double resolution) { _resolution = resolution; }
 
@@ -50,7 +49,6 @@ public:
     }
 
 protected:
-    IEnvironment *_env;
     std::mt19937 _rng;
 
     std::vector<HabitatFeatures> _habitats;
@@ -60,11 +58,12 @@ protected:
 
 class WORLDAPI_EXPORT RandomDistribution : public DistributionBase {
 public:
-    RandomDistribution(IEnvironment *env) : DistributionBase(env) {}
+    RandomDistribution() {}
 
     void setDensity(double density) { _density = density; }
 
-    std::vector<Position> getPositions(Chunk &chunk) {
+    std::vector<Position> getPositions(Chunk &chunk,
+                                       const ExplorationContext &ctx) {
         std::vector<Position> positions;
 
         const vec3d chunkPos = chunk.getPosition3D();
@@ -80,9 +79,9 @@ public:
             double x = posDistrib(_rng) * chunkDims.x;
             double y = posDistrib(_rng) * chunkDims.y;
             vec3d position =
-                _env->findNearestFreePoint(chunkPos + vec3d{x, y, -3000},
-                                           vec3d{0, 0, 1}, _resolution,
-                                           ExplorationContext::getDefault()) -
+                ctx.getEnvironment().findNearestFreePoint(
+                    chunkPos + vec3d{x, y, -3000}, vec3d{0, 0, 1}, _resolution,
+                    ExplorationContext::getDefault()) -
                 chunkPos;
 
             if (position.z < 0 || position.z >= chunkDims.z) {

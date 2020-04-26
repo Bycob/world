@@ -14,6 +14,8 @@ class WORLDAPI_EXPORT IChunkDecorator : public ISerializable {
 public:
     virtual ~IChunkDecorator() = default;
 
-    virtual void decorate(Chunk &chunk) = 0;
+    virtual void decorate(
+        Chunk &chunk,
+        const ExplorationContext &ctx = ExplorationContext::getDefault()) = 0;
 };
 } // namespace world

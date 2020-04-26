@@ -23,7 +23,7 @@ public:
     int _chunkCounter = 0;
     std::map<NodeKey, vec3d> _positions;
 
-    void decorate(Chunk &chunk) override {
+    void decorate(Chunk &chunk, const ExplorationContext &ctx) override {
         if (_verbose) {
             std::cout << "Exploration of chunk n°" << _chunkCounter
                       << std::endl;

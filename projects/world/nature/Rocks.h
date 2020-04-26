@@ -21,13 +21,15 @@ public:
 
     std::vector<Template> collectTemplates(ICollector &collector,
                                            const ExplorationContext &ctx,
-                                           double maxRes);
+                                           double maxRes) override;
 
     void collectSelf(ICollector &collector,
                      const IResolutionModel &resolutionModel,
                      const ExplorationContext &ctx) override;
 
-    HabitatFeatures randomize() { return {}; }
+    HabitatFeatures randomize() override { return {}; }
+
+    Rocks *newInstance() override { return new Rocks(); }
 
 private:
     struct Rock {

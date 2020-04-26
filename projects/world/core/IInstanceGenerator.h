@@ -55,15 +55,19 @@ private:
     std::vector<Item> _items;
 };
 
-// TODO Force every instance generator to inherit this class
-// (by specifying TGenerator in the InstancePool)
+
 class WORLDAPI_EXPORT IInstanceGenerator {
 public:
-    std::vector<Template> collectTemplates(ICollector &collector,
-                                           const ExplorationContext &ctx,
-                                           double maxRes);
+    virtual ~IInstanceGenerator() = default;
 
-    HabitatFeatures randomize();
+    virtual std::vector<Template> collectTemplates(
+        ICollector &collector, const ExplorationContext &ctx,
+        double maxRes) = 0;
+
+    virtual HabitatFeatures randomize() = 0;
+
+    /** Create a new fresh instance of this generator. */
+    virtual IInstanceGenerator *newInstance() = 0;
 
 private:
 };

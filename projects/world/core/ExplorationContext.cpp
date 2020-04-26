@@ -2,6 +2,11 @@
 
 namespace world {
 
+DefaultEnvironment &DefaultEnvironment::getDefault() {
+    static DefaultEnvironment defaultEnv;
+    return defaultEnv;
+}
+
 const ExplorationContext &ExplorationContext::getDefault() {
     static ExplorationContext defaultCtx;
     return defaultCtx;
@@ -41,13 +46,9 @@ SceneNode ExplorationContext::createNode(const ItemKey &meshKey,
 
 vec3d ExplorationContext::getOffset() const { return _offset; }
 
-bool ExplorationContext::hasEnvironment() const {
-    return _environment != nullptr;
-}
-
 const IEnvironment &ExplorationContext::getEnvironment() const {
-    if (!hasEnvironment()) {
-        throw std::runtime_error("No environment");
+    if (!_environment) {
+        return DefaultEnvironment::getDefault();
     }
     return *_environment;
 }

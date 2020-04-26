@@ -21,7 +21,7 @@ struct WORLDAPI_EXPORT Seed {
 
 class WORLDAPI_EXPORT SeedDistribution : public DistributionBase {
 public:
-    SeedDistribution(IEnvironment *env) : DistributionBase(env) {
+    SeedDistribution() : DistributionBase() {
         _tileSize = _maxDist;
         // 0.75 = Expected value of law 1 - X^2 with X in [0, 1]
         double invMeanRadius = 1 / (0.75 / 1000 * _maxDist);
@@ -32,7 +32,8 @@ public:
 
     std::vector<Seed> getSeedsAround(Chunk &chunk);
 
-    std::vector<Position> getPositions(Chunk &chunk);
+    std::vector<Position> getPositions(Chunk &chunk,
+                                       const ExplorationContext &ctx);
 
 private:
     double _tileSize;

@@ -10,9 +10,8 @@
 
 namespace world {
 
-SimpleTreeDecorator::SimpleTreeDecorator(FlatWorld *flatWorld,
-                                         int maxTreesPerChunk)
-        : _flatWorld(flatWorld), _maxTreesPerChunk(maxTreesPerChunk),
+SimpleTreeDecorator::SimpleTreeDecorator(int maxTreesPerChunk)
+        : _maxTreesPerChunk(maxTreesPerChunk),
           _rng(static_cast<u32>(time(NULL))) {
 
     auto &skeletton = _model.addWorker<TreeSkelettonGenerator>();
@@ -32,7 +31,8 @@ SimpleTreeDecorator::SimpleTreeDecorator(FlatWorld *flatWorld,
 
 void SimpleTreeDecorator::setModel(const Tree &model) { _model.setup(model); }
 
-void SimpleTreeDecorator::decorate(Chunk &chunk) {
+void SimpleTreeDecorator::decorate(Chunk &chunk,
+                                   const ExplorationContext &ctx) {
     const double treeResolution = 5;
     if (chunk.getMaxResolution() < treeResolution ||
         treeResolution <= chunk.getMinResolution())
@@ -45,7 +45,7 @@ void SimpleTreeDecorator::decorate(Chunk &chunk) {
     std::uniform_real_distribution<double> distribX(0, chunkSize.x);
     std::uniform_real_distribution<double> distribY(0, chunkSize.y);
 
-    IGround &ground = _flatWorld->ground();
+    const IEnvironment &env = ctx.getEnvironment();
 
     for (int i = 0; i < _maxTreesPerChunk; i++) {
         // On génère une position pour l'arbre
@@ -66,8 +66,9 @@ void SimpleTreeDecorator::decorate(Chunk &chunk) {
             continue;
 
         // Détermination de l'altitude de l'arbre
+        vec3d origin{position.x, position.y, 0};
         double altitude =
-            ground.observeAltitudeAt(position.x, position.y, treeResolution);
+            env.findNearestFreePoint(origin, {0, 0, 1}, treeResolution, ctx).z;
         vec3d pos3D(position.x, position.y, altitude - offset.z);
 
         // We don't generate the tree if the ground level is not in the chunk at

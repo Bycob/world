@@ -54,19 +54,20 @@ FlatWorld *VkWorld::createDemoFlatWorld() {
     multilayer.getTextureGenerator().configureCacheOverride("multilayer/");
 
     auto &chunkSystem = world->addPrimaryNode<GridChunkSystem>({0, 0, 0});
-    chunkSystem.addDecorator<ForestLayer>(world);
+    chunkSystem.addDecorator<ForestLayer>();
 
     // Grass with seed distribution
     auto &grassPool =
-        chunkSystem.addDecorator<InstancePool<VkwGrass, SeedDistribution>>(
-            world);
+        chunkSystem.addDecorator<InstancePool<SeedDistribution>>();
+    grassPool.setTemplateGenerator<VkwGrass>();
     grassPool.setResolution(40);
 
     // Rocks
-    auto &rocksPool = chunkSystem.addDecorator<InstancePool<Rocks>>(world);
+    auto &rocksPool = chunkSystem.addDecorator<InstancePool<>>();
+    rocksPool.setTemplateGenerator<Rocks>();
     rocksPool.distribution().setDensity(0.02);
 
-    auto &rocks = rocksPool.addGenerator();
+    auto &rocks = rocksPool.addGenerator<Rocks>();
     rocks.setRadius(0.7);
 
     for (int i = 0; i < 10; ++i) {

@@ -14,9 +14,9 @@ namespace world {
 class WORLDAPI_EXPORT ForestLayer : public IChunkDecorator {
     WORLD_WRITE_SUBCLASS_METHOD
 public:
-    ForestLayer(FlatWorld *world = nullptr);
+    ForestLayer();
 
-    void decorate(Chunk &chunk) override;
+    void decorate(Chunk &chunk, const ExplorationContext &ctx) override;
 
     void write(WorldFile &wf) const override;
 
@@ -24,8 +24,6 @@ public:
 
 private:
     std::mt19937 _rng;
-
-    FlatWorld *_flatWorld;
 
     Image _treeSprite;
 

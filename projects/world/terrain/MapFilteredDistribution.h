@@ -14,6 +14,8 @@ public:
     virtual double getValueAt(const vec3d &pos, int layer) = 0;
 };
 
+/** Filters a distribution based on a map of presence. This distribution
+ * aims to transfer knowledge from a */
 template <typename TDistribution>
 class MapFilteredDistribution : public TDistribution {
 public:

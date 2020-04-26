@@ -43,9 +43,11 @@ public:
 
     std::vector<Template> collectTemplates(ICollector &collector,
                                            const ExplorationContext &ctx,
-                                           double maxRes);
+                                           double maxRes) override;
 
-    HabitatFeatures randomize();
+    HabitatFeatures randomize() override;
+
+    Tree *newInstance() override { return new Tree(); }
 
 public:
     Mesh _simpleTrunk;
