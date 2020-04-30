@@ -219,6 +219,10 @@ HabitatFeatures Tree::randomize() {
     return HabitatFeatures{};
 }
 
+void Tree::write(WorldFile &wf) const { WorldNode::write(wf); }
+
+void Tree::read(const WorldFile &wf) { WorldNode::read(wf); }
+
 void Tree::generateBase() {
     for (auto &worker : _internal->_workers) {
         worker->process(*this);

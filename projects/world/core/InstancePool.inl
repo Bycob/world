@@ -119,10 +119,36 @@ TGenerator &InstancePool<TDistribution>::addGenerator(Args... args) {
 }
 
 template <typename TDistribution>
-void InstancePool<TDistribution>::write(WorldFile &wf) const {}
+void InstancePool<TDistribution>::write(WorldFile &wf) const {
+    wf.addChild("distribution", _distribution.serialize());
+
+    if (_templateGenerator) {
+        wf.addChild("templateGenerator",
+                    _templateGenerator->serializeSubclass());
+    }
+
+    wf.addArray("generators");
+
+    for (auto &generator : _generators) {
+        wf.addToArray("generators", generator->serializeSubclass());
+    }
+}
 
 template <typename TDistribution>
-void InstancePool<TDistribution>::read(const WorldFile &wf) {}
+void InstancePool<TDistribution>::read(const WorldFile &wf) {
+    _distribution.read(wf.readChild("distribution"));
+
+    if (wf.hasChild("templateGenerator")) {
+        _templateGenerator = std::unique_ptr<IInstanceGenerator>(
+            readSubclass<IInstanceGenerator>(
+                wf.readChild("templateGenerator")));
+    }
+
+    for (auto it = wf.readArray("generators"); !it.end(); ++it) {
+        _generators.emplace_back(std::unique_ptr<IInstanceGenerator>(
+            readSubclass<IInstanceGenerator>(*it)));
+    }
+}
 
 template <typename TDistribution>
 void InstancePool<TDistribution>::exportSpecies(const std::string &outputDir,

@@ -10,6 +10,7 @@
 namespace world {
 
 class WORLDAPI_EXPORT TreeSkelettonGenerator : public ITreeWorker {
+    WORLD_WRITE_SUBCLASS_METHOD
 public:
     TreeSkelettonGenerator();
 
@@ -32,6 +33,10 @@ public:
     void setWeight(const TreeParamd &weight);
 
     void process(Tree &tree) override;
+
+    void write(WorldFile &wf) const override;
+
+    void read(const WorldFile &wf) override;
 
 private:
     void forkNode(SkelettonNode<TreeInfo> *node);

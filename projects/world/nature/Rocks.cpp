@@ -5,6 +5,10 @@
 #include "world/assets/VoxelOps.h"
 
 namespace world {
+
+WORLD_REGISTER_CHILD_CLASS(WorldNode, Rocks, "Rocks")
+
+
 Rocks::Rocks() : _rng(time(NULL)) {}
 
 void Rocks::addRock(const vec3d &position) {
@@ -62,6 +66,22 @@ void Rocks::collectSelf(ICollector &collector,
             ++i;
         }
     }
+}
+
+void Rocks::write(WorldFile &wf) const {
+    WorldNode::write(wf);
+
+    wf.addDouble("radius", _radius);
+    wf.addUint("roughness", _roughness);
+    wf.addDouble("flatness", _flatness);
+}
+
+void Rocks::read(const WorldFile &wf) {
+    WorldNode::read(wf);
+
+    wf.readDoubleOpt("radius", _radius);
+    wf.readUintOpt("roughness", _roughness);
+    wf.readDoubleOpt("flatness", _flatness);
 }
 
 void Rocks::generateMesh(Mesh &mesh) {

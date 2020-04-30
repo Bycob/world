@@ -56,7 +56,7 @@ private:
 };
 
 
-class WORLDAPI_EXPORT IInstanceGenerator {
+class WORLDAPI_EXPORT IInstanceGenerator : public ISerializable {
 public:
     virtual ~IInstanceGenerator() = default;
 

@@ -194,6 +194,10 @@ const WorldFile &WorldFile::readChild(const std::string &id) const {
     return *it->second;
 }
 
+bool WorldFile::hasChild(const std::string &id) const {
+    return _children.find(id) != _children.end();
+}
+
 // TODO make toJson, fromJson, save and load methods work a consistent way
 
 void WorldFile::save(const std::string &filename) const {

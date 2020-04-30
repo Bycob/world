@@ -12,6 +12,7 @@
 namespace world {
 
 class WORLDAPI_EXPORT Rocks : public WorldNode, public IInstanceGenerator {
+    WORLD_WRITE_SUBCLASS_METHOD
 public:
     Rocks();
 
@@ -30,6 +31,10 @@ public:
     HabitatFeatures randomize() override { return {}; }
 
     Rocks *newInstance() override { return new Rocks(); }
+
+    void write(WorldFile &wf) const override;
+
+    void read(const WorldFile &wf) override;
 
 private:
     struct Rock {

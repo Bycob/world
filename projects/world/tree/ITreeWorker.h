@@ -2,13 +2,15 @@
 #define WORLD_ITREEWORKER_H
 
 #include "world/core/WorldConfig.h"
+
 #include "world/core/ICloneable.h"
+#include "world/core/WorldFile.h"
 
 namespace world {
 
 class Tree;
 
-class ITreeWorker : public ICloneable<ITreeWorker> {
+class ITreeWorker : public ICloneable<ITreeWorker>, public ISerializable {
 public:
     virtual void process(Tree &tree) = 0;
 };

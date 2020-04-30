@@ -174,6 +174,22 @@ std::vector<SeedDistribution::Position> SeedDistribution::getPositions(
     return positions;
 }
 
+void SeedDistribution::write(WorldFile &wf) const {
+    DistributionBase::write(wf);
+    wf.addDouble("tileSize", _tileSize);
+    wf.addDouble("seedDensity", _seedDensity);
+    wf.addDouble("seedAmount", _seedAmount);
+    wf.addDouble("maxDist", _maxDist);
+}
+
+void SeedDistribution::read(const WorldFile &wf) {
+    DistributionBase::read(wf);
+    wf.readDoubleOpt("tileSize", _tileSize);
+    wf.readDoubleOpt("seedDensity", _seedDensity);
+    wf.readDoubleOpt("seedAmount", _seedAmount);
+    wf.readDoubleOpt("maxDist", _maxDist);
+}
+
 std::pair<vec2i, vec2i> SeedDistribution::getBounds(const Chunk &chunk) const {
     vec2d lower = static_cast<vec2d>(chunk.getPosition3D()) - vec2d{_maxDist};
     vec2d upper = static_cast<vec2d>(chunk.getPosition3D() + chunk.getSize()) +

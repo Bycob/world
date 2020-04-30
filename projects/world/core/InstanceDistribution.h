@@ -25,10 +25,30 @@ struct WORLDAPI_EXPORT HabitatFeatures {
     // TODO add physical materials
 };
 
+template <>
+inline void read<HabitatFeatures>(const WorldFile &wf, HabitatFeatures &h) {
+    wf.readStruct("altitude", h._altitude);
+    wf.readStruct("slope", h._slope);
+    wf.readStruct("temperature", h._temperature);
+    wf.readStruct("humidity", h._humidity);
+    wf.readBoolOpt("sea", h._sea);
+    wf.readDoubleOpt("density", h._density);
+}
+
+template <>
+inline void write<HabitatFeatures>(const HabitatFeatures &h, WorldFile &wf) {
+    wf.addStruct("altitude", h._altitude);
+    wf.addStruct("slope", h._slope);
+    wf.addStruct("temperature", h._temperature);
+    wf.addStruct("humidity", h._humidity);
+    wf.addBool("sea", h._sea);
+    wf.addDouble("density", h._density);
+}
+
 
 // TODO blog post on species generation and seed distribution
 
-class WORLDAPI_EXPORT DistributionBase {
+class WORLDAPI_EXPORT DistributionBase : public ISerializable {
 public:
     struct Position {
         vec3d _pos;
@@ -46,6 +66,14 @@ public:
 
     const std::vector<HabitatFeatures> &getHabitatFeatures() const {
         return _habitats;
+    }
+
+    void write(WorldFile &wf) const override {
+        wf.addDouble("resolution", _resolution);
+    }
+
+    void read(const WorldFile &wf) override {
+        wf.readDoubleOpt("resolution", _resolution);
     }
 
 protected:
@@ -92,6 +120,16 @@ public:
         }
 
         return positions;
+    }
+
+    void write(WorldFile &wf) const override {
+        DistributionBase::write(wf);
+        wf.addDouble("density", _density);
+    }
+
+    void read(const WorldFile &wf) override {
+        DistributionBase::read(wf);
+        wf.readDoubleOpt("density", _density);
     }
 
 private:

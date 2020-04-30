@@ -49,6 +49,10 @@ public:
 
     Tree *newInstance() override { return new Tree(); }
 
+    void write(WorldFile &wf) const override;
+
+    void read(const WorldFile &wf) override;
+
 public:
     Mesh _simpleTrunk;
     Mesh _simpleLeaves;

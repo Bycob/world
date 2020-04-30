@@ -2,6 +2,8 @@
 
 namespace world {
 
+WORLD_REGISTER_BASE_CLASS(IInstanceGenerator)
+
 // TODO
 // - Add and delete methods to Template to have a coherent and handy API
 // - Add a method to automatically collect a template at a specific resolution

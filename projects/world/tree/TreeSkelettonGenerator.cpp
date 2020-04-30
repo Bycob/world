@@ -6,6 +6,9 @@
 
 namespace world {
 
+WORLD_REGISTER_CHILD_CLASS(ITreeWorker, TreeSkelettonGenerator,
+                           "TreeSkelettonGenerator")
+
 TreeSkelettonGenerator::TreeSkelettonGenerator()
         : _rng(Params<double>::uniform_real(0, 1)),
 
@@ -69,6 +72,10 @@ void TreeSkelettonGenerator::process(Tree &tree) {
 
     forkNode(primaryNode->createChild(secondInfo));
 }
+
+void TreeSkelettonGenerator::write(WorldFile &wf) const {}
+
+void TreeSkelettonGenerator::read(const WorldFile &wf) {}
 
 void TreeSkelettonGenerator::forkNode(SkelettonNode<TreeInfo> *node) {
     TreeInfo &parentInfo = node->getInfo();

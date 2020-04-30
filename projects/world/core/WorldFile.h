@@ -78,6 +78,8 @@ public:
 
     const WorldFile &readChild(const std::string &id) const;
 
+    bool hasChild(const std::string &id) const;
+
     // IO
 
     void save(const std::string &filename) const;

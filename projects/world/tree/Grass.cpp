@@ -11,9 +11,7 @@ namespace world {
 WORLD_REGISTER_CHILD_CLASS(WorldNode, Grass, "Grass")
 
 Grass::Grass()
-        : _rng(std::random_device{}()), _texture(32, 256, ImageType::RGB) {
-    generateTexture();
-}
+        : _rng(std::random_device{}()), _texture(32, 256, ImageType::RGB) {}
 
 void Grass::addBush(const vec3d &root) {
     std::uniform_real_distribution<double> angle(0, 2 * M_PI);
@@ -44,6 +42,11 @@ void Grass::removeAllBushes() {
 std::vector<Template> Grass::collectTemplates(ICollector &collector,
                                               const ExplorationContext &ctx,
                                               double maxRes) {
+    if (!_isTextureGenerated) {
+        generateTexture();
+        _isTextureGenerated = true;
+    }
+
     std::vector<Template> nodes;
 
     if (collector.hasChannel<Mesh>()) {
@@ -89,6 +92,28 @@ void Grass::collect(ICollector &collector,
             objChan.put(nodeKey, nodes[i].getDefaultNode());
         }
     }
+}
+
+void Grass::write(WorldFile &wf) const {
+    WorldNode::write(wf);
+
+    wf.addUint("grassCount", _grassCount);
+    wf.addUint("pointCount", _pointCount);
+    wf.addDouble("dispersion", _dispersion);
+    wf.addDouble("bend", _bend);
+    wf.addDouble("height", _height);
+    wf.addDouble("width", _width);
+}
+
+void Grass::read(const WorldFile &wf) {
+    WorldNode::read(wf);
+
+    wf.readUintOpt("grassCount", _grassCount);
+    wf.readUintOpt("pointCount", _pointCount);
+    wf.readDoubleOpt("dispersion", _dispersion);
+    wf.readDoubleOpt("bend", _bend);
+    wf.readDoubleOpt("height", _height);
+    wf.readDoubleOpt("width", _width);
 }
 
 void Grass::addBlade(const vec3d &root, const vec3d &bottom, Mesh &mesh) {

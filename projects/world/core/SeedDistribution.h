@@ -35,6 +35,10 @@ public:
     std::vector<Position> getPositions(Chunk &chunk,
                                        const ExplorationContext &ctx);
 
+    void write(WorldFile &wf) const override;
+
+    void read(const WorldFile &wf) override;
+
 private:
     double _tileSize;
     /// Number of seeds per km^2. Computed from seedAmount and maxDist.

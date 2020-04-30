@@ -46,6 +46,10 @@ public:
 
     Grass *newInstance() override { return new Grass(); }
 
+    void write(WorldFile &wf) const override;
+
+    void read(const WorldFile &wf) override;
+
 private:
     std::mt19937_64 _rng;
 
@@ -53,6 +57,7 @@ private:
     std::vector<GrassPoints> _points;
     std::vector<Mesh> _meshes;
     Image _texture;
+    bool _isTextureGenerated = false;
 
     u32 _grassCount = 20;
     /// Number of points per grass blade
