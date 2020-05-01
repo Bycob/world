@@ -8,6 +8,9 @@
 
 namespace world {
 
+WORLD_REGISTER_CHILD_CLASS(WorldNode, VkwGrass, "VkwGrass")
+WORLD_SECOND_REGISTER_CHILD_CLASS(IInstanceGenerator, VkwGrass, "VkwGrass")
+
 class VkwGrassPrivate {
 public:
     std::unique_ptr<VkwTextureGenerator> _generator;
@@ -61,9 +64,34 @@ std::vector<Template> VkwGrass::collectTemplates(ICollector &collector,
 
 HabitatFeatures VkwGrass::randomize() {
     HabitatFeatures habitat;
-    habitat._density = 4;
+    habitat._density = _density;
     return habitat;
 }
+
+void VkwGrass::write(WorldFile &wf) const {
+    WorldNode::write(wf);
+
+    wf.addUint("count", _count);
+    wf.addDouble("bend", _bend);
+    wf.addDouble("fold", _fold);
+    wf.addDouble("size", _size);
+    wf.addDouble("height", _height);
+    wf.addDouble("width", _width);
+    wf.addDouble("density", _density);
+}
+
+void VkwGrass::read(const WorldFile &wf) {
+    WorldNode::read(wf);
+
+    wf.readUintOpt("count", _count);
+    wf.readDoubleOpt("bend", _bend);
+    wf.readDoubleOpt("fold", _fold);
+    wf.readDoubleOpt("size", _size);
+    wf.readDoubleOpt("height", _height);
+    wf.readDoubleOpt("width", _width);
+    wf.readDoubleOpt("density", _density);
+}
+
 
 void VkwGrass::collectSelf(ICollector &collector,
                            const IResolutionModel &resolutionModel,

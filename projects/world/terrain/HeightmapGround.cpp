@@ -171,10 +171,10 @@ void HeightmapGround::collect(ICollector &collector,
         addTerrain(coord, collector);
     }
 
-    std::cout << "Ground before reducing: " << _internal->_terrains.size();
+    // std::cout << "Ground before reducing: " << _internal->_terrains.size();
     _internal->_reducer.reduceStorage();
-    std::cout << ", Ground after reducing: " << _internal->_terrains.size()
-              << std::endl;
+    // std::cout << ", Ground after reducing: " << _internal->_terrains.size()
+    //          << std::endl;
 }
 
 void HeightmapGround::paintTexture(const vec2d &origin, const vec2d &size,

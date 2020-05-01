@@ -11,6 +11,7 @@ namespace world {
 class VkwGrassPrivate;
 
 class VKWORLD_EXPORT VkwGrass : public WorldNode, public IInstanceGenerator {
+    WORLD_WRITE_SUBCLASS_METHOD
 public:
     VkwGrass();
     ~VkwGrass() override;
@@ -22,6 +23,10 @@ public:
     HabitatFeatures randomize() override;
 
     VkwGrass *newInstance() override { return new VkwGrass(); }
+
+    void write(WorldFile &wf) const override;
+
+    void read(const WorldFile &wf) override;
 
 protected:
     void collectSelf(ICollector &collector,
@@ -45,6 +50,8 @@ private:
     double _height = 0.3;
     /** width, in meters */
     double _width = 0.02;
+    /** Density of the grass */
+    double _density = 4;
 
     void setup();
 };

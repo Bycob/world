@@ -24,6 +24,7 @@ public:
     void setChild(NodeCache &parent, const NodeKey &id);
     void setSub(NodeCache &parent, const std::string &name);
 
+    bool isRoot() const;
     bool isAvailable() const;
 
     /**

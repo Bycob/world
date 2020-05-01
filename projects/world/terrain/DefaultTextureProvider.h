@@ -11,6 +11,7 @@
 namespace world {
 
 class WORLDAPI_EXPORT DefaultTextureProvider : public ITextureProvider {
+    WORLD_WRITE_SUBCLASS_METHOD
 public:
     DefaultTextureProvider(std::string path = "");
 

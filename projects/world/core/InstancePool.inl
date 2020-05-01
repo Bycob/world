@@ -132,6 +132,10 @@ void InstancePool<TDistribution>::write(WorldFile &wf) const {
     for (auto &generator : _generators) {
         wf.addToArray("generators", generator->serializeSubclass());
     }
+
+    wf.addDouble("resolution", _resolution);
+    wf.addDouble("speciesDensity", _speciesDensity);
+    wf.addUint("minSpecies", _minSpecies);
 }
 
 template <typename TDistribution>
@@ -148,6 +152,10 @@ void InstancePool<TDistribution>::read(const WorldFile &wf) {
         _generators.emplace_back(std::unique_ptr<IInstanceGenerator>(
             readSubclass<IInstanceGenerator>(*it)));
     }
+
+    wf.readDoubleOpt("resolution", _resolution);
+    wf.readDoubleOpt("speciesDensity", _speciesDensity);
+    wf.readUintOpt("minSpecies", _minSpecies);
 }
 
 template <typename TDistribution>

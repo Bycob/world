@@ -15,6 +15,9 @@
 
 namespace world {
 
+WORLD_REGISTER_CHILD_CLASS(ITerrainWorker, VkwMultilayerGroundTexture,
+                           "VkwMultilayerGroundTexture")
+
 class MultilayerElement : public IGridElement {
 public:
     // Inputs
@@ -277,6 +280,28 @@ void VkwMultilayerGroundTexture::flush() {
 
 GridStorageBase *VkwMultilayerGroundTexture::getStorage() {
     return &_internal->_storage;
+}
+
+void VkwMultilayerGroundTexture::write(WorldFile &wf) const {
+    wf.addUint("texWidth", _internal->_texWidth);
+    wf.addArray("layers");
+
+    for (auto &layer : _internal->_layers) {
+        wf.addToArray("layers", world::serialize<DistributionParams>(layer));
+    }
+
+    wf.addChild("texGenerator", _internal->_texGenerator.serialize());
+}
+
+void VkwMultilayerGroundTexture::read(const WorldFile &wf) {
+    wf.readUintOpt("texWidth", _internal->_texWidth);
+
+    for (auto it = wf.readArray("layers"); !it.end(); ++it) {
+        _internal->_layers.push_back(
+            world::deserialize<DistributionParams>(*it));
+    }
+
+    _internal->_texGenerator.read(wf.readChild("texGenerator"));
 }
 
 } // namespace world

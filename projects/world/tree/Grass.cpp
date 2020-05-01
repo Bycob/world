@@ -9,6 +9,7 @@
 namespace world {
 
 WORLD_REGISTER_CHILD_CLASS(WorldNode, Grass, "Grass")
+WORLD_SECOND_REGISTER_CHILD_CLASS(IInstanceGenerator, Grass, "Grass")
 
 Grass::Grass()
         : _rng(std::random_device{}()), _texture(32, 256, ImageType::RGB) {}

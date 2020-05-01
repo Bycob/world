@@ -56,7 +56,7 @@ void PerlinTerrainGenerator::processTile(ITileContext &context) {
 }
 
 void PerlinTerrainGenerator::write(WorldFile &wf) const {
-    wf.addInt("maxOctaves", _maxOctaves);
+    wf.addUint("maxOctaves", _maxOctaves);
     wf.addStruct("perlinInfo", _perlinInfo);
 }
 

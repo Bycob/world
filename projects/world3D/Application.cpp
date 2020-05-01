@@ -118,8 +118,20 @@ std::unique_ptr<world::Collector> Application::popFull() {
 void Application::loadWorld(int argc, char **argv) {
     bool vulkan = false;
 
-    if (argc > 1 && std::string(argv[1]) == "vulkan") {
-        vulkan = true;
+    if (argc > 1) {
+        std::string arg = argv[1];
+
+        if (arg == "vulkan") {
+            vulkan = true;
+        }
+        // Try read the file
+        else {
+            std::cout << "Loading world " << arg << std::endl;
+            _world = std::make_unique<FlatWorld>();
+            _world->load(arg);
+            // _world->save("dump.json");
+            return;
+        }
     }
 
 #ifdef USE_VKWORLD

@@ -35,7 +35,7 @@ std::string WorldFile::readString(const std::string &id) const {
 }
 
 bool WorldFile::readStringOpt(const std::string &id, std::string &str) const {
-    if (_jdoc->HasMember(id) && (*_jdoc)[id].IsDouble()) {
+    if (_jdoc->HasMember(id) && (*_jdoc)[id].IsString()) {
         str = std::string((*_jdoc)[id].GetString(),
                           (*_jdoc)[id].GetStringLength());
         return true;

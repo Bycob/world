@@ -127,7 +127,7 @@ inline void WorldFile::addStruct(const std::string &id, const T &s) {
 
 template <typename T>
 inline void WorldFile::readStruct(const std::string &id, T &s) const {
-    world::read<T>(*this, s);
+    world::read<T>(readChild(id), s);
 }
 
 class WORLDAPI_EXPORT WorldFileIterator {
@@ -203,7 +203,7 @@ template <typename T> T *readSubclass(const WorldFile &file);
     }
 
 #define WORLD_SECOND_REGISTER_CHILD_CLASS(ParentClass, ChildClass, ClassID)    \
-    ParentClass *read##ChildClass(const WorldFile &wf) {                       \
+    ParentClass *read##ChildClass##_##ParentClass(const WorldFile &wf) {       \
         auto *instance = new ChildClass();                                     \
         instance->read(wf);                                                    \
         return instance;                                                       \
@@ -211,7 +211,7 @@ template <typename T> T *readSubclass(const WorldFile &file);
                                                                                \
     void *_register##ChildClass##_##ParentClass = []() {                       \
         auto &deserIndex = getDeserializeIndex<ParentClass>();                 \
-        deserIndex[ClassID] = read##ChildClass;                                \
+        deserIndex[ClassID] = read##ChildClass##_##ParentClass;                \
         return nullptr;                                                        \
     }();
 

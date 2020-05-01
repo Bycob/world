@@ -7,6 +7,7 @@
 namespace world {
 
 WORLD_REGISTER_CHILD_CLASS(WorldNode, Rocks, "Rocks")
+WORLD_SECOND_REGISTER_CHILD_CLASS(IInstanceGenerator, Rocks, "Rocks")
 
 
 Rocks::Rocks() : _rng(time(NULL)) {}
@@ -74,6 +75,7 @@ void Rocks::write(WorldFile &wf) const {
     wf.addDouble("radius", _radius);
     wf.addUint("roughness", _roughness);
     wf.addDouble("flatness", _flatness);
+    wf.addUint("count", _rocks.size());
 }
 
 void Rocks::read(const WorldFile &wf) {
@@ -82,6 +84,13 @@ void Rocks::read(const WorldFile &wf) {
     wf.readDoubleOpt("radius", _radius);
     wf.readUintOpt("roughness", _roughness);
     wf.readDoubleOpt("flatness", _flatness);
+
+    u32 count;
+    if (wf.readUintOpt("count", count)) {
+        for (u32 i = 0; i < count; ++i) {
+            addRock({});
+        }
+    }
 }
 
 void Rocks::generateMesh(Mesh &mesh) {

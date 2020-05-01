@@ -11,7 +11,7 @@
 
 namespace world {
 
-class WORLDAPI_EXPORT ITextureProvider {
+class WORLDAPI_EXPORT ITextureProvider : public ISerializable {
 public:
     virtual ~ITextureProvider() = default;
 
@@ -27,6 +27,20 @@ public:
         else {
             _cache.setChild(parent, id);
             return true;
+        }
+    }
+
+    void write(WorldFile &wf) const override {
+        if (_cache.isRoot()) {
+            wf.addString("path", _cache.getDirectory());
+        }
+    }
+
+    void read(const WorldFile &wf) override {
+        std::string path;
+
+        if (wf.readStringOpt("path", path)) {
+            configureCacheOverride(path);
         }
     }
 
@@ -58,9 +72,9 @@ public:
 
     GridStorageBase *getStorage() override;
 
-    void write(WorldFile &wf) const;
+    void write(WorldFile &wf) const override;
 
-    void read(const WorldFile &wf);
+    void read(const WorldFile &wf) override;
 
 private:
     GridStorage<Element> _storage;

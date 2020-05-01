@@ -2,6 +2,9 @@
 
 namespace world {
 
+WORLD_REGISTER_CHILD_CLASS(ITextureProvider, DefaultTextureProvider,
+                           "DefaultTextureProvider")
+
 DefaultTextureProvider::DefaultTextureProvider(std::string path) {
     if (!path.empty()) {
         _cache.setRoot(path);

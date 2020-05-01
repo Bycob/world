@@ -3,6 +3,8 @@
 
 namespace world {
 
+WORLD_REGISTER_BASE_CLASS(ITextureProvider)
+
 WORLD_REGISTER_CHILD_CLASS(ITerrainWorker, MultilayerGroundTexture,
                            "MultilayerGroundTexture")
 
@@ -31,11 +33,20 @@ void MultilayerGroundTexture::write(WorldFile &wf) const {
     for (auto &layer : _layers) {
         wf.addToArray("layers", world::serialize(layer));
     }
+
+    if (_texProvider) {
+        wf.addChild("texProvider", _texProvider->serializeSubclass());
+    }
 }
 
 void MultilayerGroundTexture::read(const WorldFile &wf) {
     for (auto it = wf.readArray("layers"); !it.end(); ++it) {
         _layers.push_back(world::deserialize<DistributionParams>(*it));
+    }
+
+    if (wf.hasChild("texProvider")) {
+        _texProvider = std::unique_ptr<ITextureProvider>(
+            readSubclass<ITextureProvider>(wf.readChild("texProvider")));
     }
 }
 

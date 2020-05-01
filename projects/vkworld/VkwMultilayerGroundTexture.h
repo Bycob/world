@@ -16,6 +16,7 @@ class MultilayerGroundTexturePrivate;
 class GridStorageBase;
 
 class VKWORLD_EXPORT VkwMultilayerGroundTexture : public ITerrainWorker {
+    WORLD_WRITE_SUBCLASS_METHOD
 public:
     VkwMultilayerGroundTexture();
 
@@ -37,6 +38,10 @@ public:
 
     GridStorageBase *getStorage() override;
     // TODO add getCache
+
+    void write(WorldFile &wf) const override;
+
+    void read(const WorldFile &wf) override;
 
 private:
     MultilayerGroundTexturePrivate *_internal;

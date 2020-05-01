@@ -10,6 +10,9 @@
 
 namespace world {
 
+WORLD_REGISTER_CHILD_CLASS(ITextureProvider, VkwGroundTextureGenerator,
+                           "VkwGroundTextureGenerator")
+
 struct LodTextures {
     float _width = 0;
     std::unique_ptr<VkwGraphicsWorker> _texWorker;
@@ -54,6 +57,22 @@ VkwImage &VkwGroundTextureGenerator::getVkTexture(int layer, int lod) {
 Image &VkwGroundTextureGenerator::getTexture(int layer, int lod) {
     auto &lodTex = getOrCreate(lod, true);
     return lodTex._layerImages.at(layer);
+}
+
+void VkwGroundTextureGenerator::write(WorldFile &wf) const {
+    wf.addArray("layers");
+
+    for (auto &layer : _internal->_layers) {
+        WorldFile layerWf;
+        layerWf.addString("shader", layer);
+        wf.addToArray("layers", std::move(layerWf));
+    }
+}
+
+void VkwGroundTextureGenerator::read(const WorldFile &wf) {
+    for (auto it = wf.readArray("layers"); !it.end(); ++it) {
+        _internal->_layers.push_back(it->readString("shader"));
+    }
 }
 
 LodTextures &VkwGroundTextureGenerator::getOrCreate(int lod, bool cpu) {

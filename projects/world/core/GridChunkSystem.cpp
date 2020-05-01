@@ -130,10 +130,12 @@ void GridChunkSystem::collect(ICollector &collector,
         collectChunk(tc, collector, resolutionModel, ctx);
     }
 
-    std::cout << "ChunkSystem before reducing: " << _internal->_storage.size();
+    // std::cout << "ChunkSystem before reducing: " <<
+    // _internal->_storage.size();
     _internal->_reducer.reduceStorage();
-    std::cout << ", ChunkSystem after reducing: " << _internal->_storage.size()
-              << std::endl;
+    // std::cout << ", ChunkSystem after reducing: " <<
+    // _internal->_storage.size()
+    //          << std::endl;
 }
 
 void GridChunkSystem::collectChunk(const TileCoordinates &chunkKey,

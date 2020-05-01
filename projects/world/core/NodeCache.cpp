@@ -27,6 +27,8 @@ void NodeCache::setRoot(const std::string &path) {
     _directory = path;
 }
 
+bool NodeCache::isRoot() const { return _parent == nullptr; }
+
 bool NodeCache::isAvailable() const {
     if (_parent != nullptr) {
         return _parent->isAvailable();

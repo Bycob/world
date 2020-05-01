@@ -14,6 +14,7 @@ class VkwGroundTextureGeneratorPrivate;
 class LodTextures;
 
 class VKWORLD_EXPORT VkwGroundTextureGenerator : public ITextureProvider {
+    WORLD_WRITE_SUBCLASS_METHOD
 public:
     VkwGroundTextureGenerator();
     ~VkwGroundTextureGenerator() override;
@@ -31,6 +32,10 @@ public:
     Image &getTexture(int layer, int lod) override;
 
     void setBaseWorldWidth(float width) { _baseWorldWidth = width; }
+
+    void write(WorldFile &wf) const override;
+
+    void read(const WorldFile &wf) override;
 
 private:
     VkwGroundTextureGeneratorPrivate *_internal;
