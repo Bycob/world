@@ -15,10 +15,12 @@ layout(binding = 0) uniform TextureData {
 
 layout(binding = 1) uniform sampler2D randTex;
 
-#define BLADES_SPACING 0.004
-#define JITTER_MAX 0.004
-// depends on size of grass blades in pixels
-#define LOOKUP_DIST 10
+#define BLADES_SPACING 0.02
+#define JITTER_MAX 0.02
+// depends on size of grass blades in pixels & distance between blades
+#define LOOKUP_DIST 6
+#define GRASS_LENGTH 0.15
+#define GRASS_WIDTH 0.01
 
 #define HASHSCALE1 .1031
 #define HASHSCALE3 vec3(.1031, .1030, .0973)
@@ -68,7 +70,7 @@ float getGrassBlade(in vec2 position, in vec2 grassPos, out vec4 color) {
     grassVector3.z = grassVector3.z * 0.2 + 0.2;
     vec2 grassVector2 = normalize(grassVector3.xy);
 
-    float grassLength = hash12(grassPos * 1.0235) * 0.01 + 0.012;
+    float grassLength = (1 + hash12(grassPos * 1.0235)) * GRASS_LENGTH;
 
     // take coordinates in grass blade frame
     vec2 gv = position - grassPos;
@@ -77,7 +79,7 @@ float getGrassBlade(in vec2 position, in vec2 grassPos, out vec4 color) {
     float gxn = gx / grassLength;
 
     // TODO make gy depends to gx
-    if (gxn >= 0.0 && gxn <= 1.0 && abs(gy) <= 0.0008 * (1 - gxn * gxn)) {
+    if (gxn >= 0.0 && gxn <= 1.0 && abs(gy) <= GRASS_WIDTH * (1 - gxn * gxn)) {
         vec3 thisGrassColor = getGrassColor(hash12(grassPos * 2.6316));
         color = vec4(thisGrassColor * (0.2 + 0.8 * gxn), 1.0);
     	return grassVector3.z * gxn;
@@ -110,15 +112,18 @@ float getPoint(in vec2 position, out vec4 color) {
             }
         }
     }
-    if (maxz == 0.0) {
-        color = vec4(0.);
-    }
 
     return maxz;
 }
 
 void main() {
-    vec2 uv = fragCoord * size + offset;
-    uv /= 3;
-    getPoint(uv, fragColor);
+    vec2 uv = (fragCoord + 1.0) / 2.0;
+    uv = uv * size + offset;
+    vec4 color = vec4(0.0);
+    getPoint(uv, color);
+    fragColor = color;
+
+    // float distBlur = 1 - exp(min(-size.x * 0.1 + 10, 0));
+    // vec3 farColor = getGrassColor(0.5) * 0.5;
+    // fragColor = vec4(mix(color.rgb, farColor, distBlur), color.a);
 }

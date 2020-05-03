@@ -21,6 +21,8 @@ public:
         _cache.setRoot(path);
     }
 
+    void setBasePixelSize(float pixSize) { _basePixelSize = pixSize; }
+
     bool configureCache(NodeCache &parent, const std::string &id) {
         if (_cache.isAvailable())
             return false;
@@ -46,6 +48,10 @@ public:
 
 protected:
     NodeCache _cache;
+
+    /// World size (in meters) of one pixel at lod 0
+    float _basePixelSize = 1;
+
 
     std::string getImageId(int layer, int lod) const {
         return "tex" + std::to_string(layer) + "_" + std::to_string(lod);

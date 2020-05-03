@@ -74,9 +74,10 @@ public:
 
     /** Wait for texture generation to be finished and transition to a
      * texture usage. Then assign every textures to the element.
-     * @param width The width of the texture to be generated at this lod. */
+     * @param pixSize The size of one pixel of the texture to be generated
+     * at this lod. */
     void getTileTextures(const TileCoordinates &tc, MultilayerElement &elem,
-                         float width);
+                         float pixSize);
 
     VkwPerlinParameters getPerlinParameters(const TileCoordinates &tc,
                                             int layer);
@@ -144,10 +145,10 @@ VkwGroundTextureGenerator &VkwMultilayerGroundTexture::getTextureGenerator() {
 
 void MultilayerGroundTexturePrivate::getTileTextures(const TileCoordinates &tc,
                                                      MultilayerElement &elem,
-                                                     float width) {
+                                                     float pixSize) {
 
     if (tc._lod == 0) {
-        _texGenerator.setBaseWorldWidth(width);
+        _texGenerator.setBasePixelSize(pixSize);
     }
 
     for (size_t i = 0; i < _layers.size(); ++i) {
@@ -179,7 +180,7 @@ void MultilayerGroundTexturePrivate::process(Terrain &terrain, Image &image,
 
     auto &elem =
         _storage.getOrCreate(tc, terrainRes, imgWidth, _layers.size(), &image);
-    getTileTextures(tc, elem, terrainDims.x);
+    getTileTextures(tc, elem, terrainDims.x / imgWidth);
 
     VkwMemoryHelper::terrainToGPU(terrain, elem._terrain);
     // slope is not used yet

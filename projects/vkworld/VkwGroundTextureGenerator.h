@@ -31,8 +31,6 @@ public:
 
     Image &getTexture(int layer, int lod) override;
 
-    void setBaseWorldWidth(float width) { _baseWorldWidth = width; }
-
     void write(WorldFile &wf) const override;
 
     void read(const WorldFile &wf) override;
@@ -40,10 +38,9 @@ public:
 private:
     VkwGroundTextureGeneratorPrivate *_internal;
 
-    float _baseWorldWidth = 100;
 
-
-    float getWorldWidth(int lod);
+    /// Get world size of a tile
+    float getWidth(int lod);
 
     /// @param cpu Si true, récupère les textures sur le cpu depuis la carte
     /// graphique

@@ -30,7 +30,6 @@ void testCPUMultilayer(HeightmapGround &ground) {
                                     -1, 0, 0.2, 0.6,     // dh
                                     0., 1., 0.25, 0.6, 0.2});
     auto &texGen = tex.setTextureProvider<VkwGroundTextureGenerator>();
-    texGen.setBaseWorldWidth(100);
     texGen.addLayer("texture-rock.frag");
     texGen.addLayer("texture-soil.frag");
     texGen.addLayer("texture-grass.frag");

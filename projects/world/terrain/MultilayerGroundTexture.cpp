@@ -65,17 +65,30 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &image,
         throw std::runtime_error("Texture provider is nullptr");
     }
 
-
     const int imWidth = image.width();
     const int imHeight = image.height();
     const u32 tRes = u32(terrain.getResolution());
     Image proxy(imWidth, imHeight, ImageType::RGBA);
 
+    // Precomputing
+    double terrainSize = terrain.getBoundingBox().getDimensions().x;
+    const double thresholdFactor = 5.0 * exp(-tc._lod / 4.0);
+
+    if (tc._lod == 0) {
+        _texProvider->setBasePixelSize(terrainSize / imWidth);
+    }
+
     // generate perlin matrix
-    PerlinInfo pinfo{2 + tc._lod, 0.9, false, tc._lod, 4};
+    PerlinInfo pinfo{2 + tc._lod, 0.8, false, tc._lod, 4};
     int factor = 4;
     pinfo.offsetX = tc._pos.x * factor;
     pinfo.offsetY = tc._pos.y * factor;
+
+    // Limiting the number of octaves for performances
+    const u32 maxOctaves = 15;
+    if (pinfo.octaves > maxOctaves) {
+        pinfo.octaves = maxOctaves;
+    }
     auto perlinMat = _perlin.generatePerlinNoise2D(tRes, pinfo);
 
     MultilayerElement &elem = _storage.getOrCreate(tc);
@@ -103,8 +116,8 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &image,
                 double r = r1 * r2;
                 double t = perlinMat(x, y);
 
-                distrib(x, y) =
-                    smoothstep(r + params.threshold, r - params.threshold, t);
+                double threshold = params.threshold * thresholdFactor;
+                distrib(x, y) = smoothstep(r + threshold, r - threshold, t);
             }
         }
 

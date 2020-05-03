@@ -60,6 +60,7 @@ Image &VkwGroundTextureGenerator::getTexture(int layer, int lod) {
 }
 
 void VkwGroundTextureGenerator::write(WorldFile &wf) const {
+    wf.addUint("texWidth", _internal->_texWidth);
     wf.addArray("layers");
 
     for (auto &layer : _internal->_layers) {
@@ -70,6 +71,8 @@ void VkwGroundTextureGenerator::write(WorldFile &wf) const {
 }
 
 void VkwGroundTextureGenerator::read(const WorldFile &wf) {
+    wf.readUintOpt("texWidth", _internal->_texWidth);
+
     for (auto it = wf.readArray("layers"); !it.end(); ++it) {
         _internal->_layers.push_back(it->readString("shader"));
     }
@@ -80,7 +83,7 @@ LodTextures &VkwGroundTextureGenerator::getOrCreate(int lod, bool cpu) {
     LodTextures &t = it.first->second;
 
     if (it.second) {
-        t._width = getWorldWidth(lod);
+        t._width = getWidth(lod);
         _internal->launchTextureGeneration(t);
         t._texWorker->waitForCompletion();
     }
@@ -143,7 +146,7 @@ void VkwGroundTextureGeneratorPrivate::launchTextureGeneration(LodTextures &t) {
     t._texWorker->run();
 }
 
-float VkwGroundTextureGenerator::getWorldWidth(int lod) {
-    return _baseWorldWidth * powi(2.0f, -lod);
+float VkwGroundTextureGenerator::getWidth(int lod) {
+    return _basePixelSize * _internal->_texWidth * powi(2.0f, -lod);
 }
 } // namespace world
