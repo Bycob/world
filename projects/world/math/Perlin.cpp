@@ -6,6 +6,7 @@
 #include <time.h>
 #include <algorithm>
 #include <functional>
+#include <world/core/Profiler.h>
 
 #include "MathsHelper.h"
 #include "Interpolation.h"
@@ -96,16 +97,16 @@ void Perlin::growBuffer(arma::uword size) {
 void Perlin::fillBuffer(int octave, const PerlinInfo &info,
                         const modifier &sourceModifier) {
 
-    double localFreq = info.frequency * powi(2., octave);
-    uword fi = static_cast<uword>(ceil(localFreq));
+    double localFreq = info.frequency * powi(2., octave - info.reference);
+    u32 fi = static_cast<u32>(ceil(localFreq));
     growBuffer(fi + 1);
 
     int offX = getOffset(info.offsetX, octave, info);
     int offY = getOffset(info.offsetY, octave, info);
 
     // Fill buffer
-    for (u32 x = 0; x <= fi; x++) {
-        for (u32 y = 0; y <= fi; y++) {
+    for (u32 y = 0; y <= fi; y++) {
+        for (u32 x = 0; x <= fi; x++) {
             u32 px = static_cast<u32>(x + offX) & 0xFFu;
             u32 py = static_cast<u32>(y + offY) & 0xFFu;
             double val = _hash[px + _hash[py + _hash[octave]]] / 255.;
@@ -134,8 +135,8 @@ void Perlin::generatePerlinOctave(arma::Mat<double> &output, int octave,
     const double offYf = getOffsetf(info.offsetY, octave, info);
 
     // Build octave
-    for (u32 x = 0; x < output.n_rows; x++) {
-        for (u32 y = 0; y < output.n_cols; y++) {
+    for (u32 y = 0; y < output.n_cols; y++) {
+        for (u32 x = 0; x < output.n_rows; x++) {
             double xd = f * x / (output.n_rows - 1) + offXf;
             double yd = f * y / (output.n_cols - 1) + offYf;
 
