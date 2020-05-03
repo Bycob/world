@@ -64,7 +64,7 @@ std::vector<Template> VkwGrass::collectTemplates(ICollector &collector,
 
 HabitatFeatures VkwGrass::randomize() {
     HabitatFeatures habitat;
-    habitat._density = _density;
+    habitat._density = 4;
     return habitat;
 }
 
@@ -77,7 +77,6 @@ void VkwGrass::write(WorldFile &wf) const {
     wf.addDouble("size", _size);
     wf.addDouble("height", _height);
     wf.addDouble("width", _width);
-    wf.addDouble("density", _density);
 }
 
 void VkwGrass::read(const WorldFile &wf) {
@@ -89,7 +88,6 @@ void VkwGrass::read(const WorldFile &wf) {
     wf.readDoubleOpt("size", _size);
     wf.readDoubleOpt("height", _height);
     wf.readDoubleOpt("width", _width);
-    wf.readDoubleOpt("density", _density);
 }
 
 

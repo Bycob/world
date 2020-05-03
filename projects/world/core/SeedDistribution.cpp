@@ -6,6 +6,10 @@
 namespace world {
 
 void SeedDistribution::addSeeds(Chunk &chunk) {
+    if (_habitats.empty())
+        throw std::runtime_error(
+            "[SeedDistribution] No generator available for new seeds!");
+
     auto bounds = getBounds(chunk);
     double area = _tileSize * _tileSize / 1e6;
     std::uniform_real_distribution<double> distrib(0, 1);

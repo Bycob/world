@@ -70,10 +70,19 @@ public:
 
     void write(WorldFile &wf) const override {
         wf.addDouble("resolution", _resolution);
+        wf.addArray("habitats");
+
+        for (auto &habitat : _habitats) {
+            wf.addToArray("habitats", world::serialize(habitat));
+        }
     }
 
     void read(const WorldFile &wf) override {
         wf.readDoubleOpt("resolution", _resolution);
+
+        for (auto it = wf.readArray("habitats"); !it.end(); ++it) {
+            _habitats.push_back(world::deserialize<HabitatFeatures>(*it));
+        }
     }
 
 protected:

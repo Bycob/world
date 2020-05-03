@@ -50,8 +50,6 @@ private:
     double _height = 0.3;
     /** width, in meters */
     double _width = 0.02;
-    /** Density of the grass */
-    double _density = 4;
 
     void setup();
 };

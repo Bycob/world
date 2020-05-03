@@ -216,7 +216,6 @@ void HeightmapGround::write(WorldFile &wf) const {
     wf.addInt("textureRes", _textureRes);
     wf.addInt("texPixSize", _texPixSize);
 
-    // TODO not save the tilesystem but deduce it from the other parameters?
     wf.addStruct("tileSystem", _tileSystem);
 
     wf.addArray("workers");
@@ -234,6 +233,8 @@ void HeightmapGround::read(const WorldFile &wf) {
     wf.readIntOpt("texPixSize", _texPixSize);
 
     wf.readStruct("tileSystem", _tileSystem);
+    _tileSystem._bufferRes.x = _tileSystem._bufferRes.y =
+        _textureRes * _texPixSize;
 
     for (auto it = wf.readArray("workers"); !it.end(); ++it) {
         _internal->_generators.emplace_back(readSubclass<ITerrainWorker>(*it));
