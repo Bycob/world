@@ -38,6 +38,21 @@ PEACE_EXPORT WorldPtr createDemoWorld(char *name) {
     return World::createDemoWorld();
 }
 
+PEACE_EXPORT WorldPtr createWorldFromJson(char *jsonStr) {
+    auto *world = new FlatWorld();
+    WorldFile wf;
+    wf.fromJson(jsonStr);
+    world->read(wf);
+    return world;
+}
+
+PEACE_EXPORT WorldPtr createWorldFromFile(char *filename) {
+    // TODO catch exceptions and return error code
+    auto *world = new FlatWorld();
+    world->load(filename);
+    return world;
+}
+
 PEACE_EXPORT void freeWorld(WorldPtr worldPtr) {
     delete static_cast<World *>(worldPtr);
 }

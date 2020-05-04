@@ -27,9 +27,7 @@ namespace Peace
 
         public World(String configFile)
         {
-            throw new NotSupportedException(
-                "World can not yet read config file. This may be " + 
-                "available in a later version of the library :)");
+            _handle = createWorldFromFile(configFile);
         }
         
         
@@ -40,6 +38,12 @@ namespace Peace
         
         [DllImport("peace")]
         private static extern IntPtr createDemoWorld(string name);
+
+        [DllImport("peace")]
+        private static extern IntPtr createWorldFromJson(string jsonStr);
+
+        [DllImport("peace")]
+        private static extern IntPtr createWorldFromFile(string name);
         
         [DllImport("peace")]
         private static extern void freeWorld(IntPtr handle);

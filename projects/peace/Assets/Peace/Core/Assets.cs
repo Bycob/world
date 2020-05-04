@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Peace
 {
@@ -50,6 +51,12 @@ namespace Peace
             material.SetFloat("_Glossiness", .0f);
             // material.EnableKeyword("_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A");
             material.EnableKeyword("_SPECGLOSSMAP");
+            
+            if (matDesc.transparent)
+            {
+                // TODO does not work
+                material.SetOverrideTag("RenderType", "Transparent");
+            }
             return material;
         }
 
@@ -102,6 +109,7 @@ namespace Peace
             public string MapKd;
             public double Kdr, Kdg, Kdb;
             public double Ksr, Ksg, Ksb;
+            public bool transparent;
         }
 
         [DllImport("peace")]

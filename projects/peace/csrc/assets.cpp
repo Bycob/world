@@ -10,6 +10,7 @@ struct MaterialDescription {
     char *MapKd;
     double Kdr, Kdg, Kdb;
     double Ksr, Ksg, Ksb;
+    bool transparent;
 };
 
 #define DOUBLE_VERTEX_SIZE (sizeof(Vertex) / sizeof(double))
@@ -52,6 +53,8 @@ PEACE_EXPORT MaterialDescription readMaterial(MaterialPtr materialPtr) {
     result.Ksr = ks._r;
     result.Ksg = ks._g;
     result.Ksb = ks._b;
+
+    result.transparent = material->isTransparent();
 
     return result;
 }
