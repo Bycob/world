@@ -75,6 +75,6 @@ vec4 getSoilAt(vec2 uv) {
 }
 
 void main() {
-    vec2 uv = fragCoord * size + offset;
+    vec2 uv = fragCoord * 0.5 * size + offset;
     fragColor = getSoilAt(uv);
 }

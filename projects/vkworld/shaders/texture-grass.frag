@@ -117,11 +117,13 @@ float getPoint(in vec2 position, out vec4 color) {
 }
 
 void main() {
-    vec2 uv = (fragCoord + 1.0) / 2.0;
-    uv = uv * size + offset;
+    vec2 uv = fragCoord * 0.5 * size + offset;
     vec4 color = vec4(0.0);
     getPoint(uv, color);
     fragColor = color;
+
+    // ---- blur grass that is far away (not necessarily a good effect)
+    // TODO maybe fill the gaps with green when the grass is far?
 
     // float distBlur = 1 - exp(min(-size.x * 0.1 + 10, 0));
     // vec3 farColor = getGrassColor(0.5) * 0.5;
