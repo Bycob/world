@@ -124,10 +124,10 @@
         "workers": [
             {
                 "type": "PerlinTerrainGenerator",
-                "maxOctaves": 6,
+                "maxOctaves": 11,
                 "perlinInfo": {
                     "octaves": 3,
-                    "persistence": 0.35,
+                    "persistence": 0.5,
                     "repeatable": false,
                     "reference": 0,
                     "frequency": 4.0,
