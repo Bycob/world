@@ -26,19 +26,19 @@ PEACE_EXPORT WorldPtr createTestWorld() {
     return world;
 }
 
-PEACE_EXPORT WorldPtr createDemoWorld(char* name) {
+PEACE_EXPORT WorldPtr createDemoWorld(char *name) {
     if (name == std::string("vulkan")) {
 #ifdef USE_VKWORLD
         return VkWorld::createDemoFlatWorld();
 #else
-        std::cout << "Not supported ! Return default world instead..." << std::endl;
+        std::cout << "Not supported ! Return default world instead..."
+                  << std::endl;
 #endif
     }
     return World::createDemoWorld();
 }
 
 PEACE_EXPORT void freeWorld(WorldPtr worldPtr) {
-    delete static_cast<World*>(worldPtr);
+    delete static_cast<World *>(worldPtr);
 }
-
 }

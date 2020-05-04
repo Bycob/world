@@ -12,4 +12,4 @@
 #include "tree/Grass.h"
 #include "tree/ForestLayer.h"
 
-#endif //WORLD_WORLDTREE_H
+#endif // WORLD_WORLDTREE_H

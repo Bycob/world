@@ -39,7 +39,7 @@ PEACE_EXPORT CollectorPtr createCollector() {
 }
 
 PEACE_EXPORT void freeCollector(CollectorPtr collectorPtr) {
-    delete static_cast<Collector*>(collectorPtr);
+    delete static_cast<Collector *>(collectorPtr);
 }
 
 PEACE_EXPORT void collect(CollectorPtr collectorPtr, WorldPtr worldPtr,
@@ -98,8 +98,8 @@ PEACE_EXPORT void collectorGetChannel(CollectorPtr collectorPtr, int type,
 PEACE_EXPORT CollectorNode readNode(SceneNodePtr nodePtr) {
     auto *node = static_cast<SceneNode *>(nodePtr);
     CollectorNode result{};
-    result.mesh = const_cast<char*>(node->getMeshID().c_str());
-    result.material = const_cast<char*>(node->getMaterialID().c_str());
+    result.mesh = const_cast<char *>(node->getMeshID().c_str());
+    result.material = const_cast<char *>(node->getMaterialID().c_str());
     vec3d pos = node->getPosition(), scale = node->getScale(),
           rot = node->getRotation();
     result.posX = pos.x;
