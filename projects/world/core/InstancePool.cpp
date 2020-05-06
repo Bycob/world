@@ -2,8 +2,8 @@
 #include "SeedDistribution.h"
 
 namespace world {
-template class InstancePool<RandomDistribution>;
-template class InstancePool<SeedDistribution>;
+template class WORLDAPI_EXPORT InstancePool<RandomDistribution>;
+template class WORLDAPI_EXPORT InstancePool<SeedDistribution>;
 
 WORLD_REGISTER_TEMPLATE_CHILD_CLASS(IChunkDecorator, InstancePool,
                                     RandomDistribution,

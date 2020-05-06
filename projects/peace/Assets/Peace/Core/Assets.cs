@@ -54,8 +54,13 @@ namespace Peace
             
             if (matDesc.transparent)
             {
-                // TODO does not work
-                material.SetOverrideTag("RenderType", "Transparent");
+                // Equivalent to RenderType == "Cutout"
+                material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+                material.SetInt("_ZWrite", 1);
+                material.EnableKeyword("_ALPHATEST_ON");
+                material.DisableKeyword("_ALPHABLEND_ON");
+                material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
             }
             return material;
         }

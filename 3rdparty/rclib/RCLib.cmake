@@ -32,7 +32,7 @@ function(rclib_add_resource_library RC_LIB_NAME RC_NAMESPACE)
         TARGET ${RC_LIB_NAME}_files
         PRE_BUILD
         COMMAND $<TARGET_FILE:rcc>
-        ARGS ${RC_HEADER_FILE} ${RESOURCES_FILES}
+        ARGS "$<TARGET_PROPERTY:${RC_LIB_NAME},build_dir>/${RC_HEADER_FILE}" ${RESOURCES_FILES}
         DEPENDS ${RESOURCES_FILES}
         COMMENT "Building resource header ${RC_HEADER_FILE}"
         VERBATIM

@@ -10,7 +10,7 @@ namespace world {
 
 class Tree;
 
-class ITreeWorker : public ICloneable<ITreeWorker>, public ISerializable {
+class WORLDAPI_EXPORT ITreeWorker : public ICloneable<ITreeWorker>, public ISerializable {
 public:
     virtual void process(Tree &tree) = 0;
 };

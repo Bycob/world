@@ -1,0 +1,312 @@
+{
+    "nodes": [
+        {
+            "type": "GridChunkSystem",
+            "key": "31",
+            "children": [],
+            "decorators": [
+                {
+                    "type": "ForestLayer",
+                    "maxDensity": 5000.0
+                },
+                {
+                    "type": "InstancePool_SeedDistribution",
+                    "resolution": 20.0,
+                    "speciesDensity": 0.0004,
+                    "minSpecies": 10,
+                    "generators": [],
+                    "distribution": {
+                        "resolution": 20.0,
+                        "tileSize": 2000.0,
+                        "seedDensity": 0.28294212105225838,
+                        "seedAmount": 2.0,
+                        "maxDist": 2000.0,
+                        "habitats": []
+                    },
+                    "templateGenerator": {
+                        "type": "Grass",
+                        "key": "",
+                        "grassCount": 20,
+                        "pointCount": 4,
+                        "dispersion": 0.07,
+                        "bend": 0.1,
+                        "height": 0.2,
+                        "width": 0.02,
+                        "children": [],
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        }
+                    }
+                },
+                {
+                    "type": "InstancePool_RandomDistribution",
+                    "resolution": 20.0,
+                    "speciesDensity": 0.0004,
+                    "minSpecies": 10,
+                    "generators": [
+                        {
+                            "type": "Rocks",
+                            "key": "",
+                            "radius": 0.7,
+                            "roughness": 10,
+                            "flatness": 2.0,
+                            "count": 10,
+                            "children": [],
+                            "position": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            }
+                        }
+                    ],
+                    "distribution": {
+                        "resolution": 20.0,
+                        "density": 0.02,
+                        "habitats": [
+                            {
+                                "sea": false,
+                                "density": 0.4,
+                                "altitude": {
+                                    "x": 0.0,
+                                    "y": 2000.0
+                                },
+                                "humidity": {
+                                    "x": 0.0,
+                                    "y": 1.0
+                                },
+                                "slope": {
+                                    "x": 0.0,
+                                    "y": 1.5707963267948966
+                                },
+                                "temperature": {
+                                    "x": 0.0,
+                                    "y": 40.0
+                                }
+                            }
+                        ]
+                    },
+                    "templateGenerator": {
+                        "type": "Rocks",
+                        "key": "",
+                        "radius": 1.0,
+                        "roughness": 10,
+                        "flatness": 2.0,
+                        "count": 0,
+                        "children": [],
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        }
+                    }
+                }
+            ],
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "tileSystem": {
+                "maxLod": 6,
+                "factor": 2,
+                "baseSize": {
+                    "x": 1000.0,
+                    "y": 1000.0,
+                    "z": 1000.0
+                },
+                "bufferRes": {
+                    "x": 250,
+                    "y": 250,
+                    "z": 250
+                }
+            }
+        }
+    ],
+    "ground": {
+        "type": "HeightmapGround",
+        "minAltitude": -2000.0,
+        "maxAltitude": 4000.0,
+        "terrainRes": 33,
+        "textureRes": 128,
+        "texPixSize": 4,
+        "workers": [
+            {
+                "type": "PerlinTerrainGenerator",
+                "maxOctaves": 10,
+                "perlinInfo": {
+                    "octaves": 3,
+                    "persistence": 0.5,
+                    "repeatable": false,
+                    "reference": 0,
+                    "frequency": 4.0,
+                    "offsetX": 0,
+                    "offsetY": 0
+                }
+            },
+            {
+                "type": "CustomWorldRMModifier",
+                "biomeDensity": 1.0,
+                "limitBrightness": 4,
+                "tileSystem": {
+                    "maxLod": 0,
+                    "factor": 2,
+                    "baseSize": {
+                        "x": 400000.0,
+                        "y": 400000.0,
+                        "z": 0.0
+                    },
+                    "bufferRes": {
+                        "x": 400,
+                        "y": 400,
+                        "z": 0
+                    }
+                }
+            },
+            {
+                "type": "AltitudeTexturer",
+                "colorMap": {
+                    "order": 3,
+                    "points": [
+                        {
+                            "color": {
+                                "x": 0.8196078431372549,
+                                "y": 0.8117647058823529,
+                                "z": 0.6
+                            },
+                            "position": {
+                                "x": 0.15,
+                                "y": 0.5
+                            }
+                        },
+                        {
+                            "color": {
+                                "x": 0.8196078431372549,
+                                "y": 0.8117647058823529,
+                                "z": 0.6
+                            },
+                            "position": {
+                                "x": 0.31,
+                                "y": 0.0
+                            }
+                        },
+                        {
+                            "color": {
+                                "x": 0.8196078431372549,
+                                "y": 0.8117647058823529,
+                                "z": 0.6
+                            },
+                            "position": {
+                                "x": 0.31,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "color": {
+                                "x": 0.5647058823529412,
+                                "y": 0.7176470588235294,
+                                "z": 0.3607843137254902
+                            },
+                            "position": {
+                                "x": 0.35,
+                                "y": 0.0
+                            }
+                        },
+                        {
+                            "color": {
+                                "x": 0.2823529411764706,
+                                "y": 0.5176470588235295,
+                                "z": 0.2549019607843137
+                            },
+                            "position": {
+                                "x": 0.35,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "color": {
+                                "x": 0.5647058823529412,
+                                "y": 0.7176470588235294,
+                                "z": 0.39215686274509806
+                            },
+                            "position": {
+                                "x": 0.5,
+                                "y": 0.0
+                            }
+                        },
+                        {
+                            "color": {
+                                "x": 0.3764705882352941,
+                                "y": 0.2980392156862745,
+                                "z": 0.1568627450980392
+                            },
+                            "position": {
+                                "x": 0.5,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "color": {
+                                "x": 0.3764705882352941,
+                                "y": 0.2980392156862745,
+                                "z": 0.1568627450980392
+                            },
+                            "position": {
+                                "x": 0.75,
+                                "y": 0.0
+                            }
+                        },
+                        {
+                            "color": {
+                                "x": 0.6274509803921569,
+                                "y": 0.6274509803921569,
+                                "z": 0.6274509803921569
+                            },
+                            "position": {
+                                "x": 0.75,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "color": {
+                                "x": 0.9568627450980393,
+                                "y": 0.9882352941176471,
+                                "z": 0.9803921568627451
+                            },
+                            "position": {
+                                "x": 1.0,
+                                "y": 0.0
+                            }
+                        },
+                        {
+                            "color": {
+                                "x": 0.6274509803921569,
+                                "y": 0.6274509803921569,
+                                "z": 0.6274509803921569
+                            },
+                            "position": {
+                                "x": 1.0,
+                                "y": 1.0
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "tileSystem": {
+            "maxLod": 12,
+            "factor": 2,
+            "baseSize": {
+                "x": 6000.0,
+                "y": 6000.0,
+                "z": 0.0
+            },
+            "bufferRes": {
+                "x": 512,
+                "y": 512,
+                "z": 0
+            }
+        }
+    }
+}

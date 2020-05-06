@@ -119,6 +119,10 @@ public:
 // The current implementation of WORLD_REGISTER_BASE_CLASS
 // does not compile out of the world namespace.
 namespace world {
+// On Windows the symbol should not be exported
+// TODO Add a WORLDAPI_ONLY_EXPORT macro to avoid __dllimport() the specialized templates
+// And fix this issue
+#define WORLDAPI_EXPORT
 WORLD_REGISTER_BASE_CLASS(BaseClass1)
 }
 WORLD_REGISTER_CHILD_CLASS(BaseClass1, ChildClass1, "1")
