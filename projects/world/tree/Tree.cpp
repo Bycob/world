@@ -10,6 +10,10 @@
 #include "LeavesGenerator.h"
 
 namespace world {
+
+WORLD_REGISTER_CHILD_CLASS(WorldNode, Tree, "Tree");
+WORLD_SECOND_REGISTER_CHILD_CLASS(IInstanceGenerator, Tree, "Tree")
+
 class PTree {
 public:
     std::vector<std::unique_ptr<ITreeWorker>> _workers;
@@ -219,9 +223,22 @@ HabitatFeatures Tree::randomize() {
     return HabitatFeatures{};
 }
 
-void Tree::write(WorldFile &wf) const { WorldNode::write(wf); }
+void Tree::write(WorldFile &wf) const {
+    WorldNode::write(wf);
+    wf.addArray("workers");
 
-void Tree::read(const WorldFile &wf) { WorldNode::read(wf); }
+    for (auto &worker : _internal->_workers) {
+        wf.addToArray("workers", worker->serializeSubclass());
+    }
+}
+
+void Tree::read(const WorldFile &wf) {
+    WorldNode::read(wf);
+
+    for (auto it = wf.readArray("workers"); !it.end(); ++it) {
+        _internal->_workers.emplace_back(readSubclass<ITreeWorker>(*it));
+    }
+}
 
 void Tree::generateBase() {
     for (auto &worker : _internal->_workers) {

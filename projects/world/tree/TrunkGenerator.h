@@ -10,6 +10,7 @@
 namespace world {
 
 class WORLDAPI_EXPORT TrunkGenerator : public ITreeWorker {
+    WORLD_WRITE_SUBCLASS_METHOD
 public:
     TrunkGenerator(int segmentCount = 12, double resolution = 20);
 
@@ -18,6 +19,10 @@ public:
     TrunkGenerator *clone() const override;
 
     void process(Tree &tree) override;
+
+    void write(WorldFile &wf) const override;
+
+    void read(const WorldFile &wf) override;
 
 private:
     int _segmentCount;

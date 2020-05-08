@@ -21,5 +21,9 @@ public:
 
     static void copyNeighbours(Terrain &terrain, const TileCoordinates &coords,
                                const TerrainGrid &storage);
+
+    /** Find the min value and the max value of this terrain.
+     * \returns vec2d{min value, max value} */
+    static vec2d computeZBounds(const Terrain &terrain);
 };
 } // namespace world

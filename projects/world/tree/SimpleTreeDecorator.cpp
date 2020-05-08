@@ -10,6 +10,9 @@
 
 namespace world {
 
+WORLD_REGISTER_CHILD_CLASS(IChunkDecorator, SimpleTreeDecorator,
+                           "SimpleTreeDecorator")
+
 SimpleTreeDecorator::SimpleTreeDecorator(int maxTreesPerChunk)
         : _maxTreesPerChunk(maxTreesPerChunk),
           _rng(static_cast<u32>(time(NULL))) {

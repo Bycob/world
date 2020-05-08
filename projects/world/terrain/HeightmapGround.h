@@ -22,6 +22,8 @@ public:
             : TerrainTile(coords, terrainRes) {}
 
 private:
+    vec2d _zBounds;
+
     friend class HeightmapGround;
 };
 
@@ -84,9 +86,9 @@ public:
                       const vec2d &resolutionRange, const Image &img) override;
 
     // IO
-    void write(WorldFile &wf) const;
+    void write(WorldFile &wf) const override;
 
-    void read(const WorldFile &wf);
+    void read(const WorldFile &wf) override;
 
 private:
     PGround *_internal;

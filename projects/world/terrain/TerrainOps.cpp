@@ -84,4 +84,25 @@ void TerrainOps::copyNeighbours(Terrain &terrain, const TileCoordinates &coords,
         }
     }
 }
+
+vec2d TerrainOps::computeZBounds(const Terrain &terrain) {
+    vec2d bounds{std::numeric_limits<double>::max(),
+                 std::numeric_limits<double>::min()};
+
+    for (int y = 0; y < terrain.getResolution(); ++y) {
+        for (int x = 0; x < terrain.getResolution(); ++x) {
+            double val = terrain(x, y);
+
+            if (bounds.x > val) {
+                bounds.x = val;
+            }
+
+            if (bounds.y < val) {
+                bounds.y = val;
+            }
+        }
+    }
+
+    return bounds;
+}
 } // namespace world

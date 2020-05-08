@@ -186,16 +186,19 @@ std::map<std::string, std::function<T *(const WorldFile &file)>>
 template <typename T> T *readSubclass(const WorldFile &file);
 
 #define WORLD_REGISTER_BASE_CLASS(ClassName)                                   \
-    template <> WORLDAPI_EXPORT                                                               \
-    std::map<std::string, std::function<ClassName *(const WorldFile &file)>>   \
-        &getDeserializeIndex<ClassName>() {                   \
+    template <>                                                                \
+    WORLDAPI_EXPORT std::map<                                                  \
+        std::string, std::function<ClassName *(const WorldFile &file)>>        \
+        &getDeserializeIndex<ClassName>() {                                    \
         static std::map<std::string,                                           \
                         std::function<ClassName *(const WorldFile &file)>>     \
             index;                                                             \
         return index;                                                          \
     }                                                                          \
                                                                                \
-    template <> WORLDAPI_EXPORT ClassName *readSubclass<ClassName>(const WorldFile &file) {    \
+    template <>                                                                \
+    WORLDAPI_EXPORT ClassName *readSubclass<ClassName>(                        \
+        const WorldFile &file) {                                               \
         std::string type = file.readString("type");                            \
         auto &deserIndex = getDeserializeIndex<ClassName>();                   \
         auto readFunc = deserIndex.at(type);                                   \

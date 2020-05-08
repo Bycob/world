@@ -244,6 +244,8 @@ namespace Peace
         struct CollectorView
         {
             public double X, Y, Z;
+            public double eyeResolution = 700;
+            public double maxDistance = 10000;
         }
         
         [DllImport("peace")]

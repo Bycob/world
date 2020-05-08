@@ -17,6 +17,7 @@ namespace world {
 class PTree;
 
 class WORLDAPI_EXPORT Tree : public WorldNode, public IInstanceGenerator {
+    WORLD_WRITE_SUBCLASS_METHOD
 public:
     Tree();
 

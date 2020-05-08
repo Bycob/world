@@ -19,6 +19,8 @@ extern "C" {
 
 struct PEACE_EXPORT CollectorView {
     double x, y, z;
+    double eyeResolution;
+    double maxDistance;
 };
 
 struct PEACE_EXPORT CollectorNode {
@@ -47,8 +49,9 @@ PEACE_EXPORT void collect(CollectorPtr collectorPtr, WorldPtr worldPtr,
     auto *collector = static_cast<Collector *>(collectorPtr);
     collector->reset();
     auto *world = static_cast<World *>(worldPtr);
-    FirstPersonView fpsView{};
+    FirstPersonView fpsView{view.eyeResolution};
     fpsView.setPosition({view.x, view.y, view.z});
+    fpsView.setFarDistance(view.maxDistance);
     world->collect(*collector, fpsView);
 }
 

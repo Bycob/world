@@ -9,6 +9,8 @@
 
 namespace world {
 
+WORLD_REGISTER_CHILD_CLASS(ITreeWorker, TrunkGenerator, "TrunkGenerator")
+
 TrunkGenerator::TrunkGenerator(int segmentCount, double resolution)
         : _segmentCount(segmentCount), _resolution(resolution) {}
 
@@ -29,6 +31,16 @@ void TrunkGenerator::process(Tree &tree) {
     addRing(trunkMesh, primInfo._position, {1, 0, 0}, {0, 1, 0},
             getRadius(primInfo._weight));
     addNode(trunkMesh, primary, {0, 0, 1}, 0, true);
+}
+
+void TrunkGenerator::write(WorldFile &wf) const {
+    wf.addInt("segmentCount", _segmentCount);
+    wf.addDouble("resolution", _resolution);
+}
+
+void TrunkGenerator::read(const WorldFile &wf) {
+    wf.readIntOpt("segmentCount", _segmentCount);
+    wf.readDoubleOpt("resolution", _resolution);
 }
 
 void TrunkGenerator::addNode(Mesh &mesh, SkelettonNode<TreeInfo> *node,

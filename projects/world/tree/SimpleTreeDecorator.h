@@ -11,6 +11,7 @@
 namespace world {
 
 class WORLDAPI_EXPORT SimpleTreeDecorator : public IChunkDecorator {
+    WORLD_WRITE_SUBCLASS_METHOD
 public:
     SimpleTreeDecorator(int maxTreesPerChunk = 1);
 

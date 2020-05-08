@@ -64,7 +64,7 @@ public:
 
 class PGround {
 public:
-    PGround(TileSystem &ts) : _reducer(ts, ts._maxLod * 100) {
+    PGround(TileSystem &ts) : _reducer(ts, ts._maxLod * 50) {
         _terrains.setReducer(&_reducer);
     }
 
@@ -142,13 +142,6 @@ void HeightmapGround::collect(ICollector &collector,
                               const ExplorationContext &ctx) {
 
     BoundingBox bbox = resolutionModel.getBounds();
-
-    // Tune altitude for the resolution model
-    /*double estimAltitude = observeAltitudeAt(offset.x + chunkSize.x / 2,
-                                             offset.y + chunkSize.y / 2, 0);
-
-    ResolutionModelContextWrap wresModel(resolutionModel);
-    wresModel.setOffset({0, 0, estimAltitude});*/
 
     // Find terrains to generate
     std::set<TileCoordinates> toCollect;
@@ -235,9 +228,12 @@ void HeightmapGround::read(const WorldFile &wf) {
     wf.readStruct("tileSystem", _tileSystem);
     _tileSystem._bufferRes.x = _tileSystem._bufferRes.y =
         _textureRes * _texPixSize;
+    // TODO change 50 to a controllable parameter
+    // TODO put this update in a method so that everything is uniform
+    _internal->_reducer.setMaxInstances(50 * _tileSystem._maxLod);
 
     for (auto it = wf.readArray("workers"); !it.end(); ++it) {
-        _internal->_generators.emplace_back(readSubclass<ITerrainWorker>(*it));
+        addWorkerInternal(readSubclass<ITerrainWorker>(*it));
     }
 }
 

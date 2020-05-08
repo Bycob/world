@@ -4,6 +4,8 @@
 
 namespace world {
 
+WORLD_REGISTER_CHILD_CLASS(ITreeWorker, LeavesGenerator, "LeavesGenerator")
+
 LeavesGenerator::LeavesGenerator(double leafDensity, double weightThreshold)
         : _rng(static_cast<u32>(time(NULL))), _distrib(0, 1),
           _leafDensity(leafDensity), _weightThreshold(weightThreshold) {}

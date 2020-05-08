@@ -6,6 +6,10 @@
 
 namespace world {
 
+void GridStorageReducer::setMaxInstances(u32 maxInstances) {
+    _maxInstances = maxInstances;
+}
+
 void GridStorageReducer::registerStorage(GridStorageBase *storage) {
     if (std::find(_storages.begin(), _storages.end(), storage) ==
         _storages.end()) {

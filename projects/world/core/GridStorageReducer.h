@@ -14,6 +14,8 @@ public:
     GridStorageReducer(TileSystem &tileSystem, u32 maxInstances = 2000)
             : _tileSystem(tileSystem), _maxInstances(maxInstances) {}
 
+    void setMaxInstances(u32 maxInstances);
+
     void registerStorage(GridStorageBase *storage);
 
     void registerAccess(const TileCoordinates &tc);
