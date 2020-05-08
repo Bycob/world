@@ -14,6 +14,27 @@
 
 namespace world {
 
+class TreeInstance {
+public:
+    vec3d _pos;
+
+    TreeSkeletton _skeletton;
+
+    Mesh _simpleTrunk;
+    Mesh _simpleLeaves;
+    Mesh _trunkMesh;
+    Mesh _leavesMesh;
+
+    Material _trunkMaterial;
+
+    bool _generated = false;
+
+
+    TreeInstance(vec3d pos);
+
+    void reset();
+};
+
 class PTree;
 
 class WORLDAPI_EXPORT Tree : public WorldNode, public IInstanceGenerator {
@@ -23,21 +44,13 @@ public:
 
     ~Tree() override;
 
+    void addTree(vec3d pos = {});
+
+    TreeInstance &getTreeInstance(int i);
+
     void setup(const Tree &model);
 
     template <typename T, typename... Args> T &addWorker(Args &&... args);
-
-    const TreeSkeletton &getSkeletton() const;
-
-    TreeSkeletton &getSkeletton();
-
-    const Mesh &getTrunkMesh() const;
-
-    Mesh &getTrunkMesh();
-
-    const Mesh &getLeavesMesh() const;
-
-    Mesh &leavesMesh();
 
     void collect(ICollector &collector, const IResolutionModel &explorer,
                  const ExplorationContext &ctx) override;
@@ -54,26 +67,15 @@ public:
 
     void read(const WorldFile &wf) override;
 
-public:
-    Mesh _simpleTrunk;
-    Mesh _simpleLeaves;
-
-    void generateSimpleMeshes();
-
 private:
     PTree *_internal;
-
-    TreeSkeletton _skeletton;
-    Mesh _trunkMesh;
-    Mesh _leavesMesh;
-    Material _trunkMaterial;
-
-    bool _generated = false;
 
 
     void addWorkerInternal(ITreeWorker *worker);
 
-    void generateBase();
+    void generateSimpleMeshes(TreeInstance &instance);
+
+    void generateBase(TreeInstance &instance);
 
     /** Ungenerate the tree */
     void reset();

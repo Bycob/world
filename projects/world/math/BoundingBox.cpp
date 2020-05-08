@@ -34,4 +34,13 @@ void BoundingBox::translate(const vec3d &vec) {
     _lower += vec;
     _upper += vec;
 }
+
+void BoundingBox::addPoint(const vec3d &vec) {
+    _lower.x = min(_lower.x, vec.x);
+    _lower.y = min(_lower.y, vec.y);
+    _lower.z = min(_lower.z, vec.z);
+    _upper.x = max(_upper.x, vec.x);
+    _upper.y = max(_upper.y, vec.y);
+    _upper.z = max(_upper.z, vec.z);
+}
 } // namespace world

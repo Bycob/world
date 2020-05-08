@@ -32,7 +32,7 @@ public:
 
     void setWeight(const TreeParamd &weight);
 
-    void process(Tree &tree) override;
+    void process(TreeInstance &tree) override;
 
     void write(WorldFile &wf) const override;
 

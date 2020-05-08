@@ -22,10 +22,10 @@ TrunkGenerator *TrunkGenerator::clone() const {
 
 double getRadius(double weight) { return pow(weight, 0.75) / 12; }
 
-void TrunkGenerator::process(Tree &tree) {
+void TrunkGenerator::process(TreeInstance &tree) {
     // Création du mesh
-    Mesh &trunkMesh = tree.getTrunkMesh();
-    auto primary = tree.getSkeletton().getPrimaryNode();
+    Mesh &trunkMesh = tree._trunkMesh;
+    auto primary = tree._skeletton.getPrimaryNode();
     auto &primInfo = primary->getInfo();
 
     addRing(trunkMesh, primInfo._position, {1, 0, 0}, {0, 1, 0},

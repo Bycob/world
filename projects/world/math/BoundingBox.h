@@ -20,6 +20,7 @@ public:
     bool contains(const vec3d &c) const;
 
     void translate(const vec3d &vec);
+    void addPoint(const vec3d &vec);
 
 private:
     vec3d _lower;

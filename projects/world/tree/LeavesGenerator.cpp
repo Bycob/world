@@ -12,10 +12,10 @@ LeavesGenerator::LeavesGenerator(double leafDensity, double weightThreshold)
 
 void LeavesGenerator::setLeafDensity(double density) { _leafDensity = density; }
 
-void LeavesGenerator::process(Tree &tree) {
-    Mesh &leaves = tree.leavesMesh();
-    Mesh &trunk = tree.getTrunkMesh();
-    TreeSkeletton &skeletton = tree.getSkeletton();
+void LeavesGenerator::process(TreeInstance &tree) {
+    Mesh &leaves = tree._leavesMesh;
+    Mesh &trunk = tree._trunkMesh;
+    TreeSkeletton &skeletton = tree._skeletton;
 
     processNode(*skeletton.getPrimaryNode(), leaves, trunk);
 }

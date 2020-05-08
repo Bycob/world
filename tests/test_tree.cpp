@@ -8,7 +8,6 @@
 using namespace world;
 
 void testCircularSkeletton(int argc, char **argv);
-void testTreeGroup(int argc, char **argv);
 void testTree(int argc, char **argv);
 void testGrass();
 void testRock();
@@ -33,16 +32,6 @@ void testCircularSkeletton(int argc, char **argv) {
     thirdNode->addNeighbour(primaryNode);
 
     delete skeletton;
-}
-
-void testTreeGroup(int argc, char **argv) {
-    Collector collector(CollectorPresets::SCENE);
-
-    TreeGroup treeGroup;
-    treeGroup.addTree(vec3d{1, 1, 1});
-    treeGroup.addTree(vec3d{2, 5, 1});
-
-    treeGroup.collectAll(collector, 1);
 }
 
 void testTree(int argc, char **argv) {
@@ -82,13 +71,14 @@ void testTree(int argc, char **argv) {
 
     tree.addWorker<TrunkGenerator>();
     tree.addWorker<LeavesGenerator>();
+    tree.addTree();
 
     std::cout << "Generation" << std::endl;
     Collector collector(CollectorPresets::SCENE);
     tree.collectAll(collector, 15);
 
     std::cout << "Converting skeletton into 3D model..." << std::endl;
-    std::shared_ptr<Mesh> mesh(tree.getSkeletton().convertToMesh());
+    std::shared_ptr<Mesh> mesh(tree.getTreeInstance(0)._skeletton.convertToMesh());
 
     std::cout << "Ecriture du modele du squelette..." << std::endl;
     ObjLoader file;

@@ -1,7 +1,6 @@
 #include "ForestLayer.h"
 
 #include "world/core/Chunk.h"
-#include "TreeGroup.h"
 
 namespace world {
 
@@ -9,7 +8,10 @@ WORLD_REGISTER_CHILD_CLASS(IChunkDecorator, ForestLayer, "ForestLayer")
 
 ForestLayer::ForestLayer()
         : _rng(static_cast<u32>(time(NULL))),
+          _templateTree(std::make_unique<Tree>()),
           _treeSprite(3, 3, ImageType::RGB) {
+
+    _templateTree->randomize();
 
     for (int x = 0; x < 3; ++x) {
         for (int y = 0; y < 3; ++y) {
@@ -58,7 +60,7 @@ void ForestLayer::decorate(Chunk &chunk, const ExplorationContext &ctx) {
 
     // Populate trees
     int remainingTrees = 0;
-    TreeGroup *treeGroup = nullptr;
+    Tree *trees = nullptr;
 
     for (auto &pt : randomPoints) {
         vec3d origin{chunkOffset.x + pt.x, chunkOffset.y + pt.y, 0};
@@ -75,13 +77,14 @@ void ForestLayer::decorate(Chunk &chunk, const ExplorationContext &ctx) {
 
         if (stddistrib(_rng) < getDensityAtAltitude(altitude)) {
             if (remainingTrees <= 0) {
-                treeGroup = &chunk.addChild<TreeGroup>();
-                treeGroup->setPosition3D(chunkSize / 2.0);
+                trees = &chunk.addChild<Tree>();
+                trees->setup(*_templateTree);
+                trees->setPosition3D(chunkSize / 2.0);
                 remainingTrees = 50; // treeGroup->maxTreeCount();
             }
 
             vec3d pos{pt.x, pt.y, altitude - chunkOffset.z};
-            treeGroup->addTree(pos - chunkSize / 2.0);
+            trees->addTree(pos - chunkSize / 2.0);
             --remainingTrees;
 
             /*ground.paintTexture(
@@ -92,10 +95,16 @@ void ForestLayer::decorate(Chunk &chunk, const ExplorationContext &ctx) {
 }
 
 void ForestLayer::write(WorldFile &wf) const {
+    wf.addChild("templateTree",
+                dynamic_cast<WorldNode &>(*_templateTree).serialize());
     wf.addDouble("maxDensity", _maxDensity);
 }
 
 void ForestLayer::read(const WorldFile &wf) {
+    if (wf.hasChild("templateTree")) {
+        _templateTree = std::make_unique<Tree>();
+        _templateTree->read(wf.readChild("templateTree"));
+    }
     wf.readDoubleOpt("maxDensity", _maxDensity);
 }
 

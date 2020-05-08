@@ -30,6 +30,7 @@ SimpleTreeDecorator::SimpleTreeDecorator(int maxTreesPerChunk)
 
     _model.addWorker<TrunkGenerator>(12);
     _model.addWorker<LeavesGenerator>(0.2, 0.15);
+    _model.addTree();
 }
 
 void SimpleTreeDecorator::setModel(const Tree &model) { _model.setup(model); }

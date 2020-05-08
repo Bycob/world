@@ -8,12 +8,12 @@
 
 namespace world {
 
-class Tree;
+class TreeInstance;
 
 class WORLDAPI_EXPORT ITreeWorker : public ICloneable<ITreeWorker>,
                                     public ISerializable {
 public:
-    virtual void process(Tree &tree) = 0;
+    virtual void process(TreeInstance &tree) = 0;
 };
 } // namespace world
 

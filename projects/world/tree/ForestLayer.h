@@ -8,6 +8,7 @@
 #include "world/core/IChunkDecorator.h"
 #include "world/flat/FlatWorld.h"
 #include "world/assets/Image.h"
+#include "Tree.h"
 
 namespace world {
 
@@ -24,6 +25,8 @@ public:
 
 private:
     std::mt19937 _rng;
+
+    std::unique_ptr<Tree> _templateTree;
 
     Image _treeSprite;
 
