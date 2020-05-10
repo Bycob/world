@@ -7,7 +7,29 @@
             "decorators": [
                 {
                     "type": "ForestLayer",
-                    "maxDensity": 2000.0
+                    "maxDensity": 2000.0,
+                    "templateTree": {
+                        "key": "",
+                        "children": [],
+                        "workers": [
+                            {
+                                "type": "TreeSkelettonGenerator"
+                            },
+                            {
+                                "type": "TrunkGenerator",
+                                "segmentCount": 12,
+                                "resolution": 20.0
+                            },
+                            {
+                                "type": "LeavesGenerator"
+                            }
+                        ],
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        }
+                    }
                 },
                 {
                     "type": "InstancePool_SeedDistribution",
@@ -126,8 +148,8 @@
                 "type": "PerlinTerrainGenerator",
                 "maxOctaves": 11,
                 "perlinInfo": {
-                    "octaves": 3,
-                    "persistence": 0.5,
+                    "octaves": 5,
+                    "persistence": 0.45,
                     "repeatable": false,
                     "reference": 0,
                     "frequency": 4.0,

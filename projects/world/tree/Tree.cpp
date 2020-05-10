@@ -66,22 +66,30 @@ void Tree::setup(const Tree &model) {
     }
 }
 
+const double SIMPLE_RES = 2;
+const double BASE_RES = 7;
+
 void Tree::collect(ICollector &collector,
                    const IResolutionModel &resolutionModel,
                    const ExplorationContext &ctx) {
 
+    // All the trees are too far to be seen
     auto allRes = resolutionModel.getMaxResolutionIn(_internal->_bbox, ctx);
-    auto templates = collectTemplates(collector, ctx, allRes);
+    if (allRes < SIMPLE_RES)
+        return;
 
     if (collector.hasChannel<SceneNode>()) {
         auto &objChan = collector.getChannel<SceneNode>();
         int tpCount = 0;
 
         for (auto &ti : _internal->_instances) {
-            double resolution = resolutionModel.getResolutionAt(ti->_pos, ctx);
+            ++tpCount;
+            vec3d realPos = ctx.getEnvironment().findNearestFreePoint(
+                ti->_pos, {0, 0, 1}, SIMPLE_RES, ctx);
+            double resolution = resolutionModel.getResolutionAt(realPos, ctx);
 
             // Tree is too far to be seen
-            if (resolution < 1)
+            if (resolution < SIMPLE_RES)
                 continue;
 
             Template tp = collectTree(*ti, collector, ctx, resolution);
@@ -98,14 +106,12 @@ void Tree::collect(ICollector &collector,
                     node.setPosition(
                         node.getPosition() +
                         ctx.getEnvironment().findNearestFreePoint(
-                            tp._position, {0, 0, 1}, resolution, ctx));
+                            tp._position, {0, 0, 1}, item->_minRes, ctx));
 
                     objChan.put(key, node, ctx);
                     ++i;
                 }
             }
-
-            ++tpCount;
         }
     }
 }
@@ -162,9 +168,6 @@ void Tree::read(const WorldFile &wf) {
 
 Template Tree::collectTree(TreeInstance &ti, ICollector &collector,
                            const ExplorationContext &ctx, double res) {
-    const double SIMPLE_RES = 1;
-    const double BASE_RES = 5;
-
     Template tp;
 
     if (collector.hasChannel<Mesh>()) {
@@ -225,6 +228,10 @@ void Tree::generateBase(TreeInstance &instance) {
     for (auto &worker : _internal->_workers) {
         worker->process(instance);
     }
+    // u32 total = instance._trunkMesh.getVerticesCount() +
+    // instance._leavesMesh.getVerticesCount(); std::cout << total << " "  << u
+    // / total << std::endl; std::cout << (u += total * sizeof(Vertex)) <<
+    // std::endl;
 
     instance._generated = true;
 }
@@ -282,6 +289,9 @@ void Tree::generateSimpleMeshes(TreeInstance &instance) {
             }
         }
     }
+    // u32 total = _simpleTrunk.getVerticesCount() +
+    // _simpleLeaves.getVerticesCount(); std::cout << "v " << (v += total *
+    // sizeof(Vertex)) << " + " << u << std::endl;
 
     MeshOps::recalculateNormals(simpleTrunk);
     MeshOps::recalculateNormals(simpleLeaves);

@@ -98,8 +98,9 @@ void MeshOps::singleToDoubleSided(Mesh &mesh) {
 
     for (u32 i = 0; i < faceCount; ++i) {
         auto face = mesh.getFace(i);
-        mesh.newFace(face.getID(0) + offset, face.getID(1) + offset,
-                     face.getID(2) + offset);
+        // Face is flipped
+        mesh.newFace(face.getID(2) + offset, face.getID(1) + offset,
+                     face.getID(0) + offset);
     }
 }
 
