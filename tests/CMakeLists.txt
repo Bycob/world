@@ -27,6 +27,11 @@ if (${WORLD_BUILD_TESTS})
     if (WORLD_COMPILER_IS_GNU)
         add_executable(mem_test mem_test.cpp)
         target_link_libraries(mem_test world)
+
+        if (WORLD_BUILD_VULKAN_MODULES AND WORLD_HAS_VULKAN)
+            target_link_libraries(mem_test vkworld)
+            target_compile_definitions(mem_test PRIVATE USE_VKWORLD=1)
+        endif()
     endif()
 endif()
 

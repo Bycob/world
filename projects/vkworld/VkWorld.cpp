@@ -18,6 +18,8 @@
 
 namespace world {
 
+void VkWorld::loadLibrary() {}
+
 void testCPUMultilayer(HeightmapGround &ground) {
     auto &tex = ground.addWorker<MultilayerGroundTexture>();
     tex.addLayer(DistributionParams{-1, 0, 1, 2, // h

@@ -78,7 +78,8 @@ void testTree(int argc, char **argv) {
     tree.collectAll(collector, 15);
 
     std::cout << "Converting skeletton into 3D model..." << std::endl;
-    std::shared_ptr<Mesh> mesh(tree.getTreeInstance(0)._skeletton.convertToMesh());
+    std::shared_ptr<Mesh> mesh(
+        tree.getTreeInstance(0)._skeletton.convertToMesh());
 
     std::cout << "Ecriture du modele du squelette..." << std::endl;
     ObjLoader file;

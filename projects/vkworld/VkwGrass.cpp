@@ -2,6 +2,7 @@
 
 #include <world/math/Bezier.h>
 #include <world/math/RandomHelper.h>
+#include <world/assets/MeshOps.h>
 
 #include "wrappers/VkwTextureGenerator.h"
 #include "wrappers/VkwRandomTexture.h"
@@ -195,6 +196,8 @@ void VkwGrass::setup() {
     finalMesh.newVertex({-hs, -hs, 0}, norm2, {0, 0});
     finalMesh.addFace({4, 6, 5});
     finalMesh.addFace({4, 7, 6});
+
+    MeshOps::singleToDoubleSided(finalMesh);
 
     _internal->_finalTexture = generator.generateTexture();
 }

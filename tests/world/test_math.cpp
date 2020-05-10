@@ -118,3 +118,41 @@ TEST_CASE("vec2i and vec2d - mixed operators", "[math]") {
         REQUIRE(result.y == 2.5);
     }*/
 }
+
+TEST_CASE("Bounding box", "[math]") {
+    BoundingBox bbox;
+
+    SECTION("add point") {
+        // Points generated with random.org
+        vec3d points[] = {
+            {0.0931959087, 0.3047905515, 0.6859918448},
+            {0.5158539728, 0.9085651401, 0.5314731595},
+            {0.2018859499, 0.4088210356, 0.2293943995},
+            {0.7919055360, 0.7573549862, 0.4555407495},
+            {0.0044395848, 0.2859698819, 0.6574858558},
+            {0.6921222978, 0.6854456297, 0.7073222510},
+            {0.7402779224, 0.5797484260, 0.2564249857},
+            {0.5544457812, 0.4867092335, 0.0642276097},
+            {0.1179276228, 0.0407146120, 0.0963513944},
+            {0.7508715644, 0.8558748203, 0.8228310264},
+        };
+
+        int i = 0;
+        for (auto pt : points) {
+            if (i == 0) {
+                bbox.reset(pt);
+            } else {
+                bbox.addPoint(pt);
+            }
+            ++i;
+        }
+        INFO(bbox.getLowerBound());
+        INFO(bbox.getUpperBound());
+        CHECK((bbox.getLowerBound() -
+               vec3d{0.0044395848, 0.0407146120, 0.0642276097})
+                  .norm() == Approx(0));
+        CHECK((bbox.getUpperBound() -
+               vec3d{0.7919055360, 0.9085651401, 0.8228310264})
+                  .norm() == Approx(0));
+    }
+}

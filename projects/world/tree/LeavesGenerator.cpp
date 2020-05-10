@@ -1,6 +1,7 @@
 #include "LeavesGenerator.h"
 
 #include "Tree.h"
+#include "world/assets/MeshOps.h"
 
 namespace world {
 
@@ -18,6 +19,8 @@ void LeavesGenerator::process(TreeInstance &tree) {
     TreeSkeletton &skeletton = tree._skeletton;
 
     processNode(*skeletton.getPrimaryNode(), leaves, trunk);
+
+    MeshOps::singleToDoubleSided(leaves);
 }
 
 LeavesGenerator *LeavesGenerator::clone() const {

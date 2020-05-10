@@ -41,5 +41,9 @@ public:
         addAll(mesh12, meshes...);
         return mesh12;
     }
+
+    /** Duplicate geometry and flip normals to turn single sided faces into
+     * double sided faces. */
+    static void singleToDoubleSided(Mesh &mesh);
 };
 } // namespace world

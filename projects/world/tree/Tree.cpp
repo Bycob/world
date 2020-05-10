@@ -44,7 +44,7 @@ void Tree::addTree(vec3d pos) {
     _internal->_instances.emplace_back(std::make_unique<TreeInstance>(pos));
 
     if (_internal->_instances.size() == 1) {
-        _internal->_bbox.reset({}, {});
+        _internal->_bbox.reset(pos);
     } else {
         _internal->_bbox.addPoint(pos);
     }
@@ -77,9 +77,14 @@ void Tree::collect(ICollector &collector,
         auto &objChan = collector.getChannel<SceneNode>();
         int tpCount = 0;
 
-        for (auto &tp : templates) {
-            double resolution =
-                resolutionModel.getResolutionAt(tp._position, ctx);
+        for (auto &ti : _internal->_instances) {
+            double resolution = resolutionModel.getResolutionAt(ti->_pos, ctx);
+
+            // Tree is too far to be seen
+            if (resolution < 1)
+                continue;
+
+            Template tp = collectTree(*ti, collector, ctx, resolution);
             auto *item = tp.getAt(resolution);
 
             if (item != nullptr) {
@@ -103,6 +108,125 @@ void Tree::collect(ICollector &collector,
             ++tpCount;
         }
     }
+}
+
+std::vector<Template> Tree::collectTemplates(ICollector &collector,
+                                             const ExplorationContext &ctx,
+                                             double maxRes) {
+    std::vector<Template> templates;
+
+    for (auto &ti : _internal->_instances) {
+        templates.push_back(collectTree(*ti, collector, ctx, maxRes));
+    }
+
+    return templates;
+}
+
+HabitatFeatures Tree::randomize() {
+    _internal->_workers.clear();
+    reset();
+
+    auto &skeletton = addWorker<TreeSkelettonGenerator>();
+    skeletton.setRootWeight(TreeParamsd::gaussian(3, 0.2));
+    skeletton.setForkingCount(
+        TreeParamsi::WeightThreshold(0.15, TreeParamsi::uniform_int(3, 4)));
+    skeletton.setInclination(
+        TreeParamsd::PhiOffset(TreeParamsd::gaussian(0.2 * M_PI, 0.05 * M_PI)));
+    skeletton.setTheta(
+        TreeParamsd::UniformTheta(TreeParamsd::gaussian(0, 0.05 * M_PI)));
+    skeletton.setSize(
+        TreeParamsd::SizeFactor(TreeParamsd::uniform_real(0.5, 0.75)));
+
+    addWorker<TrunkGenerator>(12);
+    addWorker<LeavesGenerator>(0.2, 0.15);
+
+    return HabitatFeatures{};
+}
+
+void Tree::write(WorldFile &wf) const {
+    WorldNode::write(wf);
+    wf.addArray("workers");
+
+    for (auto &worker : _internal->_workers) {
+        wf.addToArray("workers", worker->serializeSubclass());
+    }
+}
+
+void Tree::read(const WorldFile &wf) {
+    WorldNode::read(wf);
+
+    for (auto it = wf.readArray("workers"); !it.end(); ++it) {
+        _internal->_workers.emplace_back(readSubclass<ITreeWorker>(*it));
+    }
+}
+
+Template Tree::collectTree(TreeInstance &ti, ICollector &collector,
+                           const ExplorationContext &ctx, double res) {
+    const double SIMPLE_RES = 1;
+    const double BASE_RES = 5;
+
+    Template tp;
+
+    if (collector.hasChannel<Mesh>()) {
+        auto &meshChannel = collector.getChannel<Mesh>();
+
+        // Simple model (from far away)
+        SceneNode simpleTrunk(ctx({"s1"}).str());
+        SceneNode simpleLeaves(ctx({"s2"}).str());
+
+        if (ti._simpleTrunk.getVerticesCount() == 0)
+            generateSimpleMeshes(ti);
+
+        meshChannel.put({"s1"}, ti._simpleTrunk, ctx);
+        meshChannel.put({"s2"}, ti._simpleLeaves, ctx);
+
+        // Complex tree model
+        SceneNode trunk(ctx({"1"}).str());
+        SceneNode leaves(ctx({"2"}).str());
+
+        if (res > BASE_RES) {
+            if (!ti._generated) {
+                generateBase(ti);
+            }
+
+            meshChannel.put({"1"}, ti._trunkMesh, ctx);
+            meshChannel.put({"2"}, ti._leavesMesh, ctx);
+        }
+
+
+        if (collector.hasChannel<Material>()) {
+            auto &materialsChannel = collector.getChannel<Material>();
+
+            Material leavesMat("leaves");
+            leavesMat.setKd(0.4, 0.9, 0.4);
+
+            simpleTrunk.setMaterialID(ctx({"1"}).str());
+            simpleLeaves.setMaterialID(ctx({"2"}).str());
+
+            trunk.setMaterialID(ctx({"1"}).str());
+            leaves.setMaterialID(ctx({"2"}).str());
+
+            materialsChannel.put({"1"}, ti._trunkMaterial, ctx);
+            materialsChannel.put({"2"}, leavesMat, ctx);
+        }
+
+        tp._position = ti._pos;
+        tp.insert(SIMPLE_RES, {simpleTrunk, simpleLeaves});
+
+        if (res > BASE_RES) {
+            tp.insert(BASE_RES, {trunk, leaves});
+        }
+    }
+
+    return tp;
+}
+
+void Tree::generateBase(TreeInstance &instance) {
+    for (auto &worker : _internal->_workers) {
+        worker->process(instance);
+    }
+
+    instance._generated = true;
 }
 
 void Tree::generateSimpleMeshes(TreeInstance &instance) {
@@ -161,123 +285,6 @@ void Tree::generateSimpleMeshes(TreeInstance &instance) {
 
     MeshOps::recalculateNormals(simpleTrunk);
     MeshOps::recalculateNormals(simpleLeaves);
-}
-
-std::vector<Template> Tree::collectTemplates(ICollector &collector,
-                                             const ExplorationContext &ctx,
-                                             double maxRes) {
-    const double SIMPLE_RES = 1;
-    const double BASE_RES = 5;
-
-    std::vector<Template> templates;
-
-    for (auto &ti : _internal->_instances) {
-        if (collector.hasChannel<Mesh>()) {
-            auto &meshChannel = collector.getChannel<Mesh>();
-
-            // Simple model (from far away)
-            SceneNode simpleTrunk(ctx({"s1"}).str());
-            SceneNode simpleLeaves(ctx({"s2"}).str());
-
-            if (ti->_simpleTrunk.getVerticesCount() == 0)
-                generateSimpleMeshes(*ti);
-
-            meshChannel.put({"s1"}, ti->_simpleTrunk, ctx);
-            meshChannel.put({"s2"}, ti->_simpleLeaves, ctx);
-
-            // Complex tree model
-            SceneNode trunk(ctx({"1"}).str());
-            SceneNode leaves(ctx({"2"}).str());
-
-            if (maxRes > BASE_RES) {
-                if (!ti->_generated) {
-                    generateBase(*ti);
-                }
-
-                meshChannel.put({"1"}, ti->_trunkMesh, ctx);
-                meshChannel.put({"2"}, ti->_leavesMesh, ctx);
-            }
-
-
-            if (collector.hasChannel<Material>()) {
-                auto &materialsChannel = collector.getChannel<Material>();
-
-                Material leavesMat("leaves");
-                leavesMat.setKd(0.4, 0.9, 0.4);
-
-                simpleTrunk.setMaterialID(ctx({"1"}).str());
-                simpleLeaves.setMaterialID(ctx({"2"}).str());
-
-                trunk.setMaterialID(ctx({"1"}).str());
-                leaves.setMaterialID(ctx({"2"}).str());
-
-                materialsChannel.put({"1"}, ti->_trunkMaterial, ctx);
-                materialsChannel.put({"2"}, leavesMat, ctx);
-            }
-
-            Template tp;
-            tp._position = ti->_pos;
-            tp.insert(SIMPLE_RES, {simpleTrunk, simpleLeaves});
-
-            if (maxRes > BASE_RES) {
-                tp.insert(BASE_RES, {trunk, leaves});
-            }
-
-            templates.push_back(tp);
-        }
-    }
-
-    return templates;
-}
-
-HabitatFeatures Tree::randomize() {
-    // TODO merge TreeGroup and Tree to profit of multiple instances per species
-
-    _internal->_workers.clear();
-    reset();
-
-    auto &skeletton = addWorker<TreeSkelettonGenerator>();
-    skeletton.setRootWeight(TreeParamsd::gaussian(3, 0.2));
-    skeletton.setForkingCount(
-        TreeParamsi::WeightThreshold(0.15, TreeParamsi::uniform_int(3, 4)));
-    skeletton.setInclination(
-        TreeParamsd::PhiOffset(TreeParamsd::gaussian(0.2 * M_PI, 0.05 * M_PI)));
-    skeletton.setTheta(
-        TreeParamsd::UniformTheta(TreeParamsd::gaussian(0, 0.05 * M_PI)));
-    skeletton.setSize(
-        TreeParamsd::SizeFactor(TreeParamsd::uniform_real(0.5, 0.75)));
-
-    addWorker<TrunkGenerator>(12);
-    addWorker<LeavesGenerator>(0.2, 0.15);
-
-    addTree();
-
-    return HabitatFeatures{};
-}
-
-void Tree::write(WorldFile &wf) const {
-    WorldNode::write(wf);
-    wf.addArray("workers");
-
-    for (auto &worker : _internal->_workers) {
-        wf.addToArray("workers", worker->serializeSubclass());
-    }
-}
-
-void Tree::read(const WorldFile &wf) {
-    WorldNode::read(wf);
-
-    for (auto it = wf.readArray("workers"); !it.end(); ++it) {
-        _internal->_workers.emplace_back(readSubclass<ITreeWorker>(*it));
-    }
-}
-
-void Tree::generateBase(TreeInstance &instance) {
-    for (auto &worker : _internal->_workers) {
-        worker->process(instance);
-    }
-
-    instance._generated = true;
 }
 
 void Tree::reset() {

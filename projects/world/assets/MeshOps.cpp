@@ -82,4 +82,25 @@ Mesh MeshOps::concatMeshes(const Mesh &mesh1, const Mesh &mesh2) {
     return concat;
 }
 
+void MeshOps::singleToDoubleSided(Mesh &mesh) {
+    const u32 vertCount = mesh.getVerticesCount();
+    const u32 faceCount = mesh.getFaceCount();
+    mesh.reserveVertices(vertCount);
+    mesh.reserveFaces(faceCount);
+
+    for (u32 i = 0; i < vertCount; ++i) {
+        auto vert = mesh.getVertex(i);
+        mesh.newVertex(vert.getPosition(), -vert.getNormal(),
+                       vert.getTexture());
+    }
+
+    const int offset = static_cast<int>(vertCount);
+
+    for (u32 i = 0; i < faceCount; ++i) {
+        auto face = mesh.getFace(i);
+        mesh.newFace(face.getID(0) + offset, face.getID(1) + offset,
+                     face.getID(2) + offset);
+    }
+}
+
 } // namespace world

@@ -6,6 +6,9 @@
 #include <world/core.h>
 #include <world/flat.h>
 
+#ifdef USE_VKWORLD
+#include <vkworld/VkWorld.h>
+#endif
 
 using namespace world;
 
@@ -13,46 +16,30 @@ void generate_test_world(int argc, char **argv);
 
 int main(int argc, char **argv) { generate_test_world(argc, argv); }
 
-#ifdef USE_VKWORLD
-
-#include <vkworld/VkwMultilayerGroundTexture.h>
-#include <vkworld/VkWorld.h>
-
-FlatWorld *createWorld() {
-    FlatWorld *world = new FlatWorld();
-    HeightmapGround &ground = world->setGround<HeightmapGround>();
-
-    ground.setTerrainResolution(65);
-    ground.setTextureRes(128);
-    ground.setMaxLOD(5);
-
-    ground.addWorker<PerlinTerrainGenerator>(3, 4., 0.35);
-    // ground.addWorker<CustomWorldRMModifier>(1);
-    ground.addWorker<VkwMultilayerGroundTexture>().addDefaultLayers();
-
-    return world;
-}
-#else
-
-FlatWorld *createWorld() { return FlatWorld::createDemoFlatWorld(); }
-
-#endif
-
 void generate_test_world(int argc, char **argv) {
+    VkWorld::loadLibrary();
+
     int itcount = 5;
     bool land = true;
     double max = 180000;
 
-    if (argc > 1) {
+    if (argc > 2) {
         try {
-            itcount = std::stoi(argv[1]);
+            itcount = std::stoi(argv[2]);
         } catch (...) {
             std::cout << "Unreadable argument" << std::endl;
         }
     }
 
-    std::cout << "Create world" << std::endl;
-    std::unique_ptr<FlatWorld> world(createWorld());
+    std::unique_ptr<FlatWorld> world;
+    if (argc > 1) {
+        std::cout << "Load world at " << argv[1] << std::endl;
+        world = std::make_unique<FlatWorld>();
+        world->load(argv[1]);
+    } else {
+        std::cout << "Defaulting to demo" << std::endl;
+        world.reset(FlatWorld::createDemoFlatWorld());
+    }
 
     std::cout << "Create explorer and collector" << std::endl;
     FirstPersonView fpsView(700);

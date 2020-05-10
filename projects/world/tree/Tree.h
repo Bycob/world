@@ -73,9 +73,12 @@ private:
 
     void addWorkerInternal(ITreeWorker *worker);
 
-    void generateSimpleMeshes(TreeInstance &instance);
+    Template collectTree(TreeInstance &instance, ICollector &collector,
+                         const ExplorationContext &ctx, double res);
 
     void generateBase(TreeInstance &instance);
+
+    void generateSimpleMeshes(TreeInstance &instance);
 
     /** Ungenerate the tree */
     void reset();
