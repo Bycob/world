@@ -36,6 +36,8 @@ namespace Peace
             _textures = new Dictionary<string, Texture2D>();
 
             SetPosition(Vector3.zero);
+            _view.eyeResolution = 700;
+            _view.maxDistance = 10000;
         }
 
         ~Collector()
@@ -244,8 +246,8 @@ namespace Peace
         struct CollectorView
         {
             public double X, Y, Z;
-            public double eyeResolution = 700;
-            public double maxDistance = 10000;
+            public double eyeResolution;
+            public double maxDistance;
         }
         
         [DllImport("peace")]
