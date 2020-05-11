@@ -26,8 +26,8 @@ public:
     GridStorageReducer _reducer;
     GridStorage<ChunkEntry> _storage;
 
-    GridChunkSystemPrivate()
-            : _tileSystem(0, {}, {}), _reducer(_tileSystem, 30000) {
+    GridChunkSystemPrivate(int maxLod)
+            : _tileSystem(maxLod, {}, {}), _reducer(_tileSystem, maxLod * 3000) {
         _storage.setReducer(&_reducer);
     }
 };
@@ -51,10 +51,9 @@ WORLD_REGISTER_CHILD_CLASS(WorldNode, GridChunkSystem, "GridChunkSystem")
 
 GridChunkSystem::GridChunkSystem(double baseChunkSize, int maxLod,
                                  double baseRes)
-        : _internal(new GridChunkSystemPrivate()) {
+        : _internal(new GridChunkSystemPrivate(maxLod)) {
 
     TileSystem &ts = tileSystem();
-    ts._maxLod = maxLod;
     ts._baseSize = {baseChunkSize};
     // Compute buffer resolution so that the min resolution of lod 1 is equal to
     // baseRes.

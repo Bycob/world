@@ -1,6 +1,6 @@
 ﻿# A Procedural World Generation Library
 
-![Screen capture of the real time demo](gallery/landscape16.png)
+![Screen capture of the real time demo](gallery/landscape17.png)
 
 **World** is a C++ library and collection of tools to create a whole unlimited
 virtual world, using only procedural generation techniques. With a given configuration,
