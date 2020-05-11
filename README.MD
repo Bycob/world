@@ -2,11 +2,11 @@
 
 ![Screen capture of the real time demo](gallery/landscape17.png)
 
-**World** is a C++ library and collection of tools to create a whole unlimited
-virtual world, using only procedural generation techniques. With a given configuration,
+**World** is a C++ library and collection of tools used to create a whole, unlimited
+virtual world using only procedural generation techniques. With a given configuration,
 the library can generate a large amount of assets (meshes, textures, shaders...) and
-integrate them all together in a single scene. Then you can render it with your favorite
-tool, even in real time!
+integrate them all together in a single scene. Then, you can render it with your favorite
+tool- even in real time!
 
 Please check the [World Intro](https://github.com/BynaryCobweb/world/tree/develop/docs)
 if you want to know more about the library.
@@ -24,8 +24,8 @@ The repository also includes:
 - Peace: World package for Unity. Embeds a real-time demo too (this is where the
 screenshot comes from)
 
-There are also a bunch of embryonic packages that are not worth mentioning yet
-but may be up to future development (Pyworld, blender integration, WorldGUI)
+There are also a bunch of embryonic packages that are not worth mentioning yet,
+but might be developped further (Pyworld, blender integration, WorldGUI)
 
 ## Install
 
@@ -47,15 +47,13 @@ sudo apt install libvulkan1 mesa-vulkan-drivers vulkan-utils
 ```
 
 If you can not do that please visit the [official page](https://vulkan.lunarg.com/)
-and follow the instructions there. Those are really good instructions, I guess.
+and follow the instructions there. These are really good instructions, I guess.
 
 ### As a Unity Plugin
 
 You can download *Peace* (World Plugin for Unity) [here](https://github.com/BynaryCobweb/world/releases).
-Just add it to your Unity project and it should be working.
 
-<!-- TODO add a tutorial on how to add it to you Unity project
-Don't forget to add both windows and linux library in the distributed plugin -->
+Follow the tutorial on how to use the plugin for the first time [here](docs/tuto-unity.md).
 
 ### Try the demo
 
@@ -96,7 +94,7 @@ make
 #### If you are using Visual Studio
 
 Open the generated `.sln` file containing the solution for the whole project.
-Then click on `Build > Build Solution` and it will compile all the binaries.
+Then, click on `Build > Build Solution` and it will compile all the binaries.
 
 ### Dependencies
 
@@ -120,7 +118,7 @@ Here is a table of the dependencies for each project:
 | Peace native libraries | No dependency |
 | Peace native libraries with Vulkan support | Vulkan |
 
-To install them you can go on these sites:
+To install them, you can go on these sites:
 - [Vulkan](https://vulkan.lunarg.com/)
 - [Irrlicht](http://irrlicht.sourceforge.net/)
 
@@ -130,8 +128,8 @@ To install them you can go on these sites:
 WorldGUI is an editor to edit world configurations and create complex generators.
 
 You can use Qt creator to build WorldGUI. Open the *.pro* file, and configure the project to
-get it work with your compiler. Then add this to the qmake command line :
+get it work with your compiler. Then, add this to the qmake command line :
 `"WORLDAPI_SOURCES=[WORLD_SOURCE_DIRECTORY]" "WORLDAPI_LIBDIR=[WORLD_BIN_DIRECTORY]"`
 
-Then ensure you have the libraries required to run the application in the qt build folder.
+Ensure you have the libraries required to run the application in the qt build folder.
 -->

@@ -17,7 +17,7 @@ namespace world {
 
 using namespace perlin;
 
-Perlin::modifier Perlin::DEFAULT_MODIFIER = [&](double, double, double val) {
+Perlin::modifier Perlin::DEFAULT_MODIFIER = [](double, double, double val) {
     return val;
 };
 
