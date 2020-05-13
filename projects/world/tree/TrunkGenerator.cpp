@@ -24,12 +24,13 @@ double getRadius(double weight) { return pow(weight, 0.75) / 12; }
 
 void TrunkGenerator::process(TreeInstance &tree) {
     // Création du mesh
-    Mesh &trunkMesh = tree._trunkMesh;
+    Mesh &trunkMesh = tree.trunkMesh();
     auto primary = tree._skeletton.getPrimaryNode();
     auto &primInfo = primary->getInfo();
 
     addRing(trunkMesh, primInfo._position, {1, 0, 0}, {0, 1, 0},
             getRadius(primInfo._weight));
+    setLastRingUV(trunkMesh, 0);
     addNode(trunkMesh, primary, {0, 0, 1}, 0, true);
 }
 
@@ -98,11 +99,15 @@ void TrunkGenerator::addBezierTube(Mesh &mesh, const BezierCurve &curve,
             ax = ay.crossProduct(direction).normalize();
         }
 
+        // Compute radius at
         double rf = 1 - exp(-8 * t * t);
         double radius = startRadius * (1 - rf) + endRadius * rf;
 
         int ringStart = mesh.getVerticesCount();
         addRing(mesh, origin, ax, ay, radius);
+        // mirrored, see under
+        setLastRingUV(mesh, 0.5 - abs(t - 0.5));
+
         int prevRingId = i == 1 ? joinId : ringStart - _segmentCount;
         addFaces(mesh, prevRingId, ringStart);
     }
@@ -118,6 +123,15 @@ void TrunkGenerator::addRing(Mesh &mesh, const vec3d &origin, const vec3d &xvec,
 
         vec3d dir = xvec * cs + yvec * sn;
         mesh.newVertex(origin + dir * radius, dir);
+    }
+}
+
+void TrunkGenerator::setLastRingUV(Mesh &mesh, double v) const {
+    for (int i = 0; i < _segmentCount; ++i) {
+        int j = mesh.getVerticesCount() - _segmentCount + i;
+        // the texture appears mirrored on the two sides of the tree,
+        // because I'm too lazy to just add a vertex somewhere
+        mesh.getVertex(j).setTexture(abs(double(i) / _segmentCount - 0.5), v);
     }
 }
 

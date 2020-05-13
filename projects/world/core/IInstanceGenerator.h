@@ -14,8 +14,11 @@ class WORLDAPI_EXPORT Template {
 public:
     /** One object at one resolution */
     struct Item {
-        std::vector<SceneNode> _nodes;
         double _minRes;
+        std::vector<SceneNode> _nodes;
+
+        Item(double minRes, std::vector<SceneNode> nodes = {})
+                : _minRes(minRes), _nodes(std::move(nodes)) {}
 
         Item &add(const SceneNode &node) {
             _nodes.push_back(node);

@@ -7,6 +7,7 @@
 #include "world/core/IResolutionModel.h"
 #include "world/core/WorldNode.h"
 #include "world/core/IInstanceGenerator.h"
+#include "world/core/ObjectNode.h"
 #include "world/assets/Mesh.h"
 #include "world/assets/Material.h"
 #include "ITreeWorker.h"
@@ -14,23 +15,23 @@
 
 namespace world {
 
-class TreeInstance {
+class TreeInstance : public ObjectInstance {
 public:
     vec3d _pos;
+    bool _generated = false;
 
     TreeSkeletton _skeletton;
 
-    Mesh _simpleTrunk;
-    Mesh _simpleLeaves;
-    Mesh _trunkMesh;
-    Mesh _leavesMesh;
-
-    Material _trunkMaterial;
-
-    bool _generated = false;
-
 
     TreeInstance(vec3d pos);
+
+    Mesh &simpleTrunk();
+    Mesh &simpleLeaves();
+    Mesh &trunkMesh();
+    Mesh &leavesMesh();
+
+    Material &trunkMaterial();
+    Image &trunkTexture();
 
     void reset();
 };

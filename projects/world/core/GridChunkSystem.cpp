@@ -27,7 +27,8 @@ public:
     GridStorage<ChunkEntry> _storage;
 
     GridChunkSystemPrivate(int maxLod)
-            : _tileSystem(maxLod, {}, {}), _reducer(_tileSystem, maxLod * 3000) {
+            : _tileSystem(maxLod, {}, {}),
+              _reducer(_tileSystem, maxLod * 3000) {
         _storage.setReducer(&_reducer);
     }
 };

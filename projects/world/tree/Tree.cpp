@@ -14,26 +14,62 @@ namespace world {
 WORLD_REGISTER_CHILD_CLASS(WorldNode, Tree, "Tree");
 WORLD_SECOND_REGISTER_CHILD_CLASS(IInstanceGenerator, Tree, "Tree")
 
-TreeInstance::TreeInstance(vec3d pos) : _pos(pos), _trunkMaterial("trunk") {
-    _trunkMaterial.setKd(0.5, 0.2, 0);
+
+const double SIMPLE_RES = 2;
+const double BASE_RES = 7;
+
+TreeInstance::TreeInstance(vec3d pos) : _pos(pos) {
+    auto &simpleLod = addLod(SIMPLE_RES, 2);
+
+    Material &simpleTrunkMat = simpleLod.addMaterial();
+    simpleLod.getNode(0).setMaterial(simpleTrunkMat);
+    simpleLod.getNode(1).setMaterialID("leaves");
+
+    auto &baseLod = addLod(BASE_RES, 2);
+
+    Material &trunkMat = baseLod.addMaterial();
+    // trunkMat.setKd(0.5, 0.2, 0);
+    trunkMat.setMapKd(baseLod.getId(0));
+
+    baseLod.getNode(0).setMaterial(trunkMat);
+    baseLod.getNode(1).setMaterialID("leaves");
+
+    baseLod.addTexture();
 }
+
+Mesh &TreeInstance::simpleTrunk() { return getLod(0).getMesh(0); }
+
+Mesh &TreeInstance::simpleLeaves() { return getLod(0).getMesh(1); }
+
+Mesh &TreeInstance::trunkMesh() { return getLod(1).getMesh(0); }
+
+Mesh &TreeInstance::leavesMesh() { return getLod(1).getMesh(1); }
+
+Material &TreeInstance::trunkMaterial() { return getLod(1).getMaterial(0); }
+
+Image &TreeInstance::trunkTexture() { return getLod(1).getTexture(0); }
 
 void TreeInstance::reset() {
     _generated = false;
 
-    _trunkMesh = Mesh();
-    _leavesMesh = Mesh();
-    _simpleTrunk = Mesh();
-    _simpleLeaves = Mesh();
+    simpleTrunk() = Mesh();
+    simpleLeaves() = Mesh();
+    trunkMesh() = Mesh();
+    leavesMesh() = Mesh();
 }
 
 
 class PTree {
 public:
-    std::vector<std::unique_ptr<TreeInstance>> _instances;
     std::vector<std::unique_ptr<ITreeWorker>> _workers;
 
+    std::vector<std::unique_ptr<TreeInstance>> _instances;
     BoundingBox _bbox;
+
+    // Common assets
+    Image _leavesTexture;
+
+    PTree() : _leavesTexture(1, 1, ImageType::RGBA) {}
 };
 
 Tree::Tree() : _internal(new PTree()) {}
@@ -65,9 +101,6 @@ void Tree::setup(const Tree &model) {
         addTree(ti->_pos);
     }
 }
-
-const double SIMPLE_RES = 2;
-const double BASE_RES = 7;
 
 void Tree::collect(ICollector &collector,
                    const IResolutionModel &resolutionModel,
@@ -168,57 +201,26 @@ void Tree::read(const WorldFile &wf) {
 
 Template Tree::collectTree(TreeInstance &ti, ICollector &collector,
                            const ExplorationContext &ctx, double res) {
-    Template tp;
 
-    if (collector.hasChannel<Mesh>()) {
-        auto &meshChannel = collector.getChannel<Mesh>();
+    if (res > SIMPLE_RES && ti.simpleTrunk().getVerticesCount() == 0) {
+        generateSimpleMeshes(ti);
+    }
+    if (res > BASE_RES && !ti._generated) {
+        generateBase(ti);
+    }
 
-        // Simple model (from far away)
-        SceneNode simpleTrunk(ctx({"s1"}).str());
-        SceneNode simpleLeaves(ctx({"s2"}).str());
+    Template tp = ti.collect(collector, ctx, res);
+    tp._position = ti._pos;
 
-        if (ti._simpleTrunk.getVerticesCount() == 0)
-            generateSimpleMeshes(ti);
+    if (collector.hasChannel<Material>()) {
+        auto &materialsChannel = collector.getChannel<Material>();
 
-        meshChannel.put({"s1"}, ti._simpleTrunk, ctx);
-        meshChannel.put({"s2"}, ti._simpleLeaves, ctx);
+        Material leavesMat("leaves");
+        leavesMat.setKd(0.4, 0.9, 0.4);
 
-        // Complex tree model
-        SceneNode trunk(ctx({"1"}).str());
-        SceneNode leaves(ctx({"2"}).str());
+        materialsChannel.put({"leaves"}, leavesMat, ctx);
 
-        if (res > BASE_RES) {
-            if (!ti._generated) {
-                generateBase(ti);
-            }
-
-            meshChannel.put({"1"}, ti._trunkMesh, ctx);
-            meshChannel.put({"2"}, ti._leavesMesh, ctx);
-        }
-
-
-        if (collector.hasChannel<Material>()) {
-            auto &materialsChannel = collector.getChannel<Material>();
-
-            Material leavesMat("leaves");
-            leavesMat.setKd(0.4, 0.9, 0.4);
-
-            simpleTrunk.setMaterialID(ctx({"1"}).str());
-            simpleLeaves.setMaterialID(ctx({"2"}).str());
-
-            trunk.setMaterialID(ctx({"1"}).str());
-            leaves.setMaterialID(ctx({"2"}).str());
-
-            materialsChannel.put({"1"}, ti._trunkMaterial, ctx);
-            materialsChannel.put({"2"}, leavesMat, ctx);
-        }
-
-        tp._position = ti._pos;
-        tp.insert(SIMPLE_RES, {simpleTrunk, simpleLeaves});
-
-        if (res > BASE_RES) {
-            tp.insert(BASE_RES, {trunk, leaves});
-        }
+        // TODO leaves texture
     }
 
     return tp;
@@ -240,8 +242,8 @@ void Tree::generateSimpleMeshes(TreeInstance &instance) {
     // trunk
     // TODO utiliser le générateur d'arbres pour générer une version low
     // poly du tronc avec peu de branches.
-    auto &simpleTrunk = instance._simpleTrunk;
-    auto &simpleLeaves = instance._simpleLeaves;
+    auto &simpleTrunk = instance.simpleTrunk();
+    auto &simpleLeaves = instance.simpleLeaves();
 
     vec3d trunkBottom{};
     vec3d trunkTop = trunkBottom + vec3d{0, 0.3, 2};

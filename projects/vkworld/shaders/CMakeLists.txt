@@ -1,9 +1,9 @@
 message(STATUS "Build shaders with ${Vulkan_GLSL_VALIDATOR}")
 
 file(
-	GLOB
+	GLOB_RECURSE
 	WORLD_SHADERS_SOURCES
-	"./*.comp" "./*.frag" "./*.vert"
+	"*.comp" "*.frag" "*.vert"
 )
 
 file(
@@ -11,6 +11,8 @@ file(
 	WORLD_SHADERLIB_SOURCES
 	lib/*.comp
 )
+
+list(REMOVE_ITEM WORLD_SHADERS_SOURCES ${WORLD_SHADERLIB_SOURCES})
 
 set(WORLD_SHADERS_BIN ${WORLD_SHADERLIB_SOURCES})
 

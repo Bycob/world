@@ -25,11 +25,11 @@ void Template::insert(const Item &item) {
 }
 
 void Template::insert(double resolution, const SceneNode &node) {
-    insert(Item{{node}, resolution});
+    insert(Item{resolution, {node}});
 }
 
 void Template::insert(double resolution, const std::vector<SceneNode> &nodes) {
-    insert(Item{nodes, resolution});
+    insert(Item{resolution, nodes});
 }
 
 /*Item &getOrCreate(double resolution) {
@@ -38,7 +38,7 @@ void Template::insert(double resolution, const std::vector<SceneNode> &nodes) {
         return *item;
     }
     else {
-        insert(Item{{}, resolution});
+        insert(Item{resolution, {}});
     }
 }*/
 
@@ -47,7 +47,7 @@ void Template::insert(const SceneNode &node) {
     if (zero != nullptr) {
         zero->_nodes.push_back(node);
     } else {
-        insert({{node}, 0});
+        insert({0, {node}});
     }
 }
 

@@ -29,6 +29,10 @@ public:
         _materialID = std::move(materialID);
     }
 
+    void setMaterial(const Material &material) {
+        _materialID = material.getName();
+    }
+
     const std::string &getMaterialID() const { return _materialID; }
 
     void setPosition(vec3d position) { _position = position; }
