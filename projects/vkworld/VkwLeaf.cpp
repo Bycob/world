@@ -20,11 +20,12 @@ struct VkwLeaf::GeneratingLeaf {
 
 WORLD_REGISTER_CHILD_CLASS(ITreeWorker, VkwLeaf, "VkwLeafTexture")
 
-VkwLeaf::VkwLeaf() : _internal(new VkwLeafPrivate()) {}
+VkwLeaf::VkwLeaf() : _internal(new VkwLeafPrivate()), _grid(_count) {}
 
 VkwLeaf::~VkwLeaf() { delete _internal; }
 
 void VkwLeaf::processTree(Tree &tree) {
+    _grid = tree.getLeavesGrid();
     tree.getLeavesTexture() = generateLeafTexture();
 }
 
@@ -48,25 +49,7 @@ Image VkwLeaf::getTexture(VkwLeaf::GeneratingLeaf *handle) {
     return image;
 }
 
-BoundingBox VkwLeaf::getLeafBbox(u32 id) {
-    u32 line = getLineCount();
-    u32 x = id % line;
-    u32 y = id / line;
-    vec3d o(float(x) / line, float(y) / line, 0);
-
-    BoundingBox bbox(o, o + vec3d{1. / line});
-    return bbox;
-}
-
 VkwLeaf *VkwLeaf::clone() const { return new VkwLeaf(); }
-
-u32 VkwLeaf::getLineCount() {
-    u32 line = 0;
-    while (line * line < _count) {
-        ++line;
-    }
-    return line;
-}
 
 Mesh VkwLeaf::createLeafMesh() {
     Mesh mesh;
@@ -74,7 +57,7 @@ Mesh VkwLeaf::createLeafMesh() {
     for (u32 i = 0; i < _count; ++i) {
         u32 startID = mesh.getVerticesCount();
 
-        BoundingBox bbox = getLeafBbox(i);
+        BoundingBox bbox = _grid.getBbox(i);
         // convert [0,1] to [-1,1]
         vec3d upper = bbox.getUpperBound() * 2 - vec3d{1};
         vec3d lower = bbox.getLowerBound() * 2 - vec3d{1};
@@ -98,13 +81,13 @@ Mesh VkwLeaf::createLeafMesh() {
         // leaf is defined by two bezier curves (currently mirrored)
         vec3d bodyStart = start + Y * stemHeight;
         vec3d bodyEnd = start + Y * 0.95 * dims.y;
-        vec3d dirStart{-1.0, -0.3, 0.0};
-        vec3d dirEnd{-0.1, -1.0, 0.0};
+        vec3d dirStart = vec3d{-0.5, 0.05, 0.0} * dims;
+        vec3d dirEnd = vec3d{-0.05, -0.1, 0.0} * dims;
         BezierCurve curve1{bodyStart, bodyEnd, dirStart, dirEnd};
         BezierCurve curve2{bodyStart,
                            bodyEnd,
                            {-dirStart.x, dirStart.y, dirStart.z},
-                           {-dirEnd.x, dirStart.y, dirStart.z}};
+                           {-dirEnd.x, dirEnd.y, dirEnd.z}};
 
         u32 splits = 4;
         u32 vertPerSplit = 2;
@@ -120,17 +103,25 @@ Mesh VkwLeaf::createLeafMesh() {
                 double tEnd = splitId / total;
                 vec3d splitEndVert = curve1.getPointAt(tEnd);
                 double dist = splitEndVert.x - bodyStart.x;
+                vec3d attachPoint = splitEndVert - vec3d{1, 0.2, 0} * dist;
 
-                mesh.newVertex(splitEndVert - vec3d{1, 0.2, 0} * dist, Z);
+                if (attachPoint.y < bodyStart.y) {
+                    attachPoint.y = bodyStart.y;
+                }
+
+                mesh.newVertex(attachPoint, Z);
             }
         }
 
         // first point
-        mesh.newVertex(curve1.getPointAt(i), Z);
+        mesh.newVertex(curve1.getPointAt(1 / total), Z);
+        mesh.newVertex(curve2.getPointAt(1 / total), Z);
 
         // remaining part of the leaf
         for (u32 j = 0; j < splits; ++j) {
             // first triangle
+            mesh.newFace(splitVert + j, mesh.getVerticesCount() - 2,
+                         splitVert + j + 1);
             mesh.newFace(splitVert + j, mesh.getVerticesCount() - 1,
                          splitVert + j + 1);
 
@@ -140,7 +131,10 @@ Mesh VkwLeaf::createLeafMesh() {
                 double t = x / total;
 
                 mesh.newVertex(curve1.getPointAt(t), Z);
-                mesh.newFace(splitVert + j + 1, mesh.getVerticesCount() - 2,
+                mesh.newVertex(curve2.getPointAt(t), Z);
+                mesh.newFace(splitVert + j + 1, mesh.getVerticesCount() - 4,
+                             mesh.getVerticesCount() - 2);
+                mesh.newFace(splitVert + j + 1, mesh.getVerticesCount() - 3,
                              mesh.getVerticesCount() - 1);
             }
         }

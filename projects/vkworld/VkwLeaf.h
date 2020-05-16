@@ -7,6 +7,7 @@
 #include <world/assets/Mesh.h>
 #include <world/math/BoundingBox.h>
 #include <world/tree/ITreeWorker.h>
+#include <world/core/SpriteGrid.h>
 
 namespace world {
 
@@ -34,19 +35,15 @@ public:
      * then discarded. */
     Image getTexture(GeneratingLeaf *handle);
 
-    BoundingBox getLeafBbox(u32 id);
-
     VkwLeaf *clone() const override;
 
 private:
     VkwLeafPrivate *_internal;
 
-    u32 _count = 1;
+    u32 _count = 7;
     u32 _texSize = 512;
 
-
-    /** Get number of leaves on one line. */
-    u32 getLineCount();
+    SpriteGrid _grid;
 
     Mesh createLeafMesh();
 };

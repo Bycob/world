@@ -8,6 +8,7 @@
 #include "ITreeWorker.h"
 #include "TreeSkeletton.h"
 #include "world/assets/Mesh.h"
+#include "world/core/SpriteGrid.h"
 
 namespace world {
 
@@ -30,9 +31,10 @@ private:
     double _weightThreshold;
 
     void processNode(SkelettonNode<TreeInfo> &node, Mesh &leavesMesh,
-                     Mesh &trunkMesh);
+                     Mesh &trunkMesh, const SpriteGrid &grid);
 
-    void addLeaf(Mesh &mesh, const vec3d &position, const vec3d &normal);
+    void addLeaf(Mesh &mesh, const vec3d &position, const vec3d &normal,
+                 const SpriteGrid &grid);
 };
 
 } // namespace world

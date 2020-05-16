@@ -8,6 +8,7 @@
 #include "world/core/WorldNode.h"
 #include "world/core/IInstanceGenerator.h"
 #include "world/core/ObjectNode.h"
+#include "world/core/SpriteGrid.h"
 #include "world/assets/Mesh.h"
 #include "world/assets/Material.h"
 #include "ITreeWorker.h"
@@ -17,13 +18,15 @@ namespace world {
 
 class TreeInstance : public ObjectInstance {
 public:
+    Tree &_tree;
+
     vec3d _pos;
     bool _generated = false;
 
     TreeSkeletton _skeletton;
 
 
-    TreeInstance(vec3d pos);
+    TreeInstance(Tree &tree, vec3d pos);
 
     Mesh &simpleTrunk();
     Mesh &simpleLeaves();
@@ -48,6 +51,8 @@ public:
     void addTree(vec3d pos = {});
 
     Image &getLeavesTexture();
+
+    const SpriteGrid &getLeavesGrid();
 
     TreeInstance &getTreeInstance(int i);
 
@@ -78,6 +83,8 @@ private:
 
     Template collectTree(TreeInstance &instance, ICollector &collector,
                          const ExplorationContext &ctx, double res);
+
+    void generateSelf();
 
     void generateBase(TreeInstance &instance);
 

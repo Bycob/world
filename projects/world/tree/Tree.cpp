@@ -18,7 +18,7 @@ WORLD_SECOND_REGISTER_CHILD_CLASS(IInstanceGenerator, Tree, "Tree")
 const double SIMPLE_RES = 2;
 const double BASE_RES = 7;
 
-TreeInstance::TreeInstance(vec3d pos) : _pos(pos) {
+TreeInstance::TreeInstance(Tree &tree, vec3d pos) : _tree(tree), _pos(pos) {
     auto &simpleLod = addLod(SIMPLE_RES, 2);
 
     Material &simpleTrunkMat = simpleLod.addMaterial();
@@ -68,8 +68,12 @@ public:
 
     // Common assets
     Image _leavesTexture;
+    SpriteGrid _grid;
 
-    PTree() : _leavesTexture(1, 1, ImageType::RGBA) {}
+    bool _generated = false;
+
+
+    PTree() : _leavesTexture(1, 1, ImageType::RGBA), _grid(4) {}
 };
 
 Tree::Tree() : _internal(new PTree()) {}
@@ -77,7 +81,8 @@ Tree::Tree() : _internal(new PTree()) {}
 Tree::~Tree() { delete _internal; }
 
 void Tree::addTree(vec3d pos) {
-    _internal->_instances.emplace_back(std::make_unique<TreeInstance>(pos));
+    _internal->_instances.emplace_back(
+        std::make_unique<TreeInstance>(*this, pos));
 
     if (_internal->_instances.size() == 1) {
         _internal->_bbox.reset(pos);
@@ -87,6 +92,8 @@ void Tree::addTree(vec3d pos) {
 }
 
 Image &Tree::getLeavesTexture() { return _internal->_leavesTexture; }
+
+const SpriteGrid &Tree::getLeavesGrid() { return _internal->_grid; }
 
 TreeInstance &Tree::getTreeInstance(int i) {
     return *_internal->_instances.at(i);
@@ -207,6 +214,9 @@ Template Tree::collectTree(TreeInstance &ti, ICollector &collector,
     if (res > SIMPLE_RES && ti.simpleTrunk().getVerticesCount() == 0) {
         generateSimpleMeshes(ti);
     }
+    if (!_internal->_generated) {
+        generateSelf();
+    }
     if (res > BASE_RES && !ti._generated) {
         generateBase(ti);
     }
@@ -218,14 +228,32 @@ Template Tree::collectTree(TreeInstance &ti, ICollector &collector,
         auto &materialsChannel = collector.getChannel<Material>();
 
         Material leavesMat("leaves");
-        leavesMat.setKd(0.4, 0.9, 0.4);
+        auto &leavesTex = _internal->_leavesTexture;
+
+        if (collector.hasChannel<Image>() &&
+            leavesTex.width() * leavesTex.height() != 1) {
+            auto &texChannel = collector.getChannel<Image>();
+
+            leavesMat.setKd(1.0, 1.0, 1.0);
+            leavesMat.setMapKd(ctx({"leaves"}).str());
+            leavesMat.setTransparent(true);
+            texChannel.put({"leaves"}, leavesTex, ctx);
+        } else {
+            leavesMat.setKd(0.4, 0.9, 0.4);
+        }
 
         materialsChannel.put({"leaves"}, leavesMat, ctx);
-
-        // TODO leaves texture
     }
 
     return tp;
+}
+
+void Tree::generateSelf() {
+    for (auto &worker : _internal->_workers) {
+        worker->processTree(*this);
+    }
+
+    _internal->_generated = true;
 }
 
 void Tree::generateBase(TreeInstance &instance) {
@@ -305,6 +333,8 @@ void Tree::reset() {
     for (auto &ti : _internal->_instances) {
         ti->reset();
     }
+
+    _internal->_leavesTexture = Image(1, 1, ImageType::RGBA);
 }
 
 void Tree::addWorkerInternal(ITreeWorker *worker) {
