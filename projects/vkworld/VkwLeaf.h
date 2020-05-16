@@ -6,17 +6,22 @@
 #include <world/assets/Image.h>
 #include <world/assets/Mesh.h>
 #include <world/math/BoundingBox.h>
+#include <world/tree/ITreeWorker.h>
 
 namespace world {
 
 class VkwLeafPrivate;
 
-class VKWORLD_EXPORT VkwLeaf {
+// TODO change name to VkwLeafTexture
+class VKWORLD_EXPORT VkwLeaf : public ITreeWorker {
+    WORLD_WRITE_SUBCLASS_METHOD
 public:
     struct GeneratingLeaf;
 
     VkwLeaf();
-    ~VkwLeaf();
+    ~VkwLeaf() override;
+
+    void processTree(Tree &tree) override;
 
     /** Generate one leaf texture. */
     Image generateLeafTexture();
@@ -31,11 +36,13 @@ public:
 
     BoundingBox getLeafBbox(u32 id);
 
+    VkwLeaf *clone() const override;
+
 private:
     VkwLeafPrivate *_internal;
 
-    u32 _count;
-    u32 _texSize;
+    u32 _count = 1;
+    u32 _texSize = 512;
 
 
     /** Get number of leaves on one line. */

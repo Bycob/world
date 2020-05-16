@@ -86,6 +86,8 @@ void Tree::addTree(vec3d pos) {
     }
 }
 
+Image &Tree::getLeavesTexture() { return _internal->_leavesTexture; }
+
 TreeInstance &Tree::getTreeInstance(int i) {
     return *_internal->_instances.at(i);
 }
@@ -228,7 +230,7 @@ Template Tree::collectTree(TreeInstance &ti, ICollector &collector,
 
 void Tree::generateBase(TreeInstance &instance) {
     for (auto &worker : _internal->_workers) {
-        worker->process(instance);
+        worker->processInstance(instance);
     }
     // u32 total = instance._trunkMesh.getVerticesCount() +
     // instance._leavesMesh.getVerticesCount(); std::cout << total << " "  << u

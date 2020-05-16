@@ -47,6 +47,8 @@ public:
 
     void addTree(vec3d pos = {});
 
+    Image &getLeavesTexture();
+
     TreeInstance &getTreeInstance(int i);
 
     void setup(const Tree &model);

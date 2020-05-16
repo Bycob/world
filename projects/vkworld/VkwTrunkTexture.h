@@ -14,7 +14,7 @@ class VKWORLD_EXPORT VkwTrunkTexture : public ITreeWorker {
 public:
     VkwTrunkTexture(const std::string &shaderName = "trunk.frag");
 
-    void process(TreeInstance &tree) override;
+    void processInstance(TreeInstance &tree) override;
 
     VkwTrunkTexture *clone() const override;
 

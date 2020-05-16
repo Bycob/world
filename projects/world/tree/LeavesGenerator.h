@@ -18,7 +18,7 @@ public:
 
     void setLeafDensity(double density);
 
-    void process(TreeInstance &tree) override;
+    void processInstance(TreeInstance &tree) override;
 
     LeavesGenerator *clone() const override;
 

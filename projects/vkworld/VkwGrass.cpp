@@ -178,6 +178,8 @@ void VkwGrass::setup() {
         }
     }
 
+    _internal->_finalTexture = generator.generateTexture();
+
     // Setup final mesh
     double hs = _size / (2 * std::sqrt(2));
     Mesh &finalMesh = _internal->_mesh;
@@ -198,7 +200,5 @@ void VkwGrass::setup() {
     finalMesh.addFace({4, 7, 6});
 
     MeshOps::singleToDoubleSided(finalMesh);
-
-    _internal->_finalTexture = generator.generateTexture();
 }
 } // namespace world

@@ -13,17 +13,20 @@
 #include <vkworld/VkwMultilayerGroundTexture.h>
 #include <vkworld/wrappers/VkwTextureGenerator.h>
 #include <vkworld/VkwGrass.h>
+#include <vkworld/VkwLeaf.h>
 
 using namespace world;
 
 void testMultilayerTerrainTexture(int argc, char **argv);
 void testTextureGenerator();
 void testVkwGrass();
+void testLeaves();
 
 int main(int argc, char **argv) {
-    testMultilayerTerrainTexture(argc, argv);
+    // testMultilayerTerrainTexture(argc, argv);
     // testTextureGenerator();
     // testVkwGrass();
+    testLeaves();
 }
 
 // TODO
@@ -117,4 +120,11 @@ void testVkwGrass() {
 
     Image img = (*collector.getStorageChannel<Image>().begin())._value;
     img.write("assets/vulkan/vkwgrass.png");
+}
+
+void testLeaves() {
+    VkwLeaf leaves;
+    std::cout << "writing to "
+              << "assets/vulkan/vkwleaf.png" << std::endl;
+    leaves.generateLeafTexture().write("assets/vulkan/vkwleaf.png");
 }
