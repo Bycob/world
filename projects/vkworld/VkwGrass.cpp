@@ -57,7 +57,9 @@ std::vector<Template> VkwGrass::collectTemplates(ICollector &collector,
         ItemKey meshKey{"mesh"};
         meshChan.put(meshKey, _internal->_mesh, ctx);
 
-        nodes.emplace_back(ctx.createNode(meshKey, matKey));
+        Template tp;
+        tp.insert(20, ctx.createNode(meshKey, matKey));
+        nodes.emplace_back(tp);
     }
 
     return nodes;

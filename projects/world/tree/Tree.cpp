@@ -299,6 +299,7 @@ void Tree::generateSimpleMeshes(TreeInstance &instance) {
 
     const int ringCount = 4;
     const int segmentCount = 7;
+    const double uvRatio = 4;
 
     for (int i = 0; i < ringCount; ++i) {
         for (int j = 0; j < segmentCount; ++j) {
@@ -306,11 +307,13 @@ void Tree::generateSimpleMeshes(TreeInstance &instance) {
             vec3d vert =
                 leavesCenter + vec3d{cos(angle) * radius[i],
                                      sin(angle) * radius[i], height[i]};
-            simpleLeaves.newVertex(vert);
+            vec3d norm = (vert - leavesCenter).normalize();
+            vec2d uv{(double(i) / (ringCount - 1)) * uvRatio,
+                     (double(j) / (segmentCount - 1)) * uvRatio};
+            simpleLeaves.newVertex(vert, norm, uv);
 
             if (i != ringCount - 1) {
                 int ringOffset = segmentCount * i;
-                int totalOffset = ringOffset;
                 int ids[][3] = {{ringOffset + j, ringOffset + (j + 1) % 7,
                                  ringOffset + segmentCount + j},
                                 {ringOffset + (j + 1) % 7,

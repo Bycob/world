@@ -23,6 +23,10 @@ void VkwWorker::waitForCompletion() {
     ctx._device.waitForFences(_fence, true, 100000000000);
 }
 
+void VkwWorker::reset() {
+    // TODO
+}
+
 
 // ===== VkwComputeWorker =====
 
@@ -68,6 +72,11 @@ void VkwComputeWorker::run() {
 
     vk::SubmitInfo submitInfo(0, nullptr, nullptr, 1, &_commandBuffer);
     ctx.queue(vk::QueueFlagBits::eCompute).submit(submitInfo, _fence);
+}
+
+void VkwComputeWorker::reset() {
+    VkwWorker::reset();
+    // TODO
 }
 
 
@@ -151,6 +160,11 @@ void VkwGraphicsWorker::run() {
 
     vk::SubmitInfo submitInfo(0, nullptr, nullptr, 1, &_commandBuffer);
     ctx.queue(vk::QueueFlagBits::eGraphics).submit(submitInfo, _fence);
+}
+
+void VkwGraphicsWorker::reset() {
+    VkwWorker::reset();
+    // TODO
 }
 
 } // namespace world

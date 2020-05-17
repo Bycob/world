@@ -12,6 +12,7 @@ VkwTrunkTexture::VkwTrunkTexture(const std::string &shaderName)
 
 void VkwTrunkTexture::processInstance(TreeInstance &tree) {
     tree.trunkTexture() = Image(128, 128, ImageType::RGB);
+    // TODO make texture generator usable multiple times
     _texGen.generateTextureAsync();
     _texGen.getGeneratedImage(tree.trunkTexture());
 }

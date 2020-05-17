@@ -30,6 +30,8 @@ public:
 
     void waitForCompletion();
 
+    virtual void reset();
+
 protected:
     vk::CommandBuffer _commandBuffer;
 
@@ -49,6 +51,8 @@ public:
     void dispatchCommand(u32 x, u32 y, u32 z);
 
     void run() override;
+
+    void reset() override;
 
 private:
     std::vector<VkwComputePipeline> _boundPipelines;
@@ -75,6 +79,8 @@ public:
     void endRenderPass();
 
     void run() override;
+
+    void reset() override;
 
 private:
     std::vector<VkwGraphicsPipeline> _boundPipelines;
