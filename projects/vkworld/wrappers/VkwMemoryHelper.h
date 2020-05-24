@@ -8,6 +8,7 @@
 
 #include "IVkwMemoryAccess.h"
 #include "VkwImage.h"
+#include "VkwMemoryCache.h"
 
 namespace world {
 
@@ -30,11 +31,15 @@ public:
      * number of components in the GPU buffer image. */
     static void GPUToImage(IVkwMemoryAccess &memory, Image &img);
 
+    static void GPUToImageu(IVkwMemoryAccess &memory, Image &img);
+
     /** Copy GPU buffer into an image. The GPU buffer must contain floating
      * values between 0 and 1. `elemCount` indicates the number of components
      * of the image in the vulkan buffer. The destination image can have a
      * smaller number of components. */
-    static void GPUToImage(IVkwMemoryAccess &memory, Image &img, u32 elemCount);
+    static void GPUToImage(IVkwMemoryAccess &memory, Image &img, u32 elemCount); // TODO f
+
+    static void GPUToImageu(IVkwMemoryAccess &memory, Image &img, u32 elemCount);
 
     static Image GPUToImage(VkwImage &vkimg);
 
@@ -54,6 +59,9 @@ public:
     /*
     static void toGPU(const Mesh &mesh, IVkwMemoryAccess &memory);
     */
+
+    // No. This is not the good signature.
+    static void copyBuffer(VkwSubBuffer &from, VkwSubBuffer &to);
 };
 
 } // namespace world

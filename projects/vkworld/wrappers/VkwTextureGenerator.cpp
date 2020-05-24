@@ -68,17 +68,18 @@ void VkwTextureGenerator::generateTextureAsync() {
     if (_mesh.empty()) {
         _worker->draw(6);
     } else {
-        // TODO Staging buffers
         // Setup Vertex buffer
         std::vector<VkwVertex> vertices;
 
         for (u32 i = 0; i < _mesh.getVerticesCount(); ++i) {
             vertices.emplace_back(_mesh.getVertex(i));
         }
-        _verticesBuf = ctx.allocate(vertices.size() * sizeof(VkwVertex),
+        auto stagingVert = ctx.allocate(vertices.size() * sizeof(VkwVertex),
                                     DescriptorType::VERTEX_BUFFER,
                                     MemoryUsage::CPU_WRITES);
-        _verticesBuf.setData(&vertices[0]);
+        stagingVert.setData(&vertices[0]);
+        _verticesBuf = ctx.allocate(vertices.size() * sizeof(VkwVertex), DescriptorType::VERTEX_BUFFER, MemoryUsage::GPU_ONLY);
+        VkwMemoryHelper::copyBuffer(stagingVert, _verticesBuf);
 
         // Setup Indices buffer
         std::vector<u32> indices;
@@ -90,10 +91,12 @@ void VkwTextureGenerator::generateTextureAsync() {
                 indices.push_back(face.getID(j));
             }
         }
-        _indicesBuf =
+        auto stagingIndices =
             ctx.allocate(indices.size() * sizeof(u32),
                          DescriptorType::INDEX_BUFFER, MemoryUsage::CPU_WRITES);
-        _indicesBuf.setData(&indices[0]);
+        stagingIndices.setData(&indices[0]);
+        _indicesBuf = ctx.allocate(indices.size() * sizeof(u32), DescriptorType::VERTEX_BUFFER, MemoryUsage::GPU_ONLY);
+        VkwMemoryHelper::copyBuffer(stagingIndices, _indicesBuf);
 
         // Draw Indexed
         _worker->drawIndexed(_indicesBuf, _verticesBuf, indices.size());

@@ -12,21 +12,110 @@
 #include <vkworld/MultilayerGroundTextureOld.h>
 #include <vkworld/VkwMultilayerGroundTexture.h>
 #include <vkworld/wrappers/VkwTextureGenerator.h>
+#include <vkworld/wrappers/VkwMemoryHelper.h>
 #include <vkworld/VkwGrass.h>
 #include <vkworld/VkwLeafTexture.h>
 
 using namespace world;
 
+void testCompute();
+void testRandomImage();
 void testMultilayerTerrainTexture(int argc, char **argv);
 void testTextureGenerator();
 void testVkwGrass();
 void testLeaves();
 
 int main(int argc, char **argv) {
+    world::createDirectories("assets/vulkan/");
+
+    // testCompute();
     // testMultilayerTerrainTexture(argc, argv);
-    // testTextureGenerator();
+    testTextureGenerator();
     // testVkwGrass();
-    testLeaves();
+    // testLeaves();
+    // std::cout << "====" << std::endl;
+    // testRandomImage();
+}
+
+void testCompute() {
+    // This method contains several notes to improve the API later on
+    int size = 1024;
+    int groupSize = 32;
+    int dispatchSize = size / groupSize;
+    
+    std::cout << "Set up..." << std::endl;
+
+    VkwComputeWorker worker;
+
+    VkwDescriptorSetLayout layout({0, 1}, {3, 256});
+
+    // Buffers
+    auto &ctx = Vulkan::context();
+
+    // -- 0
+    vec3u dimsVec(size, size, 1);
+    auto dims = ctx.allocate(sizeof(vec3u), DescriptorType::UNIFORM_BUFFER, MemoryUsage::CPU_WRITES);
+    dims.setData(&dimsVec); // TODO add setData(const T &struct)
+
+    // -- 1
+    struct {
+        u32 octaves = 5;
+        u32 octaveRef = 0;
+        s32 offsetX = 0;
+        s32 offsetY = 0;
+        s32 offsetZ = 0;
+        float frequency = 4.0f;
+        float persistence = 0.5f;
+    } noiseStruct;
+
+    auto noiseParams = ctx.allocate(sizeof(noiseStruct), DescriptorType::UNIFORM_BUFFER, MemoryUsage::CPU_WRITES);
+    noiseParams.setData(&noiseStruct);
+
+    // -- 256
+    Perlin perlin;
+    std::vector<u32> randVec;
+
+    for (u8 u : perlin.getHash()) {
+        randVec.push_back(u);
+    }
+
+    auto random = ctx.allocate(randVec.size() * sizeof(u32), DescriptorType::STORAGE_BUFFER, MemoryUsage::CPU_WRITES);
+    random.setData(&randVec[0]);
+
+    // -- 3
+    auto output = ctx.allocate(size * size * sizeof(float), DescriptorType::STORAGE_BUFFER, MemoryUsage::CPU_READS);
+
+
+    VkwDescriptorSet dset(layout);
+    dset.addDescriptor(0, dims);
+    dset.addDescriptor(1, noiseParams);
+    dset.addDescriptor(3, output);
+    dset.addDescriptor(256, random);
+
+    VkwComputePipeline pipeline(layout, "noise-perlin.comp");
+
+    worker.bindCommand(pipeline, dset);
+    worker.dispatchCommand(dispatchSize, dispatchSize, 1);
+    worker.endCommandRecording(); // endCommand in run ?
+
+    std::cout << "Running..." << std::endl;
+    worker.run();
+    worker.waitForCompletion();
+
+    Image img(size, size, ImageType::GREYSCALE);
+    VkwMemoryHelper::GPUToImage(output, img);
+
+    std::cout << "Completed! Writing to assets/vulkan/compute.png" << std::endl;
+    img.write("assets/vulkan/compute.png");
+}
+
+void testRandomImage() {
+    // Write a random image, then read it from GPU and write it on disk
+    VkwRandomTexture randTex(256);
+
+    world::createDirectories("assets/vulkan/");
+    VkwMemoryHelper::GPUToImage(randTex.get()).write("assets/vulkan/randTex.png");
+    std::cout << "wrote assets/vulkan/randTex.png" << std::endl;
 }
 
 // TODO
@@ -119,6 +208,7 @@ void testVkwGrass() {
     grass.collectAll(collector, 10);
 
     Image img = (*collector.getStorageChannel<Image>().begin())._value;
+    std::cout << "wrote assets/vulkan/vkwgrass.png" << std::endl;
     img.write("assets/vulkan/vkwgrass.png");
 }
 

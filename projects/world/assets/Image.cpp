@@ -529,6 +529,14 @@ const GreyPixel &Image::grey(int x, int y) const {
     return *reinterpret_cast<GreyPixel *>(_internal->at(x, y));
 }
 
+void Image::set(int x, int y, const u8 *values) {
+    u8 *target = _internal->at(x, y);
+
+    for (u32 i = 0; i < _internal->_elemSize; ++i) {
+        target[i] = values[i];
+    }
+}
+
 void Image::setf(int x, int y, const float *values) {
     u8 *target = _internal->at(x, y);
 
