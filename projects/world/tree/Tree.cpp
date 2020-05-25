@@ -50,7 +50,7 @@ Material &TreeInstance::trunkMaterial() { return getLod(1).getMaterial(0); }
 Image &TreeInstance::trunkTexture() { return getLod(1).getTexture(0); }
 
 void TreeInstance::reset() {
-    _generated = false;
+    _resolution = 0;
 
     simpleTrunk() = Mesh();
     simpleLeaves() = Mesh();
@@ -70,7 +70,8 @@ public:
     Image _leavesTexture;
     SpriteGrid _grid;
 
-    bool _generated = false;
+    /// Resolution at which the instance is currently generated.
+    double _resolution = 0;
 
 
     PTree() : _leavesTexture(1, 1, ImageType::RGBA), _grid(4) {}
@@ -211,14 +212,12 @@ void Tree::read(const WorldFile &wf) {
 Template Tree::collectTree(TreeInstance &ti, ICollector &collector,
                            const ExplorationContext &ctx, double res) {
 
-    if (res > SIMPLE_RES && ti.simpleTrunk().getVerticesCount() == 0) {
-        generateSimpleMeshes(ti);
+    // In reverse order
+    if (res > BASE_RES) {
+        generate(ti, BASE_RES);
     }
-    if (!_internal->_generated) {
-        generateSelf();
-    }
-    if (res > BASE_RES && !ti._generated) {
-        generateBase(ti);
+    if (res > SIMPLE_RES) {
+        generate(ti, SIMPLE_RES);
     }
 
     Template tp = ti.collect(collector, ctx, res);
@@ -239,6 +238,8 @@ Template Tree::collectTree(TreeInstance &ti, ICollector &collector,
             leavesMat.setTransparent(true);
             texChannel.put({"leaves"}, leavesTex, ctx);
         } else {
+            // TODO fix this being selected if the trees have not been generated
+            // yet (res < 2)
             leavesMat.setKd(0.4, 0.9, 0.4);
         }
 
@@ -248,88 +249,34 @@ Template Tree::collectTree(TreeInstance &ti, ICollector &collector,
     return tp;
 }
 
-void Tree::generateSelf() {
-    for (auto &worker : _internal->_workers) {
-        worker->processTree(*this);
+void Tree::generateSelf(double resolution) {
+    if (_internal->_resolution >= resolution) {
+        return;
     }
 
-    _internal->_generated = true;
+    for (auto &worker : _internal->_workers) {
+        worker->processTree(*this, resolution);
+    }
+
+    _internal->_resolution = resolution;
 }
 
-void Tree::generateBase(TreeInstance &instance) {
+void Tree::generate(TreeInstance &instance, double resolution) {
+    generateSelf(resolution);
+
+    if (instance._resolution >= resolution) {
+        return;
+    }
+
     for (auto &worker : _internal->_workers) {
-        worker->processInstance(instance);
+        worker->processInstance(instance, resolution);
     }
     // u32 total = instance._trunkMesh.getVerticesCount() +
     // instance._leavesMesh.getVerticesCount(); std::cout << total << " "  << u
     // / total << std::endl; std::cout << (u += total * sizeof(Vertex)) <<
     // std::endl;
 
-    instance._generated = true;
-}
-
-void Tree::generateSimpleMeshes(TreeInstance &instance) {
-    // trunk
-    // TODO utiliser le générateur d'arbres pour générer une version low
-    // poly du tronc avec peu de branches.
-    auto &simpleTrunk = instance.simpleTrunk();
-    auto &simpleLeaves = instance.simpleLeaves();
-
-    vec3d trunkBottom{};
-    vec3d trunkTop = trunkBottom + vec3d{0, 0.3, 2};
-    double trunkRadius = 0.2;
-
-    for (int i = 0; i < 3; ++i) {
-        double angle = M_PI * 2 * i / 3;
-        vec3d shift{cos(angle) * trunkRadius, sin(angle) * trunkRadius, 0};
-        simpleTrunk.newVertex(trunkBottom + shift);
-        simpleTrunk.newVertex(trunkTop + shift);
-        int ids[][3] = {{2 * i, (2 * i + 2) % 6, 2 * i + 1},
-                        {(2 * i + 2) % 6, (2 * i + 2) % 6 + 1, 2 * i + 1}};
-        simpleTrunk.newFace(ids[0]);
-        simpleTrunk.newFace(ids[1]);
-    }
-
-    // leaves
-    // TODO utiliser l'algorithme "QuickHull" pour générer des enveloppes
-    // convexes
-    vec3d leavesCenter = trunkTop;
-    float radius[] = {0.8f, 1.5f, 1.2f, 0.4f};
-    float height[] = {-0.35f, -0.05f, 0.5f, 0.9f};
-
-    const int ringCount = 4;
-    const int segmentCount = 7;
-    const double uvRatio = 4;
-
-    for (int i = 0; i < ringCount; ++i) {
-        for (int j = 0; j < segmentCount; ++j) {
-            double angle = M_PI * 2 * j / segmentCount;
-            vec3d vert =
-                leavesCenter + vec3d{cos(angle) * radius[i],
-                                     sin(angle) * radius[i], height[i]};
-            vec3d norm = (vert - leavesCenter).normalize();
-            vec2d uv{(double(i) / (ringCount - 1)) * uvRatio,
-                     (double(j) / (segmentCount - 1)) * uvRatio};
-            simpleLeaves.newVertex(vert, norm, uv);
-
-            if (i != ringCount - 1) {
-                int ringOffset = segmentCount * i;
-                int ids[][3] = {{ringOffset + j, ringOffset + (j + 1) % 7,
-                                 ringOffset + segmentCount + j},
-                                {ringOffset + (j + 1) % 7,
-                                 ringOffset + segmentCount + (j + 1) % 7,
-                                 ringOffset + segmentCount + j}};
-                simpleLeaves.newFace(ids[0]);
-                simpleLeaves.newFace(ids[1]);
-            }
-        }
-    }
-    // u32 total = _simpleTrunk.getVerticesCount() +
-    // _simpleLeaves.getVerticesCount(); std::cout << "v " << (v += total *
-    // sizeof(Vertex)) << " + " << u << std::endl;
-
-    MeshOps::recalculateNormals(simpleTrunk);
-    MeshOps::recalculateNormals(simpleLeaves);
+    instance._resolution = resolution;
 }
 
 void Tree::reset() {
@@ -337,6 +284,7 @@ void Tree::reset() {
         ti->reset();
     }
 
+    _internal->_resolution = 0;
     _internal->_leavesTexture = Image(1, 1, ImageType::RGBA);
 }
 

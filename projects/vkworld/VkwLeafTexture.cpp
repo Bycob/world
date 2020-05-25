@@ -1,4 +1,4 @@
-#include "VkwLeaf.h"
+#include "VkwLeafTexture.h"
 
 #include <world/assets/Image.h>
 #include <world/tree/Tree.h>
@@ -13,27 +13,30 @@ class VkwLeafPrivate {
 public:
 };
 
-struct VkwLeaf::GeneratingLeaf {
+struct VkwLeafTexture::GeneratingLeaf {
     std::unique_ptr<VkwTextureGenerator> _generator;
 };
 
 
-WORLD_REGISTER_CHILD_CLASS(ITreeWorker, VkwLeaf, "VkwLeafTexture")
+WORLD_REGISTER_CHILD_CLASS(ITreeWorker, VkwLeafTexture, "VkwLeafTexture")
 
-VkwLeaf::VkwLeaf() : _internal(new VkwLeafPrivate()), _grid(_count) {}
+VkwLeafTexture::VkwLeafTexture()
+        : _internal(new VkwLeafPrivate()), _grid(_count) {}
 
-VkwLeaf::~VkwLeaf() { delete _internal; }
+VkwLeafTexture::~VkwLeafTexture() { delete _internal; }
 
-void VkwLeaf::processTree(Tree &tree) {
-    _grid = tree.getLeavesGrid();
-    tree.getLeavesTexture() = generateLeafTexture();
+void VkwLeafTexture::processTree(Tree &tree, double resolution) {
+    if (resolution >= 7) { // TODO and not generated
+        _grid = tree.getLeavesGrid();
+        tree.getLeavesTexture() = generateLeafTexture();
+    }
 }
 
-Image VkwLeaf::generateLeafTexture() {
+Image VkwLeafTexture::generateLeafTexture() {
     return getTexture(generateLeafTextureAsync());
 }
 
-VkwLeaf::GeneratingLeaf *VkwLeaf::generateLeafTextureAsync() {
+VkwLeafTexture::GeneratingLeaf *VkwLeafTexture::generateLeafTextureAsync() {
     auto *handle = new GeneratingLeaf{nullptr};
     handle->_generator = std::make_unique<VkwTextureGenerator>(
         _texSize, _texSize, "leaves.frag");
@@ -42,16 +45,16 @@ VkwLeaf::GeneratingLeaf *VkwLeaf::generateLeafTextureAsync() {
     return handle;
 }
 
-Image VkwLeaf::getTexture(VkwLeaf::GeneratingLeaf *handle) {
+Image VkwLeafTexture::getTexture(VkwLeafTexture::GeneratingLeaf *handle) {
     Image image(_texSize, _texSize, ImageType::RGBA);
     handle->_generator->getGeneratedImage(image);
     delete handle;
     return image;
 }
 
-VkwLeaf *VkwLeaf::clone() const { return new VkwLeaf(); }
+VkwLeafTexture *VkwLeafTexture::clone() const { return new VkwLeafTexture(); }
 
-Mesh VkwLeaf::createLeafMesh() {
+Mesh VkwLeafTexture::createLeafMesh() {
     Mesh mesh;
 
     for (u32 i = 0; i < _count; ++i) {

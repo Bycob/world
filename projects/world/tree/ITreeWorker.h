@@ -14,9 +14,9 @@ class TreeInstance;
 class WORLDAPI_EXPORT ITreeWorker : public ICloneable<ITreeWorker>,
                                     public ISerializable {
 public:
-    virtual void processInstance(TreeInstance &tree) {}
+    virtual void processInstance(TreeInstance &tree, double resolution) {}
 
-    virtual void processTree(Tree &tree) {}
+    virtual void processTree(Tree &tree, double resolution) {}
 };
 } // namespace world
 

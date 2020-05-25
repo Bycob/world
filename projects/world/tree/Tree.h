@@ -21,9 +21,10 @@ public:
     Tree &_tree;
 
     vec3d _pos;
-    bool _generated = false;
-
     TreeSkeletton _skeletton;
+
+    /// Resolution at which the instance is currently generated.
+    double _resolution = 0;
 
 
     TreeInstance(Tree &tree, vec3d pos);
@@ -84,11 +85,9 @@ private:
     Template collectTree(TreeInstance &instance, ICollector &collector,
                          const ExplorationContext &ctx, double res);
 
-    void generateSelf();
+    void generateSelf(double resolution);
 
-    void generateBase(TreeInstance &instance);
-
-    void generateSimpleMeshes(TreeInstance &instance);
+    void generate(TreeInstance &instance, double resolution);
 
     /** Ungenerate the tree */
     void reset();

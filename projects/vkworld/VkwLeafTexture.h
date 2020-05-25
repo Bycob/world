@@ -13,16 +13,15 @@ namespace world {
 
 class VkwLeafPrivate;
 
-// TODO change name to VkwLeafTexture
-class VKWORLD_EXPORT VkwLeaf : public ITreeWorker {
+class VKWORLD_EXPORT VkwLeafTexture : public ITreeWorker {
     WORLD_WRITE_SUBCLASS_METHOD
 public:
     struct GeneratingLeaf;
 
-    VkwLeaf();
-    ~VkwLeaf() override;
+    VkwLeafTexture();
+    ~VkwLeafTexture() override;
 
-    void processTree(Tree &tree) override;
+    void processTree(Tree &tree, double resolution) override;
 
     /** Generate one leaf texture. */
     Image generateLeafTexture();
@@ -35,7 +34,7 @@ public:
      * then discarded. */
     Image getTexture(GeneratingLeaf *handle);
 
-    VkwLeaf *clone() const override;
+    VkwLeafTexture *clone() const override;
 
 private:
     VkwLeafPrivate *_internal;

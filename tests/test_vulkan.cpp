@@ -13,7 +13,7 @@
 #include <vkworld/VkwMultilayerGroundTexture.h>
 #include <vkworld/wrappers/VkwTextureGenerator.h>
 #include <vkworld/VkwGrass.h>
-#include <vkworld/VkwLeaf.h>
+#include <vkworld/VkwLeafTexture.h>
 
 using namespace world;
 
@@ -123,7 +123,7 @@ void testVkwGrass() {
 }
 
 void testLeaves() {
-    VkwLeaf leaves;
+    VkwLeafTexture leaves;
     std::cout << "writing to "
               << "assets/vulkan/vkwleaf.png" << std::endl;
     leaves.generateLeafTexture().write("assets/vulkan/vkwleaf.png");

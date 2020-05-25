@@ -80,6 +80,10 @@ std::vector<SkelettonNode<T> *> WeightedSkeletton<T>::getNodeList() {
     return result;
 }
 
+template <typename T> bool WeightedSkeletton<T>::empty() const {
+    return _primaryNode->_children_or_neighbour.empty();
+}
+
 template <class T> Mesh *WeightedSkeletton<T>::convertToMesh() {
     Mesh *mesh = new Mesh();
 

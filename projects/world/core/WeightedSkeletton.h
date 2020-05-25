@@ -93,6 +93,8 @@ public:
 
     std::vector<SkelettonNode<T> *> getNodeList();
 
+    bool empty() const;
+
     SkelettonNode<T> *getPrimaryNode() const { return _primaryNode.get(); }
 
     Mesh *convertToMesh();

@@ -55,7 +55,11 @@ void TreeSkelettonGenerator::setWeight(const TreeParamd &weight) {
     _weight = weight;
 }
 
-void TreeSkelettonGenerator::processInstance(TreeInstance &tree) {
+void TreeSkelettonGenerator::processInstance(TreeInstance &tree,
+                                             double resolution) {
+    if (resolution < 7 || !tree._skeletton.empty())
+        return;
+
     SkelettonNode<TreeInfo> *primaryNode = tree._skeletton.getPrimaryNode();
     TreeInfo &info = primaryNode->getInfo();
     info._weight = _rootWeight(TreeInfo(), info);

@@ -22,16 +22,44 @@ TrunkGenerator *TrunkGenerator::clone() const {
 
 double getRadius(double weight) { return pow(weight, 0.75) / 12; }
 
-void TrunkGenerator::processInstance(TreeInstance &tree) {
-    // Création du mesh
-    Mesh &trunkMesh = tree.trunkMesh();
-    auto primary = tree._skeletton.getPrimaryNode();
-    auto &primInfo = primary->getInfo();
+void TrunkGenerator::processInstance(TreeInstance &tree, double resolution) {
+    auto &simpleTrunk = tree.simpleTrunk();
 
-    addRing(trunkMesh, primInfo._position, {1, 0, 0}, {0, 1, 0},
-            getRadius(primInfo._weight));
-    setLastRingUV(trunkMesh, 0);
-    addNode(trunkMesh, primary, {0, 0, 1}, 0, true);
+    // TODO low poly trunk (TEMP)
+    if (resolution >= 2 && simpleTrunk.empty()) {
+        // TODO utiliser le générateur d'arbres pour générer une version low
+        // poly du tronc avec peu de branches.
+
+        vec3d trunkBottom{};
+        vec3d trunkTop = trunkBottom + vec3d{0, 0.3, 2};
+        double trunkRadius = 0.2;
+
+        for (int i = 0; i < 3; ++i) {
+            double angle = M_PI * 2 * i / 3;
+            vec3d shift{cos(angle) * trunkRadius, sin(angle) * trunkRadius, 0};
+            simpleTrunk.newVertex(trunkBottom + shift);
+            simpleTrunk.newVertex(trunkTop + shift);
+            int ids[][3] = {{2 * i, (2 * i + 2) % 6, 2 * i + 1},
+                            {(2 * i + 2) % 6, (2 * i + 2) % 6 + 1, 2 * i + 1}};
+            simpleTrunk.newFace(ids[0]);
+            simpleTrunk.newFace(ids[1]);
+        }
+
+        MeshOps::recalculateNormals(simpleTrunk);
+    }
+
+    Mesh &trunkMesh = tree.trunkMesh();
+
+    if (resolution >= 7 && trunkMesh.empty()) {
+        // Création du mesh
+        auto primary = tree._skeletton.getPrimaryNode();
+        auto &primInfo = primary->getInfo();
+
+        addRing(trunkMesh, primInfo._position, {1, 0, 0}, {0, 1, 0},
+                getRadius(primInfo._weight));
+        setLastRingUV(trunkMesh, 0);
+        addNode(trunkMesh, primary, {0, 0, 1}, 0, true);
+    }
 }
 
 void TrunkGenerator::write(WorldFile &wf) const {

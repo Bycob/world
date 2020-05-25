@@ -18,7 +18,7 @@ public:
 
     TrunkGenerator *clone() const override;
 
-    void processInstance(TreeInstance &tree) override;
+    void processInstance(TreeInstance &tree, double resolution) override;
 
     void write(WorldFile &wf) const override;
 
