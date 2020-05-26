@@ -51,3 +51,19 @@ TEST_CASE("WorldNode", "[nodes]") {
         CHECK(node2._keyPrefix != node3._keyPrefix);
     }
 }
+
+TEST_CASE("ObjectNode", "[nodes]") {
+    ObjectInstance instance;
+
+    instance.addLod(1);
+    instance.addLod(2);
+    instance.addLod(7);
+
+    CHECK(instance.getLodByResolution(0.5)._resolution == 1);
+    CHECK(instance.getLodByResolution(1)._resolution == 1);
+    CHECK(instance.getLodByResolution(1.5)._resolution == 1);
+    CHECK(instance.getLodByResolution(2)._resolution == 2);
+    CHECK(instance.getLodByResolution(2.5)._resolution == 2);
+    CHECK(instance.getLodByResolution(7)._resolution == 7);
+    CHECK(instance.getLodByResolution(7.5)._resolution == 7);
+}

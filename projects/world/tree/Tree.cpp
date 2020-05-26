@@ -37,13 +37,13 @@ TreeInstance::TreeInstance(Tree &tree, vec3d pos) : _tree(tree), _pos(pos) {
     baseLod.addTexture();
 }
 
-Mesh &TreeInstance::simpleTrunk() { return getLod(0).getMesh(0); }
+Mesh &TreeInstance::trunkMesh(double res) {
+    return getLodByResolution(res).getMesh(0);
+}
 
-Mesh &TreeInstance::simpleLeaves() { return getLod(0).getMesh(1); }
-
-Mesh &TreeInstance::trunkMesh() { return getLod(1).getMesh(0); }
-
-Mesh &TreeInstance::leavesMesh() { return getLod(1).getMesh(1); }
+Mesh &TreeInstance::leavesMesh(double res) {
+    return getLodByResolution(res).getMesh(1);
+}
 
 Material &TreeInstance::trunkMaterial() { return getLod(1).getMaterial(0); }
 
@@ -52,10 +52,11 @@ Image &TreeInstance::trunkTexture() { return getLod(1).getTexture(0); }
 void TreeInstance::reset() {
     _resolution = 0;
 
-    simpleTrunk() = Mesh();
-    simpleLeaves() = Mesh();
-    trunkMesh() = Mesh();
-    leavesMesh() = Mesh();
+    for (int i = 0; i < 2; ++i) {
+        for (int j = 0; j < 2; ++j) {
+            getLod(i).getMesh(j) = Mesh();
+        }
+    }
 }
 
 

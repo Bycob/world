@@ -23,10 +23,14 @@ TrunkGenerator *TrunkGenerator::clone() const {
 double getRadius(double weight) { return pow(weight, 0.75) / 12; }
 
 void TrunkGenerator::processInstance(TreeInstance &tree, double resolution) {
-    auto &simpleTrunk = tree.simpleTrunk();
+    auto &trunkMesh = tree.trunkMesh(resolution);
+
+    if (!trunkMesh.empty()) {
+        return;
+    }
 
     // TODO low poly trunk (TEMP)
-    if (resolution >= 2 && simpleTrunk.empty()) {
+    if (resolution >= 2 && resolution < 7) {
         // TODO utiliser le générateur d'arbres pour générer une version low
         // poly du tronc avec peu de branches.
 
@@ -37,20 +41,16 @@ void TrunkGenerator::processInstance(TreeInstance &tree, double resolution) {
         for (int i = 0; i < 3; ++i) {
             double angle = M_PI * 2 * i / 3;
             vec3d shift{cos(angle) * trunkRadius, sin(angle) * trunkRadius, 0};
-            simpleTrunk.newVertex(trunkBottom + shift);
-            simpleTrunk.newVertex(trunkTop + shift);
+            trunkMesh.newVertex(trunkBottom + shift);
+            trunkMesh.newVertex(trunkTop + shift);
             int ids[][3] = {{2 * i, (2 * i + 2) % 6, 2 * i + 1},
                             {(2 * i + 2) % 6, (2 * i + 2) % 6 + 1, 2 * i + 1}};
-            simpleTrunk.newFace(ids[0]);
-            simpleTrunk.newFace(ids[1]);
+            trunkMesh.newFace(ids[0]);
+            trunkMesh.newFace(ids[1]);
         }
 
-        MeshOps::recalculateNormals(simpleTrunk);
-    }
-
-    Mesh &trunkMesh = tree.trunkMesh();
-
-    if (resolution >= 7 && trunkMesh.empty()) {
+        MeshOps::recalculateNormals(trunkMesh);
+    } else {
         // Création du mesh
         auto primary = tree._skeletton.getPrimaryNode();
         auto &primInfo = primary->getInfo();

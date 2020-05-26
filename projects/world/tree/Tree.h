@@ -29,10 +29,8 @@ public:
 
     TreeInstance(Tree &tree, vec3d pos);
 
-    Mesh &simpleTrunk();
-    Mesh &simpleLeaves();
-    Mesh &trunkMesh();
-    Mesh &leavesMesh();
+    Mesh &trunkMesh(double resolution);
+    Mesh &leavesMesh(double resolution);
 
     Material &trunkMaterial();
     Image &trunkTexture();

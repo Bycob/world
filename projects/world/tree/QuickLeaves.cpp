@@ -10,9 +10,13 @@ WORLD_REGISTER_CHILD_CLASS(ITreeWorker, QuickLeaves, "QuickLeaves")
 QuickLeaves::QuickLeaves() {}
 
 void QuickLeaves::processInstance(TreeInstance &instance, double resolution) {
-    auto &simpleLeaves = instance.simpleLeaves();
+    auto &simpleLeaves = instance.leavesMesh(resolution);
 
-    if (resolution < 2 || !simpleLeaves.empty())
+    // TODO set better boundaries:
+    // - minimum resolution of the instance
+    // - resolution at which the leaves are no longer "quick"
+    // (defined by parameters, and the leavesgenerator adapts to it?)
+    if (resolution < 2 || resolution >= 7 || !simpleLeaves.empty())
         return;
 
     // TODO utiliser l'algorithme "QuickHull" pour générer des enveloppes

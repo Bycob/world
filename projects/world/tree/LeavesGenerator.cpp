@@ -14,12 +14,12 @@ LeavesGenerator::LeavesGenerator(double leafDensity, double weightThreshold)
 void LeavesGenerator::setLeafDensity(double density) { _leafDensity = density; }
 
 void LeavesGenerator::processInstance(TreeInstance &tree, double resolution) {
-    Mesh &leaves = tree.leavesMesh();
+    Mesh &leaves = tree.leavesMesh(resolution);
 
-    if (resolution < 7 || !leaves.empty())
+    if (!leaves.empty())
         return;
 
-    Mesh &trunk = tree.trunkMesh();
+    Mesh &trunk = tree.trunkMesh(resolution);
     TreeSkeletton &skeletton = tree._skeletton;
 
     processNode(*skeletton.getPrimaryNode(), leaves, trunk,

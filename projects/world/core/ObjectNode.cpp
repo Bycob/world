@@ -106,11 +106,24 @@ Image &ObjectLod::getTexture(size_t i) { return _textures.at(i); }
 ObjectInstance::ObjectInstance() = default;
 
 ObjectLod &ObjectInstance::addLod(double resolution, size_t meshCount) {
+    // TODO sort lods by resolution
     _lods.emplace_back(_lods.size(), resolution, meshCount);
     return _lods.back();
 }
 
 ObjectLod &ObjectInstance::getLod(size_t i) { return _lods.at(i); }
+
+ObjectLod &ObjectInstance::getLodByResolution(double res) {
+    size_t id;
+
+    for (id = 1; id < _lods.size(); ++id) {
+        if (_lods[id]._resolution > res) {
+            break;
+        }
+    }
+
+    return _lods[id - 1];
+}
 
 Template ObjectInstance::collect(ICollector &collector,
                                  const ExplorationContext &ctx,

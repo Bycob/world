@@ -60,6 +60,8 @@ public:
 
     ObjectLod &getLod(size_t i);
 
+    ObjectLod &getLodByResolution(double res);
+
     Template collect(ICollector &collector, const ExplorationContext &ctx,
                      double maxRes) const;
 
