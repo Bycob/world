@@ -24,10 +24,10 @@ public:
 
     /// First vertex in the main trunk mesh (used when
     /// generating leaves)
-    int _firstVert = 0;
+    int _firstVert = -1;
     /// Last vertex in the main trunk mesh (used when
     /// generating leaves)
-    int _lastVert = 0;
+    int _lastVert = -1;
 };
 
 using TreeSkeletton = WeightedSkeletton<TreeInfo>;

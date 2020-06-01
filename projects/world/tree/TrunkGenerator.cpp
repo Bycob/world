@@ -11,8 +11,8 @@ namespace world {
 
 WORLD_REGISTER_CHILD_CLASS(ITreeWorker, TrunkGenerator, "TrunkGenerator")
 
-TrunkGenerator::TrunkGenerator(int segmentCount, double resolution)
-        : _segmentCount(segmentCount), _resolution(resolution) {}
+TrunkGenerator::TrunkGenerator(int segmentCount)
+        : _segmentCount(segmentCount) {}
 
 TrunkGenerator::~TrunkGenerator() {}
 
@@ -29,52 +29,29 @@ void TrunkGenerator::processInstance(TreeInstance &tree, double resolution) {
         return;
     }
 
-    // TODO low poly trunk (TEMP)
-    if (resolution >= 2 && resolution < 7) {
-        // TODO utiliser le générateur d'arbres pour générer une version low
-        // poly du tronc avec peu de branches.
+    // Création du mesh
+    auto primary = tree._skeletton.getPrimaryNode();
+    auto &primInfo = primary->getInfo();
 
-        vec3d trunkBottom{};
-        vec3d trunkTop = trunkBottom + vec3d{0, 0.3, 2};
-        double trunkRadius = 0.2;
+    primInfo._firstVert = primInfo._lastVert = 0;
 
-        for (int i = 0; i < 3; ++i) {
-            double angle = M_PI * 2 * i / 3;
-            vec3d shift{cos(angle) * trunkRadius, sin(angle) * trunkRadius, 0};
-            trunkMesh.newVertex(trunkBottom + shift);
-            trunkMesh.newVertex(trunkTop + shift);
-            int ids[][3] = {{2 * i, (2 * i + 2) % 6, 2 * i + 1},
-                            {(2 * i + 2) % 6, (2 * i + 2) % 6 + 1, 2 * i + 1}};
-            trunkMesh.newFace(ids[0]);
-            trunkMesh.newFace(ids[1]);
-        }
-
-        MeshOps::recalculateNormals(trunkMesh);
-    } else {
-        // Création du mesh
-        auto primary = tree._skeletton.getPrimaryNode();
-        auto &primInfo = primary->getInfo();
-
-        addRing(trunkMesh, primInfo._position, {1, 0, 0}, {0, 1, 0},
-                getRadius(primInfo._weight));
-        setLastRingUV(trunkMesh, 0);
-        addNode(trunkMesh, primary, {0, 0, 1}, 0, true);
-    }
+    addRing(trunkMesh, primInfo._position, {1, 0, 0}, {0, 1, 0},
+            getRadius(primInfo._weight));
+    setLastRingUV(trunkMesh, 0);
+    addNode(trunkMesh, primary, {0, 0, 1}, resolution, 0, true);
 }
 
 void TrunkGenerator::write(WorldFile &wf) const {
     wf.addInt("segmentCount", _segmentCount);
-    wf.addDouble("resolution", _resolution);
 }
 
 void TrunkGenerator::read(const WorldFile &wf) {
     wf.readIntOpt("segmentCount", _segmentCount);
-    wf.readDoubleOpt("resolution", _resolution);
 }
 
 void TrunkGenerator::addNode(Mesh &mesh, SkelettonNode<TreeInfo> *node,
-                             const vec3d &direction, int joinId,
-                             bool writeVertIds) const {
+                             const vec3d &direction, double resolution,
+                             int joinId, bool writeVertIds) const {
     auto &nodeInfo = node->getInfo();
     vec3d nodePos = nodeInfo._position;
 
@@ -88,28 +65,34 @@ void TrunkGenerator::addNode(Mesh &mesh, SkelettonNode<TreeInfo> *node,
         BezierCurve curve(nodePos, childPos, direction * 0.25,
                           newDirection * -0.25);
 
+        // Compute cut count and drop if it's too small
+        double branchLength = curve._pts[0].length(curve._pts[3]);
+
+        if (branchLength < 1.0 / resolution) {
+            return;
+        }
+        int cutCount = static_cast<int>(ceil(branchLength * resolution));
+
+        // If branch is not dropped, we add the corresponding mesh
         if (writeVertIds) {
             childInfo._firstVert = mesh.getVerticesCount();
         }
 
-        addBezierTube(mesh, curve, getRadius(nodeInfo._weight),
+        addBezierTube(mesh, curve, cutCount, getRadius(nodeInfo._weight),
                       getRadius(childInfo._weight), joinId);
 
         if (writeVertIds) {
             childInfo._lastVert = mesh.getVerticesCount();
         }
 
-        addNode(mesh, child, newDirection,
+        addNode(mesh, child, newDirection, resolution,
                 mesh.getVerticesCount() - _segmentCount, writeVertIds);
     }
 }
 
 void TrunkGenerator::addBezierTube(Mesh &mesh, const BezierCurve &curve,
-                                   double startRadius, double endRadius,
-                                   int joinId) const {
-
-    int cutCount = static_cast<int>(
-        ceil(curve._pts[0].length(curve._pts[3]) * _resolution));
+                                   int cutCount, double startRadius,
+                                   double endRadius, int joinId) const {
 
     for (int i = 1; i <= cutCount; ++i) {
         double t = static_cast<double>(i) / cutCount;

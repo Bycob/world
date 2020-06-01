@@ -2,9 +2,11 @@
 #ifndef WORLD_QUICKLEAVES_H
 #define WORLD_QUICKLEAVES_H
 
+#include <world/core.h>
 #include "world/core/WorldConfig.h"
 
 #include "ITreeWorker.h"
+#include "TreeSkeletton.h"
 
 namespace world {
 
@@ -24,6 +26,15 @@ public:
     void read(const WorldFile &wf) override;
 
 private:
+    std::mt19937 _rng;
+
+    double _maxResolution = 5;
+    Color4d _color;
+
+
+    void addNode(const TreeNode *node, BoundingBox &bbox, int depth = 0);
+
+    void generateTexture(Image &img);
 };
 } // namespace world
 

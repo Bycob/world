@@ -89,13 +89,15 @@ u32 Mesh::getVerticesCount() const { return _verticesCount; }
 
 const Vertex &Mesh::getVertex(u32 id) const {
     if (id >= _verticesCount)
-        throw std::runtime_error("Mesh::getVertex bad index");
+        throw std::runtime_error("Mesh::getVertex bad index: " +
+                                 std::to_string(id));
     return _vertices.at(id);
 }
 
 Vertex &Mesh::getVertex(u32 id) {
     if (id >= _verticesCount)
-        throw std::runtime_error("Mesh::getVertex bad index");
+        throw std::runtime_error("Mesh::getVertex bad index: " +
+                                 std::to_string(id));
     return _vertices.at(id);
 }
 

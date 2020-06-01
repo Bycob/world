@@ -90,6 +90,30 @@ template <> inline void write<vec2u>(const vec2u &s, WorldFile &wf) {
     wf.addInt("y", s.y);
 }
 
+// Color
+
+template <> inline void read<Color4d>(const WorldFile &wf, Color4d &c) {
+    wf.readDoubleOpt("r", c._r);
+    wf.readDoubleOpt("g", c._g);
+    wf.readDoubleOpt("b", c._b);
+    wf.readDoubleOpt("a", c._a);
+}
+
+template <> inline void write<Color4d>(const Color4d &c, WorldFile &wf) {
+    wf.addDouble("r", c._r);
+    wf.addDouble("g", c._g);
+    wf.addDouble("b", c._b);
+    wf.addDouble("a", c._a);
+}
+
+template <> inline void read<Color4u>(const WorldFile &wf, Color4u &c) {
+    wf.readUintOpt("value", c._color);
+}
+
+template <> inline void write<Color4u>(const Color4u &c, WorldFile &wf) {
+    wf.addUint("value", c._color);
+}
+
 // TileSystem
 
 template <> inline void write<TileSystem>(const TileSystem &ts, WorldFile &wf) {

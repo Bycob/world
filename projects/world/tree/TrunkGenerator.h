@@ -12,7 +12,7 @@ namespace world {
 class WORLDAPI_EXPORT TrunkGenerator : public ITreeWorker {
     WORLD_WRITE_SUBCLASS_METHOD
 public:
-    TrunkGenerator(int segmentCount = 12, double resolution = 20);
+    TrunkGenerator(int segmentCount = 12);
 
     ~TrunkGenerator();
 
@@ -26,15 +26,15 @@ public:
 
 private:
     int _segmentCount;
-    double _resolution;
 
     void addNode(Mesh &mesh, SkelettonNode<TreeInfo> *node,
-                 const vec3d &direction, int joinId, bool writeVertIds) const;
+                 const vec3d &direction, double resolution, int joinId,
+                 bool writeVertIds) const;
 
     /// Add a tube around a bezier curve, with a smoothed radius between start
     /// and end. `joinId` is the starting id of the ring that starts the tube.
-    void addBezierTube(Mesh &mesh, const BezierCurve &curve, double startRadius,
-                       double endRadius, int joinId) const;
+    void addBezierTube(Mesh &mesh, const BezierCurve &curve, int cutCount,
+                       double startRadius, double endRadius, int joinId) const;
 
     /// Add a ring of vertices centered on origin and on the plane defined
     /// by xvec and yvec.

@@ -37,6 +37,10 @@ void LeavesGenerator::processNode(SkelettonNode<TreeInfo> &node,
                                   const SpriteGrid &grid) {
     auto &nodeInfo = node.getInfo();
 
+    if (nodeInfo._firstVert < 0) {
+        return;
+    }
+
     if (nodeInfo._weight < _weightThreshold) {
         for (int i = nodeInfo._firstVert; i < nodeInfo._lastVert; ++i) {
             if (_leafDensity > _distrib(_rng)) {

@@ -22,8 +22,15 @@ TreeInstance::TreeInstance(Tree &tree, vec3d pos) : _tree(tree), _pos(pos) {
     auto &simpleLod = addLod(SIMPLE_RES, 2);
 
     Material &simpleTrunkMat = simpleLod.addMaterial();
+    simpleTrunkMat.setKd(0.3, 0.17, 0.13);
     simpleLod.getNode(0).setMaterial(simpleTrunkMat);
-    simpleLod.getNode(1).setMaterialID("leaves");
+
+    Material &simpleLeafMat = simpleLod.addMaterial();
+    simpleLeafMat.setMapKd(simpleLod.getId(0));
+    simpleLeafMat.setTransparent(true);
+    simpleLod.getNode(1).setMaterial(simpleLeafMat);
+
+    simpleLod.addTexture();
 
     auto &baseLod = addLod(BASE_RES, 2);
 

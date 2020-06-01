@@ -76,7 +76,7 @@ SceneNode &ObjectLod::getNode(size_t i) { return _nodes.at(i); }
 
 void ObjectLod::addMaterials(size_t count) {
     for (size_t i = 0; i < count; ++i) {
-        _materials.emplace_back(getId(count));
+        _materials.emplace_back(getId(_materials.size()));
     }
 }
 
