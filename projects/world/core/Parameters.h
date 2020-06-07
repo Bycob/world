@@ -58,5 +58,11 @@ template <typename Out, typename... In> struct Params {
         });
         return ret;
     }
+
+    static Parameter<Out, In...> read(const WorldFile &wf) {
+        Parameter<Out, In...> ret;
+        // TODO
+        return ret;
+    }
 };
 } // namespace world

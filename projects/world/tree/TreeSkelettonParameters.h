@@ -147,46 +147,4 @@ struct SideBranchd {
     }
 };
 
-/*
-        // POIDS
-
-        class SpecialWeightParameter1 : public TreeParameter<double> {
-        public :
-                virtual double operator()(const TreeInfo &info,
-                                                                  int
-   divisionCount, double theta, double phi, double weight, double size) {
-
-                        double w = info.getWeight() * 1.5;
-                        if (info._level == 1) {
-                                w /= 10.0;
-                        }
-                        return w / divisionCount;
-                }
-
-                virtual SpecialWeightParameter1 *clone() const {
-                        return new SpecialWeightParameter1(*this);
-                }
-        };
-
-        // TAILLE
-
-        class SpecialSizeParameter1 : public gaussian {
-        public :
-                SpecialSizeParameter1(double median, double deviation)
-                                : gaussian(median, deviation) {}
-
-                virtual double operator()(const TreeInfo &info) {
-                        double superResult = gaussian::operator()(info);
-                        if (info._level >= 2) {
-                                superResult /= 2.0;
-                        }
-                        return superResult;
-                }
-
-                virtual SpecialSizeParameter1 *clone() const {
-                        return new SpecialSizeParameter1(*this);
-                }
-        };
-*/
-
 } // namespace world
