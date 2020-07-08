@@ -22,23 +22,27 @@ public:
     /// generating trunk.
     bool _hasNext = true;
 
+    // ==== UTILITY VARIABLES =====
+
     /// First vertex in the main trunk mesh (used when
     /// generating leaves)
     int _firstVert = -1;
     /// Last vertex in the main trunk mesh (used when
     /// generating leaves)
     int _lastVert = -1;
-
-    // ==== LEGACY =====
-
-    /// Size of the branch terminated by this node.
-    double _size = 0;
+    /// Parameter corresponding to the starting point on the bezier curve
+    /// of parent
+    double _t = 1;
     /// Rotation around z axis in radians, from 0 to 2 * PI.
     /// 0 means that the branch points toward positive x.
     double _theta = 0;
     /// angle with z axis in radians, from 0 to PI.
     /// 0 means that the branch points toward positive z.
     double _phi = 0;
+    /// Size of the branch terminated by this node.
+    double _size = 0;
+
+    // ==== LEGACY =====
 
     /// Number of children this branch has
     int _forkCount = 0;

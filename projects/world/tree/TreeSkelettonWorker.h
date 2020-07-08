@@ -21,6 +21,10 @@ public:
 private:
     std::mt19937 _rng;
 
+    // Tree parameters;
+    double _weightLambda = 2;
+    double _minWeight = 0.1;
+
     // balancing
     u32 _itcount = 5;
     double _step = 0.2;
@@ -28,14 +32,12 @@ private:
 
     void forkNode(SkelettonNode<TreeInfo> *node);
 
-    void initBranch(SkelettonNode<TreeInfo> *node); // TODO add the other
-                                                    // parameters
+    void initBranch(SkelettonNode<TreeInfo> *parent,
+                    SkelettonNode<TreeInfo> *child);
 
-    void balanceSphere(std::vector<vec3d> &dirs,
-                       const std::vector<double> &weights);
+    void balanceSides(std::vector<SkelettonNode<TreeInfo> *> &branches);
 
-    void balanceSides(std::vector<vec3d> &pos, std::vector<vec3d> &dir,
-                      const std::vector<double> &weights);
+    void balanceSphere(std::vector<SkelettonNode<TreeInfo> *> &branches);
 };
 } // namespace world
 

@@ -65,6 +65,10 @@ template <typename T> struct vec3 {
     vec3<T> ceil() const;
 
     static double length(const vec3<T> &vec1, const vec3<T> &vec2);
+
+    static constexpr vec3<T> X() { return {1, 0, 0}; }
+    static constexpr vec3<T> Y() { return {0, 1, 0}; }
+    static constexpr vec3<T> Z() { return {0, 0, 1}; }
 };
 
 template <typename T> struct vec2 {
@@ -100,6 +104,9 @@ template <typename T> struct vec2 {
     vec2<T> ceil() const;
 
     static double length(const vec2<T> &vec1, const vec2<T> &vec2);
+
+    static constexpr vec2<T> X() { return {1, 0}; }
+    static constexpr vec2<T> Y() { return {0, 1}; }
 };
 
 

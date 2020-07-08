@@ -156,3 +156,18 @@ TEST_CASE("Bounding box", "[math]") {
                   .norm() == Approx(0));
     }
 }
+
+TEST_CASE("Angles", "[math]") {
+    SECTION("wrapAngle") {
+        // Simple case
+        CHECK(wrapAngle(0.5) == Approx(0.5));
+        CHECK(wrapAngle(-0.5) == Approx(-0.5));
+
+        CHECK(wrapAngle(M_PI * 2) == Approx(0));
+        CHECK(wrapAngle(3.5) == Approx(3.5 - M_PI * 2));
+        CHECK(wrapAngle(-3.5) == Approx(M_PI * 2 - 3.5));
+
+        CHECK(wrapAngle(M_PI) == Approx(M_PI));
+        CHECK(wrapAngle(-M_PI) == Approx(-M_PI));
+    }
+}

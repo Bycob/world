@@ -9,6 +9,9 @@ class BezierCurve {
 public:
     vec3d _pts[4];
 
+
+    BezierCurve() : _pts{{}, {}, {}, {}} {}
+
     BezierCurve(vec3d pt1, vec3d pt2, vec3d pt1Weight, vec3d pt2Weight)
             : _pts{pt1, pt1 + pt1Weight, pt2 + pt2Weight, pt2} {}
 

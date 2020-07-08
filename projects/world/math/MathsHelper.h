@@ -62,4 +62,8 @@ template <typename T> inline T powi(T b, int e) {
         return t * t;
     }
 }
+
+/** Returns angle within range [-pi, pi] */
+double wrapAngle(double angle);
+
 } // namespace world
