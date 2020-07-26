@@ -11,9 +11,15 @@ class WORLDAPI_EXPORT TreeInfo : public SkelettonNodeInfo {
 public:
     /// Curve followed by the branch
     BezierCurve _curve;
-    /// The weight of a branch is generally lower on the high end of the
-    /// branch. This is the weight of the branch on its high end.
-    double _endWeight;
+    /// The size of a branch is generally smaller on the high end of the
+    /// branch. This is the area of the branch on its low end.
+    double _startArea = 0;
+    /// The size of a branch is generally smaller on the high end of the
+    /// branch. This is the area of the branch on its high end.
+    double _endArea = 0;
+    /// Weight of the branch alone (without all its children)
+    /// The weight is an approximation of the volume of the tree.
+    double _selfWeight = 0;
     /// True if the branch should be connected to the end of its parent
     /// Always false for root (since it has no parent)
     bool _connected = true;
@@ -49,6 +55,8 @@ public:
     /// ID to identify a single child in a group of children.
     int _forkId = 0;
 };
+
+std::ostream &operator<<(std::ostream &os, TreeInfo &ti);
 
 using TreeSkeletton = WeightedSkeletton<TreeInfo>;
 using TreeNode = SkelettonNode<TreeInfo>;

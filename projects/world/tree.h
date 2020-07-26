@@ -5,6 +5,7 @@
 #include "tree/Tree.h"
 #include "tree/TreeSkelettonGenerator.h"
 #include "tree/TreeSkeletton.h"
+#include "tree/TreeSkelettonWorker.h"
 #include "tree/TreeSkelettonParameters.h"
 #include "tree/TrunkGenerator.h"
 #include "tree/SimpleTreeDecorator.h"

@@ -23,7 +23,7 @@ private:
 
     // Tree parameters;
     double _weightLambda = 2;
-    double _minWeight = 0.1;
+    double _minWeight = 0.002;
 
     // balancing
     u32 _itcount = 5;
@@ -31,6 +31,11 @@ private:
 
 
     void forkNode(SkelettonNode<TreeInfo> *node);
+
+    /** Normalize branch weights according to the budget. Drop branches
+     * that are too thin. */
+    void normalizeWeights(std::vector<SkelettonNode<TreeInfo> *> &branches,
+                          double budget, double weightSum);
 
     void initBranch(SkelettonNode<TreeInfo> *parent,
                     SkelettonNode<TreeInfo> *child);

@@ -27,14 +27,13 @@ public:
 private:
     int _segmentCount;
 
-    void addNode(Mesh &mesh, SkelettonNode<TreeInfo> *node,
-                 const vec3d &direction, double resolution, int joinId,
+    void addNode(Mesh &mesh, SkelettonNode<TreeInfo> *node, double resolution,
                  bool writeVertIds) const;
 
     /// Add a tube around a bezier curve, with a smoothed radius between start
     /// and end. `joinId` is the starting id of the ring that starts the tube.
     void addBezierTube(Mesh &mesh, const BezierCurve &curve, int cutCount,
-                       double startRadius, double endRadius, int joinId) const;
+                       double startRadius, double endRadius) const;
 
     /// Add a ring of vertices centered on origin and on the plane defined
     /// by xvec and yvec.

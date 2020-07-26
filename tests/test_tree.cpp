@@ -44,30 +44,12 @@ void testTree(int argc, char **argv) {
         // to do
     }
 
-    std::cout << "Création du dossier \"tree\"..." << std::endl;
+    std::cout << "Creating folder \"tree\"..." << std::endl;
     createDirectories("assets/tree");
 
-    std::cout << "Parametrage de l'arbre" << std::endl;
+    std::cout << "Setting tree parameters" << std::endl;
     Tree tree;
-    auto &skelGen = tree.addWorker<TreeSkelettonGenerator>();
-
-//#define SIDE_BRANCH
-#ifdef SIDE_BRANCH
-    skelGen.setInclination(SideBranchd::Phi(TreeParamsd::gaussian(0.9, 0.2)));
-    skelGen.setTheta(SideBranchd::Theta(TreeParamsd::gaussian(0, 0.5)));
-    skelGen.setForkingCount(
-        TreeParamsi::WeightThreshold(0.02, TreeParamsi::uniform_int(3, 5)));
-    skelGen.setSize(SideBranchd::Size(TreeParamsd::uniform_real(0.05, 0.5)));
-    skelGen.setWeight(SideBranchd::Weight(TreeParamsd::gaussian(0.5, 0.1)));
-#else  // SIDE_BRANCH
-    skelGen.setInclination(
-        TreeParamsd::PhiOffset(TreeParamsd::gaussian(0.5, 0.1)));
-    skelGen.setTheta(TreeParamsd::UniformTheta(TreeParamsd::gaussian(0, 0.3)));
-    skelGen.setForkingCount(
-        TreeParamsi::WeightThreshold(0.01, TreeParamsi::uniform_int(3, 6)));
-    skelGen.setSize(TreeParamsd::SizeByWeight(1));
-    skelGen.setWeight(TreeParamsd::DefaultWeight());
-#endif // SIDE_BRANCH
+    auto &skelGen = tree.addWorker<TreeSkelettonWorker>();
 
     tree.addWorker<TrunkGenerator>();
     tree.addWorker<LeavesGenerator>();
@@ -75,20 +57,20 @@ void testTree(int argc, char **argv) {
 
     std::cout << "Generation" << std::endl;
     Collector collector(CollectorPresets::SCENE);
-    tree.collectAll(collector, 15);
+    tree.collectAll(collector, 20);
 
     std::cout << "Converting skeletton into 3D model..." << std::endl;
     std::shared_ptr<Mesh> mesh(
         tree.getTreeInstance(0)._skeletton.convertToMesh());
 
-    std::cout << "Ecriture du modele du squelette..." << std::endl;
+    std::cout << "Writing skeletton model..." << std::endl;
     ObjLoader file;
     Scene scene;
     scene.addMesh("mesh1", *mesh);
     scene.addNode(SceneNode("mesh1"));
     file.write(scene, "assets/tree/skeletton");
 
-    std::cout << "Ecriture du modele de l'arbre..." << std::endl;
+    std::cout << "Writing tree model..." << std::endl;
     Scene scene2 = collector.toScene();
     file.write(scene2, "assets/tree/tree");
 }

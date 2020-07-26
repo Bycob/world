@@ -1,4 +1,5 @@
 #include "TreeSkelettonWorker.h"
+#include "Tree.h"
 
 namespace world {
 WORLD_REGISTER_CHILD_CLASS(ITreeWorker, TreeSkelettonWorker,
@@ -7,7 +8,26 @@ WORLD_REGISTER_CHILD_CLASS(ITreeWorker, TreeSkelettonWorker,
 TreeSkelettonWorker::TreeSkelettonWorker() : _rng(std::random_device()()) {}
 
 void TreeSkelettonWorker::processInstance(TreeInstance &tree,
-                                          double resolution) {}
+                                          double resolution) {
+
+    // Create first node
+    auto *node = tree._skeletton.getPrimaryNode();
+    auto &info = node->getInfo();
+
+    // Setup
+    info._curve = {{0}, {0, 0, 1.5}, {0, 0, 0.5}, {0, 0, -0.5}};
+    info._t = 0;
+    info._theta = 0;
+    info._phi = M_PI_2;
+    info._hasNext = true;
+    info._weight = 0.2;
+    info._selfWeight = 0.3 * info._weight;
+    info._size = 1.5;
+    info._startArea = 0.06;
+    info._endArea = 2 * info._selfWeight / info._size - info._startArea;
+
+    forkNode(node);
+}
 
 TreeSkelettonWorker *TreeSkelettonWorker::clone() const {
     return new TreeSkelettonWorker();
@@ -17,15 +37,18 @@ void TreeSkelettonWorker::forkNode(SkelettonNode<TreeInfo> *node) {
     std::uniform_real_distribution<double> rand(0, 1);
     std::exponential_distribution<double> weightDistrib(_weightLambda);
 
-    auto &info = node->getInfo();
-    const auto parentCurve = info._curve;
+    auto &parentInfo = node->getInfo();
+    const double budget = parentInfo._weight - parentInfo._selfWeight;
+    // TODO randomize
+    const double sideRatio = 0.5;
 
-    // SIDE BRANCHES
+    // === SIDE BRANCHES
     std::vector<SkelettonNode<TreeInfo> *> sideBranches;
 
-    // TODO multiply by random factor
-    const double sideBudget = info._endWeight - info._weight;
-    const u32 sideCount = 5; // TODO randomize
+    // TODO reduce by a random amount
+    const double sideBudget = budget * sideRatio;
+    // TODO randomize
+    const u32 sideCount = 0;
 
     double weightSum = 0;
 
@@ -43,39 +66,34 @@ void TreeSkelettonWorker::forkNode(SkelettonNode<TreeInfo> *node) {
         // pick weight: overall the same
         childInfo._weight = 1 + weightDistrib(_rng);
         weightSum += childInfo._weight;
+
+        childInfo._connected = false;
     }
 
-    // Weight normalization
-    for (auto it{sideBranches.begin()}; it != sideBranches.end(); ++it) {
-        auto &childInfo = (*it)->getInfo();
-        childInfo._weight /= weightSum;
-
-        // drop branch if underweight
-        if (childInfo._weight / sideBudget < _minWeight) {
-            sideBranches.erase(it);
-            it--;
-        }
-    }
-
+    normalizeWeights(sideBranches, sideBudget, weightSum);
     balanceSides(sideBranches);
 
     for (auto &sideBranch : sideBranches) {
         auto &childInfo = sideBranch->getInfo();
         // pick inclination towards main branch
-        childInfo._phi = 0.25 * M_PI; // TODO randomize
+        // TODO randomize
+        childInfo._phi = 0.25 * M_PI;
 
         initBranch(node, sideBranch);
     }
 
-    // END BRANCHES
+
+    // === END BRANCHES
     std::vector<SkelettonNode<TreeInfo> *> endBranches;
 
     // Does gravity influence on branches ? rigidity is a parameter
     // -> Gravity also have an influence on side branches
 
-    const double endBudget = info._endWeight;
-    const u32 endCount = 8;
-    const vec3d endPos = parentCurve._pts[3];
+    const double endBudget = budget * (1 - sideRatio);
+    // TODO randomize
+    const u32 endCount = 5;
+
+    weightSum = 0;
 
     for (u32 i = 0; i < endCount; ++i) {
         auto *childNode = node->createChild({});
@@ -84,36 +102,86 @@ void TreeSkelettonWorker::forkNode(SkelettonNode<TreeInfo> *node) {
         auto &childInfo = childNode->getInfo();
 
         // Pick a random direction with uniform spheric distribution
+        childInfo._theta = rand(_rng) * 2 * M_PI;
+
         childInfo._phi = rand(_rng);
         childInfo._phi *= childInfo._phi;
-        childInfo._theta = rand(_rng) * 2 * M_PI;
 
         // Apply parameters to phi
         // ...
-        childInfo._phi *= M_PI_2; // Can be greater than pi / 2?
+        // Can be greater than pi / 2?
+        childInfo._phi *= M_PI_2;
 
         // Weight distribution: few big branches, few very small branches, most
         // are average
+        // TODO See if the method to fix weights does what we want it to do.
+        childInfo._weight = 1 + weightDistrib(_rng);
+        weightSum += childInfo._weight;
+
+        childInfo._connected = true;
     }
 
+    normalizeWeights(endBranches, endBudget, weightSum);
     balanceSphere(endBranches);
 
-    for (auto &sideBranch : sideBranches) {
-        initBranch(node, sideBranch);
+    double maxArea = 0;
+
+    for (auto &endBranch : endBranches) {
+        initBranch(node, endBranch);
+        maxArea = max(maxArea, endBranch->getInfo()._startArea);
     }
 
-    // set "end" property
     if (endBranches.empty()) {
-        info._hasNext = false;
+        // set "end" property
+        parentInfo._hasNext = false;
+    } else {
+        // set area according to children
+        parentInfo._endArea = maxArea;
+    }
+}
+
+void TreeSkelettonWorker::normalizeWeights(
+    std::vector<SkelettonNode<TreeInfo> *> &branches, double budget,
+    double weightSum) {
+    for (auto it{branches.begin()}; it != branches.end(); ++it) {
+        auto &childInfo = (*it)->getInfo();
+        childInfo._weight = childInfo._weight * budget / weightSum;
+
+        // drop branch if underweight
+        if (childInfo._weight < _minWeight) {
+            branches.erase(it);
+            it--;
+        }
     }
 }
 
 void TreeSkelettonWorker::initBranch(SkelettonNode<TreeInfo> *parent,
                                      SkelettonNode<TreeInfo> *child) {
     auto &info = parent->getInfo();
-    const auto parentCurve = info._curve;
     auto &childInfo = child->getInfo();
 
+
+    // Find parameters
+    // TODO randomize (how much weight left to further branches
+    childInfo._selfWeight = childInfo._weight * 0.7;
+
+    // TODO randomize (shape of the branch)
+    const double shapeFactor = 8;
+    const double size =
+        pow(childInfo._selfWeight * shapeFactor * shapeFactor, 1. / 3.);
+    childInfo._size = size;
+
+    // TODO randomize (difference between start and end)
+    childInfo._startArea = childInfo._selfWeight / size * 1.1;
+    childInfo._endArea =
+        2 * childInfo._selfWeight / childInfo._size - childInfo._startArea;
+
+    // TODO radomize / take gravity into account
+    const double bendFactor = 0.5;
+
+
+    // Compute curve
+    const auto parentCurve = info._curve;
     vec3d ez = info._curve.getDerivativeAt(childInfo._t).normalize();
     vec3d ex = vec3d::X();
     vec3d ey = vec3d::Y();
@@ -128,16 +196,11 @@ void TreeSkelettonWorker::initBranch(SkelettonNode<TreeInfo> *parent,
                 cos(childInfo._phi)};
 
     vec3d dir = ex * local.x + ey * local.y + ez * local.z;
-    // TODO turn into parameters
-    const double size = 5;
-    const double bendFactor = 0.2;
 
     vec3d origin = parentCurve.getPointAt(childInfo._t);
     vec3d end = origin + dir * size;
-    childInfo._curve = {origin, end, origin + ez * size * bendFactor,
-                        origin + dir * size * (1 - bendFactor)};
-
-    // TODO compute end weight
+    childInfo._curve = {origin, end, ez * size * bendFactor,
+                        -dir * size * bendFactor};
 }
 
 void TreeSkelettonWorker::balanceSides(
