@@ -32,6 +32,9 @@ public:
 
     SkelettonNode<T> *createChild(const T &info);
 
+    /** Remove this node and all its children */
+    void remove();
+
     void addNeighbour(SkelettonNode<T> *neighbour);
 
     SkelettonNode<T> *createNeighbour(const T &info);

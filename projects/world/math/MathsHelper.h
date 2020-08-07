@@ -41,6 +41,10 @@ constexpr inline auto clamp(T1 value, T2 min, T3 max)
     return value < min ? min : (value > max ? max : value);
 };
 
+template <typename T> constexpr inline T mix(T a, T b, double v) {
+    return a * (1 - v) + b * v;
+}
+
 /** @returns n modulo r, compris entre 0 et r - 1 */
 template <typename T> inline T mod(T n, T r) {
     T m = n % r;

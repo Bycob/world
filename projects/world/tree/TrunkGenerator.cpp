@@ -48,7 +48,7 @@ void TrunkGenerator::read(const WorldFile &wf) {
 
 void TrunkGenerator::addNode(Mesh &mesh, SkelettonNode<TreeInfo> *node,
                              double resolution, bool writeVertIds) const {
-    std::cout << node->getInfo() << std::endl;
+    // std::cout << node->getInfo() << std::endl;
     auto &children = node->getChildrenOrNeighboursAccess();
     auto &info = node->getInfo();
     /*
@@ -63,7 +63,7 @@ void TrunkGenerator::addNode(Mesh &mesh, SkelettonNode<TreeInfo> *node,
 
     // Compute cut count and drop if it's too small
     double branchLength = curve._pts[0].length(curve._pts[3]);
-    std::cout << branchLength << " < " << 1.0 / resolution << std::endl;
+    // std::cout << branchLength << " < " << 1.0 / resolution << std::endl;
 
     if (branchLength < 1.0 / resolution) {
         return;

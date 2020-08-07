@@ -25,6 +25,7 @@ std::ostream &operator<<(std::ostream &os, TreeInfo &ti) {
     os << "\ttheta = " << ti._theta << std::endl;
     os << "\tphi = " << ti._phi << std::endl;
     os << "\tsize = " << ti._size << std::endl;
+    os << "\tstage " << ti._forkCount << ", id " << ti._forkId << std::endl;
     os << "}" << std::endl;
 }
 

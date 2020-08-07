@@ -15,16 +15,19 @@ void TreeSkelettonWorker::processInstance(TreeInstance &tree,
     auto &info = node->getInfo();
 
     // Setup
-    info._curve = {{0}, {0, 0, 1.5}, {0, 0, 0.5}, {0, 0, -0.5}};
     info._t = 0;
     info._theta = 0;
     info._phi = M_PI_2;
     info._hasNext = true;
-    info._weight = 0.2;
-    info._selfWeight = 0.3 * info._weight;
+    info._weight = _startWeight;
+    info._selfWeight = _selfWeight * info._weight;
     info._size = 1.5;
     info._startArea = 0.06;
     info._endArea = 2 * info._selfWeight / info._size - info._startArea;
+    info._curve = {{0},
+                   {0, 0, info._size},
+                   {0, 0, info._size / 3},
+                   {0, 0, -info._size / 3}};
 
     forkNode(node);
 }
@@ -39,16 +42,19 @@ void TreeSkelettonWorker::forkNode(SkelettonNode<TreeInfo> *node) {
 
     auto &parentInfo = node->getInfo();
     const double budget = parentInfo._weight - parentInfo._selfWeight;
+
     // TODO randomize
-    const double sideRatio = 0.5;
+    const double sideRatio = _sideRatio;
+    // TODO randomize
+    const u32 endCount = _endSplit;
+    // TODO randomize
+    const u32 sideCount = _sideSplit;
 
     // === SIDE BRANCHES
     std::vector<SkelettonNode<TreeInfo> *> sideBranches;
 
     // TODO reduce by a random amount
     const double sideBudget = budget * sideRatio;
-    // TODO randomize
-    const u32 sideCount = 0;
 
     double weightSum = 0;
 
@@ -68,6 +74,7 @@ void TreeSkelettonWorker::forkNode(SkelettonNode<TreeInfo> *node) {
         weightSum += childInfo._weight;
 
         childInfo._connected = false;
+        childInfo._forkId = i;
     }
 
     normalizeWeights(sideBranches, sideBudget, weightSum);
@@ -90,8 +97,6 @@ void TreeSkelettonWorker::forkNode(SkelettonNode<TreeInfo> *node) {
     // -> Gravity also have an influence on side branches
 
     const double endBudget = budget * (1 - sideRatio);
-    // TODO randomize
-    const u32 endCount = 5;
 
     weightSum = 0;
 
@@ -119,6 +124,7 @@ void TreeSkelettonWorker::forkNode(SkelettonNode<TreeInfo> *node) {
         weightSum += childInfo._weight;
 
         childInfo._connected = true;
+        childInfo._forkId = i + sideCount;
     }
 
     normalizeWeights(endBranches, endBudget, weightSum);
@@ -138,17 +144,31 @@ void TreeSkelettonWorker::forkNode(SkelettonNode<TreeInfo> *node) {
         // set area according to children
         parentInfo._endArea = maxArea;
     }
+
+    // Fork
+    if (_maxFork > parentInfo._forkCount) {
+        for (auto &sideBranch : sideBranches) {
+            forkNode(sideBranch);
+        }
+
+        for (auto &endBranch : endBranches) {
+            forkNode(endBranch);
+        }
+    }
 }
 
 void TreeSkelettonWorker::normalizeWeights(
     std::vector<SkelettonNode<TreeInfo> *> &branches, double budget,
     double weightSum) {
+
     for (auto it{branches.begin()}; it != branches.end(); ++it) {
         auto &childInfo = (*it)->getInfo();
-        childInfo._weight = childInfo._weight * budget / weightSum;
+        childInfo._normWeight = childInfo._weight / weightSum;
+        childInfo._weight = childInfo._normWeight * budget;
 
         // drop branch if underweight
         if (childInfo._weight < _minWeight) {
+            (*it)->remove();
             branches.erase(it);
             it--;
         }
@@ -157,16 +177,18 @@ void TreeSkelettonWorker::normalizeWeights(
 
 void TreeSkelettonWorker::initBranch(SkelettonNode<TreeInfo> *parent,
                                      SkelettonNode<TreeInfo> *child) {
-    auto &info = parent->getInfo();
+    auto &parentInfo = parent->getInfo();
     auto &childInfo = child->getInfo();
 
 
+    childInfo._forkCount = parentInfo._forkCount + 1;
+
     // Find parameters
-    // TODO randomize (how much weight left to further branches
-    childInfo._selfWeight = childInfo._weight * 0.7;
+    // TODO randomize (how much weight left to further branches)
+    childInfo._selfWeight = childInfo._weight * _selfWeight;
 
     // TODO randomize (shape of the branch)
-    const double shapeFactor = 8;
+    const double shapeFactor = _shapeFactor;
     const double size =
         pow(childInfo._selfWeight * shapeFactor * shapeFactor, 1. / 3.);
     childInfo._size = size;
@@ -177,12 +199,12 @@ void TreeSkelettonWorker::initBranch(SkelettonNode<TreeInfo> *parent,
         2 * childInfo._selfWeight / childInfo._size - childInfo._startArea;
 
     // TODO radomize / take gravity into account
-    const double bendFactor = 0.5;
+    const double bendFactor = _bendFactor;
 
 
     // Compute curve
-    const auto parentCurve = info._curve;
-    vec3d ez = info._curve.getDerivativeAt(childInfo._t).normalize();
+    const auto parentCurve = parentInfo._curve;
+    vec3d ez = parentInfo._curve.getDerivativeAt(childInfo._t).normalize();
     vec3d ex = vec3d::X();
     vec3d ey = vec3d::Y();
 
@@ -195,12 +217,19 @@ void TreeSkelettonWorker::initBranch(SkelettonNode<TreeInfo> *parent,
     vec3d local{cos(childInfo._theta) * sinPhi, sin(childInfo._theta) * sinPhi,
                 cos(childInfo._phi)};
 
+    // Direction of the branch from start to end.
     vec3d dir = ex * local.x + ey * local.y + ez * local.z;
 
     vec3d origin = parentCurve.getPointAt(childInfo._t);
+    // TODO Move end according to gravity
     vec3d end = origin + dir * size;
-    childInfo._curve = {origin, end, ez * size * bendFactor,
-                        -dir * size * bendFactor};
+
+    vec3d w1 = mix(dir, ez, bendFactor);
+    // TODO check dot product formulae
+    vec3d w2 = mix(-dir, ez - dir * ez.dotProduct(dir) * 2, bendFactor);
+
+    childInfo._curve = {origin, end, w1 * size * 0.25, w2 * size * 0.25};
+    childInfo._position = end;
 }
 
 void TreeSkelettonWorker::balanceSides(
@@ -228,7 +257,8 @@ void TreeSkelettonWorker::balanceSides(
                 }
                 sqdiff *= sqdiff;
 
-                double g = infoj._weight * infok._weight / sqdiff;
+                // repulsive force
+                double g = -infoj._normWeight * infok._normWeight / sqdiff;
                 gradients[j] -= g;
                 gradients[k] += g;
             }

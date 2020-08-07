@@ -23,6 +23,23 @@ SkelettonNode<T> *SkelettonNode<T>::createChild(const T &info) {
     return node;
 }
 
+template <class T> void SkelettonNode<T>::remove() {
+    // TODO unit tests
+    for (auto *child : getChildrenOrNeighboursList()) {
+        delete child;
+    }
+
+    auto &parentList = _parent->_children_or_neighbour;
+    for (auto it{parentList.begin()}; it != parentList.end(); ++it) {
+        if (*it == this) {
+            parentList.erase(it);
+            it--;
+        }
+    }
+
+    delete this;
+}
+
 template <class T>
 void SkelettonNode<T>::addNeighbour(SkelettonNode<T> *neighbour) {
     _children_or_neighbour.push_back(neighbour);

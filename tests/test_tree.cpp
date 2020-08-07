@@ -52,7 +52,7 @@ void testTree(int argc, char **argv) {
     auto &skelGen = tree.addWorker<TreeSkelettonWorker>();
 
     tree.addWorker<TrunkGenerator>();
-    tree.addWorker<LeavesGenerator>();
+    // tree.addWorker<LeavesGenerator>();
     tree.addTree();
 
     std::cout << "Generation" << std::endl;

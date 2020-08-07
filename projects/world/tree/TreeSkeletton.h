@@ -47,8 +47,8 @@ public:
     double _phi = 0;
     /// Size of the branch terminated by this node.
     double _size = 0;
-
-    // ==== LEGACY =====
+    /// Weight normalized towards other branch with the same parents
+    double _normWeight = 0;
 
     /// Number of children this branch has
     int _forkCount = 0;
