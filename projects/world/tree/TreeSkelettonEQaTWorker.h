@@ -2,21 +2,22 @@
 
 #include "world/core/WorldConfig.h"
 
-#include "ITreeWorker.h"
+#include "TreeSkelettonWorker.h"
 #include "Tree.h"
 #include "TreeSkelettonParameters.h"
 #include "TreeSkeletton.h"
 
 namespace world {
 
-class WORLDAPI_EXPORT TreeSkelettonGenerator : public ITreeWorker {
+/** Equal distribution of branches around the trunk. */
+class WORLDAPI_EXPORT TreeSkelettonEQaTWorker : public TreeSkelettonWorker {
     WORLD_WRITE_SUBCLASS_METHOD
 public:
-    TreeSkelettonGenerator();
+    TreeSkelettonEQaTWorker();
 
-    virtual ~TreeSkelettonGenerator();
+    virtual ~TreeSkelettonEQaTWorker();
 
-    TreeSkelettonGenerator *clone() const override;
+    TreeSkelettonEQaTWorker *clone() const override;
 
     void setSeedLocation(const TreeParamd &param);
 
@@ -39,8 +40,6 @@ public:
     void read(const WorldFile &wf) override;
 
 private:
-    void forkNode(SkelettonNode<TreeInfo> *node);
-
     // Génération de nombres alétoires uniforme entre 0 et 1.
     Parameter<double> _rng;
 
@@ -56,6 +55,12 @@ private:
     TreeParamd _weight;
     // Nombre de branches à chaque division
     TreeParami _count;
+
+
+    void forkNode(SkelettonNode<TreeInfo> *node);
+
+    void initBranch(SkelettonNode<TreeInfo> *parent,
+                    SkelettonNode<TreeInfo> *node);
 };
 } // namespace world
 

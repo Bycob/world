@@ -5,7 +5,7 @@
 #include "world/math/MathsHelper.h"
 #include "world/core/Chunk.h"
 #include "TrunkGenerator.h"
-#include "TreeSkelettonGenerator.h"
+#include "TreeSkelettonEQaTWorker.h"
 #include "LeavesGenerator.h"
 
 namespace world {
@@ -17,7 +17,7 @@ SimpleTreeDecorator::SimpleTreeDecorator(int maxTreesPerChunk)
         : _maxTreesPerChunk(maxTreesPerChunk),
           _rng(static_cast<u32>(time(NULL))) {
 
-    auto &skeletton = _model.addWorker<TreeSkelettonGenerator>();
+    auto &skeletton = _model.addWorker<TreeSkelettonEQaTWorker>();
     skeletton.setRootWeight(TreeParamsd::gaussian(3, 0.2));
     skeletton.setForkingCount(
         TreeParamsi::WeightThreshold(0.15, TreeParamsi::uniform_int(3, 4)));

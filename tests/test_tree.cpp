@@ -49,7 +49,7 @@ void testTree(int argc, char **argv) {
 
     std::cout << "Setting tree parameters" << std::endl;
     Tree tree;
-    auto &skelGen = tree.addWorker<TreeSkelettonWorker>();
+    auto &skelGen = tree.addWorker<TreeSkelettonEQaTWorker>();
 
     tree.addWorker<TrunkGenerator>();
     // tree.addWorker<LeavesGenerator>();

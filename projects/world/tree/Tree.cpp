@@ -5,7 +5,7 @@
 #include "world/core/IResolutionModel.h"
 #include "world/assets/SceneNode.h"
 #include "world/assets/MeshOps.h"
-#include "TreeSkelettonGenerator.h"
+#include "TreeSkelettonEQaTWorker.h"
 #include "TrunkGenerator.h"
 #include "LeavesGenerator.h"
 
@@ -183,7 +183,7 @@ HabitatFeatures Tree::randomize() {
     _internal->_workers.clear();
     reset();
 
-    auto &skeletton = addWorker<TreeSkelettonGenerator>();
+    auto &skeletton = addWorker<TreeSkelettonEQaTWorker>();
     skeletton.setRootWeight(TreeParamsd::gaussian(3, 0.2));
     skeletton.setForkingCount(
         TreeParamsi::WeightThreshold(0.15, TreeParamsi::uniform_int(3, 4)));
