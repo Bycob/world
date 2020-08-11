@@ -14,9 +14,29 @@ class WORLDAPI_EXPORT TreeSkelettonHoGBasedWorker : public TreeSkelettonWorker {
 public:
     TreeSkelettonHoGBasedWorker();
 
+    void setStartWeight(double startWeight) { _startWeight = startWeight; }
+
+    void setWeightLambda(double weightLambda) { _weightLambda = weightLambda; }
+
+    void setSideRatio(double sideRatio) { _sideRatio = sideRatio; }
+
+    void setSideSplit(u32 sideSplit) { _sideSplit = sideSplit; }
+
+    void setEndSplit(u32 endSplit) { _endSplit = endSplit; }
+
+    void setShapeFactor(double shapeFactor) { _shapeFactor = shapeFactor; }
+
+    void setBendFactor(double bendFactor) { _bendFactor = bendFactor; }
+
     void processInstance(TreeInstance &tree, double resolution) override;
 
     TreeSkelettonHoGBasedWorker *clone() const override;
+
+    void randomize() override;
+
+    void write(WorldFile &wf) const override;
+
+    void read(const WorldFile &wf) override;
 
 private:
     std::mt19937 _rng;
@@ -26,7 +46,7 @@ private:
     double _selfWeight = 0.15;
     /// A higher lambda means the branches have different weights.
     double _weightLambda = 2;
-    double _minWeight = 0.002;
+    /// Ratio of typical side branch weight against typical end branch weight
     double _sideRatio = 0.5;
     u32 _sideSplit = 6;
     u32 _endSplit = 3;
@@ -36,8 +56,11 @@ private:
     /// 0 means straight branches, 1 means folded.
     double _bendFactor = 0.5;
 
+    // stop condition
     /// Maximum number of nodes from the root
-    u32 _maxFork = 2;
+    u32 _maxFork = 0;
+    /// Minimum weight where the branches are dropped, relatively to startWeight
+    double _minWeight = 0.005;
 
     // balancing
     u32 _itcount = 5;

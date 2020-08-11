@@ -41,7 +41,7 @@ void LeavesGenerator::processNode(SkelettonNode<TreeInfo> &node,
         return;
     }
 
-    if (nodeInfo._weight < _weightThreshold) {
+    if (nodeInfo._selfWeight < _weightThreshold) {
         for (int i = nodeInfo._firstVert; i < nodeInfo._lastVert; ++i) {
             if (_leafDensity > _distrib(_rng)) {
                 auto &vert = trunkMesh.getVertex(i);

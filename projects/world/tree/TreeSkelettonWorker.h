@@ -10,6 +10,8 @@ namespace world {
 
 class WORLDAPI_EXPORT TreeSkelettonWorker : public ITreeWorker {
 public:
+    virtual void randomize(){};
+
 protected:
 };
 } // namespace world

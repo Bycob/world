@@ -6,8 +6,10 @@
 #include "world/assets/SceneNode.h"
 #include "world/assets/MeshOps.h"
 #include "TreeSkelettonEQaTWorker.h"
+#include "TreeSkelettonHoGBasedWorker.h"
 #include "TrunkGenerator.h"
 #include "LeavesGenerator.h"
+#include "world/math/RandomHelper.h"
 
 namespace world {
 
@@ -171,31 +173,36 @@ std::vector<Template> Tree::collectTemplates(ICollector &collector,
                                              const ExplorationContext &ctx,
                                              double maxRes) {
     std::vector<Template> templates;
+    int i = 0;
 
     for (auto &ti : _internal->_instances) {
-        templates.push_back(collectTree(*ti, collector, ctx, maxRes));
+        auto childCtx = ctx;
+        childCtx.appendPrefix(std::to_string(i));
+
+        templates.push_back(collectTree(*ti, collector, childCtx, maxRes));
+
+        ++i;
     }
 
     return templates;
 }
 
 HabitatFeatures Tree::randomize() {
-    _internal->_workers.clear();
     reset();
+    _internal->_workers.clear();
 
-    auto &skeletton = addWorker<TreeSkelettonEQaTWorker>();
-    skeletton.setRootWeight(TreeParamsd::gaussian(3, 0.2));
-    skeletton.setForkingCount(
-        TreeParamsi::WeightThreshold(0.15, TreeParamsi::uniform_int(3, 4)));
-    skeletton.setInclination(
-        TreeParamsd::PhiOffset(TreeParamsd::gaussian(0.2 * M_PI, 0.05 * M_PI)));
-    skeletton.setTheta(
-        TreeParamsd::UniformTheta(TreeParamsd::gaussian(0, 0.05 * M_PI)));
-    skeletton.setSize(
-        TreeParamsd::SizeFactor(TreeParamsd::uniform_real(0.5, 0.75)));
+    auto &skeletton = addWorker<TreeSkelettonHoGBasedWorker>();
+    skeletton.randomize();
 
+    // Trunk and leaves
     addWorker<TrunkGenerator>(12);
-    addWorker<LeavesGenerator>(0.2, 0.15);
+    addWorker<LeavesGenerator>(0.2, 0.02);
+
+    // vulkan ?
+
+    while (_internal->_instances.size() < 10) {
+        addTree();
+    }
 
     return HabitatFeatures{};
 }
@@ -231,6 +238,7 @@ Template Tree::collectTree(TreeInstance &ti, ICollector &collector,
     Template tp = ti.collect(collector, ctx, res);
     tp._position = ti._pos;
 
+    // TODO this material may be collected multiple times
     if (collector.hasChannel<Material>()) {
         auto &materialsChannel = collector.getChannel<Material>();
 

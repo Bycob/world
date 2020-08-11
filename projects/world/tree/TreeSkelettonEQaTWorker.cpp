@@ -73,6 +73,16 @@ void TreeSkelettonEQaTWorker::processInstance(TreeInstance &tree,
     forkNode(primaryNode);
 }
 
+void TreeSkelettonEQaTWorker::randomize() {
+    setRootWeight(TreeParamsd::gaussian(3, 0.2));
+    setForkingCount(
+        TreeParamsi::WeightThreshold(0.15, TreeParamsi::uniform_int(3, 4)));
+    setInclination(
+        TreeParamsd::PhiOffset(TreeParamsd::gaussian(0.2 * M_PI, 0.05 * M_PI)));
+    setTheta(TreeParamsd::UniformTheta(TreeParamsd::gaussian(0, 0.05 * M_PI)));
+    setSize(TreeParamsd::SizeFactor(TreeParamsd::uniform_real(0.5, 0.75)));
+}
+
 void TreeSkelettonEQaTWorker::write(WorldFile &wf) const {}
 
 void TreeSkelettonEQaTWorker::read(const WorldFile &wf) {}

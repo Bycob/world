@@ -1,5 +1,7 @@
 #include "TreeSkelettonHoGBasedWorker.h"
+
 #include "Tree.h"
+#include "world/math/RandomHelper.h"
 
 namespace world {
 WORLD_REGISTER_CHILD_CLASS(ITreeWorker, TreeSkelettonHoGBasedWorker,
@@ -27,7 +29,44 @@ void TreeSkelettonHoGBasedWorker::processInstance(TreeInstance &tree,
 }
 
 TreeSkelettonHoGBasedWorker *TreeSkelettonHoGBasedWorker::clone() const {
-    return new TreeSkelettonHoGBasedWorker();
+    return new TreeSkelettonHoGBasedWorker(*this);
+}
+
+void TreeSkelettonHoGBasedWorker::randomize() {
+    setStartWeight(std::exponential_distribution<double>(4)(_rng) * 4 + 0.2);
+
+    u32 totalSplit = std::uniform_int_distribution<u32>(3, 15)(_rng);
+    u32 sep = std::binomial_distribution<u32>(totalSplit, 0.25)(_rng);
+    u32 sideSplit =
+        std::bernoulli_distribution(0.5)(_rng) ? totalSplit - sep : sep;
+    setSideSplit(sideSplit);
+    setEndSplit(totalSplit - sideSplit);
+
+    setSideRatio(std::exp(std::uniform_real_distribution<double>(-1, 0)(_rng)));
+    setShapeFactor(randScale(_rng, 7, 1.5));
+    setBendFactor(std::normal_distribution<double>(0.5, 0.15)(_rng));
+}
+
+void TreeSkelettonHoGBasedWorker::write(WorldFile &wf) const {
+    TreeSkelettonWorker::write(wf);
+    wf.addDouble("startWeight", _startWeight);
+    wf.addDouble("weightLambda", _weightLambda);
+    wf.addDouble("sideRatio", _sideRatio);
+    wf.addUint("sideSplit", _sideSplit);
+    wf.addUint("endSplit", _endSplit);
+    wf.addDouble("shapeFactor", _shapeFactor);
+    wf.addDouble("bendFactor", _bendFactor);
+}
+
+void TreeSkelettonHoGBasedWorker::read(const WorldFile &wf) {
+    TreeSkelettonWorker::read(wf);
+    wf.readDoubleOpt("startWeight", _startWeight);
+    wf.readDoubleOpt("weightLambda", _weightLambda);
+    wf.readDoubleOpt("sideRatio", _sideRatio);
+    wf.readUintOpt("sideSplit", _sideSplit);
+    wf.readUintOpt("endSplit", _endSplit);
+    wf.readDoubleOpt("shapeFactor", _shapeFactor);
+    wf.readDoubleOpt("bendFactor", _bendFactor);
 }
 
 void TreeSkelettonHoGBasedWorker::forkNode(SkelettonNode<TreeInfo> *node) {
@@ -38,7 +77,8 @@ void TreeSkelettonHoGBasedWorker::forkNode(SkelettonNode<TreeInfo> *node) {
     const double budget = parentInfo._weight - parentInfo._selfWeight;
 
     // TODO randomize
-    const double sideRatio = _sideRatio;
+    const double sideRatio =
+        (_sideRatio * _sideSplit) / (_sideRatio * _sideSplit + _endSplit);
     // TODO randomize
     const u32 endCount = _endSplit;
     // TODO randomize
@@ -46,8 +86,6 @@ void TreeSkelettonHoGBasedWorker::forkNode(SkelettonNode<TreeInfo> *node) {
 
     // === SIDE BRANCHES
     std::vector<SkelettonNode<TreeInfo> *> sideBranches;
-
-    // TODO reduce by a random amount
     const double sideBudget = budget * sideRatio;
 
     double weightSum = 0;
@@ -161,7 +199,7 @@ void TreeSkelettonHoGBasedWorker::normalizeWeights(
         childInfo._weight = childInfo._normWeight * budget;
 
         // drop branch if underweight
-        if (childInfo._weight < _minWeight) {
+        if (childInfo._weight < _minWeight * _startWeight) {
             (*it)->remove();
             branches.erase(it);
             it--;

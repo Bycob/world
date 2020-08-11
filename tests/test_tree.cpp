@@ -9,12 +9,13 @@ using namespace world;
 
 void testCircularSkeletton(int argc, char **argv);
 void testTree(int argc, char **argv);
+void testTrees();
 void testGrass();
 void testRock();
 
 int main(int argc, char **argv) {
     // testTree(argc, argv);
-    testTree(argc, argv);
+    testTrees();
 }
 
 void testCircularSkeletton(int argc, char **argv) {
@@ -49,10 +50,10 @@ void testTree(int argc, char **argv) {
 
     std::cout << "Setting tree parameters" << std::endl;
     Tree tree;
-    auto &skelGen = tree.addWorker<TreeSkelettonEQaTWorker>();
+    auto &skelGen = tree.addWorker<TreeSkelettonHoGBasedWorker>();
 
     tree.addWorker<TrunkGenerator>();
-    // tree.addWorker<LeavesGenerator>();
+    tree.addWorker<LeavesGenerator>();
     tree.addTree();
 
     std::cout << "Generation" << std::endl;
@@ -73,6 +74,16 @@ void testTree(int argc, char **argv) {
     std::cout << "Writing tree model..." << std::endl;
     Scene scene2 = collector.toScene();
     file.write(scene2, "assets/tree/tree");
+}
+
+void testTrees() {
+    // TODO InstancePool : enlever les templates avant d'attaquer le
+    // multitextures terrain
+    InstancePool<SeedDistribution> treePool;
+    treePool.setTemplateGenerator<Tree>();
+
+    treePool.exportSpecies("assets/tree", 10);
+    std::cout << "Species exported to assets/tree" << std::endl;
 }
 
 

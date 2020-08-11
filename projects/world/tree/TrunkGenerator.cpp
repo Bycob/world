@@ -115,8 +115,7 @@ void TrunkGenerator::addBezierTube(Mesh &mesh, const BezierCurve &curve,
 
         int ringStart = mesh.getVerticesCount();
         addRing(mesh, origin, ax, ay, radius);
-        // mirrored, see under
-        setLastRingUV(mesh, 0.5 - abs(t - 0.5));
+        setLastRingUV(mesh, t);
 
         if (i > 0) {
             int prevRingId = ringStart - _segmentCount;

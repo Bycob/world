@@ -35,6 +35,8 @@ public:
 
     void processInstance(TreeInstance &tree, double resolution) override;
 
+    void randomize() override;
+
     void write(WorldFile &wf) const override;
 
     void read(const WorldFile &wf) override;

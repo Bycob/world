@@ -15,7 +15,7 @@ namespace world {
 class WORLDAPI_EXPORT LeavesGenerator : public ITreeWorker {
     WORLD_WRITE_SUBCLASS_METHOD
 public:
-    LeavesGenerator(double leafDensity = 0.2, double weightThreshold = 0.2);
+    LeavesGenerator(double leafDensity = 0.2, double weightThreshold = 0.01);
 
     void setLeafDensity(double density);
 

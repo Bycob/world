@@ -160,13 +160,14 @@ void InstancePool<TDistribution>::read(const WorldFile &wf) {
 
 template <typename TDistribution>
 void InstancePool<TDistribution>::exportSpecies(const std::string &outputDir,
-                                                double avgSize) {
+                                                double avgSize,
+                                                double resolution) {
     world::createDirectories(outputDir);
 
     // Export different instance throught the scene
     Collector collector(CollectorPresets::SCENE);
     auto &nodeChan = collector.getChannel<SceneNode>();
-    collectSelf(collector, ConstantResolution(0.1),
+    collectSelf(collector, ConstantResolution(resolution),
                 ExplorationContext::getDefault());
     double sep = avgSize;
 
@@ -175,41 +176,36 @@ void InstancePool<TDistribution>::exportSpecies(const std::string &outputDir,
 
         for (size_t y = 0; y < templates.size(); ++y) {
             vec3d c{x * sep, y * sep, 0};
-            SceneNode node = templates[y].getDefaultNode();
-            node.setPosition(c);
-            nodeChan.put({std::to_string(x), std::to_string(y)}, node);
+            auto item = templates[y].getAt(resolution);
+            int i = 0;
+
+            for (auto node : item->_nodes) {
+                node.setPosition(c);
+                nodeChan.put(ItemKey({std::to_string(x), std::to_string(y),
+                                      std::to_string(i)}),
+                             node);
+                i++;
+            }
         }
     }
     ObjLoader().write(collector.toScene(), outputDir + "/instances.obj");
 
     // Export habitat features
+    WorldFile speciesTraits;
+    speciesTraits.addArray("species");
+
     const std::vector<HabitatFeatures> &habitats =
         _distribution.getHabitatFeatures();
-    rapidjson::StringBuffer buf;
-    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buf);
-
-    writer.StartObject();
 
     for (size_t i = 0; i < habitats.size(); ++i) {
-        auto &habitat = habitats[i];
-        writer.String(std::to_string(i));
-        writer.StartObject();
+        WorldFile instance;
+        instance.addChild("habitat", world::serialize(habitats[i]));
+        instance.addChild("features", _generators[i]->serialize());
 
-        writer.String("alt_min");
-        writer.Double(habitat._altitude.x);
-
-        writer.String("alt_max");
-        writer.Double(habitat._altitude.y);
-
-        writer.String("density");
-        writer.Double(habitat._density);
-
-        writer.EndObject();
+        speciesTraits.addToArray("species", std::move(instance));
     }
 
-    writer.EndObject();
-    std::ofstream file(outputDir + "/habitats.json");
-    file << buf.GetString();
+    speciesTraits.save(outputDir + "/habitats.json");
 }
 
 

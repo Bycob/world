@@ -41,7 +41,8 @@ public:
     /** Export species meshes in a scene and habitat features in a json file.
      * \param avgSize Average size of the element, used to compute spacing
      * between objects in the scene. */
-    void exportSpecies(const std::string &outputDir, double avgSize = 1);
+    void exportSpecies(const std::string &outputDir, double avgSize = 1,
+                       double resolution = 10000);
 
     void write(WorldFile &wf) const override;
 
