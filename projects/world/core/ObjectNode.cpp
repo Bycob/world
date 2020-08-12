@@ -44,7 +44,9 @@ void ObjectLod::collect(Template &tp, ICollector &collector,
 
         for (Material material : _materials) {
             // And again!
-            material.setMapKd(ctx(material.getMapKd()).str());
+            if (!material.getMapKd().empty()) {
+                material.setMapKd(ctx(material.getMapKd()).str());
+            }
             matChan.put(material.getName(), material, ctx);
         }
 

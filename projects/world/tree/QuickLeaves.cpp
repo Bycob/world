@@ -7,8 +7,9 @@ namespace world {
 
 WORLD_REGISTER_CHILD_CLASS(ITreeWorker, QuickLeaves, "QuickLeaves")
 
-QuickLeaves::QuickLeaves()
-        : _rng(static_cast<u32>(time(NULL))), _color(0, 1, 0) {}
+QuickLeaves::QuickLeaves(double resolution, const Color4d &color)
+        : _rng(std::random_device()()), _maxResolution(resolution),
+          _color(color) {}
 
 void QuickLeaves::processInstance(TreeInstance &instance, double resolution) {
     auto &leavesMesh = instance.leavesMesh(resolution);
@@ -52,11 +53,11 @@ void QuickLeaves::processInstance(TreeInstance &instance, double resolution) {
 
             // add faces
             if (j != 0 && i != 0) {
-                int ringOffset = segmentCount * i;
-                int ids[][3] = {{ringOffset - segmentCount + j - 1,
-                                 ringOffset - segmentCount + j,
-                                 ringOffset + j - 1},
-                                {ringOffset - segmentCount + j, ringOffset + j,
+                const int oneRing = segmentCount + 1;
+                int ringOffset = oneRing * i;
+                int ids[][3] = {{ringOffset - oneRing + j - 1,
+                                 ringOffset - oneRing + j, ringOffset + j - 1},
+                                {ringOffset - oneRing + j, ringOffset + j,
                                  ringOffset + j - 1}};
 
                 leavesMesh.newFace(ids[0]);
@@ -70,7 +71,7 @@ void QuickLeaves::processInstance(TreeInstance &instance, double resolution) {
     auto topId = leavesMesh.getVerticesCount();
     leavesMesh.newVertex(top, {0, 0, 1}, {1, 1});
 
-    int ringOffset = segmentCount * (ringCount - 1);
+    int ringOffset = (segmentCount + 1) * (ringCount - 1);
 
     for (int i = 0; i < segmentCount; ++i) {
         leavesMesh.newFace(ringOffset + i, ringOffset + i + 1, topId);

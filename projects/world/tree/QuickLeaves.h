@@ -13,7 +13,7 @@ namespace world {
 class WORLDAPI_EXPORT QuickLeaves : public ITreeWorker {
     WORLD_WRITE_SUBCLASS_METHOD
 public:
-    QuickLeaves();
+    QuickLeaves(double maxResolution = 5, const Color4d &color = {0, 1, 0});
 
     void processInstance(TreeInstance &tree, double resolution) override;
 
@@ -28,7 +28,7 @@ public:
 private:
     std::mt19937 _rng;
 
-    double _maxResolution = 5;
+    double _maxResolution;
     Color4d _color;
 
 
