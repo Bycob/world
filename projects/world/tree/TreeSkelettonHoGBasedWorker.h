@@ -16,6 +16,8 @@ public:
 
     void setStartWeight(double startWeight) { _startWeight = startWeight; }
 
+    double getStartWeight() const { return _startWeight; }
+
     void setWeightLambda(double weightLambda) { _weightLambda = weightLambda; }
 
     void setSideRatio(double sideRatio) { _sideRatio = sideRatio; }
@@ -58,9 +60,9 @@ private:
 
     // stop condition
     /// Maximum number of nodes from the root
-    u32 _maxFork = 0;
+    u32 _maxFork = 4;
     /// Minimum weight where the branches are dropped, relatively to startWeight
-    double _minWeight = 0.005;
+    double _minWeight = 0.0025;
 
     // balancing
     u32 _itcount = 5;

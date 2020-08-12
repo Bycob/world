@@ -33,12 +33,17 @@ TreeSkelettonHoGBasedWorker *TreeSkelettonHoGBasedWorker::clone() const {
 }
 
 void TreeSkelettonHoGBasedWorker::randomize() {
-    setStartWeight(std::exponential_distribution<double>(4)(_rng) * 4 + 0.2);
+    setStartWeight(std::exponential_distribution<double>(2)(_rng) * 6 + 0.4);
 
     u32 totalSplit = std::uniform_int_distribution<u32>(3, 15)(_rng);
     u32 sep = std::binomial_distribution<u32>(totalSplit, 0.25)(_rng);
     u32 sideSplit =
         std::bernoulli_distribution(0.5)(_rng) ? totalSplit - sep : sep;
+
+    if (sideSplit > totalSplit - 2) {
+        sideSplit = totalSplit - 2;
+    }
+
     setSideSplit(sideSplit);
     setEndSplit(totalSplit - sideSplit);
 

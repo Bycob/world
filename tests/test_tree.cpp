@@ -82,7 +82,7 @@ void testTrees() {
     InstancePool<SeedDistribution> treePool;
     treePool.setTemplateGenerator<Tree>();
 
-    treePool.exportSpecies("assets/tree", 10);
+    treePool.exportSpecies("assets/tree", 10, 3);
     std::cout << "Species exported to assets/tree" << std::endl;
 }
 

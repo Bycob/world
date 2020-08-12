@@ -10,6 +10,7 @@
 #include "TrunkGenerator.h"
 #include "LeavesGenerator.h"
 #include "world/math/RandomHelper.h"
+#include "QuickLeaves.h"
 
 namespace world {
 
@@ -195,16 +196,22 @@ HabitatFeatures Tree::randomize() {
     skeletton.randomize();
 
     // Trunk and leaves
-    addWorker<TrunkGenerator>(12);
+    addWorker<TrunkGenerator>(9);
+    addWorker<QuickLeaves>(5);
     addWorker<LeavesGenerator>(0.2, 0.02);
 
     // vulkan ?
 
-    while (_internal->_instances.size() < 10) {
+    while (_internal->_instances.size() < 5) {
         addTree();
     }
 
-    return HabitatFeatures{};
+    // Habitat
+    HabitatFeatures habitat;
+    // TODO test with pow(skeletton.getStartWeight(), 2./3.)
+    habitat._density = 0.1 / skeletton.getStartWeight();
+
+    return habitat;
 }
 
 void Tree::write(WorldFile &wf) const {
@@ -227,12 +234,11 @@ void Tree::read(const WorldFile &wf) {
 Template Tree::collectTree(TreeInstance &ti, ICollector &collector,
                            const ExplorationContext &ctx, double res) {
 
-    // In reverse order
-    if (res > BASE_RES) {
-        generate(ti, BASE_RES);
-    }
-    if (res > SIMPLE_RES) {
-        generate(ti, SIMPLE_RES);
+    for (int i = 0; i < ti.getLodCount(); ++i) {
+        double lodRes = ti.getLod(i)._resolution;
+
+        if (res > lodRes)
+            generate(ti, lodRes);
     }
 
     Template tp = ti.collect(collector, ctx, res);
