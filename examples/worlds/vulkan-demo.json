@@ -17,11 +17,20 @@
                             },
                             {
                                 "type": "TrunkGenerator",
-                                "segmentCount": 12,
-                                "resolution": 20.0
+                                "segmentCount": 12
+                            },
+                            {
+                                "type": "QuickLeaves",
+                                "color": {}
                             },
                             {
                                 "type": "LeavesGenerator"
+                            },
+                            {
+                                "type": "VkwTrunkTexture"
+                            },
+                            {
+                                "type": "VkwLeafTexture"
                             }
                         ],
                         "position": {
