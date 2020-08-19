@@ -12,6 +12,9 @@ QuickLeaves::QuickLeaves(double resolution, const Color4d &color)
           _color(color) {}
 
 void QuickLeaves::processInstance(TreeInstance &instance, double resolution) {
+    if (!instance._tree.isTwoMeshes(resolution))
+        return;
+
     auto &leavesMesh = instance.leavesMesh(resolution);
 
     if (resolution >= _maxResolution || !leavesMesh.empty())
@@ -80,8 +83,8 @@ void QuickLeaves::processInstance(TreeInstance &instance, double resolution) {
     MeshOps::recalculateNormals(leavesMesh);
 
     // Texture
-    Image &texture = instance.getLodByResolution(resolution).getTexture(0);
-    int size = 32;
+    Image &texture = instance.overrideTexture(1, resolution);
+    const int size = 32;
     texture = Image(size, size, ImageType::RGBA);
     generateTexture(texture);
 }

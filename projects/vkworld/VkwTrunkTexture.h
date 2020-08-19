@@ -12,13 +12,16 @@ namespace world {
 class VKWORLD_EXPORT VkwTrunkTexture : public ITreeWorker {
     WORLD_WRITE_SUBCLASS_METHOD
 public:
-    VkwTrunkTexture(const std::string &shaderName = "trunk.frag");
+    VkwTrunkTexture(size_t texSize = 128,
+                    const std::string &shaderName = "trunk.frag");
 
-    void processInstance(TreeInstance &tree, double resolution) override;
+    void processTree(Tree &tree, double resolution) override;
 
     VkwTrunkTexture *clone() const override;
 
 private:
+    size_t _texSize;
+
     VkwTextureGenerator _texGen;
 };
 

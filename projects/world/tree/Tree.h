@@ -32,8 +32,10 @@ public:
     Mesh &trunkMesh(double resolution);
     Mesh &leavesMesh(double resolution);
 
-    Material &trunkMaterial();
-    Image &trunkTexture();
+    // 0 = trunk, 1 = leaves
+    // override default common materials
+    Material &overrideMaterial(int id, double resolution);
+    Image &overrideTexture(int id, double resolution);
 
     void reset();
 };
@@ -51,7 +53,13 @@ public:
 
     Image &getLeavesTexture();
 
+    Image &getTrunkTexture();
+
     const SpriteGrid &getLeavesGrid();
+
+    /// Returns true if the tree has a trunk mesh and a leaves mesh
+    /// at the given resolution.
+    bool isTwoMeshes(double resolution) const;
 
     TreeInstance &getTreeInstance(int i);
 
@@ -80,8 +88,12 @@ private:
 
     void addWorkerInternal(ITreeWorker *worker);
 
-    Template collectTree(TreeInstance &instance, ICollector &collector,
-                         const ExplorationContext &ctx, double res);
+    Template collectInstance(TreeInstance &instance, ICollector &collector,
+                             const ExplorationContext &ctx, double res);
+
+    // Collect common material and textures (like leaves)
+    void collectCommon(ICollector &collector, const ExplorationContext &ctx,
+                       double res);
 
     void generateSelf(double resolution);
 
@@ -90,7 +102,7 @@ private:
     /** Ungenerate the tree */
     void reset();
 
-    friend class TrunkGenerator;
+    friend class TreeInstance;
 };
 
 template <typename T, typename... Args> T &Tree::addWorker(Args &&... args) {

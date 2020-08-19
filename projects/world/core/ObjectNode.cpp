@@ -105,7 +105,7 @@ Image &ObjectLod::getTexture(size_t i) { return _textures.at(i); }
 
 // ===== ObjectNode
 
-ObjectInstance::ObjectInstance() = default;
+ObjectInstance::ObjectInstance(const vec3d &pos) : _pos(pos) {}
 
 ObjectLod &ObjectInstance::addLod(double resolution, size_t meshCount) {
     // TODO sort lods by resolution
@@ -137,6 +137,8 @@ Template ObjectInstance::collect(ICollector &collector,
             break;
         lod.collect(result, collector, ctx);
     }
+
+    result._position = _pos;
 
     return result;
 }

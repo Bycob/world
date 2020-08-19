@@ -13,7 +13,7 @@
                         "children": [],
                         "workers": [
                             {
-                                "type": "TreeSkelettonGenerator"
+                                "type": "TreeSkelettonEQaTWorker"
                             },
                             {
                                 "type": "TrunkGenerator",

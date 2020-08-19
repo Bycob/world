@@ -23,6 +23,9 @@ TrunkGenerator *TrunkGenerator::clone() const {
 double getRadius(double area) { return sqrt(area) / M_PI; }
 
 void TrunkGenerator::processInstance(TreeInstance &tree, double resolution) {
+    if (!tree._tree.isTwoMeshes(resolution))
+        return;
+
     auto &trunkMesh = tree.trunkMesh(resolution);
 
     if (!trunkMesh.empty()) {

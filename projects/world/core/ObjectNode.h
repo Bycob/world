@@ -25,7 +25,11 @@ public:
 
     Mesh &getMesh(size_t i);
 
+    size_t getMeshCount() const { return _meshes.size(); }
+
     SceneNode &getNode(size_t i);
+
+    size_t getNodeCount() const { return _nodes.size(); }
 
     void addMaterials(size_t count);
 
@@ -33,12 +37,16 @@ public:
 
     Material &getMaterial(size_t i);
 
+    size_t getMaterialCount() const { return _materials.size(); }
+
     Image &addTexture(int width = 1, int height = 1,
                       ImageType imgType = ImageType::RGB);
 
     void addTextures(size_t count);
 
     Image &getTexture(size_t i);
+
+    size_t getTextureCount() const { return _textures.size(); }
 
     void collect(Template &tp, ICollector &collector,
                  const ExplorationContext &ctx) const;
@@ -54,7 +62,9 @@ private:
 
 class WORLDAPI_EXPORT ObjectInstance {
 public:
-    ObjectInstance();
+    ObjectInstance(const vec3d &pos = {});
+
+    void setPosition(const vec3d &pos) { _pos = pos; }
 
     ObjectLod &addLod(double resolution, size_t meshCount = 0);
 
@@ -69,6 +79,8 @@ public:
 
 private:
     std::vector<ObjectLod> _lods;
+
+    vec3d _pos;
 };
 
 /** This node represents one object, like a tree or a rock.

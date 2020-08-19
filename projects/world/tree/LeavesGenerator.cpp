@@ -14,6 +14,9 @@ LeavesGenerator::LeavesGenerator(double leafDensity, double weightThreshold)
 void LeavesGenerator::setLeafDensity(double density) { _leafDensity = density; }
 
 void LeavesGenerator::processInstance(TreeInstance &tree, double resolution) {
+    if (!tree._tree.isTwoMeshes(resolution))
+        return;
+
     Mesh &leaves = tree.leavesMesh(resolution);
 
     if (!leaves.empty())

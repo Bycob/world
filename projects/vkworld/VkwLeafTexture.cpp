@@ -26,9 +26,15 @@ VkwLeafTexture::VkwLeafTexture()
 VkwLeafTexture::~VkwLeafTexture() { delete _internal; }
 
 void VkwLeafTexture::processTree(Tree &tree, double resolution) {
-    if (resolution >= 7) { // TODO and not generated
+    if (tree.isTwoMeshes(resolution)) {
+        auto &leavesTex = tree.getLeavesTexture();
+
+        // Check if already generated
+        if (leavesTex.width() * leavesTex.height() > 1)
+            return;
+
         _grid = tree.getLeavesGrid();
-        tree.getLeavesTexture() = generateLeafTexture();
+        leavesTex = generateLeafTexture();
     }
 }
 

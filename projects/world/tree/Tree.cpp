@@ -18,33 +18,57 @@ WORLD_REGISTER_CHILD_CLASS(WorldNode, Tree, "Tree");
 WORLD_SECOND_REGISTER_CHILD_CLASS(IInstanceGenerator, Tree, "Tree")
 
 
-const double SIMPLE_RES = 2;
-const double BASE_RES = 7;
+class PTree {
+public:
+    std::vector<std::unique_ptr<ITreeWorker>> _workers;
 
-TreeInstance::TreeInstance(Tree &tree, vec3d pos) : _tree(tree), _pos(pos) {
-    auto &simpleLod = addLod(SIMPLE_RES, 2);
+    std::vector<std::unique_ptr<TreeInstance>> _instances;
+    BoundingBox _bbox;
 
-    Material &simpleTrunkMat = simpleLod.addMaterial();
-    simpleTrunkMat.setKd(0.3, 0.17, 0.13);
-    simpleLod.getNode(0).setMaterial(simpleTrunkMat);
+    // Common assets
+    Image _trunkTexture;
+    Image _leavesTexture;
+    SpriteGrid _grid;
 
-    Material &simpleLeafMat = simpleLod.addMaterial();
-    simpleLeafMat.setMapKd(simpleLod.getId(0));
-    simpleLeafMat.setTransparent(true);
-    simpleLod.getNode(1).setMaterial(simpleLeafMat);
+    // lods: lists of generated resolution
+    std::vector<double> _singleMeshLod;
+    std::vector<double> _twoMeshesLod;
 
-    simpleLod.addTexture();
+    /// Resolution at which the instance is currently generated.
+    double _resolution = 0;
 
-    auto &baseLod = addLod(BASE_RES, 2);
 
-    Material &trunkMat = baseLod.addMaterial();
-    // trunkMat.setKd(0.5, 0.2, 0);
-    trunkMat.setMapKd(baseLod.getId(0));
+    PTree()
+            : _trunkTexture(1, 1, ImageType::RGBA),
+              _leavesTexture(1, 1, ImageType::RGBA),
+              _grid(4), _singleMeshLod{0.1}, _twoMeshesLod{2, 7} {
 
-    baseLod.getNode(0).setMaterial(trunkMat);
-    baseLod.getNode(1).setMaterialID("leaves");
+        _trunkTexture.rgba(0, 0).setf(0.3, 0.17, 0.13);
+        _leavesTexture.rgba(0, 0).setf(0.4, 0.9, 0.4);
+    }
+};
 
-    baseLod.addTexture();
+
+// ===== TreeInstance
+
+TreeInstance::TreeInstance(Tree &tree, vec3d pos)
+        : ObjectInstance(pos), _tree(tree) {
+    for (auto res : tree._internal->_singleMeshLod) {
+        auto &lod = addLod(res, 1);
+
+        Material &treeMat = lod.addMaterial();
+        treeMat.setMapKd(lod.getId(0));
+        lod.getNode(0).setMaterial(treeMat);
+
+        lod.addTexture(1, 1, ImageType::RGBA);
+    }
+
+    for (auto res : tree._internal->_twoMeshesLod) {
+        auto &lod = addLod(res, 2);
+
+        lod.getNode(0).setMaterialID("trunk");
+        lod.getNode(1).setMaterialID("leaves");
+    }
 }
 
 Mesh &TreeInstance::trunkMesh(double res) {
@@ -55,9 +79,32 @@ Mesh &TreeInstance::leavesMesh(double res) {
     return getLodByResolution(res).getMesh(1);
 }
 
-Material &TreeInstance::trunkMaterial() { return getLod(1).getMaterial(0); }
+Material &TreeInstance::overrideMaterial(int id, double resolution) {
+    auto &lod = getLodByResolution(resolution);
 
-Image &TreeInstance::trunkTexture() { return getLod(1).getTexture(0); }
+    while (lod.getMaterialCount() <= id) {
+        lod.addMaterial();
+    }
+
+    auto &mat = lod.getMaterial(id);
+    lod.getNode(id).setMaterial(mat);
+
+    if (id == 1)
+        mat.setTransparent(true);
+
+    return mat;
+}
+
+Image &TreeInstance::overrideTexture(int id, double resolution) {
+    auto &lod = getLodByResolution(resolution);
+
+    while (lod.getTextureCount() <= id) {
+        lod.addTexture();
+    }
+
+    overrideMaterial(id, resolution).setMapKd(lod.getId(id));
+    return lod.getTexture(id);
+}
 
 void TreeInstance::reset() {
     _resolution = 0;
@@ -70,23 +117,7 @@ void TreeInstance::reset() {
 }
 
 
-class PTree {
-public:
-    std::vector<std::unique_ptr<ITreeWorker>> _workers;
-
-    std::vector<std::unique_ptr<TreeInstance>> _instances;
-    BoundingBox _bbox;
-
-    // Common assets
-    Image _leavesTexture;
-    SpriteGrid _grid;
-
-    /// Resolution at which the instance is currently generated.
-    double _resolution = 0;
-
-
-    PTree() : _leavesTexture(1, 1, ImageType::RGBA), _grid(4) {}
-};
+// ===== Tree
 
 Tree::Tree() : _internal(new PTree()) {}
 
@@ -105,7 +136,13 @@ void Tree::addTree(vec3d pos) {
 
 Image &Tree::getLeavesTexture() { return _internal->_leavesTexture; }
 
+Image &Tree::getTrunkTexture() { return _internal->_trunkTexture; }
+
 const SpriteGrid &Tree::getLeavesGrid() { return _internal->_grid; }
+
+bool Tree::isTwoMeshes(double resolution) const {
+    return resolution > _internal->_twoMeshesLod.at(0);
+}
 
 TreeInstance &Tree::getTreeInstance(int i) {
     return *_internal->_instances.at(i);
@@ -127,9 +164,11 @@ void Tree::collect(ICollector &collector,
                    const IResolutionModel &resolutionModel,
                    const ExplorationContext &ctx) {
 
-    // All the trees are too far to be seen
+    const double minRes = _internal->_singleMeshLod.at(0);
     auto allRes = resolutionModel.getMaxResolutionIn(_internal->_bbox, ctx);
-    if (allRes < SIMPLE_RES)
+
+    // All the trees are too far to be seen
+    if (allRes < minRes)
         return;
 
     if (collector.hasChannel<SceneNode>()) {
@@ -139,14 +178,14 @@ void Tree::collect(ICollector &collector,
         for (auto &ti : _internal->_instances) {
             ++tpCount;
             vec3d realPos = ctx.getEnvironment().findNearestFreePoint(
-                ti->_pos, {0, 0, 1}, SIMPLE_RES, ctx);
+                ti->_pos, {0, 0, 1}, minRes, ctx);
             double resolution = resolutionModel.getResolutionAt(realPos, ctx);
 
-            // Tree is too far to be seen
-            if (resolution < SIMPLE_RES)
+            // This particular tree is too far to be seen
+            if (resolution < minRes)
                 continue;
 
-            Template tp = collectTree(*ti, collector, ctx, resolution);
+            Template tp = collectInstance(*ti, collector, ctx, resolution);
             auto *item = tp.getAt(resolution);
 
             if (item != nullptr) {
@@ -180,7 +219,7 @@ std::vector<Template> Tree::collectTemplates(ICollector &collector,
         auto childCtx = ctx;
         childCtx.appendPrefix(std::to_string(i));
 
-        templates.push_back(collectTree(*ti, collector, childCtx, maxRes));
+        templates.push_back(collectInstance(*ti, collector, childCtx, maxRes));
 
         ++i;
     }
@@ -231,9 +270,10 @@ void Tree::read(const WorldFile &wf) {
     }
 }
 
-Template Tree::collectTree(TreeInstance &ti, ICollector &collector,
-                           const ExplorationContext &ctx, double res) {
+Template Tree::collectInstance(TreeInstance &ti, ICollector &collector,
+                               const ExplorationContext &ctx, double res) {
 
+    // Generate
     for (int i = 0; i < ti.getLodCount(); ++i) {
         double lodRes = ti.getLod(i)._resolution;
 
@@ -241,34 +281,45 @@ Template Tree::collectTree(TreeInstance &ti, ICollector &collector,
             generate(ti, lodRes);
     }
 
+    // Collect
+    // TODO collectCommon is ran more than once, because reference are broken by
+    // the change of context
+    collectCommon(collector, ctx, res);
     Template tp = ti.collect(collector, ctx, res);
-    tp._position = ti._pos;
+    return tp;
+}
 
-    // TODO this material may be collected multiple times
+void Tree::collectCommon(ICollector &collector, const ExplorationContext &ctx,
+                         double res) {
+
     if (collector.hasChannel<Material>()) {
         auto &materialsChannel = collector.getChannel<Material>();
 
         Material leavesMat("leaves");
         auto &leavesTex = _internal->_leavesTexture;
 
-        if (collector.hasChannel<Image>() &&
-            leavesTex.width() * leavesTex.height() != 1) {
+        Material trunkMat("trunk");
+        auto &trunkTex = _internal->_trunkTexture;
+
+        if (collector.hasChannel<Image>()) {
             auto &texChannel = collector.getChannel<Image>();
 
             leavesMat.setKd(1.0, 1.0, 1.0);
             leavesMat.setMapKd(ctx({"leaves"}).str());
             leavesMat.setTransparent(true);
             texChannel.put({"leaves"}, leavesTex, ctx);
+
+            trunkMat.setKd(1.0, 1.0, 1.0);
+            trunkMat.setMapKd(ctx({"trunk"}).str());
+            texChannel.put({"trunk"}, trunkTex, ctx);
         } else {
-            // TODO fix this being selected if the trees have not been generated
-            // yet (res < 2)
             leavesMat.setKd(0.4, 0.9, 0.4);
+            trunkMat.setKd(0.3, 0.17, 0.13);
         }
 
         materialsChannel.put({"leaves"}, leavesMat, ctx);
+        materialsChannel.put({"trunk"}, trunkMat, ctx);
     }
-
-    return tp;
 }
 
 void Tree::generateSelf(double resolution) {
@@ -307,7 +358,13 @@ void Tree::reset() {
     }
 
     _internal->_resolution = 0;
+
+    // Resetting images
+    _internal->_trunkTexture = Image(1, 1, ImageType::RGBA);
+    _internal->_trunkTexture.rgba(0, 0).setf(0.3, 0.17, 0.13);
+
     _internal->_leavesTexture = Image(1, 1, ImageType::RGBA);
+    _internal->_leavesTexture.rgba(0, 0).setf(0.4, 0.9, 0.4);
 }
 
 void Tree::addWorkerInternal(ITreeWorker *worker) {
