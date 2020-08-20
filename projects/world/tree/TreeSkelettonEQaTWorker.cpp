@@ -57,7 +57,7 @@ void TreeSkelettonEQaTWorker::setWeight(const TreeParamd &weight) {
 
 void TreeSkelettonEQaTWorker::processInstance(TreeInstance &tree,
                                               double resolution) {
-    if (!tree._skeletton.empty())
+    if (!tree._skeletton.empty() || !tree._tree.isTwoMeshes(resolution))
         return;
 
     SkelettonNode<TreeInfo> *primaryNode = tree._skeletton.getPrimaryNode();

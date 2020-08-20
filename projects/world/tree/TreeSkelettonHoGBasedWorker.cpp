@@ -13,6 +13,9 @@ TreeSkelettonHoGBasedWorker::TreeSkelettonHoGBasedWorker()
 void TreeSkelettonHoGBasedWorker::processInstance(TreeInstance &tree,
                                                   double resolution) {
 
+    if (!tree._skeletton.empty() || !tree._tree.isTwoMeshes(resolution))
+        return;
+
     // Create first node
     auto *node = tree._skeletton.getPrimaryNode();
     auto &info = node->getInfo();

@@ -22,11 +22,10 @@ ForestLayer::ForestLayer()
 
 void ForestLayer::decorate(Chunk &chunk, const ExplorationContext &ctx) {
     // Check resolution
-    const double resolution = 0.01;
     const double minres = chunk.getMinResolution();
     const double maxres = chunk.getMaxResolution();
 
-    if (!(resolution >= minres && resolution < maxres)) {
+    if (!(_resolution >= minres && _resolution < maxres)) {
         return;
     }
 
@@ -66,7 +65,7 @@ void ForestLayer::decorate(Chunk &chunk, const ExplorationContext &ctx) {
         vec3d origin{chunkOffset.x + pt.x, chunkOffset.y + pt.y, 0};
         const double altitude =
             ctx.getEnvironment()
-                .findNearestFreePoint(origin, {0, 0, 1}, resolution, ctx)
+                .findNearestFreePoint(origin, {0, 0, 1}, _resolution, ctx)
                 .z;
 
         // skip if altitude is not in this chunk
@@ -98,6 +97,7 @@ void ForestLayer::write(WorldFile &wf) const {
     wf.addChild("templateTree",
                 dynamic_cast<WorldNode &>(*_templateTree).serialize());
     wf.addDouble("maxDensity", _maxDensity);
+    wf.addDouble("resolution", _resolution);
 }
 
 void ForestLayer::read(const WorldFile &wf) {
@@ -106,6 +106,7 @@ void ForestLayer::read(const WorldFile &wf) {
         _templateTree->read(wf.readChild("templateTree"));
     }
     wf.readDoubleOpt("maxDensity", _maxDensity);
+    wf.readDoubleOpt("resolution", _resolution);
 }
 
 double ForestLayer::getDensityAtAltitude(double altitude) {

@@ -20,7 +20,6 @@ class TreeInstance : public ObjectInstance {
 public:
     Tree &_tree;
 
-    vec3d _pos;
     TreeSkeletton _skeletton;
 
     /// Resolution at which the instance is currently generated.

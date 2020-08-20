@@ -31,8 +31,8 @@ void QuickLeaves::processInstance(TreeInstance &instance, double resolution) {
 
     BezierCurve curve{{up.x * 0.5, 0, low.z},
                       {0, 0, up.z},
-                      {up.x * 0.5, 0, (up.z - low.z) * 0.25},
-                      {up.x * 0.5, 0, (low.z - up.z) * 0.1}};
+                      {up.x * 1, 0, (up.z - low.z) * 0.5},
+                      {up.x * 1, 0, (low.z - up.z) * 0.2}};
 
     const int ringCount = 4;
     const int segmentCount = 7;
@@ -108,16 +108,14 @@ void QuickLeaves::addNode(const TreeNode *node, BoundingBox &bbox, int depth) {
     const int minDepth = 1;
 
     // Reset bbox if needed
-    if (depth == minDepth && bbox.getLowerBound().squaredLength({}) <
-                                 std::numeric_limits<double>::epsilon()) {
+    if (depth == minDepth) {
         bbox.reset(ti._position);
     }
-
-    // Add all points to the bbox
-    if (depth >= 1) {
+    else if (depth > minDepth) {
         bbox.addPoint(ti._position);
     }
 
+    // Add all points to the bbox
     for (auto *child : node->getChildrenOrNeighboursList()) {
         addNode(child, bbox, depth + 1);
     }

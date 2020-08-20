@@ -30,7 +30,8 @@ private:
 
     Image _treeSprite;
 
-
+    /// Resolution of the chunks where the groups are placed
+    double _resolution = 0.01;
     /// Maximum possible density of trees, in tree.km^-2
     double _maxDensity = 5000;
     // 20000 is better, but needs to be optimized both in memory and mesh

@@ -141,7 +141,7 @@ Image &Tree::getTrunkTexture() { return _internal->_trunkTexture; }
 const SpriteGrid &Tree::getLeavesGrid() { return _internal->_grid; }
 
 bool Tree::isTwoMeshes(double resolution) const {
-    return resolution > _internal->_twoMeshesLod.at(0);
+    return resolution >= _internal->_twoMeshesLod.at(0);
 }
 
 TreeInstance &Tree::getTreeInstance(int i) {
@@ -156,7 +156,7 @@ void Tree::setup(const Tree &model) {
     }
 
     for (auto &ti : model._internal->_instances) {
-        addTree(ti->_pos);
+        addTree(ti->getPosition());
     }
 }
 
@@ -178,7 +178,7 @@ void Tree::collect(ICollector &collector,
         for (auto &ti : _internal->_instances) {
             ++tpCount;
             vec3d realPos = ctx.getEnvironment().findNearestFreePoint(
-                ti->_pos, {0, 0, 1}, minRes, ctx);
+                ti->getPosition(), {0, 0, 1}, minRes, ctx);
             double resolution = resolutionModel.getResolutionAt(realPos, ctx);
 
             // This particular tree is too far to be seen
@@ -260,6 +260,19 @@ void Tree::write(WorldFile &wf) const {
     for (auto &worker : _internal->_workers) {
         wf.addToArray("workers", worker->serializeSubclass());
     }
+
+    // TODO
+    /*wf.addArray("singleMeshLod");
+
+    for (double d : _internal->_singleMeshLod) {
+        wf.addToArray("singleMeshLod", world::serialize(d));
+    }
+
+    wf.addArray("twoMeshesLod");
+
+    for (double d : _internal->_twoMeshesLod) {
+        wf.addToArray("twoMeshesLod", world::serialize(d));
+    }*/
 }
 
 void Tree::read(const WorldFile &wf) {
@@ -284,6 +297,7 @@ Template Tree::collectInstance(TreeInstance &ti, ICollector &collector,
     // Collect
     // TODO collectCommon is ran more than once, because reference are broken by
     // the change of context
+    // Fix: after key API is reworked, maybe we'll have a ".." equivalent?
     collectCommon(collector, ctx, res);
     Template tp = ti.collect(collector, ctx, res);
     return tp;
