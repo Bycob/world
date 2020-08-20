@@ -1,7 +1,10 @@
 #ifndef WORLD_COLOR_H
 #define WORLD_COLOR_H
 
+#include <random>
+
 #include "world/core/WorldTypes.h"
+#include "world/math/MathsHelper.h"
 
 namespace world {
 struct Color4u;
@@ -66,6 +69,17 @@ inline Color4d::operator Color4u() const {
     return {static_cast<u32>(_r * 255), static_cast<u32>(_g * 255),
             static_cast<u32>(_b * 255), static_cast<u32>(_a * 255)};
 }
+
+// ===== Color manipulation
+
+template <class RNG>
+inline Color4d jitter(RNG &rng, const Color4d &color, double factor) {
+    std::normal_distribution<double> distrib(0, factor);
+    return {clamp(color._r + distrib(rng), 0, 1),
+            clamp(color._g + distrib(rng), 0, 1),
+            clamp(color._b + distrib(rng), 0, 1), color._a};
+}
+
 } // namespace world
 
 #endif // WORLD_COLOR_H

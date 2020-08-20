@@ -4,6 +4,7 @@
 #include <armadillo/armadillo>
 
 #include "world/core/WorldTypes.h"
+#include "world/assets/Color.h"
 
 namespace world {
 class PImage;
@@ -61,6 +62,9 @@ public:
     void set(u8 r, u8 g, u8 b);
     void setf(double r, double g, double b);
 
+    RGBPixel &operator=(const Color4d &color);
+    RGBPixel &operator=(const Color4u &color);
+
 protected:
     u8 _r, _g, _b;
 };
@@ -77,6 +81,9 @@ public:
 
     void set(u8 r, u8 g, u8 b, u8 a = 255);
     void setf(double r, double g, double b, double a = 1);
+
+    RGBAPixel &operator=(const Color4d &color);
+    RGBAPixel &operator=(const Color4u &color);
 
 private:
     u8 _a;

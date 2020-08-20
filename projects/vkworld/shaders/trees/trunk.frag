@@ -7,6 +7,10 @@ layout(location = 2) in vec2 fragUV;
 
 layout(location = 0) out vec4 fragColor;
 
+layout(binding = 0) uniform Metadata {
+    vec3 trunkColor;
+};
+
 // between 0 and 1
 float rand(vec2 v) {
     return fract(sin(dot(v + vec2(-8.5123, 23.2156), vec2(12.9898, 59.233))) * 4758.5453123);
@@ -28,10 +32,10 @@ float noise(in vec2 uv) {
 float fbm(in vec2 uv) {
     float sum = 0.0;
     float amp = 0.0;
-    float persistence = 0.7;
+    float persistence = 0.8;
     vec2 st = uv;
 
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < 6; ++i) {
         amp = amp / persistence + noise(st);
         sum = sum / persistence + 1.;
         st *= 2.;
@@ -44,7 +48,7 @@ void main() {
     vec2 uv = fragCoord;
 
     float val = abs(fbm(uv * vec2(1., 0.1)) - .5);
-    vec3 col = vec3(val * val) * 12. * vec3(0.35, 0.25, 0.1);
+    vec3 col = vec3(val * val) * 12. * trunkColor;
 
     // Output to screen
     fragColor = vec4(col,1.0);

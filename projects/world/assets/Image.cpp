@@ -378,7 +378,17 @@ void RGBPixel::setf(double r, double g, double b) {
     _b = fromDouble(b);
 }
 
-// RGBAPixel
+RGBPixel &RGBPixel::operator=(const Color4d &color) {
+    setf(color._r, color._g, color._b);
+    return *this;
+}
+
+RGBPixel &RGBPixel::operator=(const Color4u &color) {
+    set(color.getRed(), color.getGreen(), color.getBlue());
+    return *this;
+}
+
+// ===== RGBAPixel
 
 u8 RGBAPixel::getAlpha() const { return _a; }
 
@@ -398,7 +408,18 @@ void RGBAPixel::setf(double r, double g, double b, double a) {
     _a = fromDouble(a);
 }
 
-// Implémentation de Image
+RGBAPixel &RGBAPixel::operator=(const Color4d &color) {
+    setf(color._r, color._g, color._b, color._a);
+    return *this;
+}
+
+RGBAPixel &RGBAPixel::operator=(const Color4u &color) {
+    set(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
+    return *this;
+}
+
+
+// ===== Image
 
 Image::Image(int width, int height, const ImageType &type)
         : _internal(new PImage(static_cast<u32>(width),

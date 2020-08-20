@@ -19,8 +19,14 @@ public:
 
     VkwTrunkTexture *clone() const override;
 
+    void write(WorldFile &wf) const override;
+
+    void read(const WorldFile &wf) override;
+
 private:
-    size_t _texSize;
+    u32 _texSize;
+
+    Color4d _color;
 
     VkwTextureGenerator _texGen;
 };

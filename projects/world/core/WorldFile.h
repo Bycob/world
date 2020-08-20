@@ -68,6 +68,8 @@ public:
 
     template <typename T> void readStruct(const std::string &id, T &s) const;
 
+    template <typename T> bool readStructOpt(const std::string &id, T &s) const;
+
     void addArray(const std::string &id);
 
     void addToArray(const std::string &id, WorldFile &&item);
@@ -128,6 +130,14 @@ inline void WorldFile::addStruct(const std::string &id, const T &s) {
 template <typename T>
 inline void WorldFile::readStruct(const std::string &id, T &s) const {
     world::read<T>(readChild(id), s);
+}
+
+template <typename T>
+inline bool WorldFile::readStructOpt(const std::string &id, T &s) const {
+    if (!hasChild(id))
+        return false;
+    world::read<T>(readChild(id), s);
+    return true;
 }
 
 class WORLDAPI_EXPORT WorldFileIterator {

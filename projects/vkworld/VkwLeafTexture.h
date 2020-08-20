@@ -36,13 +36,21 @@ public:
 
     VkwLeafTexture *clone() const override;
 
+    void write(WorldFile &wf) const override;
+
+    void read(const WorldFile &wf) override;
+
 private:
     VkwLeafPrivate *_internal;
 
+    /// Number of leaves on the texture
     u32 _count = 7;
+    /// Resolution of the texture
     u32 _texSize = 512;
 
     SpriteGrid _grid;
+
+    Color4d _mainColor;
 
     Mesh createLeafMesh();
 };

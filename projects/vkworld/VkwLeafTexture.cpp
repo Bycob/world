@@ -21,7 +21,8 @@ struct VkwLeafTexture::GeneratingLeaf {
 WORLD_REGISTER_CHILD_CLASS(ITreeWorker, VkwLeafTexture, "VkwLeafTexture")
 
 VkwLeafTexture::VkwLeafTexture()
-        : _internal(new VkwLeafPrivate()), _grid(_count) {}
+        : _internal(new VkwLeafPrivate()), _grid(_count),
+          _mainColor(0.4, 0.9, 0.4) {}
 
 VkwLeafTexture::~VkwLeafTexture() { delete _internal; }
 
@@ -47,6 +48,15 @@ VkwLeafTexture::GeneratingLeaf *VkwLeafTexture::generateLeafTextureAsync() {
     handle->_generator = std::make_unique<VkwTextureGenerator>(
         _texSize, _texSize, "leaves.frag");
     handle->_generator->mesh() = createLeafMesh();
+
+    // Set generator parameters
+    float leavesColor[] = {static_cast<float>(_mainColor._r),
+                           static_cast<float>(_mainColor._g),
+                           static_cast<float>(_mainColor._b)};
+    handle->_generator->addParameter(0, DescriptorType::UNIFORM_BUFFER,
+                                     MemoryUsage::CPU_WRITES,
+                                     sizeof(leavesColor), leavesColor);
+
     handle->_generator->generateTextureAsync();
     return handle;
 }
@@ -59,6 +69,18 @@ Image VkwLeafTexture::getTexture(VkwLeafTexture::GeneratingLeaf *handle) {
 }
 
 VkwLeafTexture *VkwLeafTexture::clone() const { return new VkwLeafTexture(); }
+
+void VkwLeafTexture::write(WorldFile &wf) const {
+    wf.addUint("texSize", _texSize);
+    wf.addUint("count", _count);
+    wf.addStruct("mainColor", _mainColor);
+}
+
+void VkwLeafTexture::read(const WorldFile &wf) {
+    wf.readUintOpt("texSize", _texSize);
+    wf.readUintOpt("count", _count);
+    wf.readStructOpt("mainColor", _mainColor);
+}
 
 Mesh VkwLeafTexture::createLeafMesh() {
     Mesh mesh;

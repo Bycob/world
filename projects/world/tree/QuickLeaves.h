@@ -15,6 +15,8 @@ class WORLDAPI_EXPORT QuickLeaves : public ITreeWorker {
 public:
     QuickLeaves(double maxResolution = 5, const Color4d &color = {0, 1, 0});
 
+    void setColor(const Color4d &color);
+
     void processInstance(TreeInstance &tree, double resolution) override;
 
     void processTree(Tree &tree, double resolution) override;

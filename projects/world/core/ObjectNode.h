@@ -66,7 +66,7 @@ public:
 
     void setPosition(const vec3d &pos) { _pos = pos; }
 
-    vec3d getPosition() const {return _pos;}
+    vec3d getPosition() const { return _pos; }
 
     ObjectLod &addLod(double resolution, size_t meshCount = 0);
 

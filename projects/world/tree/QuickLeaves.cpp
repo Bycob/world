@@ -11,6 +11,8 @@ QuickLeaves::QuickLeaves(double resolution, const Color4d &color)
         : _rng(std::random_device()()), _maxResolution(resolution),
           _color(color) {}
 
+void QuickLeaves::setColor(const Color4d &color) { _color = color; }
+
 void QuickLeaves::processInstance(TreeInstance &instance, double resolution) {
     if (!instance._tree.isTwoMeshes(resolution))
         return;
@@ -110,8 +112,7 @@ void QuickLeaves::addNode(const TreeNode *node, BoundingBox &bbox, int depth) {
     // Reset bbox if needed
     if (depth == minDepth) {
         bbox.reset(ti._position);
-    }
-    else if (depth > minDepth) {
+    } else if (depth > minDepth) {
         bbox.addPoint(ti._position);
     }
 

@@ -34,6 +34,9 @@ public:
     std::vector<double> _singleMeshLod;
     std::vector<double> _twoMeshesLod;
 
+    Color4d _defaultTrunkColor = {0.3, 0.17, 0.13};
+    Color4d _defaultLeavesColor = {0.4, 0.9, 0.4};
+
     /// Resolution at which the instance is currently generated.
     double _resolution = 0;
 
@@ -41,10 +44,10 @@ public:
     PTree()
             : _trunkTexture(1, 1, ImageType::RGBA),
               _leavesTexture(1, 1, ImageType::RGBA),
-              _grid(4), _singleMeshLod{0.1}, _twoMeshesLod{2, 7} {
+              _grid(4), _singleMeshLod{0.1}, _twoMeshesLod{3, 7} {
 
-        _trunkTexture.rgba(0, 0).setf(0.3, 0.17, 0.13);
-        _leavesTexture.rgba(0, 0).setf(0.4, 0.9, 0.4);
+        _trunkTexture.rgba(0, 0) = _defaultTrunkColor;
+        _leavesTexture.rgba(0, 0) = _defaultLeavesColor;
     }
 };
 
@@ -234,12 +237,35 @@ HabitatFeatures Tree::randomize() {
     auto &skeletton = addWorker<TreeSkelettonHoGBasedWorker>();
     skeletton.randomize();
 
+    // Colors
+    std::mt19937 rng(std::random_device{}());
+    Color4d trunkColor = jitter(rng, {0.3, 0.17, 0.13}, 0.1);
+    Color4d leavesColor = jitter(rng, {0.4, 0.9, 1.0}, 0.1);
+
+    _internal->_trunkTexture.rgba(0, 0) = trunkColor;
+    _internal->_leavesTexture.rgba(0, 0) = leavesColor;
+
     // Trunk and leaves
     addWorker<TrunkGenerator>(9);
-    addWorker<QuickLeaves>(5);
+    addWorker<QuickLeaves>(5, leavesColor);
     addWorker<LeavesGenerator>(0.2, 0.02);
 
-    // vulkan ?
+    // Add vulkan modules for texturing if vulkan is available
+    try {
+        // Use the serialization API to avoid linking with vkworld
+        WorldFile trunkTex;
+        trunkTex.addString("type", "VkwTrunkTexture");
+        trunkTex.addStruct("color", trunkColor);
+        addWorkerInternal(readSubclass<ITreeWorker>(trunkTex));
+
+        WorldFile leavesTex;
+        leavesTex.addString("type", "VkwLeafTexture");
+        leavesTex.addStruct("mainColor", leavesColor);
+        addWorkerInternal(readSubclass<ITreeWorker>(leavesTex));
+    } catch (...) {
+        // no vulkan modules
+        std::cout << "[Warning] Vulkan modules are not available" << std::endl;
+    }
 
     while (_internal->_instances.size() < 5) {
         addTree();
@@ -375,10 +401,10 @@ void Tree::reset() {
 
     // Resetting images
     _internal->_trunkTexture = Image(1, 1, ImageType::RGBA);
-    _internal->_trunkTexture.rgba(0, 0).setf(0.3, 0.17, 0.13);
+    _internal->_trunkTexture.rgba(0, 0) = _internal->_defaultTrunkColor;
 
     _internal->_leavesTexture = Image(1, 1, ImageType::RGBA);
-    _internal->_leavesTexture.rgba(0, 0).setf(0.4, 0.9, 0.4);
+    _internal->_leavesTexture.rgba(0, 0) = _internal->_defaultLeavesColor;
 }
 
 void Tree::addWorkerInternal(ITreeWorker *worker) {
