@@ -45,9 +45,24 @@ void ImageUtils::paintTexturef(Image &dst, const Image &src,
 void ImageUtils::fill(Image &img, const Color4d &color) {
     for (u32 y = 0; y < img.height(); ++y) {
         for (u32 x = 0; x < img.width(); ++x) {
-            img.rgb(x, y).setf(color._r, color._g, color._b);
+            switch (img.type()) {
+            case ImageType::RGB:
+                img.rgb(x, y).setf(color._r, color._g, color._b);
+                break;
+            case ImageType::RGBA:
+                img.rgba(x, y).setf(color._r, color._g, color._b, color._a);
+                break;
+            default:
+                break;
+            }
         }
     }
+}
+
+void ImageUtils::floodFill(Image &img, const vec2d &from, const Color4d &color,
+                           double threshold) {
+
+    // TODO
 }
 
 void ImageUtils::drawLine(Image &img, const vec2d &from, const vec2d &to,
@@ -133,12 +148,30 @@ void ImageUtils::drawLine(Image &img, const vec2d &from, const vec2d &to,
                 double f = clamp(d - hwidth, 0, 1);
                 double f_1 = 1 - f;
 
-                auto &initRgb = img.rgb(uv.x, uv.y);
-                initRgb.setf(initRgb.getRedf() * f + color._r * f_1,
-                             initRgb.getGreenf() * f + color._g * f_1,
-                             initRgb.getBluef() * f + color._b * f_1);
+                if (img.type() == ImageType::RGB) {
+                    auto &initRgb = img.rgb(uv.x, uv.y);
+                    initRgb.setf(initRgb.getRedf() * f + color._r * f_1,
+                                 initRgb.getGreenf() * f + color._g * f_1,
+                                 initRgb.getBluef() * f + color._b * f_1);
+                } else if (img.type() == ImageType::RGBA) {
+                    auto &initRgba = img.rgba(uv.x, uv.y);
+                    initRgba.setf(initRgba.getRedf() * f + color._r * f_1,
+                                  initRgba.getGreenf() * f + color._g * f_1,
+                                  initRgba.getBluef() * f + color._b * f_1,
+                                  initRgba.getAlphaf() * f + color._a * f_1);
+                }
             }
         }
+    }
+}
+
+void ImageUtils::drawPolygon(Image &img, const std::vector<vec2d> &points,
+                             double width, const Color4d &color,
+                             bool softEnds) {
+
+    for (size_t i = 0; i < points.size(); ++i) {
+        size_t j = (i + 1) % points.size();
+        drawLine(img, points[i], points[j], width, color, softEnds);
     }
 }
 } // namespace world

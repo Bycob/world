@@ -74,6 +74,8 @@ inline void InstancePool<TDistribution>::decorate(
         return;
     }
 
+    // std::cout << chunkPos << chunkDims << std::endl;
+
     // Distribution
     std::uniform_real_distribution<double> rotDistrib(0, M_PI * 2);
     auto &instance = chunk.addChild<Instance>();
@@ -156,6 +158,8 @@ void InstancePool<TDistribution>::read(const WorldFile &wf) {
     wf.readDoubleOpt("resolution", _resolution);
     wf.readDoubleOpt("speciesDensity", _speciesDensity);
     wf.readUintOpt("minSpecies", _minSpecies);
+
+    _distribution.setResolution(_resolution);
 }
 
 template <typename TDistribution>

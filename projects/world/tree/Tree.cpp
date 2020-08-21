@@ -11,6 +11,7 @@
 #include "LeavesGenerator.h"
 #include "world/math/RandomHelper.h"
 #include "QuickLeaves.h"
+#include "TreePlaceholderWorker.h"
 
 namespace world {
 
@@ -44,7 +45,7 @@ public:
     PTree()
             : _trunkTexture(1, 1, ImageType::RGBA),
               _leavesTexture(1, 1, ImageType::RGBA),
-              _grid(4), _singleMeshLod{0.1}, _twoMeshesLod{3, 7} {
+              _grid(4), _singleMeshLod{0.3}, _twoMeshesLod{5, 12} {
 
         _trunkTexture.rgba(0, 0) = _defaultTrunkColor;
         _leavesTexture.rgba(0, 0) = _defaultLeavesColor;
@@ -56,11 +57,13 @@ public:
 
 TreeInstance::TreeInstance(Tree &tree, vec3d pos)
         : ObjectInstance(pos), _tree(tree) {
+
     for (auto res : tree._internal->_singleMeshLod) {
         auto &lod = addLod(res, 1);
 
         Material &treeMat = lod.addMaterial();
         treeMat.setMapKd(lod.getId(0));
+        treeMat.setTransparent(true);
         lod.getNode(0).setMaterial(treeMat);
 
         lod.addTexture(1, 1, ImageType::RGBA);
@@ -240,14 +243,15 @@ HabitatFeatures Tree::randomize() {
     // Colors
     std::mt19937 rng(std::random_device{}());
     Color4d trunkColor = jitter(rng, {0.3, 0.17, 0.13}, 0.1);
-    Color4d leavesColor = jitter(rng, {0.4, 0.9, 1.0}, 0.1);
+    Color4d leavesColor = jitter(rng, {0.4, 0.9, 0.4}, 0.1);
 
     _internal->_trunkTexture.rgba(0, 0) = trunkColor;
     _internal->_leavesTexture.rgba(0, 0) = leavesColor;
 
     // Trunk and leaves
+    addWorker<TreePlaceholderWorker>(trunkColor, leavesColor, 5);
     addWorker<TrunkGenerator>(9);
-    addWorker<QuickLeaves>(5, leavesColor);
+    addWorker<QuickLeaves>(6, leavesColor);
     addWorker<LeavesGenerator>(0.2, 0.02);
 
     // Add vulkan modules for texturing if vulkan is available
@@ -287,7 +291,7 @@ void Tree::write(WorldFile &wf) const {
         wf.addToArray("workers", worker->serializeSubclass());
     }
 
-    // TODO
+    // TODO need serialization of arrays of double
     /*wf.addArray("singleMeshLod");
 
     for (double d : _internal->_singleMeshLod) {

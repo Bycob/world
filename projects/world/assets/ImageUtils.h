@@ -25,10 +25,17 @@ public:
 
     static void fill(Image &img, const Color4d &color);
 
+    static void floodFill(Image &img, const vec2d &from, const Color4d &color,
+                          double threshold = 0);
+
     /** Draw a line at the given coordinates (in pixels) */
     static void drawLine(Image &img, const vec2d &from, const vec2d &to,
                          double width, const Color4d &color,
                          bool softEnds = false);
+
+    static void drawPolygon(Image &img, const std::vector<vec2d> &points,
+                            double width, const Color4d &color,
+                            bool softEnds = true);
 
 private:
 };
