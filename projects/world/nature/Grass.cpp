@@ -1,9 +1,9 @@
 #include "Grass.h"
 
 #include "world/assets/SceneNode.h"
-#include "../assets/Material.h"
-#include "../math/Bezier.h"
-#include "../math/RandomHelper.h"
+#include "world/assets/Material.h"
+#include "world/math/Bezier.h"
+#include "world/math/RandomHelper.h"
 #include "world/assets/MeshOps.h"
 
 namespace world {

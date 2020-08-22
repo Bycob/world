@@ -11,7 +11,7 @@
 #include "LeavesGenerator.h"
 #include "world/math/RandomHelper.h"
 #include "QuickLeaves.h"
-#include "TreePlaceholderWorker.h"
+#include "TreeBillboardWorker.h"
 
 namespace world {
 
@@ -249,7 +249,7 @@ HabitatFeatures Tree::randomize() {
     _internal->_leavesTexture.rgba(0, 0) = leavesColor;
 
     // Trunk and leaves
-    addWorker<TreePlaceholderWorker>(trunkColor, leavesColor, 5);
+    addWorker<TreeBillboardWorker>(trunkColor, leavesColor, 5);
     addWorker<TrunkGenerator>(9);
     addWorker<QuickLeaves>(6, leavesColor);
     addWorker<LeavesGenerator>(0.2, 0.02);

@@ -1,5 +1,5 @@
-#ifndef WORLD_TREEPLACEHOLDERWORKER_H
-#define WORLD_TREEPLACEHOLDERWORKER_H
+#ifndef WORLD_TREEBILLBOARDWORKER_H
+#define WORLD_TREEBILLBOARDWORKER_H
 
 #include "world/core/WorldConfig.h"
 
@@ -8,15 +8,15 @@
 
 namespace world {
 
-class WORLDAPI_EXPORT TreePlaceholderWorker : public ITreeWorker {
+class WORLDAPI_EXPORT TreeBillboardWorker : public ITreeWorker {
     WORLD_WRITE_SUBCLASS_METHOD
 public:
-    TreePlaceholderWorker(Color4d trunkColor = {}, Color4d leavesColor = {},
-                          double height = 0);
+    TreeBillboardWorker(Color4d trunkColor = {}, Color4d leavesColor = {},
+                        double height = 0);
 
     void processInstance(TreeInstance &tree, double resolution);
 
-    TreePlaceholderWorker *clone() const override;
+    TreeBillboardWorker *clone() const override;
 
 private:
     std::mt19937 _rng;
@@ -39,4 +39,4 @@ private:
 } // namespace world
 
 
-#endif // WORLD_TREEPLACEHOLDERWORKER_H
+#endif // WORLD_TREEBILLBOARDWORKER_H

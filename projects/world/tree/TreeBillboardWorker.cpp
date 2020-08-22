@@ -1,22 +1,22 @@
-#include "TreePlaceholderWorker.h"
+#include "TreeBillboardWorker.h"
 
 #include "Tree.h"
 #include "world/assets/MeshOps.h"
 #include "world/assets/ImageUtils.h"
 
 namespace world {
-WORLD_REGISTER_CHILD_CLASS(ITreeWorker, TreePlaceholderWorker,
-                           "TreePlaceholderWorker");
+WORLD_REGISTER_CHILD_CLASS(ITreeWorker, TreeBillboardWorker,
+                           "TreeBillboardWorker");
 
-TreePlaceholderWorker::TreePlaceholderWorker(Color4d trunkColor,
-                                             Color4d leavesColor, double height)
+TreeBillboardWorker::TreeBillboardWorker(Color4d trunkColor,
+                                         Color4d leavesColor, double height)
         : _rng(std::random_device()()), _height(height), _width(_height * 0.35),
           _texHeight(256), _texWidth(128), _trunkWidth(_width * 0.2),
           _trunkHeight(_height * 0.3), _trunkColor(trunkColor),
           _leavesColor(leavesColor) {}
 
-void TreePlaceholderWorker::processInstance(TreeInstance &tree,
-                                            double resolution) {
+void TreeBillboardWorker::processInstance(TreeInstance &tree,
+                                          double resolution) {
     if (tree._tree.isTwoMeshes(resolution)) {
         return;
     }
@@ -77,7 +77,7 @@ void TreePlaceholderWorker::processInstance(TreeInstance &tree,
                             _leavesColor);
 }
 
-TreePlaceholderWorker *TreePlaceholderWorker::clone() const {
-    return new TreePlaceholderWorker(*this);
+TreeBillboardWorker *TreeBillboardWorker::clone() const {
+    return new TreeBillboardWorker(*this);
 }
 } // namespace world

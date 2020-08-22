@@ -6,7 +6,7 @@
 #include "world/core/InstancePool.h"
 #include "world/terrain/HeightmapGround.h"
 #include "world/tree/ForestLayer.h"
-#include "world/tree/Grass.h"
+#include "world/nature/Grass.h"
 #include "world/tree/SimpleTreeDecorator.h"
 #include "world/nature/Rocks.h"
 #include "world/core/Profiler.h"
