@@ -45,7 +45,7 @@ public:
     PTree()
             : _trunkTexture(1, 1, ImageType::RGBA),
               _leavesTexture(1, 1, ImageType::RGBA),
-              _grid(4), _singleMeshLod{0.3}, _twoMeshesLod{5, 12} {
+              _grid(4), _singleMeshLod{2}, _twoMeshesLod{15} {
 
         _trunkTexture.rgba(0, 0) = _defaultTrunkColor;
         _leavesTexture.rgba(0, 0) = _defaultLeavesColor;
@@ -251,7 +251,7 @@ HabitatFeatures Tree::randomize() {
     // Trunk and leaves
     addWorker<TreeBillboardWorker>(trunkColor, leavesColor, 5);
     addWorker<TrunkGenerator>(9);
-    addWorker<QuickLeaves>(6, leavesColor);
+    // addWorker<QuickLeaves>(6, leavesColor);
     addWorker<LeavesGenerator>(0.2, 0.02);
 
     // Add vulkan modules for texturing if vulkan is available

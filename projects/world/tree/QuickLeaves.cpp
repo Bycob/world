@@ -86,8 +86,8 @@ void QuickLeaves::processInstance(TreeInstance &instance, double resolution) {
 
     // Texture
     Image &texture = instance.overrideTexture(1, resolution);
-    const int size = 32;
-    texture = Image(size, size, ImageType::RGBA);
+    const int size = 128;
+    texture = Image(size, size * 2, ImageType::RGBA);
     generateTexture(texture);
 }
 
@@ -110,9 +110,10 @@ void QuickLeaves::addNode(const TreeNode *node, BoundingBox &bbox, int depth) {
     const int minDepth = 1;
 
     // Reset bbox if needed
-    if (depth == minDepth) {
+    if (depth == minDepth && bbox.getLowerBound().squaredLength({}) <
+                             std::numeric_limits<double>::epsilon()) {
         bbox.reset(ti._position);
-    } else if (depth > minDepth) {
+    } else if (depth >= minDepth) {
         bbox.addPoint(ti._position);
     }
 
@@ -124,10 +125,10 @@ void QuickLeaves::addNode(const TreeNode *node, BoundingBox &bbox, int depth) {
 
 void QuickLeaves::generateTexture(Image &img) {
     int size = img.width();
-    std::uniform_int_distribution<int> d(0, 1);
+    std::bernoulli_distribution d(0.25);
 
-    for (int y = 0; y < size; ++y) {
-        for (int x = 0; x < size; ++x) {
+    for (int y = 0; y < img.height(); ++y) {
+        for (int x = 0; x < img.width(); ++x) {
             img.rgba(x, y).setf(_color._r, _color._g, _color._b, d(_rng));
         }
     }

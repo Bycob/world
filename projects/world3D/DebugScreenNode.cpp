@@ -14,7 +14,9 @@ DebugScreenNode::DebugScreenNode(Application &app, IrrlichtDevice *device,
         : ISceneNode(parent, device->getSceneManager(), id), _app(app),
           _device(device) {
 
+    setMaterialType(EMT_TRANSPARENT_ADD_COLOR);
     _material.ColorMaterial = ECM_NONE;
+    _material.ZWriteEnable = false;
     _material.AmbientColor.set(0, 0, 0, 0);
 
     setAutomaticCulling(EAC_OFF);
