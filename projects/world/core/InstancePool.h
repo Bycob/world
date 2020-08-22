@@ -16,16 +16,17 @@
 
 namespace world {
 
-
-template <typename TDistribution = RandomDistribution>
 class InstancePool : public IChunkDecorator, public WorldNode {
     WORLD_WRITE_SUBCLASS_METHOD
 public:
-    InstancePool() : _distribution(), _rng(static_cast<u64>(time(NULL))) {}
+    InstancePool();
+
+    template <typename TDistribution, typename... Args>
+    TDistribution &setDistribution(Args &&... args);
+
+    DistributionBase &distribution() { return *_distribution; }
 
     void setResolution(double resolution);
-
-    TDistribution &distribution() { return _distribution; }
 
     void collectSelf(ICollector &collector,
                      const IResolutionModel &resolutionModel,
@@ -49,7 +50,7 @@ public:
     void read(const WorldFile &wf) override;
 
 private:
-    TDistribution _distribution;
+    std::unique_ptr<DistributionBase> _distribution;
 
     std::mt19937 _rng;
     std::unique_ptr<IInstanceGenerator> _templateGenerator;

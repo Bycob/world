@@ -79,7 +79,7 @@ void testTree(int argc, char **argv) {
 void testTrees() {
     // TODO InstancePool : enlever les templates avant d'attaquer le
     // multitextures terrain
-    InstancePool<SeedDistribution> treePool;
+    InstancePool treePool;
     treePool.setTemplateGenerator<Tree>();
 
     treePool.exportSpecies("assets/tree", 10, 3);

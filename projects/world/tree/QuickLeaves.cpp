@@ -111,7 +111,7 @@ void QuickLeaves::addNode(const TreeNode *node, BoundingBox &bbox, int depth) {
 
     // Reset bbox if needed
     if (depth == minDepth && bbox.getLowerBound().squaredLength({}) <
-                             std::numeric_limits<double>::epsilon()) {
+                                 std::numeric_limits<double>::epsilon()) {
         bbox.reset(ti._position);
     } else if (depth >= minDepth) {
         bbox.addPoint(ti._position);

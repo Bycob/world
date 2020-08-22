@@ -20,6 +20,7 @@ struct WORLDAPI_EXPORT Seed {
 };
 
 class WORLDAPI_EXPORT SeedDistribution : public DistributionBase {
+    WORLD_WRITE_SUBCLASS_METHOD
 public:
     SeedDistribution() : DistributionBase() {
         _tileSize = _maxDist;
@@ -33,7 +34,7 @@ public:
     std::vector<Seed> getSeedsAround(Chunk &chunk);
 
     std::vector<Position> getPositions(Chunk &chunk,
-                                       const ExplorationContext &ctx);
+                                       const ExplorationContext &ctx) override;
 
     void write(WorldFile &wf) const override;
 

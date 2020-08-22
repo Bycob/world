@@ -11,15 +11,23 @@
 
 namespace world {
 
-template <typename TDistribution>
-void InstancePool<TDistribution>::setResolution(double resolution) {
+inline InstancePool::InstancePool()
+        : _distribution(std::make_unique<RandomDistribution>()),
+          _rng(static_cast<u64>(time(NULL))) {}
+
+template <typename TDistribution, typename... Args>
+TDistribution &InstancePool::setDistribution(Args &&... args) {
+    _distribution = std::make_unique<TDistribution>(args...);
+    return static_cast<TDistribution &>(*_distribution);
+}
+
+inline void InstancePool::setResolution(double resolution) {
     _resolution = resolution;
 }
 
-template <typename TDistribution>
-inline void InstancePool<TDistribution>::collectSelf(
-    ICollector &collector, const IResolutionModel &resolutionModel,
-    const ExplorationContext &ctx) {
+inline void InstancePool::collectSelf(ICollector &collector,
+                                      const IResolutionModel &resolutionModel,
+                                      const ExplorationContext &ctx) {
 
     // Add new species if required
     double totalArea = _chunksDecorated * _chunkArea / 1e6;
@@ -35,7 +43,7 @@ inline void InstancePool<TDistribution>::collectSelf(
         std::unique_ptr<IInstanceGenerator> newSpecies =
             std::unique_ptr<IInstanceGenerator>(
                 _templateGenerator->newInstance());
-        _distribution.addGenerator(newSpecies->randomize());
+        _distribution->addGenerator(newSpecies->randomize());
         _generators.push_back(std::move(newSpecies));
     }
 
@@ -56,9 +64,8 @@ inline void InstancePool<TDistribution>::collectSelf(
     }
 }
 
-template <typename TDistribution>
-inline void InstancePool<TDistribution>::decorate(
-    Chunk &chunk, const ExplorationContext &ctx) {
+inline void InstancePool::decorate(Chunk &chunk,
+                                   const ExplorationContext &ctx) {
     // Update species metadata
     vec3d chunkPos = chunk.getPosition3D();
     vec3d chunkDims = chunk.getSize();
@@ -79,7 +86,7 @@ inline void InstancePool<TDistribution>::decorate(
     // Distribution
     std::uniform_real_distribution<double> rotDistrib(0, M_PI * 2);
     auto &instance = chunk.addChild<Instance>();
-    auto positions = _distribution.getPositions(chunk, ctx);
+    auto positions = _distribution->getPositions(chunk, ctx);
 
     for (auto &position : positions) {
         auto &templates = _objects.at(position._genID);
@@ -105,24 +112,20 @@ inline void InstancePool<TDistribution>::decorate(
     }
 }
 
-template <typename TDistribution>
-template <typename TGenerator>
-void InstancePool<TDistribution>::setTemplateGenerator() {
+template <typename TGenerator> void InstancePool::setTemplateGenerator() {
     _templateGenerator = std::make_unique<TGenerator>();
 }
 
-template <typename TDistribution>
 template <typename TGenerator, typename... Args>
-TGenerator &InstancePool<TDistribution>::addGenerator(Args... args) {
+TGenerator &InstancePool::addGenerator(Args... args) {
     _generators.push_back(std::make_unique<TGenerator>(args...));
     // TODO Add custom HabitatFeatures
-    _distribution.addGenerator(HabitatFeatures{});
+    _distribution->addGenerator(HabitatFeatures{});
     return static_cast<TGenerator &>(*_generators.back());
 }
 
-template <typename TDistribution>
-void InstancePool<TDistribution>::write(WorldFile &wf) const {
-    wf.addChild("distribution", _distribution.serialize());
+inline void InstancePool::write(WorldFile &wf) const {
+    wf.addChild("distribution", _distribution->serializeSubclass());
 
     if (_templateGenerator) {
         wf.addChild("templateGenerator",
@@ -140,9 +143,9 @@ void InstancePool<TDistribution>::write(WorldFile &wf) const {
     wf.addUint("minSpecies", _minSpecies);
 }
 
-template <typename TDistribution>
-void InstancePool<TDistribution>::read(const WorldFile &wf) {
-    _distribution.read(wf.readChild("distribution"));
+inline void InstancePool::read(const WorldFile &wf) {
+    _distribution.reset(
+        readSubclass<DistributionBase>(wf.readChild("distribution")));
 
     if (wf.hasChild("templateGenerator")) {
         _templateGenerator = std::unique_ptr<IInstanceGenerator>(
@@ -159,13 +162,11 @@ void InstancePool<TDistribution>::read(const WorldFile &wf) {
     wf.readDoubleOpt("speciesDensity", _speciesDensity);
     wf.readUintOpt("minSpecies", _minSpecies);
 
-    _distribution.setResolution(_resolution);
+    _distribution->setResolution(_resolution);
 }
 
-template <typename TDistribution>
-void InstancePool<TDistribution>::exportSpecies(const std::string &outputDir,
-                                                double avgSize,
-                                                double resolution) {
+inline void InstancePool::exportSpecies(const std::string &outputDir,
+                                        double avgSize, double resolution) {
     world::createDirectories(outputDir);
 
     // Export different instance throught the scene
@@ -199,7 +200,7 @@ void InstancePool<TDistribution>::exportSpecies(const std::string &outputDir,
     speciesTraits.addArray("species");
 
     const std::vector<HabitatFeatures> &habitats =
-        _distribution.getHabitatFeatures();
+        _distribution->getHabitatFeatures();
 
     for (size_t i = 0; i < habitats.size(); ++i) {
         WorldFile instance;

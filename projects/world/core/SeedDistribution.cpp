@@ -5,6 +5,9 @@
 
 namespace world {
 
+WORLD_REGISTER_CHILD_CLASS(DistributionBase, SeedDistribution,
+                           "SeedDistribution");
+
 void SeedDistribution::addSeeds(Chunk &chunk) {
     if (_habitats.empty())
         throw std::runtime_error(

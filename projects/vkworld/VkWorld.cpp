@@ -58,15 +58,15 @@ FlatWorld *VkWorld::createDemoFlatWorld() {
     chunkSystem.addDecorator<ForestLayer>();
 
     // Grass with seed distribution
-    auto &grassPool =
-        chunkSystem.addDecorator<InstancePool<SeedDistribution>>();
+    auto &grassPool = chunkSystem.addDecorator<InstancePool>();
+    grassPool.setDistribution<SeedDistribution>();
     grassPool.setTemplateGenerator<VkwGrass>();
     grassPool.setResolution(40);
 
     // Rocks
-    auto &rocksPool = chunkSystem.addDecorator<InstancePool<>>();
+    auto &rocksPool = chunkSystem.addDecorator<InstancePool>();
+    rocksPool.setDistribution<RandomDistribution>().setDensity(0.02);
     rocksPool.setTemplateGenerator<Rocks>();
-    rocksPool.distribution().setDensity(0.02);
 
     auto &rocks = rocksPool.addGenerator<Rocks>();
     rocks.setRadius(0.7);

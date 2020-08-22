@@ -85,6 +85,9 @@ public:
         }
     }
 
+    virtual std::vector<Position> getPositions(
+        Chunk &chunk, const ExplorationContext &ctx) = 0;
+
 protected:
     std::mt19937 _rng;
 
@@ -94,13 +97,14 @@ protected:
 
 
 class WORLDAPI_EXPORT RandomDistribution : public DistributionBase {
+    WORLD_WRITE_SUBCLASS_METHOD
 public:
     RandomDistribution() {}
 
     void setDensity(double density) { _density = density; }
 
     std::vector<Position> getPositions(Chunk &chunk,
-                                       const ExplorationContext &ctx) {
+                                       const ExplorationContext &ctx) override {
         std::vector<Position> positions;
 
         const vec3d chunkPos = chunk.getPosition3D();
