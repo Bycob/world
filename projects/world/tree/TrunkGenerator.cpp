@@ -54,24 +54,17 @@ void TrunkGenerator::addNode(Mesh &mesh, SkelettonNode<TreeInfo> *node,
     // std::cout << node->getInfo() << std::endl;
     auto &children = node->getChildrenOrNeighboursAccess();
     auto &info = node->getInfo();
-    /*
-     * TODO code to generate the bezier curve the old way
-    vec3d childPos = childInfo._position;
-    vec3d newDirection = childPos - nodePos;
 
-    BezierCurve curve(nodePos, childPos, direction * 0.25,
-                      newDirection * -0.25);
-    */
     BezierCurve &curve = info._curve;
 
     // Compute cut count and drop if it's too small
     double branchLength = curve._pts[0].length(curve._pts[3]);
-    // std::cout << branchLength << " < " << 1.0 / resolution << std::endl;
+    double cutRes = resolution / 4;
 
-    if (branchLength < 1.0 / resolution) {
+    if (branchLength < 1.0 / cutRes) {
         return;
     }
-    int cutCount = static_cast<int>(ceil(branchLength * resolution));
+    int cutCount = static_cast<int>(ceil(branchLength * cutRes));
 
     // If branch is not dropped, we add the corresponding mesh
     if (writeVertIds) {

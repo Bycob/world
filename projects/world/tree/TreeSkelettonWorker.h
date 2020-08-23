@@ -8,11 +8,13 @@
 
 namespace world {
 
+/** Base class to all skeletton workers. */
 class WORLDAPI_EXPORT TreeSkelettonWorker : public ITreeWorker {
 public:
     virtual void randomize(){};
 
 protected:
+    // Utility functions may be added in the future.
 };
 } // namespace world
 
