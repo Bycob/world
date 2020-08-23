@@ -28,7 +28,7 @@ void ColorMap::rebuild() {
 
     for (arma::uword x = 0; x < w; x++) {
         for (arma::uword y = 0; y < h; y++) {
-            vec2d pt{(double)x / (w - 1), (double)y / (w - 1)};
+            vec2d pt{(x + 0.5) / w, (y + 0.5) / w};
             auto data = interp.getData(pt);
 
             _cache(x, y, 0) = data.x;

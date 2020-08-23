@@ -33,6 +33,9 @@ if (${WORLD_BUILD_TESTS})
             target_compile_definitions(mem_test PRIVATE USE_VKWORLD=1)
         endif()
     endif()
+
+    add_executable(mapper mapper.cpp)
+    target_link_libraries(mapper world)
 endif()
 
 add_subdirectory(world)

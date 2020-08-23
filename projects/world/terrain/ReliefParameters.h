@@ -46,12 +46,12 @@ struct ReliefMapParams : Params<double> {
             // Magic numbers explication (see tanh curve for reference) :
             double a, b;
             if (elevation <= seaLevel) {
-                // Under sea level : x {-4, 0} -> {-4, -2}
+                // Under sea level : x {-4, 0} (shallow) -> {-3, 1} (deep)
                 double d = (seaLevel - elevation) / seaLevel;
-                a = -4 + d * 0;
-                b = 0 - d * 2;
+                a = -4 + d * 1;
+                b = 0 + d * 1;
             } else {
-                // Over sea level : x {-3, -1} -> {1, 3}
+                // Over sea level : x {-3, -1} (low) -> {1, 3} (high)
                 double d = (elevation - seaLevel) / (1 - seaLevel);
                 a = -3 + d * 4;
                 b = -1 + d * 4;
