@@ -1,0 +1,304 @@
+{
+    "nodes": [
+        {
+            "type": "GridChunkSystem",
+            "key": "31",
+            "children": [],
+            "decorators": [
+                {
+                    "type": "InstancePool",
+                    "speciesDensity": 0.0,
+                    "minSpecies": 10,
+                    "resolution": 2.0,
+                    "templateGenerator": {
+                        "type": "Tree",
+                        "key": "",
+                        "children": [],
+                        "workers": [],
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        }
+                    },
+                    "generators": [],
+                    "distribution": {
+                        "type": "SeedDistribution",
+                        "tileSize": 2000.0,
+                        "seedDensity": 0.28294212105225838,
+                        "seedAmount": 2.0,
+                        "maxDist": 2000.0,
+                        "habitats": []
+                    }
+                },
+                {
+                    "type": "InstancePool",
+                    "speciesDensity": 0.0,
+                    "minSpecies": 1,
+                    "generators": [{
+                        "type": "VkwGrass",
+                        "key": "",
+                        "count": 20,
+                        "bend": 0.3,
+                        "fold": 0.5,
+                        "size": 0.8,
+                        "height": 1.2,
+                        "width": 0.02,
+                        "density": 0.2,
+                        "children": [],
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        }
+                    }],
+                    "distribution": {
+                        "type": "SeedDistribution",
+                        "resolution": 20.0,
+                        "tileSize": 2000.0,
+                        "seedDensity": 0.28294212105225838,
+                        "seedAmount": 2.0,
+                        "maxDist": 2000.0,
+                        "habitats": [
+                            {
+                                "density": 0.3,
+                                "altitude": {},
+                                "slope": {},
+                                "temperature": {},
+                                "humidity": {}
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "InstancePool",
+                    "generators": [
+                        {
+                            "type": "Rocks",
+                            "key": "",
+                            "radius": 0.7,
+                            "roughness": 10,
+                            "flatness": 2.0,
+			                "count":10,
+                            "children": [],
+                            "position": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            }
+                        }
+                    ],
+                    "distribution": {
+                        "type": "RandomDistribution",
+                        "resolution": 20.0,
+                        "density": 0.02,
+                        "habitats": [
+                            {
+                                "density": 0.2,
+                                "altitude": {},
+                                "slope": {},
+                                "temperature": {},
+                                "humidity": {}
+                            }
+                        ]
+                    },
+                    "templateGenerator": {
+                        "type": "Rocks",
+                        "key": "",
+                        "radius": 1.0,
+                        "roughness": 10,
+                        "flatness": 2.0,
+                        "children": [],
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        }
+                    }
+                }
+            ],
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "tileSystem": {
+                "maxLod": 6,
+                "factor": 2,
+                "baseSize": {
+                    "x": 1000.0,
+                    "y": 1000.0,
+                    "z": 1000.0
+                },
+                "bufferRes": {
+                    "x": 250,
+                    "y": 250,
+                    "z": 250
+                }
+            }
+        }
+    ],
+    "ground": {
+        "type": "HeightmapGround",
+        "minAltitude": -2000.0,
+        "maxAltitude": 4000.0,
+        "terrainRes": 65,
+        "textureRes": 128,
+        "texPixSize": 4,
+        "workers": [
+            {
+                "type": "PerlinTerrainGenerator",
+                "maxOctaves": 11,
+                "perlinInfo": {
+                    "octaves": 5,
+                    "persistence": 0.45,
+                    "repeatable": false,
+                    "reference": 0,
+                    "frequency": 4.0,
+                    "offsetX": 0,
+                    "offsetY": 0
+                }
+            },
+            {
+                "type": "CustomWorldRMModifier",
+                "biomeDensity": 1.0,
+                "limitBrightness": 4,
+                "tileSystem": {
+                    "maxLod": 0,
+                    "factor": 2,
+                    "baseSize": {
+                        "x": 400000.0,
+                        "y": 400000.0,
+                        "z": 0.0
+                    },
+                    "bufferRes": {
+                        "x": 400,
+                        "y": 400,
+                        "z": 0
+                    }
+                }
+            },
+            {
+                "type": "MultilayerGroundTexture",
+                "layers": [
+                    {
+                        "ha": -1.0,
+                        "hb": 0.0,
+                        "hc": 1.0,
+                        "hd": 2.0,
+                        "dha": -1.0,
+                        "dhb": 0.0,
+                        "dhc": 1.0,
+                        "dhd": 2.0,
+                        "hmin": 0.0,
+                        "hmax": 1.0,
+                        "dhmin": 0.0,
+                        "dhmax": 1.0,
+                        "threshold": 0.05000000074505806,
+                        "slopeFactor": 0.0
+                    },
+                    {
+                        "ha": -1.0,
+                        "hb": 0.0,
+                        "hc": 0.4000000059604645,
+                        "hd": 0.44999998807907107,
+                        "dha": -1.0,
+                        "dhb": 0.0,
+                        "dhc": 0.4000000059604645,
+                        "dhd": 0.6000000238418579,
+                        "hmin": 0.0,
+                        "hmax": 1.0,
+                        "dhmin": 0.0,
+                        "dhmax": 1.0,
+                        "threshold": 0.05000000074505806,
+                        "slopeFactor": 0.0
+                    },
+                    {
+                        "ha": 0.33000001311302187,
+                        "hb": 0.4000000059604645,
+                        "hc": 0.6000000238418579,
+                        "hd": 0.75,
+                        "dha": -1.0,
+                        "dhb": 0.0,
+                        "dhc": 0.44999998807907107,
+                        "dhd": 0.6499999761581421,
+                        "hmin": 0.0,
+                        "hmax": 0.8500000238418579,
+                        "dhmin": 0.25,
+                        "dhmax": 0.8500000238418579,
+                        "threshold": 0.05000000074505806,
+                        "slopeFactor": 0.0
+                    },
+                    {
+                        "ha": 0.33000001311302187,
+                        "hb": 0.4000000059604645,
+                        "hc": 0.6000000238418579,
+                        "hd": 0.699999988079071,
+                        "dha": -1.0,
+                        "dhb": 0.0,
+                        "dhc": 0.4000000059604645,
+                        "dhd": 0.6000000238418579,
+                        "hmin": 0.0,
+                        "hmax": 1.0,
+                        "dhmin": 0.25,
+                        "dhmax": 0.6000000238418579,
+                        "threshold": 0.05000000074505806,
+                        "slopeFactor": 0.0
+                    },
+                    {
+                        "ha": 0.6499999761581421,
+                        "hb": 0.800000011920929,
+                        "hc": 1.0,
+                        "hd": 2.0,
+                        "dha": -1.0,
+                        "dhb": 0.0,
+                        "dhc": 0.5,
+                        "dhd": 0.699999988079071,
+                        "hmin": 0.0,
+                        "hmax": 1.0,
+                        "dhmin": 0.0,
+                        "dhmax": 1.0,
+                        "threshold": 0.05000000074505806,
+                        "slopeFactor": 0.0
+                    }
+                ],
+                "texProvider": {
+                    "type": "VkwGroundTextureGenerator",
+                    "texWidth": 256,
+                    "layers": [
+                        {
+                            "shader": "texture-rock.frag"
+                        },
+                        {
+                            "shader": "texture-sand.frag"
+                        },
+                        {
+                            "shader": "texture-soil.frag"
+                        },
+                        {
+                            "shader": "texture-grass.frag"
+                        },
+                        {
+                            "shader": "texture-snow.frag"
+                        }
+                    ]
+                }
+            }
+        ],
+        "tileSystem": {
+            "maxLod":12,
+            "factor": 2,
+            "baseSize": {
+                "x": 6000.0,
+                "y": 6000.0,
+                "z": 0.0
+            },
+            "bufferRes": {
+                "x": 512,
+                "y": 512,
+                "z": 0
+            }
+        }
+    }
+}
+
