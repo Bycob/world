@@ -240,6 +240,10 @@ HabitatFeatures Tree::randomize() {
     auto &skeletton = addWorker<TreeSkelettonHoGBasedWorker>();
     skeletton.randomize();
 
+    double treeWeight = skeletton.getStartWeight();
+    double treeHeight = pow(treeWeight, 1. / 3.) * 3;
+    double treeArea = pow(treeWeight, 2. / 3.) * 3;
+
     // Colors
     std::mt19937 rng(std::random_device{}());
     Color4d trunkColor = jitter(rng, {0.3, 0.17, 0.13}, 0.1);
@@ -249,7 +253,7 @@ HabitatFeatures Tree::randomize() {
     _internal->_leavesTexture.rgba(0, 0) = leavesColor;
 
     // Trunk and leaves
-    addWorker<TreeBillboardWorker>(trunkColor, leavesColor, 5);
+    addWorker<TreeBillboardWorker>(trunkColor, leavesColor, treeHeight);
     addWorker<TrunkGenerator>(9);
     // addWorker<QuickLeaves>(6, leavesColor);
     addWorker<LeavesGenerator>(0.2, 0.02);
@@ -277,8 +281,17 @@ HabitatFeatures Tree::randomize() {
 
     // Habitat
     HabitatFeatures habitat;
-    // TODO test with pow(skeletton.getStartWeight(), 2./3.)
-    habitat._density = 0.1 / skeletton.getStartWeight();
+    double minSlope = 0.5;
+    habitat._slope = {
+        0, M_PI_2 * (minSlope + (1 - minSlope) * exp(-treeHeight * 0.2))};
+    habitat._density = 1. / (treeArea + treeHeight);
+
+    auto altStart = exponentialDistribFromMedian(1.25 / treeHeight);
+    std::uniform_real_distribution<double> altRange(200, 1000);
+    double lowAlt = altStart(rng) * 1100 - 100;
+    habitat._altitude = {lowAlt, lowAlt + altRange(rng)};
+
+    habitat._sea = false;
 
     return habitat;
 }

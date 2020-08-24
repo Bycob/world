@@ -69,6 +69,11 @@ private:
     double _speciesDensity = 0.0004;
     /// Minimal species count
     u32 _minSpecies = 10;
+
+    /// The factor by which the instances should be randomly scaled.
+    /// 1 means no scaling. The more different to 1, the more scaled
+    /// objects are.
+    double _scaleFactor = 1.2;
 };
 
 

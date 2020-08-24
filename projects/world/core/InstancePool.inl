@@ -101,7 +101,7 @@ inline void InstancePool::decorate(Chunk &chunk,
         // Apply random rotation and scaling
         object._position = position._pos;
         object._rotation = {0, 0, rotDistrib(_rng)};
-        double scale = randScale(_rng, 1, 1.2);
+        double scale = randScale(_rng, 1, _scaleFactor);
         object._scale = {scale};
 
         instance.addNode(std::move(object));
@@ -141,6 +141,7 @@ inline void InstancePool::write(WorldFile &wf) const {
     wf.addDouble("resolution", _resolution);
     wf.addDouble("speciesDensity", _speciesDensity);
     wf.addUint("minSpecies", _minSpecies);
+    wf.addDouble("scaleFactor", _scaleFactor);
 }
 
 inline void InstancePool::read(const WorldFile &wf) {
@@ -161,6 +162,7 @@ inline void InstancePool::read(const WorldFile &wf) {
     wf.readDoubleOpt("resolution", _resolution);
     wf.readDoubleOpt("speciesDensity", _speciesDensity);
     wf.readUintOpt("minSpecies", _minSpecies);
+    wf.readDoubleOpt("scaleFactor", _scaleFactor);
 
     _distribution->setResolution(_resolution);
 }
