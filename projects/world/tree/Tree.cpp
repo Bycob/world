@@ -147,7 +147,37 @@ Image &Tree::getTrunkTexture() { return _internal->_trunkTexture; }
 const SpriteGrid &Tree::getLeavesGrid() { return _internal->_grid; }
 
 bool Tree::isTwoMeshes(double resolution) const {
+    if (_internal->_twoMeshesLod.empty()) {
+        return false;
+    }
     return resolution >= _internal->_twoMeshesLod.at(0);
+}
+
+bool Tree::isSingleMesh(double resolution) const {
+    if (_internal->_singleMeshLod.empty()) {
+        return false;
+    }
+    if (!_internal->_twoMeshesLod.empty() &&
+        resolution >= _internal->_twoMeshesLod.at(0)) {
+        return false;
+    }
+    return resolution >= _internal->_twoMeshesLod.at(0);
+}
+
+double Tree::getMinimumResolution() const {
+    if (!_internal->_singleMeshLod.empty()) {
+        return _internal->_singleMeshLod.at(0);
+    } else if (!_internal->_twoMeshesLod.empty()) {
+        return _internal->_twoMeshesLod.at(0);
+    } else {
+        return 10000;
+    }
+}
+
+void Tree::setLods(std::vector<double> singleMesh,
+                   std::vector<double> twoMeshes) {
+    _internal->_singleMeshLod = std::move(singleMesh);
+    _internal->_twoMeshesLod = std::move(twoMeshes);
 }
 
 TreeInstance &Tree::getTreeInstance(int i) {
@@ -155,6 +185,9 @@ TreeInstance &Tree::getTreeInstance(int i) {
 }
 
 void Tree::setup(const Tree &model) {
+    _internal->_singleMeshLod = model._internal->_singleMeshLod;
+    _internal->_twoMeshesLod = model._internal->_twoMeshesLod;
+
     _internal->_workers.clear();
 
     for (auto &worker : model._internal->_workers) {
@@ -170,7 +203,7 @@ void Tree::collect(ICollector &collector,
                    const IResolutionModel &resolutionModel,
                    const ExplorationContext &ctx) {
 
-    const double minRes = _internal->_singleMeshLod.at(0);
+    const double minRes = getMinimumResolution();
     auto allRes = resolutionModel.getMaxResolutionIn(_internal->_bbox, ctx);
 
     // All the trees are too far to be seen

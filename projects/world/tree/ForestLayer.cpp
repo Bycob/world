@@ -12,6 +12,7 @@ ForestLayer::ForestLayer()
           _treeSprite(3, 3, ImageType::RGB) {
 
     _templateTree->randomize();
+    _templateTree->setLods({}, {2, 7, 20});
 
     for (int x = 0; x < 3; ++x) {
         for (int y = 0; y < 3; ++y) {
@@ -104,6 +105,9 @@ void ForestLayer::read(const WorldFile &wf) {
     if (wf.hasChild("templateTree")) {
         _templateTree = std::make_unique<Tree>();
         _templateTree->read(wf.readChild("templateTree"));
+
+        // TODO remove when deserialization of lods will be possible
+        _templateTree->setLods({}, {2, 7, 20});
     }
     wf.readDoubleOpt("maxDensity", _maxDensity);
     wf.readDoubleOpt("resolution", _resolution);
@@ -111,7 +115,7 @@ void ForestLayer::read(const WorldFile &wf) {
 
 double ForestLayer::getDensityAtAltitude(double altitude) {
     // [,0] -> 0; 100 -> 0.5; 500 -> 0.25; 1000 -> 0.12; 2000 -> 0;
-    // TODO utiliser des splines
+    // TODO use cubic splines
     if (altitude <= 0) {
         return 0;
     } else if (altitude <= 100) {

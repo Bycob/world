@@ -60,6 +60,15 @@ public:
     /// at the given resolution.
     bool isTwoMeshes(double resolution) const;
 
+    /// Returns true if the tree is compound of only one mesh at the
+    /// given resolution
+    bool isSingleMesh(double resolution) const;
+
+    /// Returns the resolution under which the tree is not collected.
+    double getMinimumResolution() const;
+
+    void setLods(std::vector<double> singleMesh, std::vector<double> twoMeshes);
+
     TreeInstance &getTreeInstance(int i);
 
     void setup(const Tree &model);
