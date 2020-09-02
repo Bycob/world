@@ -25,6 +25,8 @@ public:
 
     void addLayer(const std::string &textureShader);
 
+    void addLayer(Shader shader);
+
     size_t getLayerCount();
 
     VkwImage &getVkTexture(int layer, int lod);

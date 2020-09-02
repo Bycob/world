@@ -2,11 +2,13 @@
 
 #include <memory>
 #include <vector>
-#include <vkworld/wrappers/VkwMemoryHelper.h>
+
+#include "world/assets/Shader.h"
 
 #include "wrappers/VkwImage.h"
 #include "wrappers/VkwWorker.h"
 #include "wrappers/VkwRandomTexture.h"
+#include "wrappers/VkwMemoryHelper.h"
 
 namespace world {
 
@@ -23,7 +25,7 @@ struct LodTextures {
 class VkwGroundTextureGeneratorPrivate {
 public:
     u32 _texWidth = 1024;
-    std::vector<std::string> _layers;
+    std::vector<Shader> _layers;
     VkwRandomTexture _randTex;
 
     /// Generated textures
@@ -40,7 +42,11 @@ VkwGroundTextureGenerator::~VkwGroundTextureGenerator() { delete _internal; }
 
 
 void VkwGroundTextureGenerator::addLayer(const std::string &textureShader) {
-    _internal->_layers.push_back(textureShader);
+    _internal->_layers.emplace_back("generic-texture.vert", textureShader);
+}
+
+void VkwGroundTextureGenerator::addLayer(Shader shader) {
+    _internal->_layers.push_back(std::move(shader));
 }
 
 size_t VkwGroundTextureGenerator::getLayerCount() {
@@ -64,9 +70,7 @@ void VkwGroundTextureGenerator::write(WorldFile &wf) const {
     wf.addArray("layers");
 
     for (auto &layer : _internal->_layers) {
-        WorldFile layerWf;
-        layerWf.addString("shader", layer);
-        wf.addToArray("layers", std::move(layerWf));
+        wf.addToArray("layers", layer.serialize());
     }
 }
 
@@ -74,7 +78,10 @@ void VkwGroundTextureGenerator::read(const WorldFile &wf) {
     wf.readUintOpt("texWidth", _internal->_texWidth);
 
     for (auto it = wf.readArray("layers"); !it.end(); ++it) {
-        _internal->_layers.push_back(it->readString("shader"));
+        // TODO bad deserialization API
+        Shader shader("generic-texture.vert", "");
+        shader.read(*it);
+        _internal->_layers.push_back(shader);
     }
 }
 
@@ -103,9 +110,10 @@ LodTextures &VkwGroundTextureGenerator::getOrCreate(int lod, bool cpu) {
 }
 
 void VkwGroundTextureGeneratorPrivate::launchTextureGeneration(LodTextures &t) {
+    auto &ctx = Vulkan::context();
     t._texWorker = std::make_unique<VkwGraphicsWorker>();
 
-    for (const auto &layer : _layers) {
+    for (const auto &shader : _layers) {
         VkwImage image(_texWidth, _texWidth, VkwImageUsage::OFFSCREEN_RENDER);
         t._layerTextures.push_back(image);
 
@@ -113,11 +121,20 @@ void VkwGroundTextureGeneratorPrivate::launchTextureGeneration(LodTextures &t) {
         VkwDescriptorSetLayout layout({0}, {});
         layout.addBinding(DescriptorType::IMAGE, 1);
 
+        int id = 2;
+        for (auto &param : shader.getParameters()) {
+            layout.addBinding(DescriptorType::UNIFORM_BUFFER, id);
+            ++id;
+        }
+
         VkwGraphicsPipeline pipeline(layout);
         pipeline.enableVertexBuffer(false);
+
+        // Setup shader
         pipeline.setBuiltinShader(VkwShaderType::VERTEX,
-                                  "generic-texture.vert");
-        pipeline.setBuiltinShader(VkwShaderType::FRAGMENT, layer);
+                                  shader.getVertexPath());
+        pipeline.setBuiltinShader(VkwShaderType::FRAGMENT,
+                                  shader.getFragmentPath());
 
         VkwDescriptorSet dset(layout);
 
@@ -132,6 +149,21 @@ void VkwGroundTextureGeneratorPrivate::launchTextureGeneration(LodTextures &t) {
 
         dset.addUniformStruct(0, sizes);
         dset.addDescriptor(1, _randTex.get());
+
+        id = 2;
+        for (auto &param : shader.getParameters()) {
+            u8 *data = new u8[ShaderParam::MAX_SIZE];
+            int size = 0;
+            param.getData(data, size);
+            VkwSubBuffer buf = ctx.allocate(
+                size, DescriptorType::UNIFORM_BUFFER, MemoryUsage::CPU_WRITES);
+            buf.setData(data);
+
+            dset.addDescriptor(id, buf);
+            ++id;
+
+            delete[] data;
+        }
 
         VkwRenderPass renderPass(image);
         pipeline.setRenderPass(renderPass);

@@ -16,8 +16,8 @@ void Material::setName(const std::string &name) { _name = name; }
 
 void Material::setShader(std::string shader) { _shader = shader; }
 
-void Material::setShaderParam(std::string name, const ShaderParam &value) {
-    _shaderParams[std::move(name)] = value;
+void Material::addShaderParam(ShaderParam param) {
+    _shaderParams[param._name] = std::move(param);
 }
 
 ShaderParam Material::getShaderParam(const std::string &name) const {

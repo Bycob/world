@@ -15,6 +15,10 @@ layout(binding = 0) uniform TextureData {
 
 layout(binding = 1) uniform sampler2D randTex;
 
+layout(binding = 2) uniform Color {
+    vec3 grassColor;
+};
+
 #define BLADES_SPACING 0.02
 #define JITTER_MAX 0.02
 // depends on size of grass blades in pixels & distance between blades
@@ -55,11 +59,14 @@ vec2 hash22(vec2 p)
 }
 
 vec3 getGrassColor(float x) {
+    /*
     vec3 a = vec3(0.2, 0.4, 0.3);
     vec3 b = vec3(0.3, 0.5, 0.2);
     vec3 c = vec3(0.2, 0.4, 0.2);
     vec3 d = vec3(0.66, 0.77, 0.33);
     vec3 col = a + b * cos(2. * PI * (c * x + d));
+    */
+    vec3 col = grassColor;
     return col;
 }
 

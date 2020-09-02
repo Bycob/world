@@ -276,19 +276,28 @@
                     "texWidth": 256,
                     "layers": [
                         {
-                            "shader": "texture-rock.frag"
+                            "fragmentPath": "texture-rock.frag",
+                            "params": []
                         },
                         {
-                            "shader": "texture-sand.frag"
+                            "fragmentPath": "texture-sand.frag",
+                            "params": []
                         },
                         {
-                            "shader": "texture-soil.frag"
+                            "fragmentPath": "texture-soil.frag",
+                            "params": []
                         },
                         {
-                            "shader": "texture-grass.frag"
+                            "fragmentPath": "texture-grass.frag",
+                            "params": [{
+                                "name": "grassColor",
+                                "type": 1,
+                                "value": "0.96,0.82,0.3"
+                            }]
                         },
                         {
-                            "shader": "texture-snow.frag"
+                            "fragmentPath": "texture-snow.frag",
+                            "params": []
                         }
                     ]
                 }

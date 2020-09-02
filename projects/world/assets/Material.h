@@ -26,7 +26,7 @@ public:
 
     std::string getShader() const { return _shader; }
 
-    void setShaderParam(std::string name, const ShaderParam &value);
+    void addShaderParam(ShaderParam value);
 
     ShaderParam getShaderParam(const std::string &name) const;
 

@@ -3,6 +3,7 @@
 #include "world/core/WorldConfig.h"
 
 #include "WorldFile.h"
+#include "ExplorationContext.h"
 
 namespace world {
 
@@ -12,7 +13,7 @@ class Chunk;
 /** This object is used to populate newly created chunks. */
 class WORLDAPI_EXPORT IChunkDecorator : public ISerializable {
 public:
-    virtual ~IChunkDecorator() = default;
+    ~IChunkDecorator() override = default;
 
     virtual void decorate(
         Chunk &chunk,

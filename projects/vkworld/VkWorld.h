@@ -16,6 +16,8 @@ public:
     static void loadLibrary();
 
     static FlatWorld *createDemoFlatWorld();
+
+    static void setupShader(const Shader &shader);
 };
 } // namespace world
 
