@@ -262,6 +262,4 @@ public:                                                                        \
 
 } // namespace world
 
-#include "Serialization.inl"
-
 #endif // WORLD_WORLDFILE_H
