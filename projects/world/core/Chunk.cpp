@@ -15,4 +15,8 @@ void Chunk::setResolutionLimits(double min, double max) {
     _maxResolution = max;
 }
 
+bool Chunk::supportsResolution(double resolution) const {
+    return _minResolution <= resolution && _maxResolution > resolution;
+}
+
 } // namespace world

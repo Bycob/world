@@ -16,8 +16,12 @@ namespace world {
 struct ReliefMapEntry : public IGridElement {
     Terrain _height;
     Terrain _diff;
+    Terrain _humidity;
+    Terrain _temperature;
 
-    ReliefMapEntry(int resolution) : _height(resolution), _diff(resolution) {}
+    ReliefMapEntry(int resolution)
+            : _height(resolution), _diff(resolution), _humidity(resolution),
+              _temperature(resolution) {}
 };
 
 /** Base class for generating relief maps.
@@ -28,7 +32,8 @@ struct ReliefMapEntry : public IGridElement {
  * For example, mountains have a high offset and a high diff,
  * countryside has a low offset and a low diff, and a plateau
  * would have a high offset but a low diff. */
-class WORLDAPI_EXPORT ReliefMapModifier : public ITerrainWorker {
+class WORLDAPI_EXPORT ReliefMapModifier : public ITerrainWorker,
+                                          public IAtmosphericProvider {
 public:
     ReliefMapModifier(double width = 400000, int resolution = 400);
 
@@ -39,6 +44,10 @@ public:
     void processTile(ITileContext &context) override;
 
     const ReliefMapEntry &obtainMap(int x, int y);
+
+    AtmosphericData getAtmosphericDataPoint(
+        const vec3d &point, double resolution,
+        const ExplorationContext &ctx) override;
 
     void setRegion(const vec2d &center, double radius, double curvature,
                    double height, double diff);

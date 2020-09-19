@@ -9,6 +9,24 @@ namespace world {
 
 class ExplorationContext;
 
+struct AtmosphericData {
+    /// in percentage
+    double _humidity;
+    /// in celsius degrees
+    double _temperature;
+};
+
+
+class WORLDAPI_EXPORT IAtmosphericProvider {
+public:
+    virtual ~IAtmosphericProvider() = default;
+
+    virtual AtmosphericData getAtmosphericDataPoint(
+        const vec3d &point, double resolution,
+        const ExplorationContext &ctx) = 0;
+};
+
+
 class WORLDAPI_EXPORT IEnvironment {
 public:
     virtual ~IEnvironment() = default;
@@ -17,6 +35,13 @@ public:
                                        const vec3d &direction,
                                        double resolution,
                                        const ExplorationContext &ctx) const = 0;
+
+    virtual AtmosphericData getAtmosphericDataPoint(
+        const vec3d &point, double resolution,
+        const ExplorationContext &ctx) const = 0;
+
+    virtual void setAtmosphericProvider(
+        IAtmosphericProvider *provider) const = 0;
 };
 
 class WORLDAPI_EXPORT DefaultEnvironment : public IEnvironment {
@@ -26,11 +51,29 @@ public:
 
     vec3d findNearestFreePoint(const vec3d &origin, const vec3d &direction,
                                double resolution,
-                               const ExplorationContext &ctx) const {
+                               const ExplorationContext &ctx) const override {
         vec3d res = origin;
         res.z = 0;
         return res;
     }
+
+    AtmosphericData getAtmosphericDataPoint(
+        const vec3d &point, double resolution,
+        const ExplorationContext &ctx) const override {
+
+        if (_atmosphericProvider != nullptr) {
+            return _atmosphericProvider->getAtmosphericDataPoint(
+                point, resolution, ctx);
+        }
+        return {0.5, 15};
+    }
+
+    void setAtmosphericProvider(IAtmosphericProvider *provider) const override {
+        _atmosphericProvider = provider;
+    }
+
+protected:
+    mutable IAtmosphericProvider *_atmosphericProvider = nullptr;
 };
 
 } // namespace world

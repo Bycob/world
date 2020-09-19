@@ -61,6 +61,12 @@ public:
 
     void setMaxLOD(int lod) { _tileSystem._maxLod = lod; }
 
+    /** Returns an atmospheric provider if there is any. */
+    // This method is used in a bad hack that should not be required
+    // anymore when we will be able to serialize references (should
+    // come right after Unity terrains).
+    IAtmosphericProvider *getAtmosphericProvider();
+
     // TERRAIN WORKERS
     /** Adds a default worker set to generate heightmaps in the
      * ground. This method is for quick-setup purpose. */

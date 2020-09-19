@@ -8,7 +8,7 @@
 namespace world {
 class PFlatWorld;
 
-class WORLDAPI_EXPORT FlatWorld : public World, public IEnvironment {
+class WORLDAPI_EXPORT FlatWorld : public World, public DefaultEnvironment {
 public:
     /** Create a complete and rich world that can be used
      * as a demonstration of the API power ! */

@@ -93,6 +93,16 @@ HeightmapGround::HeightmapGround(double unitSize, double minAltitude,
 
 HeightmapGround::~HeightmapGround() { delete _internal; }
 
+IAtmosphericProvider *HeightmapGround::getAtmosphericProvider() {
+    for (auto &worker : _internal->_generators) {
+        auto *ap = dynamic_cast<IAtmosphericProvider *>(worker._worker.get());
+        if (ap != nullptr) {
+            return ap;
+        }
+    }
+    return nullptr;
+}
+
 void HeightmapGround::setDefaultWorkerSet() {
     // setLodRange(addWorker<PerlinTerrainGenerator>(3, 4., 0.35), 0, 0);
     // setLodRange(addWorker<DiamondSquareTerrain>(0.5), 1, 5);

@@ -14,6 +14,7 @@
 #include "world/terrain/MultilayerGroundTexture.h"
 #include "world/terrain/DefaultTextureProvider.h"
 #include "world/core/WorldFile.h"
+#include "world/terrain/GroundBiomes.h"
 
 namespace world {
 
@@ -34,6 +35,8 @@ FlatWorld *FlatWorld::createDemoFlatWorld() {
     auto &map = ground.addWorker<CustomWorldRMModifier>();
     map.setRegion({0, 0}, 10000, 3, 0.1, 0.3);
     map.setRegion({0, 0}, 6000, 0.7, 1.6, 0.8);
+
+    ground.addWorker<GroundBiomes>();
 
     auto &multilayer = ground.addWorker<MultilayerGroundTexture>();
     multilayer.setTextureProvider<DefaultTextureProvider>("multilayer/");
@@ -97,6 +100,13 @@ IGround &FlatWorld::ground() { return *_internal->_ground; }
 
 void FlatWorld::collect(ICollector &collector,
                         const IResolutionModel &resolutionModel) {
+    // TODO remove this hack when we can deserialize references
+    auto *hg = dynamic_cast<HeightmapGround *>(_internal->_ground.get());
+    if (hg != nullptr) {
+        _atmosphericProvider = hg->getAtmosphericProvider();
+    }
+    // end of hack
+
     _internal->_ground->collect(collector, resolutionModel);
     World::collect(collector, resolutionModel);
 }

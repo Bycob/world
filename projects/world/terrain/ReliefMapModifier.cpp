@@ -82,6 +82,13 @@ const ReliefMapEntry &ReliefMapModifier::obtainMap(int x, int y) {
     return provideMap(x, y);
 }
 
+AtmosphericData ReliefMapModifier::getAtmosphericDataPoint(
+    const vec3d &point, double resolution, const ExplorationContext &ctx) {
+    ReliefMapEntry &entry = provideMap(0, 0);
+    const vec3d pos = _tileSystem.getTileOffset({{0, 0, 0}, 0});
+    return {entry._humidity(pos.x, pos.y), entry._temperature(pos.x, pos.y)};
+}
+
 void ReliefMapModifier::setRegion(const vec2d &center, double radius,
                                   double curvature, double height,
                                   double diff) {
