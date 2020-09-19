@@ -63,6 +63,7 @@ template <typename T> struct vec3 {
 
     vec3<T> floor() const;
     vec3<T> ceil() const;
+    vec3<T> round() const;
 
     static double length(const vec3<T> &vec1, const vec3<T> &vec2);
 
@@ -90,6 +91,7 @@ template <typename T> struct vec2 {
     vec2<T> operator*(const vec2<T> &rhs) const;
     vec2<T> operator/(const vec2<T> &rhs) const;
 
+    template <typename R> bool operator==(const vec2<R> &rhs) const;
     template <typename R> bool operator<(const vec2<R> &rhs) const;
 
     vec2<T> normalize() const;
@@ -280,6 +282,11 @@ template <typename T> inline vec3<T> vec3<T>::ceil() const {
     return {T(::ceil(x)), T(::ceil(y)), T(::ceil(z))};
 }
 
+template <typename T> inline vec3<T> vec3<T>::round() const {
+    return {T(::round(x)), T(::round(y)), T(::round(z))};
+}
+
+
 template <typename T>
 inline double vec3<T>::length(const vec3<T> &vec1, const vec3<T> &vec2) {
     return vec1.length(vec2);
@@ -355,6 +362,12 @@ template <typename T>
 template <typename R>
 inline bool vec2<T>::operator<(const vec2<R> &rhs) const {
     return x < rhs.x ? true : x == rhs.x && y < rhs.y;
+}
+
+template <typename T>
+template <typename R>
+inline bool vec2<T>::operator==(const vec2<R> &rhs) const {
+    return x == rhs.x && y == rhs.y;
 }
 
 template <typename T> inline double vec2<T>::norm() const {

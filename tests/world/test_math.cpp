@@ -81,6 +81,21 @@ TEST_CASE("vec3i and vec3d - mixed operators", "[math]") {
     }
 }
 
+TEST_CASE("vec2i", "[math]") {
+    SECTION("Equal") {
+        vec2i a(1, 2);
+        vec2i abis(1, 2);
+        vec2i b(3, 4);
+        vec2i c(1, 4);
+        vec2i d(2, 2);
+
+        CHECK(a == abis);
+        CHECK_FALSE(a == b);
+        CHECK_FALSE(a == c);
+        CHECK_FALSE(a == d);
+    }
+}
+
 TEST_CASE("vec2i and vec2d - mixed operators", "[math]") {
     vec2i veci{5, -5};
     vec2d vecd{2.1, 2.1};
