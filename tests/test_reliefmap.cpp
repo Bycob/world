@@ -10,10 +10,11 @@ using namespace world;
 
 void testReliefMap(int, char **);
 void testLightning(int argc, char **argv);
+void testHSV(int argc, char **argv);
 
 int main(int argc, char **argv) {
     // testReliefMap(argc, argv);
-    testLightning(argc, argv);
+    testHSV(argc, argv);
 }
 
 void testReliefMap(int argc, char **argv) {
@@ -60,4 +61,19 @@ void testLightning(int argc, char **argv) {
     lightning.generateLightning(img, {500, 200}, {500, 800});
 
     img.write("assets/lightning.png");
+}
+
+void testHSV(int argc, char **argv) {
+    const int size = 1024;
+    Image img(size, size, ImageType::RGB);
+
+    for (int x = 0; x < size; ++x) {
+        for (int y = 0; y < size; ++y) {
+            img.rgb(x, y) =
+                ColorOps::fromHSV(double(x) / size, 1 - double(y) / size,
+                                  1 - double(x + y) / (size * 2));
+        }
+    }
+
+    img.write("assets/hsv_test.png");
 }

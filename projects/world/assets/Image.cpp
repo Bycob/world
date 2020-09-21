@@ -388,6 +388,10 @@ RGBPixel &RGBPixel::operator=(const Color4u &color) {
     return *this;
 }
 
+RGBPixel::operator Color4d() {
+    return {toDouble(_r), toDouble(_g), toDouble(_b)};
+}
+
 // ===== RGBAPixel
 
 u8 RGBAPixel::getAlpha() const { return _a; }
@@ -416,6 +420,10 @@ RGBAPixel &RGBAPixel::operator=(const Color4d &color) {
 RGBAPixel &RGBAPixel::operator=(const Color4u &color) {
     set(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
     return *this;
+}
+
+RGBAPixel::operator Color4d() {
+    return {toDouble(_r), toDouble(_g), toDouble(_b), toDouble(_a)};
 }
 
 

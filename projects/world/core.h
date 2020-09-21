@@ -12,6 +12,7 @@
 #include "math/Vector.h"
 
 #include "assets/Color.h"
+#include "assets/ColorOps.h"
 #include "assets/Image.h"
 #include "assets/ImageUtils.h"
 #include "assets/Material.h"

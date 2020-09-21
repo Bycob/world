@@ -51,6 +51,12 @@ template <typename T> inline T mod(T n, T r) {
     return m < 0 ? m + r : m;
 }
 
+/** @returns remainder of floating point operation */
+inline double modd(double n, double r) {
+    double m = std::remainder(n, r);
+    return m < 0 ? m + r : m;
+}
+
 /** @returns b^e, using fast exponential algorithm.
  * @param e The signed integer exponent*/
 template <typename T> inline T powi(T b, int e) {

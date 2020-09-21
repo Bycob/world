@@ -65,6 +65,8 @@ public:
     RGBPixel &operator=(const Color4d &color);
     RGBPixel &operator=(const Color4u &color);
 
+    operator Color4d();
+
 protected:
     u8 _r, _g, _b;
 };
@@ -84,6 +86,8 @@ public:
 
     RGBAPixel &operator=(const Color4d &color);
     RGBAPixel &operator=(const Color4u &color);
+
+    operator Color4d();
 
 private:
     u8 _a;
