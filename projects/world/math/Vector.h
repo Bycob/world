@@ -65,6 +65,8 @@ template <typename T> struct vec3 {
     vec3<T> ceil() const;
     vec3<T> round() const;
 
+    vec3<T> clamp(const vec3<T> &min, const vec3<T> &max) const;
+
     static double length(const vec3<T> &vec1, const vec3<T> &vec2);
 
     static constexpr vec3<T> X() { return {1, 0, 0}; }
@@ -83,13 +85,27 @@ template <typename T> struct vec2 {
     template <typename R> operator vec2<R>() const;
     template <typename R> explicit operator vec3<R>() const;
 
-    vec2<T> operator*(T rhs) const;
-    vec2<T> operator/(T rhs) const;
+    template <typename R>
+    auto operator*(R rhs) const -> vec2<decltype(x * rhs)>;
+    template <typename R>
+    auto operator/(R rhs) const -> vec2<decltype(x / rhs)>;
 
-    vec2<T> operator+(const vec2<T> &rhs) const;
-    vec2<T> operator-(const vec2<T> &rhs) const;
-    vec2<T> operator*(const vec2<T> &rhs) const;
-    vec2<T> operator/(const vec2<T> &rhs) const;
+    template <typename R>
+    auto operator+(const vec2<R> &rhs) const -> vec2<decltype(x + rhs.x)>;
+    template <typename R>
+    auto operator-(const vec2<R> &rhs) const -> vec2<decltype(x - rhs.x)>;
+    template <typename R>
+    auto operator*(const vec2<R> &rhs) const -> vec2<decltype(x * rhs.x)>;
+    template <typename R>
+    auto operator/(const vec2<R> &rhs) const -> vec2<decltype(x / rhs.x)>;
+
+    vec2<T> &operator*=(T rhs);
+    vec2<T> &operator/=(T rhs);
+
+    template <typename R> vec2<T> &operator+=(const vec2<R> &rhs);
+    template <typename R> vec2<T> &operator-=(const vec2<R> &rhs);
+    template <typename R> vec2<T> &operator*=(const vec2<R> &rhs);
+    template <typename R> vec2<T> &operator/=(const vec2<R> &rhs);
 
     template <typename R> bool operator==(const vec2<R> &rhs) const;
     template <typename R> bool operator<(const vec2<R> &rhs) const;
@@ -104,6 +120,9 @@ template <typename T> struct vec2 {
 
     vec2<T> floor() const;
     vec2<T> ceil() const;
+    vec2<T> round() const;
+
+    vec2<T> clamp(const vec2<T> &min, const vec2<T> &max) const;
 
     static double length(const vec2<T> &vec1, const vec2<T> &vec2);
 
@@ -286,6 +305,12 @@ template <typename T> inline vec3<T> vec3<T>::round() const {
     return {T(::round(x)), T(::round(y)), T(::round(z))};
 }
 
+template <typename T>
+inline vec3<T> vec3<T>::clamp(const vec3<T> &min, const vec3<T> &max) const {
+    return {world::clamp(x, min.x, max.x), world::clamp(y, min.y, max.y),
+            world::clamp(z, min.z, max.z)};
+}
+
 
 template <typename T>
 inline double vec3<T>::length(const vec3<T> &vec1, const vec3<T> &vec2) {
@@ -331,31 +356,87 @@ inline vec2<T>::operator vec3<R>() const {
 }
 
 template <typename T>
-inline vec2<T> vec2<T>::operator+(const vec2<T> &rhs) const {
-    return vec2(this->x + rhs.x, this->y + rhs.y);
+template <typename R>
+inline auto vec2<T>::operator*(R rhs) const -> vec2<decltype(x * rhs)> {
+    return vec2<decltype(x * rhs)>(this->x * rhs, this->y * rhs);
 }
 
 template <typename T>
-inline vec2<T> vec2<T>::operator-(const vec2<T> &rhs) const {
-    return vec2(this->x - rhs.x, this->y - rhs.y);
+template <typename R>
+inline auto vec2<T>::operator/(R rhs) const -> vec2<decltype(x / rhs)> {
+    return vec2<decltype(x / rhs)>(this->x / rhs, this->y / rhs);
 }
 
 template <typename T>
-inline vec2<T> vec2<T>::operator*(const vec2<T> &rhs) const {
-    return vec2(this->x * rhs.x, this->y * rhs.y);
+template <typename R>
+inline auto vec2<T>::operator+(const vec2<R> &rhs) const
+    -> vec2<decltype(x + rhs.x)> {
+    return vec2<decltype(x + rhs.x)>(this->x + rhs.x, this->y + rhs.y);
 }
 
 template <typename T>
-inline vec2<T> vec2<T>::operator/(const vec2<T> &rhs) const {
-    return vec2(this->x / rhs.x, this->y / rhs.y);
+template <typename R>
+inline auto vec2<T>::operator-(const vec2<R> &rhs) const
+    -> vec2<decltype(x - rhs.x)> {
+    return vec2<decltype(x - rhs.x)>(this->x - rhs.x, this->y - rhs.y);
 }
 
-template <typename T> inline vec2<T> vec2<T>::operator*(T rhs) const {
-    return vec2(this->x * rhs, this->y * rhs);
+template <typename T>
+template <typename R>
+inline auto vec2<T>::operator*(const vec2<R> &rhs) const
+    -> vec2<decltype(x * rhs.x)> {
+    return vec2<decltype(x * rhs.x)>(this->x * rhs.x, this->y * rhs.y);
 }
 
-template <typename T> inline vec2<T> vec2<T>::operator/(T rhs) const {
-    return vec2(this->x / rhs, this->y / rhs);
+template <typename T>
+template <typename R>
+inline auto vec2<T>::operator/(const vec2<R> &rhs) const
+    -> vec2<decltype(x / rhs.x)> {
+    return vec2<decltype(x / rhs.x)>(this->x / rhs.x, this->y / rhs.y);
+}
+
+template <typename T> inline vec2<T> &vec2<T>::operator*=(T rhs) {
+    x *= rhs;
+    y *= rhs;
+    return *this;
+}
+
+template <typename T> inline vec2<T> &vec2<T>::operator/=(T rhs) {
+    x /= rhs;
+    y /= rhs;
+    return *this;
+}
+
+template <typename T>
+template <typename R>
+inline vec2<T> &vec2<T>::operator+=(const vec2<R> &rhs) {
+    x += rhs.x;
+    y += rhs.y;
+    return *this;
+}
+
+template <typename T>
+template <typename R>
+inline vec2<T> &vec2<T>::operator-=(const vec2<R> &rhs) {
+    x -= rhs.x;
+    y -= rhs.y;
+    return *this;
+}
+
+template <typename T>
+template <typename R>
+inline vec2<T> &vec2<T>::operator*=(const vec2<R> &rhs) {
+    x *= rhs.x;
+    y *= rhs.y;
+    return *this;
+}
+
+template <typename T>
+template <typename R>
+inline vec2<T> &vec2<T>::operator/=(const vec2<R> &rhs) {
+    x /= rhs.x;
+    y /= rhs.y;
+    return *this;
 }
 
 template <typename T>
@@ -402,6 +483,15 @@ template <typename T> inline vec2<T> vec2<T>::floor() const {
 
 template <typename T> inline vec2<T> vec2<T>::ceil() const {
     return {T(::ceil(x)), T(::ceil(y))};
+}
+
+template <typename T> inline vec2<T> vec2<T>::round() const {
+    return {T(::round(x)), T(::round(y))};
+}
+
+template <typename T>
+inline vec2<T> vec2<T>::clamp(const vec2<T> &min, const vec2<T> &max) const {
+    return {world::clamp(x, min.x, max.x), world::clamp(y, min.y, max.y)};
 }
 
 template <typename T>
