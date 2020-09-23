@@ -1,17 +1,17 @@
-#include "DefaultTextureProvider.h"
+#include "CachedTextureProvider.h"
 
 namespace world {
 
-WORLD_REGISTER_CHILD_CLASS(ITextureProvider, DefaultTextureProvider,
-                           "DefaultTextureProvider")
+WORLD_REGISTER_CHILD_CLASS(ITextureProvider, CachedTextureProvider,
+                           "CachedTextureProvider")
 
-DefaultTextureProvider::DefaultTextureProvider(std::string path) {
+CachedTextureProvider::CachedTextureProvider(std::string path) {
     if (!path.empty()) {
         _cache.setRoot(path);
     }
 }
 
-Image &DefaultTextureProvider::getTexture(int layer, int lod) {
+Image &CachedTextureProvider::getTexture(int layer, int lod) {
     std::pair<int, int> key(layer, lod);
     auto it = _images.find(key);
 

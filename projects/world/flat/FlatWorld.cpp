@@ -12,7 +12,7 @@
 #include "world/core/Profiler.h"
 #include "world/core/SeedDistribution.h"
 #include "world/terrain/MultilayerGroundTexture.h"
-#include "world/terrain/DefaultTextureProvider.h"
+#include "world/terrain/CachedTextureProvider.h"
 #include "world/core/WorldFile.h"
 #include "world/terrain/GroundBiomes.h"
 
@@ -37,9 +37,10 @@ FlatWorld *FlatWorld::createDemoFlatWorld() {
     map.setRegion({0, 0}, 6000, 0.7, 1.6, 0.8);
 
     ground.addWorker<GroundBiomes>();
+    ground.addWorker<AltitudeTexturer>();
 
-    auto &multilayer = ground.addWorker<MultilayerGroundTexture>();
-    multilayer.setTextureProvider<DefaultTextureProvider>("multilayer/");
+    /*auto &multilayer = ground.addWorker<MultilayerGroundTexture>();
+    multilayer.setTextureProvider<CachedTextureProvider>("multilayer/");
     // rock
     multilayer.addLayer(DistributionParams{-1, 0, 1, 2, // h
                                            -1, 0, 1, 2, // dh
@@ -59,7 +60,7 @@ FlatWorld *FlatWorld::createDemoFlatWorld() {
     // snow
     multilayer.addLayer(DistributionParams{0.65, 0.8, 1, 2, // h
                                            -1, 0, 0.5, 0.7, // dh
-                                           0.0, 1.0, 0, 1., 0.05});
+                                           0.0, 1.0, 0, 1., 0.05});*/
 
 
     auto &chunkSystem = world->addPrimaryNode<GridChunkSystem>({0, 0, 0});

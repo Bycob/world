@@ -21,7 +21,7 @@
 #include "world/core/GridStorage.h"
 #include "world/core/GridStorageReducer.h"
 #include "MultilayerGroundTexture.h"
-#include "DefaultTextureProvider.h"
+#include "CachedTextureProvider.h"
 
 namespace world {
 
