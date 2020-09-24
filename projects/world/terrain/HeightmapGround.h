@@ -6,6 +6,7 @@
 #include <utility>
 #include <functional>
 #include <set>
+#include <typeinfo>
 
 #include "world/core/TileSystem.h"
 #include "world/flat/IGround.h"
@@ -79,6 +80,11 @@ public:
      * */
     template <typename T, typename... Args> T &addWorker(Args &&... args);
 
+    /** Get the first ITerrainWorker found with the required type.
+     * If no ITerrainWorker is found with the correct type, an
+     * exception is thrown. */
+    template <typename T> T &getWorker();
+
     void setLodRange(const ITerrainWorker &worker, int minLod, int maxLod);
 
     // EXPLORATION
@@ -115,6 +121,8 @@ private:
 
     // WORKER
     void addWorkerInternal(ITerrainWorker *worker);
+
+    ITerrainWorker *getWorkerInternal(const std::type_info &type);
 
     double observeAltitudeAt(double x, double y, int lvl);
 
@@ -155,6 +163,14 @@ T &HeightmapGround::addWorker(Args &&... args) {
     addWorkerInternal(worker);
     return *worker;
 };
+
+template <typename T> T &HeightmapGround::getWorker() {
+    auto *worker = getWorkerInternal(typeid(T));
+    if (worker != nullptr) {
+        return dynamic_cast<T &>(*worker);
+    } else
+        throw std::runtime_error("Bad ground worker type");
+}
 } // namespace world
 
 #endif // WORLD_TERRAINNODE_H

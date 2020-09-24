@@ -263,6 +263,16 @@ void HeightmapGround::addWorkerInternal(ITerrainWorker *worker) {
     }
 }
 
+ITerrainWorker *HeightmapGround::getWorkerInternal(const std::type_info &type) {
+    for (auto &entry : _internal->_generators) {
+        if (typeid(*entry._worker).hash_code() == type.hash_code()) {
+            return entry._worker.get();
+        }
+    }
+
+    return nullptr;
+}
+
 double HeightmapGround::observeAltitudeAt(double x, double y, int lvl) {
     TileCoordinates key = _tileSystem.getTileCoordinates({x, y, 0}, lvl);
     vec3d inTile = _tileSystem.getLocalCoordinates({x, y, 0}, lvl);

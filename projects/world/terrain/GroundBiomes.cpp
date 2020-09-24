@@ -3,6 +3,7 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <world/assets/ColorOps.h>
 
 #include "world/core/WorldTypes.h"
 #include "world/core/Chunk.h"
@@ -96,12 +97,95 @@ void GroundBiomes::processTile(ITileContext &context) {
 
     // TODO get real ctx
     ExplorationContext ctx = ExplorationContext::getDefault();
-    auto &env = ctx.getEnvironment();
 
     vec2i chunkPos{
         (c._pos * context.getTile()._terrain.getBoundingBox().getDimensions() /
          _chunkSize)
             .round()};
+
+    generateBiomes(chunkPos, ctx);
+}
+
+void GroundBiomes::flush() {}
+
+void GroundBiomes::exportZones(Image &output, const BoundingBox &bbox,
+                               u32 biomeType) {
+    if (biomeType >= _internal->_typeList.size()) {
+        throw std::runtime_error("Wrong biome type");
+    }
+    std::mt19937 rng(std::random_device{}());
+    std::uniform_real_distribution<double> distrib(0, 1);
+
+    vec2d offset = vec2d(bbox.getLowerBound());
+    vec2d pixelSize(bbox.getDimensions() /
+                    vec3d(output.width(), output.height(), 1));
+
+    vec2i lower =
+        ((vec2d(bbox.getLowerBound()) + vec2d(0.5)) / _chunkSize).floor();
+    vec2i upper =
+        ((vec2d(bbox.getUpperBound()) + vec2d(0.5)) / _chunkSize).floor();
+
+    for (int x = lower.x; x <= upper.x; ++x) {
+        for (int y = lower.y; y <= upper.y; ++y) {
+            auto it = _internal->_biomes.find({x, y});
+
+            if (it == _internal->_biomes.end()) {
+                continue;
+            }
+
+            ChunkBiomes &chunkBiomes = it->second;
+
+            if (!chunkBiomes._generated) {
+                continue;
+            }
+
+            vec2i chunkPos{x, y};
+            // TODO duplicated computing of offset with "setupZone"
+            vec2d chunkOffset = (vec2d{chunkPos} - vec2d{1.5}) * _chunkSize;
+            double chunkPixelSize = _chunkSize * 3. / _distribResolution;
+
+            for (auto &instance : chunkBiomes._instances) {
+                Color4d seedColor =
+                    ColorOps::fromHSV(distrib(rng), 0.8, 0.8, 0.5);
+
+                for (u32 imgX = 0; imgX < output.width(); ++imgX) {
+                    for (u32 imgY = 0; imgY < output.height(); ++imgY) {
+                        vec2u imgPos{imgX, imgY};
+                        vec2d realPos = offset + vec2d(imgPos) * pixelSize;
+                        vec2i bufPos =
+                            vec2i((realPos - chunkOffset) / chunkPixelSize);
+
+                        if (bufPos.x < 0 || bufPos.x >= _distribResolution ||
+                            bufPos.y < 0 || bufPos.y >= _distribResolution)
+                            continue;
+
+                        Color4d baseColor = output.rgba(imgX, imgY);
+                        seedColor._a =
+                            0.5 * (*instance._distribution)(bufPos.x, bufPos.y);
+                        output.rgba(imgX, imgY) =
+                            ColorOps::superpose(baseColor, seedColor);
+                    }
+                }
+            }
+        }
+    }
+}
+
+BiomeLayer GroundBiomes::createLayer(int type) {
+    BiomeLayer layer;
+    layer._type = type;
+    // pick color (with palette)
+
+    // pick style
+    std::uniform_real_distribution<double> d(0, 1);
+    layer._style = {d(_rng), d(_rng), d(_rng)};
+    return layer;
+}
+
+void GroundBiomes::generateBiomes(const vec2i &chunkPos,
+                                  const ExplorationContext &ctx) {
+    auto &env = ctx.getEnvironment();
+
     std::vector<BiomeLayerInstance *> allSeeds;
     bool needGeneration = true;
 
@@ -170,17 +254,6 @@ void GroundBiomes::processTile(ITileContext &context) {
     }
 }
 
-BiomeLayer GroundBiomes::createLayer(int type) {
-    BiomeLayer layer;
-    layer._type = type;
-    // pick color (with palette)
-
-    // pick style
-    std::uniform_real_distribution<double> d(0, 1);
-    layer._style = {d(_rng), d(_rng), d(_rng)};
-    return layer;
-}
-
 void GroundBiomes::seedChunk(const vec2i &chunkPos, ChunkBiomes &chunk) {
     std::uniform_real_distribution<double> offsetDistrib(0, _chunkSize);
     double biomeCountd = _chunkArea / _biomeArea;
@@ -190,7 +263,8 @@ void GroundBiomes::seedChunk(const vec2i &chunkPos, ChunkBiomes &chunk) {
 
         for (int i = 0; i < biomeCount; i++) {
             vec3d localPos{offsetDistrib(_rng), offsetDistrib(_rng), 0};
-            vec3d seedPos = (vec3d(chunkPos) - vec3d(0.5, 0.5, 0)) * _chunkSize + localPos;
+            vec3d seedPos =
+                (vec3d(chunkPos) - vec3d(0.5, 0.5, 0)) * _chunkSize + localPos;
 
             // Select layer based on humidity and temperature
             chunk._instances.emplace_back(type._id, seedPos);
@@ -201,8 +275,8 @@ void GroundBiomes::seedChunk(const vec2i &chunkPos, ChunkBiomes &chunk) {
 void GroundBiomes::setupZone(BiomeLayerInstance &seed, Perlin &perlin,
                              const vec2i &chunkPos) {
     seed._distribution = std::make_unique<Terrain>(_distribResolution);
-    vec2d offset = (vec2d{chunkPos} - vec2d{1.5, 1.5}) * _chunkSize;
-    double pixelSpace = _chunkSize * 3. / _distribResolution;
+    vec2d offset = (vec2d{chunkPos} - vec2d{1.5}) * _chunkSize;
+    double pixelSize = _chunkSize * 3. / _distribResolution;
     vec2d seedPos(seed._location);
     // we use squared distance for speed
     double boundDist = _chunkSize * _chunkSize;
@@ -222,7 +296,7 @@ void GroundBiomes::setupZone(BiomeLayerInstance &seed, Perlin &perlin,
     // Creation of zones throught warping
     for (u32 y = 0; y < _distribResolution; ++y) {
         for (u32 x = 0; x < _distribResolution; ++x) {
-            vec2d pos = offset + vec2d(x, y) * pixelSpace;
+            vec2d pos = offset + vec2d(x, y) * pixelSize;
             double d = seedPos.squaredLength(pos);
             double n = (1 + (noise(x, y) - 0.5) * noiseFactor);
             (*seed._distribution)(x, y) =
@@ -231,9 +305,9 @@ void GroundBiomes::setupZone(BiomeLayerInstance &seed, Perlin &perlin,
     }
 
     // TODO temporary
-    if (chunkPos == vec2d{}) {
-        // export the zone to an image to visualize what shape it has
-        seed._distribution->createImage().write("zone.png");
-    }
+    // export the zone to an image to visualize what shape it has
+    seed._distribution->createImage().write(
+        "zones/zone" + std::to_string(chunkPos.x) + "_" +
+        std::to_string(chunkPos.y) + ".png");
 }
 } // namespace world

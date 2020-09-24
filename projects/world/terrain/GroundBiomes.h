@@ -37,9 +37,14 @@ public:
 
     void processTile(ITileContext &context) override;
 
+    void flush() override;
+
     void write(WorldFile &wf) const override;
 
     void read(const WorldFile &wf) override;
+
+    /** Create an image to visualize the biomes of a particular BiomeType. */
+    void exportZones(Image &output, const BoundingBox &bbox, u32 biomeType);
 
 private:
     GroundBiomesPrivate *_internal;
@@ -61,6 +66,9 @@ private:
 
 
     BiomeLayer createLayer(int type);
+
+
+    void generateBiomes(const vec2i &chunkPos, const ExplorationContext &ctx);
 
     /** Add seeds to the chunk
      * @param chunkPos coordinates of the chunk in the GroundBiomes system. */

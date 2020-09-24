@@ -27,4 +27,4 @@ private:
 
 } // namespace world
 
-#endif //WORLD_CACHEDTEXTUREPROVIDER_H
+#endif // WORLD_CACHEDTEXTUREPROVIDER_H
