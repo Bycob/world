@@ -15,6 +15,10 @@ public:
 
     u32 _id;
 
+    /** If _allowHoles = false this type of layer must exist everywhere
+     * on the terrain. */
+    bool _allowHoles = false;
+
     BiomeType(std::string shader) : _shader(std::move(shader)) {}
 };
 
@@ -61,8 +65,8 @@ private:
     /// Area of a biomechunk in m^2 (typically, _chunkSize^2)
     double _chunkArea;
 
-    /// Resolution of the distribution buffer for each layer
-    u32 _distribResolution = 128;
+    /// Resolution of the distribution buffer for each layer (for one tile only)
+    u32 _distribResolution = 64;
 
 
     BiomeLayer createLayer(int type);
@@ -78,6 +82,8 @@ private:
      * account */
     void setupZone(BiomeLayerInstance &seed, Perlin &perlin,
                    const vec2i &chunkPos);
+
+    u32 zoneBuffersResolution() const;
 };
 
 } // namespace world

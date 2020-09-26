@@ -64,13 +64,20 @@ public:
     // Internal fields
     std::vector<BiomeLayer> _layers;
     std::map<vec2i, ChunkBiomes> _biomes;
+
+    Terrain _holesBuffer;
+
+    GroundBiomesPrivate() : _holesBuffer(1) {}
 };
 
 GroundBiomes::GroundBiomes(double biomeArea)
         : _internal(new GroundBiomesPrivate()), _rng(std::random_device()()),
-          _biomeArea(biomeArea), _layerDensity(1. / 6.e6) {
+          _biomeArea(biomeArea), _layerDensity(0.5) {
     _chunkSize = std::sqrt(biomeArea) * 2;
     _chunkArea = _chunkSize * _chunkSize;
+
+    // Init buffer
+    _internal->_holesBuffer = Terrain(_distribResolution);
 
     // Testing purpose (TODO remove)
     addBiomeType({"texture-grass.frag"});
@@ -98,12 +105,16 @@ void GroundBiomes::processTile(ITileContext &context) {
     // TODO get real ctx
     ExplorationContext ctx = ExplorationContext::getDefault();
 
-    vec2i chunkPos{
-        (c._pos * context.getTile()._terrain.getBoundingBox().getDimensions() /
-         _chunkSize)
-            .round()};
+    vec3d terrainDims =
+        context.getTile()._terrain.getBoundingBox().getDimensions();
+    vec2i lower{(c._pos * terrainDims / _chunkSize).round()};
+    vec2i upper{((c._pos + vec3d{1}) * terrainDims / _chunkSize).round()};
 
-    generateBiomes(chunkPos, ctx);
+    for (int x = lower.x; x <= upper.x; ++x) {
+        for (int y = lower.y; y <= upper.y; ++y) {
+            generateBiomes({x, y}, ctx);
+        }
+    }
 }
 
 void GroundBiomes::flush() {}
@@ -116,14 +127,14 @@ void GroundBiomes::exportZones(Image &output, const BoundingBox &bbox,
     std::mt19937 rng(std::random_device{}());
     std::uniform_real_distribution<double> distrib(0, 1);
 
+    int bufRes = int(zoneBuffersResolution());
+
     vec2d offset = vec2d(bbox.getLowerBound());
     vec2d pixelSize(bbox.getDimensions() /
                     vec3d(output.width(), output.height(), 1));
 
-    vec2i lower =
-        ((vec2d(bbox.getLowerBound()) + vec2d(0.5)) / _chunkSize).floor();
-    vec2i upper =
-        ((vec2d(bbox.getUpperBound()) + vec2d(0.5)) / _chunkSize).floor();
+    vec2i lower = (vec2d(bbox.getLowerBound()) / _chunkSize).round();
+    vec2i upper = (vec2d(bbox.getUpperBound()) / _chunkSize).round();
 
     for (int x = lower.x; x <= upper.x; ++x) {
         for (int y = lower.y; y <= upper.y; ++y) {
@@ -142,7 +153,7 @@ void GroundBiomes::exportZones(Image &output, const BoundingBox &bbox,
             vec2i chunkPos{x, y};
             // TODO duplicated computing of offset with "setupZone"
             vec2d chunkOffset = (vec2d{chunkPos} - vec2d{1.5}) * _chunkSize;
-            double chunkPixelSize = _chunkSize * 3. / _distribResolution;
+            double chunkPixelSize = _chunkSize * 3. / bufRes;
 
             for (auto &instance : chunkBiomes._instances) {
                 Color4d seedColor =
@@ -155,8 +166,8 @@ void GroundBiomes::exportZones(Image &output, const BoundingBox &bbox,
                         vec2i bufPos =
                             vec2i((realPos - chunkOffset) / chunkPixelSize);
 
-                        if (bufPos.x < 0 || bufPos.x >= _distribResolution ||
-                            bufPos.y < 0 || bufPos.y >= _distribResolution)
+                        if (bufPos.x < 0 || bufPos.x >= bufRes ||
+                            bufPos.y < 0 || bufPos.y >= bufRes)
                             continue;
 
                         Color4d baseColor = output.rgba(imgX, imgY);
@@ -187,18 +198,15 @@ void GroundBiomes::generateBiomes(const vec2i &chunkPos,
     auto &env = ctx.getEnvironment();
 
     std::vector<BiomeLayerInstance *> allSeeds;
-    bool needGeneration = true;
 
     // Add the seeds on all chunk around
-    for (int x = chunkPos.x - 1; x <= chunkPos.x + 1; ++x) {
-        for (int y = chunkPos.y - 1; y <= chunkPos.y + 1; ++y) {
+    for (int y = chunkPos.y - 1; y <= chunkPos.y + 1; ++y) {
+        for (int x = chunkPos.x - 1; x <= chunkPos.x + 1; ++x) {
             vec2i pos{x, y};
             auto res = _internal->_biomes.insert({pos, ChunkBiomes{}});
 
             if (res.second) {
                 seedChunk(pos, res.first->second);
-            } else if (pos == chunkPos && res.first->second._generated) {
-                needGeneration = false;
             }
 
             for (auto &seed : res.first->second._instances) {
@@ -207,47 +215,137 @@ void GroundBiomes::generateBiomes(const vec2i &chunkPos,
         }
     }
 
-    // TODO check that the list is sorted in the good order
+    // TODO double check that the list is sorted in the good order
     std::sort(allSeeds.begin(), allSeeds.end(),
               [](BiomeLayerInstance *b1, BiomeLayerInstance *b2) {
                   return b1->_biomeId > b2->_biomeId;
               });
 
-    // Create two noise map: one is completely independent from temperature /
-    // humidity and the other is directly linked. By ponderation between the 2,
-    // we can have biomes that follow geography, but not always
-
     // Each "type" requires to have at least 1 layer everywhere
     ChunkBiomes &chunkBiomes = _internal->_biomes[chunkPos];
+    int tileRes = int(_distribResolution);
+    double chunkPixSize = _chunkSize / tileRes;
+    vec2d chunkOffset = chunkPos * _chunkSize;
 
-    if (needGeneration) {
-        auto currentSeedIt = chunkBiomes._instances.begin();
+    if (!chunkBiomes._generated) {
         auto allSeedIt = allSeeds.begin();
 
         for (auto &type : _internal->_typeList) {
             Perlin perlin;
 
-            // Get bounds of seed of the same type
+            // Get all the seeds of the same type
             auto allSeedBegin = allSeedIt;
+            u32 seedCount = 0;
 
             while (allSeedIt != allSeeds.end() &&
                    (*allSeedIt)->_biomeId == type._id) {
                 ++allSeedIt;
+                ++seedCount;
             }
 
-            // Process all new seed of this type
-            // Compute a zone for each seed using perlin + warping (with
-            // weights) Fill the holes by making zone fights Where they overlap,
-            // fight as well but both can stay (and will still overlap)
-            while (currentSeedIt != chunkBiomes._instances.end() &&
-                   currentSeedIt->_biomeId == type._id) {
-                setupZone(*currentSeedIt, perlin, chunkPos);
+            // This call only compute biome distribution for the current chunk
+            // (It does not change the distributions of seeds in other chunks,
+            // but it can modify nearby chunks seeds distribution if their zone
+            // overlap with this chunk)
 
-                for (auto it = allSeedBegin; it != allSeedIt; ++it) {
+            // I - Map the holes in the chunk
+            // Create holes if seed is not adapted to its environment
+
+            // Reset the holeBuffer
+            for (int y = 0; y < tileRes; ++y) {
+                for (int x = 0; x < tileRes; ++x) {
+                    _internal->_holesBuffer(x, y) = 0;
+                }
+            }
+
+            for (auto it = allSeedBegin; it != allSeedIt; ++it) {
+                BiomeLayerInstance &seed = *(*it);
+                vec2i seedChunkPos{
+                    (vec2d(seed._location) / _chunkSize + vec2d{0.5}).floor()};
+
+                if (seed._distribution == nullptr) {
+                    setupZone(seed, perlin, seedChunkPos);
                 }
 
-                ++currentSeedIt;
+                Terrain &seedDistrib = *seed._distribution;
+                vec2i seedOffset =
+                    (chunkPos - seedChunkPos + vec2i{1}) * tileRes;
+
+                for (int y = 0; y < tileRes; ++y) {
+                    for (int x = 0; x < tileRes; ++x) {
+                        int seedX = x + seedOffset.x, seedY = y + seedOffset.y;
+                        // TODO Environment penalty
+                        seedDistrib(seedX, seedY) *= 1;
+
+                        // Compute holes
+                        _internal->_holesBuffer(x, y) +=
+                            seedDistrib(seedX, seedY);
+                    }
+                }
             }
+
+            // II - for each point in the holes, compute a coefficient based on
+            // the exponential of the distance with a environmental penalty and
+            // a perlin disturbance
+            //
+            // III - Choose the seed with the highest coefficient and assign it
+            // to 1 (or softmax) to fill the hole
+
+            if (!type._allowHoles) {
+                std::vector<double> coefs(seedCount, 0);
+                const double temperature = 100;
+
+                for (int y = 0; y < tileRes; ++y) {
+                    for (int x = 0; x < tileRes; ++x) {
+                        double holeValue = _internal->_holesBuffer(x, y);
+
+                        if (holeValue < 1) {
+                            double coefsSum = 0;
+
+                            // Compute coefs
+                            int i = 0;
+                            for (auto it = allSeedBegin; it != allSeedIt;
+                                 ++it) {
+                                vec2d seedPos((*it)->_location);
+                                vec2d currentPos{chunkOffset +
+                                                 vec2i{x, y} * chunkPixSize};
+
+                                double d = seedPos.length(currentPos);
+                                double coef =
+                                    exp(-d * temperature / _chunkSize);
+                                coefsSum += coef;
+                                coefs[i] = coef;
+                                ++i;
+                            }
+
+                            double coefMult = (1 - holeValue) / coefsSum;
+
+                            // Apply coefs to every seed
+                            i = 0;
+                            for (auto it = allSeedBegin; it != allSeedIt;
+                                 ++it) {
+                                Terrain &seedDistrib = *(*it)->_distribution;
+                                // Same as above, put in a common method or
+                                // whatever?
+                                vec2i seedChunkPos{
+                                    (vec2d((*it)->_location) / _chunkSize +
+                                     vec2d{0.5})
+                                        .floor()};
+                                vec2i seedOffset =
+                                    (chunkPos - seedChunkPos + vec2i{1}) *
+                                    tileRes;
+                                int seedX = x + seedOffset.x,
+                                    seedY = y + seedOffset.y;
+
+                                seedDistrib(seedX, seedY) +=
+                                    coefs[i] * coefMult;
+
+                                ++i;
+                            }
+                        } // if (holeValue < 1)
+                    }
+                }
+            } // if (!type._allowHoles) {
         }
 
         chunkBiomes._generated = true;
@@ -256,7 +354,7 @@ void GroundBiomes::generateBiomes(const vec2i &chunkPos,
 
 void GroundBiomes::seedChunk(const vec2i &chunkPos, ChunkBiomes &chunk) {
     std::uniform_real_distribution<double> offsetDistrib(0, _chunkSize);
-    double biomeCountd = _chunkArea / _biomeArea;
+    double biomeCountd = _chunkArea / _biomeArea * _layerDensity;
 
     for (const BiomeType &type : _internal->_typeList) {
         int biomeCount = randRound(_rng, biomeCountd);
@@ -274,13 +372,14 @@ void GroundBiomes::seedChunk(const vec2i &chunkPos, ChunkBiomes &chunk) {
 
 void GroundBiomes::setupZone(BiomeLayerInstance &seed, Perlin &perlin,
                              const vec2i &chunkPos) {
-    seed._distribution = std::make_unique<Terrain>(_distribResolution);
+    int bufRes = int(zoneBuffersResolution());
+    seed._distribution = std::make_unique<Terrain>(bufRes);
     vec2d offset = (vec2d{chunkPos} - vec2d{1.5}) * _chunkSize;
-    double pixelSize = _chunkSize * 3. / _distribResolution;
+    double pixelSize = _chunkSize * 3. / bufRes;
     vec2d seedPos(seed._location);
     // we use squared distance for speed
-    double boundDist = _chunkSize * _chunkSize;
-    const double noiseFactor = 2;
+    double boundDist = _chunkSize * _chunkSize / 4;
+    const double noiseFactor = 2; // make this a parameter
 
     // Generation of perlin
     PerlinInfo pi;
@@ -291,11 +390,11 @@ void GroundBiomes::setupZone(BiomeLayerInstance &seed, Perlin &perlin,
     pi.persistence = 0.9;
     pi.offsetX = chunkPos.x * freq;
     pi.offsetY = chunkPos.y * freq;
-    auto noise = perlin.generatePerlinNoise2D(_distribResolution, pi);
+    auto noise = perlin.generatePerlinNoise2D(bufRes, pi);
 
     // Creation of zones throught warping
-    for (u32 y = 0; y < _distribResolution; ++y) {
-        for (u32 x = 0; x < _distribResolution; ++x) {
+    for (u32 y = 0; y < bufRes; ++y) {
+        for (u32 x = 0; x < bufRes; ++x) {
             vec2d pos = offset + vec2d(x, y) * pixelSize;
             double d = seedPos.squaredLength(pos);
             double n = (1 + (noise(x, y) - 0.5) * noiseFactor);
@@ -306,8 +405,12 @@ void GroundBiomes::setupZone(BiomeLayerInstance &seed, Perlin &perlin,
 
     // TODO temporary
     // export the zone to an image to visualize what shape it has
-    seed._distribution->createImage().write(
+    /*seed._distribution->createImage().write(
         "zones/zone" + std::to_string(chunkPos.x) + "_" +
-        std::to_string(chunkPos.y) + ".png");
+        std::to_string(chunkPos.y) + ".png");*/
+}
+
+u32 GroundBiomes::zoneBuffersResolution() const {
+    return _distribResolution * 3;
 }
 } // namespace world
