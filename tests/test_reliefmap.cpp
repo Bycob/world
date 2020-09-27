@@ -11,10 +11,12 @@ using namespace world;
 void testReliefMap(int, char **);
 void testLightning(int argc, char **argv);
 void testHSV(int argc, char **argv);
+void testPalette(int argc, char **argv);
 
 int main(int argc, char **argv) {
     // testReliefMap(argc, argv);
-    testHSV(argc, argv);
+    // testHSV(argc, argv);
+    testPalette(argc, argv);
 }
 
 void testReliefMap(int argc, char **argv) {
@@ -76,4 +78,19 @@ void testHSV(int argc, char **argv) {
     }
 
     img.write("assets/hsv_test.png");
+}
+
+void testPalette(int argc, char **argv) {
+    int w = 512, h = 256;
+    Image img(w, h, ImageType::RGB);
+
+    ColorPalette palette{
+        {0.2, 0.4, 0.3},
+        {0.3, 0.5, 0.2},
+        {0.2, 0.4, 0.2},
+        {0.66, 0.77, 0.33},
+    };
+
+    palette.exportToImage(img);
+    img.write("assets/palette.png");
 }

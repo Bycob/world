@@ -53,6 +53,7 @@
 #include "core/Profiler.h"
 #include "core/WeightedSkeletton.h"
 #include "core/ColorMap.h"
+#include "core/ColorPalette.h"
 #include "core/Parameters.h"
 
 #include "nature/Lightning.h"
