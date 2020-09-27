@@ -65,6 +65,10 @@ template <typename T> struct vec3 {
     vec3<T> ceil() const;
     vec3<T> round() const;
 
+    vec3<T> cos() const;
+    vec3<T> sin() const;
+    vec3<T> tan() const;
+
     vec3<T> clamp(const vec3<T> &min, const vec3<T> &max) const;
 
     static double length(const vec3<T> &vec1, const vec3<T> &vec2);
@@ -121,6 +125,10 @@ template <typename T> struct vec2 {
     vec2<T> floor() const;
     vec2<T> ceil() const;
     vec2<T> round() const;
+
+    vec2<T> cos() const;
+    vec2<T> sin() const;
+    vec2<T> tan() const;
 
     vec2<T> clamp(const vec2<T> &min, const vec2<T> &max) const;
 
@@ -305,6 +313,21 @@ template <typename T> inline vec3<T> vec3<T>::round() const {
     return {T(::round(x)), T(::round(y)), T(::round(z))};
 }
 
+template <typename T> inline vec3<T> vec3<T>::cos() const {
+    return {static_cast<T>(::cos(x)), static_cast<T>(::cos(y)),
+            static_cast<T>(::cos(z))};
+}
+
+template <typename T> inline vec3<T> vec3<T>::sin() const {
+    return {static_cast<T>(::sin(x)), static_cast<T>(::sin(y)),
+            static_cast<T>(::sin(z))};
+}
+
+template <typename T> inline vec3<T> vec3<T>::tan() const {
+    return {static_cast<T>(::tan(x)), static_cast<T>(::tan(y)),
+            static_cast<T>(::tan(z))};
+}
+
 template <typename T>
 inline vec3<T> vec3<T>::clamp(const vec3<T> &min, const vec3<T> &max) const {
     return {world::clamp(x, min.x, max.x), world::clamp(y, min.y, max.y),
@@ -331,6 +354,8 @@ inline double getAngle(const vec3<T> &vec1, const vec3<T> &vec2) {
         c = -1;
     return acos(c);
 }
+
+// vec3 - useful functions
 
 template <typename T>
 std::ostream &operator<<(std::ostream &os, const vec3<T> &vec) {
@@ -489,6 +514,18 @@ template <typename T> inline vec2<T> vec2<T>::round() const {
     return {T(::round(x)), T(::round(y))};
 }
 
+template <typename T> inline vec2<T> vec2<T>::cos() const {
+    return {static_cast<T>(::cos(x)), static_cast<T>(::cos(y))};
+}
+
+template <typename T> inline vec2<T> vec2<T>::sin() const {
+    return {static_cast<T>(::sin(x)), static_cast<T>(::sin(y))};
+}
+
+template <typename T> inline vec2<T> vec2<T>::tan() const {
+    return {static_cast<T>(::tan(x)), static_cast<T>(::tan(y))};
+}
+
 template <typename T>
 inline vec2<T> vec2<T>::clamp(const vec2<T> &min, const vec2<T> &max) const {
     return {world::clamp(x, min.x, max.x), world::clamp(y, min.y, max.y)};
@@ -498,6 +535,9 @@ template <typename T>
 inline double vec2<T>::length(const vec2<T> &vec1, const vec2<T> &vec2) {
     return vec1.length(vec2);
 }
+
+
+// vec2 - useful functions
 
 template <typename T>
 std::ostream &operator<<(std::ostream &os, const vec2<T> vec) {
