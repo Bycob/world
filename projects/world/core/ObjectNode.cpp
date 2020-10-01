@@ -25,7 +25,7 @@ void ObjectLod::collect(Template &tp, ICollector &collector,
 
             ItemKey key{getId(i)};
             meshChan.put(key, _meshes[i], ctx);
-            node.setMesh(ctx(key).str());
+            node.setMeshID(ctx(key).str());
 
             if (!node.getMaterialID().empty()) {
                 // TODO The problem of the "keys" API, in one line:

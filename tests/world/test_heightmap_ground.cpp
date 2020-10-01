@@ -18,7 +18,8 @@ TEST_CASE("HeightmapGround - observeAltitudeAt benchmark",
     for (int x = -10000; x < 10000; x += 10) {
         for (int y = -10000; y < 10000; y += 10) {
             positions.emplace_back(x, y);
-            ground.observeAltitudeAt(x, y, resolution);
+            ground.observeAltitudeAt(x, y, resolution,
+                                     ExplorationContext::getDefault());
         }
     }
 
@@ -26,7 +27,8 @@ TEST_CASE("HeightmapGround - observeAltitudeAt benchmark",
 
     BENCHMARK("4 million points altitude lookup") {
         for (auto &pos : positions) {
-            ground.observeAltitudeAt(pos.x, pos.y, resolution);
+            ground.observeAltitudeAt(pos.x, pos.y, resolution,
+                                     ExplorationContext::getDefault());
         }
     }
 }

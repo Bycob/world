@@ -1,9 +1,14 @@
 #include "Collector.h"
 
+#include "world/terrain/Terrain.h"
+
 namespace world {
 
 Collector::Collector(CollectorPresets preset) {
     switch (preset) {
+    case CollectorPresets ::GAME_ENGINE:
+        addStorageChannel<Terrain>();
+        // no break;
     case CollectorPresets::SCENE:
         addStorageChannel<SceneNode>();
         addStorageChannel<Mesh>();
@@ -48,7 +53,7 @@ void Collector::fillScene(Scene &scene) {
                 Material addedMat(material._value);
 
                 // If texture is "" then the material has no diffuse texture
-                if (addedMat.getMapKd() != "")
+                if (!addedMat.getMapKd().empty())
                     addedMat.setMapKd(addedMat.getMapKd() + ".png");
 
                 scene.addMaterial(material._key.str(), addedMat);

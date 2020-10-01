@@ -14,7 +14,8 @@ class WORLDAPI_EXPORT IGround {
 public:
     virtual ~IGround() = default;
 
-    virtual double observeAltitudeAt(double x, double y, double resolution) = 0;
+    virtual double observeAltitudeAt(double x, double y, double resolution,
+                                     const ExplorationContext &ctx) = 0;
 
     /** Paint the given image on the terrain texture.
      * \param origin the (x, y) coordinates of the top left corner of
@@ -22,8 +23,8 @@ public:
      * \param size the size of the image on the terrain, in meters
      * \param resolutionRange */
     virtual void paintTexture(const vec2d &origin, const vec2d &size,
-                              const vec2d &resolutionRange,
-                              const Image &img) = 0;
+                              const vec2d &resolutionRange, const Image &img,
+                              const ExplorationContext &ctx) = 0;
 };
 
 class WORLDAPI_EXPORT GroundNode : public WorldNode, public IGround {};

@@ -3,10 +3,11 @@
 
 #include "world/core/WorldConfig.h"
 
-#include "world/core/GridStorage.h"
 #include "ITerrainWorker.h"
 #include "DistributionParams.h"
 #include "world/core/NodeCache.h"
+#include "world/core/GridStorage.h"
+#include "world/core/ICollector.h"
 #include "world/math/Perlin.h"
 
 namespace world {
@@ -74,6 +75,8 @@ public:
 
     void processTile(ITileContext &context) override;
 
+    void collectTile(ICollector &collector, ITileContext &context) override;
+
     void addLayer(DistributionParams params);
 
     GridStorageBase *getStorage() override;
@@ -90,8 +93,19 @@ private:
 
     Perlin _perlin;
 
+    u32 _distribResolution = 33;
 
-    void process(Terrain &terrain, Image &image, const TileCoordinates &tc);
+
+    void process(Terrain &terrain, Image &image, const TileCoordinates &tc,
+                 const ExplorationContext &ctx);
+
+    void collectTextures(ICollectorChannel<Image> &texChannel,
+                         const TileCoordinates &tc,
+                         const ExplorationContext &ctx);
+
+    ItemKey getDistributionKey(const TileCoordinates &tc, int id) const;
+
+    ItemKey getTextureKey(const TileCoordinates &tc, int id) const;
 };
 
 template <typename T, typename... Args>

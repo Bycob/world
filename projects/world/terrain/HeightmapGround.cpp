@@ -48,9 +48,11 @@ public:
     HeightmapGround *_ground;
     WorkerEntry *_entry;
     Tile *_tile;
+    ExplorationContext _ctx;
 
-    GroundContext(HeightmapGround *ground, WorkerEntry *entry, Tile *tile)
-            : _ground(ground), _entry(entry), _tile(tile) {}
+    GroundContext(HeightmapGround *ground, WorkerEntry *entry, Tile *tile,
+                  const ExplorationContext &ctx)
+            : _ground(ground), _entry(entry), _tile(tile), _ctx(ctx) {}
 
     Tile &getTile() const override { return *_tile; }
 
@@ -58,6 +60,10 @@ public:
 
     TileCoordinates getParentCoords() const override {
         return _ground->_tileSystem.getParentTileCoordinates(_tile->_key);
+    }
+
+    const ExplorationContext &getExplorationContext() const override {
+        return _ctx;
     }
 };
 
@@ -141,10 +147,10 @@ void HeightmapGround::setLodRange(const ITerrainWorker &worker, int minLod,
     }
 }
 
-double HeightmapGround::observeAltitudeAt(double x, double y,
-                                          double resolution) {
+double HeightmapGround::observeAltitudeAt(double x, double y, double resolution,
+                                          const ExplorationContext &ctx) {
     int lvl = _tileSystem.getLod(resolution);
-    return observeAltitudeAt(x, y, lvl);
+    return observeAltitudeAt(x, y, lvl, ctx);
 }
 
 void HeightmapGround::collect(ICollector &collector,
@@ -168,10 +174,10 @@ void HeightmapGround::collect(ICollector &collector,
     }
 
     addNotGeneratedParents(toGenerate);
-    generateTerrains(toGenerate);
+    generateTerrains(toGenerate, ctx);
 
     for (auto &coord : toCollect) {
-        addTerrain(coord, collector);
+        addTerrain(coord, collector, ctx);
     }
 
     // std::cout << "Ground before reducing: " << _internal->_terrains.size();
@@ -182,7 +188,8 @@ void HeightmapGround::collect(ICollector &collector,
 
 void HeightmapGround::paintTexture(const vec2d &origin, const vec2d &size,
                                    const vec2d &resolutionRange,
-                                   const Image &img) {
+                                   const Image &img,
+                                   const ExplorationContext &ctx) {
     const int minLod = _tileSystem.getLod(resolutionRange.x);
     const int maxLod = _tileSystem.getLod(resolutionRange.y);
 
@@ -204,9 +211,10 @@ void HeightmapGround::paintTexture(const vec2d &origin, const vec2d &size,
                 TileCoordinates current{x, y, 0, lod};
                 vec3d imgCoords =
                     (tileMin._pos - current._pos) * tileSize + localMin;
-                ImageUtils::paintTexturef(provideTerrain(current).getTexture(),
-                                          img, {imgCoords.x, imgCoords.y},
-                                          {imgSize.x, imgSize.y});
+                // TODO context or not context?
+                ImageUtils::paintTexturef(
+                    provideTerrain(current, ctx).getTexture(), img,
+                    {imgCoords.x, imgCoords.y}, {imgSize.x, imgSize.y});
             }
         }
     }
@@ -273,11 +281,12 @@ ITerrainWorker *HeightmapGround::getWorkerInternal(const std::type_info &type) {
     return nullptr;
 }
 
-double HeightmapGround::observeAltitudeAt(double x, double y, int lvl) {
+double HeightmapGround::observeAltitudeAt(double x, double y, int lvl,
+                                          const ExplorationContext &ctx) {
     TileCoordinates key = _tileSystem.getTileCoordinates({x, y, 0}, lvl);
     vec3d inTile = _tileSystem.getLocalCoordinates({x, y, 0}, lvl);
 
-    const Terrain &terrain = this->provideTerrain(key);
+    const Terrain &terrain = this->provideTerrain(key, ctx);
     return _minAltitude +
            getAltitudeRange() * terrain.getExactHeightAt(inTile.x, inTile.y);
 }
@@ -285,11 +294,21 @@ double HeightmapGround::observeAltitudeAt(double x, double y, int lvl) {
 inline ItemKey terrainToItem(const std::string &key) { return {"_" + key}; }
 
 void HeightmapGround::addTerrain(const TileCoordinates &key,
-                                 ICollector &collector) {
+                                 ICollector &collector,
+                                 const ExplorationContext &ctx) {
     ItemKey itemKey = terrainToItem(getTerrainDataId(key));
-    Terrain &terrain = this->provideTerrain(key);
+    Tile &tile = provide(key, ctx);
+    Terrain &terrain = tile._terrain;
 
-    if (collector.hasChannel<SceneNode>() && collector.hasChannel<Mesh>()) {
+    if (collector.hasChannel<SceneNode>() && collector.hasChannel<Terrain>()) {
+        // Collect as terrains (more optimized e.g. for game engines)
+
+        auto &terrainChannel = collector.getChannel<Terrain>();
+        terrainChannel.put(itemKey, terrain);
+
+    } else if (collector.hasChannel<SceneNode>() &&
+               collector.hasChannel<Mesh>()) {
+        // Collect as meshes (more generic)
 
         auto &objChannel = collector.getChannel<SceneNode>();
         auto &meshChannel = collector.getChannel<Mesh>();
@@ -300,7 +319,7 @@ void HeightmapGround::addTerrain(const TileCoordinates &key,
             vec3d offset = bbox.getLowerBound();
 
             // Create the mesh
-            meshChannel.put(itemKey, provideMesh(key));
+            meshChannel.put(itemKey, provideMesh(key, ctx), ctx);
 
             SceneNode object(itemKey.str());
             object.setPosition(offset);
@@ -326,39 +345,47 @@ void HeightmapGround::addTerrain(const TileCoordinates &key,
                 if (collector.hasChannel<Image>()) {
                     auto &imageChan = collector.getChannel<Image>();
                     material.setMapKd(itemKey.str());
-                    imageChan.put(itemKey, texture);
+                    imageChan.put(itemKey, texture, ctx);
                 }
 
-                matChan.put(itemKey, material);
+                matChan.put(itemKey, material, ctx);
             }
 
-            objChannel.put(itemKey, object);
+            objChannel.put(itemKey, object, ctx);
         }
+    }
+
+    for (auto &gen : _internal->_generators) {
+        GroundContext gctx(this, &gen, &tile, ctx);
+        gen._worker->collectTile(collector, gctx);
     }
 }
 
 // ==== ACCESS
 
-Tile &HeightmapGround::provide(const TileCoordinates &key) {
+Tile &HeightmapGround::provide(const TileCoordinates &key,
+                               const ExplorationContext &ctx) {
     return _internal->_terrains.getOrCreateCallback(
         key,
-        [this, &key](HeightmapGroundTile &tile) {
+        [this, &key, &ctx](HeightmapGroundTile &tile) {
             std::set<TileCoordinates> coords{key};
             addNotGeneratedParents(coords);
-            generateTerrains(coords);
+            generateTerrains(coords, ctx);
         },
         key, _terrainRes);
 }
 
-Terrain &HeightmapGround::provideTerrain(const TileCoordinates &key) {
-    return provide(key)._terrain;
+Terrain &HeightmapGround::provideTerrain(const TileCoordinates &key,
+                                         const ExplorationContext &ctx) {
+    return provide(key, ctx)._terrain;
 }
 
-Mesh &HeightmapGround::provideMesh(const TileCoordinates &key) {
-    auto &mesh = provide(key)._mesh;
+Mesh &HeightmapGround::provideMesh(const TileCoordinates &key,
+                                   const ExplorationContext &ctx) {
+    auto &mesh = provide(key, ctx)._mesh;
 
     if (mesh.empty()) {
-        generateMesh(key);
+        generateMesh(key, ctx);
     }
 
     return mesh;
@@ -399,7 +426,8 @@ void HeightmapGround::addNotGeneratedParents(std::set<TileCoordinates> &keys) {
     } while (!temp.empty());
 }
 
-void HeightmapGround::generateTerrains(const std::set<TileCoordinates> &keys) {
+void HeightmapGround::generateTerrains(const std::set<TileCoordinates> &keys,
+                                       const ExplorationContext &ctx) {
     typedef std::vector<Tile *> generateTiles_t;
     std::vector<generateTiles_t> lods(_tileSystem._maxLod + 1);
 
@@ -432,7 +460,7 @@ void HeightmapGround::generateTerrains(const std::set<TileCoordinates> &keys) {
             auto &generator = entry._worker;
             auto &constraints = entry._constraints;
 
-            GroundContext context(this, &entry, nullptr);
+            GroundContext context(this, &entry, nullptr, ctx);
 
             // check if constraints are fullfilled
             bool doGeneration =
@@ -454,7 +482,8 @@ void HeightmapGround::generateTerrains(const std::set<TileCoordinates> &keys) {
     }
 }
 
-void HeightmapGround::generateMesh(const TileCoordinates &key) {
+void HeightmapGround::generateMesh(const TileCoordinates &key,
+                                   const ExplorationContext &ctx) {
     // Find required terrains
     Terrain *terrains[3][3];
 
@@ -463,14 +492,14 @@ void HeightmapGround::generateMesh(const TileCoordinates &key) {
             TileCoordinates jitteredKey = key;
             jitteredKey._pos.x += i - 1;
             jitteredKey._pos.y += j - 1;
-            terrains[i][j] = &provideTerrain(jitteredKey);
+            terrains[i][j] = &provideTerrain(jitteredKey, ctx);
         }
     }
 
     // Fill mesh
     // Same as Terrain::createMesh, but may become different
     // + here we compute normals a different way (for tiling to be acceptable).
-    Mesh &mesh = provide(key)._mesh;
+    Mesh &mesh = provide(key, ctx)._mesh;
 
     // TODO compute size from TileSystem
     BoundingBox bbox = terrains[1][1]->getBoundingBox();

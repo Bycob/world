@@ -65,7 +65,8 @@ void generate_test_world(int argc, char **argv) {
 
     std::cout << "Creation de l'explorer et du collecteur" << std::endl;
     FirstPersonView fpsView;
-    double z = world->ground().observeAltitudeAt(0, 0, 1);
+    double z = world->ground().observeAltitudeAt(
+        0, 0, 1, ExplorationContext::getDefault());
     fpsView.setFarDistance(200);
     fpsView.setPosition({0, 0, z + 5});
     std::cout << "Explorer position is " << vec3d{0, 0, z + 5} << std::endl;

@@ -18,5 +18,6 @@ typedef void *SceneNodePtr;
 typedef void *MeshPtr;
 typedef void *MaterialPtr;
 typedef void *TexturePtr;
+typedef void *TerrainPtr;
 
 #endif // PEACE_COMMON_H

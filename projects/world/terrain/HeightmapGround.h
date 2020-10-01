@@ -88,14 +88,15 @@ public:
     void setLodRange(const ITerrainWorker &worker, int minLod, int maxLod);
 
     // EXPLORATION
-    double observeAltitudeAt(double x, double y, double resolution) override;
+    double observeAltitudeAt(double x, double y, double resolution,
+                             const ExplorationContext &ctx) override;
 
     void collect(ICollector &collector, const IResolutionModel &resolutionModel,
-                 const ExplorationContext &ctx =
-                     ExplorationContext::getDefault()) override;
+                 const ExplorationContext &ctx) override;
 
     void paintTexture(const vec2d &origin, const vec2d &size,
-                      const vec2d &resolutionRange, const Image &img) override;
+                      const vec2d &resolutionRange, const Image &img,
+                      const ExplorationContext &ctx) override;
 
     // IO
     void write(WorldFile &wf) const override;
@@ -124,17 +125,22 @@ private:
 
     ITerrainWorker *getWorkerInternal(const std::type_info &type);
 
-    double observeAltitudeAt(double x, double y, int lvl);
+    double observeAltitudeAt(double x, double y, int lvl,
+                             const ExplorationContext &ctx);
 
-    void addTerrain(const TileCoordinates &key, ICollector &collector);
+    void addTerrain(const TileCoordinates &key, ICollector &collector,
+                    const ExplorationContext &ctx);
 
 
     // ACCESS
-    HeightmapGround::Tile &provide(const TileCoordinates &key);
+    HeightmapGround::Tile &provide(const TileCoordinates &key,
+                                   const ExplorationContext &ctx);
 
-    Terrain &provideTerrain(const TileCoordinates &key);
+    Terrain &provideTerrain(const TileCoordinates &key,
+                            const ExplorationContext &ctx);
 
-    Mesh &provideMesh(const TileCoordinates &key);
+    Mesh &provideMesh(const TileCoordinates &key,
+                      const ExplorationContext &ctx);
 
     bool isGenerated(const TileCoordinates &key);
 
@@ -149,9 +155,11 @@ private:
 
     /** Generate the terrains located at all the keys given in parameters. If
      * the terrains already exist they are not generated again. */
-    void generateTerrains(const std::set<TileCoordinates> &keys);
+    void generateTerrains(const std::set<TileCoordinates> &keys,
+                          const ExplorationContext &ctx);
 
-    void generateMesh(const TileCoordinates &key);
+    void generateMesh(const TileCoordinates &key,
+                      const ExplorationContext &ctx);
 
     friend class PGround;
     friend class GroundContext;

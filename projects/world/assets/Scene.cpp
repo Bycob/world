@@ -84,7 +84,7 @@ void Scene::addMeshNode(const SceneNode &node, const Mesh &mesh) {
 
     addMesh(meshName, mesh);
     addNode(node);
-    _internal->_nodes.back()->setMesh(meshName);
+    _internal->_nodes.back()->setMeshID(meshName);
 }
 
 std::vector<SceneNode *> Scene::getNodes() const {

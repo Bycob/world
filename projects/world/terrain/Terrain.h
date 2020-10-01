@@ -11,6 +11,7 @@
 #include "world/math/BoundingBox.h"
 #include "world/assets/Mesh.h"
 #include "world/assets/Image.h"
+#include "world/assets/Material.h"
 
 namespace world {
 
@@ -109,9 +110,15 @@ public:
 
     const Image &getTexture() const;
 
+    // ------ Material
+    Material &getMaterial() { return _material; }
+
+    const Material &getMaterial() const { return _material; }
+
 private:
     BoundingBox _bbox;
     arma::Mat<double> _array;
+    Material _material;
     Image _texture;
 
     // ------

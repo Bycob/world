@@ -32,4 +32,13 @@ void Material::setKa(double r, double g, double b) { _Ka.set(r, g, b); }
 void Material::setKs(double r, double g, double b) { _Ks.set(r, g, b); }
 
 void Material::setMapKd(const std::string &texName) { _mapKd = texName; }
+
+void Material::setCustomMap(const std::string &mapId,
+                            const std::string &mapName) {
+    _customMaps[mapId] = mapName;
+}
+
+std::string Material::getCustomMap(const std::string &mapId) const {
+    return _customMaps.at(mapId);
+}
 } // namespace world

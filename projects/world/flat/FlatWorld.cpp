@@ -37,6 +37,7 @@ FlatWorld *FlatWorld::createDemoFlatWorld() {
     map.setRegion({0, 0}, 6000, 0.7, 1.6, 0.8);
 
     ground.addWorker<GroundBiomes>();
+    // TODO add color configuration to the texturer (just as before)
     ground.addWorker<AltitudeTexturer>();
 
     /*auto &multilayer = ground.addWorker<MultilayerGroundTexture>();
@@ -116,7 +117,8 @@ vec3d FlatWorld::findNearestFreePoint(const vec3d &origin,
                                       const vec3d &direction, double resolution,
                                       const ExplorationContext &ctx) const {
     auto pos = origin + ctx.getOffset();
-    double z = _internal->_ground->observeAltitudeAt(pos.x, pos.y, resolution);
+    double z =
+        _internal->_ground->observeAltitudeAt(pos.x, pos.y, resolution, ctx);
     // std::cout << z - ctx.getOffset().z << " <> " << origin.z << std::endl;
     return {origin.x, origin.y, z - ctx.getOffset().z};
 }

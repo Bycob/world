@@ -48,6 +48,10 @@ public:
 
     std::string getMapKd() const { return _mapKd; }
 
+    void setCustomMap(const std::string &mapId, const std::string &mapName);
+
+    std::string getCustomMap(const std::string &mapId) const;
+
     void setTransparent(bool transparent) { _transparent = transparent; }
 
     bool isTransparent() const { return _transparent; }
@@ -57,6 +61,7 @@ private:
     std::string _shader;
 
     std::map<std::string, ShaderParam> _shaderParams;
+    std::map<std::string, std::string> _customMaps;
 
     /// Specular exponent from 0 to 1000
     double _Ns;

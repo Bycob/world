@@ -14,7 +14,7 @@ enum class HeightMapFormat { F32, F64, U8 };
 class WORLDAPI_EXPORT HeightMapInputStream {
 public:
     HeightMapInputStream(const Terrain &terrain, double offset = 0,
-                         double scale = 0,
+                         double scale = 1,
                          HeightMapFormat format = HeightMapFormat::F32);
 
     HeightMapInputStream(const HeightMapInputStream &stream);

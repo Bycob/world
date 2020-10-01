@@ -53,7 +53,8 @@ void generate_test_world(int argc, char **argv) {
 
     for (int i = 0; i < itcount; ++i) {
         xpos += step;
-        double z = world->ground().observeAltitudeAt(xpos, ypos, 1);
+        double z = world->ground().observeAltitudeAt(
+            xpos, ypos, 1, ExplorationContext::getDefault());
 
         while (!land || z < 100 || z > 1500) {
             xpos += z > 1500 ? 10 : 1000;
@@ -63,7 +64,8 @@ void generate_test_world(int argc, char **argv) {
                 ypos = ypos > max ? -max : ypos + step;
             }
 
-            z = world->ground().observeAltitudeAt(xpos, ypos, 1);
+            z = world->ground().observeAltitudeAt(
+                xpos, ypos, 1, ExplorationContext::getDefault());
         }
         vec3d pos{xpos, ypos, z + 5};
         fpsView.setPosition(pos);

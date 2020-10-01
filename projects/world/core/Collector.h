@@ -20,7 +20,11 @@ namespace world {
 
 enum class CollectorPresets {
     NONE,
+    /// meshes, materials, texture
     SCENE,
+    /// Same as scene, in addition to some objects typically managed
+    /// by game engines (eg. terrains)
+    GAME_ENGINE,
 };
 
 template <typename T> class CollectorChannel;

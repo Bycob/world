@@ -6,7 +6,8 @@ if (${WORLD_BUILD_PEACE})
             csrc/world.cpp
             csrc/collector.cpp
             csrc/assets.cpp
-            csrc/util.cpp)
+            csrc/util.cpp
+            csrc/terrains.cpp)
 
     target_link_libraries(peace world)
 

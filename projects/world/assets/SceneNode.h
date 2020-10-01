@@ -21,7 +21,9 @@ public:
 
     SceneNode(const Mesh &mesh, const Material &material);
 
-    void setMesh(std::string meshID) { _meshID = std::move(meshID); }
+    void setMeshID(std::string meshID) { _meshID = std::move(meshID); }
+
+    void setMesh(const Mesh &mesh) { _meshID = mesh.getName(); }
 
     const std::string &getMeshID() const { return _meshID; }
 

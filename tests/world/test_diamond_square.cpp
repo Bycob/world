@@ -16,6 +16,10 @@ public:
     TileCoordinates getCoords() const override { return {{}, 1}; }
 
     TileCoordinates getParentCoords() const override { return {}; }
+
+    const ExplorationContext &getExplorationContext() const override {
+        return ExplorationContext::getDefault();
+    }
 };
 
 TEST_CASE("Test diamond square terrain generation", "[diamond_square]") {

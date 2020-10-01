@@ -13,12 +13,38 @@ using MultilayerElement = MultilayerGroundTexture::Element;
 MultilayerGroundTexture::MultilayerGroundTexture() = default;
 
 void MultilayerGroundTexture::processTerrain(Terrain &terrain) {
-    process(terrain, terrain.getTexture(), {});
+    process(terrain, terrain.getTexture(), {},
+            ExplorationContext::getDefault());
 }
 
 void MultilayerGroundTexture::processTile(ITileContext &context) {
     process(context.getTile().terrain(), context.getTile().texture(),
-            context.getCoords());
+            context.getCoords(), context.getExplorationContext());
+}
+
+void MultilayerGroundTexture::collectTile(ICollector &collector,
+                                          ITileContext &context) {
+    if (collector.hasChannel<Image>()) {
+        auto &imgChannel = collector.getChannel<Image>();
+        const ExplorationContext &ctx = context.getExplorationContext();
+        TileCoordinates tc = context.getCoords();
+
+        // Textures (if not collected already)
+        collectTextures(imgChannel, tc, ctx);
+
+        // Distribution
+        ItemKey baseKey = context.getCoords().toKey();
+        auto &tileElem = _storage.get(context.getCoords());
+
+        for (size_t i = 0; i < tileElem._distributions.size(); ++i) {
+            ItemKey key = getDistributionKey(tc, i);
+            // TODO create image at each distribution is bad for performances
+            // TODO reduce distribution size in comparison to texture size (this
+            // will be required for large terrains)
+            imgChannel.put(key, tileElem._distributions.at(i).createImage(),
+                           ctx);
+        }
+    }
 }
 
 void MultilayerGroundTexture::addLayer(DistributionParams params) {
@@ -59,7 +85,8 @@ double ramp(double a, double b, double c, double d, double lowb, double highb,
 }
 
 void MultilayerGroundTexture::process(Terrain &terrain, Image &image,
-                                      const TileCoordinates &tc) {
+                                      const TileCoordinates &tc,
+                                      const ExplorationContext &ctx) {
 
     if (_texProvider == nullptr) {
         throw std::runtime_error("Texture provider is nullptr");
@@ -67,7 +94,7 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &image,
 
     const int imWidth = image.width();
     const int imHeight = image.height();
-    const u32 tRes = u32(terrain.getResolution());
+    const u32 dRes = _distribResolution;
     Image proxy(imWidth, imHeight, ImageType::RGBA);
 
     // Precomputing
@@ -89,22 +116,22 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &image,
     if (pinfo.octaves > maxOctaves) {
         pinfo.octaves = maxOctaves;
     }
-    auto perlinMat = _perlin.generatePerlinNoise2D(tRes, pinfo);
+    auto perlinMat = _perlin.generatePerlinNoise2D(dRes, pinfo);
 
     MultilayerElement &elem = _storage.getOrCreate(tc);
 
     for (size_t layer = 0; layer < _layers.size(); ++layer) {
         // Compute distribution
-        elem._distributions.emplace_back(tRes);
+        elem._distributions.emplace_back(dRes);
         Terrain &distrib = elem._distributions.back();
 
         DistributionParams &params = _layers.at(layer);
 
-        for (u32 y = 0; y < tRes; ++y) {
-            for (u32 x = 0; x < tRes; ++x) {
+        for (u32 y = 0; y < dRes; ++y) {
+            for (u32 x = 0; x < dRes; ++x) {
                 // See shader distribution-height.frag in vkworld for more
                 // details
-                vec2d uv = vec2d{vec2u{x, y}} / (tRes - 1);
+                vec2d uv = vec2d{vec2u{x, y}} / (dRes - 1);
                 double h = terrain.getExactHeightAt(uv.x, uv.y);
                 double dh =
                     std::atan(terrain.getSlopeAt(uv.x, uv.y)) * 2.0 / M_PI;
@@ -122,6 +149,7 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &image,
         }
 
         // Sum with final image
+        // TODO allow to disable this part
         Image &layerTex = _texProvider->getTexture(layer, tc._lod);
         const int texWidth = layerTex.width();
         const int texHeight = layerTex.height();
@@ -151,5 +179,42 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &image,
     }
 
     image = ImageUtils::toType(proxy, ImageType::RGB);
+
+    // Setup terrain material
+    Material &terrainMat = terrain.getMaterial();
+
+    for (size_t i = 0; i < _layers.size(); ++i) {
+        std::string distribName(ctx(getDistributionKey(tc, i)).str());
+        terrainMat.setCustomMap("distribution" + std::to_string(i),
+                                distribName);
+        std::string texName(ctx(getTextureKey(tc, i)).str());
+        terrainMat.setCustomMap("texture" + std::to_string(i), texName);
+    }
+}
+
+void MultilayerGroundTexture::collectTextures(
+    ICollectorChannel<Image> &texChannel, const TileCoordinates &tc,
+    const ExplorationContext &ctx) {
+
+    // TODO this may change with biomes update
+    int lod = tc._lod;
+
+    for (size_t i = 0; i < _layers.size(); ++i) {
+        ItemKey texKey = getTextureKey(tc, i);
+
+        if (!texChannel.has(texKey, ctx)) {
+            texChannel.put(texKey, _texProvider->getTexture(i, lod), ctx);
+        }
+    }
+}
+
+ItemKey MultilayerGroundTexture::getDistributionKey(const TileCoordinates &tc,
+                                                    int id) const {
+    return {tc.toKey(), NodeKeys::fromInt(id)};
+}
+
+ItemKey MultilayerGroundTexture::getTextureKey(const TileCoordinates &tc,
+                                               int id) const {
+    return std::to_string(id) + "_" + std::to_string(tc._lod);
 }
 } // namespace world

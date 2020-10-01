@@ -9,6 +9,7 @@
 #include "world/core/GridStorage.h"
 #include "world/core/NodeCache.h"
 #include "world/core/WorldFile.h"
+#include "world/core/ICollector.h"
 
 namespace world {
 
@@ -37,6 +38,8 @@ public:
     virtual TileCoordinates getCoords() const = 0;
 
     virtual TileCoordinates getParentCoords() const = 0;
+
+    virtual const ExplorationContext &getExplorationContext() const = 0;
 };
 
 class WORLDAPI_EXPORT ITerrainWorker : public ISerializable {
@@ -56,6 +59,11 @@ public:
     virtual void processTerrain(Terrain &terrain) = 0;
 
     virtual void processTile(ITileContext &context) = 0;
+
+    /** If the worker generates additional resources that should be collected
+     * with the terrain, they can be with this method.
+     * It is assumed that processTile has been called before. */
+    virtual void collectTile(ICollector &collector, ITileContext &context){};
 
     /** This method apply all modifications to the terrains before the next
      * worker starts processing. This may be useful if this ITerrainWorker can

@@ -23,7 +23,9 @@ void FlatMapper::map(FlatWorld &world, Image &output,
                 double xr = lower.x + (x / double(w - 1)) * dims.x;
                 double yr = lower.y + (y / double(h - 1)) * dims.y;
                 double altitude =
-                    clamp((ground.observeAltitudeAt(xr, yr, res) - _zbounds.x) /
+                    clamp((ground.observeAltitudeAt(
+                               xr, yr, res, ExplorationContext::getDefault()) -
+                           _zbounds.x) /
                               (_zbounds.y - _zbounds.x),
                           0, 1);
                 output.rgb(x, y) = _terrainColors.getColorAt({0.5, altitude});
