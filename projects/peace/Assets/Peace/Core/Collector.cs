@@ -21,7 +21,10 @@ namespace Peace
         private Dictionary<string, Mesh> _meshes;
         private Dictionary<string, Material> _materials;
         private Dictionary<string, Texture2D> _textures;
-        
+        private Dictionary<string, IntPtr> _terrainHandles;
+
+        private TerrainSystem _terrainSystem;
+
         public CollectorStats LastStats = new CollectorStats();
 
 
@@ -34,6 +37,9 @@ namespace Peace
             _meshes = new Dictionary<string, Mesh>();
             _materials = new Dictionary<string, Material>();
             _textures = new Dictionary<string, Texture2D>();
+            _terrainHandles = new Dictionary<string, IntPtr>();
+
+            _terrainSystem = new TerrainSystem();
 
             SetPosition(Vector3.zero);
             _view.eyeResolution = 700;
@@ -80,8 +86,8 @@ namespace Peace
             sw.Start();
 
             // Get from native code
-            IntPtr[] nodes = new IntPtr[0], meshes = new IntPtr[0], materials = new IntPtr[0], textures = new IntPtr[0];
-            string[] nodeNames = new string[0], meshNames = new string[0], materialNames = new string[0], textureNames = new string[0];
+            IntPtr[] nodes = new IntPtr[0], meshes = new IntPtr[0], materials = new IntPtr[0], textures = new IntPtr[0], terrains = new IntPtr[0];
+            string[] nodeNames = new string[0], meshNames = new string[0], materialNames = new string[0], textureNames = new string[0], terrainNames = new string[0];
 
             await Task.Run(() =>
             {
@@ -93,10 +99,11 @@ namespace Peace
 
             double l = LastStats.interopTime = sw.Elapsed.TotalMilliseconds;
 
+
             // Update scene nodes
             _newNodes.Clear();
             HashSet<string> toRemove = new HashSet<string>(_nodes.Keys);
-            
+
             for (int i = 0; i < nodes.Length; ++i)
             {
                 if (!_nodes.ContainsKey(nodeNames[i]))
@@ -109,7 +116,7 @@ namespace Peace
                     toRemove.Remove(nodeNames[i]);
                 }
             }
-            
+
             foreach (var key in toRemove)
             {
                 _nodes.Remove(key);
@@ -117,6 +124,7 @@ namespace Peace
 
             LastStats.nodesTime = sw.Elapsed.TotalMilliseconds - l;
             l = sw.Elapsed.TotalMilliseconds;
+
 
             // Update meshes
             toRemove = new HashSet<string>(_meshes.Keys);
@@ -142,6 +150,7 @@ namespace Peace
             LastStats.meshesTime = sw.Elapsed.TotalMilliseconds - l;
             l = sw.Elapsed.TotalMilliseconds;
 
+
             // Update textures
             toRemove = new HashSet<string>(_textures.Keys);
 
@@ -165,6 +174,7 @@ namespace Peace
 
             LastStats.texturesTime = sw.Elapsed.TotalMilliseconds - l;
             l = sw.Elapsed.TotalMilliseconds;
+
 
             // Update materials
             toRemove = new HashSet<string>(_materials.Keys);
@@ -196,6 +206,29 @@ namespace Peace
             sw.Stop();
             LastStats.materialsTime = sw.Elapsed.TotalMilliseconds - l;
             LastStats.totalTime = sw.Elapsed.TotalMilliseconds;
+
+
+            // Update terrains
+            toRemove = new HashSet<string>(_terrainHandles.Keys);
+
+            for (int i = 0; i < terrains.Length; ++i)
+            {
+                if (!_terrainHandles.ContainsKey(terrainNames[i]))
+                {
+                    _terrainHandles[terrainNames[i]] = terrains[i];
+                }
+                else
+                {
+                    toRemove.Remove(terrainNames[i]);
+                }
+            }
+
+            foreach (var key in toRemove)
+            {
+                _terrainHandles.Remove(key);
+            }
+
+            _terrainSystem.AddTerrains(_nodes.Values, this);
         }
 
         public IEnumerable<string> GetNewNodes()
@@ -212,17 +245,29 @@ namespace Peace
         {
             return _nodes[key];
         }
-        
+
         public Mesh GetMesh(string key)
         {
             Mesh mesh;
             return _meshes.TryGetValue(key, out mesh) ? mesh : null;
         }
-        
+
         public Material GetMaterial(string key)
         {
             Material material;
             return _materials.TryGetValue(key, out material) ? material : null;
+        }
+
+        public Texture2D GetTexture(string key)
+        {
+            Texture2D texture;
+            return _textures.TryGetValue(key, out texture) ? texture : null;
+        }
+
+        internal IntPtr GetTerrainHandle(string key)
+        {
+            IntPtr handle;
+            return _terrainHandles.TryGetValue(key, out handle) ? handle : IntPtr.Zero;
         }
 
 
@@ -231,7 +276,7 @@ namespace Peace
         private const int MESH_CHANNEL = 1;
         private const int MATERIAL_CHANNEL = 2;
         private const int TEXTURE_CHANNEL = 3;
-        
+
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
         public struct CollectorNode
         {
@@ -249,21 +294,21 @@ namespace Peace
             public double eyeResolution;
             public double maxDistance;
         }
-        
+
         [DllImport("peace")]
         private static extern IntPtr createCollector();
-        
+
         [DllImport("peace")]
         private static extern void freeCollector(IntPtr handle);
-        
+
         [DllImport("peace")]
         private static extern void collect(IntPtr collector, IntPtr world, CollectorView view);
 
         [DllImport("peace")]
         private static extern int collectorGetChannelSize(IntPtr collectorPtr, int type);
-        
+
         [DllImport("peace")]
-        private static extern void collectorGetChannel(IntPtr collectorPtr, int type, 
+        private static extern void collectorGetChannel(IntPtr collectorPtr, int type,
             [In, Out] IntPtr[] names, [In, Out] IntPtr[] items);
 
 

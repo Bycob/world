@@ -9,7 +9,7 @@ using UnityEngine.Rendering;
 
 namespace Peace
 {
-    public class Assets
+    public static class Assets
     {
         public static Mesh GetMesh(IntPtr handle)
         {
@@ -18,7 +18,7 @@ namespace Peace
 
             double[] vertices = new double[vertSize];
             int[] indices = new int[indicesSize];
-            
+
             readMesh(handle, vertices, indices);
 
             int vertCount = vertSize / 8;
@@ -26,7 +26,7 @@ namespace Peace
             Vector3[] vertPositions = new Vector3[vertCount];
             Vector3[] vertNormals = new Vector3[vertCount];
             Vector2[] vertUVs = new Vector2[vertCount];
-            
+
             for (int i = 0; i < vertCount; i++) {
                 vertPositions[i] = new Vector3((float)vertices[i * 8 + 0], (float)vertices[i * 8 + 2], (float)vertices[i * 8 + 1]);
                 vertNormals[i] = new Vector3((float)vertices[i * 8 + 3], (float)vertices[i * 8 + 5], (float)vertices[i * 8 + 4]);
@@ -45,13 +45,13 @@ namespace Peace
         public static Material GetMaterial(IntPtr handle)
         {
             MaterialDescription matDesc = readMaterial(handle);
-            
+
             Material material = new Material(Shader.Find("Standard"));
             material.color = new Color((float)matDesc.Kdr, (float)matDesc.Kdg, (float)matDesc.Kdb);
             material.SetFloat("_Glossiness", .0f);
             // material.EnableKeyword("_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A");
             material.EnableKeyword("_SPECGLOSSMAP");
-            
+
             if (matDesc.transparent)
             {
                 // Equivalent to RenderType == "Cutout"
@@ -76,7 +76,7 @@ namespace Peace
             IntPtr dataPtr = IntPtr.Zero;
             int width = 0, height = 0, type = 0;
             readTexture(handle, ref dataPtr, ref width, ref height, ref type);
-            
+
             TextureFormat format;
             switch (type)
             {
@@ -93,7 +93,7 @@ namespace Peace
                     throw new DataException("Image type not supported: " + type);
             }
             Texture2D texture = new Texture2D(width, height, format, false);
-            
+
             int size = width * height * type;
             byte[] data = texture.GetRawTextureData();
             Marshal.Copy(dataPtr, data, 0, size);
@@ -102,12 +102,13 @@ namespace Peace
 
             return texture;
         }
-        
+
+
         // Dll functions
         private const int IM_GREY = 1;
         private const int IM_RGB = 3;
         private const int IM_RGBA = 4;
-        
+
         [StructLayout(LayoutKind.Sequential)]
         struct MaterialDescription
         {
@@ -119,12 +120,15 @@ namespace Peace
 
         [DllImport("peace")]
         private static extern void readMeshSizes(IntPtr meshPtr, ref int vertSize, ref int indicesSize);
-        
+
         [DllImport("peace")]
         private static extern void readMesh(IntPtr meshPtr, [In, Out] double[] vertices, [In, Out] int[] indices);
-        
+
         [DllImport("peace")]
         private static extern MaterialDescription readMaterial(IntPtr materialPtr);
+
+        [DllImport("peace")]
+        private static extern string materialGetCustomMap(IntPtr materialPtr, string mapName);
 
         [DllImport("peace")]
         private static extern void readTexture(IntPtr texturePtr, ref IntPtr data,

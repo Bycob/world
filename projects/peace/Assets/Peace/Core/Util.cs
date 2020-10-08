@@ -3,7 +3,14 @@ using System.Runtime.InteropServices;
 
 namespace Peace
 {
-    public class Util
+    [StructLayout(LayoutKind.Sequential)]
+    struct BBox
+    {
+        public double xmin, ymin, zmin;
+        public double xmax, ymax, zmax;
+    }
+
+    public static class Util
     {
         public static string[] ToStringArray(IntPtr arrayPtr, int size)
         {
@@ -28,8 +35,8 @@ namespace Peace
         {
             freePtrs(array.Length, array);
         }
-        
-        
+
+
         // Dll functions
         // C-like free
         [DllImport("peace")]
