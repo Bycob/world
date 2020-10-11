@@ -15,14 +15,14 @@ TEST_CASE("normal wrapper use case", "[peace][.long]") {
         World *world = World::createDemoWorld();
 
         Collector collector(CollectorPresets::SCENE);
-        collect(&collector, world, CollectorView{0, 0, 1000});
+        collectFirstPerson(&collector, world, ::FirstPersonView{0, 0, 1000});
 
         auto chanSize = collector.getStorageChannel<SceneNode>().size();
         char **names = new char *[chanSize];
         void **nodes = new void *[chanSize];
         collectorGetChannel(&collector, NODE_CHANNEL, names, nodes);
 
-        for (int i = 0; i < chanSize; ++i) {
+        for (size_t i = 0; i < chanSize; ++i) {
             auto node = readNode(nodes[i]);
             CHECK(strlen(node.mesh) > 0);
         }

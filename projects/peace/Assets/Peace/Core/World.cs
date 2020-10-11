@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Peace.Serialization;
 using UnityEngine;
 
 namespace Peace
@@ -9,7 +10,7 @@ namespace Peace
     public class World
     {
         internal IntPtr _handle;
-        
+
         public static World CreateDemo()
         {
             return new World(createDemoWorld(""));
@@ -29,13 +30,19 @@ namespace Peace
         {
             _handle = createWorldFromFile(configFile);
         }
-        
-        
+
+        public World(WorldDef worldDef)
+        {
+            string jsonStr = WorldSerialization.ToJson(worldDef);
+            _handle = createWorldFromJson(jsonStr);
+        }
+
+
         // Dll functions
-        
+
         [DllImport("peace")]
         private static extern IntPtr createTestWorld();
-        
+
         [DllImport("peace")]
         private static extern IntPtr createDemoWorld(string name);
 
@@ -44,8 +51,9 @@ namespace Peace
 
         [DllImport("peace")]
         private static extern IntPtr createWorldFromFile(string name);
-        
+
         [DllImport("peace")]
         private static extern void freeWorld(IntPtr handle);
+
     }
 }

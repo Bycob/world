@@ -4,10 +4,25 @@ using System.Runtime.InteropServices;
 namespace Peace
 {
     [StructLayout(LayoutKind.Sequential)]
-    struct BBox
+    public struct BBox
     {
         public double xmin, ymin, zmin;
         public double xmax, ymax, zmax;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct FirstPersonView
+    {
+        public double X, Y, Z;
+        public double eyeResolution;
+        public double maxDistance;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct ZoneView
+    {
+        public BBox bbox;
+        public double resolution;
     }
 
     public static class Util
@@ -31,14 +46,7 @@ namespace Peace
             return strArray;
         }
 
-        public static void FreePtrs(IntPtr[] array)
-        {
-            freePtrs(array.Length, array);
-        }
-
-
         // Dll functions
-        // C-like free
         [DllImport("peace")]
         // TODO change [In, Out] to read only
         private static extern void freePtrs(int size, [In, Out] IntPtr[] array);

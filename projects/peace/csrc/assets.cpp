@@ -59,6 +59,12 @@ PEACE_EXPORT MaterialDescription readMaterial(MaterialPtr materialPtr) {
     return result;
 }
 
+PEACE_EXPORT char *materialGetCustomMap(MaterialPtr materialPtr,
+                                        char *mapName) {
+    auto *material = static_cast<Material *>(materialPtr);
+    return strdup(material->getCustomMap(mapName).c_str());
+}
+
 PEACE_EXPORT void readTexture(TexturePtr texturePtr, u8 **data, int *width,
                               int *height, int *type) {
     auto *image = static_cast<Image *>(texturePtr);

@@ -52,6 +52,8 @@ public:
 
     std::string getCustomMap(const std::string &mapId) const;
 
+    const std::map<std::string, std::string> &getCustomMaps() const;
+
     void setTransparent(bool transparent) { _transparent = transparent; }
 
     bool isTransparent() const { return _transparent; }

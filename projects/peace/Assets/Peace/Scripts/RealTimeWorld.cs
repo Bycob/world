@@ -15,6 +15,7 @@ namespace Peace
         private Collector _collector;
         private World _world;
         private Vector3 _position;
+        private FirstPersonView _view;
 
         private bool _collecting;
 
@@ -22,12 +23,11 @@ namespace Peace
 
         private Queue<GameObject> _objectPool;
         private List<GameObject> _objectsUsed;
-        
+
         private async void RunCollect()
         {
             _collecting = true;
-            _collector.SetPosition(_position);
-            await _collector.Collect(_world);
+            await _collector.CollectFirstPerson(_world, _view);
             UpdateFromCollector();
             _collecting = false;
         }
@@ -50,7 +50,7 @@ namespace Peace
                     _objectPool.Enqueue(used);
                 }
             }
-            
+
             foreach (var nodeKey in _collector.GetNewNodes())
             {
                 var node = _collector.GetNode(nodeKey);
@@ -62,7 +62,7 @@ namespace Peace
                     child.transform.localPosition = new Vector3((float)node.posX, (float)node.posZ, (float)node.posY);
                     child.transform.localScale = new Vector3((float)node.scaleX, (float)node.scaleZ, (float)node.scaleY);
                     child.transform.localEulerAngles = new Vector3((float)node.rotX, (float)node.rotZ, (float)node.rotY);
-                    
+
                     MeshFilter meshFilter = child.GetComponent<MeshFilter>();
                     meshFilter.sharedMesh = mesh;
 
@@ -109,7 +109,7 @@ namespace Peace
             }
             return obj;
         }
-        
+
         // Start is called before the first frame update
         void Start()
         {
@@ -124,8 +124,19 @@ namespace Peace
             {
                 _world = new World(configLocation);
             }
-            
+
             _collector = new Collector();
+
+            _view.eyeResolution = 700;
+            _view.maxDistance = 10000;
+        }
+
+        void UpdatePosition(Vector3 position)
+        {
+            _position = position;
+            _view.X = position.x;
+            _view.Y = position.z;
+            _view.Z = position.y;
         }
 
         void Update()
@@ -134,7 +145,7 @@ namespace Peace
 
             if (Vector3.Distance(newPos, _position) > 10 && !_collecting)
             {
-                _position = newPos;
+                UpdatePosition(newPos);
                 RunCollect();
             }
         }

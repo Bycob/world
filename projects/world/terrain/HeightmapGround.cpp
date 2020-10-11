@@ -302,14 +302,16 @@ void HeightmapGround::addTerrain(const TileCoordinates &key,
 
     if (collector.hasChannel<SceneNode>() && collector.hasChannel<Terrain>()) {
         // Collect as terrains (more optimized e.g. for game engines)
-
         auto &terrainChannel = collector.getChannel<Terrain>();
         terrainChannel.put(itemKey, terrain);
+
+        auto &objChannel = collector.getChannel<SceneNode>();
+        SceneNode node(ctx(itemKey).str());
+        objChannel.put(itemKey, node, ctx);
 
     } else if (collector.hasChannel<SceneNode>() &&
                collector.hasChannel<Mesh>()) {
         // Collect as meshes (more generic)
-
         auto &objChannel = collector.getChannel<SceneNode>();
         auto &meshChannel = collector.getChannel<Mesh>();
 
@@ -321,7 +323,7 @@ void HeightmapGround::addTerrain(const TileCoordinates &key,
             // Create the mesh
             meshChannel.put(itemKey, provideMesh(key, ctx), ctx);
 
-            SceneNode object(itemKey.str());
+            SceneNode object(ctx(itemKey).str());
             object.setPosition(offset);
 
             // Create the material
@@ -340,11 +342,11 @@ void HeightmapGround::addTerrain(const TileCoordinates &key,
 
             if (collector.hasChannel<Material>()) {
                 auto &matChan = collector.getChannel<Material>();
-                object.setMaterialID(itemKey.str());
+                object.setMaterialID(ctx(itemKey).str());
 
                 if (collector.hasChannel<Image>()) {
                     auto &imageChan = collector.getChannel<Image>();
-                    material.setMapKd(itemKey.str());
+                    material.setMapKd(ctx(itemKey).str());
                     imageChan.put(itemKey, texture, ctx);
                 }
 

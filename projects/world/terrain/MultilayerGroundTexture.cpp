@@ -24,7 +24,7 @@ void MultilayerGroundTexture::processTile(ITileContext &context) {
 
 void MultilayerGroundTexture::collectTile(ICollector &collector,
                                           ITileContext &context) {
-    if (collector.hasChannel<Image>()) {
+    if (collector.hasChannel<Terrain>() && collector.hasChannel<Image>()) {
         auto &imgChannel = collector.getChannel<Image>();
         const ExplorationContext &ctx = context.getExplorationContext();
         TileCoordinates tc = context.getCoords();
@@ -33,16 +33,13 @@ void MultilayerGroundTexture::collectTile(ICollector &collector,
         collectTextures(imgChannel, tc, ctx);
 
         // Distribution
+        auto &terrainChannel = collector.getChannel<Terrain>();
         ItemKey baseKey = context.getCoords().toKey();
         auto &tileElem = _storage.get(context.getCoords());
 
         for (size_t i = 0; i < tileElem._distributions.size(); ++i) {
             ItemKey key = getDistributionKey(tc, i);
-            // TODO create image at each distribution is bad for performances
-            // TODO reduce distribution size in comparison to texture size (this
-            // will be required for large terrains)
-            imgChannel.put(key, tileElem._distributions.at(i).createImage(),
-                           ctx);
+            terrainChannel.put(key, tileElem._distributions.at(i), ctx);
         }
     }
 }

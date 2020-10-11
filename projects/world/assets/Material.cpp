@@ -41,4 +41,8 @@ void Material::setCustomMap(const std::string &mapId,
 std::string Material::getCustomMap(const std::string &mapId) const {
     return _customMaps.at(mapId);
 }
+
+const std::map<std::string, std::string> &Material::getCustomMaps() const {
+    return _customMaps;
+}
 } // namespace world

@@ -17,10 +17,15 @@ inline void getChannelContent(CollectorChannel<T> &channel, char **names,
 
 extern "C" {
 
-struct PEACE_EXPORT CollectorView {
+struct PEACE_EXPORT FirstPersonView {
     double x, y, z;
     double eyeResolution;
     double maxDistance;
+};
+
+struct PEACE_EXPORT ZoneView {
+    BBox bbox;
+    double resolution;
 };
 
 struct PEACE_EXPORT CollectorNode {
@@ -35,24 +40,41 @@ const int NODE_CHANNEL = 0;
 const int MESH_CHANNEL = 1;
 const int MATERIAL_CHANNEL = 2;
 const int TEXTURE_CHANNEL = 3;
+const int TERRAIN_CHANNEL = 4;
 
-PEACE_EXPORT CollectorPtr createCollector() {
-    return new Collector(CollectorPresets::SCENE);
+PEACE_EXPORT CollectorPtr createCollector(int preset) {
+    return new Collector(static_cast<CollectorPresets>(preset));
 }
 
 PEACE_EXPORT void freeCollector(CollectorPtr collectorPtr) {
     delete static_cast<Collector *>(collectorPtr);
 }
 
-PEACE_EXPORT void collect(CollectorPtr collectorPtr, WorldPtr worldPtr,
-                          CollectorView view) {
+PEACE_EXPORT void collectFirstPerson(CollectorPtr collectorPtr,
+                                     WorldPtr worldPtr,
+                                     ::FirstPersonView view) {
     auto *collector = static_cast<Collector *>(collectorPtr);
-    collector->reset();
     auto *world = static_cast<World *>(worldPtr);
-    FirstPersonView fpsView{view.eyeResolution};
+    collector->reset();
+
+    world::FirstPersonView fpsView{view.eyeResolution};
     fpsView.setPosition({view.x, view.y, view.z});
     fpsView.setFarDistance(view.maxDistance);
+
     world->collect(*collector, fpsView);
+}
+
+PEACE_EXPORT void collectZone(CollectorPtr collectorPtr, WorldPtr worldPtr,
+                              ZoneView view) {
+    auto *collector = static_cast<Collector *>(collectorPtr);
+    auto *world = static_cast<World *>(worldPtr);
+    collector->reset();
+
+    ConstantResolution zoneView{view.resolution};
+    zoneView.setBounds({{view.bbox.xmin, view.bbox.ymin, view.bbox.zmin},
+                        {view.bbox.xmax, view.bbox.ymax, view.bbox.zmax}});
+
+    world->collect(*collector, zoneView);
 }
 
 PEACE_EXPORT int collectorGetChannelSize(CollectorPtr collectorPtr, int type) {
@@ -66,6 +88,8 @@ PEACE_EXPORT int collectorGetChannelSize(CollectorPtr collectorPtr, int type) {
         return collector->getStorageChannel<Material>().size();
     case TEXTURE_CHANNEL:
         return collector->getStorageChannel<Image>().size();
+    case TERRAIN_CHANNEL:
+        return collector->getStorageChannel<Terrain>().size();
     default:
         return -1;
     }
@@ -90,6 +114,10 @@ PEACE_EXPORT void collectorGetChannel(CollectorPtr collectorPtr, int type,
         break;
     case TEXTURE_CHANNEL:
         getChannelContent(collector->getStorageChannel<Image>(), names,
+                          objects);
+        break;
+    case TERRAIN_CHANNEL:
+        getChannelContent(collector->getStorageChannel<Terrain>(), names,
                           objects);
         break;
     default:

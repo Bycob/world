@@ -12,9 +12,13 @@ namespace Peace
 {
     public class Collector
     {
-        private IntPtr _handle;
+        public enum Preset
+        {
+            SCENE = 1,
+            ENGINE = 2
+        }
 
-        private CollectorView _view;
+        private IntPtr _handle;
 
         private HashSet<string> _newNodes;
         private Dictionary<string, CollectorNode> _nodes;
@@ -23,14 +27,12 @@ namespace Peace
         private Dictionary<string, Texture2D> _textures;
         private Dictionary<string, IntPtr> _terrainHandles;
 
-        private TerrainSystem _terrainSystem;
-
         public CollectorStats LastStats = new CollectorStats();
 
 
-        public Collector()
+        public Collector(Preset preset = Preset.SCENE)
         {
-            _handle = createCollector();
+            _handle = createCollector((int) preset);
 
             _newNodes = new HashSet<string>();
             _nodes = new Dictionary<string, CollectorNode>();
@@ -39,11 +41,7 @@ namespace Peace
             _textures = new Dictionary<string, Texture2D>();
             _terrainHandles = new Dictionary<string, IntPtr>();
 
-            _terrainSystem = new TerrainSystem();
-
             SetPosition(Vector3.zero);
-            _view.eyeResolution = 700;
-            _view.maxDistance = 10000;
         }
 
         ~Collector()
@@ -62,9 +60,6 @@ namespace Peace
 
         public void SetPosition(Vector3 position)
         {
-            _view.X = position.x;
-            _view.Y = position.z;
-            _view.Z = position.y;
         }
 
         private void GetChannel(int type, out string[] names, out IntPtr[] items)
@@ -78,10 +73,20 @@ namespace Peace
             items = itemsArray;
         }
 
-        public async Task Collect(World world)
+        public async Task CollectFirstPerson(World world, FirstPersonView view)
         {
-            await Task.Run(() => collect(_handle, world._handle, _view));
+            await Task.Run(() => collectFirstPerson(_handle, world._handle, view));
+            await Collect(world);
+        }
 
+        public async Task CollectZone(World world, ZoneView view)
+        {
+            await Task.Run(() => collectZone(_handle, world._handle, view));
+            await Collect(world);
+        }
+
+        private async Task Collect(World world)
+        {
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
@@ -95,6 +100,7 @@ namespace Peace
                 GetChannel(MESH_CHANNEL, out meshNames, out meshes);
                 GetChannel(MATERIAL_CHANNEL, out materialNames, out materials);
                 GetChannel(TEXTURE_CHANNEL, out textureNames, out textures);
+                GetChannel(TERRAIN_CHANNEL, out terrainNames, out terrains);
             });
 
             double l = LastStats.interopTime = sw.Elapsed.TotalMilliseconds;
@@ -227,8 +233,6 @@ namespace Peace
             {
                 _terrainHandles.Remove(key);
             }
-
-            _terrainSystem.AddTerrains(_nodes.Values, this);
         }
 
         public IEnumerable<string> GetNewNodes()
@@ -276,6 +280,7 @@ namespace Peace
         private const int MESH_CHANNEL = 1;
         private const int MATERIAL_CHANNEL = 2;
         private const int TEXTURE_CHANNEL = 3;
+        private const int TERRAIN_CHANNEL = 4;
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
         public struct CollectorNode
@@ -287,22 +292,17 @@ namespace Peace
             public double rotX, rotY, rotZ;
         }
 
-        [StructLayout(LayoutKind.Sequential)]
-        struct CollectorView
-        {
-            public double X, Y, Z;
-            public double eyeResolution;
-            public double maxDistance;
-        }
-
         [DllImport("peace")]
-        private static extern IntPtr createCollector();
+        private static extern IntPtr createCollector(int preset);
 
         [DllImport("peace")]
         private static extern void freeCollector(IntPtr handle);
 
         [DllImport("peace")]
-        private static extern void collect(IntPtr collector, IntPtr world, CollectorView view);
+        private static extern void collectFirstPerson(IntPtr collector, IntPtr world, FirstPersonView view);
+
+        [DllImport("peace")]
+        private static extern void collectZone(IntPtr collector, IntPtr world, ZoneView view);
 
         [DllImport("peace")]
         private static extern int collectorGetChannelSize(IntPtr collectorPtr, int type);

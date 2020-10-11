@@ -20,4 +20,12 @@ typedef void *MaterialPtr;
 typedef void *TexturePtr;
 typedef void *TerrainPtr;
 
+extern "C" {
+
+struct PEACE_EXPORT BBox {
+    double xmin, ymin, zmin;
+    double xmax, ymax, zmax;
+};
+}
+
 #endif // PEACE_COMMON_H

@@ -7,18 +7,15 @@ namespace Peace
 {
     public static class Terrains
     {
-        public static TerrainData ReadTerrainData(IntPtr handle)
+        public static void ReadTerrainData(TerrainData tData, IntPtr handle)
         {
-            TerrainData tData = new TerrainData();
-
             // Get height map
             int resolution = terrainGetResolution(handle);
+            tData.heightmapResolution = resolution;
             float[,] heights = new float[resolution, resolution];
             readTerrain(handle, heights, false);
             // <info> function SetHeightsDelayLOD to not regenerate lods if needed </info>
             tData.SetHeights(0, 0, heights);
-
-            return tData;
         }
 
         public static void ReadTerrainTextures(Terrain terrain, IntPtr terrainHandle, Collector collector)
@@ -60,7 +57,7 @@ namespace Peace
                 }
 
                 // Texture
-                string layerTex = materialGetCustomMap(matHandle, "layer" + i);
+                string layerTex = materialGetCustomMap(matHandle, "texture" + i);
                 TerrainLayer layer = new TerrainLayer
                 {
                     diffuseTexture = collector.GetTexture(layerTex)
@@ -90,10 +87,10 @@ namespace Peace
 
         // Dll functions
         [DllImport("peace")]
-        private static extern int terrainGetResolution(IntPtr terrainPtr);
+        private static extern void readTerrain(IntPtr terrainPtr, [Out] float[,] value, bool applyBbox);
 
         [DllImport("peace")]
-        private static extern void readTerrain(IntPtr terrainPtr, [In, Out] float[,] value, bool applyBbox);
+        private static extern int terrainGetResolution(IntPtr terrainPtr);
 
         [DllImport("peace")]
         private static extern IntPtr terrainGetMaterial(IntPtr terrainPtr);
@@ -108,64 +105,5 @@ namespace Peace
         [DllImport("peace")]
         private static extern string materialGetCustomMap(IntPtr materialPtr, string mapName);
 
-    }
-
-    public class TerrainSystem
-    {
-        private Dictionary<Vector2Int, Terrain> _terrains = new Dictionary<Vector2Int, Terrain>();
-
-
-        public void AddTerrains(IEnumerable<Collector.CollectorNode> nodes, Collector collector)
-        {
-            HashSet<Vector2Int> toRemove = new HashSet<Vector2Int>(_terrains.Keys);
-
-            foreach (var node in nodes)
-            {
-                string terrainName = node.Mesh;
-                IntPtr terrainHandle = collector.GetTerrainHandle(terrainName);
-
-                if (terrainHandle != IntPtr.Zero)
-                {
-                    // get bbox
-                    BBox bbox = Terrains.terrainGetBBox(terrainHandle);
-                    double size = bbox.xmax - bbox.xmin;
-                    var coords = new Vector2Int((int)(bbox.xmin / size), (int)(bbox.ymin / size));
-
-                    if (!_terrains.ContainsKey(coords))
-                    {
-                        var terrain = new Terrain();
-                        terrain.terrainData = Terrains.ReadTerrainData(terrainHandle);
-                        Terrains.ReadTerrainTextures(terrain, terrainHandle, collector);
-                        Terrains.UpdateTerrainBBox(terrain, bbox);
-                        _terrains.Add(coords, terrain);
-                    }
-                    else
-                    {
-                        toRemove.Remove(coords);
-                    }
-                }
-            }
-
-            foreach (var key in toRemove)
-            {
-                _terrains.Remove(key);
-            }
-
-            UpdateNeighbours();
-        }
-
-        private void UpdateNeighbours()
-        {
-            foreach (var key in _terrains.Keys)
-            {
-                Terrain current = _terrains[key];
-                Terrain leftNeighbor, topNeighbor, rightNeighbor, bottomNeighbor;
-                _terrains.TryGetValue(key + Vector2Int.left, out leftNeighbor);
-                _terrains.TryGetValue(key + Vector2Int.up, out topNeighbor);
-                _terrains.TryGetValue(key + Vector2Int.right, out rightNeighbor);
-                _terrains.TryGetValue(key + Vector2Int.down, out bottomNeighbor);
-                current.SetNeighbors(leftNeighbor, topNeighbor, rightNeighbor, bottomNeighbor);
-            }
-        }
     }
 }

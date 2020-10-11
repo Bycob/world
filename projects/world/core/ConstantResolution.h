@@ -10,8 +10,8 @@ namespace world {
 class WORLDAPI_EXPORT ConstantResolution : public IResolutionModel {
 public:
     ConstantResolution(double resolution)
-            : _resolution(resolution), _bbox{{-10000, -10000, -10000},
-                                             {10000, 10000, 10000}} {}
+            : _bbox{{-10000, -10000, -10000}, {10000, 10000, 10000}},
+              _resolution(resolution) {}
 
     void setResolution(double resolution) { _resolution = resolution; }
 
@@ -26,11 +26,13 @@ public:
         return _resolution;
     }
 
+    void setBounds(const BoundingBox &bbox) { _bbox = bbox; }
+
     BoundingBox getBounds() const override { return _bbox; }
 
 private:
-    double _resolution;
     BoundingBox _bbox;
+    double _resolution;
 };
 
 } // namespace world
