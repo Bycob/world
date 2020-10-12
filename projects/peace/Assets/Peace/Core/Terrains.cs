@@ -39,7 +39,7 @@ namespace Peace
 
                     if (alphamaps == null)
                     {
-                        alphamaps = new float[texCount, distribRes, distribRes];
+                        alphamaps = new float[distribRes, distribRes, texCount];
                         tData.alphamapResolution = distribRes;
                     }
 
@@ -51,7 +51,7 @@ namespace Peace
                     {
                         for (int y = 0; y < distribRes; ++y)
                         {
-                            alphamaps[i, x, y] = alphamap[x, y];
+                            alphamaps[x, y, i] = alphamap[x, y];
                         }
                     }
                 }
@@ -67,8 +67,8 @@ namespace Peace
 
             if (texCount != 0)
             {
-                tData.SetAlphamaps(0, 0, alphamaps);
                 tData.terrainLayers = layers;
+                tData.SetAlphamaps(0, 0, alphamaps);
             }
         }
 

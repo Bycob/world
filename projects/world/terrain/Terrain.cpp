@@ -33,11 +33,11 @@ Terrain::Terrain(const Mat<double> &data)
 
 Terrain::Terrain(const Terrain &terrain)
         : _bbox(terrain._bbox), _array(terrain._array),
-          _texture(terrain._texture) {}
+          _material(terrain._material), _texture(terrain._texture) {}
 
 Terrain::Terrain(Terrain &&terrain)
         : _bbox(terrain._bbox), _array(std::move(terrain._array)),
-          _texture(std::move(terrain._texture)) {}
+          _material(terrain._material), _texture(std::move(terrain._texture)) {}
 
 Terrain::~Terrain() = default;
 

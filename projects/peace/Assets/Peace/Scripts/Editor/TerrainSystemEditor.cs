@@ -31,38 +31,13 @@ namespace Peace
 
             if (GUILayout.Button("Generate"))
             {
-                CreateTerrain();
+                _terrainSystem.Regenerate();
             }
 
             if (GUILayout.Button("Cleanup"))
             {
                 _terrainSystem.Clear();
             }
-        }
-
-
-        public async Task CreateTerrain()
-        {
-            var world = new World(CreateTerrainWorldDef());
-            var collector = new Collector(Collector.Preset.ENGINE);
-
-            ZoneView view = new ZoneView();
-            int width = 1000;
-            view.bbox.xmin = 0;
-            view.bbox.ymin = 0;
-            view.bbox.zmin = -2000;
-            view.bbox.xmax = width;
-            view.bbox.ymax = width;
-            view.bbox.zmax = 4000;
-            view.resolution = 10;
-
-            Debug.Log("Start generating");
-            await collector.CollectZone(world, view);
-
-            Debug.Log("Generated!");
-            _terrainSystem.AddTerrains(collector);
-
-            Debug.Log("Terrains Added");
         }
 
         private void AddTestTerrain()
@@ -77,21 +52,6 @@ namespace Peace
 
             terrain.terrainData = tData;
             terrainGO.AddComponent<TerrainCollider>().terrainData = terrain.terrainData;
-        }
-
-        private static WorldDef CreateTerrainWorldDef()
-        {
-            var worldDef = new WorldDef();
-
-            var perlin = new PerlinTerrainGeneratorDef();
-            perlin.perlinInfo.octaves = perlin.maxOctaves = 11;
-
-            worldDef.ground.terrainRes = 2049;
-            worldDef.ground.textureRes = 3;
-            worldDef.ground.tileSystem.maxLod = 0;
-            worldDef.ground.workers_list.Add(perlin);
-
-            return worldDef;
         }
     }
 }

@@ -59,7 +59,13 @@ namespace Peace.Serialization
         public int textureRes = 128;
         public int texPixSize = 4;
 
-        public TileSystem tileSystem = new TileSystem();
+        public TileSystem tileSystem = new TileSystem()
+        {
+            maxLod = 12,
+            factor = 2,
+            baseSize = new Vector3(6000, 6000, 0),
+            bufferRes = new Vector3Int(512, 512, 0)
+        };
 
 
             [NonSerialized]
@@ -94,12 +100,91 @@ namespace Peace.Serialization
     }
 
     [Serializable]
-    public class TileSystem
+    public class CustomWorldRMModifierDef : IGroundWorkerDef
     {
-        public int maxLod = 12;
-        public int factor = 2;
-        public Vector3 baseSize = new Vector3(6000, 6000, 0);
-        public Vector3Int bufferRes = new Vector3Int(512, 512, 0);
+        public string type = "CustomWorldRMModifier";
+
+        public double biomeDensity = 1.0;
+        public double limitBrightness = 4;
+
+        public TileSystem tileSystem = new TileSystem()
+        {
+            maxLod = 0,
+            factor = 2,
+            baseSize = new Vector3(4e5f, 4e5f, 0.0f),
+            bufferRes = new Vector3Int(400, 400, 0)
+        };
+    }
+
+    [Serializable]
+    public class MultilayerGroundTextureDef : IGroundWorkerDef
+    {
+        public string type = "MultilayerGroundTexture";
+
+        public List<DistributionParams> layers = new List<DistributionParams>();
+
+        public GroundTextureGeneratorDef texProvider = new GroundTextureGeneratorDef();
+    }
+
+    [Serializable]
+    public class GroundTextureGeneratorDef
+    {
+        public string type = "VkwGroundTextureGenerator";
+        public int texWidth = 256;
+
+        public List<ShaderDef> layers = new List<ShaderDef>();
+    }
+
+    [Serializable]
+    public class ShaderDef
+    {
+        public string fragmentPath;
+        public List<ShaderParam> @params = new List<ShaderParam>();
+
+        public ShaderDef(string fragmentPath = "", IEnumerable<ShaderParam> pparams = null)
+        {
+            this.fragmentPath = fragmentPath;
+            if (pparams != null)
+            {
+                @params.AddRange(pparams);
+            }
+        }
+    }
+
+    [Serializable]
+    public struct TileSystem
+    {
+        public int maxLod;
+        public int factor;
+        public Vector3 baseSize;
+        public Vector3Int bufferRes;
+    }
+
+    [Serializable]
+    public struct DistributionParams
+    {
+        public float ha;
+        public float hb;
+        public float hc;
+        public float hd;
+        public float dha;
+        public float dhb;
+        public float dhc;
+        public float dhd;
+        public float hmin;
+        public float hmax;
+        public float dhmin;
+        public float dhmax;
+        public float threshold;
+        public float slopeFactor;
+    }
+
+    [Serializable]
+    public struct ShaderParam
+    {
+        public string name;
+        public int type;
+        public string value;
     }
 
     [Serializable]
