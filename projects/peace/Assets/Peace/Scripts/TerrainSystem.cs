@@ -9,7 +9,16 @@ namespace Peace
     public class TerrainSystem : MonoBehaviour
     {
         // Public variables
+        [Header("Terrain parameters")]
+        public int resolution = 2049;
+        public int octavesCount = 11;
+        public float tileWidth = 1000;
+        public float minAltitude = -2000;
+        public float maxAltitude = 4000;
 
+        [Header("Biomes Parameters")]
+        public double biomeDensity = 1.0;
+        public double limitBrightness = 4;
 
         // Private variables
         private Dictionary<Vector2Int, GameObject> _terrainGOs = new Dictionary<Vector2Int, GameObject>();
@@ -21,17 +30,21 @@ namespace Peace
         {
             var worldDef = new WorldDef();
 
-            worldDef.ground.terrainRes = 2049;
+            worldDef.ground.terrainRes = resolution;
             worldDef.ground.textureRes = 3;
+            worldDef.ground.minAltitude = minAltitude;
+            worldDef.ground.maxAltitude = maxAltitude;
             worldDef.ground.tileSystem.maxLod = 0;
+            worldDef.ground.tileSystem.baseSize.x = tileWidth;
+            worldDef.ground.tileSystem.baseSize.y = tileWidth;
 
             var perlin = new PerlinTerrainGeneratorDef();
-            perlin.perlinInfo.octaves = perlin.maxOctaves = 11;
+            perlin.perlinInfo.octaves = perlin.maxOctaves = octavesCount;
             worldDef.ground.workers_list.Add(perlin);
 
             var customMap = new CustomWorldRMModifierDef();
-            customMap.biomeDensity = 1.0;
-            customMap.limitBrightness = 4;
+            customMap.biomeDensity = biomeDensity;
+            customMap.limitBrightness = limitBrightness;
             worldDef.ground.workers_list.Add(customMap);
 
             var texturer = new MultilayerGroundTextureDef();
@@ -89,14 +102,16 @@ namespace Peace
             var collector = new Collector(Collector.Preset.ENGINE);
 
             var view = new ZoneView();
-            const int width = 1000;
-            view.bbox.xmin = 0;
-            view.bbox.ymin = 0;
-            view.bbox.zmin = -2000;
-            view.bbox.xmax = width;
-            view.bbox.ymax = width;
-            view.bbox.zmax = 4000;
-            view.resolution = 10;
+            Vector2 pos = new Vector2(0, 0);
+            const double margin = 0.05;
+            float width = tileWidth;
+            view.bbox.xmin = (pos.x + margin) * width;
+            view.bbox.ymin = (pos.y + margin) * width;
+            view.bbox.zmin = minAltitude;
+            view.bbox.xmax = view.bbox.xmin + width * (1 - margin * 2);
+            view.bbox.ymax = view.bbox.ymin + width * (1 - margin * 2);
+            view.bbox.zmax = maxAltitude;
+            view.resolution = resolution / tileWidth;
 
             Debug.Log("Start generating");
             await collector.CollectZone(_world, view);
@@ -106,6 +121,11 @@ namespace Peace
 
             Debug.Log("Terrains Added");
 
+        }
+
+        public void GenerateTile(Vector2Int tileCoords)
+        {
+            // TODO
         }
 
         public void Clear()

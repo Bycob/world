@@ -7,6 +7,23 @@ namespace Peace
 {
     public static class Terrains
     {
+        private static float[,] InvertAxis(float[,] heights)
+        {
+            int w = heights.GetLength(0);
+            int h = heights.GetLength(1);
+            float[,] invertedHeights = new float[h, w];
+
+            for (int y = 0; y < h; ++y)
+            {
+                for (int x = 0; x < w; ++x)
+                {
+                    invertedHeights[y, x] = heights[x, y];
+                }
+            }
+
+            return invertedHeights;
+        }
+
         public static void ReadTerrainData(TerrainData tData, IntPtr handle)
         {
             // Get height map
@@ -15,7 +32,7 @@ namespace Peace
             float[,] heights = new float[resolution, resolution];
             readTerrain(handle, heights, false);
             // <info> function SetHeightsDelayLOD to not regenerate lods if needed </info>
-            tData.SetHeights(0, 0, heights);
+            tData.SetHeights(0, 0, InvertAxis(heights));
         }
 
         public static void ReadTerrainTextures(Terrain terrain, IntPtr terrainHandle, Collector collector)
