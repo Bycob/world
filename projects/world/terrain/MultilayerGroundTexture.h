@@ -64,12 +64,19 @@ class WORLDAPI_EXPORT MultilayerGroundTexture : public ITerrainWorker {
 public:
     struct Element : public IGridElement {
         std::vector<Terrain> _distributions;
+        /// One terrain can have only few textures
+        std::vector<int> _layerIds;
     };
 
     MultilayerGroundTexture();
 
     template <typename T, typename... Args>
     T &setTextureProvider(Args &&... args);
+
+    u32 getDistributionResolution() const { return _distribResolution; }
+
+    // TODO deprecate this or hide it
+    Element &getTile(const TileCoordinates &tc);
 
     void processTerrain(Terrain &terrain) override;
 
@@ -94,6 +101,9 @@ private:
     Perlin _perlin;
 
     u32 _distribResolution = 33;
+    /// If this flag is false, only the distribution of each texture is
+    /// generated.
+    bool _generateTexture = true;
 
 
     void process(Terrain &terrain, Image &image, const TileCoordinates &tc,
@@ -105,7 +115,7 @@ private:
 
     ItemKey getDistributionKey(const TileCoordinates &tc, int id) const;
 
-    ItemKey getTextureKey(const TileCoordinates &tc, int id) const;
+    ItemKey getTextureKey(int layer, int lod) const;
 };
 
 template <typename T, typename... Args>

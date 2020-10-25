@@ -1,5 +1,7 @@
-#include <world/assets/ImageUtils.h>
 #include "MultilayerGroundTexture.h"
+
+#include <world/assets/ImageUtils.h>
+#include "world/terrain/TerrainOps.h"
 
 namespace world {
 
@@ -11,6 +13,12 @@ WORLD_REGISTER_CHILD_CLASS(ITerrainWorker, MultilayerGroundTexture,
 using MultilayerElement = MultilayerGroundTexture::Element;
 
 MultilayerGroundTexture::MultilayerGroundTexture() = default;
+
+MultilayerGroundTexture::Element &MultilayerGroundTexture::getTile(
+    const TileCoordinates &tc) {
+    auto &elem = _storage.getOrCreate(tc);
+    return elem;
+}
 
 void MultilayerGroundTexture::processTerrain(Terrain &terrain) {
     process(terrain, terrain.getTexture(), {},
@@ -60,6 +68,8 @@ void MultilayerGroundTexture::write(WorldFile &wf) const {
     if (_texProvider) {
         wf.addChild("texProvider", _texProvider->serializeSubclass());
     }
+
+    wf.addBool("generateTexture", _generateTexture);
 }
 
 void MultilayerGroundTexture::read(const WorldFile &wf) {
@@ -99,7 +109,7 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &image,
     const double thresholdFactor = 5.0 * exp(-tc._lod / 4.0);
 
     if (tc._lod == 0) {
-        _texProvider->setBasePixelSize(terrainSize / imWidth);
+        _texProvider->setBasePixelSize(float(terrainSize) / float(imWidth));
     }
 
     // generate perlin matrix
@@ -117,11 +127,23 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &image,
 
     MultilayerElement &elem = _storage.getOrCreate(tc);
 
-    for (size_t layer = 0; layer < _layers.size(); ++layer) {
-        // Compute distribution
-        elem._distributions.emplace_back(dRes);
-        Terrain &distrib = elem._distributions.back();
+    // If layerIds is empty, initialize it with all layers
+    if (elem._layerIds.empty()) {
+        elem._layerIds.resize(_layers.size());
+        std::iota(elem._layerIds.begin(), elem._layerIds.end(), 0);
+    }
 
+    Material &terrainMat = terrain.getMaterial();
+
+    for (size_t i = 0; i < elem._layerIds.size(); ++i) {
+        int layer = elem._layerIds[i];
+
+        // Compute distribution
+        if (elem._distributions.size() <= i) {
+            elem._distributions.emplace_back(dRes);
+            TerrainOps::fill(elem._distributions.back(), 1);
+        }
+        Terrain &distrib = elem._distributions[i];
         DistributionParams &params = _layers.at(layer);
 
         for (u32 y = 0; y < dRes; ++y) {
@@ -141,7 +163,7 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &image,
                 double t = perlinMat(x, y);
 
                 double threshold = params.threshold * thresholdFactor;
-                distrib(x, y) = smoothstep(r + threshold, r - threshold, t);
+                distrib(x, y) *= smoothstep(r + threshold, r - threshold, t);
             }
         }
 
@@ -173,31 +195,28 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &image,
                     1);
             }
         }
-    }
 
-    image = ImageUtils::toType(proxy, ImageType::RGB);
-
-    // Setup terrain material
-    Material &terrainMat = terrain.getMaterial();
-
-    for (size_t i = 0; i < _layers.size(); ++i) {
+        // Setup terrain material
         std::string distribName(ctx(getDistributionKey(tc, i)).str());
         terrainMat.setCustomMap("distribution" + std::to_string(i),
                                 distribName);
-        std::string texName(ctx(getTextureKey(tc, i)).str());
+        std::string texName(ctx(getTextureKey(layer, tc._lod)).str());
         terrainMat.setCustomMap("texture" + std::to_string(i), texName);
     }
+
+    image = ImageUtils::toType(proxy, ImageType::RGB);
 }
 
 void MultilayerGroundTexture::collectTextures(
     ICollectorChannel<Image> &texChannel, const TileCoordinates &tc,
     const ExplorationContext &ctx) {
 
-    // TODO this may change with biomes update
+    MultilayerElement &elem = _storage.get(tc);
     int lod = tc._lod;
 
-    for (size_t i = 0; i < _layers.size(); ++i) {
-        ItemKey texKey = getTextureKey(tc, i);
+    for (size_t i = 0; i < elem._layerIds.size(); ++i) {
+        int layer = elem._layerIds[i];
+        ItemKey texKey = getTextureKey(layer, tc._lod);
 
         if (!texChannel.has(texKey, ctx)) {
             texChannel.put(texKey, _texProvider->getTexture(i, lod), ctx);
@@ -210,8 +229,7 @@ ItemKey MultilayerGroundTexture::getDistributionKey(const TileCoordinates &tc,
     return {tc.toKey(), NodeKeys::fromInt(id)};
 }
 
-ItemKey MultilayerGroundTexture::getTextureKey(const TileCoordinates &tc,
-                                               int id) const {
-    return std::to_string(id) + "_" + std::to_string(tc._lod);
+ItemKey MultilayerGroundTexture::getTextureKey(int layer, int lod) const {
+    return std::to_string(layer) + "_" + std::to_string(lod);
 }
 } // namespace world

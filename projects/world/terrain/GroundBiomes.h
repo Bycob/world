@@ -10,16 +10,40 @@ namespace world {
 
 class BiomeType {
 public:
-    std::string _shader;
-    // palettes
-
+    /// Id of the biome type. A biome with a low type id will be drawn
+    /// first on the texture.
     u32 _id;
+
+    std::string _shader;
+    // TODO palettes
 
     /** If _allowHoles = false this type of layer must exist everywhere
      * on the terrain. */
     bool _allowHoles = false;
 
     BiomeType(std::string shader) : _shader(std::move(shader)) {}
+};
+
+class BiomeLayer {
+public:
+    /// To identify similar layers
+    int _type;
+
+    std::vector<Color4d> _colors;
+    /// style embedding (the style is determined by the shader
+    /// relatively to the embedding)
+    vec3d _style;
+
+    vec2d _humidity;
+    vec2d _temperature;
+};
+
+/** Generator for biome textures. Can transform */
+class IBiomeTextureGenerator {
+public:
+    virtual ~IBiomeTextureGenerator() = default;
+
+    virtual void addLayer(const BiomeLayer &layer) = 0;
 };
 
 class GroundBiomesPrivate;
@@ -31,7 +55,7 @@ class BiomeLayerInstance;
 class WORLDAPI_EXPORT GroundBiomes : public ITerrainWorker {
     WORLD_WRITE_SUBCLASS_METHOD
 public:
-    GroundBiomes(double biomeArea = 100e6);
+    explicit GroundBiomes(double biomeArea = 100e6);
 
     ~GroundBiomes() override;
 
@@ -40,6 +64,8 @@ public:
     void processTerrain(Terrain &terrain) override;
 
     void processTile(ITileContext &context) override;
+
+    void collectTile(ICollector &collector, ITileContext &context) override;
 
     void flush() override;
 
@@ -69,8 +95,18 @@ private:
     u32 _distribResolution = 64;
 
 
-    BiomeLayer createLayer(int type);
+    void applyToDistribution(const vec2i &biomeCoords,
+                             BiomeLayerInstance &instance,
+                             ITileContext &context, Terrain &distribution);
 
+    /** Get the biome value for specified biome at the specified position
+     * in the terrain with coordinates `tc`.
+     * \param coords Coordinates of biome. */
+    double getBiomeValue(const vec2i &biomeCoords,
+                         const BiomeLayerInstance &instance,
+                         const ITileContext &context, const vec2d &terrainPos);
+
+    BiomeLayer createLayer(int type);
 
     void generateBiomes(const vec2i &chunkPos, const ExplorationContext &ctx);
 

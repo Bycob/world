@@ -3,33 +3,21 @@
 #include <vector>
 #include <map>
 #include <memory>
-#include <world/assets/ColorOps.h>
+#include <list>
 
 #include "world/core/WorldTypes.h"
 #include "world/core/Chunk.h"
 #include "world/math/Vector.h"
 #include "world/math/BoundingBox.h"
 #include "world/math/RandomHelper.h"
+#include "world/assets/ColorOps.h"
 #include "Terrain.h"
+#include "MultilayerGroundTexture.h"
+#include "TerrainOps.h"
 
 namespace world {
 
 WORLD_REGISTER_CHILD_CLASS(ITerrainWorker, GroundBiomes, "GroundBiomes")
-
-class BiomeLayer {
-public:
-    // Image _img;
-
-    std::vector<Color4d> _colors;
-    /// style embedding (the style is determined by the shader
-    /// relatively to the embedding)
-    vec3d _style;
-    /// To identify similar layers
-    int _type;
-
-    vec2d _humidity;
-    vec2d _temperature;
-};
 
 class BiomeLayerInstance {
 public:
@@ -38,8 +26,7 @@ public:
     /// Location of the seed in the world (absolute coordinates)
     vec3d _location;
 
-    BoundingBox _bbox;
-    // 1 if present, 0 if absent.
+    // for each point: 1 if present, 0 if absent.
     std::unique_ptr<Terrain> _distribution;
 
     BiomeLayerInstance(u32 biomeId, vec3d location)
@@ -57,8 +44,11 @@ public:
     std::unique_ptr<Terrain> _distribution;
 };
 
+
 class GroundBiomesPrivate {
 public:
+    std::unique_ptr<MultilayerGroundTexture> _texturer;
+
     std::vector<BiomeType> _typeList;
 
     // Internal fields
@@ -67,7 +57,9 @@ public:
 
     Terrain _holesBuffer;
 
-    GroundBiomesPrivate() : _holesBuffer(1) {}
+    GroundBiomesPrivate()
+            : _texturer(std::make_unique<MultilayerGroundTexture>()),
+              _holesBuffer(1) {}
 };
 
 GroundBiomes::GroundBiomes(double biomeArea)
@@ -102,19 +94,52 @@ void GroundBiomes::processTile(ITileContext &context) {
         return;
     }
 
-    // TODO get real ctx
-    ExplorationContext ctx = ExplorationContext::getDefault();
+    const ExplorationContext &ctx = context.getExplorationContext();
 
     vec3d terrainDims =
         context.getTile()._terrain.getBoundingBox().getDimensions();
     vec2i lower{(c._pos * terrainDims / _chunkSize).round()};
     vec2i upper{((c._pos + vec3d{1}) * terrainDims / _chunkSize).round()};
 
-    for (int x = lower.x; x <= upper.x; ++x) {
-        for (int y = lower.y; y <= upper.y; ++y) {
+    const int dRes = _internal->_texturer->getDistributionResolution();
+    std::map<int, Terrain> layers;
+
+    for (int x = lower.x - 1; x <= upper.x + 1; ++x) {
+        for (int y = lower.y - 1; y <= upper.y + 1; ++y) {
             generateBiomes({x, y}, ctx);
+            ChunkBiomes &biomes = _internal->_biomes.at({x, y});
+
+            for (auto &instance : biomes._instances) {
+                auto it = layers.insert({instance._biomeId, Terrain(dRes)});
+
+                if (it.second) {
+                    TerrainOps::fill(it.first->second, 0);
+                }
+                applyToDistribution({x, y}, instance, context,
+                                    it.first->second);
+            }
         }
     }
+
+    // Setup texturer layers for this tile
+    auto &texturerTile = _internal->_texturer->getTile(context.getCoords());
+
+    // TODO improve complexity
+    for (size_t typeId = 0; typeId < _internal->_typeList.size(); ++typeId) {
+        for (auto &entry : layers) {
+            if (_internal->_layers[entry.first]._type == typeId) {
+                texturerTile._layerIds.emplace_back(entry.first);
+                texturerTile._distributions.emplace_back(
+                    std::move(entry.second));
+            }
+        }
+    }
+
+    _internal->_texturer->processTile(context);
+}
+
+void GroundBiomes::collectTile(ICollector &collector, ITileContext &context) {
+    _internal->_texturer->collectTile(collector, context);
 }
 
 void GroundBiomes::flush() {}
@@ -182,6 +207,35 @@ void GroundBiomes::exportZones(Image &output, const BoundingBox &bbox,
     }
 }
 
+void GroundBiomes::applyToDistribution(const vec2i &biomeCoords,
+                                       BiomeLayerInstance &instance,
+                                       ITileContext &context,
+                                       Terrain &distribution) {
+    int res = distribution.getResolution();
+
+    for (int y = 0; y < res; ++y) {
+        for (int x = 0; x < res; ++x) {
+            double xd = double(x) / (res - 1), yd = double(y) / (res - 1);
+            distribution(x, y) +=
+                getBiomeValue(biomeCoords, instance, context, {xd, yd});
+        }
+    }
+}
+
+double GroundBiomes::getBiomeValue(const vec2i &biomeCoords,
+                                   const BiomeLayerInstance &instance,
+                                   const ITileContext &context,
+                                   const vec2d &terrainPos) {
+
+    vec2i terrainCoords{context.getCoords()._pos};
+    double terrainWidth =
+        context.getTile()._terrain.getBoundingBox().getDimensions().x;
+    vec2d globalLoc = (terrainCoords + terrainPos) * terrainWidth;
+    vec2d loc = (globalLoc / _chunkSize) - biomeCoords;
+
+    return instance._distribution->getCubicHeight(loc.x, loc.y);
+}
+
 BiomeLayer GroundBiomes::createLayer(int type) {
     BiomeLayer layer;
     layer._type = type;
@@ -190,6 +244,8 @@ BiomeLayer GroundBiomes::createLayer(int type) {
     // pick style
     std::uniform_real_distribution<double> d(0, 1);
     layer._style = {d(_rng), d(_rng), d(_rng)};
+
+    // TODO add to multilayerground textures layers
     return layer;
 }
 
@@ -215,7 +271,7 @@ void GroundBiomes::generateBiomes(const vec2i &chunkPos,
         }
     }
 
-    // TODO double check that the list is sorted in the good order
+    // TODO double check that the list is sorted in the correct order
     std::sort(allSeeds.begin(), allSeeds.end(),
               [](BiomeLayerInstance *b1, BiomeLayerInstance *b2) {
                   return b1->_biomeId > b2->_biomeId;
@@ -365,6 +421,7 @@ void GroundBiomes::seedChunk(const vec2i &chunkPos, ChunkBiomes &chunk) {
                 (vec3d(chunkPos) - vec3d(0.5, 0.5, 0)) * _chunkSize + localPos;
 
             // Select layer based on humidity and temperature
+            // TODO finish this part, call createLayer if needed
             chunk._instances.emplace_back(type._id, seedPos);
         }
     }
