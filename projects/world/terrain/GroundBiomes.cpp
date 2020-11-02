@@ -48,7 +48,7 @@ public:
 class GroundBiomesPrivate {
 public:
     std::unique_ptr<MultilayerGroundTexture> _texturer;
-
+    IBiomeTextureGenerator *_texGen;
     std::vector<BiomeType> _typeList;
 
     // Internal fields
@@ -57,14 +57,34 @@ public:
 
     Terrain _holesBuffer;
 
+    /// Currently generated surface. Used to compute how much layers
+    double _coveredSurface = 0;
+
     GroundBiomesPrivate()
             : _texturer(std::make_unique<MultilayerGroundTexture>()),
               _holesBuffer(1) {}
 };
 
+
+template <> void write<BiomeType>(const BiomeType &bt, WorldFile &wf) {
+    wf.addString("shader", bt._shader);
+    wf.addChild("humidityPalette", bt._humidityPalette.serialize());
+    wf.addStruct("dparams", bt._dparams);
+    wf.addBool("allowHoles", bt._allowHoles);
+}
+
+template <> void read<BiomeType>(const WorldFile &wf, BiomeType &bt) {
+    wf.readStringOpt("shader", bt._shader);
+    if (wf.hasChild("humidityPalette"))
+        bt._humidityPalette.read(wf.readChild("humidityPalette"));
+    wf.readStructOpt("dparams", bt._dparams);
+    wf.readBoolOpt("allowHoles", bt._allowHoles);
+}
+
 GroundBiomes::GroundBiomes(double biomeArea)
         : _internal(new GroundBiomesPrivate()), _rng(std::random_device()()),
-          _biomeArea(biomeArea), _layerDensity(0.5) {
+          _biomeArea(biomeArea), _layerDensity(0.5),
+          _temperatureBounds(-20, 40) {
     _chunkSize = std::sqrt(biomeArea) * 2;
     _chunkArea = _chunkSize * _chunkSize;
 
@@ -72,7 +92,21 @@ GroundBiomes::GroundBiomes(double biomeArea)
     _internal->_holesBuffer = Terrain(_distribResolution);
 
     // Testing purpose (TODO remove)
-    addBiomeType({"texture-grass.frag"});
+    BiomeType rocks{"texture-rock.frag",
+                    ColorPalette::fromStartEnd({0.3}, {0.6, 0.54, 0.4}),
+                    DistributionParams{-1, 0, 1, 2, // h
+                                       -1, 0, 1, 2, // dh
+                                       0, 1, 0, 1, 0.05}};
+    BiomeType grass{
+        "texture-grass.frag",
+        ColorPalette::fromStartEnd({0.7, 0.75, 0.3}, {0.28, 0.75, 0.33}),
+        DistributionParams{0.33, 0.4, 0.6, 0.7, // h
+                           -1, 0, 0.4, 0.6,     // dh
+                           0., 1., 0.25, 0.6, 0.05}
+
+    };
+    addBiomeType(rocks);
+    addBiomeType(grass);
 }
 
 GroundBiomes::~GroundBiomes() { delete _internal; }
@@ -82,9 +116,23 @@ void GroundBiomes::addBiomeType(const BiomeType &type) {
     _internal->_typeList.back()._id = _internal->_typeList.size() - 1;
 }
 
-void GroundBiomes::write(WorldFile &wf) const {}
+void GroundBiomes::write(WorldFile &wf) const {
+    wf.addChild("texturer", _internal->_texturer->serialize());
+    wf.addArray("typeList");
 
-void GroundBiomes::read(const WorldFile &wf) {}
+    for (const auto &type : _internal->_typeList) {
+        wf.addStruct("typeList", type);
+    }
+}
+
+void GroundBiomes::read(const WorldFile &wf) {
+    if (wf.hasChild("texturer"))
+        _internal->_texturer->read(wf.readChild("texturer"));
+
+    for (auto it = wf.readArray("typeList"); !it.end(); ++it) {
+        _internal->_typeList.push_back(world::deserialize<BiomeType>(*it));
+    }
+}
 
 void GroundBiomes::processTerrain(Terrain &terrain) {}
 
@@ -124,7 +172,7 @@ void GroundBiomes::processTile(ITileContext &context) {
     // Setup texturer layers for this tile
     auto &texturerTile = _internal->_texturer->getTile(context.getCoords());
 
-    // TODO improve complexity
+    // TODO reduce complexity
     for (size_t typeId = 0; typeId < _internal->_typeList.size(); ++typeId) {
         for (auto &entry : layers) {
             if (_internal->_layers[entry.first]._type == typeId) {
@@ -236,17 +284,77 @@ double GroundBiomes::getBiomeValue(const vec2i &biomeCoords,
     return instance._distribution->getCubicHeight(loc.x, loc.y);
 }
 
-BiomeLayer GroundBiomes::createLayer(int type) {
-    BiomeLayer layer;
-    layer._type = type;
+void GroundBiomes::generateLayersAsNeeded(ChunkBiomes &chunk) {
+    _internal->_coveredSurface += _chunkArea;
+    std::vector<size_t> typeCounts(_internal->_typeList.size(), 0);
+
+    for (const BiomeLayer &layer : _internal->_layers) {
+        typeCounts[layer._id]++;
+    }
+
+    for (size_t i = 0; i < _internal->_typeList.size(); ++i) {
+        if (typeCounts[i] == 0) {
+            for (int j = 0; j < _minBiomeCount; ++j) {
+                double u = double(j * 2 + 1) / (_minBiomeCount * 2);
+                auto tb = _temperatureBounds;
+                createLayer(i, mix(tb.x, tb.y, u), u);
+            }
+        }
+    }
+}
+
+BiomeLayer &GroundBiomes::createLayer(int typeId, double temperature,
+                                      double humidity) {
+    const BiomeType &type = _internal->_typeList[typeId];
+
+    _internal->_layers.emplace_back();
+    BiomeLayer &layer = _internal->_layers.back();
+    layer._id = _internal->_layers.size();
+    layer._type = typeId;
+    layer._shader = type._shader;
+
+    // pick temperature and humidity
+    const vec2d &tb = _temperatureBounds;
+    std::normal_distribution<double> tempDistrib(0, (tb.y - tb.x) * 0.1);
+    double tempDiff = abs(tempDistrib(_rng));
+    layer._temperature = {clamp(temperature - tempDiff, tb.x, tb.y),
+                          clamp(temperature + tempDiff, tb.x, tb.y)};
+
+    std::normal_distribution<double> humidDistrib(0, 0.1);
+    double humidDiff = abs(humidDistrib(_rng));
+    layer._humidity = {clamp(humidity - humidDiff, 0, 1),
+                       clamp(humidity + humidDiff, 0, 1)};
+
     // pick color (with palette)
+    layer._colors.push_back(type._humidityPalette.getColor(humidity));
 
     // pick style
     std::uniform_real_distribution<double> d(0, 1);
     layer._style = {d(_rng), d(_rng), d(_rng)};
 
-    // TODO add to multilayerground textures layers
+    // Add to multilayerground textures layers & texture generator
+    _internal->_texturer->addLayer(type._dparams);
+    if (_internal->_texGen != nullptr)
+        _internal->_texGen->addLayer(layer);
     return layer;
+}
+
+int GroundBiomes::selectLayer(int type, double temperature, double humidity) {
+    int layerId = -1;
+    // TODO not check all the layer to select one
+    // TODO add randomness and approximations
+
+    for (auto &layer : _internal->_layers) {
+        if (layer._type != type)
+            continue;
+        layerId = layer._id;
+
+        if (layer._humidity.x < humidity && layer._humidity.y > humidity) {
+            return layer._id;
+        }
+    }
+
+    return layerId;
 }
 
 void GroundBiomes::generateBiomes(const vec2i &chunkPos,
@@ -308,11 +416,7 @@ void GroundBiomes::generateBiomes(const vec2i &chunkPos,
             // Create holes if seed is not adapted to its environment
 
             // Reset the holeBuffer
-            for (int y = 0; y < tileRes; ++y) {
-                for (int x = 0; x < tileRes; ++x) {
-                    _internal->_holesBuffer(x, y) = 0;
-                }
-            }
+            TerrainOps::fill(_internal->_holesBuffer, 0);
 
             for (auto it = allSeedBegin; it != allSeedIt; ++it) {
                 BiomeLayerInstance &seed = *(*it);
@@ -411,6 +515,9 @@ void GroundBiomes::generateBiomes(const vec2i &chunkPos,
 void GroundBiomes::seedChunk(const vec2i &chunkPos, ChunkBiomes &chunk) {
     std::uniform_real_distribution<double> offsetDistrib(0, _chunkSize);
     double biomeCountd = _chunkArea / _biomeArea * _layerDensity;
+    generateLayersAsNeeded(chunk);
+
+    std::uniform_real_distribution<double> humidity(0, 1);
 
     for (const BiomeType &type : _internal->_typeList) {
         int biomeCount = randRound(_rng, biomeCountd);
@@ -421,8 +528,9 @@ void GroundBiomes::seedChunk(const vec2i &chunkPos, ChunkBiomes &chunk) {
                 (vec3d(chunkPos) - vec3d(0.5, 0.5, 0)) * _chunkSize + localPos;
 
             // Select layer based on humidity and temperature
-            // TODO finish this part, call createLayer if needed
-            chunk._instances.emplace_back(type._id, seedPos);
+            // TODO use real temperature and humidity
+            int selectedLayer = selectLayer(type._id, 0, humidity(_rng));
+            chunk._instances.emplace_back(selectedLayer, seedPos);
         }
     }
 }

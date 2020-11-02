@@ -4,30 +4,42 @@
 #include "world/core/WorldConfig.h"
 
 #include "world/math/Perlin.h"
+#include "world/core/ColorPalette.h"
 #include "ITerrainWorker.h"
+#include "DistributionParams.h"
 
 namespace world {
 
-class BiomeType {
-public:
+struct WORLDAPI_EXPORT BiomeType {
     /// Id of the biome type. A biome with a low type id will be drawn
     /// first on the texture.
     u32 _id;
-
     std::string _shader;
-    // TODO palettes
+    ColorPalette _humidityPalette;
+    DistributionParams _dparams;
 
     /** If _allowHoles = false this type of layer must exist everywhere
      * on the terrain. */
     bool _allowHoles = false;
 
-    BiomeType(std::string shader) : _shader(std::move(shader)) {}
+
+    BiomeType()
+            : _id(0), _shader(""), _humidityPalette({}, {}, {}, {}),
+              _dparams() {}
+
+    BiomeType(std::string shader, ColorPalette palette,
+              DistributionParams dparams)
+            : _id(0), _shader(std::move(shader)), _humidityPalette(palette),
+              _dparams(dparams) {}
 };
 
-class BiomeLayer {
-public:
+struct WORLDAPI_EXPORT BiomeLayer {
+    /// Id of the layer
+    int _id;
     /// To identify similar layers
     int _type;
+
+    std::string _shader;
 
     std::vector<Color4d> _colors;
     /// style embedding (the style is determined by the shader
@@ -38,8 +50,9 @@ public:
     vec2d _temperature;
 };
 
-/** Generator for biome textures. Can transform */
-class IBiomeTextureGenerator {
+/** Generator for biome textures. Can generate terrain repetable
+ * textures from BiomeLayer description. */
+class WORLDAPI_EXPORT IBiomeTextureGenerator {
 public:
     virtual ~IBiomeTextureGenerator() = default;
 
@@ -85,6 +98,10 @@ private:
     /// Density of layers, ie for a given surface, how many different
     /// possible layers are there.
     double _layerDensity;
+    /// Minimum and maximum possible value of temperature.
+    vec2d _temperatureBounds;
+    /// Minimum biome layer count
+    int _minBiomeCount = 3;
 
     /// Width of a biomechunk in m
     double _chunkSize;
@@ -106,7 +123,13 @@ private:
                          const BiomeLayerInstance &instance,
                          const ITileContext &context, const vec2d &terrainPos);
 
-    BiomeLayer createLayer(int type);
+    /** Generate layers that are required for the additionnal surface added
+     * by this chunk. */
+    void generateLayersAsNeeded(ChunkBiomes &chunk);
+
+    BiomeLayer &createLayer(int type, double temperature, double humidity);
+
+    int selectLayer(int type, double temperature, double humidity);
 
     void generateBiomes(const vec2i &chunkPos, const ExplorationContext &ctx);
 

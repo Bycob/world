@@ -5,6 +5,7 @@
 
 #include <world/assets/Image.h>
 #include <world/terrain/MultilayerGroundTexture.h>
+#include <world/terrain/GroundBiomes.h>
 
 #include <vkworld/wrappers/VkwImage.h>
 
@@ -13,7 +14,8 @@ namespace world {
 class VkwGroundTextureGeneratorPrivate;
 class LodTextures;
 
-class VKWORLD_EXPORT VkwGroundTextureGenerator : public ITextureProvider {
+class VKWORLD_EXPORT VkwGroundTextureGenerator : public ITextureProvider,
+                                                 public IBiomeTextureGenerator {
     WORLD_WRITE_SUBCLASS_METHOD
 public:
     VkwGroundTextureGenerator();
@@ -26,6 +28,8 @@ public:
     void addLayer(const std::string &textureShader);
 
     void addLayer(Shader shader);
+
+    void addLayer(const BiomeLayer &layer) override;
 
     size_t getLayerCount();
 

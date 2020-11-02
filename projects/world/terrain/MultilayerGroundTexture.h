@@ -12,6 +12,8 @@
 
 namespace world {
 
+// TODO this is an "interface" class and it should not hold cache logic (put it
+// in a separate class)
 class WORLDAPI_EXPORT ITextureProvider : public ISerializable {
 public:
     virtual ~ITextureProvider() = default;

@@ -49,6 +49,19 @@ void VkwGroundTextureGenerator::addLayer(Shader shader) {
     _internal->_layers.push_back(std::move(shader));
 }
 
+void VkwGroundTextureGenerator::addLayer(const BiomeLayer &layer) {
+    _internal->_layers.emplace_back("generic-texture.vert", layer._shader);
+    Shader &shader = _internal->_layers.back();
+
+    for (size_t i = 0; i < layer._colors.size(); ++i) {
+        auto &col = layer._colors[i];
+        shader.addParameter(
+            {ShaderParam::Type::SCALAR, "color" + std::to_string(i),
+             std::to_string(col._r) + "," + std::to_string(col._g) + "," +
+                 std::to_string(col._b)});
+    }
+}
+
 size_t VkwGroundTextureGenerator::getLayerCount() {
     return _internal->_layers.size();
 }
