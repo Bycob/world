@@ -14,6 +14,13 @@ using MultilayerElement = MultilayerGroundTexture::Element;
 
 MultilayerGroundTexture::MultilayerGroundTexture() = default;
 
+ITextureProvider &MultilayerGroundTexture::getTextureProvider() const {
+    if (!_texProvider) {
+        throw std::runtime_error("Texture provider is nullptr");
+    }
+    return *_texProvider;
+}
+
 MultilayerGroundTexture::Element &MultilayerGroundTexture::getTile(
     const TileCoordinates &tc) {
     auto &elem = _storage.getOrCreate(tc);
@@ -95,9 +102,7 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &image,
                                       const TileCoordinates &tc,
                                       const ExplorationContext &ctx) {
 
-    if (_texProvider == nullptr) {
-        throw std::runtime_error("Texture provider is nullptr");
-    }
+    ITextureProvider &texProvider = getTextureProvider();
 
     const int imWidth = image.width();
     const int imHeight = image.height();
@@ -109,7 +114,7 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &image,
     const double thresholdFactor = 5.0 * exp(-tc._lod / 4.0);
 
     if (tc._lod == 0) {
-        _texProvider->setBasePixelSize(float(terrainSize) / float(imWidth));
+        texProvider.setBasePixelSize(float(terrainSize) / float(imWidth));
     }
 
     // generate perlin matrix
@@ -169,7 +174,7 @@ void MultilayerGroundTexture::process(Terrain &terrain, Image &image,
 
         // Sum with final image
         // TODO allow to disable this part
-        Image &layerTex = _texProvider->getTexture(layer, tc._lod);
+        Image &layerTex = texProvider.getTexture(layer, tc._lod);
         const int texWidth = layerTex.width();
         const int texHeight = layerTex.height();
         vec2i offset(world::mod<int>(tc._pos.x * imWidth, texWidth),

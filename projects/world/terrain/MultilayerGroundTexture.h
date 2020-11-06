@@ -75,6 +75,8 @@ public:
     template <typename T, typename... Args>
     T &setTextureProvider(Args &&... args);
 
+    ITextureProvider &getTextureProvider() const;
+
     u32 getDistributionResolution() const { return _distribResolution; }
 
     // TODO deprecate this or hide it

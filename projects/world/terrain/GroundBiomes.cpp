@@ -22,7 +22,7 @@ WORLD_REGISTER_CHILD_CLASS(ITerrainWorker, GroundBiomes, "GroundBiomes")
 class BiomeLayerInstance {
 public:
     /// Id of the biome in the layers list
-    u32 _biomeId;
+    u32 _layerId;
     /// Location of the seed in the world (absolute coordinates)
     vec3d _location;
 
@@ -30,7 +30,7 @@ public:
     std::unique_ptr<Terrain> _distribution;
 
     BiomeLayerInstance(u32 biomeId, vec3d location)
-            : _biomeId(biomeId), _location(location) {}
+            : _layerId(biomeId), _location(location), _distribution(nullptr) {}
 };
 
 class ChunkBiomes {
@@ -48,7 +48,6 @@ public:
 class GroundBiomesPrivate {
 public:
     std::unique_ptr<MultilayerGroundTexture> _texturer;
-    IBiomeTextureGenerator *_texGen;
     std::vector<BiomeType> _typeList;
 
     // Internal fields
@@ -134,7 +133,9 @@ void GroundBiomes::read(const WorldFile &wf) {
     }
 }
 
-void GroundBiomes::processTerrain(Terrain &terrain) {}
+void GroundBiomes::processTerrain(Terrain &terrain) {
+    _internal->_texturer->processTerrain(terrain);
+}
 
 void GroundBiomes::processTile(ITileContext &context) {
     auto c = context.getCoords();
@@ -158,7 +159,7 @@ void GroundBiomes::processTile(ITileContext &context) {
             ChunkBiomes &biomes = _internal->_biomes.at({x, y});
 
             for (auto &instance : biomes._instances) {
-                auto it = layers.insert({instance._biomeId, Terrain(dRes)});
+                auto it = layers.insert({instance._layerId, Terrain(dRes)});
 
                 if (it.second) {
                     TerrainOps::fill(it.first->second, 0);
@@ -289,7 +290,7 @@ void GroundBiomes::generateLayersAsNeeded(ChunkBiomes &chunk) {
     std::vector<size_t> typeCounts(_internal->_typeList.size(), 0);
 
     for (const BiomeLayer &layer : _internal->_layers) {
-        typeCounts[layer._id]++;
+        typeCounts[layer._type]++;
     }
 
     for (size_t i = 0; i < _internal->_typeList.size(); ++i) {
@@ -309,7 +310,7 @@ BiomeLayer &GroundBiomes::createLayer(int typeId, double temperature,
 
     _internal->_layers.emplace_back();
     BiomeLayer &layer = _internal->_layers.back();
-    layer._id = _internal->_layers.size();
+    layer._id = _internal->_layers.size() - 1;
     layer._type = typeId;
     layer._shader = type._shader;
 
@@ -334,8 +335,14 @@ BiomeLayer &GroundBiomes::createLayer(int typeId, double temperature,
 
     // Add to multilayerground textures layers & texture generator
     _internal->_texturer->addLayer(type._dparams);
-    if (_internal->_texGen != nullptr)
-        _internal->_texGen->addLayer(layer);
+    auto *texGen = dynamic_cast<IBiomeTextureGenerator *>(
+        &_internal->_texturer->getTextureProvider());
+    if (texGen) {
+        texGen->addLayer(layer);
+    } else {
+        throw std::runtime_error(
+            "Layer could not be added because no texture generator was found");
+    }
     return layer;
 }
 
@@ -353,6 +360,10 @@ int GroundBiomes::selectLayer(int type, double temperature, double humidity) {
             return layer._id;
         }
     }
+
+    // TODO correct error message when no available type, I'm too tired to do things right
+    if (layerId == -1)
+        throw std::runtime_error("Layer id is < 0 and this is bad");
 
     return layerId;
 }
@@ -381,8 +392,8 @@ void GroundBiomes::generateBiomes(const vec2i &chunkPos,
 
     // TODO double check that the list is sorted in the correct order
     std::sort(allSeeds.begin(), allSeeds.end(),
-              [](BiomeLayerInstance *b1, BiomeLayerInstance *b2) {
-                  return b1->_biomeId > b2->_biomeId;
+              [this](BiomeLayerInstance *b1, BiomeLayerInstance *b2) {
+                  return layerType(b1->_layerId) < layerType(b2->_layerId);
               });
 
     // Each "type" requires to have at least 1 layer everywhere
@@ -402,7 +413,7 @@ void GroundBiomes::generateBiomes(const vec2i &chunkPos,
             u32 seedCount = 0;
 
             while (allSeedIt != allSeeds.end() &&
-                   (*allSeedIt)->_biomeId == type._id) {
+                   layerType((*allSeedIt)->_layerId) == type._id) {
                 ++allSeedIt;
                 ++seedCount;
             }
@@ -423,7 +434,7 @@ void GroundBiomes::generateBiomes(const vec2i &chunkPos,
                 vec2i seedChunkPos{
                     (vec2d(seed._location) / _chunkSize + vec2d{0.5}).floor()};
 
-                if (seed._distribution == nullptr) {
+                if (!seed._distribution) {
                     setupZone(seed, perlin, seedChunkPos);
                 }
 
@@ -577,5 +588,9 @@ void GroundBiomes::setupZone(BiomeLayerInstance &seed, Perlin &perlin,
 
 u32 GroundBiomes::zoneBuffersResolution() const {
     return _distribResolution * 3;
+}
+
+u32 GroundBiomes::layerType(u32 layerId) const {
+    return _internal->_layers[layerId]._type;
 }
 } // namespace world

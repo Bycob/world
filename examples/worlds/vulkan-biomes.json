@@ -188,114 +188,15 @@
                 }
             },
             {
-                "type": "MultilayerGroundTexture",
-                "layers": [
-                    {
-                        "ha": -1.0,
-                        "hb": 0.0,
-                        "hc": 1.0,
-                        "hd": 2.0,
-                        "dha": -1.0,
-                        "dhb": 0.0,
-                        "dhc": 1.0,
-                        "dhd": 2.0,
-                        "hmin": 0.0,
-                        "hmax": 1.0,
-                        "dhmin": 0.0,
-                        "dhmax": 1.0,
-                        "threshold": 0.05000000074505806,
-                        "slopeFactor": 0.0
-                    },
-                    {
-                        "ha": -1.0,
-                        "hb": 0.0,
-                        "hc": 0.4000000059604645,
-                        "hd": 0.44999998807907107,
-                        "dha": -1.0,
-                        "dhb": 0.0,
-                        "dhc": 0.4000000059604645,
-                        "dhd": 0.6000000238418579,
-                        "hmin": 0.0,
-                        "hmax": 1.0,
-                        "dhmin": 0.0,
-                        "dhmax": 1.0,
-                        "threshold": 0.05000000074505806,
-                        "slopeFactor": 0.0
-                    },
-                    {
-                        "ha": 0.33000001311302187,
-                        "hb": 0.4000000059604645,
-                        "hc": 0.6000000238418579,
-                        "hd": 0.75,
-                        "dha": -1.0,
-                        "dhb": 0.0,
-                        "dhc": 0.44999998807907107,
-                        "dhd": 0.6499999761581421,
-                        "hmin": 0.0,
-                        "hmax": 0.8500000238418579,
-                        "dhmin": 0.25,
-                        "dhmax": 0.8500000238418579,
-                        "threshold": 0.05000000074505806,
-                        "slopeFactor": 0.0
-                    },
-                    {
-                        "ha": 0.33000001311302187,
-                        "hb": 0.4000000059604645,
-                        "hc": 0.6000000238418579,
-                        "hd": 0.699999988079071,
-                        "dha": -1.0,
-                        "dhb": 0.0,
-                        "dhc": 0.4000000059604645,
-                        "dhd": 0.6000000238418579,
-                        "hmin": 0.0,
-                        "hmax": 1.0,
-                        "dhmin": 0.25,
-                        "dhmax": 0.6000000238418579,
-                        "threshold": 0.05000000074505806,
-                        "slopeFactor": 0.0
-                    },
-                    {
-                        "ha": 0.6499999761581421,
-                        "hb": 0.800000011920929,
-                        "hc": 1.0,
-                        "hd": 2.0,
-                        "dha": -1.0,
-                        "dhb": 0.0,
-                        "dhc": 0.5,
-                        "dhd": 0.699999988079071,
-                        "hmin": 0.0,
-                        "hmax": 1.0,
-                        "dhmin": 0.0,
-                        "dhmax": 1.0,
-                        "threshold": 0.05000000074505806,
-                        "slopeFactor": 0.0
+                "type": "GroundBiomes",
+                "typeList": [],
+                "texturer": {
+                    "layers": [],
+                    "texProvider": {
+                        "type": "VkwGroundTextureGenerator",
+                        "texWidth": 256,
+                        "layers": []
                     }
-                ],
-                "texProvider": {
-                    "type": "VkwGroundTextureGenerator",
-                    "texWidth": 256,
-                    "layers": [
-                        {
-                            "fragmentPath": "texture-rock.frag",
-                            "params": []
-                        },
-                        {
-                            "fragmentPath": "texture-sand.frag",
-                            "params": []
-                        },
-                        {
-                            "fragmentPath": "texture-soil.frag",
-                            "params": []
-                        },
-                        {
-                            "fragmentPath": "texture-grass.frag",
-                            "params": []
-                        },
-                        {
-                            "fragmentPath": "texture-snow.frag",
-                            "params": []
-                        }
-                    ]
                 }
             }
         ],

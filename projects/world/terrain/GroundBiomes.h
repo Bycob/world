@@ -35,9 +35,9 @@ struct WORLDAPI_EXPORT BiomeType {
 
 struct WORLDAPI_EXPORT BiomeLayer {
     /// Id of the layer
-    int _id;
+    u32 _id;
     /// To identify similar layers
-    int _type;
+    u32 _type;
 
     std::string _shader;
 
@@ -143,6 +143,8 @@ private:
                    const vec2i &chunkPos);
 
     u32 zoneBuffersResolution() const;
+
+    u32 layerType(u32 layerId) const;
 };
 
 } // namespace world
