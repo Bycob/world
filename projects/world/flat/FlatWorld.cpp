@@ -36,10 +36,23 @@ FlatWorld *FlatWorld::createDemoFlatWorld() {
     map.setRegion({0, 0}, 10000, 3, 0.1, 0.3);
     map.setRegion({0, 0}, 6000, 0.7, 1.6, 0.8);
 
-    ground.addWorker<GroundBiomes>();
-    // TODO add color configuration to the texturer (just as before)
-    ground.addWorker<AltitudeTexturer>();
+    auto &texturer = ground.addWorker<AltitudeTexturer>();
+    ColorMap &colorMap = texturer.getColorMap();
 
+    colorMap.addPoint({0.15, 0.5}, Color4u(209, 207, 153)); // Sand
+    colorMap.addPoint({0.31, 0}, Color4u(209, 207, 153));   // Sand
+    colorMap.addPoint({0.31, 1}, Color4u(209, 207, 153));   // Sand
+    colorMap.addPoint({0.35, 0}, Color4u(144, 183, 92));    // Light grass
+    colorMap.addPoint({0.35, 1}, Color4u(72, 132, 65));     // Dark grass
+    colorMap.addPoint({0.5, 0}, Color4u(144, 183, 100));    // Light grass
+    colorMap.addPoint({0.5, 1}, Color4u(96, 76, 40));       // Dark dirt
+    colorMap.addPoint({0.75, 0}, Color4u(96, 76, 40));      // Dark dirt
+    colorMap.addPoint({0.75, 1}, Color4u(160, 160, 160));   // Rock
+    colorMap.addPoint({1, 0}, Color4u(244, 252, 250));      // Snow
+    colorMap.addPoint({1, 1}, Color4u(160, 160, 160));      // Rock
+    colorMap.setOrder(3);
+
+    // ground.addWorker<GroundBiomes>();
     /*auto &multilayer = ground.addWorker<MultilayerGroundTexture>();
     multilayer.setTextureProvider<CachedTextureProvider>("multilayer/");
     // rock
