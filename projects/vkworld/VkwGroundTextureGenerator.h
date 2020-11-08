@@ -50,7 +50,7 @@ private:
 
     /// @param cpu Si true, récupère les textures sur le cpu depuis la carte
     /// graphique
-    LodTextures &getOrCreate(int lod, bool cpu = false);
+    LodTextures &getOrCreate(int layerId, int lod, bool cpu);
 };
 
 } // namespace world

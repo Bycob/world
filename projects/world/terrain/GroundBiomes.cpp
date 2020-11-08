@@ -96,6 +96,7 @@ GroundBiomes::GroundBiomes(double biomeArea)
                     DistributionParams{-1, 0, 1, 2, // h
                                        -1, 0, 1, 2, // dh
                                        0, 1, 0, 1, 0.05}};
+
     BiomeType grass{
         "texture-grass.frag",
         ColorPalette::fromStartEnd({0.7, 0.75, 0.3}, {0.28, 0.75, 0.33}),
@@ -104,6 +105,8 @@ GroundBiomes::GroundBiomes(double biomeArea)
                            0., 1., 0.25, 0.6, 0.05}
 
     };
+    grass._allowHoles = true;
+
     addBiomeType(rocks);
     addBiomeType(grass);
 }
@@ -139,10 +142,6 @@ void GroundBiomes::processTerrain(Terrain &terrain) {
 
 void GroundBiomes::processTile(ITileContext &context) {
     auto c = context.getCoords();
-    if (c._lod != 0) {
-        return;
-    }
-
     const ExplorationContext &ctx = context.getExplorationContext();
 
     vec3d terrainDims =
@@ -280,7 +279,8 @@ double GroundBiomes::getBiomeValue(const vec2i &biomeCoords,
     double terrainWidth =
         context.getTile()._terrain.getBoundingBox().getDimensions().x;
     vec2d globalLoc = (terrainCoords + terrainPos) * terrainWidth;
-    vec2d loc = (globalLoc / _chunkSize) - biomeCoords;
+    vec2d loc = (globalLoc / _chunkSize) - (biomeCoords - vec2d{1.5});
+    loc /= 3;
 
     return instance._distribution->getCubicHeight(loc.x, loc.y);
 }
@@ -361,9 +361,10 @@ int GroundBiomes::selectLayer(int type, double temperature, double humidity) {
         }
     }
 
-    // TODO correct error message when no available type, I'm too tired to do things right
     if (layerId == -1)
-        throw std::runtime_error("Layer id is < 0 and this is bad");
+        throw std::runtime_error(
+            "No layer was generated of the required type: " +
+            std::to_string(type));
 
     return layerId;
 }

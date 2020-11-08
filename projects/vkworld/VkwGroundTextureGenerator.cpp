@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <unordered_map>
 
 #include "world/assets/Shader.h"
 
@@ -18,8 +19,8 @@ WORLD_REGISTER_CHILD_CLASS(ITextureProvider, VkwGroundTextureGenerator,
 struct LodTextures {
     float _width = 0;
     std::unique_ptr<VkwGraphicsWorker> _texWorker;
-    std::vector<VkwImage> _layerTextures;
-    std::vector<Image> _layerImages;
+    std::unordered_map<int, std::unique_ptr<VkwImage>> _layerTextures;
+    std::unordered_map<int, std::unique_ptr<Image>> _layerImages;
 };
 
 class VkwGroundTextureGeneratorPrivate {
@@ -32,7 +33,8 @@ public:
     std::map<int, LodTextures> _lodTextures;
 
 
-    void launchTextureGeneration(LodTextures &t);
+    void launchTextureGeneration(LodTextures &t,
+                                 const std::vector<int> &layerIds);
 };
 
 VkwGroundTextureGenerator::VkwGroundTextureGenerator()
@@ -69,16 +71,17 @@ size_t VkwGroundTextureGenerator::getLayerCount() {
 VkwImage &VkwGroundTextureGenerator::getVkTexture(int layer, int lod) {
     // FIXME cpu was set to false, but we actually need (...)
     // to set it to true to take advantage of the cache
-    auto &lodTex = getOrCreate(lod, true);
-    return lodTex._layerTextures.at(layer);
+    auto &lodTex = getOrCreate(layer, lod, true);
+    return *lodTex._layerTextures.at(layer);
 }
 
 Image &VkwGroundTextureGenerator::getTexture(int layer, int lod) {
-    auto &lodTex = getOrCreate(lod, true);
-    return lodTex._layerImages.at(layer);
+    auto &lodTex = getOrCreate(layer, lod, true);
+    return *lodTex._layerImages.at(layer);
 }
 
 void VkwGroundTextureGenerator::write(WorldFile &wf) const {
+    ITextureProvider::write(wf);
     wf.addUint("texWidth", _internal->_texWidth);
     wf.addArray("layers");
 
@@ -88,6 +91,7 @@ void VkwGroundTextureGenerator::write(WorldFile &wf) const {
 }
 
 void VkwGroundTextureGenerator::read(const WorldFile &wf) {
+    ITextureProvider::read(wf);
     wf.readUintOpt("texWidth", _internal->_texWidth);
 
     for (auto it = wf.readArray("layers"); !it.end(); ++it) {
@@ -98,37 +102,41 @@ void VkwGroundTextureGenerator::read(const WorldFile &wf) {
     }
 }
 
-LodTextures &VkwGroundTextureGenerator::getOrCreate(int lod, bool cpu) {
+LodTextures &VkwGroundTextureGenerator::getOrCreate(int layerId, int lod,
+                                                    bool cpu) {
     auto it = _internal->_lodTextures.insert({lod, LodTextures{}});
     LodTextures &t = it.first->second;
 
     if (it.second) {
         t._width = getWidth(lod);
-        _internal->launchTextureGeneration(t);
-        t._texWorker->waitForCompletion();
     }
+    _internal->launchTextureGeneration(t, {layerId});
+    t._texWorker->waitForCompletion();
 
     // TODO transitions to textures ?
 
-    if (cpu && t._layerTextures.size() != t._layerImages.size()) {
-        t._layerImages.clear();
-
-        for (VkwImage &img : t._layerTextures) {
-            t._layerImages.push_back(VkwMemoryHelper::GPUToImage(img));
-            _cache.saveImage(getImageId(t._layerImages.size() - 1, lod),
-                             t._layerImages.back());
-        }
+    if (cpu && t._layerImages.find(layerId) == t._layerImages.end()) {
+        t._layerImages[layerId] = std::make_unique<Image>(
+            VkwMemoryHelper::GPUToImage(*t._layerTextures.at(layerId)));
+        _cache.saveImage(getImageId(layerId, lod), *t._layerImages[layerId]);
     }
     return t;
 }
 
-void VkwGroundTextureGeneratorPrivate::launchTextureGeneration(LodTextures &t) {
+void VkwGroundTextureGeneratorPrivate::launchTextureGeneration(
+    LodTextures &t, const std::vector<int> &layerIds) {
     auto &ctx = Vulkan::context();
     t._texWorker = std::make_unique<VkwGraphicsWorker>();
 
-    for (const auto &shader : _layers) {
-        VkwImage image(_texWidth, _texWidth, VkwImageUsage::OFFSCREEN_RENDER);
-        t._layerTextures.push_back(image);
+    for (int layerId : layerIds) {
+        if (t._layerTextures.find(layerId) != t._layerTextures.end()) {
+            continue;
+        }
+
+        auto &shader = _layers.at(layerId);
+        auto &image =
+            *(t._layerTextures[layerId] = std::make_unique<VkwImage>(
+                  _texWidth, _texWidth, VkwImageUsage::OFFSCREEN_RENDER));
 
         // Generate image
         VkwDescriptorSetLayout layout({0}, {});
