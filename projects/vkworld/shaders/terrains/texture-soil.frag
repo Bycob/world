@@ -13,6 +13,12 @@ layout(binding = 0) uniform TextureData {
     vec2 size;
 };
 
+layout(binding = 1) uniform sampler2D randTex;
+
+layout(binding = 2) uniform Color {
+    vec3 soilColor;
+};
+
 #define PI 3.14
 
 #define VORONOI_SPACE 0.001

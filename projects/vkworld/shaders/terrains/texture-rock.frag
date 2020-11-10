@@ -13,6 +13,12 @@ layout(binding = 0) uniform TextureData {
 	vec2 size;
 };
 
+layout(binding = 1) uniform sampler2D randTex;
+
+layout(binding = 2) uniform Color {
+    vec3 rockColor;
+};
+
 #define PI 3.14
 
 // between 0 and 1
@@ -89,7 +95,7 @@ void main() {
     vec2 a = vec2(voronoi(uv + vec2(4.2, 2.6)), voronoi(uv + vec2(8.2, 5.6)));
     vec2 b = vec2(fbm2(uv), fbm2(uv + vec2(5.)));
 
-    vec3 col = vec3(voronoi(uv + (b - 0.5) * 0.4));
+    vec3 col = rockColor * (voronoi(uv + (b - 0.5) * 0.4));
     col *= fbm2(uv);
 
     fragColor = vec4(col,1.0);

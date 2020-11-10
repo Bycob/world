@@ -89,26 +89,6 @@ GroundBiomes::GroundBiomes(double biomeArea)
 
     // Init buffer
     _internal->_holesBuffer = Terrain(_distribResolution);
-
-    // Testing purpose (TODO remove)
-    BiomeType rocks{"texture-rock.frag",
-                    ColorPalette::fromStartEnd({0.3}, {0.6, 0.54, 0.4}),
-                    DistributionParams{-1, 0, 1, 2, // h
-                                       -1, 0, 1, 2, // dh
-                                       0, 1, 0, 1, 0.05}};
-
-    BiomeType grass{
-        "texture-grass.frag",
-        ColorPalette::fromStartEnd({0.7, 0.75, 0.3}, {0.28, 0.75, 0.33}),
-        DistributionParams{0.33, 0.4, 0.6, 0.7, // h
-                           -1, 0, 0.4, 0.6,     // dh
-                           0., 1., 0.25, 0.6, 0.05}
-
-    };
-    grass._allowHoles = true;
-
-    addBiomeType(rocks);
-    addBiomeType(grass);
 }
 
 GroundBiomes::~GroundBiomes() { delete _internal; }
