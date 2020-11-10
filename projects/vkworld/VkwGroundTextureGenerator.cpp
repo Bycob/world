@@ -110,8 +110,11 @@ LodTextures &VkwGroundTextureGenerator::getOrCreate(int layerId, int lod,
     if (it.second) {
         t._width = getWidth(lod);
     }
-    _internal->launchTextureGeneration(t, {layerId});
-    t._texWorker->waitForCompletion();
+
+    if (t._layerTextures.find(layerId) == t._layerTextures.end()) {
+        _internal->launchTextureGeneration(t, {layerId});
+        t._texWorker->waitForCompletion();
+    }
 
     // TODO transitions to textures ?
 
@@ -125,14 +128,11 @@ LodTextures &VkwGroundTextureGenerator::getOrCreate(int layerId, int lod,
 
 void VkwGroundTextureGeneratorPrivate::launchTextureGeneration(
     LodTextures &t, const std::vector<int> &layerIds) {
+
     auto &ctx = Vulkan::context();
     t._texWorker = std::make_unique<VkwGraphicsWorker>();
 
     for (int layerId : layerIds) {
-        if (t._layerTextures.find(layerId) != t._layerTextures.end()) {
-            continue;
-        }
-
         auto &shader = _layers.at(layerId);
         auto &image =
             *(t._layerTextures[layerId] = std::make_unique<VkwImage>(

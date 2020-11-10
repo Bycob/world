@@ -123,7 +123,7 @@ void GroundBiomes::write(WorldFile &wf) const {
     wf.addArray("typeList");
 
     for (const auto &type : _internal->_typeList) {
-        wf.addStruct("typeList", type);
+        wf.addToArray("typeList", world::serialize(type));
     }
 }
 
@@ -133,6 +133,7 @@ void GroundBiomes::read(const WorldFile &wf) {
 
     for (auto it = wf.readArray("typeList"); !it.end(); ++it) {
         _internal->_typeList.push_back(world::deserialize<BiomeType>(*it));
+        _internal->_typeList.back()._id = _internal->_typeList.size() - 1;
     }
 }
 
