@@ -5,8 +5,14 @@
 using namespace world;
 
 int main(int argc, char **argv) {
-    std::unique_ptr<FlatWorld> world(FlatWorld::createDemoFlatWorld());
+    std::unique_ptr<FlatWorld> world;
 
+    if (argc > 1) {
+        world = std::make_unique<FlatWorld>();
+        world->load(argv[1]);
+    } else {
+        world.reset(FlatWorld::createDemoFlatWorld());
+    }
 
     FlatMapper mapper;
     Image output(1024, 1024, ImageType::RGB);
@@ -18,7 +24,7 @@ int main(int argc, char **argv) {
 
     // Export biomes
     auto &ground = dynamic_cast<HeightmapGround &>(world->ground());
-    GroundBiomes &gb = ground.getWorker<GroundBiomes>();
+    auto &gb = ground.getWorker<GroundBiomes>();
 
     Image img(1024, 1024, ImageType::RGBA);
     gb.exportZones(img, BoundingBox({-u}, {u}), 0);
