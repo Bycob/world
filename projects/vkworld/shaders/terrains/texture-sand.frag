@@ -72,8 +72,8 @@ float fbm2(in vec2 uv) {
     return fbm3(vec3(uv, 0));
 }
 
-const vec3 SAND1 = vec3(163. / 255., 158. / 255., 131. / 255.);
-const vec3 SAND2 = vec3(250. / 255., 236. / 255., 201. / 255.);
+// const vec3 SAND1 = vec3(163. / 255., 158. / 255., 131. / 255.);
+// const vec3 SAND2 = vec3(250. / 255., 236. / 255., 201. / 255.);
 
 void main() {
     vec2 uv = fragCoord * 0.5 * size + offset;
@@ -82,7 +82,7 @@ void main() {
     float val = fbm2(uv) * 0.3 + rand(uv) * 0.7;
     val = (val - 0.5) / dist + 0.5;
 
-    vec3 col = vec3(mix(SAND1, SAND2, val));
+    vec3 col = vec3(mix(sandColor, vec3(1), val * 0.7));
 
     // Output to screen
     fragColor = vec4(col,1.0);

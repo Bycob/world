@@ -128,6 +128,7 @@ LodTextures &VkwGroundTextureGenerator::getOrCreate(int layerId, int lod,
 
 void VkwGroundTextureGeneratorPrivate::launchTextureGeneration(
     LodTextures &t, const std::vector<int> &layerIds) {
+    // TODO if not enough parameters, segfault
 
     auto &ctx = Vulkan::context();
     t._texWorker = std::make_unique<VkwGraphicsWorker>();

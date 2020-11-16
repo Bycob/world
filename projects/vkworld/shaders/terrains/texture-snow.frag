@@ -16,6 +16,7 @@ layout(binding = 0) uniform TextureData {
 layout(binding = 1) uniform sampler2D randTex;
 
 layout(binding = 2) uniform Color {
+    // But actually... snow is white right ?
     vec3 snowColor;
 };
 

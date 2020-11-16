@@ -44,7 +44,8 @@ vec2 hash22(vec2 p)
 }
 
 vec3 getSoilColor(float x) {
-    vec3 a = vec3(0.13, 0.09, 0.06);
+    // vec3 a = vec3(0.13, 0.09, 0.06);
+    vec3 a = soilColor;
     vec3 b = vec3(0.08, 0.05, 0.02);
     vec3 c = vec3(0.3, 0.3, 0.2);
     vec3 d = vec3(0.8, 0.8, 0.5);

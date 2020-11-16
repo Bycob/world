@@ -329,16 +329,16 @@ BiomeLayer &GroundBiomes::createLayer(int typeId, double temperature,
 
 int GroundBiomes::selectLayer(int type, double temperature, double humidity) {
     int layerId = -1;
-    // TODO not check all the layer to select one
-    // TODO add randomness and approximations
+    std::normal_distribution<double> jitter(0, 0.1);
+    humidity += jitter(_rng);
+    // TODO not check all the layer to select one (dichotomie?)
 
     for (auto &layer : _internal->_layers) {
         if (layer._type != type)
             continue;
-        layerId = layer._id;
 
-        if (layer._humidity.x < humidity && layer._humidity.y > humidity) {
-            return layer._id;
+        if (layer._humidity.x < humidity || layerId == -1) {
+            layerId = layer._id;
         }
     }
 

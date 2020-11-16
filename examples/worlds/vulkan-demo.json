@@ -277,23 +277,53 @@
                     "layers": [
                         {
                             "fragmentPath": "texture-rock.frag",
-                            "params": []
+                            "params": [
+                                {
+                                    "type": 1,
+                                    "name": "color",
+                                    "value": "0.8,0.8,0.8"
+                                }
+                            ]
                         },
                         {
                             "fragmentPath": "texture-sand.frag",
-                            "params": []
+                            "params": [
+                                {
+                                    "type": 1,
+                                    "name": "color",
+                                    "value": "0.75,0.7,0.6"
+                                }
+                            ]
                         },
                         {
                             "fragmentPath": "texture-soil.frag",
-                            "params": []
+                            "params": [
+                                {
+                                    "type": 1,
+                                    "name": "color",
+                                    "value": "0.13,0.09,0.06"
+                                }
+                            ]
                         },
                         {
                             "fragmentPath": "texture-grass.frag",
-                            "params": []
+                            "params": [
+                                {
+                                    "type": 1,
+                                    "name": "color",
+                                    "value": "0.2,0.4,0.3"
+                                }
+                            ]
                         },
                         {
                             "fragmentPath": "texture-snow.frag",
-                            "params": []
+                            "params": [
+                                {
+                                    "type": 1,
+                                    "name": "color",
+                                    "value": "0.95,0.95,0.96"
+                                }
+                            ]
                         }
                     ]
                 }

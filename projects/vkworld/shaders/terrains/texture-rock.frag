@@ -95,7 +95,7 @@ void main() {
     vec2 a = vec2(voronoi(uv + vec2(4.2, 2.6)), voronoi(uv + vec2(8.2, 5.6)));
     vec2 b = vec2(fbm2(uv), fbm2(uv + vec2(5.)));
 
-    vec3 col = rockColor * (voronoi(uv + (b - 0.5) * 0.4));
+    vec3 col = vec3(0.2) + rockColor * (voronoi(uv + (b - 0.5) * 0.4));
     col *= fbm2(uv);
 
     fragColor = vec4(col,1.0);
