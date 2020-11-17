@@ -185,3 +185,14 @@ TEST_CASE("Angles", "[math]") {
         CHECK(wrapAngle(-M_PI) == Approx(-M_PI));
     }
 }
+
+TEST_CASE("SDF", "[math]") {
+    SECTION("Segment SDF") {
+        vec2d a{0, 1};
+        vec2d b{1, 0};
+
+        CHECK(segmentSDF(a, b, vec2d{0, 2}) == Approx(1));
+        CHECK(segmentSDF(a, b, vec2d{2, -1}) == Approx(M_SQRT2));
+        CHECK(segmentSDF(a, b, vec2d{1.5, 1.5}) == Approx(M_SQRT2));
+    }
+}

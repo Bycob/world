@@ -2,4 +2,4 @@
 
 namespace world {
 // Rien pour le moment
-}
+} // namespace world

@@ -10,6 +10,7 @@
 #include "math/MathsHelper.h"
 #include "math/Perlin.h"
 #include "math/Vector.h"
+#include "math/SDF.h"
 
 #include "assets/Color.h"
 #include "assets/ColorOps.h"

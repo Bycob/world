@@ -54,6 +54,7 @@ template <typename T> struct vec3 {
 
     vec3<T> normalize() const;
     double norm() const;
+    T squaredNorm() const;
 
     vec3<T> crossProduct(const vec3<T> &rhs) const;
     T dotProduct(const vec3<T> &rhs) const;
@@ -116,6 +117,7 @@ template <typename T> struct vec2 {
 
     vec2<T> normalize() const;
     double norm() const;
+    T squaredNorm() const;
 
     T dotProduct(const vec2<T> &rhs) const;
 
@@ -269,6 +271,10 @@ inline bool vec3<T>::operator<(const vec3<R> &rhs) const {
 
 template <typename T> inline double vec3<T>::norm() const {
     return sqrt(this->x * this->x + this->y * this->y + this->z * this->z);
+}
+
+template <typename T> inline T vec3<T>::squaredNorm() const {
+    return this->x * this->x + this->y * this->y + this->z * this->z;
 }
 
 template <typename T> inline vec3<T> vec3<T>::normalize() const {
@@ -478,6 +484,10 @@ inline bool vec2<T>::operator==(const vec2<R> &rhs) const {
 
 template <typename T> inline double vec2<T>::norm() const {
     return sqrt(this->x * this->x + this->y * this->y);
+}
+
+template <typename T> inline T vec2<T>::squaredNorm() const {
+    return this->x * this->x + this->y * this->y;
 }
 
 template <typename T> inline vec2<T> vec2<T>::normalize() const {
