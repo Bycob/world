@@ -29,9 +29,12 @@ namespace Peace
 
         public CollectorStats LastStats = new CollectorStats();
 
+        private Preset _preset;
+
 
         public Collector(Preset preset = Preset.SCENE)
         {
+            _preset = preset;
             _handle = createCollector((int) preset);
 
             _newNodes = new HashSet<string>();
@@ -100,7 +103,11 @@ namespace Peace
                 GetChannel(MESH_CHANNEL, out meshNames, out meshes);
                 GetChannel(MATERIAL_CHANNEL, out materialNames, out materials);
                 GetChannel(TEXTURE_CHANNEL, out textureNames, out textures);
-                GetChannel(TERRAIN_CHANNEL, out terrainNames, out terrains);
+
+                if (_preset == Preset.ENGINE)
+                {
+                    GetChannel(TERRAIN_CHANNEL, out terrainNames, out terrains);
+                }
             });
 
             double l = LastStats.interopTime = sw.Elapsed.TotalMilliseconds;
@@ -214,24 +221,27 @@ namespace Peace
             LastStats.totalTime = sw.Elapsed.TotalMilliseconds;
 
 
-            // Update terrains
-            toRemove = new HashSet<string>(_terrainHandles.Keys);
-
-            for (int i = 0; i < terrains.Length; ++i)
+            if (_preset == Preset.ENGINE)
             {
-                if (!_terrainHandles.ContainsKey(terrainNames[i]))
-                {
-                    _terrainHandles[terrainNames[i]] = terrains[i];
-                }
-                else
-                {
-                    toRemove.Remove(terrainNames[i]);
-                }
-            }
+                // Update terrains
+                toRemove = new HashSet<string>(_terrainHandles.Keys);
 
-            foreach (var key in toRemove)
-            {
-                _terrainHandles.Remove(key);
+                for (int i = 0; i < terrains.Length; ++i)
+                {
+                    if (!_terrainHandles.ContainsKey(terrainNames[i]))
+                    {
+                        _terrainHandles[terrainNames[i]] = terrains[i];
+                    }
+                    else
+                    {
+                        toRemove.Remove(terrainNames[i]);
+                    }
+                }
+
+                foreach (var key in toRemove)
+                {
+                    _terrainHandles.Remove(key);
+                }
             }
         }
 

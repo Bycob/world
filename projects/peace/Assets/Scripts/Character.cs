@@ -85,6 +85,9 @@ public class Character : MonoBehaviour
         {
             ToggleInGame();
         }
+        if (Input.GetKeyDown(KeyCode.F1)) {
+            ScreenCapture.CaptureScreenshot("screenshot");
+        }
 
         if (positionText)
         {
