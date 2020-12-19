@@ -395,20 +395,20 @@ void Tree::collectCommon(ICollector &collector, const ExplorationContext &ctx,
             auto &texChannel = collector.getChannel<Image>();
 
             leavesMat.setKd(1.0, 1.0, 1.0);
-            leavesMat.setMapKd(ctx({"leaves"}).str());
+            leavesMat.setMapKd(ctx("leaves"_k).str());
             leavesMat.setTransparent(true);
-            texChannel.put({"leaves"}, leavesTex, ctx);
+            texChannel.put("leaves"_k, leavesTex, ctx);
 
             trunkMat.setKd(1.0, 1.0, 1.0);
-            trunkMat.setMapKd(ctx({"trunk"}).str());
-            texChannel.put({"trunk"}, trunkTex, ctx);
+            trunkMat.setMapKd(ctx("trunk"_k).str());
+            texChannel.put("trunk"_k, trunkTex, ctx);
         } else {
             leavesMat.setKd(0.4, 0.9, 0.4);
             trunkMat.setKd(0.3, 0.17, 0.13);
         }
 
-        materialsChannel.put({"leaves"}, leavesMat, ctx);
-        materialsChannel.put({"trunk"}, trunkMat, ctx);
+        materialsChannel.put("leaves"_k, leavesMat, ctx);
+        materialsChannel.put("trunk"_k, trunkMat, ctx);
     }
 }
 

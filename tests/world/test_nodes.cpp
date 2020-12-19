@@ -4,12 +4,6 @@
 
 using namespace world;
 
-TEST_CASE("NodeKeys", "[nodes]") {
-    NodeKey key{0, 0, 0, 0};
-    REQUIRE(NodeKeys::toString(key) == "00000000");
-}
-
-
 class TestNode : public WorldNode {
 public:
     bool _collected = false;

@@ -22,15 +22,15 @@ TEST_CASE("TileSystem", "[utilities]") {
         // TODO Test operator<
 
         SECTION("test toKey") {
-            REQUIRE(c1a.toKey() == c1b.toKey());
-            REQUIRE(c1a.toKey() != c2.toKey());
-            REQUIRE(c1a.toKey() != c3.toKey());
-            REQUIRE(c2.toKey() != c3.toKey());
+            CHECK(c1a.toKey() == c1b.toKey());
+            CHECK(c1a.toKey() != c2.toKey());
+            CHECK(c1a.toKey() != c3.toKey());
+            CHECK(c2.toKey() != c3.toKey());
         }
 
         SECTION("test toKey features") {
-            REQUIRE(c1a.toKey().length() == sizeof(int) * 4);
-            REQUIRE((c1a.toKey() + c2.toKey()).length() == sizeof(int) * 8);
+            CHECK(TileCoordinates(c1a.toKey()) == c1a);
+            CHECK_FALSE(TileCoordinates(c1a.toKey()) == c3);
         }
     }
 

@@ -76,7 +76,8 @@ TEST_CASE("GridChunkSystem", "[chunksystem]") {
         std::stringstream errors;
 
         for (auto &entry : spy._positions) {
-            vec3d goodOffset = chunkSystem.getOffset({entry.first});
+            vec3d goodOffset =
+                chunkSystem.getOffset(TileCoordinates(entry.first));
             vec3d realOffset = entry.second;
 
             if (goodOffset.length(realOffset) != Approx(0)) {

@@ -97,7 +97,7 @@ void ObjectNodeHandler::setMaterial(const Material &mat, Collector &collector) {
                 }
             }
 
-            const Shader &shader = shaderChan.get(shaderName);
+            const Shader &shader = shaderChan.get({shaderName});
             s32 shaderMat = gpu->addHighLevelShaderMaterialFromFiles(
                 shader.getVertexPath().c_str(), "main", video::EVST_VS_1_1,
                 shader.getFragmentPath().c_str(), "main", video::EPST_PS_1_1,

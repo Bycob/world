@@ -59,13 +59,13 @@ std::vector<Template> Grass::collectTemplates(ICollector &collector,
             auto &matChan = collector.getChannel<Material>();
             auto &imgChan = collector.getChannel<Image>();
 
-            imgChan.put({"grass_texture"}, _texture, ctx);
+            imgChan.put("grass_texture"_k, _texture, ctx);
 
             Material grassMat;
             grassMat.setKd(1, 1, 1);
-            grassMat.setMapKd(ctx.mutateKey({"grass_texture"}).str());
+            grassMat.setMapKd(ctx.mutateKey("grass_texture"_k).str());
 
-            matKey = {"grass_material"};
+            matKey = "grass_material"_k;
             matChan.put(matKey, grassMat, ctx);
         }
 

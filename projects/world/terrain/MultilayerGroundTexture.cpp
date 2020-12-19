@@ -235,6 +235,6 @@ ItemKey MultilayerGroundTexture::getDistributionKey(const TileCoordinates &tc,
 }
 
 ItemKey MultilayerGroundTexture::getTextureKey(int layer, int lod) const {
-    return std::to_string(layer) + "_" + std::to_string(lod);
+    return {std::to_string(layer) + "_" + std::to_string(lod)};
 }
 } // namespace world

@@ -250,8 +250,9 @@ inline void Instance::collectSelf(ICollector &collector,
                     // TODO update position based on rotation
                     node.setRotation(tp._rotation);
                     node.setScale(node.getScale() * tp._scale);
-                    objChan.put({key, std::to_string(j) + "." +
-                                          std::to_string(nodes->_minRes)},
+                    objChan.put({key,
+                                 {std::to_string(j) + "." +
+                                  std::to_string(nodes->_minRes)}},
                                 node, ctx);
                     ++j;
                 }

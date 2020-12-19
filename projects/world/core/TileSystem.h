@@ -20,17 +20,23 @@ class TileSystemIterator;
  * and a level of detail.
  */
 struct WORLDAPI_EXPORT TileCoordinates {
-    TileCoordinates() {}
-    TileCoordinates(const NodeKey &key) {
-        const int keySize = sizeof(int) * 4;
-
-        if (key.length() != keySize)
+    TileCoordinates() = default;
+    explicit TileCoordinates(const NodeKey &key) {
+        try {
+            std::string keystr = key._name;
+            size_t pos = 0;
+            _pos.x = std::stoi(keystr, &pos);
+            keystr = keystr.substr(pos + 1);
+            _pos.y = std::stoi(keystr, &pos);
+            keystr = keystr.substr(pos + 1);
+            _pos.z = std::stoi(keystr, &pos);
+            keystr = keystr.substr(pos + 1);
+            _lod = std::stoi(keystr, &pos);
+        } catch (std::invalid_argument &e) {
             throw std::runtime_error("bad usage : please provide a valid key");
-
-        const int *features = reinterpret_cast<const int *>(key.c_str());
-
-        _pos = {features[0], features[1], features[2]};
-        _lod = features[3];
+        } catch (std::out_of_range &e) {
+            throw std::runtime_error("bad usage : please provide a valid key");
+        }
     }
     TileCoordinates(int x, int y, int z, int lod) : _pos{x, y, z}, _lod(lod) {}
     TileCoordinates(const vec3i &pos, int lod) : _pos(pos), _lod(lod) {}
@@ -45,9 +51,8 @@ struct WORLDAPI_EXPORT TileCoordinates {
     }
 
     NodeKey toKey() const {
-        int features[] = {_pos.x, _pos.y, _pos.z, _lod};
-        return std::string(reinterpret_cast<char *>(features),
-                           sizeof(features));
+        return std::to_string(_pos.x) + "_" + std::to_string(_pos.y) + "_" +
+               std::to_string(_pos.z) + "_" + std::to_string(_lod);
     }
 
     vec3i _pos;

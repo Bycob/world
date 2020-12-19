@@ -5,23 +5,75 @@
 
 #include <iostream>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace world {
 
-typedef std::string NodeKey;
+// Key refactor:
+// use a string literal to transform a string to a key
+// conversion from NodeKey to string is implicit
+// string literal (_s) to convert itemkey to string ?
 
-struct WORLDAPI_EXPORT NodeKeys {
-    static NodeKey none() { return std::string(""); }
+class ItemKey;
 
-    static NodeKey fromUint(unsigned int id);
-    static NodeKey fromInt(int id);
+const char KEY_SEPARATOR = '/';
+constexpr char KEY_SEPARATOR_STR[] = {KEY_SEPARATOR};
 
-    static std::string toString(const NodeKey &key);
-    static NodeKey fromString(const std::string &str);
+/** A key for a node in a world. Must only contain alphanumeric characters,
+ * '_', '-' or '.'. */
+class WORLDAPI_EXPORT NodeKey {
+public:
+    std::string _name;
+
+    NodeKey(std::string name) : _name(std::move(name)) {}
+
+    NodeKey(const char *name) : _name(name) {}
+
+    explicit NodeKey(int id);
+
+    /** Check if the key contains only valid characters (alphanumeric
+     * characters, '_', '-' or '.'). */
+    bool valid() const;
+
+    bool operator==(const NodeKey &other) const;
+
+    bool operator!=(const NodeKey &other) const;
+
+    bool operator<(const NodeKey &other) const;
+
+    bool operator>(const NodeKey &other) const;
+
+    operator std::string() const { return _name; }
 };
 
+inline NodeKey operator"" _k(const char *keyStr, size_t) {
+    return NodeKey(keyStr);
+}
 
+// TODO change to ItemKey & ItemPath
+
+/**
+ * ItemKeys are used to reference items in the world. Items can be
+ * WorldNodes or assets within WorldNodes, and ItemKeys are used
+ * in many places including world internal structures, collector and
+ * cache on hard drive.
+ *
+ * An ItemKey is compound of multiple NodeKeys that make up a path
+ * to the resource they reference. For example, if a resource is produced
+ * by a WorldNode, its key will be the concatenation of the parent node
+ * and the resource specific key.
+ *
+ * Path are corresponding exactly to file path on cache, so the keys
+ * can only hold valid characters for file names, and the different
+ * keys that form a path are separated by '/'.
+ *
+ * Here is a list of some of the possible operations on keys:
+ * - concatenation of two keys: key = { key1, key2 } with keyx as a path / key
+ * - get last part of a key: nodeKey = key1.last()
+ * - comparison between keys (for mapping): key1 < key2
+ * - conversion to path string: key.str()
+ */
 class WORLDAPI_EXPORT ItemKey {
 public:
     std::vector<NodeKey> _components;
@@ -29,15 +81,7 @@ public:
 
     ItemKey() = default;
 
-    explicit ItemKey(const std::vector<NodeKey> &components)
-            : _components(components) {}
-
     ItemKey(const NodeKey &key) { _components.push_back(key); }
-    ItemKey(const ItemKey &parent, const NodeKey &key)
-            : _components(parent._components) {
-
-        _components.push_back(key);
-    }
 
     ItemKey(const ItemKey &key1, const ItemKey &key2)
             : _components(key1._components) {
@@ -46,23 +90,13 @@ public:
                            key2._components.end());
     }
 
-    std::string str() const {
-        std::string result;
-        for (size_t i = 0; i < _components.size(); ++i) {
-            result += (i == 0 ? "" : "/") + NodeKeys::toString(_components[i]);
-        }
-        return result;
-    }
+    ItemKey(std::vector<NodeKey> components)
+            : _components(std::move(components)) {}
 
-    ItemKey parent() const {
-        if (_components.empty()) {
-            throw std::runtime_error("no parent");
-        }
 
-        ItemKey result = *this;
-        result._components.pop_back();
-        return result;
-    }
+    std::string str() const;
+
+    ItemKey parent() const;
 
     NodeKey last() const { return _components.back(); }
 
@@ -77,6 +111,22 @@ public:
     bool operator<(const ItemKey &other) const {
         return _components < other._components;
     }
+
+    bool operator>(const ItemKey &other) const {
+        return _components > other._components;
+    }
+};
+
+
+// LEGACY (for backward compatibility)
+struct WORLDAPI_EXPORT NodeKeys {
+    static NodeKey none() { return std::string(""); }
+
+    static NodeKey fromUint(unsigned int id);
+    static NodeKey fromInt(int id);
+
+    static std::string toString(const NodeKey &key);
+    static NodeKey fromString(const std::string &str);
 };
 
 struct WORLDAPI_EXPORT ItemKeys {
@@ -99,31 +149,7 @@ struct WORLDAPI_EXPORT ItemKeys {
 
     static ItemKey defaultKey() { return {}; }
 
-    static ItemKey fromString(const std::string &str) {
-        ItemKey result;
-        size_t sep;
-        size_t start = 0;
-
-        do {
-            sep = str.find_first_of('/', start);
-            std::string keystr;
-
-            if (sep == std::string::npos) {
-                keystr = str.substr(start);
-            } else {
-                keystr = str.substr(start, sep - start);
-                start = sep + 1;
-            }
-
-            try {
-                result._components.push_back(NodeKeys::fromString(keystr));
-            } catch (std::invalid_argument &e) {
-                throw e;
-            }
-        } while (sep != std::string::npos);
-
-        return result;
-    }
+    static ItemKey fromString(const std::string &str);
 
     /** Gets an unique string representation for this key. The
      * string is printable and usable in a file system. */

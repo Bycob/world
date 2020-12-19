@@ -30,7 +30,7 @@ void ObjectLod::collect(Template &tp, ICollector &collector,
             if (!node.getMaterialID().empty()) {
                 // TODO The problem of the "keys" API, in one line:
                 // Why do we have to apply so much modifications to the key!
-                node.setMaterialID(ctx(node.getMaterialID()).str());
+                node.setMaterialID(ctx({node.getMaterialID()}).str());
             }
 
             item.add(node);
@@ -45,9 +45,9 @@ void ObjectLod::collect(Template &tp, ICollector &collector,
         for (Material material : _materials) {
             // And again!
             if (!material.getMapKd().empty()) {
-                material.setMapKd(ctx(material.getMapKd()).str());
+                material.setMapKd(ctx({material.getMapKd()}).str());
             }
-            matChan.put(material.getName(), material, ctx);
+            matChan.put({material.getName()}, material, ctx);
         }
 
         if (collector.hasChannel<Image>()) {

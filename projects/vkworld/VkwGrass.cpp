@@ -43,18 +43,18 @@ std::vector<Template> VkwGrass::collectTemplates(ICollector &collector,
             auto &matChan = collector.getChannel<Material>();
             auto &imgChan = collector.getChannel<Image>();
 
-            imgChan.put({"texturea"}, _internal->_finalTexture, ctx);
+            imgChan.put("texturea"_k, _internal->_finalTexture, ctx);
 
             Material grassMat;
             grassMat.setTransparent(true);
             grassMat.setKd(1, 1, 1);
-            grassMat.setMapKd(ctx({"texturea"}).str());
+            grassMat.setMapKd(ctx("texturea"_k).str());
 
-            matKey = {"material"};
+            matKey = "material"_k;
             matChan.put(matKey, grassMat, ctx);
         }
 
-        ItemKey meshKey{"mesh"};
+        ItemKey meshKey{"mesh"_k};
         meshChan.put(meshKey, _internal->_mesh, ctx);
 
         Template tp;
@@ -103,7 +103,7 @@ void VkwGrass::collectSelf(ICollector &collector,
     if (collector.hasChannel<SceneNode>()) {
         auto &nodeChan = collector.getChannel<SceneNode>();
 
-        nodeChan.put({"item"}, nodes.at(0).getDefaultNode(), ctx);
+        nodeChan.put("item"_k, nodes.at(0).getDefaultNode(), ctx);
     }
 }
 
