@@ -114,7 +114,9 @@ public:
         _tcs.insert(coords);
     }
 
-    void remove(const TileCoordinates &coords) override { _tcs.erase(coords); }
+    void remove(const TileCoordinates &coords, bool keepCached) override {
+        _tcs.erase(coords);
+    }
 
     bool has(const TileCoordinates &coords) const override {
         return _tcs.find(coords) != _tcs.end();
@@ -162,11 +164,11 @@ TEST_CASE("GridStorage", "[utilities]") {
     }
 
     SECTION("GridStorageReducer") {
-        DummyGridStorage storage;
+        DummyGridStorage dummyStorage;
         GridStorageReducer reducer(ts, 3);
 
-        storage._reducer = &reducer;
-        reducer.registerStorage(&storage);
+        dummyStorage._reducer = &reducer;
+        reducer.registerStorage(&dummyStorage);
 
         // p = parent, c = child, r = removed
         TileCoordinates p1 = {{0}, 0}, p1c1r = {{0}, 1}, p2r = {{1}, 0},
@@ -180,23 +182,23 @@ TEST_CASE("GridStorage", "[utilities]") {
         REQUIRE(ts.getParentTileCoordinates(p3cr) == p3);
 
         // Actual testing
-        storage.add(p1);
-        storage.add(p1c1r);
-        storage.add(p2r);
-        storage.add(p2cr);
-        storage.add(p3);
-        storage.add(p3cr);
-        storage.add(p1c2);
+        dummyStorage.add(p1);
+        dummyStorage.add(p1c1r);
+        dummyStorage.add(p2r);
+        dummyStorage.add(p2cr);
+        dummyStorage.add(p3);
+        dummyStorage.add(p3cr);
+        dummyStorage.add(p1c2);
 
         reducer.reduceStorage();
 
-        CHECK(storage._tcs.find(p1) != storage._tcs.end());
-        CHECK(storage._tcs.find(p1c1r) == storage._tcs.end());
-        CHECK(storage._tcs.find(p2r) == storage._tcs.end());
-        CHECK(storage._tcs.find(p2cr) == storage._tcs.end());
-        CHECK(storage._tcs.find(p3) != storage._tcs.end());
-        CHECK(storage._tcs.find(p3cr) == storage._tcs.end());
-        CHECK(storage._tcs.find(p1c2) != storage._tcs.end());
+        CHECK(dummyStorage._tcs.find(p1) != dummyStorage._tcs.end());
+        CHECK(dummyStorage._tcs.find(p1c1r) == dummyStorage._tcs.end());
+        CHECK(dummyStorage._tcs.find(p2r) == dummyStorage._tcs.end());
+        CHECK(dummyStorage._tcs.find(p2cr) == dummyStorage._tcs.end());
+        CHECK(dummyStorage._tcs.find(p3) != dummyStorage._tcs.end());
+        CHECK(dummyStorage._tcs.find(p3cr) == dummyStorage._tcs.end());
+        CHECK(dummyStorage._tcs.find(p1c2) != dummyStorage._tcs.end());
     }
 
     SECTION("GridStorage && Reducer interaction") {

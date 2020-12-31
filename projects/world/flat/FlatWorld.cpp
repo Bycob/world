@@ -107,6 +107,8 @@ FlatWorld *FlatWorld::createDemoFlatWorld() {
 
 FlatWorld::FlatWorld() : _internal(new PFlatWorld()) {
     auto &ground = setGround<HeightmapGround>();
+    ground.setKey("ground"_k);
+    ground.configureCache(_cacheRoot);
 }
 
 FlatWorld::~FlatWorld() { delete _internal; }
@@ -142,14 +144,18 @@ void FlatWorld::write(WorldFile &wf) const {
 }
 
 void FlatWorld::read(const WorldFile &wf) {
-    _internal->_ground.reset(readSubclass<GroundNode>(wf.readChild("ground")));
+    setGroundInternal(readSubclass<GroundNode>(wf.readChild("ground")));
     World::read(wf);
 }
 
 IEnvironment *FlatWorld::getInitialEnvironment() { return this; }
 
 void FlatWorld::setGroundInternal(GroundNode *ground) {
+    // <!> The default ground is deleted when calling setGround
+    // This may cause problems with the cache in the future
     _internal->_ground = std::unique_ptr<GroundNode>(ground);
+    _internal->_ground->setKey("ground"_k);
+    _internal->_ground->configureCache(_cacheRoot);
 }
 
 } // namespace world

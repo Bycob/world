@@ -22,6 +22,15 @@ public:
     HeightmapGroundTile(TileCoordinates coords, int terrainRes)
             : TerrainTile(coords, terrainRes) {}
 
+    void saveTo(NodeCache &cache) const override {
+        cache.saveTerrain("terrain", _terrain);
+        // TODO texture, mesh
+    }
+
+    bool tryLoadFrom(const NodeCache &cache) override {
+        return cache.readTerrainInplace("terrain", _terrain);
+    }
+
 private:
     vec2d _zBounds;
 

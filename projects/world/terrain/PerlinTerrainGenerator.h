@@ -38,12 +38,17 @@ public:
 
     void read(const WorldFile &wf);
 
+    GridStorageBase *getStorage() override { return &_storage; }
+
+    NodeCache *getCache() override { return &_cache; }
+
 private:
     PerlinInfo _perlinInfo;
     Perlin _perlin;
     u32 _maxOctaves = 0;
 
     TerrainGrid _storage;
+    NodeCache _cache;
 
     void processByNeighbours(Terrain &terrain, ITileContext &context);
 

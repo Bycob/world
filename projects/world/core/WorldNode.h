@@ -27,7 +27,7 @@ public:
 
     NodeKey getKey() const { return _key; }
 
-    void configureCache(NodeCache &parent, const NodeKey &key);
+    void configureCache(NodeCache &parent);
 
     WorldNode &operator=(const WorldNode &node) = delete;
     WorldNode &operator=(WorldNode &&node) = delete;

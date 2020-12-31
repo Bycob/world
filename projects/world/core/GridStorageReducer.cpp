@@ -78,7 +78,7 @@ void GridStorageReducer::reduceStorage() {
 
     for (auto storage : _storages) {
         for (u64 i = 0; i < removeCount; ++i) {
-            storage->remove(accesses[i].second);
+            storage->remove(accesses[i].second, true);
         }
     }
 

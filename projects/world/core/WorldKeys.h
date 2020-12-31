@@ -45,6 +45,8 @@ public:
     bool operator>(const NodeKey &other) const;
 
     operator std::string() const { return _name; }
+
+    std::string str() const { return _name; }
 };
 
 inline NodeKey operator"" _k(const char *keyStr, size_t) {

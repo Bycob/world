@@ -95,6 +95,7 @@ HeightmapGround::HeightmapGround(double unitSize, double minAltitude,
               5, vec3d(_textureRes * _texPixSize, _textureRes * _texPixSize, 0),
               vec3d(unitSize, unitSize, 0)) {
     _internal = new PGround(_tileSystem);
+    _internal->_terrains._cache.setChild(_cache, "terrains");
 }
 
 HeightmapGround::~HeightmapGround() { delete _internal; }
@@ -257,17 +258,23 @@ void HeightmapGround::read(const WorldFile &wf) {
 
 void HeightmapGround::addWorkerInternal(ITerrainWorker *worker) {
     _internal->_generators.emplace_back(worker);
+    const size_t workerId = _internal->_generators.size();
+    const std::string workerName = "worker" + std::to_string(workerId);
+
     auto *storage = worker->getStorage();
+    auto *cache = worker->getCache();
 
     if (storage != nullptr) {
         _internal->_reducer.registerStorage(storage);
+        storage->getCache().setChild(_cache, workerName);
     }
 
-    auto *cache = worker->getCache();
-
     if (cache != nullptr) {
-        cache->setChild(
-            _cache, "worker" + std::to_string(_internal->_generators.size()));
+        cache->setChild(_cache, workerName);
+
+        if (storage != nullptr) {
+            storage->getCache().setChild(*cache, "storage");
+        }
     }
 }
 
@@ -430,32 +437,36 @@ void HeightmapGround::addNotGeneratedParents(std::set<TileCoordinates> &keys) {
 
 void HeightmapGround::generateTerrains(const std::set<TileCoordinates> &keys,
                                        const ExplorationContext &ctx) {
+
+    // Each lod is generated separately to ensure parents are
+    // created before generating children
     typedef std::vector<Tile *> generateTiles_t;
     std::vector<generateTiles_t> lods(_tileSystem._maxLod + 1);
 
     for (const TileCoordinates &key : keys) {
-        Tile *tile = &_internal->_terrains.getOrCreate(key, key, _terrainRes);
-        lods[key._lod].push_back(tile);
+        Tile &tile = _internal->_terrains.getOrCreateCallback(
+            key,
+            [&](Tile &tileElem) {
+                lods[key._lod].push_back(&tileElem);
+
+                // Allocation of terrain and textures
+                Terrain &terrain = tileElem._terrain;
+                terrain.setTexture(
+                    Image(_textureRes, _textureRes, ImageType::RGB));
+            },
+            key, _terrainRes);
+
+        // Set bounds: required because bounds are not cached
+        Terrain &terrain = tile._terrain;
+        double terrainSize = _tileSystem.getTileSize(key._lod).x;
+        terrain.setBounds(terrainSize * key._pos.x, terrainSize * key._pos.y,
+                          _minAltitude, terrainSize * (key._pos.x + 1),
+                          terrainSize * (key._pos.y + 1), _maxAltitude);
     }
 
-    // Each lod is generated separately to ensure parents are
-    // created before generating children
     int lod = 0;
 
     for (auto &generatedTiles : lods) {
-
-        // Allocation of terrain and textures
-        for (auto &tile : generatedTiles) {
-            const auto &key = tile->_key;
-            Terrain &terrain = tile->_terrain;
-            terrain.setTexture(Image(_textureRes, _textureRes, ImageType::RGB));
-
-            double terrainSize = _tileSystem.getTileSize(key._lod).x;
-            terrain.setBounds(terrainSize * key._pos.x,
-                              terrainSize * key._pos.y, _minAltitude,
-                              terrainSize * (key._pos.x + 1),
-                              terrainSize * (key._pos.y + 1), _maxAltitude);
-        }
 
         // Generation
         for (auto &entry : _internal->_generators) {

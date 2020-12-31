@@ -19,7 +19,7 @@ WorldNode::~WorldNode() { delete _internal; }
 
 void WorldNode::setKey(NodeKey key) { _key = std::move(key); }
 
-void WorldNode::configureCache(NodeCache &parent, const NodeKey &key) {
+void WorldNode::configureCache(NodeCache &parent) {
     _cache.setChild(parent, _key);
 }
 

@@ -1,6 +1,8 @@
+#include <tinydir/tinydir.h>
 #include "NodeCache.h"
 
 #include "IOUtil.h"
+#include "world/terrain/Terrain.h"
 
 namespace world {
 
@@ -37,6 +39,16 @@ bool NodeCache::isAvailable() const {
     }
 }
 
+bool NodeCache::hasChild(const NodeKey &id) const {
+    // TODO tests & benchmark
+    tinydir_dir dir;
+    bool exists = tinydir_open(&dir, getPath(id).c_str()) != -1;
+    tinydir_close(&dir);
+    return exists;
+}
+
+void NodeCache::clear() { removeDirectory(getDirectory()); }
+
 void NodeCache::createDirectory() {
     if (!isAvailable()) {
         throw std::runtime_error("Cache is not available!");
@@ -64,6 +76,23 @@ std::string NodeCache::getChildDirectory(const NodeKey &key) const {
     return getDirectory() + NodeKeys::toString(key) + "/";
 }
 
+void NodeCache::saveData(const std::string &id, const char *data, size_t size) {
+    if (!isAvailable())
+        return;
+    createDirectory();
+
+    std::ofstream ofs(getPath(id) + ".bin", std::ios::binary);
+    ofs.write(data, size);
+}
+
+size_t NodeCache::readData(const std::string &id, char *data,
+                           size_t size) const {
+    std::ifstream ifs(getPath(id) + ".bin", std::ios::binary);
+    ifs.read(data, size);
+    // TODO return the real amount of characters read
+    return size;
+}
+
 void NodeCache::saveImage(const std::string &id, const Image &image) {
     if (!isAvailable())
         return;
@@ -71,16 +100,93 @@ void NodeCache::saveImage(const std::string &id, const Image &image) {
     image.write(getPath(id) + ".png");
 }
 
-Image NodeCache::readImage(const std::string &id) {
-    createDirectory();
+Image NodeCache::readImage(const std::string &id) const {
     return Image::read(getPath(id) + ".png");
 }
 
-bool NodeCache::readImage(const std::string &id, Image &image) {
+bool NodeCache::readImage(const std::string &id, Image &image) const {
     try {
         image = readImage(id);
         return true;
     } catch (std::runtime_error &e) {
+        return false;
+    }
+}
+
+void NodeCache::saveMesh(const std::string &id, const Mesh &mesh) {
+    if (!isAvailable())
+        return;
+    createDirectory();
+    // TODO write mesh to disk
+}
+
+Mesh NodeCache::readMesh(const std::string &id) const {
+    throw std::runtime_error("NodeCache::readMesh not implemented");
+}
+
+bool NodeCache::readMeshInplace(const std::string &id, Mesh &mesh) const {
+    throw std::runtime_error("NodeCache::readMesh not implemented");
+}
+
+void NodeCache::saveTerrain(const std::string &id, const Terrain &terrain) {
+    if (!isAvailable())
+        return;
+    createDirectory();
+
+    // write raw to disk
+    std::ofstream ofstr(getPath(id) + ".raw", std::ios::binary);
+    int res = terrain.getResolution();
+
+    for (int x = 0; x < res; ++x) {
+        for (int y = 0; y < res; ++y) {
+            f32 v = terrain(x, y);
+            ofstr.write(reinterpret_cast<char *>(&v), sizeof(v));
+        }
+    }
+
+    // save texture to disk
+    terrain.getTexture().write(getPath(id) + ".png");
+}
+
+Terrain NodeCache::readTerrain(const std::string &id) const {
+    std::ifstream ifstr(getPath(id) + ".raw", std::ios::binary);
+
+    if (ifstr.fail()) {
+        throw std::runtime_error("The file " + getPath(id) + " does not exist");
+    }
+
+    ifstr.seekg(0, std::ios::end);
+    size_t fileSize = ifstr.tellg() / sizeof(f32);
+    int res = int(sqrt(fileSize));
+
+    if (res * res != fileSize) {
+        throw std::runtime_error("The file " + getPath(id) +
+                                 ".raw does not contain a terrain");
+    }
+
+    ifstr.seekg(0, std::ios::beg);
+    Terrain terrain(res);
+
+    for (int x = 0; x < res; ++x) {
+        for (int y = 0; y < res; ++y) {
+            f32 v;
+            ifstr.read(reinterpret_cast<char *>(&v), sizeof(v));
+            terrain(x, y) = v;
+        }
+    }
+
+    // Read terrain texture
+    terrain.setTexture(Image::read(getPath(id) + ".png"));
+    return terrain;
+}
+
+bool NodeCache::readTerrainInplace(const std::string &id,
+                                   Terrain &terrain) const {
+    try {
+        terrain = readTerrain(id);
+        return true;
+    } catch (std::runtime_error &e) {
+        std::cerr << e.what() << std::endl;
         return false;
     }
 }

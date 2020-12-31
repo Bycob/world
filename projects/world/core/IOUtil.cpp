@@ -82,6 +82,12 @@ std::vector<std::string> getFileList(const std::string &directory) {
     return result;
 }
 
+void removeDirectory(const std::string &directory) {
+    std::cerr << "TODO Directory removal not implemented, could not remove " +
+                     directory
+              << std::endl;
+}
+
 #if defined(WIN32)
 #else
 #include <sys/resource.h>

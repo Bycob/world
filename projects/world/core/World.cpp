@@ -48,8 +48,15 @@ void World::write(WorldFile &wf) const {
 void World::read(const WorldFile &wf) {
     for (auto it = wf.readArray("nodes"); !it.end(); ++it) {
         std::unique_ptr<WorldNode> node(readSubclass<WorldNode>(*it));
-        _internal->_primaryNodes.emplace(node->getKey(), std::move(node));
+        auto entry =
+            _internal->_primaryNodes.emplace(node->getKey(), std::move(node))
+                .first;
+        entry->second->configureCache(_cacheRoot);
     }
+}
+
+void World::setCacheDirectory(const std::string &path) {
+    _cacheRoot.setRoot(path);
 }
 
 void World::addPrimaryNodeInternal(WorldNode *node) {
@@ -64,7 +71,7 @@ void World::addPrimaryNodeInternal(WorldNode *node) {
                            std::unique_ptr<WorldNode>(node))
                   .first;
     it->second->setKey(it->first);
-    it->second->configureCache(_cacheRoot, it->first);
+    it->second->configureCache(_cacheRoot);
     // But we have to set the key still, we cannot ignore that problem :(
 }
 

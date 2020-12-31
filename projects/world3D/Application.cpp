@@ -24,6 +24,7 @@ Application::Application()
 
 void Application::run(int argc, char **argv) {
     loadWorld(argc, argv);
+    _world->setCacheDirectory("./.cache/");
 
     _running = true;
     _mainView->show();

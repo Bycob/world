@@ -11,7 +11,12 @@
 
 namespace world {
 
+class Terrain;
+
 // TODO error management
+
+// For cache properties, use a separate struct, so that only the parent
+// can be modified.
 
 class WORLDAPI_EXPORT NodeCache {
 public:
@@ -26,6 +31,11 @@ public:
 
     bool isRoot() const;
     bool isAvailable() const;
+    bool hasChild(const NodeKey &id) const;
+
+    /** Remove everything in the cache. It removes the cache directory
+     * as well. */
+    void clear();
 
     /**
      * \brief Create the directory where all the objects from this cache
@@ -43,17 +53,30 @@ public:
 
     std::string getChildDirectory(const NodeKey &key) const;
 
+    /** Save raw data to disk. */
+    void saveData(const std::string &id, const char *data, size_t size);
+
+    /** Read data of known size from disk. */
+    size_t readData(const std::string &id, char *data, size_t size) const;
+
     void saveImage(const std::string &id, const Image &image);
+
+    Image readImage(const std::string &id) const;
+
+    bool readImage(const std::string &id, Image &image) const;
 
     void saveMesh(const std::string &id, const Mesh &mesh);
 
-    Image readImage(const std::string &id);
+    Mesh readMesh(const std::string &id) const;
 
-    bool readImage(const std::string &id, Image &image);
+    bool readMeshInplace(const std::string &id, Mesh &mesh) const;
 
-    Mesh readMesh(const std::string &id);
+    /** Save a terrain to the cache at the specified id. */
+    void saveTerrain(const std::string &id, const Terrain &terrain);
 
-    void readMeshInplace(const std::string &id, Mesh &mesh);
+    Terrain readTerrain(const std::string &id) const;
+
+    bool readTerrainInplace(const std::string &id, Terrain &terrain) const;
 
 private:
     NodeCache *_parent = nullptr;

@@ -52,7 +52,12 @@ public:
 
     void read(const WorldFile &wf) override;
 
+    void setCacheDirectory(const std::string &path);
+
 protected:
+    NodeCache _cacheRoot;
+
+
     void addPrimaryNodeInternal(WorldNode *node);
 
     /** Gets initial environment to initialize the base context */
@@ -60,8 +65,6 @@ protected:
 
 private:
     WorldPrivate *_internal;
-
-    NodeCache _cacheRoot;
 };
 } // namespace world
 

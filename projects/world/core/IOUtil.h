@@ -13,6 +13,9 @@ void WORLDAPI_EXPORT createDirectories(const std::string &directory);
 std::vector<std::string> WORLDAPI_EXPORT
 getFileList(const std::string &directory);
 
+/** Removes a directory recursively. */
+void WORLDAPI_EXPORT removeDirectory(const std::string &directory);
+
 // TODO Move that on the correct file
 /** On linux returns memory usage in kB. */
 long WORLDAPI_EXPORT getMemoryUsage();
