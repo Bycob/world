@@ -49,9 +49,15 @@ private:
 
     TerrainGrid _storage;
     NodeCache _cache;
+    bool _seedUpdated = false;
+
 
     void processByNeighbours(Terrain &terrain, ITileContext &context);
 
     void processByTileCoords(Terrain &terrain, ITileContext &context);
+
+    /** Ad-hoc method to read perlin seed from cache. Sets _seedUpdated to
+     * false. */
+    void updateSeed();
 };
 } // namespace world

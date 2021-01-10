@@ -67,6 +67,8 @@ std::vector<SeedDistribution::Position> SeedDistribution::getPositions(
     Chunk &chunk, const ExplorationContext &ctx) {
     addSeeds(chunk);
 
+    // FIXME There is a segfault in here
+
     std::vector<Position> positions;
     std::vector<Seed> seedsAround = getSeedsAround(chunk);
 

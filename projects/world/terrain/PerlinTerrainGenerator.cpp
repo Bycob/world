@@ -52,6 +52,9 @@ void PerlinTerrainGenerator::processTerrain(Terrain &terrain) {
 }
 
 void PerlinTerrainGenerator::processTile(ITileContext &context) {
+    if (!_seedUpdated) {
+        updateSeed();
+    }
     processByTileCoords(context.getTile().terrain(), context);
 }
 
@@ -124,6 +127,21 @@ void PerlinTerrainGenerator::processByTileCoords(Terrain &terrain,
 
     // Normalize relatively to the first lod level
     TerrainOps::multiply(terrain, 1 / _perlin.getMaxPossibleValue(_perlinInfo));
+}
+
+void PerlinTerrainGenerator::updateSeed() {
+    // if hash written in cache, we use cached hash
+    // if no hash written in cache, we write the current hash in cache
+    std::vector<u8> hash = _perlin.getHash();
+    const size_t s = hash.size() * sizeof(u8);
+
+    if (_cache.readData("hash", &hash[0], s) == s) {
+        _perlin.setHash(hash);
+    } else {
+        hash = _perlin.getHash();
+        _cache.saveData("hash", &hash[0], s);
+    }
+    _seedUpdated = true;
 }
 
 } // namespace world

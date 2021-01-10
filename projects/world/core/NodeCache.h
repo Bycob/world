@@ -54,10 +54,10 @@ public:
     std::string getChildDirectory(const NodeKey &key) const;
 
     /** Save raw data to disk. */
-    void saveData(const std::string &id, const char *data, size_t size);
+    void saveData(const std::string &id, const void *data, size_t size);
 
     /** Read data of known size from disk. */
-    size_t readData(const std::string &id, char *data, size_t size) const;
+    size_t readData(const std::string &id, void *data, size_t size) const;
 
     void saveImage(const std::string &id, const Image &image);
 
@@ -72,11 +72,13 @@ public:
     bool readMeshInplace(const std::string &id, Mesh &mesh) const;
 
     /** Save a terrain to the cache at the specified id. */
-    void saveTerrain(const std::string &id, const Terrain &terrain);
+    void saveTerrain(const std::string &id, const Terrain &terrain,
+                     bool saveTexture = true);
 
-    Terrain readTerrain(const std::string &id) const;
+    Terrain readTerrain(const std::string &id, bool readTexture = true) const;
 
-    bool readTerrainInplace(const std::string &id, Terrain &terrain) const;
+    bool readTerrainInplace(const std::string &id, Terrain &terrain,
+                            bool readTexture = true) const;
 
 private:
     NodeCache *_parent = nullptr;

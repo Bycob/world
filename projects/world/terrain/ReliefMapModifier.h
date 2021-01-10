@@ -22,6 +22,24 @@ struct ReliefMapEntry : public IGridElement {
     ReliefMapEntry(int resolution)
             : _height(resolution), _diff(resolution), _humidity(resolution),
               _temperature(resolution) {}
+
+    void saveTo(NodeCache &cache) const override {
+        cache.saveTerrain("height", _height, false);
+        cache.saveTerrain("diff", _diff, false);
+        cache.saveTerrain("humidity", _humidity, false);
+        cache.saveTerrain("temperature", _temperature, false);
+    }
+
+    bool tryLoadFrom(const NodeCache &cache) override {
+        bool success = true;
+        success = success && cache.readTerrainInplace("height", _height, false);
+        success = success && cache.readTerrainInplace("diff", _diff, false);
+        success =
+            success && cache.readTerrainInplace("humidity", _humidity, false);
+        success = success &&
+                  cache.readTerrainInplace("temperature", _temperature, false);
+        return success;
+    }
 };
 
 /** Base class for generating relief maps.
@@ -55,6 +73,8 @@ public:
     void write(WorldFile &wf) const;
 
     void read(const WorldFile &wf);
+
+    GridStorageBase *getStorage() override { return &_reliefMap; }
 
 protected:
     mutable std::mt19937 _rng;

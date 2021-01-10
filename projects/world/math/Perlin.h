@@ -46,6 +46,7 @@ public:
     typedef std::function<double(double, double, double)> modifier;
 
     static modifier DEFAULT_MODIFIER;
+    static const size_t HASH_SIZE = 512;
 
     Perlin();
 
@@ -74,13 +75,15 @@ public:
 
     std::vector<u8> getHash() const;
 
+    void setHash(const std::vector<u8> &hash);
+
 private:
     // Parameters
     bool _normalize = true;
 
     // Internal fields
     std::mt19937 _rng;
-    u8 _hash[512];
+    u8 _hash[HASH_SIZE];
 
     // Buffer for perlin points
     arma::mat _buffer;

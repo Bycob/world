@@ -79,21 +79,23 @@ std::string NodeCache::getChildDirectory(const NodeKey &key) const {
     return getDirectory() + NodeKeys::toString(key) + "/";
 }
 
-void NodeCache::saveData(const std::string &id, const char *data, size_t size) {
+void NodeCache::saveData(const std::string &id, const void *data, size_t size) {
     if (!isAvailable())
         return;
     createDirectory();
 
     std::ofstream ofs(getPath(id) + ".bin", std::ios::binary);
-    ofs.write(data, size);
+    ofs.write(reinterpret_cast<const char *>(data), size);
 }
 
-size_t NodeCache::readData(const std::string &id, char *data,
+size_t NodeCache::readData(const std::string &id, void *data,
                            size_t size) const {
     std::ifstream ifs(getPath(id) + ".bin", std::ios::binary);
-    ifs.read(data, size);
-    // TODO return the real amount of characters read
-    return size;
+    ifs.read(reinterpret_cast<char *>(data), size);
+    if (ifs.fail()) {
+        return 0;
+    }
+    return ifs.gcount();
 }
 
 void NodeCache::saveImage(const std::string &id, const Image &image) {
@@ -131,7 +133,8 @@ bool NodeCache::readMeshInplace(const std::string &id, Mesh &mesh) const {
     throw std::runtime_error("NodeCache::readMesh not implemented");
 }
 
-void NodeCache::saveTerrain(const std::string &id, const Terrain &terrain) {
+void NodeCache::saveTerrain(const std::string &id, const Terrain &terrain,
+                            bool saveTexture) {
     if (!isAvailable())
         return;
     createDirectory();
@@ -148,10 +151,11 @@ void NodeCache::saveTerrain(const std::string &id, const Terrain &terrain) {
     }
 
     // save texture to disk
-    terrain.getTexture().write(getPath(id) + ".png");
+    if (saveTexture)
+        terrain.getTexture().write(getPath(id) + ".png");
 }
 
-Terrain NodeCache::readTerrain(const std::string &id) const {
+Terrain NodeCache::readTerrain(const std::string &id, bool readTexture) const {
     std::ifstream ifstr(getPath(id) + ".raw", std::ios::binary);
 
     if (ifstr.fail()) {
@@ -179,17 +183,18 @@ Terrain NodeCache::readTerrain(const std::string &id) const {
     }
 
     // Read terrain texture
-    terrain.setTexture(Image::read(getPath(id) + ".png"));
+    if (readTexture)
+        terrain.setTexture(Image::read(getPath(id) + ".png"));
     return terrain;
 }
 
-bool NodeCache::readTerrainInplace(const std::string &id,
-                                   Terrain &terrain) const {
+bool NodeCache::readTerrainInplace(const std::string &id, Terrain &terrain,
+                                   bool readTexture) const {
     try {
-        terrain = readTerrain(id);
+        terrain = readTerrain(id, readTexture);
         return true;
     } catch (std::runtime_error &e) {
-        std::cerr << e.what() << std::endl;
+        // std::cerr << e.what() << std::endl;
         return false;
     }
 }

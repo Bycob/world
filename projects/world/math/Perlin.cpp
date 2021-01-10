@@ -57,21 +57,34 @@ double getOffsetf(int offset, int octave, const PerlinInfo &info) {
 Perlin::Perlin() : Perlin::Perlin(static_cast<long>(time(NULL))) {}
 
 Perlin::Perlin(long seed) : _rng(seed) {
-    for (u32 i = 0; i < 256; ++i) {
+    const size_t s = HASH_SIZE / 2;
+
+    for (u32 i = 0; i < s; ++i) {
         _hash[i] = static_cast<u8>(i);
     }
 
-    std::shuffle(std::begin(_hash), std::begin(_hash) + 256, _rng);
+    std::shuffle(std::begin(_hash), std::begin(_hash) + s, _rng);
 
-    for (u32 i = 0; i < 256; ++i) {
-        _hash[i + 256] = _hash[i];
+    for (u32 i = 0; i < s; ++i) {
+        _hash[i + s] = _hash[i];
     }
 }
 
 void Perlin::setNormalize(bool normalize) { _normalize = normalize; }
 
 std::vector<u8> Perlin::getHash() const {
-    return std::vector<u8>(_hash, _hash + 512);
+    return std::vector<u8>(_hash, _hash + HASH_SIZE);
+}
+
+void Perlin::setHash(const std::vector<u8> &hash) {
+    if (hash.size() != HASH_SIZE)
+        throw std::runtime_error(
+            "Bad hash size (" + std::to_string(hash.size()) +
+            "), hash size must be " + std::to_string(HASH_SIZE));
+
+    for (u32 i = 0; i < HASH_SIZE; ++i) {
+        _hash[i] = hash[i];
+    }
 }
 
 double Perlin::getMaxPossibleValue(const PerlinInfo &info) {
