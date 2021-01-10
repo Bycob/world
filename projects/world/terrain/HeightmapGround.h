@@ -162,8 +162,9 @@ private:
     // GENERATION
     void addNotGeneratedParents(std::set<TileCoordinates> &keys);
 
-    /** Generate the terrains located at all the keys given in parameters. If
-     * the terrains already exist they are not generated again. */
+    /** Generate the terrains located at all the keys given in parameters.
+     * Assume the terrains are not generated nor cached (this should be
+     * verified before). */
     void generateTerrains(const std::set<TileCoordinates> &keys,
                           const ExplorationContext &ctx);
 

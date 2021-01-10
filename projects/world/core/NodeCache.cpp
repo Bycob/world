@@ -40,6 +40,9 @@ bool NodeCache::isAvailable() const {
 }
 
 bool NodeCache::hasChild(const NodeKey &id) const {
+    if (!isAvailable()) {
+        return false;
+    }
     // TODO tests & benchmark
     tinydir_dir dir;
     bool exists = tinydir_open(&dir, getPath(id).c_str()) != -1;

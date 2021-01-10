@@ -136,9 +136,6 @@ public:
             *elemPtr = it->second.get();
             return true;
         } else {
-            // TODO make a "tryGetFromCache" function that gives minimal set of
-            // parameters to initialize the grid element
-            // since not all parameters are in the cache, only data
             return false;
         }
     }
@@ -163,10 +160,23 @@ public:
         }
     }
 
+    // Tiles are created externally
+    // but when they are cached, they still need be created by the caller
+    // So for example when doing a getopt:
+    // - if the tile is not cached nor created, return nullopt
+    // - if the tile is created in memory, return the tile
+    // - if the tile is cached: it should be created but initialized with the
+    // cache
+    // -> function tryGetOrUncache, and getoptFromCache can do what described
+    // above?
+
     bool has(const TileCoordinates &coords) const override {
-        return _storage.find(coords) != _storage.end();
+        return _storage.find(coords) != _storage.end() || isCached(coords);
     }
 
+    /** \param keepCache If true, the tile is only removed from memory
+     * but is saved to cache beforehand. If false, the tile is completely
+     * removed, from memory and from cache if needed. */
     void remove(const TileCoordinates &coords, bool keepCache) override {
         auto it = _storage.find(coords);
 
@@ -217,6 +227,10 @@ private:
             NodeCache tileCache(_cache, coords.toKey());
             return elem.tryLoadFrom(tileCache);
         }
+    }
+
+    bool isCached(const TileCoordinates &coords) const {
+        return _cache.hasChild(coords.toKey());
     }
 };
 
