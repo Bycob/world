@@ -163,8 +163,8 @@ private:
     void addNotGeneratedParents(std::set<TileCoordinates> &keys);
 
     /** Generate the terrains located at all the keys given in parameters.
-     * Assume the terrains are not generated nor cached (this should be
-     * verified before). */
+     * Assume the terrains are not generated. If the terrains are cached,
+     * they can be retrieved from cache. */
     void generateTerrains(const std::set<TileCoordinates> &keys,
                           const ExplorationContext &ctx);
 

@@ -101,7 +101,6 @@ public:
         auto it = _storage.insert({coords, nullptr});
         if (it.second) {
             it.first->second = std::make_unique<TElement>(args...);
-            readTileFromCache(coords, *it.first->second);
         }
         return *it.first->second;
     }
@@ -120,10 +119,7 @@ public:
         auto it = _storage.insert({coords, nullptr});
         if (it.second) {
             it.first->second = std::make_unique<TElement>(args...);
-
-            if (!readTileFromCache(coords, *it.first->second)) {
-                callback(*it.first->second);
-            }
+            callback(*it.first->second);
         }
         return *it.first->second;
     }
@@ -167,11 +163,33 @@ public:
     // - if the tile is created in memory, return the tile
     // - if the tile is cached: it should be created but initialized with the
     // cache
-    // -> function tryGetOrUncache, and getoptFromCache can do what described
+    // TODO function tryGetOrUncache, and getoptFromCache can do what described
     // above?
 
     bool has(const TileCoordinates &coords) const override {
-        return _storage.find(coords) != _storage.end() || isCached(coords);
+        return _storage.find(coords) != _storage.end();
+    }
+
+    bool isCached(const TileCoordinates &coords) const {
+        return _cache.hasChild(coords.toKey());
+    }
+
+    /** Try to get cached tile. Update elem and returns true if
+     * success, return false otherwise. */
+    bool readTileFromCache(const TileCoordinates &coords, TElement &elem) {
+        if (!_cache.isAvailable()) {
+            return false;
+        } else {
+            NodeCache tileCache(_cache, coords.toKey());
+            return elem.tryLoadFrom(tileCache);
+        }
+    }
+
+    void writeTileToCache(const TileCoordinates &coords, TElement &elem) {
+        if (_cache.isAvailable()) {
+            NodeCache tileCache(_cache, coords.toKey());
+            dynamic_cast<IGridElement *>(&elem)->saveTo(tileCache);
+        }
     }
 
     /** \param keepCache If true, the tile is only removed from memory
@@ -209,29 +227,6 @@ public:
 
 private:
     std::map<TileCoordinates, std::unique_ptr<TElement>> _storage;
-
-
-    void writeTileToCache(const TileCoordinates &coords, TElement &elem) {
-        if (_cache.isAvailable()) {
-            NodeCache tileCache(_cache, coords.toKey());
-            dynamic_cast<IGridElement *>(&elem)->saveTo(tileCache);
-        }
-    }
-
-    /** Try to get cached tile. Set the pointer and returns true if
-     * success, return false otherwise. */
-    bool readTileFromCache(const TileCoordinates &coords, TElement &elem) {
-        if (!_cache.isAvailable()) {
-            return false;
-        } else {
-            NodeCache tileCache(_cache, coords.toKey());
-            return elem.tryLoadFrom(tileCache);
-        }
-    }
-
-    bool isCached(const TileCoordinates &coords) const {
-        return _cache.hasChild(coords.toKey());
-    }
 };
 
 typedef GridStorage<TerrainElement> TerrainGrid;

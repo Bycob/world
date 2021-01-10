@@ -374,31 +374,16 @@ void HeightmapGround::addTerrain(const TileCoordinates &key,
 
 Tile &HeightmapGround::provide(const TileCoordinates &key,
                                const ExplorationContext &ctx) {
-    std::set<TileCoordinates> coords;
 
     Tile &tile = _internal->_terrains.getOrCreateCallback(
         key,
-        [this, &key, &coords](HeightmapGroundTile &tile) {
-            coords.insert(key);
+        [this, &key, &ctx](HeightmapGroundTile &tile) {
+            std::set<TileCoordinates> coords{key};
             addNotGeneratedParents(coords);
+            generateTerrains(coords, ctx);
         },
         key, _terrainRes);
 
-    // FIXME we have to set bounds of terrain because cached tiles
-    // have not their bounds set.
-    // considering manage the cache externally from GridStorage
-    // like, if (cache) reload data
-    // maybe it's simpler
-
-    Terrain &terrain = tile._terrain;
-    double terrainSize = _tileSystem.getTileSize(key._lod).x;
-    terrain.setBounds(terrainSize * key._pos.x, terrainSize * key._pos.y,
-                      _minAltitude, terrainSize * (key._pos.x + 1),
-                      terrainSize * (key._pos.y + 1), _maxAltitude);
-
-    if (!coords.empty()) {
-        generateTerrains(coords, ctx);
-    }
     return tile;
 }
 
@@ -463,16 +448,21 @@ void HeightmapGround::generateTerrains(const std::set<TileCoordinates> &keys,
 
     for (const TileCoordinates &key : keys) {
         Tile &tile = _internal->_terrains.getOrCreate(key, key, _terrainRes);
-        lods[key._lod].push_back(&tile);
 
-        Terrain &terrain = tile._terrain;
-        // set texture
-        terrain.setTexture(Image(_textureRes, _textureRes, ImageType::RGB));
+        if (!_internal->_terrains.readTileFromCache(key, tile)) {
+            lods[key._lod].push_back(&tile);
+
+            // set texture
+            tile._terrain.setTexture(
+                Image(_textureRes, _textureRes, ImageType::RGB));
+        }
+
         // set bounds
         double terrainSize = _tileSystem.getTileSize(key._lod).x;
-        terrain.setBounds(terrainSize * key._pos.x, terrainSize * key._pos.y,
-                          _minAltitude, terrainSize * (key._pos.x + 1),
-                          terrainSize * (key._pos.y + 1), _maxAltitude);
+        tile._terrain.setBounds(terrainSize * key._pos.x,
+                                terrainSize * key._pos.y, _minAltitude,
+                                terrainSize * (key._pos.x + 1),
+                                terrainSize * (key._pos.y + 1), _maxAltitude);
     }
 
     int lod = 0;
