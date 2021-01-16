@@ -98,6 +98,10 @@ size_t NodeCache::readData(const std::string &id, void *data,
     return ifs.gcount();
 }
 
+bool NodeCache::hasImage(std::string &id) const {
+    return fileExists(getPath(id) + ".png");
+}
+
 void NodeCache::saveImage(const std::string &id, const Image &image) {
     if (!isAvailable())
         return;

@@ -135,10 +135,15 @@ void ReliefMapModifier::read(const WorldFile &wf) {
 
 ReliefMapEntry &ReliefMapModifier::provideMap(int x, int y) {
     int resolution = _tileSystem._bufferRes.x;
+    TileCoordinates coords({x, y, 0}, 0);
 
     return _reliefMap.getOrCreateCallback(
-        TileCoordinates({x, y, 0}, 0),
-        [&](ReliefMapEntry &elem) { generate(elem._height, elem._diff); },
+        coords,
+        [&](ReliefMapEntry &elem) {
+            if (!_reliefMap.readTileFromCache(coords, elem)) {
+                generate(elem._height, elem._diff);
+            }
+        },
         resolution);
 }
 

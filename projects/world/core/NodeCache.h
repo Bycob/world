@@ -59,6 +59,8 @@ public:
     /** Read data of known size from disk. */
     size_t readData(const std::string &id, void *data, size_t size) const;
 
+    bool hasImage(std::string &id) const;
+
     void saveImage(const std::string &id, const Image &image);
 
     Image readImage(const std::string &id) const;

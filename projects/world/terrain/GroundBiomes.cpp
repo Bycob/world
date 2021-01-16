@@ -89,6 +89,12 @@ GroundBiomes::GroundBiomes(double biomeArea)
 
     // Init buffer
     _internal->_holesBuffer = Terrain(_distribResolution);
+
+    // Connect cache
+    auto *cache = _internal->_texturer->getCache();
+    if (cache) {
+        cache->setSub(_cache, "texturer");
+    }
 }
 
 GroundBiomes::~GroundBiomes() { delete _internal; }

@@ -89,8 +89,12 @@ public:
     /** Create an image to visualize the biomes of a particular BiomeType. */
     void exportZones(Image &output, const BoundingBox &bbox, u32 biomeType);
 
+    NodeCache *getCache() override { return &_cache; }
+
 private:
     GroundBiomesPrivate *_internal;
+
+    NodeCache _cache;
 
     std::mt19937_64 _rng;
     /// Average biome area in m^2

@@ -88,6 +88,16 @@ void removeDirectory(const std::string &directory) {
               << std::endl;
 }
 
+bool fileExists(const std::string &filename) {
+    // TODO Replace with std::filesystem::exists() in C++17
+    if (FILE *file = fopen(filename.c_str(), "r")) {
+        fclose(file);
+        return true;
+    } else {
+        return false;
+    }
+}
+
 #if defined(WIN32)
 #else
 #include <sys/resource.h>

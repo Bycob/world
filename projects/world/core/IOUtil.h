@@ -16,6 +16,8 @@ getFileList(const std::string &directory);
 /** Removes a directory recursively. */
 void WORLDAPI_EXPORT removeDirectory(const std::string &directory);
 
+bool WORLDAPI_EXPORT fileExists(const std::string &filename);
+
 // TODO Move that on the correct file
 /** On linux returns memory usage in kB. */
 long WORLDAPI_EXPORT getMemoryUsage();

@@ -92,12 +92,15 @@ public:
 
     GridStorageBase *getStorage() override;
 
+    NodeCache *getCache() override { return &_cache; }
+
     void write(WorldFile &wf) const override;
 
     void read(const WorldFile &wf) override;
 
 private:
     GridStorage<Element> _storage;
+    NodeCache _cache;
 
     std::unique_ptr<ITextureProvider> _texProvider;
     std::vector<DistributionParams> _layers;
@@ -125,6 +128,7 @@ private:
 template <typename T, typename... Args>
 T &MultilayerGroundTexture::setTextureProvider(Args &&... args) {
     _texProvider = std::make_unique<T>(args...);
+    _texProvider->configureCache(_cache, "texProvider");
     return static_cast<T &>(*_texProvider);
 }
 

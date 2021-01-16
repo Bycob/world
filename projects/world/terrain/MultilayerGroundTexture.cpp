@@ -87,6 +87,7 @@ void MultilayerGroundTexture::read(const WorldFile &wf) {
     if (wf.hasChild("texProvider")) {
         _texProvider = std::unique_ptr<ITextureProvider>(
             readSubclass<ITextureProvider>(wf.readChild("texProvider")));
+        _texProvider->configureCache(_cache, "texProvider");
     }
 }
 

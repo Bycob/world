@@ -69,9 +69,7 @@ size_t VkwGroundTextureGenerator::getLayerCount() {
 }
 
 VkwImage &VkwGroundTextureGenerator::getVkTexture(int layer, int lod) {
-    // FIXME cpu was set to false, but we actually need (...)
-    // to set it to true to take advantage of the cache
-    auto &lodTex = getOrCreate(layer, lod, true);
+    auto &lodTex = getOrCreate(layer, lod, false);
     return *lodTex._layerTextures.at(layer);
 }
 
@@ -95,10 +93,8 @@ void VkwGroundTextureGenerator::read(const WorldFile &wf) {
     wf.readUintOpt("texWidth", _internal->_texWidth);
 
     for (auto it = wf.readArray("layers"); !it.end(); ++it) {
-        // TODO bad deserialization API
-        Shader shader("generic-texture.vert", "");
-        shader.read(*it);
-        _internal->_layers.push_back(shader);
+        _internal->_layers.emplace_back("generic-texture.vert", "");
+        _internal->_layers.back().read(*it);
     }
 }
 
@@ -111,18 +107,38 @@ LodTextures &VkwGroundTextureGenerator::getOrCreate(int layerId, int lod,
         t._width = getWidth(lod);
     }
 
-    if (t._layerTextures.find(layerId) == t._layerTextures.end()) {
-        _internal->launchTextureGeneration(t, {layerId});
-        t._texWorker->waitForCompletion();
+    std::string imageId = getImageId(layerId, lod);
+    bool generatedCpu = t._layerImages.find(layerId) != t._layerImages.end();
+    bool generatedGpu =
+        t._layerTextures.find(layerId) != t._layerTextures.end();
+
+    if ((cpu && !generatedCpu) || (!cpu && !generatedGpu)) {
+        if (_cache.hasImage(imageId)) {
+            t._layerImages[layerId] =
+                std::make_unique<Image>(_cache.readImage(imageId));
+
+            if (!cpu) {
+                Image &img = *t._layerImages[layerId];
+                t._layerTextures[layerId] = std::make_unique<VkwImage>(
+                    img.width(), img.height(), VkwImageUsage::OFFSCREEN_RENDER);
+                VkwMemoryHelper::imageToGPU(img, *t._layerTextures[layerId]);
+            }
+        } else {
+            if (!generatedGpu) {
+                _internal->launchTextureGeneration(t, {layerId});
+                t._texWorker->waitForCompletion();
+
+                // TODO transitions to textures ?
+            }
+
+            if (cpu || _cache.isAvailable()) {
+                t._layerImages[layerId] = std::make_unique<Image>(
+                    VkwMemoryHelper::GPUToImage(*t._layerTextures.at(layerId)));
+                _cache.saveImage(imageId, *t._layerImages[layerId]);
+            }
+        }
     }
 
-    // TODO transitions to textures ?
-
-    if (cpu && t._layerImages.find(layerId) == t._layerImages.end()) {
-        t._layerImages[layerId] = std::make_unique<Image>(
-            VkwMemoryHelper::GPUToImage(*t._layerTextures.at(layerId)));
-        _cache.saveImage(getImageId(layerId, lod), *t._layerImages[layerId]);
-    }
     return t;
 }
 

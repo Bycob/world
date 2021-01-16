@@ -43,7 +43,9 @@ Image VkwMemoryHelper::GPUToImage(VkwImage &vkimg) {
     return img;
 }
 
-void VkwMemoryHelper::imageToGPU(const Image &img, IVkwMemoryAccess &memory) {}
+void VkwMemoryHelper::imageToGPU(const Image &img, IVkwMemoryAccess &memory) {
+    // TODO VkwMemoryHelper::imageToGPU
+}
 
 void VkwMemoryHelper::GPUToTerrain(IVkwMemoryAccess &memory, Terrain &terrain) {
 
