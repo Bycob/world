@@ -106,6 +106,7 @@ class DummyGridStorage : public GridStorageBase {
 public:
     std::set<TileCoordinates> _tcs;
     GridStorageReducer *_reducer = nullptr;
+    NodeCache _cache;
 
     void add(const TileCoordinates &coords) {
         if (_reducer != nullptr) {
@@ -120,6 +121,10 @@ public:
 
     bool has(const TileCoordinates &coords) const override {
         return _tcs.find(coords) != _tcs.end();
+    }
+
+    NodeCache &getCache() override {
+        return _cache;
     }
 };
 

@@ -61,7 +61,6 @@ public:
 
 class GroundBiomesPrivate;
 
-class BiomeLayer;
 class ChunkBiomes;
 class BiomeLayerInstance;
 

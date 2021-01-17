@@ -236,6 +236,8 @@ template <typename T> T *readSubclass(const WorldFile &file);
         this->write(wf);                                                       \
     }
 
+// FIXME WORLDAPI_EXPORT in ChildClass::writeSubclass prevents template class
+// instantiation from external user: make another macro?
 #define WORLD_REGISTER_TEMPLATE_CHILD_CLASS(ParentClass, ChildClass,           \
                                             TemplateType, ClassID)             \
     ParentClass *read##ChildClass##_##TemplateType(const WorldFile &wf) {      \
@@ -251,7 +253,7 @@ template <typename T> T *readSubclass(const WorldFile &file);
     }();                                                                       \
                                                                                \
     template <>                                                                \
-    void ChildClass<TemplateType>::writeSubclass(WorldFile &wf) const {        \
+    void WORLDAPI_EXPORT ChildClass<TemplateType>::writeSubclass(WorldFile &wf) const { \
         wf.addString("type", ClassID);                                         \
         this->write(wf);                                                       \
     }

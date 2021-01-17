@@ -42,7 +42,7 @@ public:
      * are corrupted. */
     // It is required that we create a minimum, ungenerated version of the
     // tile before reading the cache
-    virtual bool tryLoadFrom(const NodeCache &cache) {}
+    virtual bool tryLoadFrom(const NodeCache &cache) { return false; }
 };
 
 class WORLDAPI_EXPORT TerrainElement : public IGridElement {

@@ -27,6 +27,7 @@ std::ostream &operator<<(std::ostream &os, TreeInfo &ti) {
     os << "\tsize = " << ti._size << std::endl;
     os << "\tstage " << ti._forkCount << ", id " << ti._forkId << std::endl;
     os << "}" << std::endl;
+    return os;
 }
 
 } // namespace world

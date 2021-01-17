@@ -1,5 +1,7 @@
 #include "MultilayerGroundTexture.h"
 
+#include <numeric>
+
 #include <world/assets/ImageUtils.h>
 #include "world/terrain/TerrainOps.h"
 

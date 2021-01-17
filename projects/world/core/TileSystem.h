@@ -32,9 +32,9 @@ struct WORLDAPI_EXPORT TileCoordinates {
             _pos.z = std::stoi(keystr, &pos);
             keystr = keystr.substr(pos + 1);
             _lod = std::stoi(keystr, &pos);
-        } catch (std::invalid_argument &e) {
+        } catch (std::invalid_argument &) {
             throw std::runtime_error("bad usage : please provide a valid key");
-        } catch (std::out_of_range &e) {
+        } catch (std::out_of_range &) {
             throw std::runtime_error("bad usage : please provide a valid key");
         }
     }

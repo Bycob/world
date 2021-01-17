@@ -1,11 +1,13 @@
 #ifndef WORLD_COLOROPS_H
 #define WORLD_COLOROPS_H
 
+#include "world/core/WorldConfig.h"
+
 #include "Color.h"
 
 namespace world {
 
-class ColorOps {
+class WORLDAPI_EXPORT ColorOps {
 public:
     static Color4d superpose(const Color4d &bg, const Color4d &fg);
 

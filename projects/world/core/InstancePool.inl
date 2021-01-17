@@ -9,6 +9,8 @@
 #include "IOUtil.h"
 #include "world/assets/SceneNode.h"
 
+// TODO move non template stuff in .cpp
+
 namespace world {
 
 inline InstancePool::InstancePool()

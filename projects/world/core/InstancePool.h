@@ -16,7 +16,7 @@
 
 namespace world {
 
-class InstancePool : public IChunkDecorator, public WorldNode {
+class WORLDAPI_EXPORT InstancePool : public IChunkDecorator, public WorldNode {
     WORLD_WRITE_SUBCLASS_METHOD
 public:
     InstancePool();

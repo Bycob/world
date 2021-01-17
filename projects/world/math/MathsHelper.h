@@ -74,6 +74,6 @@ template <typename T> inline T powi(T b, int e) {
 }
 
 /** Returns angle within range [-pi, pi] */
-double wrapAngle(double angle);
+double WORLDAPI_EXPORT wrapAngle(double angle);
 
 } // namespace world

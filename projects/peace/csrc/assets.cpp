@@ -1,5 +1,7 @@
 #include "common.h"
 
+#include <cstring>
+
 #include <world/core.h>
 
 using namespace world;

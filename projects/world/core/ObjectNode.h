@@ -72,7 +72,7 @@ public:
 
     ObjectLod &getLod(size_t i);
 
-    int getLodCount() const { return _lods.size(); }
+    int getLodCount() const { return static_cast<int>(_lods.size()); }
 
     ObjectLod &getLodByResolution(double res);
 

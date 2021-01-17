@@ -3,6 +3,8 @@
 
 #include "world/core/WorldConfig.h"
 
+#include <random>
+
 #include "TreeSkelettonWorker.h"
 #include "TreeSkeletton.h"
 
