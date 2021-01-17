@@ -58,3 +58,6 @@ crashlytics-build.properties
 
 # Generated plugins
 [Aa]ssets/Peace/Plugins/
+
+# World Cache
+[Aa]ssets/_world/

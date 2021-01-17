@@ -61,7 +61,12 @@ PEACE_EXPORT void collectFirstPerson(CollectorPtr collectorPtr,
     fpsView.setPosition({view.x, view.y, view.z});
     fpsView.setFarDistance(view.maxDistance);
 
-    world->collect(*collector, fpsView);
+    try {
+        world->collect(*collector, fpsView);
+    } catch (std::runtime_error &e) {
+        std::cerr << e.what() << std::endl;
+        throw;
+    }
 }
 
 PEACE_EXPORT void collectZone(CollectorPtr collectorPtr, WorldPtr worldPtr,
@@ -74,11 +79,17 @@ PEACE_EXPORT void collectZone(CollectorPtr collectorPtr, WorldPtr worldPtr,
     zoneView.setBounds({{view.bbox.xmin, view.bbox.ymin, view.bbox.zmin},
                         {view.bbox.xmax, view.bbox.ymax, view.bbox.zmax}});
 
-    world->collect(*collector, zoneView);
+    try {
+        world->collect(*collector, zoneView);
+    } catch (std::runtime_error &e) {
+        std::cerr << e.what() << std::endl;
+        throw;
+    }
 }
 
 PEACE_EXPORT int collectorGetChannelSize(CollectorPtr collectorPtr, int type) {
     auto *collector = static_cast<Collector *>(collectorPtr);
+    // TODO check that channel exists before returning the size.
     switch (type) {
     case NODE_CHANNEL:
         return collector->getStorageChannel<SceneNode>().size();
@@ -99,7 +110,7 @@ PEACE_EXPORT void collectorGetChannel(CollectorPtr collectorPtr, int type,
                                       char **names, void **objects) {
 
     auto *collector = static_cast<Collector *>(collectorPtr);
-
+    // TODO check that channel exists before getting its content.
     switch (type) {
     case NODE_CHANNEL:
         getChannelContent(collector->getStorageChannel<SceneNode>(), names,

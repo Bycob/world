@@ -54,7 +54,7 @@ void NodeCache::clear() { removeDirectory(getDirectory()); }
 
 void NodeCache::createDirectory() {
     if (!isAvailable()) {
-        throw std::runtime_error("Cache is not available!");
+        throw std::runtime_error("createDirectory(): Cache is not available!");
     }
 
     createDirectories(getDirectory());
@@ -62,12 +62,15 @@ void NodeCache::createDirectory() {
 
 std::string NodeCache::getPath(const std::string &id) const {
     if (!isAvailable()) {
-        throw std::runtime_error("Cache is not available!");
+        throw std::runtime_error("getPath(): Cache is not available!");
     }
     return getDirectory() + id;
 }
 
 std::string NodeCache::getDirectory() const {
+    if (!isAvailable()) {
+        throw std::runtime_error("getDirectory(): Cache is not available!");
+    }
     if (_parent == nullptr) {
         return _directory;
     } else {
@@ -76,6 +79,9 @@ std::string NodeCache::getDirectory() const {
 }
 
 std::string NodeCache::getChildDirectory(const NodeKey &key) const {
+    if (!isAvailable()) {
+        throw std::runtime_error("getChildDirectory(): Cache is not available!");
+    }
     return getDirectory() + NodeKeys::toString(key) + "/";
 }
 
@@ -90,6 +96,8 @@ void NodeCache::saveData(const std::string &id, const void *data, size_t size) {
 
 size_t NodeCache::readData(const std::string &id, void *data,
                            size_t size) const {
+    if (!isAvailable())
+        return 0;
     std::ifstream ifs(getPath(id) + ".bin", std::ios::binary);
     ifs.read(reinterpret_cast<char *>(data), size);
     if (ifs.fail()) {
@@ -99,6 +107,8 @@ size_t NodeCache::readData(const std::string &id, void *data,
 }
 
 bool NodeCache::hasImage(std::string &id) const {
+    if (!isAvailable())
+        return false;
     return fileExists(getPath(id) + ".png");
 }
 
@@ -134,7 +144,12 @@ Mesh NodeCache::readMesh(const std::string &id) const {
 }
 
 bool NodeCache::readMeshInplace(const std::string &id, Mesh &mesh) const {
-    throw std::runtime_error("NodeCache::readMesh not implemented");
+    try {
+        mesh = readMesh(id);
+        return true;
+    } catch (std::runtime_error &e) {
+        return false;
+    }
 }
 
 void NodeCache::saveTerrain(const std::string &id, const Terrain &terrain,
@@ -198,7 +213,6 @@ bool NodeCache::readTerrainInplace(const std::string &id, Terrain &terrain,
         terrain = readTerrain(id, readTexture);
         return true;
     } catch (std::runtime_error &e) {
-        // std::cerr << e.what() << std::endl;
         return false;
     }
 }

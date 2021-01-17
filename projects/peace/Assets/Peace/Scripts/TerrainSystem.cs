@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Peace.Serialization;
 using UnityEngine;
 
@@ -94,19 +95,26 @@ namespace Peace
             worldDef.ground.workers_list.Add(texturer);
 
             _world = new World(worldDef);
+            _world.SetCacheLocation("Assets/_world/");
         }
 
         public async void Regenerate()
         {
             InitWorld();
+
+            Vector2Int pos = new Vector2Int(0, 0);
+            await GenerateTile(pos);
+        }
+
+        public async Task GenerateTile(Vector2Int tileCoords)
+        {
             var collector = new Collector(Collector.Preset.ENGINE);
 
             var view = new ZoneView();
-            Vector2 pos = new Vector2(0, 0);
             const double margin = 0.05;
             float width = tileWidth;
-            view.bbox.xmin = (pos.x + margin) * width;
-            view.bbox.ymin = (pos.y + margin) * width;
+            view.bbox.xmin = (tileCoords.x + margin) * width;
+            view.bbox.ymin = (tileCoords.y + margin) * width;
             view.bbox.zmin = minAltitude;
             view.bbox.xmax = view.bbox.xmin + width * (1 - margin * 2);
             view.bbox.ymax = view.bbox.ymin + width * (1 - margin * 2);
@@ -120,12 +128,6 @@ namespace Peace
             AddTerrains(collector);
 
             Debug.Log("Terrains Added");
-
-        }
-
-        public void GenerateTile(Vector2Int tileCoords)
-        {
-            // TODO
         }
 
         public void Clear()

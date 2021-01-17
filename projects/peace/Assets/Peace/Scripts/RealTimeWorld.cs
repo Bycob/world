@@ -118,7 +118,7 @@ namespace Peace
 
             if (configLocation == "")
             {
-                _world = World.CreateDemo();
+                _world = World.CreateDemo("");
             }
             else
             {

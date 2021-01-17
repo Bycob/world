@@ -11,9 +11,9 @@ namespace Peace
     {
         internal IntPtr _handle;
 
-        public static World CreateDemo()
+        public static World CreateDemo(string demoId)
         {
-            return new World(createDemoWorld(""));
+            return new World(createDemoWorld(demoId));
         }
 
         private World(IntPtr handle)
@@ -37,6 +37,11 @@ namespace Peace
             _handle = createWorldFromJson(jsonStr);
         }
 
+        public void SetCacheLocation(string cacheLocation)
+        {
+            setWorldCache(_handle, cacheLocation);
+        }
+
 
         // Dll functions
 
@@ -51,6 +56,9 @@ namespace Peace
 
         [DllImport("peace")]
         private static extern IntPtr createWorldFromFile(string name);
+
+        [DllImport("peace")]
+        private static extern void setWorldCache(IntPtr worldPtr, string cacheLocation);
 
         [DllImport("peace")]
         private static extern void freeWorld(IntPtr handle);
