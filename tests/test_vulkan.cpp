@@ -31,9 +31,8 @@ int main(int argc, char **argv) {
     // testCompute();
     // testMultilayerTerrainTexture(argc, argv);
     testTextureGenerator();
-    // testVkwGrass();
-    // testLeaves();
-    // std::cout << "====" << std::endl;
+    testVkwGrass();
+    testLeaves();
     // testRandomImage();
 }
 
@@ -161,9 +160,30 @@ void testMultilayerTerrainTexture(int argc, char **argv) {
     delete mesh;
 }
 
+/*
+Debug vulkan:
+- Skipped validation layers (I don't think the pb is here)
+- No descriptor pool in theirs -> sépassa
+- No depth buffer in mine -> sépassa
+- VkImage is both used as "Transfer Src" & "Sampled"
+- VkRenderPass: final layout is img::general instead of transfer
+- vkDeviceWaitIdle
+- No depth & stencil buffer
+- subpass dependency -> might be the thing
+
+- no one time submit
+- no bind descriptor set layout
+- pipeline cache
+- no line width rasterization
+- blend enable = false & pas les trucs par défaut
+- dynamic set viewport
+- begin render pass VK subpass content inline
+- verifier queue family index (chez moi = 0)
+- (peut-être) vérifier image get data
+*/
+
 void testTextureGenerator() {
-#define GEN_SHADER_NAME "grass.frag"
-#define GEN_RAND_TEX
+#define GEN_SHADER_NAME "test-texture.frag"
 
     const u32 size = 1024;
     VkwTextureGenerator generator(size, size, GEN_SHADER_NAME);
@@ -198,8 +218,11 @@ void testTextureGenerator() {
     generator.addImageParameter(0, randomTex.get());
 #endif
 
+    std::cout << "writing to "
+        << "assets/vulkan/test_generator.png" << std::endl;
     generator.generateTexture().write("assets/vulkan/test_generator.png");
 }
+
 
 void testVkwGrass() {
     VkwGrass grass;

@@ -12,6 +12,7 @@ void VkwMemoryHelper::GPUToImageu(IVkwMemoryAccess &memory, Image &img) {
     GPUToImageu(memory, img, img.elemSize());
 }
 
+// TODO change int to size_t to avoid overflow
 void VkwMemoryHelper::GPUToImage(IVkwMemoryAccess &memory, Image &img, u32 e) {
     const int w = img.width(), h = img.height();
     const int size = w * h * e;

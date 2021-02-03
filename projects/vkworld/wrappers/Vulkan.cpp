@@ -133,11 +133,7 @@ VulkanContext::~VulkanContext() {
 
 void VulkanContext::displayAvailableExtensions() {
     // Extensions check
-    u32 extensionCount = 0;
-    vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
-    std::vector<VkExtensionProperties> extensions(extensionCount);
-    vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount,
-                                           extensions.data());
+    auto extensions = vk::enumerateInstanceExtensionProperties();
 
     std::cout << "Extensions :" << std::endl;
     for (auto &ext : extensions) {
@@ -145,12 +141,35 @@ void VulkanContext::displayAvailableExtensions() {
     }
 }
 
+void VulkanContext::displayAvailableValidationLayers() {
+    auto availableLayers = vk::enumerateInstanceLayerProperties();
+
+    std::cout << "Validation layers :" << std::endl;
+    for (auto &layer : availableLayers) {
+        std::cout << "\t- " << layer.layerName << std::endl;
+    }
+}
 
 // ---- INITIALISATION METHODS
 
 bool VulkanContext::checkValidationLayerSupport() {
-    // TODO for each validation layer in validationLayers, check if it's
-    // supported and return false if at least one isn't.
+    auto availableLayers = vk::enumerateInstanceLayerProperties();
+
+    for (const char* layerName : validationLayers) {
+        bool layerFound = false;
+
+        for (const auto& layerProperties : availableLayers) {
+            if (strcmp(layerName, layerProperties.layerName) == 0) {
+                layerFound = true;
+                break;
+            }
+        }
+
+        if (!layerFound) {
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -206,10 +225,10 @@ void VulkanContext::createLogicalDevice() {
 
     std::vector<vk::DeviceQueueCreateInfo> queueInfos;
 
+    const float defaultQueuePriority(1.0f);
     for (int familyIndex : familyIndexes) {
-        float queuePriority = 1.0f;
         queueInfos.push_back(
-            vk::DeviceQueueCreateInfo({}, familyIndex, 1, &queuePriority));
+            vk::DeviceQueueCreateInfo({}, familyIndex, 1, &defaultQueuePriority));
     }
 
     // Device creation
@@ -405,6 +424,24 @@ vk::SampleCountFlagBits VulkanContext::getMaxUsableSampleCount(
     }
 
     return vk::SampleCountFlagBits::e1;
+}
+
+void VulkanContext::insertImageMemoryBarrier(vk::CommandBuffer commandBuf,
+    vk::Image image,
+    vk::AccessFlags srcAccessMask,
+    vk::AccessFlags dstAccessMask,
+    vk::ImageLayout srcLayout,
+    vk::ImageLayout dstLayout,
+    vk::PipelineStageFlags srcStageMask,
+    vk::PipelineStageFlags dstStageMask) {
+
+    vk::ImageMemoryBarrier memBarrier(srcAccessMask, dstAccessMask, srcLayout,
+        dstLayout);
+    memBarrier.image = image;
+    memBarrier.subresourceRange =
+        vk::ImageSubresourceRange(vk::ImageAspectFlagBits ::eColor, 0, 1, 0, 1);
+    commandBuf.pipelineBarrier(srcStageMask, dstStageMask, {}, {}, {},
+        memBarrier);
 }
 
 VkwSubBuffer VulkanContext::allocate(u32 size, DescriptorType usage,

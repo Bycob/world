@@ -100,24 +100,24 @@ public:
                                     offsetof(VkwVertex, _uv));
 
             vertInputStageInfo.vertexBindingDescriptionCount = bindings.size();
-            vertInputStageInfo.pVertexBindingDescriptions = &bindings[0];
+            vertInputStageInfo.pVertexBindingDescriptions = bindings.data();
 
             vertInputStageInfo.vertexAttributeDescriptionCount =
                 attributes.size();
-            vertInputStageInfo.pVertexAttributeDescriptions = &attributes[0];
+            vertInputStageInfo.pVertexAttributeDescriptions = attributes.data();
         }
 
         vk::PipelineInputAssemblyStateCreateInfo inputAssemblyStageInfo(
             {}, _primitive);
 
-        vk::Viewport viewport(0, 0, _width, _height, 0, 1);
+        vk::Viewport viewport(0, 0, _width, _height, -1, 1);
         vk::Rect2D scissor({0, 0}, {_width, _height});
         vk::PipelineViewportStateCreateInfo viewportStageInfo({}, 1, &viewport,
                                                               1, &scissor);
 
         // TODO: Add other parameters
         vk::PipelineRasterizationStateCreateInfo rasterizationStageInfo(
-            {}, false, false, vk::PolygonMode::eFill);
+            {}, false, false, vk::PolygonMode::eFill, vk::CullModeFlagBits::eNone, vk::FrontFace::eCounterClockwise);
         rasterizationStageInfo.lineWidth = 1;
 
         // TODO: Enable multisampling
@@ -140,7 +140,7 @@ public:
 
         // Create pipeline from layout and stage info
         vk::GraphicsPipelineCreateInfo pipelineCreateInfo({}, stageInfos.size(),
-                                                          &stageInfos[0]);
+                                                          stageInfos.data());
         pipelineCreateInfo.layout = _pipelineLayout;
         pipelineCreateInfo.pVertexInputState = &vertInputStageInfo;
         pipelineCreateInfo.pInputAssemblyState = &inputAssemblyStageInfo;

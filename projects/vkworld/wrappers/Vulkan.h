@@ -72,6 +72,15 @@ public:
 
     vk::SampleCountFlagBits getDefaultMSAASample() { return _msaaSample; }
 
+    void insertImageMemoryBarrier(vk::CommandBuffer commandBuf,
+        vk::Image image,
+        vk::AccessFlags srcAccessMask,
+        vk::AccessFlags dstAccessMask,
+        vk::ImageLayout srcLayout,
+        vk::ImageLayout dstLayout,
+        vk::PipelineStageFlags srcStageMask,
+        vk::PipelineStageFlags dstStageMask);
+
     std::vector<char> readFile(const std::string &filename);
 
     std::vector<char> readInternalFile(const std::string &filename);
@@ -81,6 +90,8 @@ public:
     void configTest();
 
     void displayAvailableExtensions();
+
+    void displayAvailableValidationLayers();
 
 private:
     vk::Instance _instance;

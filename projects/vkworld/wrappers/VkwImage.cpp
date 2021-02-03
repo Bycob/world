@@ -20,8 +20,7 @@ VkwImagePrivate::VkwImagePrivate(int width, int height, VkwImageUsage imgUse,
         break;
     case VkwImageUsage::OFFSCREEN_RENDER:
         imgUsageBits |= vk::ImageUsageFlagBits::eColorAttachment |
-                        vk::ImageUsageFlagBits::eTransferSrc |
-                        vk::ImageUsageFlagBits::eSampled;
+                        vk::ImageUsageFlagBits::eTransferSrc;
         // TODO find how to convert rendered image into sampled
         break;
     }
@@ -43,7 +42,7 @@ VkwImagePrivate::VkwImagePrivate(int width, int height, VkwImageUsage imgUse,
     vk::MemoryAllocateInfo memAllocate(memRequirements.size,
                                        memRequirements.alignment);
     memAllocate.memoryTypeIndex = ctx.findMemoryType(
-        memRequirements.size, {}, {}, memRequirements.memoryTypeBits);
+        memRequirements.size, vk::MemoryPropertyFlagBits::eDeviceLocal, {}, memRequirements.memoryTypeBits);
 
     _memory = ctx._device.allocateMemory(memAllocate);
     ctx._device.bindImageMemory(_image, _memory, 0);
@@ -139,40 +138,59 @@ void VkwImage::registerTo(vk::DescriptorSet &descriptorSet,
 void VkwImage::setData(const void *data, u32 count, u32 offset) {
     VulkanContext &ctx = Vulkan::context();
 
-    // TODO Put staging buffering in functions somewhere
-    // Create staging buffer
-    VkwSubBuffer staging = ctx.allocate(count, DescriptorType::TRANSFER_SRC,
-                                        MemoryUsage::CPU_WRITES);
-    staging.setData(data, count, offset);
+    vk::ImageCreateInfo stagingImgInfo(
+        {}, vk::ImageType::e2D, _internal->_imageFormat,
+        vk::Extent3D(static_cast<u32>(_internal->_width), static_cast<u32>(_internal->_height), 1u), 1u, 1u,
+        vk::SampleCountFlagBits::e1, vk::ImageTiling::eLinear,
+        vk::ImageUsageFlagBits::eTransferSrc, vk::SharingMode::eExclusive,
+        0, nullptr, vk::ImageLayout::eGeneral);
+    vk::Image stagingImg = ctx._device.createImage(stagingImgInfo);
 
-    // Copy staging buffer to image
+    VkMemoryRequirements memRequirements = ctx._device.getImageMemoryRequirements(stagingImg);
+
+    vk::MemoryAllocateInfo memAllocate(memRequirements.size);
+    memAllocate.memoryTypeIndex = ctx.findMemoryType(
+        memRequirements.size, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, {}, memRequirements.memoryTypeBits);
+    vk::DeviceMemory stagingMemory = ctx._device.allocateMemory(memAllocate);
+    ctx._device.bindImageMemory(stagingImg, stagingMemory, 0);
+
+    vk::ImageSubresource subResource{vk::ImageAspectFlagBits::eColor};
+    VkSubresourceLayout subResourceLayout = ctx._device.getImageSubresourceLayout(stagingImg, subResource);
+
+    // TODO take rowpitch into account
+    char *imageData = reinterpret_cast<char*>(ctx._device.mapMemory(stagingMemory, offset, count, {}));
+    imageData += subResourceLayout.offset;
+    std::memcpy(imageData, data, count);
+    ctx._device.unmapMemory(stagingMemory);
+
+    // Copy image to staging image
     vk::CommandBufferAllocateInfo commandBufInfo(
         ctx._graphicsCommandPool, vk::CommandBufferLevel::ePrimary, 1);
     auto commandBuf = ctx._device.allocateCommandBuffers(commandBufInfo).at(0);
     commandBuf.begin(vk::CommandBufferBeginInfo(
         vk::CommandBufferUsageFlagBits::eOneTimeSubmit));
 
-    insertBarrier(commandBuf, {}, vk::AccessFlagBits ::eTransferWrite,
-                  vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral,
-                  vk::PipelineStageFlagBits::eTopOfPipe,
-                  vk::PipelineStageFlagBits::eTransfer);
+    ctx.insertImageMemoryBarrier(commandBuf, stagingImg, vk::AccessFlagBits ::eMemoryWrite, vk::AccessFlagBits ::eTransferRead,
+        vk::ImageLayout::eGeneral, vk::ImageLayout::eTransferSrcOptimal,
+        vk::PipelineStageFlagBits ::eTransfer,
+        vk::PipelineStageFlagBits ::eTransfer);
 
-    vk::BufferImageCopy imgCopy{
-        staging.getOffset(),
-        0u,
-        0u,
-        vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1),
-        vk::Offset3D{0, 0, 0},
+    vk::ImageCopy imgCopy{
+        vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0u, 0u, 1u),
+        vk::Offset3D(),
+        vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0u, 0u, 1u),
+        vk::Offset3D(),
         vk::Extent3D{static_cast<u32>(_internal->_width),
-                     static_cast<u32>(_internal->_height), 1u}};
-    commandBuf.copyBufferToImage(staging.handle(), _internal->_image,
-                                 vk::ImageLayout::eGeneral, imgCopy);
+        static_cast<u32>(_internal->_height), 1u}
+    };
+    commandBuf.copyImage(stagingImg, vk::ImageLayout::eTransferSrcOptimal,
+        _internal->_image, vk::ImageLayout::eTransferDstOptimal, imgCopy);
 
-    insertBarrier(commandBuf, vk::AccessFlagBits ::eTransferWrite,
-                  vk::AccessFlagBits ::eShaderRead, vk::ImageLayout::eGeneral,
-                  vk::ImageLayout::eGeneral,
-                  vk::PipelineStageFlagBits::eTransfer,
-                  vk::PipelineStageFlagBits::eFragmentShader);
+    // not sure if this barrier is needed
+    ctx.insertImageMemoryBarrier(commandBuf, stagingImg, vk::AccessFlagBits::eTransferRead, {},
+        vk::ImageLayout::eTransferSrcOptimal, vk::ImageLayout::eUndefined,
+        vk::PipelineStageFlagBits ::eTransfer,
+        vk::PipelineStageFlagBits ::eTransfer);
 
     commandBuf.end();
 
@@ -180,72 +198,85 @@ void VkwImage::setData(const void *data, u32 count, u32 offset) {
     vk::SubmitInfo submitInfo(0, nullptr, nullptr, 1, &commandBuf);
     ctx.queue(vk::QueueFlagBits::eGraphics).submit(submitInfo, fence);
 
-    ctx._device.waitForFences(fence, true, 1000000000000);
+    ctx._device.waitForFences(fence, VK_TRUE, UINT64_MAX);
 
     // Destroy resources
     ctx._device.freeCommandBuffers(ctx._graphicsCommandPool, commandBuf);
     ctx._device.destroyFence(fence);
+    // TODO write test to check if setData & getData work correctly in vulkan.
 }
 
 void VkwImage::getData(void *data, u32 count, u32 offset) {
     VulkanContext &ctx = Vulkan::context();
 
-    // Create staging buffer
-    VkwSubBuffer staging = ctx.allocate(count, DescriptorType::TRANSFER_DST,
-                                        MemoryUsage::CPU_READS);
+    vk::ImageCreateInfo stagingImgInfo(
+        {}, vk::ImageType::e2D, _internal->_imageFormat,
+        vk::Extent3D(static_cast<u32>(_internal->_width), static_cast<u32>(_internal->_height), 1u), 1u, 1u,
+        vk::SampleCountFlagBits::e1, vk::ImageTiling::eLinear,
+        vk::ImageUsageFlagBits::eTransferDst, vk::SharingMode::eExclusive,
+        0, nullptr, vk::ImageLayout::eUndefined);
+    vk::Image stagingImg = ctx._device.createImage(stagingImgInfo);
 
-    // Copy image to buffer
+    VkMemoryRequirements memRequirements = ctx._device.getImageMemoryRequirements(stagingImg);
+    
+    vk::MemoryAllocateInfo memAllocate(memRequirements.size);
+    memAllocate.memoryTypeIndex = ctx.findMemoryType(
+        memRequirements.size, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, {}, memRequirements.memoryTypeBits);
+    vk::DeviceMemory stagingMemory = ctx._device.allocateMemory(memAllocate);
+    ctx._device.bindImageMemory(stagingImg, stagingMemory, 0);
+ 
+    // Copy image to staging image
     vk::CommandBufferAllocateInfo commandBufInfo(
         ctx._graphicsCommandPool, vk::CommandBufferLevel::ePrimary, 1);
     auto commandBuf = ctx._device.allocateCommandBuffers(commandBufInfo).at(0);
     commandBuf.begin(vk::CommandBufferBeginInfo(
         vk::CommandBufferUsageFlagBits::eOneTimeSubmit));
 
-    insertBarrier(commandBuf, {}, vk::AccessFlagBits ::eTransferRead,
-                  vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral,
-                  vk::PipelineStageFlagBits ::eBottomOfPipe,
+    ctx.insertImageMemoryBarrier(commandBuf, stagingImg, {}, vk::AccessFlagBits ::eTransferWrite,
+                  vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal,
+                  vk::PipelineStageFlagBits ::eTransfer,
                   vk::PipelineStageFlagBits ::eTransfer);
 
-    vk::BufferImageCopy imgCopy{
-        staging.getOffset(),
-        0u,
-        0u,
-        vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0u, 0u, 1),
-        vk::Offset3D{0, 0, 0},
+    vk::ImageCopy imgCopy{
+        vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0u, 0u, 1u),
+        vk::Offset3D(),
+        vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0u, 0u, 1u),
+        vk::Offset3D(),
         vk::Extent3D{static_cast<u32>(_internal->_width),
-                     static_cast<u32>(_internal->_height), 1u}};
-    commandBuf.copyImageToBuffer(_internal->_image, vk::ImageLayout::eGeneral,
-                                 staging.handle(), imgCopy);
+            static_cast<u32>(_internal->_height), 1u}
+    };
+    commandBuf.copyImage(_internal->_image, vk::ImageLayout::eTransferSrcOptimal,
+                                 stagingImg, vk::ImageLayout::eTransferDstOptimal, imgCopy);
+    
+    ctx.insertImageMemoryBarrier(commandBuf, stagingImg, vk::AccessFlagBits::eTransferWrite, vk::AccessFlagBits ::eMemoryRead,
+        vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eGeneral,
+        vk::PipelineStageFlagBits ::eTransfer,
+        vk::PipelineStageFlagBits ::eTransfer);
+
     commandBuf.end();
 
     auto fence = ctx._device.createFence(vk::FenceCreateInfo());
     vk::SubmitInfo submitInfo(0, nullptr, nullptr, 1, &commandBuf);
     ctx.queue(vk::QueueFlagBits::eGraphics).submit(submitInfo, fence);
 
-    ctx._device.waitForFences(fence, true, 1000000000000);
+    ctx._device.waitForFences(fence, VK_TRUE, UINT64_MAX);
 
-    // Get data from staging buffer
-    staging.getData(data, count, offset);
+    // Get data from staging image
+    // Get layout of the image (including row pitch)
+    vk::ImageSubresource subResource{vk::ImageAspectFlagBits::eColor};
+    VkSubresourceLayout subResourceLayout = ctx._device.getImageSubresourceLayout(stagingImg, subResource);
+
+    // TODO take rowpitch into account
+    const char *imageData = reinterpret_cast<char*>(ctx._device.mapMemory(stagingMemory, offset, count, {}));
+    imageData += subResourceLayout.offset;
+    std::memcpy(data, imageData, count);
+    ctx._device.unmapMemory(stagingMemory);
 
     // Destroy resources
+    ctx._device.freeMemory(stagingMemory);
+    ctx._device.destroyImage(stagingImg);
     ctx._device.freeCommandBuffers(ctx._graphicsCommandPool, commandBuf);
     ctx._device.destroyFence(fence);
-}
-
-void VkwImage::insertBarrier(vk::CommandBuffer commandBuf,
-                             vk::AccessFlags srcAccessMask,
-                             vk::AccessFlags dstAccessMask,
-                             vk::ImageLayout srcLayout,
-                             vk::ImageLayout dstLayout,
-                             vk::PipelineStageFlags srcStageMask,
-                             vk::PipelineStageFlags dstStageMask) {
-    vk::ImageMemoryBarrier memBarrier(srcAccessMask, dstAccessMask, srcLayout,
-                                      dstLayout);
-    memBarrier.image = _internal->_image;
-    memBarrier.subresourceRange =
-        vk::ImageSubresourceRange(vk::ImageAspectFlagBits ::eColor, 0, 1, 0, 1);
-    commandBuf.pipelineBarrier(srcStageMask, dstStageMask, {}, {}, {},
-                               memBarrier);
 }
 
 vk::SubresourceLayout VkwImage::getSubresourceLayout() {
@@ -268,6 +299,10 @@ vk::Sampler VkwImage::getSampler() {
         _internal->createSampler();
     }
     return _internal->_sampler;
+}
+
+vk::Image VkwImage::handle() {
+    return _internal->_image;
 }
 
 } // namespace world
