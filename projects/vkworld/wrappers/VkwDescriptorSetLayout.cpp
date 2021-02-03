@@ -27,7 +27,9 @@ public:
     void createDescriptorSetLayout() {
         auto &ctx = Vulkan::context();
         vk::DescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo(
-            {}, static_cast<u32>(_bindings.size()), &_bindings[0]);
+            {}, static_cast<u32>(_bindings.size()), nullptr);
+        if (!_bindings.empty())
+            descriptorSetLayoutCreateInfo.pBindings = &_bindings[0];
         _descriptorSetLayout = ctx._device.createDescriptorSetLayout(
             descriptorSetLayoutCreateInfo);
 
@@ -68,6 +70,7 @@ vk::DescriptorType VkwDescriptorSetLayout::getBindingType(u32 id) const {
                                 std::to_string(id));
 }
 
+// TODO rename to getHandle()
 vk::DescriptorSetLayout &VkwDescriptorSetLayout::getLayout() {
     if (!_internal->_initialized) {
         _internal->createDescriptorSetLayout();

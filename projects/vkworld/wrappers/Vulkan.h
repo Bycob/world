@@ -82,6 +82,8 @@ public:
 
     void displayAvailableExtensions();
 
+    void displayAvailableValidationLayers();
+
 private:
     vk::Instance _instance;
 

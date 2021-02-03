@@ -20,7 +20,7 @@ void VkwWorker::endCommandRecording() { _commandBuffer.end(); }
 
 void VkwWorker::waitForCompletion() {
     auto &ctx = Vulkan::context();
-    ctx._device.waitForFences(_fence, true, 100000000000);
+    ctx._device.waitForFences(_fence, VK_TRUE, UINT64_MAX);
 }
 
 void VkwWorker::reset() {
