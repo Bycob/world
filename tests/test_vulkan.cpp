@@ -226,15 +226,6 @@ void testTextureGenerator() {
     generator.generateTexture().write("assets/vulkan/test_generator.png");
 }
 
-#define VK_CHECK_RESULT(f)																				\
-{																										\
-	VkResult res = (f);																					\
-	if (res != VK_SUCCESS)																				\
-	{																									\
-		std::cout << "Fatal : VkResult is \"" << res << "\" in " << __FILE__ << " at line " << __LINE__ << "\n"; \
-		assert(res == VK_SUCCESS);																		\
-	}																									\
-}
 
 void testVkwGrass() {
     VkwGrass grass;
@@ -259,6 +250,16 @@ void testLeaves() {
 // working example from sasha willem
 
 #include "VulkanInitializers.hpp"
+
+#define VK_CHECK_RESULT(f)																				\
+{																										\
+	VkResult res = (f);																					\
+	if (res != VK_SUCCESS)																				\
+	{																									\
+		std::cout << "Fatal : VkResult is \"" << res << "\" in " << __FILE__ << " at line " << __LINE__ << "\n"; \
+		assert(res == VK_SUCCESS);																		\
+	}																									\
+}
 
 void insertImageMemoryBarrier(
     VkCommandBuffer cmdbuffer,
@@ -346,9 +347,6 @@ void workingExample() {
     VkCommandPool commandPool = ctx._graphicsCommandPool;
 
     // Variables
-    VkImage colorImage;
-    VkDeviceMemory colorMemory;
-    VkImageView colorView;
     VkDescriptorSetLayout descriptorSetLayout;
     VkPipelineLayout pipelineLayout;
     std::vector<VkShaderModule> shaderModules;
@@ -458,45 +456,9 @@ void workingExample() {
     */
     int width = 1024;
     int height = 1024;
-    VkFormat colorFormat = VK_FORMAT_R32G32B32A32_SFLOAT;
-    VkFormat depthFormat;
-    {
-        // Color attachment
-        VkImageCreateInfo image = vks::initializers::imageCreateInfo();
-        image.imageType = VK_IMAGE_TYPE_2D;
-        image.format = colorFormat;
-        image.extent.width = width;
-        image.extent.height = height;
-        image.extent.depth = 1;
-        image.mipLevels = 1;
-        image.arrayLayers = 1;
-        image.samples = VK_SAMPLE_COUNT_1_BIT;
-        image.tiling = VK_IMAGE_TILING_OPTIMAL;
-        image.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-
-        VkMemoryAllocateInfo memAlloc = vks::initializers::memoryAllocateInfo();
-        VkMemoryRequirements memReqs;
-
-        VK_CHECK_RESULT(vkCreateImage(device, &image, nullptr, &colorImage));
-        vkGetImageMemoryRequirements(device, colorImage, &memReqs);
-        memAlloc.allocationSize = memReqs.size;
-        memAlloc.memoryTypeIndex = ctx.findMemoryType(0, vk::MemoryPropertyFlagBits::eDeviceLocal, {}, memReqs.memoryTypeBits);
-        std::cout << "device local memory index: " << memAlloc.memoryTypeIndex << std::endl;
-        VK_CHECK_RESULT(vkAllocateMemory(device, &memAlloc, nullptr, &colorMemory));
-        VK_CHECK_RESULT(vkBindImageMemory(device, colorImage, colorMemory, 0));
-
-        VkImageViewCreateInfo colorImageView = vks::initializers::imageViewCreateInfo();
-        colorImageView.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        colorImageView.format = colorFormat;
-        colorImageView.subresourceRange = {};
-        colorImageView.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        colorImageView.subresourceRange.baseMipLevel = 0;
-        colorImageView.subresourceRange.levelCount = 1;
-        colorImageView.subresourceRange.baseArrayLayer = 0;
-        colorImageView.subresourceRange.layerCount = 1;
-        colorImageView.image = colorImage;
-        VK_CHECK_RESULT(vkCreateImageView(device, &colorImageView, nullptr, &colorView));
-    }
+    vk::Format colorFormat = vk::Format::eR32G32B32A32Sfloat;
+    VkFormat colorFormatC = VK_FORMAT_R32G32B32A32_SFLOAT;
+    VkwImage image(width, height, VkwImageUsage::OFFSCREEN_RENDER, colorFormat);
 
     /*
     Create renderpass
@@ -504,7 +466,7 @@ void workingExample() {
     {
         std::array<VkAttachmentDescription, 1> attchmentDescriptions = {};
         // Color attachment
-        attchmentDescriptions[0].format = colorFormat;
+        attchmentDescriptions[0].format = colorFormatC;
         attchmentDescriptions[0].samples = VK_SAMPLE_COUNT_1_BIT;
         attchmentDescriptions[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         attchmentDescriptions[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -552,7 +514,7 @@ void workingExample() {
         VK_CHECK_RESULT(vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass));
 
         VkImageView attachments[1];
-        attachments[0] = colorView;
+        attachments[0] = image.getImageView();
 
         VkFramebufferCreateInfo framebufferCreateInfo = vks::initializers::framebufferCreateInfo();
         framebufferCreateInfo.renderPass = renderPass;
@@ -700,8 +662,6 @@ void workingExample() {
         vkDeviceWaitIdle(device);
     }
 
-    // VkwImage image();
-
     /*
     Copy framebuffer image to host visible image
     */
@@ -767,7 +727,7 @@ void workingExample() {
 
         vkCmdCopyImage(
             copyCmd,
-            colorImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+            image.handle(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
             dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
             1,
             &imageCopyRegion);
