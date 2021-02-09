@@ -426,6 +426,24 @@ vk::SampleCountFlagBits VulkanContext::getMaxUsableSampleCount(
     return vk::SampleCountFlagBits::e1;
 }
 
+void VulkanContext::insertImageMemoryBarrier(vk::CommandBuffer commandBuf,
+    vk::Image image,
+    vk::AccessFlags srcAccessMask,
+    vk::AccessFlags dstAccessMask,
+    vk::ImageLayout srcLayout,
+    vk::ImageLayout dstLayout,
+    vk::PipelineStageFlags srcStageMask,
+    vk::PipelineStageFlags dstStageMask) {
+
+    vk::ImageMemoryBarrier memBarrier(srcAccessMask, dstAccessMask, srcLayout,
+        dstLayout);
+    memBarrier.image = image;
+    memBarrier.subresourceRange =
+        vk::ImageSubresourceRange(vk::ImageAspectFlagBits ::eColor, 0, 1, 0, 1);
+    commandBuf.pipelineBarrier(srcStageMask, dstStageMask, {}, {}, {},
+        memBarrier);
+}
+
 VkwSubBuffer VulkanContext::allocate(u32 size, DescriptorType usage,
                                      MemoryUsage memType) {
     memid key(usage, memType);

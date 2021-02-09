@@ -32,8 +32,8 @@ int main(int argc, char **argv) {
     // testCompute();
     // testMultilayerTerrainTexture(argc, argv);
     testTextureGenerator();
-    // testVkwGrass();
-    // testLeaves();
+    testVkwGrass();
+    testLeaves();
     // std::cout << "====" << std::endl;
     // testRandomImage();
     // workingExample();
