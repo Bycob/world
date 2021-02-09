@@ -135,6 +135,26 @@ void VkwImage::registerTo(vk::DescriptorSet &descriptorSet,
     ctx._device.updateDescriptorSets(1, &writeDescriptorSet, 0, nullptr);
 }
 
+// TODO move this function out in utility somewhere
+void insertBarrier(vk::CommandBuffer commandBuf,
+    vk::Image image,
+    vk::AccessFlags srcAccessMask,
+    vk::AccessFlags dstAccessMask,
+    vk::ImageLayout srcLayout,
+    vk::ImageLayout dstLayout,
+    vk::PipelineStageFlags srcStageMask,
+    vk::PipelineStageFlags dstStageMask) {
+
+    vk::ImageMemoryBarrier memBarrier(srcAccessMask, dstAccessMask, srcLayout,
+        dstLayout);
+    memBarrier.image = image;
+    memBarrier.subresourceRange =
+        vk::ImageSubresourceRange(vk::ImageAspectFlagBits ::eColor, 0, 1, 0, 1);
+    commandBuf.pipelineBarrier(srcStageMask, dstStageMask, {}, {}, {},
+        memBarrier);
+}
+
+// TODO update this function
 void VkwImage::setData(const void *data, u32 count, u32 offset) {
     VulkanContext &ctx = Vulkan::context();
 
@@ -149,10 +169,10 @@ void VkwImage::setData(const void *data, u32 count, u32 offset) {
     commandBuf.begin(vk::CommandBufferBeginInfo(
         vk::CommandBufferUsageFlagBits::eOneTimeSubmit));
 
-    insertBarrier(commandBuf, {}, vk::AccessFlagBits ::eTransferWrite,
+    /*insertBarrier(commandBuf, stagingImg, {}, vk::AccessFlagBits ::eTransferWrite,
                   vk::ImageLayout::eUndefined, vk::ImageLayout::eGeneral,
                   vk::PipelineStageFlagBits::eTopOfPipe,
-                  vk::PipelineStageFlagBits::eTransfer);
+                  vk::PipelineStageFlagBits::eTransfer);*/
 
     vk::BufferImageCopy imgCopy{
         staging.getOffset(),
@@ -165,11 +185,11 @@ void VkwImage::setData(const void *data, u32 count, u32 offset) {
     commandBuf.copyBufferToImage(staging.handle(), _internal->_image,
                                  vk::ImageLayout::eGeneral, imgCopy);
 
-    insertBarrier(commandBuf, vk::AccessFlagBits ::eTransferWrite,
+    /*insertBarrier(commandBuf, stagingImg, vk::AccessFlagBits ::eTransferWrite,
                   vk::AccessFlagBits ::eShaderRead, vk::ImageLayout::eGeneral,
                   vk::ImageLayout::eGeneral,
                   vk::PipelineStageFlagBits::eTransfer,
-                  vk::PipelineStageFlagBits::eFragmentShader);
+                  vk::PipelineStageFlagBits::eFragmentShader);*/
 
     commandBuf.end();
 
@@ -187,20 +207,19 @@ void VkwImage::setData(const void *data, u32 count, u32 offset) {
 void VkwImage::getData(void *data, u32 count, u32 offset) {
     VulkanContext &ctx = Vulkan::context();
 
-    vk::ImageCreateInfo stagingImgInfo{
+    vk::ImageCreateInfo stagingImgInfo(
         {}, vk::ImageType::e2D, _internal->_imageFormat,
         vk::Extent3D(static_cast<u32>(_internal->_width), static_cast<u32>(_internal->_height), 1u), 1u, 1u,
         vk::SampleCountFlagBits::e1, vk::ImageTiling::eLinear,
         vk::ImageUsageFlagBits::eTransferDst, vk::SharingMode::eExclusive,
-        0, nullptr, vk::ImageLayout::eUndefined};
-
+        0, nullptr, vk::ImageLayout::eUndefined);
     vk::Image stagingImg = ctx._device.createImage(stagingImgInfo);
+
     VkMemoryRequirements memRequirements = ctx._device.getImageMemoryRequirements(stagingImg);
-    vk::MemoryAllocateInfo memAllocate(memRequirements.size,
-        memRequirements.alignment);
+    
+    vk::MemoryAllocateInfo memAllocate(memRequirements.size);
     memAllocate.memoryTypeIndex = ctx.findMemoryType(
         memRequirements.size, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, {}, memRequirements.memoryTypeBits);
-
     vk::DeviceMemory stagingMemory = ctx._device.allocateMemory(memAllocate);
     ctx._device.bindImageMemory(stagingImg, stagingMemory, 0);
  
@@ -211,7 +230,7 @@ void VkwImage::getData(void *data, u32 count, u32 offset) {
     commandBuf.begin(vk::CommandBufferBeginInfo(
         vk::CommandBufferUsageFlagBits::eOneTimeSubmit));
 
-    insertBarrier(commandBuf, {}, vk::AccessFlagBits ::eTransferWrite,
+    insertBarrier(commandBuf, stagingImg, {}, vk::AccessFlagBits ::eTransferWrite,
                   vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal,
                   vk::PipelineStageFlagBits ::eTransfer,
                   vk::PipelineStageFlagBits ::eTransfer);
@@ -226,6 +245,12 @@ void VkwImage::getData(void *data, u32 count, u32 offset) {
     };
     commandBuf.copyImage(_internal->_image, vk::ImageLayout::eTransferSrcOptimal,
                                  stagingImg, vk::ImageLayout::eTransferDstOptimal, imgCopy);
+    
+    insertBarrier(commandBuf, stagingImg, vk::AccessFlagBits::eTransferWrite, vk::AccessFlagBits ::eMemoryRead,
+        vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eGeneral,
+        vk::PipelineStageFlagBits ::eTransfer,
+        vk::PipelineStageFlagBits ::eTransfer);
+
     commandBuf.end();
 
     auto fence = ctx._device.createFence(vk::FenceCreateInfo());
@@ -252,22 +277,6 @@ void VkwImage::getData(void *data, u32 count, u32 offset) {
     ctx._device.destroyFence(fence);
 }
 
-void VkwImage::insertBarrier(vk::CommandBuffer commandBuf,
-                             vk::AccessFlags srcAccessMask,
-                             vk::AccessFlags dstAccessMask,
-                             vk::ImageLayout srcLayout,
-                             vk::ImageLayout dstLayout,
-                             vk::PipelineStageFlags srcStageMask,
-                             vk::PipelineStageFlags dstStageMask) {
-    vk::ImageMemoryBarrier memBarrier(srcAccessMask, dstAccessMask, srcLayout,
-                                      dstLayout);
-    memBarrier.image = _internal->_image;
-    memBarrier.subresourceRange =
-        vk::ImageSubresourceRange(vk::ImageAspectFlagBits ::eColor, 0, 1, 0, 1);
-    commandBuf.pipelineBarrier(srcStageMask, dstStageMask, {}, {}, {},
-                               memBarrier);
-}
-
 vk::SubresourceLayout VkwImage::getSubresourceLayout() {
     VulkanContext &ctx = Vulkan::context();
     // TODO ensure subresource is correctly selected
@@ -288,6 +297,10 @@ vk::Sampler VkwImage::getSampler() {
         _internal->createSampler();
     }
     return _internal->_sampler;
+}
+
+vk::Image VkwImage::handle() {
+    return _internal->_image;
 }
 
 } // namespace world

@@ -31,12 +31,12 @@ int main(int argc, char **argv) {
 
     // testCompute();
     // testMultilayerTerrainTexture(argc, argv);
-    // testTextureGenerator();
+    testTextureGenerator();
     // testVkwGrass();
     // testLeaves();
     // std::cout << "====" << std::endl;
     // testRandomImage();
-    workingExample();
+    // workingExample();
 }
 
 void testCompute() {
@@ -665,6 +665,7 @@ void workingExample() {
     /*
     Copy framebuffer image to host visible image
     */
+    
     const char* imagedata;
     {
         // Create the linear tiled destination image to copy to and to read the memory from
@@ -760,10 +761,6 @@ void workingExample() {
         imagedata += subResourceLayout.offset;
         std::cout << "offset " << subResourceLayout.offset << std::endl;
 
-        /*
-        Save host visible framebuffer image to disk (ppm format)
-        */
-
 #if defined (VK_USE_PLATFORM_ANDROID_KHR)
         const char* filename = strcat(getenv("EXTERNAL_STORAGE"), "/headless.ppm");
 #else
@@ -805,4 +802,7 @@ void workingExample() {
     }
 
     vkQueueWaitIdle(queue);
+
+    VkwMemoryHelper::GPUToImage(image).write("assets/vulkan/test_generator.png");
+    std::cout << "Image was written" << std::endl;
 }

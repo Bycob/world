@@ -81,16 +81,10 @@ public:
 
     vk::Sampler getSampler();
 
+    vk::Image handle();
+
 private:
     std::shared_ptr<VkwImagePrivate> _internal;
-
-
-    void insertBarrier(vk::CommandBuffer commandBuf,
-                       vk::AccessFlags srcAccessMask,
-                       vk::AccessFlags dstAccessMask, vk::ImageLayout srcLayout,
-                       vk::ImageLayout dstLayout,
-                       vk::PipelineStageFlags srcStageMask,
-                       vk::PipelineStageFlags dstStageMask);
 };
 
 } // namespace world
