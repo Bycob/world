@@ -24,7 +24,6 @@ Application::Application()
 
 void Application::run(int argc, char **argv) {
     loadWorld(argc, argv);
-    _world->setCacheDirectory("./.cache/");
 
     _running = true;
     _mainView->show();
@@ -118,12 +117,20 @@ std::unique_ptr<world::Collector> Application::popFull() {
 
 void Application::loadWorld(int argc, char **argv) {
     bool vulkan = false;
+    bool cache = false;
 
-    if (argc > 1) {
-        std::string arg = argv[1];
+    for (int i = 1; i <= argc; ++i) {
+        std::string arg = argv[i];
 
-        if (arg == "vulkan") {
+        if (arg == "--vulkan") {
             vulkan = true;
+        }
+        else if (arg == "--cache") {
+            cache = true;
+        }
+        else if (arg == "--help") {
+            std::cout << "Usage: world3D [--vulkan] [--cache] [filename]" << std::endl;
+            exit(0);
         }
         // Try read the file
         else {
@@ -131,21 +138,26 @@ void Application::loadWorld(int argc, char **argv) {
             _world = std::make_unique<FlatWorld>();
             _world->load(arg);
             // _world->save("dump.json");
-            return;
         }
     }
 
+    if (!_world) {
 #ifdef USE_VKWORLD
-    if (vulkan) {
-        _world = std::unique_ptr<FlatWorld>(VkWorld::createDemoFlatWorld());
-    } else {
-        _world = std::unique_ptr<FlatWorld>(FlatWorld::createDemoFlatWorld());
-    }
+        if (vulkan) {
+            _world = std::unique_ptr<FlatWorld>(VkWorld::createDemoFlatWorld());
+        } else {
+            _world = std::unique_ptr<FlatWorld>(FlatWorld::createDemoFlatWorld());
+        }
 #else
-    if (vulkan) {
-        std::cout << "Vulkan not supported, fallback to default world"
-                  << std::endl;
-    }
-    _world = std::unique_ptr<FlatWorld>(FlatWorld::createDemoFlatWorld());
+        if (vulkan) {
+            std::cout << "Vulkan not supported, fallback to default world"
+                      << std::endl;
+        }
+        _world = std::unique_ptr<FlatWorld>(FlatWorld::createDemoFlatWorld());
 #endif
+    }
+
+    if (cache) {
+        _world->setCacheDirectory("./.cache/");
+    }
 }
