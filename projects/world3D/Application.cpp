@@ -119,7 +119,7 @@ void Application::loadWorld(int argc, char **argv) {
     bool vulkan = false;
     bool cache = false;
 
-    for (int i = 1; i <= argc; ++i) {
+    for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
 
         if (arg == "--vulkan") {

@@ -305,7 +305,7 @@ HabitatFeatures Tree::randomize() {
         addWorkerInternal(readSubclass<ITreeWorker>(leavesTex));
     } catch (...) {
         // no vulkan modules
-        std::cout << "[Warning] Vulkan modules are not available" << std::endl;
+        std::cerr << "[Warning] Vulkan modules are not available" << std::endl;
     }
 
     while (_internal->_instances.size() < 5) {

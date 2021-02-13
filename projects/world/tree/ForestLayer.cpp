@@ -11,6 +11,7 @@ ForestLayer::ForestLayer()
           _templateTree(std::make_unique<Tree>()),
           _treeSprite(3, 3, ImageType::RGB) {
 
+    // FIXME should not call randomize in constructor (creates vulkan context)
     _templateTree->randomize();
     _templateTree->setLods({}, {2, 7, 20});
 
