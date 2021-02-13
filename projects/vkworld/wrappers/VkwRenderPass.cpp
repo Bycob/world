@@ -38,22 +38,26 @@ void VkwRenderPassPrivate::init() {
     dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
     dependencies[0].dstSubpass = 0;
     dependencies[0].srcStageMask = vk::PipelineStageFlagBits::eBottomOfPipe;
-    dependencies[0].dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+    dependencies[0].dstStageMask =
+        vk::PipelineStageFlagBits::eColorAttachmentOutput;
     dependencies[0].srcAccessMask = vk::AccessFlagBits::eMemoryRead;
-    dependencies[0].dstAccessMask = vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite;
+    dependencies[0].dstAccessMask = vk::AccessFlagBits::eColorAttachmentRead |
+                                    vk::AccessFlagBits::eColorAttachmentWrite;
     dependencies[0].dependencyFlags = vk::DependencyFlagBits::eByRegion;
 
     dependencies[1].srcSubpass = 0;
     dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
-    dependencies[1].srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+    dependencies[1].srcStageMask =
+        vk::PipelineStageFlagBits::eColorAttachmentOutput;
     dependencies[1].dstStageMask = vk::PipelineStageFlagBits::eBottomOfPipe;
-    dependencies[1].srcAccessMask = vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite;
+    dependencies[1].srcAccessMask = vk::AccessFlagBits::eColorAttachmentRead |
+                                    vk::AccessFlagBits::eColorAttachmentWrite;
     dependencies[1].dstAccessMask = vk::AccessFlagBits::eMemoryRead;
     dependencies[1].dependencyFlags = vk::DependencyFlagBits::eByRegion;
 
-    vk::RenderPassCreateInfo renderPassInfo({}, 1, &colorAttachment, 1,
-                                            &subpass, static_cast<uint32_t>(dependencies.size()),
-        dependencies.data());
+    vk::RenderPassCreateInfo renderPassInfo(
+        {}, 1, &colorAttachment, 1, &subpass,
+        static_cast<uint32_t>(dependencies.size()), dependencies.data());
     _renderPass = ctx._device.createRenderPass(renderPassInfo);
 
     // --- Framebuffer

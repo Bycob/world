@@ -19,7 +19,7 @@ void VkwMemoryHelper::GPUToImage(IVkwMemoryAccess &memory, Image &img, u32 e) {
 
     float *buffer = new float[size];
     memory.getData(buffer, size * sizeof(float), 0);
-        
+
     for (u32 y = 0; y < h; ++y) {
         for (u32 x = 0; x < w; ++x) {
             u32 pos = (y * w + x) * e;
@@ -72,8 +72,7 @@ Image VkwMemoryHelper::GPUToImage(VkwImage &vkimg) {
     Image img(vkimg.width(), vkimg.height(), imType);
     if (isFloat) {
         GPUToImage(vkimg, img);
-    }
-    else {
+    } else {
         GPUToImageu(vkimg, img);
     }
     return img;
@@ -126,7 +125,7 @@ void VkwMemoryHelper::copyBuffer(VkwSubBuffer &from, VkwSubBuffer &to) {
         vk::PipelineStageFlagBits::eTopOfPipe,
         vk::PipelineStageFlagBits::eTransfer);*/
 
-    vk::BufferCopy bufCopy{ from.getOffset(), to.getOffset(), from.getSize() };
+    vk::BufferCopy bufCopy{from.getOffset(), to.getOffset(), from.getSize()};
     commandBuf.copyBuffer(from.handle(), to.handle(), bufCopy);
 
     /*insertBarrier(commandBuf, vk::AccessFlagBits ::eTransferWrite,

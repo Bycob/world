@@ -123,9 +123,7 @@ public:
         return _tcs.find(coords) != _tcs.end();
     }
 
-    NodeCache &getCache() override {
-        return _cache;
-    }
+    NodeCache &getCache() override { return _cache; }
 };
 
 TEST_CASE("GridStorage", "[utilities]") {

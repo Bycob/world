@@ -161,8 +161,8 @@ public:
     const GreyPixel &grey(int x, int y) const;
 
     /** Set the value of the pixel at (x, y). The number of elements
-    * copied from the array depends on the type of the image.
-    * @param values a u8 array holding the values to be set. */
+     * copied from the array depends on the type of the image.
+     * @param values a u8 array holding the values to be set. */
     void set(int x, int y, const u8 *values);
 
     /** Set the value of the pixel at (x, y). The number of elements

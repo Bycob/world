@@ -124,12 +124,11 @@ void Application::loadWorld(int argc, char **argv) {
 
         if (arg == "--vulkan") {
             vulkan = true;
-        }
-        else if (arg == "--cache") {
+        } else if (arg == "--cache") {
             cache = true;
-        }
-        else if (arg == "--help") {
-            std::cout << "Usage: world3D [--vulkan] [--cache] [filename]" << std::endl;
+        } else if (arg == "--help") {
+            std::cout << "Usage: world3D [--vulkan] [--cache] [filename]"
+                      << std::endl;
             exit(0);
         }
         // Try read the file
@@ -146,7 +145,8 @@ void Application::loadWorld(int argc, char **argv) {
         if (vulkan) {
             _world = std::unique_ptr<FlatWorld>(VkWorld::createDemoFlatWorld());
         } else {
-            _world = std::unique_ptr<FlatWorld>(FlatWorld::createDemoFlatWorld());
+            _world =
+                std::unique_ptr<FlatWorld>(FlatWorld::createDemoFlatWorld());
         }
 #else
         if (vulkan) {

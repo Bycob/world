@@ -41,7 +41,7 @@ void testCompute() {
     int size = 1024;
     int groupSize = 32;
     int dispatchSize = size / groupSize;
-    
+
     std::cout << "Set up..." << std::endl;
 
     VkwComputeWorker worker;
@@ -53,7 +53,8 @@ void testCompute() {
 
     // -- 0
     vec3u dimsVec(size, size, 1);
-    auto dims = ctx.allocate(sizeof(vec3u), DescriptorType::UNIFORM_BUFFER, MemoryUsage::CPU_WRITES);
+    auto dims = ctx.allocate(sizeof(vec3u), DescriptorType::UNIFORM_BUFFER,
+                             MemoryUsage::CPU_WRITES);
     dims.setData(&dimsVec); // TODO add setData(const T &struct)
 
     // -- 1
@@ -67,7 +68,9 @@ void testCompute() {
         float persistence = 0.5f;
     } noiseStruct;
 
-    auto noiseParams = ctx.allocate(sizeof(noiseStruct), DescriptorType::UNIFORM_BUFFER, MemoryUsage::CPU_WRITES);
+    auto noiseParams =
+        ctx.allocate(sizeof(noiseStruct), DescriptorType::UNIFORM_BUFFER,
+                     MemoryUsage::CPU_WRITES);
     noiseParams.setData(&noiseStruct);
 
     // -- 256
@@ -78,11 +81,15 @@ void testCompute() {
         randVec.push_back(u);
     }
 
-    auto random = ctx.allocate(randVec.size() * sizeof(u32), DescriptorType::STORAGE_BUFFER, MemoryUsage::CPU_WRITES);
+    auto random =
+        ctx.allocate(randVec.size() * sizeof(u32),
+                     DescriptorType::STORAGE_BUFFER, MemoryUsage::CPU_WRITES);
     random.setData(&randVec[0]);
 
     // -- 3
-    auto output = ctx.allocate(size * size * sizeof(float), DescriptorType::STORAGE_BUFFER, MemoryUsage::CPU_READS);
+    auto output =
+        ctx.allocate(size * size * sizeof(float),
+                     DescriptorType::STORAGE_BUFFER, MemoryUsage::CPU_READS);
 
 
     VkwDescriptorSet dset(layout);
@@ -113,7 +120,8 @@ void testRandomImage() {
     VkwRandomTexture randTex(256);
 
     world::createDirectories("assets/vulkan/");
-    VkwMemoryHelper::GPUToImage(randTex.get()).write("assets/vulkan/randTex.png");
+    VkwMemoryHelper::GPUToImage(randTex.get())
+        .write("assets/vulkan/randTex.png");
     std::cout << "wrote assets/vulkan/randTex.png" << std::endl;
 }
 
@@ -219,7 +227,7 @@ void testTextureGenerator() {
 #endif
 
     std::cout << "writing to "
-        << "assets/vulkan/test_generator.png" << std::endl;
+              << "assets/vulkan/test_generator.png" << std::endl;
     generator.generateTexture().write("assets/vulkan/test_generator.png");
 }
 

@@ -155,10 +155,10 @@ void VulkanContext::displayAvailableValidationLayers() {
 bool VulkanContext::checkValidationLayerSupport() {
     auto availableLayers = vk::enumerateInstanceLayerProperties();
 
-    for (const char* layerName : validationLayers) {
+    for (const char *layerName : validationLayers) {
         bool layerFound = false;
 
-        for (const auto& layerProperties : availableLayers) {
+        for (const auto &layerProperties : availableLayers) {
             if (strcmp(layerName, layerProperties.layerName) == 0) {
                 layerFound = true;
                 break;
@@ -227,8 +227,8 @@ void VulkanContext::createLogicalDevice() {
 
     const float defaultQueuePriority(1.0f);
     for (int familyIndex : familyIndexes) {
-        queueInfos.push_back(
-            vk::DeviceQueueCreateInfo({}, familyIndex, 1, &defaultQueuePriority));
+        queueInfos.push_back(vk::DeviceQueueCreateInfo({}, familyIndex, 1,
+                                                       &defaultQueuePriority));
     }
 
     // Device creation
@@ -426,22 +426,19 @@ vk::SampleCountFlagBits VulkanContext::getMaxUsableSampleCount(
     return vk::SampleCountFlagBits::e1;
 }
 
-void VulkanContext::insertImageMemoryBarrier(vk::CommandBuffer commandBuf,
-    vk::Image image,
-    vk::AccessFlags srcAccessMask,
-    vk::AccessFlags dstAccessMask,
-    vk::ImageLayout srcLayout,
-    vk::ImageLayout dstLayout,
-    vk::PipelineStageFlags srcStageMask,
-    vk::PipelineStageFlags dstStageMask) {
+void VulkanContext::insertImageMemoryBarrier(
+    vk::CommandBuffer commandBuf, vk::Image image,
+    vk::AccessFlags srcAccessMask, vk::AccessFlags dstAccessMask,
+    vk::ImageLayout srcLayout, vk::ImageLayout dstLayout,
+    vk::PipelineStageFlags srcStageMask, vk::PipelineStageFlags dstStageMask) {
 
     vk::ImageMemoryBarrier memBarrier(srcAccessMask, dstAccessMask, srcLayout,
-        dstLayout);
+                                      dstLayout);
     memBarrier.image = image;
     memBarrier.subresourceRange =
         vk::ImageSubresourceRange(vk::ImageAspectFlagBits ::eColor, 0, 1, 0, 1);
     commandBuf.pipelineBarrier(srcStageMask, dstStageMask, {}, {}, {},
-        memBarrier);
+                               memBarrier);
 }
 
 VkwSubBuffer VulkanContext::allocate(u32 size, DescriptorType usage,

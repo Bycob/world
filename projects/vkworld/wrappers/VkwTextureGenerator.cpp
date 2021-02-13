@@ -75,10 +75,12 @@ void VkwTextureGenerator::generateTextureAsync() {
             vertices.emplace_back(_mesh.getVertex(i));
         }
         auto stagingVert = ctx.allocate(vertices.size() * sizeof(VkwVertex),
-                                    DescriptorType::VERTEX_BUFFER,
-                                    MemoryUsage::CPU_WRITES);
+                                        DescriptorType::VERTEX_BUFFER,
+                                        MemoryUsage::CPU_WRITES);
         stagingVert.setData(&vertices[0]);
-        _verticesBuf = ctx.allocate(vertices.size() * sizeof(VkwVertex), DescriptorType::VERTEX_BUFFER, MemoryUsage::GPU_ONLY);
+        _verticesBuf =
+            ctx.allocate(vertices.size() * sizeof(VkwVertex),
+                         DescriptorType::VERTEX_BUFFER, MemoryUsage::GPU_ONLY);
         VkwMemoryHelper::copyBuffer(stagingVert, _verticesBuf);
 
         // Setup Indices buffer
@@ -95,7 +97,9 @@ void VkwTextureGenerator::generateTextureAsync() {
             ctx.allocate(indices.size() * sizeof(u32),
                          DescriptorType::INDEX_BUFFER, MemoryUsage::CPU_WRITES);
         stagingIndices.setData(&indices[0]);
-        _indicesBuf = ctx.allocate(indices.size() * sizeof(u32), DescriptorType::VERTEX_BUFFER, MemoryUsage::GPU_ONLY);
+        _indicesBuf =
+            ctx.allocate(indices.size() * sizeof(u32),
+                         DescriptorType::VERTEX_BUFFER, MemoryUsage::GPU_ONLY);
         VkwMemoryHelper::copyBuffer(stagingIndices, _indicesBuf);
 
         // Draw Indexed

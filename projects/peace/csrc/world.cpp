@@ -47,8 +47,7 @@ PEACE_EXPORT WorldPtr createWorldFromJson(char *jsonStr) {
         WorldFile wf;
         wf.fromJson(jsonStr);
         world->read(wf);
-    }
-    catch (std::runtime_error &e) {
+    } catch (std::runtime_error &e) {
         std::cerr << jsonStr << std::endl;
         std::cerr << e.what() << std::endl;
         throw;
@@ -60,8 +59,7 @@ PEACE_EXPORT WorldPtr createWorldFromFile(char *filename) {
     auto *world = new FlatWorld();
     try {
         world->load(filename);
-    }
-    catch (std::runtime_error &e) {
+    } catch (std::runtime_error &e) {
         std::cerr << e.what() << std::endl;
         throw;
     }

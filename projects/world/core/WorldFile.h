@@ -253,7 +253,8 @@ template <typename T> T *readSubclass(const WorldFile &file);
     }();                                                                       \
                                                                                \
     template <>                                                                \
-    void WORLDAPI_EXPORT ChildClass<TemplateType>::writeSubclass(WorldFile &wf) const { \
+    void WORLDAPI_EXPORT ChildClass<TemplateType>::writeSubclass(              \
+        WorldFile &wf) const {                                                 \
         wf.addString("type", ClassID);                                         \
         this->write(wf);                                                       \
     }

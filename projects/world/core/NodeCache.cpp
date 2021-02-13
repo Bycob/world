@@ -80,7 +80,8 @@ std::string NodeCache::getDirectory() const {
 
 std::string NodeCache::getChildDirectory(const NodeKey &key) const {
     if (!isAvailable()) {
-        throw std::runtime_error("getChildDirectory(): Cache is not available!");
+        throw std::runtime_error(
+            "getChildDirectory(): Cache is not available!");
     }
     return getDirectory() + NodeKeys::toString(key) + "/";
 }

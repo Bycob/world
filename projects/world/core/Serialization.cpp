@@ -94,38 +94,44 @@ template <> void WORLDAPI_EXPORT write<vec2u>(const vec2u &s, WorldFile &wf) {
 
 // Color
 
-template <> void WORLDAPI_EXPORT read<Color4d>(const WorldFile &wf, Color4d &c) {
+template <>
+void WORLDAPI_EXPORT read<Color4d>(const WorldFile &wf, Color4d &c) {
     wf.readDoubleOpt("r", c._r);
     wf.readDoubleOpt("g", c._g);
     wf.readDoubleOpt("b", c._b);
     wf.readDoubleOpt("a", c._a);
 }
 
-template <> void WORLDAPI_EXPORT write<Color4d>(const Color4d &c, WorldFile &wf) {
+template <>
+void WORLDAPI_EXPORT write<Color4d>(const Color4d &c, WorldFile &wf) {
     wf.addDouble("r", c._r);
     wf.addDouble("g", c._g);
     wf.addDouble("b", c._b);
     wf.addDouble("a", c._a);
 }
 
-template <> void WORLDAPI_EXPORT read<Color4u>(const WorldFile &wf, Color4u &c) {
+template <>
+void WORLDAPI_EXPORT read<Color4u>(const WorldFile &wf, Color4u &c) {
     wf.readUintOpt("value", c._color);
 }
 
-template <> void WORLDAPI_EXPORT write<Color4u>(const Color4u &c, WorldFile &wf) {
+template <>
+void WORLDAPI_EXPORT write<Color4u>(const Color4u &c, WorldFile &wf) {
     wf.addUint("value", c._color);
 }
 
 // TileSystem
 
-template <> void WORLDAPI_EXPORT write<TileSystem>(const TileSystem &ts, WorldFile &wf) {
+template <>
+void WORLDAPI_EXPORT write<TileSystem>(const TileSystem &ts, WorldFile &wf) {
     wf.addInt("maxLod", ts._maxLod);
     wf.addInt("factor", ts._factor);
     wf.addStruct("bufferRes", ts._bufferRes);
     wf.addStruct("baseSize", ts._baseSize);
 }
 
-template <> void WORLDAPI_EXPORT read<TileSystem>(const WorldFile &wf, TileSystem &ts) {
+template <>
+void WORLDAPI_EXPORT read<TileSystem>(const WorldFile &wf, TileSystem &ts) {
     wf.readIntOpt("maxLod", ts._maxLod);
     wf.readIntOpt("factor", ts._factor);
     wf.readStruct("bufferRes", ts._bufferRes);
@@ -134,7 +140,8 @@ template <> void WORLDAPI_EXPORT read<TileSystem>(const WorldFile &wf, TileSyste
 
 // Perlin info
 
-template <> void WORLDAPI_EXPORT write<PerlinInfo>(const PerlinInfo &pi, WorldFile &wf) {
+template <>
+void WORLDAPI_EXPORT write<PerlinInfo>(const PerlinInfo &pi, WorldFile &wf) {
     wf.addInt("octaves", pi.octaves);
     wf.addDouble("persistence", pi.persistence);
     wf.addBool("repeatable", pi.repeatable);
@@ -144,7 +151,8 @@ template <> void WORLDAPI_EXPORT write<PerlinInfo>(const PerlinInfo &pi, WorldFi
     wf.addInt("offsetY", pi.offsetY);
 }
 
-template <> void WORLDAPI_EXPORT read<PerlinInfo>(const WorldFile &wf, PerlinInfo &pi) {
+template <>
+void WORLDAPI_EXPORT read<PerlinInfo>(const WorldFile &wf, PerlinInfo &pi) {
     wf.readIntOpt("octaves", pi.octaves);
     wf.readDoubleOpt("persistence", pi.persistence);
     wf.readBoolOpt("repeatable", pi.repeatable);

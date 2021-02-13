@@ -42,7 +42,8 @@ VkwImagePrivate::VkwImagePrivate(int width, int height, VkwImageUsage imgUse,
     vk::MemoryAllocateInfo memAllocate(memRequirements.size,
                                        memRequirements.alignment);
     memAllocate.memoryTypeIndex = ctx.findMemoryType(
-        memRequirements.size, vk::MemoryPropertyFlagBits::eDeviceLocal, {}, memRequirements.memoryTypeBits);
+        memRequirements.size, vk::MemoryPropertyFlagBits::eDeviceLocal, {},
+        memRequirements.memoryTypeBits);
 
     _memory = ctx._device.allocateMemory(memAllocate);
     ctx._device.bindImageMemory(_image, _memory, 0);
@@ -140,25 +141,32 @@ void VkwImage::setData(const void *data, u32 count, u32 offset) {
 
     vk::ImageCreateInfo stagingImgInfo(
         {}, vk::ImageType::e2D, _internal->_imageFormat,
-        vk::Extent3D(static_cast<u32>(_internal->_width), static_cast<u32>(_internal->_height), 1u), 1u, 1u,
-        vk::SampleCountFlagBits::e1, vk::ImageTiling::eLinear,
-        vk::ImageUsageFlagBits::eTransferSrc, vk::SharingMode::eExclusive,
-        0, nullptr, vk::ImageLayout::eGeneral);
+        vk::Extent3D(static_cast<u32>(_internal->_width),
+                     static_cast<u32>(_internal->_height), 1u),
+        1u, 1u, vk::SampleCountFlagBits::e1, vk::ImageTiling::eLinear,
+        vk::ImageUsageFlagBits::eTransferSrc, vk::SharingMode::eExclusive, 0,
+        nullptr, vk::ImageLayout::eGeneral);
     vk::Image stagingImg = ctx._device.createImage(stagingImgInfo);
 
-    VkMemoryRequirements memRequirements = ctx._device.getImageMemoryRequirements(stagingImg);
+    VkMemoryRequirements memRequirements =
+        ctx._device.getImageMemoryRequirements(stagingImg);
 
     vk::MemoryAllocateInfo memAllocate(memRequirements.size);
-    memAllocate.memoryTypeIndex = ctx.findMemoryType(
-        memRequirements.size, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, {}, memRequirements.memoryTypeBits);
+    memAllocate.memoryTypeIndex =
+        ctx.findMemoryType(memRequirements.size,
+                           vk::MemoryPropertyFlagBits::eHostVisible |
+                               vk::MemoryPropertyFlagBits::eHostCoherent,
+                           {}, memRequirements.memoryTypeBits);
     vk::DeviceMemory stagingMemory = ctx._device.allocateMemory(memAllocate);
     ctx._device.bindImageMemory(stagingImg, stagingMemory, 0);
 
     vk::ImageSubresource subResource{vk::ImageAspectFlagBits::eColor};
-    VkSubresourceLayout subResourceLayout = ctx._device.getImageSubresourceLayout(stagingImg, subResource);
+    VkSubresourceLayout subResourceLayout =
+        ctx._device.getImageSubresourceLayout(stagingImg, subResource);
 
     // TODO take rowpitch into account
-    char *imageData = reinterpret_cast<char*>(ctx._device.mapMemory(stagingMemory, offset, count, {}));
+    char *imageData = reinterpret_cast<char *>(
+        ctx._device.mapMemory(stagingMemory, offset, count, {}));
     imageData += subResourceLayout.offset;
     std::memcpy(imageData, data, count);
     ctx._device.unmapMemory(stagingMemory);
@@ -170,8 +178,10 @@ void VkwImage::setData(const void *data, u32 count, u32 offset) {
     commandBuf.begin(vk::CommandBufferBeginInfo(
         vk::CommandBufferUsageFlagBits::eOneTimeSubmit));
 
-    ctx.insertImageMemoryBarrier(commandBuf, stagingImg, vk::AccessFlagBits ::eMemoryWrite, vk::AccessFlagBits ::eTransferRead,
-        vk::ImageLayout::eGeneral, vk::ImageLayout::eTransferSrcOptimal,
+    ctx.insertImageMemoryBarrier(
+        commandBuf, stagingImg, vk::AccessFlagBits ::eMemoryWrite,
+        vk::AccessFlagBits ::eTransferRead, vk::ImageLayout::eGeneral,
+        vk::ImageLayout::eTransferSrcOptimal,
         vk::PipelineStageFlagBits ::eTransfer,
         vk::PipelineStageFlagBits ::eTransfer);
 
@@ -181,13 +191,14 @@ void VkwImage::setData(const void *data, u32 count, u32 offset) {
         vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0u, 0u, 1u),
         vk::Offset3D(),
         vk::Extent3D{static_cast<u32>(_internal->_width),
-        static_cast<u32>(_internal->_height), 1u}
-    };
+                     static_cast<u32>(_internal->_height), 1u}};
     commandBuf.copyImage(stagingImg, vk::ImageLayout::eTransferSrcOptimal,
-        _internal->_image, vk::ImageLayout::eTransferDstOptimal, imgCopy);
+                         _internal->_image,
+                         vk::ImageLayout::eTransferDstOptimal, imgCopy);
 
     // not sure if this barrier is needed
-    ctx.insertImageMemoryBarrier(commandBuf, stagingImg, vk::AccessFlagBits::eTransferRead, {},
+    ctx.insertImageMemoryBarrier(
+        commandBuf, stagingImg, vk::AccessFlagBits::eTransferRead, {},
         vk::ImageLayout::eTransferSrcOptimal, vk::ImageLayout::eUndefined,
         vk::PipelineStageFlagBits ::eTransfer,
         vk::PipelineStageFlagBits ::eTransfer);
@@ -211,20 +222,25 @@ void VkwImage::getData(void *data, u32 count, u32 offset) {
 
     vk::ImageCreateInfo stagingImgInfo(
         {}, vk::ImageType::e2D, _internal->_imageFormat,
-        vk::Extent3D(static_cast<u32>(_internal->_width), static_cast<u32>(_internal->_height), 1u), 1u, 1u,
-        vk::SampleCountFlagBits::e1, vk::ImageTiling::eLinear,
-        vk::ImageUsageFlagBits::eTransferDst, vk::SharingMode::eExclusive,
-        0, nullptr, vk::ImageLayout::eUndefined);
+        vk::Extent3D(static_cast<u32>(_internal->_width),
+                     static_cast<u32>(_internal->_height), 1u),
+        1u, 1u, vk::SampleCountFlagBits::e1, vk::ImageTiling::eLinear,
+        vk::ImageUsageFlagBits::eTransferDst, vk::SharingMode::eExclusive, 0,
+        nullptr, vk::ImageLayout::eUndefined);
     vk::Image stagingImg = ctx._device.createImage(stagingImgInfo);
 
-    VkMemoryRequirements memRequirements = ctx._device.getImageMemoryRequirements(stagingImg);
-    
+    VkMemoryRequirements memRequirements =
+        ctx._device.getImageMemoryRequirements(stagingImg);
+
     vk::MemoryAllocateInfo memAllocate(memRequirements.size);
-    memAllocate.memoryTypeIndex = ctx.findMemoryType(
-        memRequirements.size, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, {}, memRequirements.memoryTypeBits);
+    memAllocate.memoryTypeIndex =
+        ctx.findMemoryType(memRequirements.size,
+                           vk::MemoryPropertyFlagBits::eHostVisible |
+                               vk::MemoryPropertyFlagBits::eHostCoherent,
+                           {}, memRequirements.memoryTypeBits);
     vk::DeviceMemory stagingMemory = ctx._device.allocateMemory(memAllocate);
     ctx._device.bindImageMemory(stagingImg, stagingMemory, 0);
- 
+
     // Copy image to staging image
     vk::CommandBufferAllocateInfo commandBufInfo(
         ctx._graphicsCommandPool, vk::CommandBufferLevel::ePrimary, 1);
@@ -232,10 +248,11 @@ void VkwImage::getData(void *data, u32 count, u32 offset) {
     commandBuf.begin(vk::CommandBufferBeginInfo(
         vk::CommandBufferUsageFlagBits::eOneTimeSubmit));
 
-    ctx.insertImageMemoryBarrier(commandBuf, stagingImg, {}, vk::AccessFlagBits ::eTransferWrite,
-                  vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal,
-                  vk::PipelineStageFlagBits ::eTransfer,
-                  vk::PipelineStageFlagBits ::eTransfer);
+    ctx.insertImageMemoryBarrier(
+        commandBuf, stagingImg, {}, vk::AccessFlagBits ::eTransferWrite,
+        vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal,
+        vk::PipelineStageFlagBits ::eTransfer,
+        vk::PipelineStageFlagBits ::eTransfer);
 
     vk::ImageCopy imgCopy{
         vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0u, 0u, 1u),
@@ -243,14 +260,15 @@ void VkwImage::getData(void *data, u32 count, u32 offset) {
         vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0u, 0u, 1u),
         vk::Offset3D(),
         vk::Extent3D{static_cast<u32>(_internal->_width),
-            static_cast<u32>(_internal->_height), 1u}
-    };
-    commandBuf.copyImage(_internal->_image, vk::ImageLayout::eTransferSrcOptimal,
-                                 stagingImg, vk::ImageLayout::eTransferDstOptimal, imgCopy);
-    
-    ctx.insertImageMemoryBarrier(commandBuf, stagingImg, vk::AccessFlagBits::eTransferWrite, vk::AccessFlagBits ::eMemoryRead,
-        vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eGeneral,
-        vk::PipelineStageFlagBits ::eTransfer,
+                     static_cast<u32>(_internal->_height), 1u}};
+    commandBuf.copyImage(_internal->_image,
+                         vk::ImageLayout::eTransferSrcOptimal, stagingImg,
+                         vk::ImageLayout::eTransferDstOptimal, imgCopy);
+
+    ctx.insertImageMemoryBarrier(
+        commandBuf, stagingImg, vk::AccessFlagBits::eTransferWrite,
+        vk::AccessFlagBits ::eMemoryRead, vk::ImageLayout::eTransferDstOptimal,
+        vk::ImageLayout::eGeneral, vk::PipelineStageFlagBits ::eTransfer,
         vk::PipelineStageFlagBits ::eTransfer);
 
     commandBuf.end();
@@ -264,10 +282,12 @@ void VkwImage::getData(void *data, u32 count, u32 offset) {
     // Get data from staging image
     // Get layout of the image (including row pitch)
     vk::ImageSubresource subResource{vk::ImageAspectFlagBits::eColor};
-    VkSubresourceLayout subResourceLayout = ctx._device.getImageSubresourceLayout(stagingImg, subResource);
+    VkSubresourceLayout subResourceLayout =
+        ctx._device.getImageSubresourceLayout(stagingImg, subResource);
 
     // TODO take rowpitch into account
-    const char *imageData = reinterpret_cast<char*>(ctx._device.mapMemory(stagingMemory, offset, count, {}));
+    const char *imageData = reinterpret_cast<char *>(
+        ctx._device.mapMemory(stagingMemory, offset, count, {}));
     imageData += subResourceLayout.offset;
     std::memcpy(data, imageData, count);
     ctx._device.unmapMemory(stagingMemory);
@@ -301,8 +321,6 @@ vk::Sampler VkwImage::getSampler() {
     return _internal->_sampler;
 }
 
-vk::Image VkwImage::handle() {
-    return _internal->_image;
-}
+vk::Image VkwImage::handle() { return _internal->_image; }
 
 } // namespace world

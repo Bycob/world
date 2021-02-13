@@ -117,7 +117,8 @@ public:
 
         // TODO: Add other parameters
         vk::PipelineRasterizationStateCreateInfo rasterizationStageInfo(
-            {}, false, false, vk::PolygonMode::eFill, vk::CullModeFlagBits::eNone, vk::FrontFace::eCounterClockwise);
+            {}, false, false, vk::PolygonMode::eFill,
+            vk::CullModeFlagBits::eNone, vk::FrontFace::eCounterClockwise);
         rasterizationStageInfo.lineWidth = 1;
 
         // TODO: Enable multisampling

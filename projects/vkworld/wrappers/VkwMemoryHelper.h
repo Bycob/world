@@ -37,9 +37,11 @@ public:
      * values between 0 and 1. `elemCount` indicates the number of components
      * of the image in the vulkan buffer. The destination image can have a
      * smaller number of components. */
-    static void GPUToImage(IVkwMemoryAccess &memory, Image &img, u32 elemCount); // TODO f
+    static void GPUToImage(IVkwMemoryAccess &memory, Image &img,
+                           u32 elemCount); // TODO f
 
-    static void GPUToImageu(IVkwMemoryAccess &memory, Image &img, u32 elemCount);
+    static void GPUToImageu(IVkwMemoryAccess &memory, Image &img,
+                            u32 elemCount);
 
     static Image GPUToImage(VkwImage &vkimg);
 
