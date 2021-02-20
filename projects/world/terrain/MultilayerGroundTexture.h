@@ -68,6 +68,10 @@ public:
         std::vector<Terrain> _distributions;
         /// One terrain can have only few textures
         std::vector<int> _layerIds;
+
+        void saveTo(NodeCache &cache) const override;
+
+        bool tryLoadFrom(const NodeCache &cache) override;
     };
 
     MultilayerGroundTexture();

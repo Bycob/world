@@ -12,6 +12,9 @@ namespace Peace.Serialization
     {
         private const string DEL = "$";
 
+        /** Serialize a world definition object to be sent to World API.
+         * This function supports serialization of polymorphic objects,
+         * as it is not supported by Unity. */
         public static string ToJson(object obj)
         {
             string jsonStr = JsonUtility.ToJson(obj);
@@ -28,6 +31,10 @@ namespace Peace.Serialization
             return jsonStr;
         }
 
+        /** This function may be called from OnBeforeSerialize callback. It
+         * transforms a list of polymorphic objects to a list of their JSON
+         * representation. Then this list is processed by ToJson() into a list
+         * of json objects. */
         public static void SerializeList<T>(List<T> from, List<string> to)
         {
             to.Clear();
@@ -68,11 +75,11 @@ namespace Peace.Serialization
         };
 
 
-            [NonSerialized]
+        [NonSerialized]
         public List<IGroundWorkerDef> workers_list = new List<IGroundWorkerDef>();
 
         [SerializeField]
-        private List<String> workers = new List<String>();
+        private List<string> workers = new List<string>();
 
 
         public void OnBeforeSerialize()
@@ -82,7 +89,7 @@ namespace Peace.Serialization
 
         public void OnAfterDeserialize()
         {
-
+            // TODO transfer workers content to workers_list
         }
     }
 
@@ -123,16 +130,36 @@ namespace Peace.Serialization
 
         public List<DistributionParams> layers = new List<DistributionParams>();
 
-        public GroundTextureGeneratorDef texProvider = new GroundTextureGeneratorDef();
+        public ITextureProviderDef texProvider = new GroundTextureGeneratorDef();
     }
 
     [Serializable]
-    public class GroundTextureGeneratorDef
+    public class ITextureProviderDef
     {
-        public string type = "VkwGroundTextureGenerator";
+        public string type;
+  
         public int texWidth = 256;
 
         public List<ShaderDef> layers = new List<ShaderDef>();
+        public List<Color4dDef> colors = new List<Color4dDef>();
+    }
+
+    [Serializable]
+    public class GroundTextureGeneratorDef : ITextureProviderDef
+    {
+        public GroundTextureGeneratorDef()
+        {
+            type = "GroundTextureGenerator";
+        }
+    }
+
+    [Serializable]
+    public class VkwGroundTextureGeneratorDef : ITextureProviderDef
+    {
+        public VkwGroundTextureGeneratorDef()
+        {
+            type = "VkwGroundTextureGenerator";
+        }
     }
 
     [Serializable]
@@ -185,6 +212,15 @@ namespace Peace.Serialization
         public string name;
         public int type;
         public string value;
+    }
+
+    [Serializable]
+    public struct Color4dDef
+    {
+        public double r;
+        public double g;
+        public double b;
+        public double a;
     }
 
     [Serializable]

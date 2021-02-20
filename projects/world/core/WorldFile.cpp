@@ -207,16 +207,32 @@ void WorldFile::save(const std::string &filename) const {
 }
 
 void WorldFile::load(const std::string &filename) {
-    std::ifstream is(filename, std::ios::ate);
+    // std::ios::binary is required in Windows, because the file size returned
+    // by tellg can be different than the real size of the file in bytes.
+    std::ifstream is(filename, std::ios::ate | std::ios::binary);
+    if (!is.good()) {
+        throw std::runtime_error("File not found: " + filename);
+    }
+
     size_t filesize = static_cast<size_t>(is.tellg());
-    char *buf = new char[filesize];
+    char *buf = new char[filesize + 1];
+    // null terminate string
+    buf[filesize] = 0;
+
     is.seekg(0, is.beg);
     is.read(buf, filesize);
     is.close();
 
     Json jdoc;
     jdoc.Parse(buf, filesize);
-    readFromJdoc(jdoc);
+    try {
+        readFromJdoc(jdoc);
+    }
+    catch (std::runtime_error &e) {
+        std::cerr << "Error while deserializing file " << filename <<
+            ": " << e.what() << std::endl;
+        throw;
+    }
 
     delete[] buf;
 }

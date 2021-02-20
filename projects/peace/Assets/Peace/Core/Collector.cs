@@ -43,8 +43,6 @@ namespace Peace
             _materials = new Dictionary<string, Material>();
             _textures = new Dictionary<string, Texture2D>();
             _terrainHandles = new Dictionary<string, IntPtr>();
-
-            SetPosition(Vector3.zero);
         }
 
         ~Collector()
@@ -60,11 +58,7 @@ namespace Peace
             _materials.Clear();
             _textures.Clear();
         }
-
-        public void SetPosition(Vector3 position)
-        {
-        }
-
+        
         private void GetChannel(int type, out string[] names, out IntPtr[] items)
         {
             int size = collectorGetChannelSize(_handle, type);

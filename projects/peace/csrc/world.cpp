@@ -34,7 +34,7 @@ PEACE_EXPORT WorldPtr createDemoWorld(char *name) {
 #ifdef USE_VKWORLD
         return VkWorld::createDemoFlatWorld();
 #else
-        std::cerr << "Not supported ! Return default world instead..."
+        std::cout << "Not supported ! Return default world instead..."
                   << std::endl;
 #endif
     }
@@ -48,8 +48,9 @@ PEACE_EXPORT WorldPtr createWorldFromJson(char *jsonStr) {
         wf.fromJson(jsonStr);
         world->read(wf);
     } catch (std::runtime_error &e) {
-        std::cerr << jsonStr << std::endl;
-        std::cerr << e.what() << std::endl;
+        // Write error to cout so it will be captured by Unity
+        std::cout << jsonStr << std::endl;
+        std::cout << e.what() << std::endl;
         throw;
     }
     return world;
@@ -60,7 +61,8 @@ PEACE_EXPORT WorldPtr createWorldFromFile(char *filename) {
     try {
         world->load(filename);
     } catch (std::runtime_error &e) {
-        std::cerr << e.what() << std::endl;
+        // Write error to cout so it will be captured by Unity
+        std::cout << e.what() << std::endl;
         throw;
     }
     return world;

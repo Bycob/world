@@ -14,6 +14,31 @@ WORLD_REGISTER_CHILD_CLASS(ITerrainWorker, MultilayerGroundTexture,
 
 using MultilayerElement = MultilayerGroundTexture::Element;
 
+void MultilayerElement::saveTo(NodeCache &cache) const {
+    cache.saveVector("layerIds", _layerIds);
+
+    for (size_t i = 0; i < _distributions.size(); ++i) {
+        auto &distrib = _distributions[i];
+        cache.saveTerrain("distrib" + std::to_string(i), distrib);
+    }
+}
+
+bool MultilayerElement::tryLoadFrom(const NodeCache &cache) {
+    size_t layerCount = cache.readVector("layerIds", _layerIds);
+
+    if (layerCount == 0) {
+        return false;
+    }
+
+    for (size_t i = 0; i < layerCount; ++i) {
+        _distributions.push_back(cache.readTerrain("distrib" + std::to_string(i)));
+    }
+    return true;
+}
+
+
+// ===== MultilayerGroundTexture
+
 MultilayerGroundTexture::MultilayerGroundTexture() = default;
 
 ITextureProvider &MultilayerGroundTexture::getTextureProvider() const {
@@ -46,13 +71,17 @@ void MultilayerGroundTexture::collectTile(ICollector &collector,
         const ExplorationContext &ctx = context.getExplorationContext();
         TileCoordinates tc = context.getCoords();
 
+        auto &tileElem = _storage.getOrCreate(tc);
+
+        if (tileElem._layerIds.empty())
+            _storage.readTileFromCache(tc, tileElem);
+
         // Textures (if not collected already)
         collectTextures(imgChannel, tc, ctx);
 
         // Distribution
         auto &terrainChannel = collector.getChannel<Terrain>();
         ItemKey baseKey = context.getCoords().toKey();
-        auto &tileElem = _storage.get(context.getCoords());
 
         for (size_t i = 0; i < tileElem._distributions.size(); ++i) {
             ItemKey key = getDistributionKey(tc, i);
@@ -219,6 +248,7 @@ void MultilayerGroundTexture::collectTextures(
     ICollectorChannel<Image> &texChannel, const TileCoordinates &tc,
     const ExplorationContext &ctx) {
 
+    // TODO throws when has cache
     MultilayerElement &elem = _storage.get(tc);
     int lod = tc._lod;
 

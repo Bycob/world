@@ -59,6 +59,15 @@ public:
     /** Read data of known size from disk. */
     size_t readData(const std::string &id, void *data, size_t size) const;
 
+    /** Save vector of simple types in raw data form. */
+    template <typename T>
+    void saveVector(const std::string &id, const std::vector<T> &vec);
+
+    /** Read vector of simple types in raw data form. Add the read elements to
+     * vector vec, return the size of read data. */
+    template <typename T>
+    size_t readVector(const std::string &id, std::vector<T> &vec) const;
+
     bool hasImage(std::string &id) const;
 
     void saveImage(const std::string &id, const Image &image);
@@ -87,6 +96,36 @@ private:
 
     std::string _directory;
 };
+
+template <typename T>
+void NodeCache::saveVector(const std::string &id, const std::vector<T> &vec) {
+    saveData(id, vec.data(), sizeof(T) * vec.size());
+}
+
+template <typename T>
+size_t NodeCache::readVector(const std::string &id, std::vector<T> &vec) const {
+    if (!isAvailable())
+        return 0;
+    std::ifstream ifs(getPath(id) + ".bin", std::ios::binary | std::ios::ate);
+
+    if (!ifs.good())
+        return 0;
+    size_t filesize = static_cast<size_t>(ifs.tellg());
+
+    if (filesize % sizeof(T) != 0) {
+        throw std::runtime_error("Size does not match: data of size " + std::to_string(filesize)
+            + " cannot be a vector of a type of size " + std::to_string(sizeof(T)));
+    }
+    
+    size_t vecsize = filesize / sizeof(T);
+    vec.resize(vecsize);
+
+    ifs.seekg(0, ifs.beg);
+    ifs.read(reinterpret_cast<char*>(vec.data()), filesize);
+    ifs.close();
+
+    return vecsize;
+}
 
 } // namespace world
 

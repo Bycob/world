@@ -1,5 +1,7 @@
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
+using UnityEngine;
 
 namespace Peace
 {
@@ -46,9 +48,19 @@ namespace Peace
             return strArray;
         }
 
-        // Dll functions
-        [DllImport("peace")]
-        // TODO change [In, Out] to read only
-        private static extern void freePtrs(int size, [In, Out] IntPtr[] array);
+        /** Remove path recursively */
+        public static void DeleteTree(DirectoryInfo path)
+        {
+            if (!path.Exists)
+            {
+                return;
+            }
+
+            foreach (var dir in path.EnumerateDirectories())
+            {
+                DeleteTree(dir);
+            }
+            path.Delete(true);
+        }
     }
 }

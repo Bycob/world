@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Peace
 {
-    public class World
+    public class World : IDisposable
     {
         internal IntPtr _handle;
 
@@ -23,10 +23,11 @@ namespace Peace
 
         ~World()
         {
-            freeWorld(_handle);
+            if (_handle != IntPtr.Zero)
+                freeWorld(_handle);
         }
 
-        public World(String configFile)
+        public World(string configFile)
         {
             _handle = createWorldFromFile(configFile);
         }
@@ -37,10 +38,29 @@ namespace Peace
             _handle = createWorldFromJson(jsonStr);
         }
 
+        public void Dispose()
+        {
+            if (_handle != IntPtr.Zero)
+            {
+                freeWorld(_handle);
+                _handle = IntPtr.Zero;
+            }
+        }
+
         public void SetCacheLocation(string cacheLocation)
         {
+            CheckAccess();
             setWorldCache(_handle, cacheLocation);
         }
+
+        private void CheckAccess()
+        {
+            if (_handle == IntPtr.Zero)
+            {
+                throw new MethodAccessException("This object was deleted manually");
+            }
+        }
+
 
 
         // Dll functions
@@ -62,6 +82,5 @@ namespace Peace
 
         [DllImport("peace")]
         private static extern void freeWorld(IntPtr handle);
-
     }
 }

@@ -64,7 +64,8 @@ PEACE_EXPORT void collectFirstPerson(CollectorPtr collectorPtr,
     try {
         world->collect(*collector, fpsView);
     } catch (std::runtime_error &e) {
-        std::cerr << e.what() << std::endl;
+        // Write error to cout so it will be captured by Unity
+        std::cout << e.what() << std::endl;
         throw;
     }
 }
@@ -82,7 +83,8 @@ PEACE_EXPORT void collectZone(CollectorPtr collectorPtr, WorldPtr worldPtr,
     try {
         world->collect(*collector, zoneView);
     } catch (std::runtime_error &e) {
-        std::cerr << e.what() << std::endl;
+        // Write error to cout so it will be captured by Unity
+        std::cout << e.what() << std::endl;
         throw;
     }
 }

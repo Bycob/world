@@ -5,7 +5,7 @@ using UnityEngine;
 public class SeaLocker : MonoBehaviour
 {
     [SerializeField]
-    private Transform follow;
+    private Transform follow = null;
     
     // Update is called once per frame
     void Update()

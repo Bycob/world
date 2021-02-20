@@ -205,61 +205,11 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 104712874}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 2.43, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &138451437
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 138451439}
-  - component: {fileID: 138451438}
-  m_Layer: 0
-  m_Name: Terrain System
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &138451438
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 138451437}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4a0eddc0d4694b3f49a0137f6ff13985, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  resolution: 257
-  octavesCount: 11
-  tileWidth: 1000
-  minAltitude: -2000
-  maxAltitude: 4000
-  biomeDensity: 1
-  limitBrightness: 4
---- !u!4 &138451439
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 138451437}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &955506408
 GameObject:
@@ -352,6 +302,173 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!1 &1404099123
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1404099125}
+  - component: {fileID: 1404099124}
+  m_Layer: 0
+  m_Name: Terrain System
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1404099124
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1404099123}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a0eddc0d4694b3f49a0137f6ff13985, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  resolution: 2049
+  octavesCount: 11
+  tileWidth: 1000
+  minAltitude: -2000
+  maxAltitude: 4000
+  useBiomes: 1
+  biomeDensity: 1
+  limitBrightness: 4
+  layers:
+  - distribParams:
+      ha: -1
+      hb: 0
+      hc: 1
+      hd: 2
+      dha: -1
+      dhb: 0
+      dhc: 1
+      dhd: 2
+      hmin: 0
+      hmax: 1
+      dhmin: 0
+      dhmax: 1
+      threshold: 0.05
+      slopeFactor: 0
+    color:
+      r: 0.2
+      g: 0.2
+      b: 0.2
+      a: 1
+    shader:
+      fragmentPath: texture-rock.frag
+      params: []
+  - distribParams:
+      ha: -1
+      hb: 0
+      hc: 0.4
+      hd: 0.45
+      dha: -1
+      dhb: 0
+      dhc: 0.4
+      dhd: 0.6
+      hmin: 0
+      hmax: 1
+      dhmin: 0
+      dhmax: 1
+      threshold: 0.05
+      slopeFactor: 0
+    color:
+      r: 0.5
+      g: 0.5
+      b: 0.2
+      a: 1
+    shader:
+      fragmentPath: texture-sand.frag
+      params: []
+  - distribParams:
+      ha: 0.33
+      hb: 0.4
+      hc: 0.6
+      hd: 0.75
+      dha: -1
+      dhb: 0
+      dhc: 0.45
+      dhd: 0.65
+      hmin: 0
+      hmax: 0.85
+      dhmin: 0.25
+      dhmax: 0.85
+      threshold: 0.05
+      slopeFactor: 0
+    color:
+      r: 0.2
+      g: 0.5
+      b: 0.2
+      a: 1
+    shader:
+      fragmentPath: texture-soil.frag
+      params: []
+  - distribParams:
+      ha: 0.33
+      hb: 0.4
+      hc: 0.6
+      hd: 0.7
+      dha: -1
+      dhb: 0
+      dhc: 0.4
+      dhd: 0.6
+      hmin: 0
+      hmax: 1
+      dhmin: 0.25
+      dhmax: 0.6
+      threshold: 0.05
+      slopeFactor: 0
+    color:
+      r: 0.2
+      g: 0.5
+      b: 0.2
+      a: 1
+    shader:
+      fragmentPath: texture-grass.frag
+      params: []
+  - distribParams:
+      ha: 0.65
+      hb: 0.8
+      hc: 1
+      hd: 2
+      dha: -1
+      dhb: 0
+      dhc: 0.5
+      dhd: 0.7
+      hmin: 0
+      hmax: 1
+      dhmin: 0
+      dhmax: 1
+      threshold: 0.05
+      slopeFactor: 0
+    color:
+      r: 0.95
+      g: 0.95
+      b: 0.96
+      a: 1
+    shader:
+      fragmentPath: texture-snow.frag
+      params: []
+--- !u!4 &1404099125
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1404099123}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1569291016
 GameObject:
   m_ObjectHideFlags: 0
