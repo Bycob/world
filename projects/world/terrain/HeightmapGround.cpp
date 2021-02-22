@@ -310,7 +310,7 @@ void HeightmapGround::addTerrain(const TileCoordinates &key,
     if (collector.hasChannel<SceneNode>() && collector.hasChannel<Terrain>()) {
         // Collect as terrains (more optimized e.g. for game engines)
         auto &terrainChannel = collector.getChannel<Terrain>();
-        terrainChannel.put(itemKey, terrain);
+        terrainChannel.put(itemKey, terrain, ctx);
 
         auto &objChannel = collector.getChannel<SceneNode>();
         SceneNode node(ctx(itemKey).str());
@@ -364,9 +364,13 @@ void HeightmapGround::addTerrain(const TileCoordinates &key,
         }
     }
 
+    int id = 0;
     for (auto &gen : _internal->_generators) {
-        GroundContext gctx(this, &gen, &tile, ctx);
+        ExplorationContext childCtx(ctx);
+        childCtx.appendPrefix("worker" + std::to_string(id));
+        GroundContext gctx(this, &gen, &tile, childCtx);
         gen._worker->collectTile(collector, gctx);
+        ++id;
     }
 }
 
@@ -470,11 +474,14 @@ void HeightmapGround::generateTerrains(const std::set<TileCoordinates> &keys,
     for (auto &generatedTiles : lods) {
 
         // Generation
+        int gid = 0;
+
         for (auto &entry : _internal->_generators) {
             auto &generator = entry._worker;
             auto &constraints = entry._constraints;
 
             GroundContext context(this, &entry, nullptr, ctx);
+            context._ctx.appendPrefix("worker" + std::to_string(gid));
 
             // check if constraints are fullfilled
             bool doGeneration =
@@ -490,6 +497,7 @@ void HeightmapGround::generateTerrains(const std::set<TileCoordinates> &keys,
 
                 generator->flush();
             }
+            ++gid;
         }
 
         ++lod;

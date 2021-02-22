@@ -124,7 +124,10 @@ void FlatWorld::collect(ICollector &collector,
     }
     // end of hack
 
-    _internal->_ground->collect(collector, resolutionModel);
+    ExplorationContext groundCtx;
+    groundCtx.appendPrefix(_internal->_ground->getKey());
+    _internal->_ground->collect(collector, resolutionModel, groundCtx);
+
     World::collect(collector, resolutionModel);
 }
 

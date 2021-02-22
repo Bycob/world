@@ -68,7 +68,7 @@ namespace Peace
                     {
                         for (int y = 0; y < distribRes; ++y)
                         {
-                            alphamaps[x, y, i] = alphamap[x, y];
+                            alphamaps[x, y, i] = alphamap[y, x];
                         }
                     }
                 }

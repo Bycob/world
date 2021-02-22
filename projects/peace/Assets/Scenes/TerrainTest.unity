@@ -302,7 +302,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
---- !u!1 &1404099123
+--- !u!1 &1309250104
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -310,8 +310,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1404099125}
-  - component: {fileID: 1404099124}
+  - component: {fileID: 1309250106}
+  - component: {fileID: 1309250105}
   m_Layer: 0
   m_Name: Terrain System
   m_TagString: Untagged
@@ -319,24 +319,24 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1404099124
+--- !u!114 &1309250105
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1404099123}
+  m_GameObject: {fileID: 1309250104}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4a0eddc0d4694b3f49a0137f6ff13985, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   resolution: 2049
-  octavesCount: 11
-  tileWidth: 1000
-  minAltitude: -2000
-  maxAltitude: 4000
-  useBiomes: 1
+  octavesCount: 3
+  tileWidth: 2000
+  minAltitude: 0
+  maxAltitude: 1000
+  useBiomes: 0
   biomeDensity: 1
   limitBrightness: 4
   layers:
@@ -455,13 +455,13 @@ MonoBehaviour:
     shader:
       fragmentPath: texture-snow.frag
       params: []
---- !u!4 &1404099125
+--- !u!4 &1309250106
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1404099123}
+  m_GameObject: {fileID: 1309250104}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}

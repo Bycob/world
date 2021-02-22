@@ -64,7 +64,7 @@ namespace Peace
             
             foreach (var extPos in extensions)
             {
-                Vector3 buttonLoc = new Vector3((extPos.x + 0.5f) * tw, 0, (extPos.y + 0.5f) * tw);
+                Vector3 buttonLoc = new Vector3((extPos.x + 0.5f) * tw, _terrainSystem.minAltitude, (extPos.y + 0.5f) * tw);
                 float pickSize = _terrainSystem.generating ? 0 : tw / 2;
 
                 if (Handles.Button(buttonLoc, Quaternion.LookRotation(Vector3.up), tw / 2, pickSize, Handles.RectangleHandleCap))
@@ -75,11 +75,11 @@ namespace Peace
 
             foreach(Vector2Int pos in generate)
             {
-                Task.Run(() =>
+                _terrainSystem.GenerateTile(pos);
+                /*Task.Run(() =>
                 {
                     // Undo.RecordObject(myGameObject.transform, "Zero Transform Position");
-                    _terrainSystem.GenerateTile(pos).RunSynchronously();
-                });
+                });*/
             }
         }
     }

@@ -39,6 +39,7 @@ namespace world {
         });
         Image &img = in.first->second;
         ImageUtils::fill(img, _colors[layer]);
+        _cache.saveImage(imageId, img);
         return img;
     }
 

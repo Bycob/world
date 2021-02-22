@@ -248,7 +248,6 @@ void MultilayerGroundTexture::collectTextures(
     ICollectorChannel<Image> &texChannel, const TileCoordinates &tc,
     const ExplorationContext &ctx) {
 
-    // TODO throws when has cache
     MultilayerElement &elem = _storage.get(tc);
     int lod = tc._lod;
 
@@ -268,6 +267,6 @@ ItemKey MultilayerGroundTexture::getDistributionKey(const TileCoordinates &tc,
 }
 
 ItemKey MultilayerGroundTexture::getTextureKey(int layer, int lod) const {
-    return {std::to_string(layer) + "_" + std::to_string(lod)};
+    return ItemKey({"texProvider"_k, "tex" + std::to_string(layer) + "_" + std::to_string(lod)});
 }
 } // namespace world

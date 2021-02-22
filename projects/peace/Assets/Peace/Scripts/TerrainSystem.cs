@@ -5,6 +5,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Peace.Serialization;
+using UnityEditor;
 using UnityEngine;
 
 namespace Peace
@@ -12,13 +13,18 @@ namespace Peace
     [ExecuteInEditMode]
     public class TerrainSystem : MonoBehaviour
     {
-        // TODO allow removal of terrains by user
+        // DONE allow removal of terrains by user
         // DONE allow reloading of terrainsystem and integration of terrains
-        // TODO add a WorldTerrain component to store information on created terrains
+        // DONE add a WorldTerrain component to store information on created terrains
         // TODO fix no texture on terrain when reloading from cache
+        // TODO make user able to modify texture for the whole terrain (by referencing unity textures instead of anonymous images)
+        // TODO make custom editors for colors
+        // TODO make unity able to save scene and Ctrl Z when adding a new terrain
+        // TODO Add UI for when the terrain is generating
+
+        // For later?
         // TODO make biomes usable by modifying the biome map
-        // TODO make custom editors for colors and distribution params
-        // TODO make unity able to save scene and Ctrl Z etc
+        // TODO make custom editor for DistributionParams
 
         [System.Serializable]
         public struct Layer
@@ -32,6 +38,8 @@ namespace Peace
         [Header("Terrain parameters")]
         public int resolution = 2049;
         public int octavesCount = 11;
+        public float persistence = 0.5f;
+        public float frequency = 4;
         public float tileWidth = 1000;
         public float minAltitude = -2000;
         public float maxAltitude = 4000;
@@ -88,9 +96,9 @@ namespace Peace
                 },
                 color = new Color4dDef
                 {
-                    r = 0.2,
-                    g = 0.2,
-                    b = 0.2,
+                    r = 0.3,
+                    g = 0.3,
+                    b = 0.3,
                     a = 1.0,
                 },
                 shader = new ShaderDef("texture-rock.frag")
@@ -118,9 +126,9 @@ namespace Peace
                 },
                 color = new Color4dDef
                 {
-                    r = 0.5,
-                    g = 0.5,
-                    b = 0.2,
+                    r = 0.75,
+                    g = 0.7,
+                    b = 0.6,
                     a = 1.0,
                 },
                 shader = new ShaderDef("texture-sand.frag")
@@ -148,9 +156,9 @@ namespace Peace
                 },
                 color = new Color4dDef
                 {
-                    r = 0.2,
-                    g = 0.5,
-                    b = 0.2,
+                    r = 0.13,
+                    g = 0.09,
+                    b = 0.06,
                     a = 1.0,
                 },
                 shader = new ShaderDef("texture-soil.frag")
@@ -179,8 +187,8 @@ namespace Peace
                 color = new Color4dDef
                 {
                     r = 0.2,
-                    g = 0.5,
-                    b = 0.2,
+                    g = 0.6,
+                    b = 0.3,
                     a = 1.0,
                 },
                 shader = new ShaderDef("texture-grass.frag")
@@ -229,22 +237,19 @@ namespace Peace
                 return;
             }
 
-            List<Vector2Int> deleted = new List<Vector2Int>();
+            List<Vector2Int> deleted = new List<Vector2Int>(_terrainGOs.Keys);
             
-            foreach (var key in _terrainGOs.Keys)
+            foreach (var key in deleted)
             {
-                DestroyImmediate(_terrainGOs[key]);
-                deleted.Add(key);
+                DeleteTerrain(key);
             }
-
-            _terrainGOs.Clear();
-            _terrains.Clear();
 
             if (_world != null)
             {
                 _world.Dispose();
                 Util.DeleteTree(new DirectoryInfo(_cacheLocation));
             }
+
             InitWorld();
 
             if (deleted.Count == 0)
@@ -256,6 +261,8 @@ namespace Peace
             {
                 await GenerateTile(pos);
             }
+
+            AssetDatabase.Refresh();
         }
 
         public async Task GenerateTile(Vector2Int tileCoords)
@@ -327,12 +334,17 @@ namespace Peace
 
             var perlin = new PerlinTerrainGeneratorDef();
             perlin.perlinInfo.octaves = perlin.maxOctaves = octavesCount;
+            perlin.perlinInfo.frequency = frequency;
+            perlin.perlinInfo.persistence = persistence;
             worldDef.ground.workers_list.Add(perlin);
 
-            var customMap = new CustomWorldRMModifierDef();
-            customMap.biomeDensity = biomeDensity;
-            customMap.limitBrightness = limitBrightness;
-            worldDef.ground.workers_list.Add(customMap);
+            if (useBiomes)
+            {
+                var customMap = new CustomWorldRMModifierDef();
+                customMap.biomeDensity = biomeDensity;
+                customMap.limitBrightness = limitBrightness;
+                worldDef.ground.workers_list.Add(customMap);
+            }
 
             var texturer = new MultilayerGroundTextureDef();
             foreach (Layer layer in layers)
@@ -370,6 +382,7 @@ namespace Peace
             _world.SetCacheLocation(_cacheLocation);
         }
 
+        /** \param removeOld: Remove terrains that are not in the collector. */
         private void AddTerrains(Collector collector, bool removeOld = false)
         {
             // Get new nodes
@@ -392,6 +405,9 @@ namespace Peace
                     {
                         GameObject terrainGO = new GameObject("Terrain " + coords);
                         terrainGO.transform.SetParent(transform);
+                        var worldTerrain = terrainGO.AddComponent<WorldTerrain>();
+                        worldTerrain.terrainSystem = this;
+                        worldTerrain.coords = coords;
                         var terrain = terrainGO.AddComponent<Terrain>();
                         terrain.terrainData = new TerrainData();
                         terrainGO.AddComponent<TerrainCollider>().terrainData = terrain.terrainData;
@@ -414,11 +430,7 @@ namespace Peace
             {
                 foreach (var key in toRemove)
                 {
-                    _terrains.Remove(key);
-
-                    // TODO if in edit mode... else...
-                    DestroyImmediate(_terrainGOs[key]);
-                    _terrainGOs.Remove(key);
+                    DeleteTerrain(key);
                 }
             }
 
@@ -429,32 +441,34 @@ namespace Peace
         private void ReconnectGeneratedTerrains()
         {
             int childCount = transform.childCount;
-            Regex rx = new Regex(@"^Terrain \((-?\d+), (-?\d+)\)$");
 
             for (int i = 0; i < childCount; ++i)
             {
                 GameObject terrainGO = transform.GetChild(i).gameObject;
                 Terrain terrain = terrainGO.GetComponent<Terrain>();
+                WorldTerrain worldTerrain = terrainGO.GetComponent<WorldTerrain>();
                 
-                if (terrain == null)
+                if (terrain != null && worldTerrain != null)
                 {
-                    continue;
-                }
-
-                string name = terrainGO.name;
-                MatchCollection matches = rx.Matches(name);
-
-                if (matches.Count == 1)
-                {
-                    GroupCollection groups = matches[0].Groups;
-                    Vector2Int pos = new Vector2Int(
-                        int.Parse(groups[1].Value),
-                        int.Parse(groups[2].Value));
-
+                    Vector2Int pos = worldTerrain.coords;
                     _terrainGOs.Add(pos, terrainGO);
                     _terrains.Add(pos, terrain);
                 }
             }
+        }
+
+        private void DeleteTerrain(Vector2Int coords)
+        {
+            _terrainGOs[coords].GetComponent<WorldTerrain>().terrainSystem = null;
+            // TODO if in edit mode... else...
+            DestroyImmediate(_terrainGOs[coords]);
+            OnTerrainDeleted(coords);
+        }
+
+        internal void OnTerrainDeleted(Vector2Int coords)
+        {
+            _terrainGOs.Remove(coords);
+            _terrains.Remove(coords);
         }
 
         private void UpdateNeighbours()
