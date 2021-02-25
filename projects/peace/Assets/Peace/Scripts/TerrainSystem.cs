@@ -13,18 +13,21 @@ namespace Peace
     [ExecuteInEditMode]
     public class TerrainSystem : MonoBehaviour
     {
+        // DONE Add UI for when the terrain is generating
+        // FIXME fix no texture on terrain when reloading from cache
+        // TODO ensure generated terrain can be used in builds later on (remove editor references in play mode)
+        // TODO make custom editors for colors
+        // TODO make custom editor for DistributionParams
+        // DONE make unity able to save scene and Ctrl Z when adding a new terrain
         // DONE allow removal of terrains by user
         // DONE allow reloading of terrainsystem and integration of terrains
         // DONE add a WorldTerrain component to store information on created terrains
-        // TODO fix no texture on terrain when reloading from cache
-        // TODO make user able to modify texture for the whole terrain (by referencing unity textures instead of anonymous images)
-        // TODO make custom editors for colors
-        // TODO make unity able to save scene and Ctrl Z when adding a new terrain
-        // TODO Add UI for when the terrain is generating
+        // DONE make user able to modify texture for the whole terrain (by referencing unity textures instead of anonymous images)
 
         // For later?
         // TODO make biomes usable by modifying the biome map
-        // TODO make custom editor for DistributionParams
+        // FIXME Texture don't refresh after changing them (workaround: reloading the terrain or idk)
+        // TODO check that demo can work with a terrain system (in hope to benefit from unity optimizations?)
 
         [System.Serializable]
         public struct Layer
@@ -58,7 +61,9 @@ namespace Peace
         
         private string _cacheLocation = "Assets/_world/";
 
-        public bool generating { get; private set; } = false;
+        private HashSet<Vector2Int> _generatingCoords = new HashSet<Vector2Int>();
+        public bool generating { get { return _generatingCoords.Count != 0; } }
+        public IEnumerable<Vector2Int> generatingCoords { get { return _generatingCoords; } }
 
         private World _world;
         
@@ -256,6 +261,7 @@ namespace Peace
             {
                 deleted.Add(new Vector2Int(0, 0));
             }
+            _generatingCoords.UnionWith(deleted);
 
             foreach (var pos in deleted)
             {
@@ -267,12 +273,7 @@ namespace Peace
 
         public async Task GenerateTile(Vector2Int tileCoords)
         {
-            if (generating)
-            {
-                return;
-            }
-            generating = true;
-
+            _generatingCoords.Add(tileCoords);
             var collector = new Collector(Collector.Preset.ENGINE);
 
             var view = new ZoneView();
@@ -289,7 +290,7 @@ namespace Peace
             await collector.CollectZone(_world, view);
 
             AddTerrains(collector);
-            generating = false;
+            _generatingCoords.Remove(tileCoords);
         }
 
         public List<Vector2Int> GetExtensionPossibility()
@@ -404,6 +405,8 @@ namespace Peace
                     if (!_terrains.ContainsKey(coords))
                     {
                         GameObject terrainGO = new GameObject("Terrain " + coords);
+                        // TODO if Unity Editor
+                        Undo.RegisterCreatedObjectUndo(terrainGO, "Added terrain");
                         terrainGO.transform.SetParent(transform);
                         var worldTerrain = terrainGO.AddComponent<WorldTerrain>();
                         worldTerrain.terrainSystem = this;
@@ -413,7 +416,7 @@ namespace Peace
                         terrainGO.AddComponent<TerrainCollider>().terrainData = terrain.terrainData;
                         
                         Terrains.ReadTerrainData(terrain.terrainData, terrainHandle);
-                        Terrains.ReadTerrainTextures(terrain, terrainHandle, collector);
+                        Terrains.ReadTerrainTextures(terrain, terrainHandle, collector, _cacheLocation);
                         Terrains.UpdateTerrainBBox(terrain, bbox);
 
                         _terrainGOs.Add(coords, terrainGO);

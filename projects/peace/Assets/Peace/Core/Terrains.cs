@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using UnityEditor;
 using UnityEngine;
 
 namespace Peace
@@ -35,7 +36,7 @@ namespace Peace
             tData.SetHeights(0, 0, InvertAxis(heights));
         }
 
-        public static void ReadTerrainTextures(Terrain terrain, IntPtr terrainHandle, Collector collector)
+        public static void ReadTerrainTextures(Terrain terrain, IntPtr terrainHandle, Collector collector, string cacheLocation = null)
         {
             TerrainData tData = terrain.terrainData;
             IntPtr matHandle = terrainGetMaterial(terrainHandle);
@@ -75,11 +76,23 @@ namespace Peace
 
                 // Texture
                 string layerTex = materialGetCustomMap(matHandle, "texture" + i);
-                TerrainLayer layer = new TerrainLayer
+                if (cacheLocation == null)
                 {
-                    diffuseTexture = collector.GetTexture(layerTex)
-                };
-                layers[i] = layer;
+                    layers[i] = new TerrainLayer
+                    {
+                        diffuseTexture = collector.GetTexture(layerTex)
+                    };
+                }
+                else
+                {
+                    AssetDatabase.Refresh();
+                    string texPath = cacheLocation + layerTex + ".png";
+                    Texture2D tex = (Texture2D)AssetDatabase.LoadAssetAtPath(texPath, typeof(Texture2D));
+                    layers[i] = new TerrainLayer
+                    {
+                        diffuseTexture = tex
+                    };
+                }
             }
 
             if (texCount != 0)

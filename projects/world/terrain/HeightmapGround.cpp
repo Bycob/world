@@ -257,9 +257,9 @@ void HeightmapGround::read(const WorldFile &wf) {
 }
 
 void HeightmapGround::addWorkerInternal(ITerrainWorker *worker) {
-    _internal->_generators.emplace_back(worker);
     const size_t workerId = _internal->_generators.size();
-    const std::string workerName = "worker" + std::to_string(workerId);
+    const std::string workerName = getWorkerName(workerId);
+    _internal->_generators.emplace_back(worker);
 
     auto *storage = worker->getStorage();
     auto *cache = worker->getCache();
@@ -286,6 +286,10 @@ ITerrainWorker *HeightmapGround::getWorkerInternal(const std::type_info &type) {
     }
 
     return nullptr;
+}
+
+std::string HeightmapGround::getWorkerName(size_t workerId) const {
+    return "worker" + std::to_string(workerId + 1);
 }
 
 double HeightmapGround::observeAltitudeAt(double x, double y, int lvl,
@@ -364,10 +368,10 @@ void HeightmapGround::addTerrain(const TileCoordinates &key,
         }
     }
 
-    int id = 0;
+    size_t id = 0;
     for (auto &gen : _internal->_generators) {
         ExplorationContext childCtx(ctx);
-        childCtx.appendPrefix("worker" + std::to_string(id));
+        childCtx.appendPrefix(getWorkerName(id));
         GroundContext gctx(this, &gen, &tile, childCtx);
         gen._worker->collectTile(collector, gctx);
         ++id;
@@ -474,14 +478,14 @@ void HeightmapGround::generateTerrains(const std::set<TileCoordinates> &keys,
     for (auto &generatedTiles : lods) {
 
         // Generation
-        int gid = 0;
+        size_t gid = 0;
 
         for (auto &entry : _internal->_generators) {
             auto &generator = entry._worker;
             auto &constraints = entry._constraints;
 
             GroundContext context(this, &entry, nullptr, ctx);
-            context._ctx.appendPrefix("worker" + std::to_string(gid));
+            context._ctx.appendPrefix(getWorkerName(gid));
 
             // check if constraints are fullfilled
             bool doGeneration =

@@ -61,7 +61,7 @@ namespace Peace
             var extensions = _terrainSystem.GetExtensionPossibility();
 
             List<Vector2Int> generate = new List<Vector2Int>();
-            
+
             foreach (var extPos in extensions)
             {
                 Vector3 buttonLoc = new Vector3((extPos.x + 0.5f) * tw, _terrainSystem.minAltitude, (extPos.y + 0.5f) * tw);
@@ -73,14 +73,39 @@ namespace Peace
                 }
             }
 
-            foreach(Vector2Int pos in generate)
-            {
-                _terrainSystem.GenerateTile(pos);
-                /*Task.Run(() =>
+            if (!_terrainSystem.generating)
+            { 
+                foreach (Vector2Int pos in generate)
                 {
-                    // Undo.RecordObject(myGameObject.transform, "Zero Transform Position");
-                });*/
+                    _terrainSystem.GenerateTile(pos);
+                }
             }
+            else
+            {
+                foreach (Vector2Int pos in _terrainSystem.generatingCoords)
+                {
+                    DrawHandleBox(
+                        new Vector3(pos.x * tw, _terrainSystem.minAltitude, pos.y * tw),
+                        new Vector3(tw, _terrainSystem.maxAltitude - _terrainSystem.minAltitude, tw),
+                        new Color(0, 0.8f, 0.9f, 0.5f)
+                    );
+                }
+            }
+        }
+
+        private void DrawHandleBox(Vector3 o, Vector3 sizes, Color color)
+        {
+            Vector3 sx = Vector3.right * sizes.x;
+            Vector3 sy = Vector3.up * sizes.y;
+            Vector3 sz = Vector3.forward * sizes.z;
+
+            Handles.DrawSolidRectangleWithOutline(new Vector3[] { o, o + sx, o + sx + sy, o + sy }, color, color);
+            Handles.DrawSolidRectangleWithOutline(new Vector3[] { o, o + sz, o + sz + sy, o + sy }, color, color);
+            Handles.DrawSolidRectangleWithOutline(new Vector3[] { o, o + sx, o + sx + sz, o + sz }, color, color);
+            Handles.DrawSolidRectangleWithOutline(new Vector3[] { o + sx, o + sx + sy, o + sx + sy + sz, o + sx + sz }, color, color);
+            Handles.DrawSolidRectangleWithOutline(new Vector3[] { o + sy, o + sx + sy, o + sx + sy + sz, o + sy + sz }, color, color);
+            Handles.DrawSolidRectangleWithOutline(new Vector3[] { o + sz, o + sx + sz, o + sx + sy + sz, o + sy + sz }, color, color);
         }
     }
 }
+

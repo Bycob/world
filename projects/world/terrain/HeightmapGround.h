@@ -134,6 +134,8 @@ private:
 
     ITerrainWorker *getWorkerInternal(const std::type_info &type);
 
+    std::string getWorkerName(size_t workerId) const;
+
     double observeAltitudeAt(double x, double y, int lvl,
                              const ExplorationContext &ctx);
 
