@@ -107,6 +107,7 @@ void MultilayerGroundTexture::write(WorldFile &wf) const {
         wf.addChild("texProvider", _texProvider->serializeSubclass());
     }
 
+    wf.addUint("distribResolution", _distribResolution);
     wf.addBool("generateTexture", _generateTexture);
 }
 
@@ -120,6 +121,8 @@ void MultilayerGroundTexture::read(const WorldFile &wf) {
             readSubclass<ITextureProvider>(wf.readChild("texProvider")));
         _texProvider->configureCache(_cache, "texProvider");
     }
+    wf.readUintOpt("distribResolution", _distribResolution);
+    wf.readBoolOpt("generateTexture", _generateTexture);
 }
 
 double ramp(double a, double b, double c, double d, double lowb, double highb,

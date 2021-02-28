@@ -128,6 +128,9 @@ namespace Peace.Serialization
     {
         public string type = "MultilayerGroundTexture";
 
+        public uint distribResolution = 257;
+        public bool generateTexture = false;
+
         public List<DistributionParams> layers = new List<DistributionParams>();
 
         public ITextureProviderDef texProvider = new GroundTextureGeneratorDef();

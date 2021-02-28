@@ -13,16 +13,19 @@ namespace Peace
     [ExecuteInEditMode]
     public class TerrainSystem : MonoBehaviour
     {
-        // DONE Add UI for when the terrain is generating
         // FIXME fix no texture on terrain when reloading from cache
         // TODO ensure generated terrain can be used in builds later on (remove editor references in play mode)
-        // TODO make custom editors for colors
-        // TODO make custom editor for DistributionParams
+        // WIP make custom editor for DistributionParams (curve done, add set params...)
+        // TODO Change bad terrain material
+        // TODO bug: when painting on terrain colors are different...
+        // TODO prevent crash when C++ exception
         // DONE make unity able to save scene and Ctrl Z when adding a new terrain
         // DONE allow removal of terrains by user
         // DONE allow reloading of terrainsystem and integration of terrains
         // DONE add a WorldTerrain component to store information on created terrains
         // DONE make user able to modify texture for the whole terrain (by referencing unity textures instead of anonymous images)
+        // DONE Add UI for when the terrain is generating
+        // DONE make custom editors for colors
 
         // For later?
         // TODO make biomes usable by modifying the biome map
@@ -32,27 +35,31 @@ namespace Peace
         [System.Serializable]
         public struct Layer
         {
+            public string name;
             public DistributionParams distribParams;
-            public Color4dDef color;
+            public Color color;
             public ShaderDef shader;
+            // this is used by the editor to know when we need to remove a layer
+            public bool toRemove;
         }
 
         // Public variables
         [Header("Terrain parameters")]
         public int resolution = 2049;
-        public int octavesCount = 11;
-        public float persistence = 0.5f;
+        public int octavesCount = 9;
+        public float persistence = 0.45f;
         public float frequency = 4;
-        public float tileWidth = 1000;
-        public float minAltitude = -2000;
-        public float maxAltitude = 4000;
+        public float tileWidth = 2000;
+        public float minAltitude = 0;
+        public float maxAltitude = 1000;
 
         [Header("Biomes Parameters")]
-        public bool useBiomes = true;
+        public bool useBiomes = false;
         public double biomeDensity = 1.0;
         public double limitBrightness = 4;
 
         [Header("Texture layers parameters")]
+        public uint distributionResolution = 257;
         public List<Layer> layers = new List<Layer>();
 
         // Private variables
@@ -79,9 +86,9 @@ namespace Peace
 
         public void SetupDefaultLayers()
         {
-            // Rock
             layers.Add(new Layer
             {
+                name = "rocks",
                 distribParams = new DistributionParams
                 {
                     ha = -1.0f,
@@ -99,19 +106,19 @@ namespace Peace
                     threshold = 0.05f,
                     slopeFactor = 0.0f,
                 },
-                color = new Color4dDef
+                color = new Color
                 {
-                    r = 0.3,
-                    g = 0.3,
-                    b = 0.3,
-                    a = 1.0,
+                    r = 0.3f,
+                    g = 0.3f,
+                    b = 0.3f,
+                    a = 1.0f,
                 },
                 shader = new ShaderDef("texture-rock.frag")
             });
-
-            // Sand
+            
             layers.Add(new Layer
             {
+                name = "sand",
                 distribParams = new DistributionParams
                 {
                     ha = -1.0f,
@@ -129,19 +136,19 @@ namespace Peace
                     threshold = 0.05000000074505806f,
                     slopeFactor = 0.0f
                 },
-                color = new Color4dDef
+                color = new Color
                 {
-                    r = 0.75,
-                    g = 0.7,
-                    b = 0.6,
-                    a = 1.0,
+                    r = 0.75f,
+                    g = 0.7f,
+                    b = 0.6f,
+                    a = 1.0f,
                 },
                 shader = new ShaderDef("texture-sand.frag")
             });
-
-            // Soil
+            
             layers.Add(new Layer
             {
+                name = "soil",
                 distribParams = new DistributionParams
                 {
                     ha = 0.33000001311302187f,
@@ -159,19 +166,19 @@ namespace Peace
                     threshold = 0.05000000074505806f,
                     slopeFactor = 0.0f
                 },
-                color = new Color4dDef
+                color = new Color
                 {
-                    r = 0.13,
-                    g = 0.09,
-                    b = 0.06,
-                    a = 1.0,
+                    r = 0.13f,
+                    g = 0.09f,
+                    b = 0.06f,
+                    a = 1.0f,
                 },
                 shader = new ShaderDef("texture-soil.frag")
             });
-
-            // Grass
+            
             layers.Add(new Layer
             {
+                name = "grass",
                 distribParams = new DistributionParams
                 {
                     ha = 0.33000001311302187f,
@@ -189,19 +196,19 @@ namespace Peace
                     threshold = 0.05000000074505806f,
                     slopeFactor = 0.0f
                 },
-                color = new Color4dDef
+                color = new Color
                 {
-                    r = 0.2,
-                    g = 0.6,
-                    b = 0.3,
-                    a = 1.0,
+                    r = 0.2f,
+                    g = 0.6f,
+                    b = 0.3f,
+                    a = 1.0f,
                 },
                 shader = new ShaderDef("texture-grass.frag")
             });
             
-            // Snow
             layers.Add(new Layer
             {
+                name = "snow",
                 distribParams = new DistributionParams
                 {
                     ha = 0.6499999761581421f,
@@ -219,12 +226,12 @@ namespace Peace
                     threshold = 0.05000000074505806f,
                     slopeFactor = 0.0f
                 },
-                color = new Color4dDef
+                color = new Color
                 {
-                    r = 0.95,
-                    g = 0.95,
-                    b = 0.96,
-                    a = 1.0,
+                    r = 0.95f,
+                    g = 0.95f,
+                    b = 0.96f,
+                    a = 1.0f,
                 },
                 shader = new ShaderDef("texture-snow.frag")
             });
@@ -348,6 +355,7 @@ namespace Peace
             }
 
             var texturer = new MultilayerGroundTextureDef();
+            texturer.distribResolution = distributionResolution;
             foreach (Layer layer in layers)
             {
                 texturer.layers.Add(layer.distribParams);
@@ -373,7 +381,14 @@ namespace Peace
 
                 foreach (Layer layer in layers)
                 {
-                    texProvider.colors.Add(layer.color);
+                    Color4dDef color = new Color4dDef
+                    {
+                        r = layer.color.r,
+                        g = layer.color.g,
+                        b = layer.color.b,
+                        a = layer.color.a,
+                    };
+                    texProvider.colors.Add(color);
                 }
             }
 
