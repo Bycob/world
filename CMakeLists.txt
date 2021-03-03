@@ -1,5 +1,5 @@
 # Version minimum de cmake
-cmake_minimum_required(VERSION 2.8.6)
+cmake_minimum_required(VERSION 3.10)
 
 # Declaration du projet
 project(World)
@@ -34,6 +34,11 @@ endif()
 message(STATUS "Build type : ${CMAKE_BUILD_TYPE}")
 
 # Paramètres du projet
+set(WORLD_VERSION 0.4)
+set(WORLD_VERSION_MAJOR 0)
+set(WORLD_VERSION_MINOR 4)
+set(WORLD_VERSION_PATCH 0)
+
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -93,3 +98,17 @@ add_subdirectory(projects/peace/)
 add_subdirectory(tests/)
 
 message("=====")
+
+# Packaging
+set(CPACK_PACKAGE_NAME "world")
+set(CPACK_PACKAGE_VERSION_MAJOR ${WORLD_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${WORLD_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${WORLD_VERSION_PATCH})
+set(CPACK_PACKAGE_VENDOR "BynaryCobweb")
+if (WIN32)
+    set(CPACK_GENERATOR ZIP)
+else()
+    set(CPACK_GENERATOR TGZ)
+endif()
+
+include(CPack)
