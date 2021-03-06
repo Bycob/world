@@ -151,6 +151,7 @@ namespace Peace
         {
             GameObject terrainSystemGO = new GameObject("Terrain System");
             var terrainSystem = terrainSystemGO.AddComponent<TerrainSystem>();
+            terrainSystem.materialTemplate = new Material(Shader.Find("Standard"));
             terrainSystem.SetupDefaultLayers();
             Undo.RegisterCreatedObjectUndo(terrainSystemGO, "Created Terrain System");
         }

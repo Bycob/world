@@ -44,6 +44,8 @@ namespace Peace
         }
 
         // Public variables
+        public Material materialTemplate;
+
         [Header("Terrain parameters")]
         public int resolution = 2049;
         public int octavesCount = 9;
@@ -427,6 +429,7 @@ namespace Peace
                         worldTerrain.terrainSystem = this;
                         worldTerrain.coords = coords;
                         var terrain = terrainGO.AddComponent<Terrain>();
+                        terrain.materialTemplate = materialTemplate;
                         terrain.terrainData = new TerrainData();
                         terrainGO.AddComponent<TerrainCollider>().terrainData = terrain.terrainData;
                         
