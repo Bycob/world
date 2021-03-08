@@ -15,10 +15,11 @@ namespace Peace
     {
         // FIXME fix no texture on terrain when reloading from cache
         // TODO ensure generated terrain can be used in builds later on (remove editor references in play mode)
-        // WIP make custom editor for DistributionParams (curve done, add set params...)
-        // TODO Change bad terrain material
         // TODO bug: when painting on terrain colors are different...
         // TODO prevent crash when C++ exception
+
+        // DONE Change bad terrain material
+        // DONE make custom editor for DistributionParams (curve done, add set params...)
         // DONE make unity able to save scene and Ctrl Z when adding a new terrain
         // DONE allow removal of terrains by user
         // DONE allow reloading of terrainsystem and integration of terrains
@@ -276,8 +277,9 @@ namespace Peace
             {
                 await GenerateTile(pos);
             }
-
+#if UNITY_EDITOR
             AssetDatabase.Refresh();
+#endif
         }
 
         public async Task GenerateTile(Vector2Int tileCoords)
@@ -422,8 +424,9 @@ namespace Peace
                     if (!_terrains.ContainsKey(coords))
                     {
                         GameObject terrainGO = new GameObject("Terrain " + coords);
-                        // TODO if Unity Editor
+#if UNITY_EDITOR
                         Undo.RegisterCreatedObjectUndo(terrainGO, "Added terrain");
+#endif
                         terrainGO.transform.SetParent(transform);
                         var worldTerrain = terrainGO.AddComponent<WorldTerrain>();
                         worldTerrain.terrainSystem = this;

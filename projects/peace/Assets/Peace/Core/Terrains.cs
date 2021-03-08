@@ -76,12 +76,15 @@ namespace Peace
 
                 // Texture
                 string layerTex = materialGetCustomMap(matHandle, "texture" + i);
+#if UNITY_EDITOR
                 if (cacheLocation == null)
                 {
+#endif
                     layers[i] = new TerrainLayer
                     {
                         diffuseTexture = collector.GetTexture(layerTex)
                     };
+#if UNITY_EDITOR
                 }
                 else
                 {
@@ -93,6 +96,7 @@ namespace Peace
                         diffuseTexture = tex
                     };
                 }
+#endif
             }
 
             if (texCount != 0)
