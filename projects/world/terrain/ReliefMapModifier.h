@@ -74,7 +74,7 @@ public:
 
     void read(const WorldFile &wf);
 
-    GridStorageBase *getStorage() override { return &_reliefMap; }
+    NodeCache *getCache() override { return &_reliefMap.getCache(); }
 
 protected:
     mutable std::mt19937 _rng;

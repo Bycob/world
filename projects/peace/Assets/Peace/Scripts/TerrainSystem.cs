@@ -17,6 +17,7 @@ namespace Peace
         // TODO ensure generated terrain can be used in builds later on (remove editor references in play mode)
         // TODO bug: when painting on terrain colors are different...
         // TODO prevent crash when C++ exception
+        // TODO Add button "Add" to layer list
 
         // DONE Change bad terrain material
         // DONE make custom editor for DistributionParams (curve done, add set params...)

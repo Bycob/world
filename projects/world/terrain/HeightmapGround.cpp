@@ -464,6 +464,13 @@ void HeightmapGround::generateTerrains(const std::set<TileCoordinates> &keys,
             tile._terrain.setTexture(
                 Image(_textureRes, _textureRes, ImageType::RGB));
         }
+        else {
+            // Call post read hook
+            for (auto &entry : _internal->_generators) {
+                GroundContext context(this, &entry, &tile, ctx);
+                entry._worker->onReadingCached(context);
+            }
+        }
 
         // set bounds
         double terrainSize = _tileSystem.getTileSize(key._lod).x;

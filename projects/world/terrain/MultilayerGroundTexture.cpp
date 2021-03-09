@@ -90,6 +90,28 @@ void MultilayerGroundTexture::collectTile(ICollector &collector,
     }
 }
 
+void MultilayerGroundTexture::onReadingCached(ITileContext &context) {
+    TileCoordinates tc = context.getCoords();
+    MultilayerElement &elem = _storage.getOrCreate(tc);
+    auto &ctx = context.getExplorationContext();
+
+    Terrain &terrain = context.getTile().terrain();
+    Material &terrainMat = terrain.getMaterial();
+
+    if (elem._layerIds.empty())
+        _storage.readTileFromCache(tc, elem);
+
+    for (size_t i = 0; i < elem._layerIds.size(); ++i) {
+        int layer = elem._layerIds[i];
+
+        std::string distribName(ctx(getDistributionKey(tc, i)).str());
+        terrainMat.setCustomMap("distribution" + std::to_string(i),
+            distribName);
+        std::string texName(ctx(getTextureKey(layer, tc._lod)).str());
+        terrainMat.setCustomMap("texture" + std::to_string(i), texName);
+    }
+}
+
 void MultilayerGroundTexture::addLayer(DistributionParams params) {
     _layers.push_back(params);
 }

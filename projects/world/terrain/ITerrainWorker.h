@@ -47,13 +47,13 @@ public:
     virtual ~ITerrainWorker() = default;
 
     /** Get storage associated with this worker. The HeightmapGround may
-     * execute some operations on the storage.
+     * execute some operations on the storage, like tile dropping.
      *
      * This method can return null, if the worker has no storage. */
-    // This may even not be useful if tile dropping is managed by
-    // GridStorage
     virtual GridStorageBase *getStorage() { return nullptr; };
 
+    /** Get cache. If this method returns a cache, then the HeightmapGround
+     * will set the parent of this cache to its cache.*/
     virtual NodeCache *getCache() { return nullptr; }
 
     virtual void processTerrain(Terrain &terrain) = 0;
@@ -64,6 +64,11 @@ public:
      * with the terrain, they can be with this method.
      * It is assumed that processTile has been called before. */
     virtual void collectTile(ICollector &collector, ITileContext &context){};
+
+    /** This method is called by the HeightmapGround when a tile is read
+     * from the cache. It can be useful to recreate some broken links
+     * (for example on the terrain material). */
+    virtual void onReadingCached(ITileContext &context){};
 
     /** This method apply all modifications to the terrains before the next
      * worker starts processing. This may be useful if this ITerrainWorker can

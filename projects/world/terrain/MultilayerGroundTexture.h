@@ -92,6 +92,8 @@ public:
 
     void collectTile(ICollector &collector, ITileContext &context) override;
 
+    void onReadingCached(ITileContext &context) override;
+
     void addLayer(DistributionParams params);
 
     GridStorageBase *getStorage() override;
