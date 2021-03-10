@@ -70,6 +70,11 @@ namespace Peace
                         for (int y = 0; y < distribRes; ++y)
                         {
                             alphamaps[x, y, i] = alphamap[y, x];
+
+                            for (int j = 0; j < i; ++j)
+                            {
+                                alphamaps[x, y, j] *= 1 - alphamap[y, x];
+                            }
                         }
                     }
                 }

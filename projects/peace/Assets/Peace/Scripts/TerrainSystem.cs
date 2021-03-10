@@ -13,11 +13,8 @@ namespace Peace
     [ExecuteInEditMode]
     public class TerrainSystem : MonoBehaviour
     {
-        // FIXME fix no texture on terrain when reloading from cache
         // TODO ensure generated terrain can be used in builds later on (remove editor references in play mode)
-        // TODO bug: when painting on terrain colors are different...
         // TODO prevent crash when C++ exception
-        // TODO Add button "Add" to layer list
 
         // DONE Change bad terrain material
         // DONE make custom editor for DistributionParams (curve done, add set params...)
@@ -28,6 +25,9 @@ namespace Peace
         // DONE make user able to modify texture for the whole terrain (by referencing unity textures instead of anonymous images)
         // DONE Add UI for when the terrain is generating
         // DONE make custom editors for colors
+        // DONE bug: when painting on terrain colors are different...
+        // DONE fix no texture on terrain when reloading from cache
+        // DONE Add button "Add" to layer list
 
         // For later?
         // TODO make biomes usable by modifying the biome map
@@ -43,6 +43,8 @@ namespace Peace
             public ShaderDef shader;
             // this is used by the editor to know when we need to remove a layer
             public bool toRemove;
+            public bool addAfter;
+            public int posChange;
         }
 
         // Public variables
@@ -300,7 +302,7 @@ namespace Peace
             view.resolution = resolution / tileWidth;
 
             await collector.CollectZone(_world, view);
-
+            
             AddTerrains(collector);
             _generatingCoords.Remove(tileCoords);
         }

@@ -466,9 +466,13 @@ void HeightmapGround::generateTerrains(const std::set<TileCoordinates> &keys,
         }
         else {
             // Call post read hook
+            int gid = 0;
+
             for (auto &entry : _internal->_generators) {
                 GroundContext context(this, &entry, &tile, ctx);
+                context._ctx.appendPrefix(getWorkerName(gid));
                 entry._worker->onReadingCached(context);
+                ++gid;
             }
         }
 

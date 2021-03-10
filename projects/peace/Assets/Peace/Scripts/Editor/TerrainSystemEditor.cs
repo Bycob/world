@@ -12,7 +12,7 @@ namespace Peace
     public class TerrainSystemLayerDrawer : PropertyDrawer
     {
         const float ROW_SPACING = 5;
-        const float END_SPACING = 20;
+        const float END_SPACING = 30;
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -85,10 +85,24 @@ namespace Peace
             EditorGUI.CurveField(new Rect(o.x, o.y + row * rh, w, 2 * hu), slopeCurve);
             row += 2;
 
-            if (GUI.Button(new Rect(o.x, o.y + row * rh, w, hu), "Remove"))
+            if (GUI.Button(new Rect(o.x, o.y + row * rh, w * 0.25f, hu), "Move Before"))
+            {
+                property.FindPropertyRelative("posChange").intValue = -1;
+            }
+            if (GUI.Button(new Rect(o.x + w * 0.25f, o.y + row * rh, w * 0.75f, hu), "Remove"))
             {
                 property.FindPropertyRelative("toRemove").boolValue = true;
             }
+            ++row;
+            if (GUI.Button(new Rect(o.x, o.y + row * rh, w * 0.25f, hu), "Move After"))
+            {
+                property.FindPropertyRelative("posChange").intValue = 1;
+            }
+            if (GUI.Button(new Rect(o.x + w * 0.25f, o.y + row * rh, w * 0.75f, hu), "Add Layer After"))
+            {
+                property.FindPropertyRelative("addAfter").boolValue = true;
+            }
+
             ++row;
 
             EditorGUIUtility.labelWidth = oldLblWidth;
@@ -98,7 +112,7 @@ namespace Peace
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             float rh = EditorGUI.GetPropertyHeight(property.FindPropertyRelative("name")) + ROW_SPACING;
-            return rh * 13 + END_SPACING;
+            return rh * 14 + END_SPACING;
         }
 
         private void prepareCurve(AnimationCurve curve)
@@ -174,6 +188,25 @@ namespace Peace
                 if (_terrainSystem.layers[i].toRemove)
                 {
                     _terrainSystem.layers.RemoveAt(i);
+                }
+                else if (_terrainSystem.layers[i].addAfter)
+                {
+                    _terrainSystem.layers.Insert(i + 1, new TerrainSystem.Layer());
+                    var layer = _terrainSystem.layers[i];
+                    layer.addAfter = false;
+                    _terrainSystem.layers[i] = layer;
+                }
+                else if (_terrainSystem.layers[i].posChange != 0)
+                {
+                    int targPos = i + _terrainSystem.layers[i].posChange;
+
+                    if (targPos >= 0 && targPos < _terrainSystem.layers.Count)
+                    {
+                        var layer = _terrainSystem.layers[i];
+                        layer.posChange = 0;
+                        _terrainSystem.layers[i] = _terrainSystem.layers[targPos];
+                        _terrainSystem.layers[targPos] = layer;
+                    }
                 }
             }
 
