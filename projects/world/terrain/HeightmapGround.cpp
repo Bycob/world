@@ -463,8 +463,7 @@ void HeightmapGround::generateTerrains(const std::set<TileCoordinates> &keys,
             // set texture
             tile._terrain.setTexture(
                 Image(_textureRes, _textureRes, ImageType::RGB));
-        }
-        else {
+        } else {
             // Call post read hook
             int gid = 0;
 

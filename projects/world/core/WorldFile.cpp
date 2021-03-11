@@ -227,10 +227,9 @@ void WorldFile::load(const std::string &filename) {
     jdoc.Parse(buf, filesize);
     try {
         readFromJdoc(jdoc);
-    }
-    catch (std::runtime_error &e) {
-        std::cerr << "Error while deserializing file " << filename <<
-            ": " << e.what() << std::endl;
+    } catch (std::runtime_error &e) {
+        std::cerr << "Error while deserializing file " << filename << ": "
+                  << e.what() << std::endl;
         throw;
     }
 

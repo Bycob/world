@@ -113,15 +113,17 @@ size_t NodeCache::readVector(const std::string &id, std::vector<T> &vec) const {
     size_t filesize = static_cast<size_t>(ifs.tellg());
 
     if (filesize % sizeof(T) != 0) {
-        throw std::runtime_error("Size does not match: data of size " + std::to_string(filesize)
-            + " cannot be a vector of a type of size " + std::to_string(sizeof(T)));
+        throw std::runtime_error("Size does not match: data of size " +
+                                 std::to_string(filesize) +
+                                 " cannot be a vector of a type of size " +
+                                 std::to_string(sizeof(T)));
     }
-    
+
     size_t vecsize = filesize / sizeof(T);
     vec.resize(vecsize);
 
     ifs.seekg(0, ifs.beg);
-    ifs.read(reinterpret_cast<char*>(vec.data()), filesize);
+    ifs.read(reinterpret_cast<char *>(vec.data()), filesize);
     ifs.close();
 
     return vecsize;

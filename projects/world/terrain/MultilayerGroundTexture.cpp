@@ -31,7 +31,8 @@ bool MultilayerElement::tryLoadFrom(const NodeCache &cache) {
     }
 
     for (size_t i = 0; i < layerCount; ++i) {
-        _distributions.push_back(cache.readTerrain("distrib" + std::to_string(i)));
+        _distributions.push_back(
+            cache.readTerrain("distrib" + std::to_string(i)));
     }
     return true;
 }
@@ -106,7 +107,7 @@ void MultilayerGroundTexture::onReadingCached(ITileContext &context) {
 
         std::string distribName(ctx(getDistributionKey(tc, i)).str());
         terrainMat.setCustomMap("distribution" + std::to_string(i),
-            distribName);
+                                distribName);
         std::string texName(ctx(getTextureKey(layer, tc._lod)).str());
         terrainMat.setCustomMap("texture" + std::to_string(i), texName);
     }
@@ -292,6 +293,7 @@ ItemKey MultilayerGroundTexture::getDistributionKey(const TileCoordinates &tc,
 }
 
 ItemKey MultilayerGroundTexture::getTextureKey(int layer, int lod) const {
-    return ItemKey({"texProvider"_k, "tex" + std::to_string(layer) + "_" + std::to_string(lod)});
+    return ItemKey({"texProvider"_k,
+                    "tex" + std::to_string(layer) + "_" + std::to_string(lod)});
 }
 } // namespace world
