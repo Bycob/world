@@ -17,7 +17,9 @@ void generate_test_world(int argc, char **argv);
 int main(int argc, char **argv) { generate_test_world(argc, argv); }
 
 void generate_test_world(int argc, char **argv) {
+#ifdef USE_VKWORLD
     VkWorld::loadLibrary();
+#endif
 
     int itcount = 5;
     bool land = true;

@@ -11,6 +11,8 @@ if (${WORLD_BUILD_VULKAN_MODULES})
         rclib_include_directory(shaderlib)
 
         add_subdirectory(shaders/)
+
+        # TODO add vkworld to install
     else()
         message(STATUS "Cannot build Vulkan modules : Missign dependencies (Vulkan)")
     endif()

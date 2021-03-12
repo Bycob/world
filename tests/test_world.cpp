@@ -50,7 +50,7 @@ FlatWorld *createWorld() {
     ground.addWorker<CustomWorldRMModifier>(1);
 
     auto &chunkSystem = world->addPrimaryNode<GridChunkSystem>({0, 0, 0});
-    chunkSystem.addDecorator<ForestLayer>(world);
+    chunkSystem.addDecorator<ForestLayer>();
 
     return world;
 }
