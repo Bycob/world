@@ -8,7 +8,7 @@ the library can generate a large amount of assets (meshes, textures, shaders...)
 integrate them all together in a single scene. Then, you can render it with your favorite
 tool- even in real time!
 
-Please check the [World Intro](https://github.com/BynaryCobweb/world/tree/develop/docs)
+Please check the [World Intro](docs/what-is-world.md)
 if you want to know more about the library.
 
 ## Features
@@ -53,7 +53,7 @@ and follow the instructions there. These are really good instructions, I guess.
 
 You can download *Peace* (World Plugin for Unity) [here](https://github.com/BynaryCobweb/world/releases).
 
-Follow the tutorial on how to use the plugin for the first time [here](docs/tuto-unity.md).
+See more about the plugin in [the documentation](docs/readme.md).
 
 ### Try the demo
 
