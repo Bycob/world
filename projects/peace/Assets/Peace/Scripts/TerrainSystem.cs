@@ -15,20 +15,7 @@ namespace Peace
     {
         // TODO ensure generated terrain can be used in builds later on (remove editor references in play mode)
         // TODO prevent crash when C++ exception
-
-        // DONE Change bad terrain material
-        // DONE make custom editor for DistributionParams (curve done, add set params...)
-        // DONE make unity able to save scene and Ctrl Z when adding a new terrain
-        // DONE allow removal of terrains by user
-        // DONE allow reloading of terrainsystem and integration of terrains
-        // DONE add a WorldTerrain component to store information on created terrains
-        // DONE make user able to modify texture for the whole terrain (by referencing unity textures instead of anonymous images)
-        // DONE Add UI for when the terrain is generating
-        // DONE make custom editors for colors
-        // DONE bug: when painting on terrain colors are different...
-        // DONE fix no texture on terrain when reloading from cache
-        // DONE Add button "Add" to layer list
-
+        
         // For later?
         // TODO make biomes usable by modifying the biome map
         // FIXME Texture don't refresh after changing them (workaround: reloading the terrain or idk)

@@ -55,7 +55,12 @@ if (${WORLD_BUILD_PEACE})
 		add_custom_target(peace_demo
 			COMMAND ${UNITY_EXE} -batchmode -nographics -projectPath "${CMAKE_CURRENT_SOURCE_DIR}" -buildWindows64Player "${WORLD_BINARY_OUTPUT_DIRECTORY}/WorldDemo/WorldDemo.exe" -quit
 			DEPENDS peace)
-		add_custom_command(TARGET peace_demo POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_SOURCE_DIR}/examples/worlds/demo.json" "${WORLD_BINARY_OUTPUT_DIRECTORY}/WorldDemo/world.json")
+
+		if (${WORLD_BUILD_VULKAN_MODULES} AND ${WORLD_HAS_VULKAN})
+			add_custom_command(TARGET peace_demo POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_SOURCE_DIR}/examples/worlds/vulkan-demo.json" "${WORLD_BINARY_OUTPUT_DIRECTORY}/WorldDemo/world.json")
+		else()
+			add_custom_command(TARGET peace_demo POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_SOURCE_DIR}/examples/worlds/demo.json" "${WORLD_BINARY_OUTPUT_DIRECTORY}/WorldDemo/world.json")
+		endif()
 
 		set_target_properties(peace_package peace_demo
 			PROPERTIES EXCLUDE_FROM_ALL ON)
