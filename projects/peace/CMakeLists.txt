@@ -39,6 +39,9 @@ if (${WORLD_BUILD_PEACE})
     find_file(UNITY_EXE
         NAMES
             Unity.exe
+            Unity
+        PATHS
+            $ENV{HOME}/.unity/
         PATH_SUFFIXES
             ${UNITY_VERSION}/Editor/
     )
@@ -52,9 +55,15 @@ if (${WORLD_BUILD_PEACE})
 			DEPENDS peace)
 
 		# Add target for automatic demo build
-		add_custom_target(peace_demo
-			COMMAND ${UNITY_EXE} -batchmode -nographics -projectPath "${CMAKE_CURRENT_SOURCE_DIR}" -buildWindows64Player "${WORLD_BINARY_OUTPUT_DIRECTORY}/WorldDemo/WorldDemo.exe" -quit
-			DEPENDS peace)
+		if (WIN32)
+			add_custom_target(peace_demo
+				COMMAND ${UNITY_EXE} -batchmode -nographics -projectPath "${CMAKE_CURRENT_SOURCE_DIR}" -buildWindows64Player "${WORLD_BINARY_OUTPUT_DIRECTORY}/WorldDemo/WorldDemo.exe" -quit
+				DEPENDS peace)
+		else()
+			add_custom_target(peace_demo
+				COMMAND ${UNITY_EXE} -batchmode -nographics -projectPath "${CMAKE_CURRENT_SOURCE_DIR}" -buildLinux64Player "${WORLD_BINARY_OUTPUT_DIRECTORY}/WorldDemo/WorldDemo" -quit
+				DEPENDS peace)
+		endif()
 
 		if (${WORLD_BUILD_VULKAN_MODULES} AND ${WORLD_HAS_VULKAN})
 			add_custom_command(TARGET peace_demo POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_SOURCE_DIR}/examples/worlds/vulkan-demo.json" "${WORLD_BINARY_OUTPUT_DIRECTORY}/WorldDemo/world.json")

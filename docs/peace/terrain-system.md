@@ -18,6 +18,7 @@ parameters as you want.
 choose a terrain material, e.g. `Default-Terrain-Diffuse`
 
 **Terrain parameters**
+
 - **Resolution**: The resolution of a terrain tile. This corresponds to **Heightmap Resolution**
 parameter in terrain settings.
 - **Octave Count**: Number of Perlin octave for the terrain. The higher, the more details will
@@ -32,6 +33,7 @@ large scale structures.
 - **Max altitude**: Highest possible altitude for the terrain.
 
 **Biome parameters**
+
 - **Use Biomes**: If this parameter is activated, the terrain will exibhit a lot of variety in
 relief types: mountains, plains, oceans, hills. There are currently not much control over how
 the zones are generated, so using biomes can lead to a lot of randomness and unpredictability in
@@ -41,12 +43,14 @@ the different relief zones. If the density is high, the relief can change a lot 
 - **Limit Brightness**: The higher, the more sharp the limit between relief zones will be.
 
 **Texture layers parameters**
+
 - **Distribution Resolution**: Resolution of the alphamaps used to texture the terrain.
 - **Layers**: a list of parameters for each terrain layer that will be generated. The
 parameters control the repartition of the layers on the terrain depending on altitude
 and slope.
 
 Here are the parameters available for each layer:
+
 - **name**: A name for the layer. This is useful to know which layer represents which physical
 feature of the terrain, for example rocks or grass.
 - **color**: A single color texture will be generated for each layer. This texture can be changed
@@ -82,9 +86,11 @@ for you changes to apply. To do so, just click the `Regenerate` button at the bo
 **Terrain System** component.
 
 ```
-/!\ Beware: Clicking on Regenerate button erase all modifications you may have done on the
-previously generated terrain, creates a totally new terrain and remove all textures in the
-cache (see below). So be careful with it!
+/!\ Beware: Clicking on Regenerate button erase all
+modifications you may have done on the previously
+generated terrain, creates a totally new terrain
+and remove all textures in the cache (see below).
+So be careful with it!
 ```
 
 ### Changing textures
