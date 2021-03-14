@@ -13,6 +13,8 @@ int getSize(HeightMapFormat format) {
     case HeightMapFormat::U8:
         return sizeof(u8);
     }
+    throw std::runtime_error("Unknown HeightmapFormat: " + std::to_string(
+        static_cast<int>(format)));
 }
 
 HeightMapInputStream::HeightMapInputStream(const world::Terrain &terrain,

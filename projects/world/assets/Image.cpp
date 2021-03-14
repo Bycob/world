@@ -258,6 +258,8 @@ u32 typeElemSize(const ImageType &type) {
     case ImageType::RGBA:
         return 4;
     }
+    throw std::runtime_error("Unknown image type: " + std::to_string(
+        static_cast<int>(type)));
 }
 
 class PImage {

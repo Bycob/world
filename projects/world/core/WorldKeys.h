@@ -18,7 +18,7 @@ namespace world {
 class ItemKey;
 
 const char KEY_SEPARATOR = '/';
-constexpr char KEY_SEPARATOR_STR[] = {KEY_SEPARATOR};
+constexpr char KEY_SEPARATOR_STR[] = {KEY_SEPARATOR, '\0'};
 
 /** A key for a node in a world. Must only contain alphanumeric characters,
  * '_', '-' or '.'. */
