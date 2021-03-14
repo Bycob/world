@@ -44,8 +44,11 @@ public:
         // Create pipeline from layout and stage info
         vk::ComputePipelineCreateInfo pipelineCreateInfo({}, pipelineStageInfo,
                                                          _pipelineLayout);
-        _pipeline = ctx._device.createComputePipeline(vk::PipelineCache(),
-                                                      pipelineCreateInfo);
+        // breaks in vulkan 1.2
+        // _pipeline = ctx._device.createComputePipeline(vk::PipelineCache(),
+        // pipelineCreateInfo);
+        ctx._device.createComputePipelines(vk::PipelineCache(), 1, &pipelineCreateInfo,
+                                           nullptr, &_pipeline);
     }
 
     void initialize() {

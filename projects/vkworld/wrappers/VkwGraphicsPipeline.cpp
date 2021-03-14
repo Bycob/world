@@ -161,8 +161,10 @@ public:
         pipelineCreateInfo.basePipelineIndex = -1;
 
         // TODO: May use pipeline cache?
-        _pipeline =
-            ctx._device.createGraphicsPipeline(nullptr, pipelineCreateInfo);
+        // breaks in vulkan 1.2
+        // _pipeline = ctx._device.createGraphicsPipeline(nullptr, pipelineCreateInfo);
+        ctx._device.createGraphicsPipelines(vk::PipelineCache(), 1, &pipelineCreateInfo,
+            nullptr, &_pipeline);
     }
 
     void initialize() {
