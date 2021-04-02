@@ -18,6 +18,8 @@ set(WORLD_SHADERS_BIN ${WORLD_SHADERLIB_SOURCES})
 
 # Choose output directory according to the target and the compiler
 set(WORLD_SHADERS_OUTPUT_DIRECTORY ${WORLD_BINARY_OUTPUT_DIRECTORY}/shaders)
+add_custom_target(create_shader_dir
+	COMMAND ${CMAKE_COMMAND} -E make_directory "${WORLD_SHADERS_OUTPUT_DIRECTORY}")
 
 message(STATUS "Shader output directory is: ${WORLD_SHADERS_OUTPUT_DIRECTORY}")
 
@@ -30,6 +32,7 @@ foreach(SOURCE_SHADER ${WORLD_SHADERS_SOURCES})
 		OUTPUT ${COMPILED_SHADER}
 		COMMAND ${Vulkan_GLSL_VALIDATOR} 
 		ARGS -V ${SOURCE_SHADER} -o ${COMPILED_SHADER}
+		DEPENDS create_shader_dir
 		MAIN_DEPENDENCY ${SOURCE_SHADER}
 		COMMENT "Compiling shader ${SHADER_NAME}"
 		VERBATIM
